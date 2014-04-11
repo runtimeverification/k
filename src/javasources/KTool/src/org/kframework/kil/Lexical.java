@@ -1,8 +1,6 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /** A terminal in a {@link Production}. */
 public class Lexical extends ProductionItem {
@@ -25,16 +23,6 @@ public class Lexical extends ProductionItem {
     @Override
     public String toString() {
         return "Lexical{" + lexicalRule + "}";
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
     }
 
     @Override
@@ -77,5 +65,10 @@ public class Lexical extends ProductionItem {
 
     public void setLexicalRule(String lexicalRule) {
         this.lexicalRule = lexicalRule;
+    }
+    
+    @Override
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
 }

@@ -3,9 +3,7 @@ package org.kframework.kil;
 import org.kframework.compile.sharing.DataStructureSortCollector;
 import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.loader.*;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -100,16 +98,6 @@ public class Definition extends ASTNode {
         return mainSyntaxModule;
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
     public void preprocess(org.kframework.kil.loader.Context context) {
         // Collect information
         // this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
@@ -185,5 +173,10 @@ public class Definition extends ASTNode {
         if (result == null)
             throw new ConfigurationNotFound();
         return result;
+    }
+
+    @Override
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
 }

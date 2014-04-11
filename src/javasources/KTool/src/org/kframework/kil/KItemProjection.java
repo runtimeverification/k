@@ -1,11 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-
 
 /**
  * @author AndreiS
@@ -69,18 +65,7 @@ public class KItemProjection extends Term {
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
-
 }

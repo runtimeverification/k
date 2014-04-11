@@ -1,9 +1,6 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /** Represents a term of sort KLabel made by injecting something else.
  * Corresponds to operators Foo2KLabel and #_ in source.
@@ -51,22 +48,6 @@ public class KInjectedLabel extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
-
-
-    @Override
     public KInjectedLabel shallowCopy() {
         return new KInjectedLabel(this);
     }
@@ -89,10 +70,13 @@ public class KInjectedLabel extends Term {
         return term.contains(k.term);
     }
 
-
     @Override
     public int hashCode() {
         return term.hashCode();
     }
-
+    
+    @Override
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
+    }
 }

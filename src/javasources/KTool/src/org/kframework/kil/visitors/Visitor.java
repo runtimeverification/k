@@ -1,107 +1,100 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
-import org.kframework.kil.KItemProjection;
 
-
-public interface Visitor {
-    public void visit(ASTNode node);
-    public void visit(ParseError node);
-    public void visit(Definition node);
-    public void visit(DefinitionItem node);
+public interface Visitor<P, R> {
+    public R visit(ASTNode node, P p);
+    public R visit(Definition node, P p);
+    public R visit(DefinitionItem node, P p);
     // <DefinitionItems>
-    public void visit(LiterateDefinitionComment node);
-    public void visit(Module node);
-    public void visit(Require require);
+    public R visit(LiterateDefinitionComment node, P p);
+    public R visit(Module node, P p);
+    public R visit(Require require, P p);
     // </DefinitionItems>
-    public void visit(ModuleItem node);
+    public R visit(ModuleItem node, P p);
     // <ModuleItems>
-    public void visit(Import node);
-    public void visit(LiterateModuleComment node);
-    public void visit(Sentence node);
+    public R visit(Import node, P p);
+    public R visit(LiterateModuleComment node, P p);
+    public R visit(Sentence node, P p);
     // <Sentences>
-    public void visit(StringSentence node);
-    public void visit(Restrictions node);
-    public void visit(Configuration node);
-    public void visit(Context node);
-    public void visit(Rule node);
+    public R visit(StringSentence node, P p);
+    public R visit(Restrictions node, P p);
+    public R visit(Configuration node, P p);
+    public R visit(Context node, P p);
+    public R visit(Rule node, P p);
     // </Sentences>
-    public void visit(Syntax node);
-    public void visit(PriorityExtended node);
-    public void visit(PriorityExtendedAssoc node);
+    public R visit(Syntax node, P p);
+    public R visit(PriorityExtended node, P p);
+    public R visit(PriorityExtendedAssoc node, P p);
     // <ModuleItems>
-    public void visit(PriorityBlock node);
-    public void visit(PriorityBlockExtended node);
-    public void visit(Production node);
-    public void visit(ProductionItem node);
+    public R visit(PriorityBlock node, P p);
+    public R visit(PriorityBlockExtended node, P p);
+    public R visit(Production node, P p);
+    public R visit(ProductionItem node, P p);
     // <ProductionItems>
-    public void visit(Sort node);
-    public void visit(Lexical node);
-    public void visit(Terminal node);
-    public void visit(UserList node);
+    public R visit(Sort node, P p);
+    public R visit(Lexical node, P p);
+    public R visit(Terminal node, P p);
+    public R visit(UserList node, P p);
     // </ProductionItems>
-    public void visit(Term node);
+    public R visit(Term node, P p);
     // <Terms>
-    public void visit(Cell node);
-    public void visit(Collection node);
+    public R visit(Cell node, P p);
+    public R visit(org.kframework.kil.Collection node, P p);
     // <Collections>
-    public void visit(Ambiguity node);
-    public void visit(Bag node);
-    public void visit(KSequence node);
-    public void visit(List node);
-    public void visit(KList node);
-    public void visit(Map node);
-    public void visit(Set node);
+    public R visit(Ambiguity node, P p);
+    public R visit(Bag node, P p);
+    public R visit(KSequence node, P p);
+    public R visit(List node, P p);
+    public R visit(KList node, P p);
+    public R visit(org.kframework.kil.Map node, P p);
+    public R visit(Set node, P p);
     // </Collections>
-    public void visit(CollectionItem node);
+    public R visit(CollectionItem node, P p);
     // <CollectionItems>
-    public void visit(BagItem node);
-    public void visit(ListItem node);
-    public void visit(MapItem node);
-    public void visit(SetItem node);
+    public R visit(BagItem node, P p);
+    public R visit(ListItem node, P p);
+    public R visit(MapItem node, P p);
+    public R visit(SetItem node, P p);
     // </CollectionItems>
     // <BuiltinDataStructure>
-    public void visit(DataStructureBuiltin node);
-    public void visit(CollectionBuiltin node);
-    public void visit(ListBuiltin node);
-    public void visit(ListLookup node);
-    public void visit(ListUpdate node);
-    public void visit(SetBuiltin node);
-    public void visit(SetLookup node);
-    public void visit(SetUpdate node);
-    public void visit(MapBuiltin node);
-    public void visit(MapLookup node);
-    public void visit(MapUpdate node);
+    public R visit(DataStructureBuiltin node, P p);
+    public R visit(CollectionBuiltin node, P p);
+    public R visit(ListBuiltin node, P p);
+    public R visit(ListLookup node, P p);
+    public R visit(ListUpdate node, P p);
+    public R visit(SetBuiltin node, P p);
+    public R visit(SetLookup node, P p);
+    public R visit(SetUpdate node, P p);
+    public R visit(MapBuiltin node, P p);
+    public R visit(MapLookup node, P p);
+    public R visit(MapUpdate node, P p);
     // </BuiltinDataStructure>
     // <Token>
-    public void visit(Token node);
-    public void visit(BoolBuiltin node);
-    public void visit(IntBuiltin node);
-    public void visit(StringBuiltin node);
-    public void visit(GenericToken node);
+    public R visit(Token node, P p);
+    public R visit(BoolBuiltin node, P p);
+    public R visit(IntBuiltin node, P p);
+    public R visit(StringBuiltin node, P p);
+    public R visit(GenericToken node, P p);
     // </Token>
-    public void visit(ListTerminator node);
-    public void visit(Hole node);
-    public void visit(FreezerHole node);
-    public void visit(KApp node);
-    public void visit(KItemProjection node);
-    public void visit(KLabel node);
-    public void visit(KLabelConstant node);
-    public void visit(KLabelInjection node);
-    public void visit(Rewrite node);
-    public void visit(TermCons node);
-    public void visit(Bracket node);
-    public void visit(Cast node);
-    public void visit(Variable node);
+    public R visit(ListTerminator node, P p);
+    public R visit(Hole node, P p);
+    public R visit(FreezerHole node, P p);
+    public R visit(KApp node, P p);
+    public R visit(KItemProjection node, P p);
+    public R visit(KLabel node, P p);
+    public R visit(KLabelConstant node, P p);
+    public R visit(KLabelInjection node, P p);
+    public R visit(Rewrite node, P p);
+    public R visit(TermCons node, P p);
+    public R visit(Bracket node, P p);
+    public R visit(Cast node, P p);
+    public R visit(Variable node, P p);
     // </Terms>
-    public void visit(Attributes attributes);
-    public void visit(Attribute attribute);
-    public void visit(TermComment node);
+    public R visit(TermComment node, P p);
     // Others
-    public void visit(KInjectedLabel kInjectedLabel);
-    public void visit(FreezerLabel freezerLabel);
-    public void visit(Freezer f);
-    public void visit(BackendTerm term);
-
-    public String getName();
+    public R visit(KInjectedLabel kInjectedLabel, P p);
+    public R visit(FreezerLabel freezerLabel, P p);
+    public R visit(Freezer f, P p);
+    public R visit(BackendTerm term, P p);
 }

@@ -1,17 +1,12 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.*;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -140,21 +135,6 @@ public class KApp extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
-    }
-
-    @Override
     public KApp shallowCopy() {
         return new KApp(this);
     }
@@ -184,4 +164,8 @@ public class KApp extends Term {
         return label.hashCode() * 23 + child.hashCode();
     }
 
+    @Override
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
+    }
 }

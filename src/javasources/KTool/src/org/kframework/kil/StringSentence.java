@@ -1,8 +1,6 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Used as a container for unparsed sentences like rule, context and configuration.
@@ -31,17 +29,12 @@ public class StringSentence extends ModuleItem {
     public String toString() {
         return type+"["+label+"]:"+content;
     }
-
+ 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
+    
     public String getContent() {
         return content;
     }

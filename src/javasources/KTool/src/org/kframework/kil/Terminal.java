@@ -1,9 +1,6 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
 
 /** A terminal in a {@link Production}. */
 public class Terminal extends ProductionItem {
@@ -32,15 +29,10 @@ public class Terminal extends ProductionItem {
     public String toString() {
         return "\"" + terminal + "\"";
     }
-
+    
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
 
     @Override

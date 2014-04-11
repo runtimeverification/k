@@ -4,7 +4,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 @SuppressWarnings("serial")
-public class TransformerException extends Exception {
+public class TransformerException extends RuntimeException {
     KException exception;
 
     public TransformerException(KException kException) {

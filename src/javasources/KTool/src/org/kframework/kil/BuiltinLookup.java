@@ -1,7 +1,5 @@
 package org.kframework.kil;
 
-import java.util.ArrayList;
-
 /**
  * Abstract class for Builtin Lookups
  *

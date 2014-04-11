@@ -9,10 +9,7 @@ import java.util.List;
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -175,21 +172,6 @@ public class KLabelConstant extends KLabel {
         return getLabel();
     }
 
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
     /**
      * A KLabel is considered functional if either it syntactically qualifies as a predicate,
      * or if the attributes associated to its production contain
@@ -220,5 +202,10 @@ public class KLabelConstant extends KLabel {
             }
         }
         return false;
+    }
+    
+    @Override
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
 }

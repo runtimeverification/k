@@ -1,10 +1,6 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -288,20 +284,4 @@ public abstract class DataStructureBuiltin extends Term {
         return sort.equals(dataStructureBuiltin.sort)
                && baseTerms.equals(dataStructureBuiltin.baseTerms);
     }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
 }

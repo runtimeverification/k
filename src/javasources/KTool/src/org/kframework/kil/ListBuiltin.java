@@ -1,13 +1,10 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
+
+import org.kframework.kil.visitors.Visitor;
 
 /**
  * A builtin list
@@ -29,11 +26,6 @@ public class ListBuiltin extends CollectionBuiltin {
 
     public Collection<Term> elementsRight() {
         return Collections.unmodifiableCollection(elementsRight);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
     }
 
     // TODO(YilongL): shouldn't elementsLeft and elementsRight have type java.util.List?
@@ -85,6 +77,11 @@ public class ListBuiltin extends CollectionBuiltin {
     @Override
     public String toString() {
         return elements().toString() + baseTerms().toString() + elementsRight.toString();
+    }
+    
+    @Override
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
 
 }

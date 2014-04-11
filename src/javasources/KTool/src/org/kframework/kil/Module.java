@@ -1,9 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,13 +91,8 @@ public class Module extends DefinitionItem {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+        return visitor.visit(this, p);
     }
 
     public Module addModuleItems(List<ModuleItem> rules) {

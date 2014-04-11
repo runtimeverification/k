@@ -2,10 +2,6 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
@@ -145,21 +141,6 @@ public abstract class Token extends KLabel {
     public String toString() {
         // TODO (BUG): has extra quotations when #Sort string
         return "#token(\"" + tokenSort() + "\", " + StringUtil.escapeK(value()) + ")";
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
     }
 
 }
