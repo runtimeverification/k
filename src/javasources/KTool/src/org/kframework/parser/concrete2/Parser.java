@@ -609,7 +609,7 @@ public class Parser {
                             matches = ((Nil) exit.mapping).values;
                         } else if (exit.mapping instanceof One) {
                             matches = ((One) exit.mapping).values.get(context);
-                        } else { unknownMappingType(); }
+                        } else { throw unknownMappingType(); }
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
                             KList newKList = new KList(context);
@@ -655,7 +655,7 @@ public class Parser {
                     }
                 } else if (that.mapping instanceof One) {
                     promotedThat = ((One) that.mapping);
-                } else { unknownMappingType(); }
+                } else { throw unknownMappingType(); }
 
                 boolean result = false;
                 for (KList key : promotedThat.values.keySet()) {
