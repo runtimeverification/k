@@ -444,6 +444,11 @@ public class Parser {
          * mapping may grow when new contexts are added to a {@link NonTerminalCall}.
          * The reason we have both {@link Nil} and {@link One} is that several operations
          * on {@link Nil} can be done much more efficiently than on a {@link One}.
+         *
+         * For example, a {@link Nil} containing the set {+(), -()} maps every context to those two values.
+         * On the other hand, a {@link One} containing the map {*() |-> {+(), -()}}
+         * maps the context *() to the two values +() and -(), but does not have a mapping
+         * for other contexts.  In this example, the context *() represents what we expect
          */
         private abstract class Mapping {}
         private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
