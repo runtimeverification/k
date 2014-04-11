@@ -503,8 +503,9 @@
       programs="tests/regression/profiler"
       results="tests/regression/profiler"
       extension="test">
-      <all-programs>
+      <all-programs regex="true">
          <krun-option name="--profile" />
+         <krun-option name="--output" value="raw" />
       </all-programs>
   </test>
 
