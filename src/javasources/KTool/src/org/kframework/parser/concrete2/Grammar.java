@@ -72,7 +72,7 @@ public class Grammar implements Serializable {
 
     /**
      * Returns a set of all NonTerminals, including the hidden ones which are not considered
-     * start symbols.  This is do Grammar doesn't have to track the hidden NonTerminals itself,
+     * start symbols.  This is so Grammar doesn't have to track the hidden NonTerminals itself,
      * and makes it impossible for a user to cause problems by failing to add a NonTerminal.
      * @return a Set of all the {@link NonTerminal}s
      */

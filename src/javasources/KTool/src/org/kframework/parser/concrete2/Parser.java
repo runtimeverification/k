@@ -71,6 +71,7 @@ import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
  *  - entry/exit: the (static) start/end states of a non-terminal
  *  - call/return: the (dynamic) record for the start/end of a parse
  *  - begin/end: the start/end positions of a parse
+ *  - position: a character index in a string
  *  - next/previous: next/previous edges in the state machine
  *
  * Thus we have the following terms:
@@ -449,6 +450,9 @@ public class Parser {
          * On the other hand, a {@link One} containing the map {*() |-> {+(), -()}}
          * maps the context *() to the two values +() and -(), but does not have a mapping
          * for other contexts.  In this example, the context *() represents what we expect
+         * as the AST parsed thus far by the *caller* of the current non-terminal.
+         * In other words, we are trying to parse a +() or -() that will become children
+         * of the *().
          */
         private abstract class Mapping {}
         private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
