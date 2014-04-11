@@ -72,7 +72,8 @@ public class Grammar implements Serializable {
 
     /**
      * Returns a set of all NonTerminals, including the hidden ones which are not considered
-     * start symbols.
+     * start symbols.  This is do Grammar doesn't have to track the hidden NonTerminals itself,
+     * and makes it impossible for a user to cause problems by failing to add a NonTerminal.
      * @return a Set of all the {@link NonTerminal}s
      */
     public Set<NonTerminal> getAllNonTerminals() {
@@ -81,7 +82,7 @@ public class Grammar implements Serializable {
     }
 
     /**
-     * Returns the NonTerminal specific to the given name.
+     * Returns the NonTerminal specific to the given name that is exposed as a start non-terminal by this grammar.
      * @param name of the NonTerminal
      * @return the NonTerminal or null if it couldn't find it
      */
@@ -110,6 +111,10 @@ public class Grammar implements Serializable {
     /**
      * Adds (whitespace)---<Del> pairs of states at the beginning of start NonTerminals
      * and right after every PrimitiveState in order to allow for whitespace in the language.
+     *
+     * For now, whitespace means spaces (See {@link #whites}),
+     * single line comments (See {@link #singleLine}), and
+     * multi-line comments (See {@link #multiLine}).
      */
     public void addWhiteSpace() {
         // create a whitespace PrimitiveState after every every terminal that can match a character
@@ -155,7 +160,8 @@ public class Grammar implements Serializable {
 
     /**
      * Calculates Nullability and OrderinInfo for all the states in the grammar.
-     * Must be called before being handed over to the parser.
+     * Must be called before being handed over to the parser, but after
+     * the grammar is finished being built.
      */
     public void compile() {
         // 1. get all nullable states
@@ -220,10 +226,10 @@ public class Grammar implements Serializable {
     }
 
     /**
-     * Recursive DFS that traverses all the states and returns a set of all reachable {@Link NonTerminal}.
+     * Recursive DFS that traverses all the states and returns a set of all reachable {@link NonTerminal}.
      * @param start The state from which to run the collector.
      * @param visited Start with an empty Set<State>. Used as intermediate data.
-     * @return A set of all reachable {@Link NonTerminal}.
+     * @param reachableNonTerminals A set in which is stored the set of all reachable {@link NonTerminal}.
      */
     private static void collectNTCallers(State start, Set<State> visited,
         Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals) {
