@@ -259,7 +259,13 @@ public class Grammar implements Serializable {
      */
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
         public final String name;
+        /**
+         * The first state of the state machine for the non-terminal.
+         */
         public final EntryState entryState;
+        /**
+         * The last state of the state machine for the non-terminal.
+         */
         public final ExitState exitState;
         // contains a list of all States found in this NonTerminal other than the EntryState
         // and ExitState

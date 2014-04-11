@@ -35,118 +35,86 @@ import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
  * This is the main code for running the parser.
  *
  * ----------------
- * Terminology
+ * Overview
  * ----------------
  *
- * entryState/exitState: the first and last states in a non-terminal
- *
- * stateCall/stateReturn: records for the entry to or exit from a state
- * ntCall/ntReturn: records for the entry to or exit from a non-terminal
- *
- * stateBegin/stateEnd: the source positions for the beginning and end the span of a state
- * ntBegin/ntEnd: the source positions for the beginning and end the span of a state
- *
- * nextState/previousState: successor/predecessor states in a state machine
- *
- * ----------------
- * ParseState
- * ----------------
- *
- * The parser operates by maintaining tables of NonTerminalCall,
- * StateCall and StateReturn records. These tables are stored
- * in ParseState and are keyed by NonTerminalCall.Key,
- * StateCall.Key and StateReturn.Key. For any given Key, there is
- * a single value that can be looked up with getNtCall(), getStateCall(),
- * and getStateReturn(). If no value exists for a given Key, then those
+ * The parser operates by maintaining tables of {@link NonTerminalCall},
+ * {@link StateCall} and {@link StateReturn} records. These tables are stored
+ * in ParseState and are keyed by {@link NonTerminalCall.Key},
+ * {@link StateCall.Key} and {@link StateReturn.Key}. For any given Key, there is
+ * a single value that can be looked up with
+ * {@link ParseState#getNtCall(NonTerminalCall.Key)},
+ * {@link ParseState#getStateCall(StateCall.Key)}, and
+ * {@link ParseState#getStateReturn(StateReturn.Key)}.
+ * If no value exists for a given Key, then those
  * functions will create one.
  *
- * In addition to these tables, a work queue of StateReturn to be processed
- * is kept in StateReturnWorkList. This queue is ordered according to
- * StateReturn.compareTo() in such a way that it is impossible for a
- * StateReturn later in the queue to contribute to or influence a StateReturn
+ * In addition to these tables, a work queue of {@link StateReturn}s
+ * to be processed is kept in {@link StateReturnWorkList}.
+ * This queue is ordered according to {@link StateReturn#compareTo(StateReturn)}
+ * in such a way that it is impossible for a {@link StateReturn} later
+ * in the queue to contribute to or influence a {@link StateReturn}
  * earlier in the queue.
  *
  * The main loop of the parser then processes elements in this queue until
  * it is empty.
  *
- * ----------------
- * NonTerminalCall
- * ----------------
- *
- * A NonTerminalCall represents the fact that the parser needs to try parsing
- * a particular NonTerminal (i.e., key.nt) starting at a particular position
- * (i.e., key.ntBegin).
- *
- * For each NonTerminalCall, we keep track of all StateCall
- * that triggered this NonTerminalCall (i.e., callers) so that when
- * the NonTerminalCall is finished, we can notify them of the successful parse.
- *
- * We also keep track of all StateReturns for the ExitState (i.e., exitStateReturns)
- * so that when a new StateCall activates this NonTerminalCall, we can notify
- * the StateCall of successful parses of this NonTerminalCall that are
- * already computed.
- *
- * We also keep track of all StateReturns in this NonTerminal that
- * should be added back on the work queue if we discover that this NonTerminalCall
- * is called from a new context (i.e., reactivations).  This is used
- * to handle context sensitivity.
- *
- * The contexts in which a NonTerminalCall is called are stored in a Context object
- * (i.e., 'context'). For now, contexts are limited to one layer and thus a context
- * might say that this NonTerminal is called from a StateCall that has thus far
- * parsed a '+(1,_)'.  This information is stored as a KList where the "_"
- * are omitted.  This is kept as a separate class because they might be extended
- * in the future.
+ * See {@link NonTerminalCall}, {@link StateCall} and {@link StateReturn}
+ * (preferably in that order) for more information.
  *
  * ----------------
- * StateCall
+ * Terminology
  * ----------------
  *
- * A StateCall represents the fact that the parser started parsing
- * a particular State (i.e., key.state) at a particular position
- * (i.e., key.stateBegin) while parsing a particular NonTerminalCall
- * (i.e., key.ntCall).
+ * In talking about the parser we have adopted the following naming conventions:
  *
- * For each StateCall, we keep track of the AST produced up to that point.
- * Since the AST produced may depend on the context in which the
- * NonTerminalCall associated with this StateCall (i.e., key.ntCall.context),
- * we do not simply store an AST but rather a function from individual contexts.
- * This is stored in the 'function' field.
- * (See the Function class for how that is implemented).
+ *  - entry/exit: the (static) start/end states of a non-terminal
+ *  - call/return: the (dynamic) record for the start/end of a parse
+ *  - begin/end: the start/end positions of a parse
+ *  - next/previous: next/previous edges in the state machine
  *
- * ----------------
- * StateReturn
- * ----------------
+ * Thus we have the following terms:
  *
- * A StateReturn represents the fact that the parser finished parsing
- * something that was started by a particular StateCall (i.e., key.stateCall)
- * at a particular position (i.e. key.stateEnd).
+ *  - entry state/exit state: the first and last states in a non-terminal
  *
- * Just was with StateCall, a StateReturn stores the AST produced up to that
- * point as the 'function' field.
+ *  - state call/state return: records for the entry to or exit from a state
+ *  - non-terminal call: record for the entry to a non-terminal
  *
- * ----------------
- * Context
- * ----------------
+ *  - state begin/state end: the source positions for the beginning and end the span of a state
+ *  - non-terminal begin: the source positions for the beginning of the span of a non-terminal
  *
- * See NonTerminalCall for an explanation of Context.
- *
+ *  - next state/previous state: successor/predecessor states in a state machine
  */
 public class Parser {
 
     /**
-     * The dynamic record for where a state starts parsing.
+     * A StateCall represents the fact that the parser started parsing
+     * a particular {@link State} (i.e., key.state) at a particular position
+     * (i.e., key.stateBegin) while parsing a particular {@link NonTerminalCall}
+     * (i.e., key.ntCall).
+     *
+     * For each StateCall, we keep track of the AST produced up to that point.
+     * Since the AST produced may depend on the context in which the
+     * {@link NonTerminalCall} associated with this StateCall
+     * (i.e., key.ntCall.context), we do not simply store an AST
+     * but rather a function from individual contexts.
+     * This is stored in the 'function' field.
+     * (See the {@link Function} class for how that is implemented).
      */
     private static class StateCall {
+        /** The {@link Function} storing the AST parsed so far */
         final Function function = Function.empty();
 
         private static class Key {
+            /** The {@link NonTerminalCall} containing this StateCall */
             final NonTerminalCall ntCall;
+            /** The start position of this StateCall */
             final int stateBegin;
+            /** The {@link State} that this StateCall is for */
             final State state;
 
-            public Key(NonTerminalCall ntCall, int stateBegin, State state) {
     //***************************** Start Boilerplate *****************************
+            public Key(NonTerminalCall ntCall, int stateBegin, State state) {
                 assert ntCall != null; assert state != null;
                 this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
             }
@@ -183,9 +151,15 @@ public class Parser {
     }
 
     /**
-     *  The dynamic record for where a state ends parsing.
+     * A StateReturn represents the fact that the parser finished parsing
+     * something that was started by a particular {@link StateCall}
+     * (i.e., key.stateCall) at a particular position (i.e. key.stateEnd).
+     *
+     * Just was with {@link StateCall}, a StateReturn stores the AST produced up to that
+     * point as the 'function' field.
      */
     private static class StateReturn implements Comparable<StateReturn> {
+        /** The {@link Function} storing the AST parsed so far */
         final Function function = Function.empty();
 
         public int compareTo(StateReturn that) {
@@ -213,7 +187,9 @@ public class Parser {
         }
 
         private static class Key {
+            /** The {@link StateCall} that this StateReturn finishes */
             public final StateCall stateCall;
+            /** The end position of the parse */
             public final int stateEnd;
             public Key(StateCall stateCall, int stateEnd) {
                 assert stateCall != null;
@@ -263,20 +239,53 @@ public class Parser {
     //***************************** End Boilerplate *****************************
     }
 
+    /**
+     * See NonTerminalCall for an explanation of Context.
+     */
     private static class Context {
         final Set<KList> contexts = new HashSet<>();
     }
 
     /**
-     * The dynamic record for where a non-terminal starts parsing.
+     * A NonTerminalCall represents the fact that the parser needs to try parsing
+     * a particular {@link NonTerminal} (i.e., key.nt) starting at a particular position
+     * (i.e., key.ntBegin).
+     *
+     * For each NonTerminalCall, we keep track of all {@link StateCall}
+     * that triggered this NonTerminalCall (i.e., callers) so that when
+     * the NonTerminalCall is finished, we can notify them of the successful parse.
+     *
+     * We also keep track of all {@link StateReturn}s for the {@link ExitState} (i.e., exitStateReturns)
+     * so that when a new StateCall activates this NonTerminalCall, we can notify
+     * the StateCall of successful parses of this NonTerminalCall that are
+     * already computed.
+     *
+     * We also keep track of all {@link StateReturn}s in this NonTerminalCall that
+     * should be added back on the work queue if we discover that this NonTerminalCall
+     * is called from a new context (i.e., reactivations).  This is used
+     * to handle context sensitivity.
+     *
+     * The contexts in which a NonTerminalCall is called are stored in a {@link Context} object
+     * (i.e., 'context'). For now, contexts are limited to one layer and thus a context
+     * might say that this NonTerminalCall is called from a {@link StateCall} that has thus far
+     * parsed a '+(1,_)'.  This information is stored as a {@link KList} where the "_"
+     * are omitted.  This is kept as a separate class because they might be extended
+     * in the future.
      */
     private static class NonTerminalCall {
+        /** The {@link StateCall}s that call this NonTerminalCall */
         final Set<StateCall> callers = new HashSet<>();
+        /** The {@link StateReturn}s for the {@link ExitState} in this NonTerminalCall */
         final Set<StateReturn> exitStateReturns = new HashSet<>();
+        /** The {@link StateReturn}s that should be added back on the work queue if
+         * this NonTerminal Call is called from a new context */
         final Set<StateReturn> reactivations = new HashSet<>();
+        /** The {@link Context}s from which this NonTerminalCall is called */
         final Context context = new Context();
         private static class Key {
+            /** The {@link NonTerminal} being called */
             public final NonTerminal nt;
+            /** The start position for parsing the {@link NonTerminal} */
             public final int ntBegin;
     //***************************** Start Boilerplate *****************************
             public Key(NonTerminal nt, int ntBegin) {
@@ -379,6 +388,8 @@ public class Parser {
         private BiMap<StateCall.Key,StateCall> stateCalls = HashBiMap.create();
         private BiMap<StateReturn.Key,StateReturn> stateReturns = HashBiMap.create();
 
+        /** Retrieves the {@link NonTerminalCall} associated with a given {@link NonTerminalCall.Key}.
+         * Creates a new one if one doesn't exist yet. */
         public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
             NonTerminalCall value = ntCalls.get(key);
             if (value == null) {
@@ -388,6 +399,8 @@ public class Parser {
             return value;
         }
 
+        /** Retrieves the {@link StateCall} associated with a given {@link StateCall.Key}.
+         * Creates a new one if one doesn't exist yet. */
         public StateCall getStateCall(StateCall.Key key) {
             StateCall value = stateCalls.get(key);
             if (value == null) {
@@ -397,8 +410,11 @@ public class Parser {
             return value;
         }
 
+        /** Returns all {@link StateCall.Key} currently being used. */
         public Set<StateCall.Key> getStateCallKeys() { return stateCalls.keySet(); }
 
+        /** Retrieves the {@link StateReturn} associated with a given {@link StateReturn.Key}.
+         * Creates a new one if one doesn't exist yet. */
         public StateReturn getStateReturn(StateReturn.Key key) {
             StateReturn value = stateReturns.get(key);
             if (value == null) {
@@ -412,32 +428,34 @@ public class Parser {
     ////////////////
 
     /**
-     * A 'Function' represents a mapping from one or more 'Context's
-     * to one or more ASTs.  'Function's are used throughout the parser
+     * A Function represents a mapping from one or more {@link Context}s
+     * to one or more ASTs. Functions are used throughout the parser
      * instead of manipulating ASTs in order to support context sensitivity.
-     *
-     * A 'Function' stores this mapping from a context to an AST as it's
-     * 'mapping' field.  Their are two sorts of mappings: Nil and One.
-     * A 'Nil' mapping does not depend on the context in any way.
-     * In effect, it represents a constant 'Function' that ignores its argument.
-     * A 'One' mapping, on the other hand, depends on one layer of context.
-     * It does this by storing input/output pairs.  These pairs are populated
-     * dynamically based on what input contexts actually occur, so this
-     * mapping may grow when new contexts are added to a NonTerminalCall.
-     * The reason we have both 'Nil' and 'One' is that several operations
-     * on 'Nil' can be done much more efficiently than on a 'One'.
      */
     private static class Function {
+        /**
+         * A Function stores this mapping from a context to an AST as it's
+         * {@link #mapping} field.  Their are two sorts of mappings: {@link Nil} and {@link One}.
+         * A {@link Nil} mapping does not depend on the context in any way.
+         * In effect, it represents a constant Function that ignores its argument.
+         * A {@link One} mapping, on the other hand, depends on one layer of context.
+         * It does this by storing input/output pairs.  These pairs are populated
+         * dynamically based on what input contexts actually occur, so this
+         * mapping may grow when new contexts are added to a {@link NonTerminalCall}.
+         * The reason we have both {@link Nil} and {@link One} is that several operations
+         * on {@link Nil} can be done much more efficiently than on a {@link One}.
+         */
         private abstract class Mapping {}
         private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
         private class One extends Mapping { Map<KList, Set<KList>> values = new HashMap<>(); }
 
+        /** The mapping that this Function represents */
         private Mapping mapping = new Nil();
         private AssertionError unknownMappingType() { return new AssertionError("Unknown mapping type"); }
 
         /**
          * The identity function that maps everything to a singleton containing an empty KList.
-         * This is an identity because it maps every context to the KList.EMPTY which is the identity for KList.
+         * This is an identity because it maps every context to the {@link KList#EMPTY} which is the identity for KList.
          *
          * NOTE: It is important that this function is never mutated, but we have no good way
          * of enforcing this.
@@ -454,9 +472,9 @@ public class Parser {
         static Function empty() { return new Function(); }
 
         /**
-         * Converts a function containing a 'Nil' mapping to and equivalent one with
-         * a 'One' mapping for the given contexts
-         * @param contexts The contexts for which the 'One' should have mappings
+         * Converts a function containing a {@link Nil} mapping to and equivalent one with
+         * a {@link One} mapping for the given contexts
+         * @param contexts The contexts for which the {@link One} should have mappings
          */
         private void promote(Set<KList> contexts) {
             assert this.mapping instanceof Nil;
@@ -503,8 +521,8 @@ public class Parser {
         }
 
         /**
-         * Get the set of KLists that this function maps to regardless of input (i.e., the range of this function).
-         * @return The set of KLists that this function maps to
+         * Get the set of {@link KList}s that this function maps to regardless of input (i.e., the range of this function).
+         * @return The set of {@link KList}s that this function maps to
          */
         Set<KList> results() {
             if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
@@ -564,9 +582,9 @@ public class Parser {
          * Add to this function the mappings resulting from composing mappings in call with the mappings in exit.
          * We do this in a way that matches up the contexts in 'exit' with the results in 'call'.
          *
-         * This is used when the child (a NonTerminal) of a NonTerminalState finishes parsing.
-         * In that case 'call' is the Function for the StateCall for that NonTerminalState and
-         * 'exit' is the Function for the StateReturn of the ExitState in the NonTerminal.
+         * This is used when the child (a {@link NonTerminal}) of a {@link NonTerminalState} finishes parsing.
+         * In that case 'call' is the Function for the {@link StateCall} for that {@link NonTerminalState} and
+         * 'exit' is the Function for the {@link StateReturn} of the {@link ExitState} in the {@link NonTerminal}.
          * @param call    The base function onto which 'exit' should be appended
          * @param exit    The function to append on 'call'
          * @return 'true' iff the mapping in this function changed
@@ -598,7 +616,7 @@ public class Parser {
         /**
          * Add to 'this', the mappings from 'that' after they have had 'rule' applied to them.
          *
-         * NOTE: May also add 'stateReturn' to the 'reactivations' of the NonTerminalCall containing 'stateReturn'
+         * NOTE: May also add 'stateReturn' to the 'reactivations' of the {@link NonTerminalCall} containing 'stateReturn'
          *
          * @param that           The function on which to apply 'rule'
          * @param rule           The 'Rule' to apply to the values in 'that'
@@ -737,10 +755,6 @@ public class Parser {
     }
 
     private AssertionError unknownStateType() { return new AssertionError("Unknown state type"); }
-
-    /****************
-     * State Return
-     ****************/
 
     // finish the process of one state return from the work list
     private void workListStep(StateReturn stateReturn) {
