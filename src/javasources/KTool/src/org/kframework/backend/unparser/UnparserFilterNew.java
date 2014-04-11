@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MetaK;
@@ -48,16 +49,19 @@ public class UnparserFilterNew extends BasicVisitor {
     }
 
     public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color, addParentheses, false, context);
+        this(inConfiguration, color, addParentheses, false, false, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context) {
+    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, boolean wrapLine, org.kframework.kil.loader.Context context) {
         super(context);
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
         this.addParentheses = addParentheses;
         this.annotateLocation = annotateLocation;
+        if (!wrapLine) {
+            indenter.setWidth(-1);
+        }
     }
 
     public String getResult() {

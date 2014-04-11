@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -84,7 +85,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
                 );
         }
         Term term = null;
-        if (!GlobalSettings.testgen) {
+        if (!kompileOptions.experimental.testGen) {
             java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
             if (vars.size() != 1) {
                 GlobalSettings.kem.register(

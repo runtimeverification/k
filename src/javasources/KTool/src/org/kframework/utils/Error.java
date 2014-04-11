@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
 import java.io.File;
@@ -49,8 +50,8 @@ public class Error {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
         }
     }
-    public static void checkIfOutputDirectory(String directory) {
-        if (new File(directory).isFile()) { // isFile = exists && !isDirectory
+    public static void checkIfOutputDirectory(File directory) {
+        if (directory.isFile()) { // isFile = exists && !isDirectory
             String msg = "Not a directory: " + directory;
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
         }

@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
 import java.io.*;
@@ -15,6 +16,10 @@ public class BinaryLoader {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+    
+    public static <T> T load(Class<T> cls, String fileName) {
+        return cls.cast(load(fileName));
     }
 
     public static Object load(String fileName) {

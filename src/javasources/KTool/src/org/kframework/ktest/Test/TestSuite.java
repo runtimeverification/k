@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
@@ -48,8 +49,8 @@ public class TestSuite {
     private final boolean generateOut;
 
     private final ReportGen reportGen;
-
-    private final Comparator<String> strComparator;
+    
+    private final StringMatcher strComparator;
 
     // real times are times spend on a step, other times are total time spend by processess
     // generated for a step
@@ -66,7 +67,7 @@ public class TestSuite {
     private int krunSteps; // total number of krun tasks
 
     private TestSuite(List<TestCase> tests, Set<KTestStep> skips, int threads, boolean verbose,
-                     Comparator<String> strComparator, ColorSetting colorSetting,
+                     StringMatcher strComparator, ColorSetting colorSetting,
                      int timeout, boolean updateOut, boolean generateOut, boolean report) {
         this.tests = tests;
         this.skips = skips;
@@ -82,7 +83,7 @@ public class TestSuite {
 
     public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
         this(tests, cmdArg.getSkips(), cmdArg.getThreads(), cmdArg.isVerbose(),
-                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
+                cmdArg.getDefaultStringMatcher(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
                 cmdArg.getUpdateOut(), cmdArg.getGenerateOut(),
                 cmdArg.getGenerateReport());
     }
@@ -421,8 +422,12 @@ public class TestSuite {
 
         if (verbose)
             printVerboseRunningMsg(program);
+        StringMatcher matcher = strComparator;
+        if (program.regex) {
+            matcher = new RegexStringMatcher();
+        }
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
-                errorContentsAnn, program.toLogString(), strComparator, timeout, verbose,
+                errorContentsAnn, program.toLogString(), matcher, timeout, verbose,
                 colorSetting, updateOut, generateOut, program.outputFile, program.newOutputFile);
         p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);

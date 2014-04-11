@@ -1,4 +1,12 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
+
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterDescription;
 
 public class StringUtil {
     public static String unescape(String str) {
@@ -449,14 +457,16 @@ public class StringUtil {
     public static String splitLines(String str, int col) {
         String[] lines = str.split("\n");
         StringBuilder builder = new StringBuilder();
+        String nl = "";
         for (String line : lines) {
+            builder.append(nl);
             if (line.length() < 80) {
                 builder.append(line);
-                builder.append("\n");
+                
             } else {
                 builder.append(splitLine(line, col));
-                builder.append("\n");
             }
+            nl = "\n";
         }
 
         return builder.toString();
@@ -474,5 +484,43 @@ public class StringUtil {
             }
         }
         return str.substring(0, lastIdx) + "\n" + splitLine(str.substring(lastIdx + 1), col);
+    }
+
+    /**
+     * Finesse the JCommander usage output to make it more readable to the user.
+     * 
+     * This function does two things. First, it reworks the indentation to fix a 
+     * bug where different commands are indented differently. Second, it
+     * separates out experimental and non-experimental options in order to print
+     * their usage separately.
+     * @param string The unfiltered output from JCommander's usage
+     * @return An array of strings. If the command has experimental options, they 
+     * are in the second string, and the main options are in the first string.
+     * Otherwise, there will only be one string outputted.
+     */
+    public static String[] finesseJCommanderUsage(String string, JCommander jc) {
+        //for some reason the usage pattern indents commands inconsistently, so we need to adjust it
+        string = string.replaceAll("        ", "    ");
+        String lastLine = "";
+        StringBuilder mainOptions = new StringBuilder();
+        StringBuilder experimentalOptions = new StringBuilder();
+        experimentalOptions.append("  Experimental Options:\n");
+        boolean inExperimentalOptions = false;
+        for (String line : string.split("\n")) {
+            if (line.startsWith("    --")) {
+                if (lastLine.compareTo(line) > 0) {
+                    inExperimentalOptions = true;
+                }
+                lastLine = line;
+            }
+            if (inExperimentalOptions) {
+                experimentalOptions.append(line);
+                experimentalOptions.append("\n");
+            } else {
+                mainOptions.append(line);
+                mainOptions.append("\n");
+            }
+        }
+        return new String[] {mainOptions.toString(), experimentalOptions.toString()};
     }
 }

@@ -16,6 +16,10 @@
     <property name="fileExtensions" value="xml,xsd" />
   </module>
   <module name="RegexpHeader">
+    <property name="header" value="^&lt;!-- Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved. --&gt;$" />
+    <property name="fileExtensions" value="md" />
+  </module>
+  <module name="RegexpHeader">
     <property name="header" value="^// Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
     <property name="fileExtensions" value="k,kore,java,jj,c,h,str" />
   </module>

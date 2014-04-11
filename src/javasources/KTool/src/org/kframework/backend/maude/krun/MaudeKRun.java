@@ -1,5 +1,4 @@
-// Copyright (C) 2012-2014 K Team. All Rights Reserved.
-
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude.krun;
 
 import org.apache.commons.collections15.Transformer;
@@ -49,9 +48,11 @@ import java.util.Set;
 
 public class MaudeKRun implements KRun {
     protected Context context;
-
-    public MaudeKRun(Context context) {
+    protected Stopwatch sw;
+    
+    public MaudeKRun(Context context, Stopwatch sw) {
         this.context = context;
+        this.sw = sw;
     }
 
     private boolean ioServer = K.io;
@@ -118,7 +119,7 @@ public class MaudeKRun implements KRun {
         cmd.append(getCounter());
 
         executeKRun(cmd);
-        Stopwatch.sw.printIntermediate("Execution");
+        sw.printIntermediate("Execution");
         try {
             return parseRunResult();
         } catch (IOException e) {
@@ -225,7 +226,6 @@ public class MaudeKRun implements KRun {
         List<Element> list = XmlUtil.getChildElements(xml);
         
         try {
-            Matcher m;
             if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("<_>_</_>")) {
                 Cell cell = new Cell();
                 assertXMLTerm(list.size() == 3 && list.get(0).getAttribute("sort").equals("CellLabel") && list.get(2).getAttribute("sort").equals("CellLabel") && list.get(0).getAttribute("op").equals(list.get(2).getAttribute("op")));
