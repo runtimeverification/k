@@ -1,14 +1,6 @@
 // Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -30,6 +22,14 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 /**
  * This is the main code for running the parser.
@@ -715,6 +715,7 @@ public class Parser {
                     KSorts.K, stateReturn.function.applyToNull())));
             }
         }
+
         return result;
     }
 
