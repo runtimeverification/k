@@ -256,7 +256,6 @@ public class BuiltinList extends Collection {
                 for (int i = removeRight; i < size; i++) {
                    right.add(iterator.next());
                 }
-                right.addAll(elementsRight);
                 if (removeRight > size) {
                     removeRight -= size;
                 } else removeRight = 0;
