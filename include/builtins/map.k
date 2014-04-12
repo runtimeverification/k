@@ -81,7 +81,7 @@ module MAP
   syntax Bool ::= Map "<=Map" Map    [function, hook(Map:inclusion)]
 
   /*@ Get Map size (TODO: number of key/value pairs? Total combined number of keys and values?):*/
-  syntax Int ::= size(Map)   [function]
+  syntax Int ::= size(Map)   [function, hook(Collection:size)]
 //  rule size(_ |-> _ M:Map) => 1 +Int size(M)
 //  rule size(.Map) => 0
 endmodule

@@ -51,7 +51,7 @@ module SET
 //  rule _ in .Set => false
 
   /*@ Get the cardinality of a set (|A|) :*/
-  syntax Int ::= size(Set)   [function]
+  syntax Int ::= size(Set)   [function, hook(Collection:size)]
 //  rule size(SetItem(_) S:Set) => 1 +Int size(S)
 //  rule size(.Set) => 0
 endmodule
