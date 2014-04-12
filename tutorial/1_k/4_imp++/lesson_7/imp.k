@@ -1,3 +1,5 @@
+// Copyright (C) 2010-2014 K Team. All Rights Reserved.
+
 module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
@@ -54,13 +56,13 @@ module IMP
        <env>... X |-> N ...</env>
        <store>... N |-> (I => I +Int 1) ...</store>  [increment]
   rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => . ...</in>  [read]
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule Str1:String + Str2:String => Str1 +String Str2
+       <in> ListItem(I:Int) => .List ...</in>  [read]
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
+  rule Str1 + Str2 => Str1 +String Str2
 // BExp
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule ! T:Bool => notBool T
+  rule I1 <= I2 => I1 <=Int I2
+  rule ! T => notBool T
   rule true && B => B
   rule false && _ => false
 // Block
@@ -76,16 +78,16 @@ module IMP
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
 
-  rule <k> int (X:Id,Xs => Xs); ...</k>
-       <env> Rho => Rho[N/X] </env>
-       <store>... . => N|->0 ...</store>
-    when fresh(N:Nat)
+  rule <k> int (X,Xs => Xs); ...</k>
+       <env> Rho => Rho[X <- N] </env>
+       <store>... .Map => N |-> 0 ...</store>
+    when fresh(N:Int)
   rule int .Ids; => .  [structural]
 
-  syntax Printable ::= Int | String
   syntax AExp ::= Printable
+  syntax Printable ::= Int | String
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <out>... . => ListItem(P) </out>  [print]
+       <out>... .List => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]
   
   rule <k> halt; ~> _ => . </k>
@@ -93,9 +95,10 @@ module IMP
   rule <k> spawn S => T ...</k> <env> Rho </env>
        (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
     when fresh(T:Int)
-  rule <k> join(T); => . ...</k> <thread>... <k>.</k> <id>T</id> ...</thread>
+  rule <k> join(T:Int); => . ...</k>
+       <thread>... <k> . </k> <id> T </id> ...</thread>
 
 // Stmts
-  rule .Stmts => .
-  rule S Ss => S ~> Ss  [structural]
+  rule .Stmts => .                 [structural]
+  rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
 endmodule
