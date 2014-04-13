@@ -52,19 +52,20 @@ a fresh location in the store and bind the newly declared variable to it.
 This is quite similar to the way we allocated space for variables in
 the environment-based definition of LAMBDA++ in Part 3 of the tutorial.
 
-    rule <k> int (X:Id,Xs:Ids => Xs); ...</k>
+    rule <k> int (X,Xs => Xs); ...</k>
          <env> Rho:Map => Rho[N/X] </env>
-         <store>... . => N|->0 ...</store>
+         <store>... .Map => N|->0 ...</store>
       when fresh(N:Nat)
 
 The side condition `fresh(N:Nat)` generates an *element* of sort `Nat` that has
 not been generated so far.  We emphasized *element*, because, like also
 explained in the LAMBDA++ tutorial, technically it is nothing but K syntactic
 sugar for a straightforward operation: it generates a term of the form
-`symNat(n)` of sort `Nat`, where `n` is a natural number, thought of as the
-`n`-th symbolic natural number that had been generated so far; the counter
-`n` is maintained in a cell that the K tool automatically adds to the
-configuration for this purpose.
+`symNat(n)` of sort `Nat`, or something similar (because the internal
+representation of symbolic numbers may change in the K implementation), where
+`n` is a natural number, thought of as the `n`-th symbolic natural number that
+had been generated so far; the counter `n` is maintained in a cell that the K
+tool automatically adds to the configuration for this purpose.
 
 `kompile` and `krun` `sum.imp` to see how the fresh locations have been
 generated and used.  There were two fresh locations needed, for the two
