@@ -167,8 +167,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         public static final String SEPARATOR = " =? ";
 
-        private Term leftHandSide;
-        private Term rightHandSide;
+        private final Term leftHandSide;
+        private final Term rightHandSide;
 
         private Equality(Term leftHandSide, Term rightHandSide) {
             if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
@@ -297,27 +297,29 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         /**
-         * Substitutes this equality with according to a specified substitution
-         * map.
-         * 
+         * Returns an {@code Equality} obtained by applying the {@code substitution} on
+         * {@code this} equality.
+         *
          * @param substitution
          *            the specified substitution map
          */
-        private void substitute(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
-            rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
+        private Equality substitute(Map<Variable, ? extends Term> substitution) {
+            return new Equality(
+                    leftHandSide.substituteWithBinders(substitution, context),
+                    rightHandSide.substituteWithBinders(substitution, context));
         }
-        
+
         /**
-         * Substitutes this equality with according to a specified substitution
-         * map and evaluates pending functions.
-         * 
+         * Returns an {@code Equality} obtained by applying the {@code substitution} on
+         * {@code this} equality and then evaluating pending functions.
+         *
          * @param substitution
          *            the specified substitution map
          */
-        public void substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
-            rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
+        private Equality substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
+            return new Equality(
+                    leftHandSide.substituteAndEvaluate(substitution, context),
+                    rightHandSide.substituteAndEvaluate(substitution, context));
         }
 
         @Override
@@ -961,23 +963,23 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }        
         recursiveNormalize = false;
     }
-    
+
     private void renormalize() {
         isNormal = true;
         equalities.addAll(equalityBuffer);
         equalityBuffer.clear();
-                
-        Set<Equality> equalitiesToRemove = new HashSet<Equality>();
-        for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
-            Equality equality = iterator.next();
-            
+
+        List<Integer> equalitiesToRemove = new ArrayList<>();
+        for (int i = 0; i < equalities.size(); ++i) {
             // YilongL: no need to evaluate after substitution because the LHS
             // of the rule and the subject term should have no function symbol
             // inside; in other words, only side conditions need to be evaluated
             // and they should have been taken care of in method add(Term,Term)
-            equality.substitute(substitution);
+            Equality equality = equalities.get(i).substitute(substitution);
+            equalities.set(i, equality);
+
             if (equality.isTrue()) {
-                equalitiesToRemove.add(equality);
+                equalitiesToRemove.add(i);
                 continue;
             } else if (equality.isFalse()) {
                 falsify(equality);
@@ -1008,38 +1010,36 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 continue;
             }
 
+            equalitiesToRemove.add(i);
+
             Map<Variable, Term> tempSubst = Collections.singletonMap(variable, term);
             composeSubstitution(tempSubst, context, false);
             if (truthValue == TruthValue.FALSE) {
                 return;
             }
 
-            for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
-                Equality previousEquality = previousIterator.next();
-                if (previousEquality == equality) {
-                    break;
-                }
-                
+            for (int j = 0; j < i; ++j) {
                 /*
                  * Do not modify the previousEquality if it has been added to
                  * the HashSet equalitiesToRemove since this may result in
                  * inconsistent hashCodes in the HashSet; besides, there is no
                  * need to do so
                  */
-                if (!equalitiesToRemove.contains(previousEquality)) {
-                    previousEquality.substituteAndEvaluate(tempSubst);
+                if (!equalitiesToRemove.contains(j)) {
+                    Equality previousEquality = equalities.get(j).substituteAndEvaluate(tempSubst);
                     if (previousEquality.isTrue()) {
-                        equalitiesToRemove.add(previousEquality);
+                        equalitiesToRemove.add(j);
                     } else if (previousEquality.isFalse()) {
                         falsify(previousEquality);
                         return;
                     }
                 }
             }
-            equalitiesToRemove.add(equality);
         }
-        
-        equalities.removeAll(equalitiesToRemove);
+
+        for (int i = equalitiesToRemove.size() - 1; i >= 0; --i) {
+            equalities.remove((int) equalitiesToRemove.get(i));
+        }
     }
 
     /**
@@ -1101,8 +1101,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             entry.setValue(entry.getValue().substituteWithBinders(freshSubstitution, context));
         }
 
-        for (Equality equality : equalities) {
-            equality.substitute(freshSubstitution);
+        for (int i = 0; i < equalities.size(); ++i) {
+            equalities.set(i, equalities.get(i).substitute(freshSubstitution));
         }
 
         return freshSubstitution;
