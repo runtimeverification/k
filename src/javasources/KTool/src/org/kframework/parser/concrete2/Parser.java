@@ -42,12 +42,9 @@ import java.util.regex.Pattern;
  * {@link StateCall} and {@link StateReturn} records. These tables are stored
  * in ParseState and are keyed by {@link NonTerminalCall.Key},
  * {@link StateCall.Key} and {@link StateReturn.Key}. For any given Key, there is
- * a single value that can be looked up with
- * {@link ParseState#getNtCall(NonTerminalCall.Key)},
- * {@link ParseState#getStateCall(StateCall.Key)}, and
- * {@link ParseState#getStateReturn(StateReturn.Key)}.
- * If no value exists for a given Key, then those
- * functions will create one.
+ * a single value that can be looked up in an {@link AutoVivifyingBiMap}.
+ * If no value exists for a given Key, then the {@link AutoVivifyingBiMap}
+ * will create one.
  *
  * In addition to these tables, a work queue of {@link StateReturn}s
  * to be processed is kept in {@link StateReturnWorkList}.
@@ -106,7 +103,7 @@ public class Parser {
         /** The {@link Function} storing the AST parsed so far */
         final Function function = Function.empty();
 
-        private static class Key {
+        private static class Key implements AutoVivifyingBiMap.Create<StateCall> {
             /** The {@link NonTerminalCall} containing this StateCall */
             final NonTerminalCall ntCall;
             /** The start position of this StateCall */
@@ -119,6 +116,8 @@ public class Parser {
                 assert ntCall != null; assert state != null;
                 this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
             }
+
+            public StateCall create() { return new StateCall(this); }
 
             @Override
             public boolean equals(Object o) {
@@ -187,7 +186,7 @@ public class Parser {
                 this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state);
         }
 
-        private static class Key {
+        private static class Key implements AutoVivifyingBiMap.Create<StateReturn> {
             /** The {@link StateCall} that this StateReturn finishes */
             public final StateCall stateCall;
             /** The end position of the parse */
@@ -202,6 +201,8 @@ public class Parser {
     //***************************** Start Boilerplate *****************************
                 this.stateCall = stateCall; this.stateEnd = stateEnd;
             }
+
+            public StateReturn create() { return new StateReturn(this); }
 
             @Override
             public boolean equals(Object o) {
@@ -283,7 +284,7 @@ public class Parser {
         final Set<StateReturn> reactivations = new HashSet<>();
         /** The {@link Context}s from which this NonTerminalCall is called */
         final Context context = new Context();
-        private static class Key {
+        private static class Key implements AutoVivifyingBiMap.Create<NonTerminalCall> {
             /** The {@link NonTerminal} being called */
             public final NonTerminal nt;
             /** The start position for parsing the {@link NonTerminal} */
@@ -294,6 +295,8 @@ public class Parser {
                 // assert ntBegin == c.stateBegin for c in callers
                 this.nt = nt; this.ntBegin = ntBegin;
             }
+
+            public NonTerminalCall create() { return new NonTerminalCall(this); }
 
             @Override
             public boolean equals(Object o) {
@@ -344,6 +347,10 @@ public class Parser {
         // TODO: extract Location class into it's own file
         final int[] lines;
         final int[] columns;
+        AutoVivifyingBiMap<NonTerminalCall.Key, NonTerminalCall> ntCalls = new AutoVivifyingBiMap<>();
+        AutoVivifyingBiMap<StateCall.Key, StateCall> stateCalls = new AutoVivifyingBiMap<>();
+        AutoVivifyingBiMap<StateReturn.Key, StateReturn> stateReturns = new AutoVivifyingBiMap<>();
+
         public ParseState(CharSequence input) {
             /**
              * Create arrays corresponding to the index in the input CharSequence and the line and
@@ -383,46 +390,6 @@ public class Parser {
             }
             lines[input.length()] = l;
             columns[input.length()] = c;
-        }
-
-        private BiMap<NonTerminalCall.Key,NonTerminalCall> ntCalls = HashBiMap.create();
-        private BiMap<StateCall.Key,StateCall> stateCalls = HashBiMap.create();
-        private BiMap<StateReturn.Key,StateReturn> stateReturns = HashBiMap.create();
-
-        /** Retrieves the {@link NonTerminalCall} associated with a given {@link NonTerminalCall.Key}.
-         * Creates a new one if one doesn't exist yet. */
-        public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
-            NonTerminalCall value = ntCalls.get(key);
-            if (value == null) {
-                value = new NonTerminalCall(key);
-                ntCalls.put(key, value);
-            }
-            return value;
-        }
-
-        /** Retrieves the {@link StateCall} associated with a given {@link StateCall.Key}.
-         * Creates a new one if one doesn't exist yet. */
-        public StateCall getStateCall(StateCall.Key key) {
-            StateCall value = stateCalls.get(key);
-            if (value == null) {
-                value = new StateCall(key);
-                stateCalls.put(key, value);
-            }
-            return value;
-        }
-
-        /** Returns all {@link StateCall.Key} currently being used. */
-        public Set<StateCall.Key> getStateCallKeys() { return stateCalls.keySet(); }
-
-        /** Retrieves the {@link StateReturn} associated with a given {@link StateReturn.Key}.
-         * Creates a new one if one doesn't exist yet. */
-        public StateReturn getStateReturn(StateReturn.Key key) {
-            StateReturn value = stateReturns.get(key);
-            if (value == null) {
-                value = new StateReturn(key);
-                stateReturns.put(key, value);
-            }
-            return value;
         }
     }
 
@@ -699,7 +666,7 @@ public class Parser {
         startNt.exitState.orderingInfo = new State.OrderingInfo(Integer.MAX_VALUE);
         state.orderingInfo = new State.OrderingInfo(Integer.MAX_VALUE - 1);
 
-        activateStateCall(s.getStateCall(new StateCall.Key(s.getNtCall(
+        activateStateCall(s.stateCalls.get(new StateCall.Key(s.ntCalls.get(
             new NonTerminalCall.Key(startNt, position)), position, startNt.entryState)),
             Function.IDENTITY);
 
@@ -709,7 +676,7 @@ public class Parser {
         }
 
         Ambiguity result = new Ambiguity(KSorts.K, new ArrayList<Term>());
-        for(StateReturn stateReturn : s.getNtCall(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
+        for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
                 result.getContents().add(new KList(new Ambiguity(
                     KSorts.K, stateReturn.function.applyToNull())));
@@ -727,12 +694,12 @@ public class Parser {
      */
     public ParseError getErrors() {
         int current = 0;
-        for (StateCall.Key key : s.getStateCallKeys()) {
+        for (StateCall.Key key : s.stateCalls.keySet()) {
             if (key.state instanceof PrimitiveState)
                 current = Math.max(current, key.stateBegin);
         }
         Set<Pair<String, Pattern>> tokens = new HashSet<>();
-        for (StateCall.Key key : s.getStateCallKeys()) {
+        for (StateCall.Key key : s.stateCalls.keySet()) {
             if (key.state instanceof RegExState && key.stateBegin == current) {
                 tokens.add(new ImmutablePair<>(
                     ((RegExState) key.state).sort, ((RegExState) key.state).pattern));
@@ -773,12 +740,12 @@ public class Parser {
             if (state instanceof ExitState) {
                 for (StateCall stateCall : stateReturn.key.stateCall.key.ntCall.callers) {
                     s.stateReturnWorkList.enqueue(
-                        s.getStateReturn(
+                        s.stateReturns.get(
                             new StateReturn.Key(stateCall, stateReturn.key.stateEnd)));
                 }
             } else if (state instanceof NextableState) {
                 for (State nextState : ((NextableState) state).next) {
-                    activateStateCall(s.getStateCall(new StateCall.Key(
+                    activateStateCall(s.stateCalls.get(new StateCall.Key(
                         stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState)),
                         stateReturn.function);
                 }
@@ -809,9 +776,9 @@ public class Parser {
         } else if (stateReturn.key.stateCall.key.state instanceof NonTerminalState) {
             return stateReturn.function.addNTCall(
                 stateReturn.key.stateCall.function,
-                s.getStateReturn(new StateReturn.Key(
-                    s.getStateCall(new StateCall.Key(
-                        s.getNtCall(new NonTerminalCall.Key(
+                s.stateReturns.get(new StateReturn.Key(
+                    s.stateCalls.get(new StateCall.Key(
+                        s.ntCalls.get(new NonTerminalCall.Key(
                             ((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child,
                             stateReturn.key.stateCall.key.stateBegin)),
                         stateReturn.key.stateEnd,
@@ -830,13 +797,13 @@ public class Parser {
             nextState instanceof ExitState ||
             nextState instanceof RuleState) {
             s.stateReturnWorkList.enqueue(
-                s.getStateReturn(
+                s.stateReturns.get(
                     new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
         } else if (nextState instanceof PrimitiveState) {
             for (PrimitiveState.MatchResult matchResult :
                     ((PrimitiveState)nextState).matches(s.input, stateCall.key.stateBegin)) {
                 s.stateReturnWorkList.enqueue(
-                    s.getStateReturn(
+                    s.stateReturns.get(
                         new StateReturn.Key(stateCall, matchResult.matchEnd)));
             }
         // not instanceof SimpleState
@@ -844,11 +811,11 @@ public class Parser {
             // make sure lookaheads have a stateReturn even if empty
             if (((NonTerminalState) nextState).isLookahead) {
                 s.stateReturnWorkList.enqueue(
-                    s.getStateReturn(
+                    s.stateReturns.get(
                         new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
             }
             // add to the ntCall
-            NonTerminalCall ntCall = s.getNtCall(new NonTerminalCall.Key(
+            NonTerminalCall ntCall = s.ntCalls.get(new NonTerminalCall.Key(
                 ((NonTerminalState) nextState).child, stateCall.key.stateBegin));
             ntCall.callers.add(stateCall);
             if (ntCall.context.contexts.addAll(stateCall.function.results())) {
@@ -856,13 +823,13 @@ public class Parser {
                 s.stateReturnWorkList.addAll(ntCall.reactivations);
             }
             // activate the entry state call (almost like activateStateCall but we have no stateReturn)
-            StateCall entryStateCall = s.getStateCall(new StateCall.Key(
+            StateCall entryStateCall = s.stateCalls.get(new StateCall.Key(
                 ntCall, stateCall.key.stateBegin, ntCall.key.nt.entryState));
             activateStateCall(entryStateCall, Function.IDENTITY);
             // process existStateReturns already done in the ntCall
             for (StateReturn exitStateReturn : ntCall.exitStateReturns) {
                 s.stateReturnWorkList.enqueue(
-                    s.getStateReturn(
+                    s.stateReturns.get(
                         new StateReturn.Key(stateCall, exitStateReturn.key.stateEnd)));
             }
         } else { throw unknownStateType(); }
