@@ -30,6 +30,14 @@ public class AutoVivifyingBiMap<K extends AutoVivifyingBiMap.Create<V>,V> {
 
     /** Retrieves the V associated with a given K.
      * Creates a new one if one doesn't exist yet.
+     *
+     * NOTE: We would prefer for this to conform to the java.util.Map interface
+     * but that interface requires get() to take an Object as instance and
+     * then check that the object is an instance of the right class.
+     * Unfortunately we can't do that because K, the class to check,
+     * is generic and Java doesn't allow 'instanceof' on generic parameters.
+     * Sigh ... Java fails us yet another time.
+     *
      * @param key    The key to lookup
      * @return The value that key maps to
      */
