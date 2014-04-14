@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import java.util.HashSet;
@@ -16,13 +16,15 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions.Backend;
+import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
- * 
+ *
  * @author RaduFmse
- * 
+ *
  */
 public class ProgramSDF {
 
@@ -35,11 +37,16 @@ public class ProgramSDF {
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
         CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context);
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
             m.accept(psdfv);
             m.accept(ctv);
+            m.accept(ks2gsf);
         }
+
+        // save the new parser info
+        BinaryLoader.save(context.dotk.getPath()+ "/pgm/newParser.bin", ks2gsf.getGrammar());
 
         StringBuilder sdf = new StringBuilder();
         sdf.append("module Program\n\n");

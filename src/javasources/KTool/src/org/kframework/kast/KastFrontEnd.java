@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kast;
 
 import java.io.*;
@@ -192,6 +192,8 @@ public class KastFrontEnd {
             String parser = cmd.getOptionValue("parser");
             if (parser.equals("program")) {
                 GlobalSettings.whatParser = GlobalSettings.ParserType.PROGRAM;
+            } else if (parser.equals("newprogram")) {
+                GlobalSettings.whatParser = GlobalSettings.ParserType.NEWPROGRAM;
             } else if (parser.equals("ground")) {
                 GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
             } else if (parser.equals("rule")) {
