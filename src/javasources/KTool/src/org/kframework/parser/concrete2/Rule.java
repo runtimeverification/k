@@ -78,7 +78,7 @@ public abstract class Rule implements Serializable {
         protected KList apply(KList klist, MetaData metaData) {
             Term term = new KApp(label, klist);
             term.setSort(this.sort);
-            return new KList(Arrays.<Term>asList(term));
+            return new KList(Arrays.asList(term));
         }
     }
 
@@ -90,20 +90,11 @@ public abstract class Rule implements Serializable {
         protected abstract boolean rejectSmallKLists();
         /** Returns the number of elements at the end of a KList to consider */
         protected abstract int getSuffixLength();
-        /** Transforms the last {@link getSuffixLength()} elements of a KList */
-        protected abstract Result applySuffix(List<Term> suffix, MetaData metaData);
-
-        /** Determines what should be done with the entire KList */
-        protected abstract class Result {}
-        /** Reject the entire KList */
-        protected class Reject extends Result {}
-        /** Keep the KList unchanged */
-        protected class Original extends Result {}
-        /** Change the last {@link getSuffixLength()} elements to the ones in {@link list} */
-        protected class Accept extends Result {
-            List<Term> list;
-            public Accept(List<Term> list) { assert list != null; this.list = list; }
-        }
+        /** Transforms the last {@link getSuffixLength()} elements of a KList.
+         * Returns 'null' if the parse should be rejected.
+         * Returns 'suffix' if the original parse should be used.
+         */
+        protected abstract List<Term> applySuffix(List<Term> suffix, MetaData metaData);
 
         protected KList apply(KList klist, MetaData metaData) {
             List<Term> terms = klist.getContents();
@@ -115,22 +106,20 @@ public abstract class Rule implements Serializable {
                 for (; i < terms.size(); i++) {
                     suffix.add(terms.get(i));
                 }
-                Result result = this.applySuffix(suffix, metaData);
-                if (result instanceof Reject) {
-                    return null;
-                } else if (result instanceof Original) {
-                    return klist;
-                } else if (result instanceof Accept) {
+                List<Term> result = this.applySuffix(suffix, metaData);
+                if (result == null) { return null; }
+                else if (result == suffix) { return klist; }
+                else {
                     KList prefix = new KList(klist);
                     for (int j = terms.size() - 1;
                          j >= terms.size() - this.getSuffixLength(); j--) {
                         prefix.getContents().remove(j);
                     }
-                    for (Term term : ((Accept) result).list) {
+                    for (Term term : result) {
                         prefix.add(term);
                     }
                     return prefix;
-                } else { assert false : "impossible"; return null; }
+                }
             }
         }
     }
@@ -148,8 +137,8 @@ public abstract class Rule implements Serializable {
 
         protected boolean rejectSmallKLists() { return reject; }
         protected int getSuffixLength() { return length; }
-        protected Result applySuffix(List<Term> terms, MetaData metaData) {
-            return new Accept(Arrays.<Term>asList());
+        protected List<Term> applySuffix(List<Term> terms, MetaData metaData) {
+            return Arrays.asList();
         }
     }
 
@@ -162,8 +151,8 @@ public abstract class Rule implements Serializable {
         public InsertRule(Term term) { assert term != null; this.term = term; }
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 0; }
-        public Result applySuffix(List<Term> set, MetaData metaData) {
-            return new Accept(Arrays.asList(term));
+        public List<Term> applySuffix(List<Term> set, MetaData metaData) {
+            return Arrays.asList(term);
         }
     }
 
@@ -173,10 +162,10 @@ public abstract class Rule implements Serializable {
     public static class AddLocationRule extends SuffixRule {
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 1; }
-        public Result applySuffix(List<Term> terms, MetaData metaData) {
+        public List<Term> applySuffix(List<Term> terms, MetaData metaData) {
             Term newTerm = terms.get(0).shallowCopy();
             newTerm.setLocation("("+metaData.start.line+","+metaData.start.column+","+metaData.end.line+","+metaData.end.column+")");
-            return new Accept(Arrays.asList(newTerm));
+            return Arrays.asList(newTerm);
         }
     }
 
