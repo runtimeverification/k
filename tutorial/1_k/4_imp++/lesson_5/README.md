@@ -37,21 +37,14 @@ My preferred solution is to follow a style similar to how we saved/restored
 LAMBDA++ environments in Part 3 of the Tutorial, namely to use the already
 existing `<k/>` cell for such operations.  More specifically, we place a
 *reminder* item in the computation whenever we need to take a snapshot of
-some cell contents; the item simply holds the entire contents of the cell.
-Then, when the reminder item is reached, we restore the contents of the cell.
-In our case here, like in Part 3 of the tutorial we define an item construct
-`env`
+some cell contents; the item simply consists of the entire contents of the cell.
+Then, when the reminder item is reached, we restore the contents of the cell:
 
-    syntax K ::= env(Map)
-
-which holds a map, and we use it to place a reminder in the block rule to
-restore the environment map when the enclosed statement is done:
-
-    rule <k> {S} => S ~> env(Rho) ...</k> <env> Rho </env>  [structural]
+    rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>  [structural]
 
 The only thing left now is to give the definition of environment restore:
 
-    rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
+    rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
 
 Done.  `kompile` and `krun` `locals.imp`.  Everything should work correctly now.
 Note that the rule above is different from the one we had for LAMBDA++ in

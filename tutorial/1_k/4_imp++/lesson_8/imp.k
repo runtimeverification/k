@@ -479,7 +479,7 @@ below can be structural, because what it effectively does is to take a
 snapshot of the current environment; this operation is arguably not a
 computational step. */
 
-  rule <k> {Ss} => Ss ~> env(Rho) ...</k> <env> Rho </env>  [structural]
+  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>  [structural]
 
 /*@ \subsubsection{Variable declaration}
 We allocate a fresh location for each newly declared variable and
@@ -498,13 +498,12 @@ recovery.  Its role is to discard the current environment in the
 This rule is structural: we do not want them to count as computational
 steps in the transition system of a program. */
 
-  syntax K ::= env(Map)
-  rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
 
 /*@ If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule
 \begin{verbatim}
- rule (env(_) => .) ~> env(_)  [structural]
+ rule (_:Map => .) ~> _:Map  [structural]
 \end{verbatim}
 This rule acts like a ``tail recursion'' optimization, but for blocks. */
 endmodule

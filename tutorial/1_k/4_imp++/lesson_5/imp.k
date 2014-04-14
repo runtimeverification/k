@@ -61,9 +61,8 @@ module IMP
   rule false && _ => false
 // Block
   rule {} => .   [structural]
-  rule <k> {S} => S ~> env(Rho) ...</k> <env> Rho </env>  [structural]
-  syntax K ::= env(Map)
-  rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>  [structural]
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <env>... X |-> N ...</env>
