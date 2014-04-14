@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -50,7 +51,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
             return node;
         }
         boolean superheat = false;
-        for (String heat : GlobalSettings.superheat) {
+        for (String heat : kompileOptions.superheat) {
             if (node.containsAttribute(heat)) {
                 superheat = true;
                 break;

@@ -1,9 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2012-2014 K Team. All Rights Reserved. -->
+
 <tests>
 
   <include file="../../../../../../tutorial/1_k/2_imp/lesson_5/tests/config.xml" >
    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--color" value="off" />
     </all-programs>

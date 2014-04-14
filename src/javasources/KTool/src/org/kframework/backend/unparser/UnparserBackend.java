@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import org.apache.commons.io.FilenameUtils;
@@ -8,7 +9,6 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class UnparserBackend extends BasicBackend {
 
         FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
-        FileUtil.save(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + ".unparsed.k", unparsedText);
+        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + ".unparsed.k", unparsedText);
     }
 
     @Override

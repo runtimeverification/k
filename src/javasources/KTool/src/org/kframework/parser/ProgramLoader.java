@@ -11,7 +11,6 @@ import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
@@ -58,7 +57,7 @@ public class ProgramLoader {
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
-        if (GlobalSettings.fastKast) {
+        if (context.experimentalParserOptions.fastKast) {
             //out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
             JavaClassesFactory.startConstruction(context);
             out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content, filename);
@@ -100,7 +99,7 @@ public class ProgramLoader {
      */
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
-        Stopwatch.sw.printIntermediate("Importing Files");
+        Stopwatch.instance().printIntermediate("Importing Files");
         assert context.definedSorts.contains(startSymbol) : "The start symbol must be declared in the definition. Found: " + startSymbol;
 
         try {
@@ -136,11 +135,11 @@ public class ProgramLoader {
 
                 Parser parser = new Parser(content);
                 out = parser.parse(grammar.get(startSymbol), 0);
-                if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
                     System.out.println("Raw: " + out + "\n");
                 try {
                     out = out.accept(new TreeCleanerVisitor(context));
-                    if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                    if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
                         System.out.println("Clean: " + out + "\n");
                 } catch (TransformerException te) {
                     ParseError perror = parser.getErrors();
@@ -157,7 +156,7 @@ public class ProgramLoader {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
             }
-            Stopwatch.sw.printIntermediate("Parsing Program");
+            Stopwatch.instance().printIntermediate("Parsing Program");
 
             return (Term) out;
         } catch (IOException e) {

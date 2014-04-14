@@ -1,21 +1,4 @@
-Search results:
-
-Solution 1:
-Solution:Map -->
-"L" |-> cons ( a (  ), cons ( b (  ), cons ( c (  ), cons ( d (  ), nil (  ) )
-   ) ) )
-
-Solution 2:
-Solution:Map -->
-"L" |-> cons ( b (  ), cons ( a (  ), cons ( c (  ), cons ( d (  ), nil (  ) )
-   ) ) )
-
-Solution 3:
-Solution:Map -->
-"L" |-> cons ( b (  ), cons ( c (  ), cons ( a (  ), cons ( d (  ), nil (  ) )
-   ) ) )
-
-Solution 4:
-Solution:Map -->
-"L" |-> cons ( b (  ), cons ( c (  ), cons ( d (  ), cons ( a (  ), nil (  ) )
-   ) ) )
+\Q"L" |-> cons ( a (  ), cons ( b (  ), cons ( c (  ), cons ( d (  ), nil (  ) ) ) ) )\E
+\Q"L" |-> cons ( b (  ), cons ( a (  ), cons ( c (  ), cons ( d (  ), nil (  ) ) ) ) )\E
+\Q"L" |-> cons ( b (  ), cons ( c (  ), cons ( a (  ), cons ( d (  ), nil (  ) ) ) ) )\E
+\Q"L" |-> cons ( b (  ), cons ( c (  ), cons ( d (  ), cons ( a (  ), nil (  ) ) ) ) )\E

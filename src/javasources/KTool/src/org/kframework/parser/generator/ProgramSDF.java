@@ -15,16 +15,16 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
- * 
+ *
  * @author RaduFmse
- * 
+ *
  */
 public class ProgramSDF {
 
@@ -122,7 +122,7 @@ public class ProgramSDF {
                 sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
         }
 
-        if (GlobalSettings.symbolic) {
+        if (context.kompileOptions.backend == Backend.SYMBOLIC) {
             sdf.append("\ncontext-free syntax\n");
             sdf.append("    DzId    -> UnitDz\n");
             sdf.append("    DzBool    -> UnitDz\n");

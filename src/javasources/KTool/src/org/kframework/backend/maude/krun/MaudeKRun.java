@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude.krun;
 
 import org.apache.commons.collections15.Transformer;
@@ -47,9 +48,11 @@ import java.util.Set;
 
 public class MaudeKRun implements KRun {
     protected Context context;
-
-    public MaudeKRun(Context context) {
+    protected Stopwatch sw;
+    
+    public MaudeKRun(Context context, Stopwatch sw) {
         this.context = context;
+        this.sw = sw;
     }
 
     private boolean ioServer = K.io;
@@ -97,19 +100,26 @@ public class MaudeKRun implements KRun {
         MaudeFilter maudeFilter = new MaudeFilter(context);
         cfg.accept(maudeFilter);
         StringBuilder cmd = new StringBuilder();
+
         if(K.trace) {
             cmd.append("set trace on .").append(K.lineSeparator);
         }
+        if(K.profile) {
+            cmd.append("set profile on .").append(K.lineSeparator);
+        }
+
         cmd.append("set show command off .").append(K.lineSeparator)
             .append(setCounter()).append(K.maude_cmd).append(" ")
-            .append(maudeFilter.getResult()).append(" .");
+            .append(maudeFilter.getResult()).append(" .").append(K.lineSeparator);
+
         if(K.profile) {
-            cmd.append("set profile on .").append(K.lineSeparator).append(K.lineSeparator).append("show profile .");
+            cmd.append("show profile .").append(K.lineSeparator);
         }
+
         cmd.append(getCounter());
 
         executeKRun(cmd);
-        Stopwatch.sw.printIntermediate("Execution");
+        sw.printIntermediate("Execution");
         try {
             return parseRunResult();
         } catch (IOException e) {
@@ -216,7 +226,6 @@ public class MaudeKRun implements KRun {
         List<Element> list = XmlUtil.getChildElements(xml);
         
         try {
-            Matcher m;
             if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("<_>_</_>")) {
                 Cell cell = new Cell();
                 assertXMLTerm(list.size() == 3 && list.get(0).getAttribute("sort").equals("CellLabel") && list.get(2).getAttribute("sort").equals("CellLabel") && list.get(0).getAttribute("op").equals(list.get(2).getAttribute("op")));
