@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
 import java.util.HashSet;
@@ -17,9 +18,11 @@ import org.kframework.parser.concrete2.Grammar.State;
  * Helper class in the parser that finds all of the entryNullable NonTerminals in a grammar.
  */
 public class Nullability {
-    /// Accumulated set of "entry nullable" states.
-    /// A state is entry nullable if we can get to the start of it from the start of its
-    /// non-terminal without consuming input.
+    /**
+     * Accumulated set of "entry nullable" states.
+     * A state is entry nullable if we can get to the start of it from the start of its
+     * non-terminal without consuming input.
+     */
     private Set<State> entryNullable = new HashSet<>();
 
     /**
@@ -41,6 +44,7 @@ public class Nullability {
      * @return A set with all the NonTerminals that can become entryNullable.
      */
     public Nullability(Grammar grammar) {
+        assert grammar != null;
         // 1. get all entryNullable states
         // list NonTerminals reachable from the start symbol.
         // the value of the map keeps a reference to all the states which call NonTerminals
@@ -55,7 +59,8 @@ public class Nullability {
         }
     }
 
-    /** marks a state as entryNullable if it is not already, and calls mark on any
+    /**
+     * marks a state as entryNullable if it is not already, and calls mark on any
      * states that should be entryNullable as a result.
      */
     private void mark(State state, Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers) {
@@ -66,12 +71,11 @@ public class Nullability {
                     for (State s : ((NextableState) state).next)
                         mark(s, nonTerminalCallers);
             } else {
-                assert state instanceof ExitState: "I was expecting this element to be of type ExitState";
+                assert state instanceof ExitState: "Expected element of type ExitState: " + state;
                 // previous calls to childNullable would have returned False
                 // so now we restart those recursions
                 for (State s : nonTerminalCallers.get(state.nt)) {
                     if (entryNullable.contains(s)) {
-                        // assert s instanceof NonTerminalState : "Intermediary states are NonTerminalStates?";
                         for (State child : ((NextableState)s).next) {
                             mark(child, nonTerminalCallers);
                         }

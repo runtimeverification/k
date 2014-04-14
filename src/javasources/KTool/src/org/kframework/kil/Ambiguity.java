@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.matchers.Matcher;
@@ -40,10 +41,10 @@ public class Ambiguity extends Collection {
 
         for (Term term : contents)
             if (term != null)
-                content += term + ",,";
+                content += term + ",";
 
         if (content.length() > 1)
-            content = content.substring(0, content.length() - 2);
+            content = content.substring(0, content.length() - 1);
 
         return "'amb(" + content + ")";
     }

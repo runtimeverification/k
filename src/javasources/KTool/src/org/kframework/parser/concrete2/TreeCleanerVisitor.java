@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
 import java.util.ArrayList;
@@ -21,28 +22,10 @@ public class TreeCleanerVisitor extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Ambiguity node) throws TransformerException {
-        java.util.List<Term> contents = new ArrayList<>();
-        for (Term t : node.getContents()) {
-            ASTNode transformed = t.accept(this);
-            if (transformed != null)
-                contents.add((Term) transformed);
-        }
-        node.setContents(contents);
-        if (contents.size() == 0)
-            return null;
-        else if(contents.size() == 1)
-            return contents.get(0);
-        else
-            return node;
-    }
-
-    @Override
     public ASTNode transform(KApp node) throws TransformerException {
         ASTNode rez = node.getChild().accept(this);
-        if (rez == null)
-            node.setChild(KList.EMPTY);
-        else if (rez instanceof KList)
+        assert rez != null;
+        if (rez instanceof KList)
             node.setChild((KList) rez);
         else {
             KList contents = new KList();
@@ -62,7 +45,7 @@ public class TreeCleanerVisitor extends BasicTransformer {
         }
         node.setContents(contents);
         if (contents.size() == 0)
-            return null;
+            return KList.EMPTY;
         else if(contents.size() == 1)
             return contents.get(0);
         else

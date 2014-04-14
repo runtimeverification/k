@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 require "bool.k"
 
 module LTL-SYNTAX-HOOKS
