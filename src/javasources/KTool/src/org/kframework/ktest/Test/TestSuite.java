@@ -308,8 +308,11 @@ public class TestSuite {
             else
                 kompileSuccesses.add(tc);
         }
-        System.out.println("Kompiling definitions that are not yet kompiled.");
-        kompileSuccesses.addAll(runKompileSteps(notKompiled));
+
+        if (!notKompiled.isEmpty()) {
+            System.out.println("Kompiling definitions that are not yet kompiled.");
+            kompileSuccesses.addAll(runKompileSteps(notKompiled));
+        }
 
         // at this point we have a subset of tests that are successfully kompiled,
         // so run programs of those tests
