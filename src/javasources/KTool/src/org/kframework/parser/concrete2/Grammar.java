@@ -21,32 +21,32 @@ import com.google.common.collect.HashBiMap;
 
 /**
  * The classes used by the parser to represent the internal structure of a grammar.
- * A grammar consists of NFAs generated for each non-terminal from a EBNF style grammar
- * (in this case the K syntax declarations).
+ * A grammar consists of NFAs (Non Finite Automata) generated for each non-terminal from a
+ * EBNF style grammar (in this case the K syntax declarations).
  * The main object is the {@link NonTerminal}, containing a unique {@link String} name,
  * and two states: entry and exit.
  *
  * There are five main types of states: {@link EntryState}, {@link NonTerminalState},
  * {@link PrimitiveState}, @{@link RuleState} and {@link ExitState}.
- * The first four extend {@link NextableState} in order to make accommodate connections
- * between the sates. ExitState signifies the end of a NonTerminal so it doesn't have a 'next' field.
+ * The first four extend {@link NextableState} in order to make connections between the sates.
+ * ExitState signifies the end of a NonTerminal so it doesn't need a 'next' field.
  *
  * Each {@link NonTerminal} contains exactly one {@link EntryState}
  * and one {@link ExitState}. Depending on the grammar it may contain
  * multiple {@link NonTerminalState}, {@link PrimitiveState} or {@link RuleState}.
  *
  * Example of a NonTerminal NFA structure:
- * E ::= E "+" E
- *     | E "*" E
- *     | {E, ","}+
+ * E ::= E "+" E   [label(add)]
+ *     | E "*" E   [label(mul)]
+ *     | {E, ","}+ [label(lst)]
  *
- *     |->[E]-->("+")--->[E]--|
- *     |                      |
- * (|--|->[E]-->("*")--->[E]--|->|)
- *     |                      |
- *     |   |------------------|
- *     |->[E]-->(",")
- *         ^------|
+ *     +--[E]---("+")--<Del>--[E]--<add>--+
+ *     |                                  |
+ * (|--+--[E]---("*")--<Del>--[E]--<mul>--+--|)
+ *     |                                  |
+ *     |   +-----------------------<lst>--+
+ *     +--[E]---(",")--<Del>--+
+ *         ^------------------+
  *
  * (| - EntryState
  * |) - ExitState
@@ -54,7 +54,7 @@ import com.google.common.collect.HashBiMap;
  * () - PrimitiveState
  * <> - RuleState
  *
- * NOTE: compile() must be called on a grammar before it is handed to the parser
+ * NOTE: compile() must be called before it is handed to the parser
  */
 public class Grammar implements Serializable {
 
@@ -70,11 +70,22 @@ public class Grammar implements Serializable {
         }
     }
 
+    /**
+     * Returns a set of all NonTerminals, including the hidden ones which are not considered
+     * start symbols.  This is so Grammar doesn't have to track the hidden NonTerminals itself,
+     * and makes it impossible for a user to cause problems by failing to add a NonTerminal.
+     * @return a Set of all the {@link NonTerminal}s
+     */
     public Set<NonTerminal> getAllNonTerminals() {
         // TODO: in the future make a cache for this
         return getNonTerminalCallers().keySet();
     }
 
+    /**
+     * Returns the NonTerminal specific to the given name that is exposed as a start non-terminal by this grammar.
+     * @param name of the NonTerminal
+     * @return the NonTerminal or null if it couldn't find it
+     */
     public NonTerminal get(String name) { return startNonTerminals.get(name); }
 
     /**
@@ -100,12 +111,12 @@ public class Grammar implements Serializable {
     /**
      * Adds (whitespace)---<Del> pairs of states at the beginning of start NonTerminals
      * and right after every PrimitiveState in order to allow for whitespace in the language.
+     *
+     * For now, whitespace means spaces (See {@link #whites}),
+     * single line comments (See {@link #singleLine}), and
+     * multi-line comments (See {@link #multiLine}).
      */
     public void addWhiteSpace() {
-        // create a NonTerminal which parses a list of whitespace characters.
-        // the NT is a star list that has 3 branches
-        // 1. whitespace, 2. single line comment, 3. multiple lines comment
-
         // create a whitespace PrimitiveState after every every terminal that can match a character
         for (NonTerminal nonTerminal : getAllNonTerminals()) {
             for (State s : nonTerminal.getReachableStates()) {
@@ -116,10 +127,9 @@ public class Grammar implements Serializable {
             }
         }
 
-        // create a new state for every start state that can have whitespace at the beginning
+        // add whitespace to the beginning of every start NonTerminal to allow for
+        // whitespace at the beginning of the input
         for (NonTerminal nt : startNonTerminals.values()) {
-            // add whitespace to the beginning of every start NonTerminal to allow for
-            // whitespace at the beginning of the input
             addWhitespace(nt.entryState);
         }
     }
@@ -148,6 +158,11 @@ public class Grammar implements Serializable {
         return deleteToken;
     }
 
+    /**
+     * Calculates Nullability and OrderinInfo for all the states in the grammar.
+     * Must be called before being handed over to the parser, but after
+     * the grammar is finished being built.
+     */
     public void compile() {
         // 1. get all nullable states
         Nullability nullability = new Nullability(this);
@@ -211,10 +226,10 @@ public class Grammar implements Serializable {
     }
 
     /**
-     * Recursive DFS that traverses all the states and returns a set of all reachable {@Link NonTerminal}.
+     * Recursive DFS that traverses all the states and returns a set of all reachable {@link NonTerminal}.
      * @param start The state from which to run the collector.
      * @param visited Start with an empty Set<State>. Used as intermediate data.
-     * @return A set of all reachable {@Link NonTerminal}.
+     * @param reachableNonTerminals A set in which is stored the set of all reachable {@link NonTerminal}.
      */
     private static void collectNTCallers(State start, Set<State> visited,
         Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals) {
@@ -250,7 +265,13 @@ public class Grammar implements Serializable {
      */
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
         public final String name;
+        /**
+         * The first state of the state machine for the non-terminal.
+         */
         public final EntryState entryState;
+        /**
+         * The last state of the state machine for the non-terminal.
+         */
         public final ExitState exitState;
         // contains a list of all States found in this NonTerminal other than the EntryState
         // and ExitState

@@ -18,9 +18,11 @@ import org.kframework.parser.concrete2.Grammar.State;
  * Helper class in the parser that finds all of the entryNullable NonTerminals in a grammar.
  */
 public class Nullability {
-    /// Accumulated set of "entry nullable" states.
-    /// A state is entry nullable if we can get to the start of it from the start of its
-    /// non-terminal without consuming input.
+    /**
+     * Accumulated set of "entry nullable" states.
+     * A state is entry nullable if we can get to the start of it from the start of its
+     * non-terminal without consuming input.
+     */
     private Set<State> entryNullable = new HashSet<>();
 
     /**
@@ -57,7 +59,8 @@ public class Nullability {
         }
     }
 
-    /** marks a state as entryNullable if it is not already, and calls mark on any
+    /**
+     * marks a state as entryNullable if it is not already, and calls mark on any
      * states that should be entryNullable as a result.
      */
     private void mark(State state, Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers) {
