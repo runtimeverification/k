@@ -136,28 +136,23 @@ public class ProgramLoader {
 
                 Parser parser = new Parser(content);
                 out = parser.parse(grammar.get(startSymbol), 0);
-                if (GlobalSettings.verbose)
+                if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
                     System.out.println("Raw: " + out + "\n");
-                if (((Ambiguity)out).getContents().size() == 0) {
-                    // say parsing error
-                    // TODO(Radu, Michael): revisit error reporting. At the moment we are making
-                    // TODO: the assumption that the parser always Ambiguity with 0 elements if
-                    // TODO: the parse fails.
+                try {
+                    out = out.accept(new TreeCleanerVisitor(context));
+                    if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                        System.out.println("Clean: " + out + "\n");
+                } catch (TransformerException te) {
                     ParseError perror = parser.getErrors();
 
-                    String msg;
-                    if (content.length() == perror.position)
-                        msg = "Parse error: unexpected end of file.";
-                    else
-                        msg = "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+                    String msg = content.length() == perror.position ?
+                        "Parse error: unexpected end of file." :
+                        "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
                     String loc = "(" + perror.line + "," + perror.column + "," +
-                                       perror.line + "," +(perror.column+1) + ")";
+                            perror.line + "," + (perror.column + 1) + ")";
                     throw new TransformerException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
-                out = out.accept(new TreeCleanerVisitor(context));
-                if (GlobalSettings.verbose)
-                    System.out.println("Clean: " + out + "\n");
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
