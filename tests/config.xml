@@ -347,7 +347,7 @@
       results="tests/regression/tokenconstants"
       extension="issue">
     <program name="test.issue">
-      <krun-option name="-color" value="off" />
+      <krun-option name="--color" value="off" />
     </program>
   </test>
 
@@ -496,6 +496,17 @@
     <all-programs>
        <krun-option name="--color" value="off" />
     </all-programs>
+  </test>
+
+  <test
+      definition="tests/regression/profiler/test.k"
+      programs="tests/regression/profiler"
+      results="tests/regression/profiler"
+      extension="test">
+      <all-programs regex="true">
+         <krun-option name="--profile" />
+         <krun-option name="--output" value="raw" />
+      </all-programs>
   </test>
 
   <include file="regression/generalized-strictness/config.xml"

@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.KilProperty;
@@ -86,5 +87,4 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             return node;
         return new Sort("K");
     }
-
 }

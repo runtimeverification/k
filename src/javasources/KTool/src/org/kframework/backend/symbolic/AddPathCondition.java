@@ -1,13 +1,16 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.kframework.backend.SMTSolver;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.KApp;
@@ -21,7 +24,6 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Add path condition cell to rules. Since this step is right after
@@ -106,7 +108,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             
             Attributes atts = node.getAttributes();
             Term cond = condition;
-            if (!GlobalSettings.NOSMT) {
+            if (context.kompileOptions.experimental.smt == SMTSolver.NONE) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition, context));
@@ -131,14 +133,13 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         return node;
     }
 
-    public static Term andBool(List<Term> filteredTerms) {
+    public static Term andBool(List<Term> terms) {
 
-        Iterator<Term> it = filteredTerms.iterator();
-        Term and = it.next();
-        while (it.hasNext()) {
+        Term and = BoolBuiltin.TRUE;
+        for (Term t : terms){
             List<Term> list = new ArrayList<Term>();
             list.add(and);
-            list.add(it.next());
+            list.add(t);
             and = new KApp(KLabelConstant.BOOL_ANDBOOL_KLABEL, new KList(list));
         }
         return and;

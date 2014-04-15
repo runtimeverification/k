@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend;
 
 import org.kframework.compile.FlattenModules;
@@ -13,10 +14,10 @@ import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.*;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Initially created by: Traian Florin Serbanuta
@@ -26,10 +27,12 @@ import org.kframework.utils.general.GlobalSettings;
 public abstract class BasicBackend implements Backend {
     protected Stopwatch sw;
     protected Context context;
+    protected KompileOptions options;
 
     public BasicBackend(Stopwatch sw, Context context) {
         this.sw = sw;
         this.context = context;
+        this.options = context.kompileOptions;
     }
 
     @Override
@@ -44,7 +47,7 @@ public abstract class BasicBackend implements Backend {
 
     @Override
     public boolean autoinclude() {
-        return !GlobalSettings.noPrelude;
+        return !options.experimental.noPrelude;
     }
 
     public CompilerSteps<Definition> getCompilationSteps() {
@@ -75,7 +78,7 @@ public abstract class BasicBackend implements Backend {
         steps.add(new FreshCondToFreshVar(context));
         steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
-        if (GlobalSettings.addTopCell) {
+        if (options.experimental.addTopCell) {
             steps.add(new AddTopCellRules(context));
         }
         steps.add(new ResolveBinder(context));

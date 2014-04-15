@@ -1,10 +1,13 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.parser;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.kframework.compile.transformers.*;
-import org.kframework.kil.loader.ResolveVariableAttribute;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.FlattenTerms;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -14,12 +17,16 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
-import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
+import org.kframework.parser.concrete2.Grammar;
+import org.kframework.parser.concrete2.Parser;
+import org.kframework.parser.concrete2.Parser.ParseError;
+import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
@@ -50,7 +57,7 @@ public class ProgramLoader {
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
-        if (GlobalSettings.fastKast) {
+        if (context.experimentalParserOptions.fastKast) {
             //out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
             JavaClassesFactory.startConstruction(context);
             out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content, filename);
@@ -92,7 +99,7 @@ public class ProgramLoader {
      */
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
-        Stopwatch.sw.printIntermediate("Importing Files");
+        Stopwatch.instance().printIntermediate("Importing Files");
         assert context.definedSorts.contains(startSymbol) : "The start symbol must be declared in the definition. Found: " + startSymbol;
 
         try {
@@ -120,11 +127,36 @@ public class ProgramLoader {
                 out = ((Rule) out).getBody();
             } else if (whatParser == GlobalSettings.ParserType.BINARY) {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
+            } else if (whatParser == GlobalSettings.ParserType.NEWPROGRAM) {
+                // load the new parser
+                // TODO(Radu): after the parser is in a good enough shape, replace the program parser
+                // TODO(Radu): (the default one) with this branch of the 'if'
+                Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
+
+                Parser parser = new Parser(content);
+                out = parser.parse(grammar.get(startSymbol), 0);
+                if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                    System.out.println("Raw: " + out + "\n");
+                try {
+                    out = out.accept(new TreeCleanerVisitor(context));
+                    if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                        System.out.println("Clean: " + out + "\n");
+                } catch (TransformerException te) {
+                    ParseError perror = parser.getErrors();
+
+                    String msg = content.length() == perror.position ?
+                        "Parse error: unexpected end of file." :
+                        "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+                    String loc = "(" + perror.line + "," + perror.column + "," +
+                            perror.line + "," + (perror.column + 1) + ")";
+                    throw new TransformerException(new KException(
+                            ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
+                }
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
             }
-            Stopwatch.sw.printIntermediate("Parsing Program");
+            Stopwatch.instance().printIntermediate("Parsing Program");
 
             return (Term) out;
         } catch (IOException e) {

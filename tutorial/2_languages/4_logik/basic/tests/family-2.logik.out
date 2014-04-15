@@ -1,13 +1,3 @@
-Search results:
-
-Solution 1:
-Solution:Map -->
-"X" |-> david (  )
-
-Solution 2:
-Solution:Map -->
-"X" |-> jim (  )
-
-Solution 3:
-Solution:Map -->
-"X" |-> steve (  )
+"X".*david
+"X".*jim
+"X".*steve

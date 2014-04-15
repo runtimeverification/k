@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api.io;
 
 import java.io.IOException;
@@ -35,5 +36,5 @@ public interface FileSystem {
     */
     public void close(long fd) throws IOException;
 
-    //TODO(DwightG): getcwd, chdir, opendir, remove, rename, mkdir, stat, lstat
+    //TODO(dwightguth): getcwd, chdir, opendir, remove, rename, mkdir, stat, lstat
 }

@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import java.io.File;
@@ -28,6 +29,9 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
+import org.kframework.kompile.KompileOptions;
+import org.kframework.main.GlobalOptions;
+import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -130,11 +134,7 @@ public class Context implements Serializable {
 
     
     public java.util.List<String> getKomputationCells() {
-        return komputationCells;
-    }
-
-    public void setKomputationCells(java.util.List<String> komputationCells) {
-        this.komputationCells = komputationCells;
+        return kompileOptions.experimental.kCells;
     }
 
     public ConfigurationStructureMap getConfigurationStructureMap() {
@@ -156,9 +156,25 @@ public class Context implements Serializable {
         subsorts.addRelation("K", KSorts.KITEM);
         subsorts.addRelation("Bag", "BagItem");
     }
+
+    // TODO(dwightguth): remove these fields and replace with injected dependencies
+    public transient GlobalOptions globalOptions;
+    public KompileOptions kompileOptions;
+    public transient ExperimentalParserOptions experimentalParserOptions;
     
-    public Context() {
+    public Context(GlobalOptions globalOptions) {
+        this.globalOptions = globalOptions;
         initSubsorts();
+    }
+    
+    public Context(GlobalOptions globalOptions, ExperimentalParserOptions experimentalParserOptions) {
+        this(globalOptions);
+        this.experimentalParserOptions = experimentalParserOptions;
+    }
+    
+    public Context(KompileOptions kompileOptions) {
+        this(kompileOptions.global, kompileOptions.experimental.parser);
+        this.kompileOptions = kompileOptions;
     }
 
     public void putLabel(Production p, String cons) {

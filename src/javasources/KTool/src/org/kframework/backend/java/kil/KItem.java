@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import java.util.Collection;
@@ -23,8 +24,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
-import org.kframework.utils.general.GlobalSettings;
-
 import com.google.common.collect.Sets;
 
 
@@ -273,7 +272,7 @@ public final class KItem extends Term {
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
             } catch (RuntimeException e) {
-                if (GlobalSettings.verbose) {
+                if (context.definition().context().globalOptions.verbose) {
                     System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
                     e.printStackTrace();
                 }

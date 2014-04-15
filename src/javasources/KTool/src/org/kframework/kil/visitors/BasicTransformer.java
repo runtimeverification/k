@@ -1,15 +1,21 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.visitors;
 
 import java.util.*;
 
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
-import org.kframework.kil.KItemProjection;
 import org.kframework.kil.List;
 import org.kframework.kil.Map;
 import org.kframework.kil.Set;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.kompile.KompileOptions;
+import org.kframework.main.GlobalOptions;
+import org.kframework.parser.ExperimentalParserOptions;
 
 
 /**
@@ -18,10 +24,17 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class BasicTransformer implements Transformer {
     protected Context context;
     private String name;
+    
+    protected KompileOptions kompileOptions;
+    protected GlobalOptions globalOptions;
+    protected ExperimentalParserOptions experimentalParserOptions;
 
     public BasicTransformer(String name, Context context) {
         this.name = name;
         this.context = context;
+        this.kompileOptions = context.kompileOptions;
+        this.globalOptions = context.globalOptions;
+        this.experimentalParserOptions = context.experimentalParserOptions;
     }
 
     @Override
@@ -215,8 +228,15 @@ public class BasicTransformer implements Transformer {
                 exception = e;
             }
         }
-        if (terms.isEmpty())
+        if (terms.isEmpty()) {
+            if (exception == null) {
+                String msg = "Found empty ambiguity!";
+                exception = new TransformerException(
+                    new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg,
+                        node.getFilename(), node.getLocation()));
+            }
             throw exception;
+        }
         if (terms.size() == 1) {
             return terms.get(0);
         }

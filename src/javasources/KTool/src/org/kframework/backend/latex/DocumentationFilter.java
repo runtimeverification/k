@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.latex;
 
 import org.kframework.kil.Attributes;
@@ -6,7 +7,6 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rule;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 public class DocumentationFilter extends LatexFilter {
 
@@ -38,7 +38,7 @@ public class DocumentationFilter extends LatexFilter {
         // termComment = false;
         Attributes atts = rule.getAttributes(); 
         boolean process = false;
-        for(String tag : GlobalSettings.doctags) {
+        for(String tag : options.experimental.documentation) {
             if(atts.containsKey(tag)) {
                 process = true;
                 break;

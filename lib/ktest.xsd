@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
+<!-- Copyright (C) 2013-2014 K Team. All Rights Reserved. -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 <xs:complexType name="program-config">
   <xs:sequence>
     <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" type="option" />
   </xs:sequence>
+  <xs:attribute name="regex" type="xs:boolean" use="optional" />
 </xs:complexType>
 
 <xs:complexType name="program-group-config">
