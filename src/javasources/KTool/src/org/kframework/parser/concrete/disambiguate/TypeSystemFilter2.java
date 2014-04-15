@@ -24,6 +24,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
         this.maxSort = tsf.maxSort;
     }
 
+    @Override
     public ASTNode visit(Term trm, Void _) throws TransformerException {
         if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
                 && !trm.getSort().equals(KSorts.KRESULT)) {

@@ -10,8 +10,8 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.LocalTransformer;
+import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -26,6 +26,7 @@ public class CorrectKSeqFilter extends BasicTransformer {
         secondFilter = new CorrectKSeqFilter2(context);
     }
 
+    @Override
     public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         List<Term> children = new ArrayList<Term>();
         for (Term t : amb.getContents()) {
@@ -77,6 +78,7 @@ public class CorrectKSeqFilter extends BasicTransformer {
             super("org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter2", context);
         }
 
+        @Override
         public ASTNode visit(KSequence ks, Void _) throws TransformerException {
             /* TODO: andreis changed here; radu please review */
             if (ks.isEmpty()) {

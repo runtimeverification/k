@@ -15,6 +15,7 @@ public class PreferAvoidFilter extends BasicTransformer {
         super("Ambiguity filter", context);
     }
 
+    @Override
     public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         java.util.List<Term> prefer = new ArrayList<Term>();
         java.util.List<Term> avoid = new ArrayList<Term>();

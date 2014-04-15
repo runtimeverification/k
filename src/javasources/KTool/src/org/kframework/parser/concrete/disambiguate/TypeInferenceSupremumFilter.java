@@ -25,6 +25,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
         super("Type inference supremum", context);
     }
 
+    @Override
     public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         // find the groups of terms alike
 

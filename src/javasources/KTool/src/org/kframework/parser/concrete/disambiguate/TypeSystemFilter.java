@@ -17,6 +17,7 @@ public class TypeSystemFilter extends BasicTransformer {
         super("Type system", context);
     }
 
+    @Override
     public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         // choose only the allowed subsorts for a TermCons
         if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
@@ -39,6 +40,7 @@ public class TypeSystemFilter extends BasicTransformer {
         return super.visit(tc, _);
     }
 
+    @Override
     public ASTNode visit(Cast cast, Void _) throws TransformerException {
         cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getInnerSort(), context)));
         return super.visit(cast, _);

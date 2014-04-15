@@ -28,6 +28,7 @@ public class PriorityFilter2 extends LocalTransformer {
         this.parent = pf.parent;
     }
 
+    @Override
     public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         String parentLabel = parent.getProduction().getKLabel();
         String localLabel = tc.getProduction().getKLabel();

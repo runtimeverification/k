@@ -13,8 +13,8 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.LocalTransformer;
+import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -29,6 +29,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
         secondFilter = new CorrectCastPriorityFilter2(context);
     }
 
+    @Override
     public ASTNode visit(Cast cst, Void _) throws TransformerException {
         // removed variables and allowing only Cast
         // if I find a Cast near a variable, then I remove the cast and translate the sort restrictions to the variable

@@ -7,6 +7,7 @@ import org.kframework.parser.ExperimentalParserOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +34,16 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     protected ExperimentalParserOptions experimentalParserOptions;
     String name;
     
-    protected java.util.Map<ASTNode, R> cache = new HashMap<>();
+    protected IdentityHashMap<ASTNode, R> cache = new IdentityHashMap<>();
 
     public AbstractVisitor(org.kframework.kil.loader.Context context) {
         this.context = context;
-        this.kompileOptions = context.kompileOptions;
-        this.globalOptions = context.globalOptions;
-        this.experimentalParserOptions = context.experimentalParserOptions;
+        if (context != null) {
+            this.kompileOptions = context.kompileOptions;
+            this.globalOptions = context.globalOptions;
+            this.experimentalParserOptions = context.experimentalParserOptions;
+        }
+        this.name = this.getClass().toString();
     }
 
     public AbstractVisitor(String name, org.kframework.kil.loader.Context context) {
@@ -62,12 +66,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<DefinitionItem> items = new ArrayList<>();
             for (DefinitionItem item : node.getItems()) {
-                items.add((DefinitionItem)processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((DefinitionItem) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getItems(), items)) {
+            if (changed(node.getItems(), items)) {
+                node = copy(node);
                 node.setItems(items);
             }
         }
@@ -98,12 +103,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<ModuleItem> items = new ArrayList<>();
             for (ModuleItem item : node.getItems()) {
-                items.add((ModuleItem)processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((ModuleItem) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getItems(), items)) {
+            if (changed(node.getItems(), items)) {
+                node = copy(node);
                 node.setItems(items);
             }
         }
@@ -155,16 +161,16 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             Term ensures = node.getEnsures();
             if (ensures != null)
                 ensures = (Term) processChildTerm(node, ensures, ensures.accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getBody(), body)) {
+            if (changed(node.getBody(), body)) {
+                node = copy(node);
                 node.setBody(body);
             }
-            if (change(node.getRequires(), requires)) {
+            if (changed(node.getRequires(), requires)) {
+                node = copy(node);
                 node.setRequires(requires);
             }
-            if (change(node.getEnsures(), ensures)) {
+            if (changed(node.getEnsures(), ensures)) {
+                node = copy(node);
                 node.setEnsures(ensures);
             }
         }
@@ -204,15 +210,17 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             Sort sort = (Sort)processChildTerm(node, node.getSort(), node.getSort().accept(this, p), p);
             List<PriorityBlock> items = new ArrayList<>();
             for (PriorityBlock item : node.getPriorityBlocks()) {
-                items.add((PriorityBlock) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((PriorityBlock) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getSort(), sort)) {
+            if (changed(node.getSort(), sort)) {
+                node = copy(node);
                 node.setSort(sort);
             }
-            if (change(node.getPriorityBlocks(), items)) {
+            if (changed(node.getPriorityBlocks(), items)) {
+                node = copy(node);
                 node.setPriorityBlocks(items);
             }
         }
@@ -227,12 +235,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<PriorityBlockExtended> items = new ArrayList<>();
             for (PriorityBlockExtended item : node.getPriorityBlocks()) {
-                items.add((PriorityBlockExtended) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((PriorityBlockExtended) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getPriorityBlocks(), items)) {
+            if (changed(node.getPriorityBlocks(), items)) {
+                node = copy(node);
                 node.setPriorityBlocks(items);
             }
         }
@@ -247,12 +256,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<KLabelConstant> items = new ArrayList<>();
             for (KLabelConstant item : node.getTags()) {
-                    items.add((KLabelConstant) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((KLabelConstant) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getTags(), items)) {
+            if (changed(node.getTags(), items)) {
+                node = copy(node);
                 node.setTags(items);
             }
         }
@@ -267,12 +277,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<Production> items = new ArrayList<>();
             for (Production item : node.getProductions()) {
-                items.add((Production) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((Production) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getProductions(), items)) {
+            if (changed(node.getProductions(), items)) {
+                node = copy(node);
                 node.setProductions(items);
             }
         }
@@ -287,12 +298,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<KLabelConstant> items = new ArrayList<>();
             for (KLabelConstant item : node.getProductions()) {
-                items.add((KLabelConstant) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((KLabelConstant) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getProductions(), items)) {
+            if (changed(node.getProductions(), items)) {
+                node = copy(node);
                 node.setProductions(items);
             }
         }
@@ -307,12 +319,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<ProductionItem> items = new ArrayList<>();
             for (ProductionItem item : node.getItems()) {
-                items.add((ProductionItem) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((ProductionItem) result);
+                }
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getItems(), items)) {
+            if (changed(node.getItems(), items)) {
+                node = copy(node);
                 node.setItems(items);
             }
         }
@@ -382,10 +395,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term)processChildTerm(node, node.getContents(), node.getContents().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getContents(), item)) {
+            if (changed(node.getContents(), item)) {
+                node = copy(node);
                 node.setContents(item);
             }
         }
@@ -402,10 +413,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             for (int i = 0; i < node.getContents().size(); i++) {
                 items.add((Term) processChildTerm(node, node.getContents().get(i), node.getContents().get(i).accept(this, p), p));
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getContents(), items)) {
+            if (changed(node.getContents(), items)) {
+                node = copy(node);
                 node.setContents(items);
             }
         }
@@ -475,10 +484,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term)processChildTerm(node, node.getItem(), node.getItem().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getItem(), item)) {
+            if (changed(node.getItem(), item)) {
+                node = copy(node);
                 node.setItem(item);
             }
         }
@@ -506,6 +513,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
+        if(visitChildren()) {
+            Term item = (Term) processChildTerm(node, node.getKey(), node.getKey().accept(this, p), p);
+            if (changed(node.getKey(), item)) {
+                node = copy(node);
+                node.setKey(item);
+            }
+        }
         return visit((CollectionItem) node, p);
     }
 
@@ -525,9 +539,12 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             java.util.Collection<Term> items = new ArrayList<>();
             for (Term item : node.baseTerms()) {
-                items.add((Term) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((Term) result);
+                }
             }
-            if (change(node.baseTerms(), items)) {
+            if (changed(node.baseTerms(), items)) {
                 node = DataStructureBuiltin.of(node.sort(), items.toArray(new Term[items.size()]));
             }
         }
@@ -542,9 +559,12 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             java.util.Collection<Term> items = new ArrayList<>();
             for (Term item : node.elements()) {
-                items.add((Term) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((Term) result);
+                }
             }
-            if (change(node.elements(), items)) {
+            if (changed(node.elements(), items)) {
                 node = CollectionBuiltin.of(node.sort(), node.baseTerms(), items);
             }
         }
@@ -567,7 +587,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             Variable base = (Variable) processChildTerm(node, node.base(), node.base().accept(this, p), p);
             Term key = (Term) processChildTerm(node, node.key(), node.key().accept(this, p), p);
-            if (change(node.base(), base) || change(node.key(), key)) {
+            if (changed(node.base(), base) || changed(node.key(), key)) {
                 node = new SetLookup(base, key, node.choice());
             }
         }
@@ -583,9 +603,12 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             Variable set = (Variable) processChildTerm(node, node.set(), node.set().accept(this, p), p);
             java.util.Collection<Term> items = new ArrayList<>();
             for (Term item : node.removeEntries()) {
-                items.add((Term) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((Term) result);
+                }
             }
-            if (change(node.set(), set) || change(node.removeEntries(), items)) {
+            if (changed(node.set(), set) || changed(node.removeEntries(), items)) {
                 node = new SetUpdate(set, items);
             }
         }
@@ -601,12 +624,18 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             java.util.Collection<Term> elementsLeft = new ArrayList<>();
             java.util.Collection<Term> elementsRight = new ArrayList<>();
             for (Term item : node.elementsLeft()) {
-                elementsLeft.add((Term) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    elementsLeft.add((Term) result);
+                }
             }
             for (Term item : node.elementsRight()) {
-                elementsRight.add((Term) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    elementsRight.add((Term) result);
+                }
             }
-            if (change(node.elementsLeft(), elementsLeft) || change(node.elementsRight(), elementsRight)) {
+            if (changed(node.elementsLeft(), elementsLeft) || changed(node.elementsRight(), elementsRight)) {
                 node = ListBuiltin.of(node.sort(), elementsLeft, elementsRight, node.baseTerms());
             }
         }
@@ -622,7 +651,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             Variable base = (Variable) processChildTerm(node, node.base(), node.base().accept(this, p), p);
             Term key = (Term) processChildTerm(node, node.key(), node.key().accept(this, p), p);
             Term value = (Term) processChildTerm(node, node.value(), node.value().accept(this, p), p);
-            if (change(node.base(), base) || change(node.key(), key)) {
+            if (changed(node.base(), base) || changed(node.key(), key)) {
                 node = new ListLookup(base, key, value, node.kind());
             }
         }
@@ -639,13 +668,19 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             java.util.Collection<Term> removeLeft = new ArrayList<>();
             java.util.Collection<Term> removeRight = new ArrayList<>();
             for (Term item : node.removeLeft()) {
-                removeLeft.add((Term) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    removeLeft.add((Term) result);
+                }
             }
             for (Term item : node.removeRight()) {
-                removeRight.add((Term) processChildTerm(node, item, item.accept(this, p), p));
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    removeRight.add((Term) result);
+                }
             }
-            if (change(node.base(), base) || change(node.removeLeft(), removeLeft)
-                    || change(node.removeRight(), removeRight)) {
+            if (changed(node.base(), base) || changed(node.removeLeft(), removeLeft)
+                    || changed(node.removeRight(), removeRight)) {
                 node = new ListUpdate(base, removeLeft, removeRight);
             }
         }
@@ -662,9 +697,11 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             for (Map.Entry<Term, Term> entry : node.elements().entrySet()) {
                 Term key = (Term) processChildTerm(node, entry.getKey(), entry.getKey().accept(this, p), p);
                 Term value = (Term) processChildTerm(node, entry.getValue(), entry.getValue().accept(this, p), p);
-                items.put(key, value);
+                if (key != null && value != null) {
+                    items.put(key, value);
+                }
             }
-            if (change(node.elements(), items)) {
+            if (changed(node.elements(), items)) {
                 node = new MapBuiltin(node.sort(), node.baseTerms(), items);
             }
         }
@@ -680,7 +717,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             Variable base = (Variable) processChildTerm(node, node.base(), node.base().accept(this, p), p);
             Term key = (Term) processChildTerm(node, node.key(), node.key().accept(this, p), p);
             Term value = (Term) processChildTerm(node, node.value(), node.value().accept(this, p), p);
-            if (change(node.base(), base) || change(node.key(), key)) {
+            if (changed(node.base(), base) || changed(node.key(), key)) {
                 node = new MapLookup(base, key, value, node.kind(), node.choice());
             }
         }
@@ -699,15 +736,19 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             for (java.util.Map.Entry<Term, Term> entry : node.removeEntries().entrySet()) {
                 Term key = (Term) processChildTerm(node, entry.getKey(), entry.getKey().accept(this, p), p);
                 Term value = (Term) processChildTerm(node, entry.getValue(), entry.getValue().accept(this, p), p);
-                removeEntries.put(key, value);
+                if (key != null && value != null) {
+                    removeEntries.put(key, value);
+                }
             }
             for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
                 Term key = (Term) processChildTerm(node, entry.getKey(), entry.getKey().accept(this, p), p);
                 Term value = (Term) processChildTerm(node, entry.getValue(), entry.getValue().accept(this, p), p);
-                updateEntries.put(key, value);
+                if (key != null && value != null) {
+                    updateEntries.put(key, value);
+                }
             }
-            if (change(node.map(), map) || change(node.removeEntries(), removeEntries) ||
-                    change(node.updateEntries(), updateEntries)) {
+            if (changed(node.map(), map) || changed(node.removeEntries(), removeEntries) ||
+                    changed(node.updateEntries(), updateEntries)) {
                 node = new MapUpdate(map, removeEntries, updateEntries);
             }
         }
@@ -786,13 +827,12 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             Term label = (Term) processChildTerm(node, node.getLabel(), node.getLabel().accept(this, p), p);
             Term child = (Term) processChildTerm(node, node.getChild(), node.getChild().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getLabel(), label)) {
+            if (changed(node.getLabel(), label)) {
+                node = copy(node);
                 node.setLabel(label);
             }
-            if (change(node.getChild(), child)) {
+            if (changed(node.getChild(), child)) {
+                node = copy(node);
                 node.setChild(child);
             }
         }
@@ -806,10 +846,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
-            if (copy()) {
-                 node = node.shallowCopy();
-            }
-            if (change(node.getTerm(), item)) {
+            if (changed(node.getTerm(), item)) {
+                node = copy(node);
                 node.setTerm(item);
             }
         }
@@ -839,10 +877,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getTerm(), item)) {
+            if (changed(node.getTerm(), item)) {
+                node = copy(node);
                 node.setTerm(item);
             }
         }
@@ -857,13 +893,12 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             Term left = (Term) processChildTerm(node, node.getLeft(), node.getLeft().accept(this, p), p);
             Term right = (Term) processChildTerm(node, node.getRight(), node.getRight().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getLeft(), left)) {
+            if (changed(node.getLeft(), left)) {
+                node = copy(node);
                 node.setLeft(left, context);
             }
-            if (change(node.getRight(), right)) {
+            if (changed(node.getRight(), right)) {
+                node = copy(node);
                 node.setRight(right, context);
             }
         }
@@ -880,10 +915,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             for (int i = 0; i < node.getContents().size(); i++) {
                 items.add((Term) processChildTerm(node, node.getContents().get(i), node.getContents().get(i).accept(this, p), p));
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getContents(), items)) {
+            if (changed(node.getContents(), items)) {
+                node = copy(node);
                 node.setContents(items);
             }
         }
@@ -900,10 +933,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             for (int i = 0; i < node.getContents().size(); i++) {
                 items.add((Attribute) processChildTerm(node, node.getContents().get(i), node.getContents().get(i).accept(this, p), p));
             }
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getContents(), items)) {
+            if (changed(node.getContents(), items)) {
+                node = copy(node);
                 node.setContents(items);
             }
         }
@@ -934,10 +965,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term)processChildTerm(node, node.getContent(), node.getContent().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getContent(), item)) {
+            if (changed(node.getContent(), item)) {
+                node = copy(node);
                 node.setContent(item);
             }
         }
@@ -951,10 +980,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term)processChildTerm(node, node.getContent(), node.getContent().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getContent(), item)) {
+            if (changed(node.getContent(), item)) {
+                node = copy(node);
                 node.setContent(item);
             }
         }
@@ -992,10 +1019,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getTerm(), item)) {
+            if (changed(node.getTerm(), item)) {
+                node = copy(node);
                 node.setTerm(item);
             }
         }
@@ -1017,10 +1042,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getTerm(), item)) {
+            if (changed(node.getTerm(), item)) {
+                node = copy(node);
                 node.setTerm(item);
             }
         }
@@ -1034,10 +1057,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
-            if (copy()) {
-                node = node.shallowCopy();
-            }
-            if (change(node.getTerm(), item)) {
+            if (changed(node.getTerm(), item)) {
+                node = copy(node);
                 node.setTerm(item);
             }
         }
@@ -1048,18 +1069,18 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         return name;
     }
     
-    public final <T extends ASTNode> boolean change(java.util.Collection<T> o,
+    public final <T extends ASTNode> boolean changed(java.util.Collection<T> o,
             java.util.Collection<T> n) {
         Iterator<T> iter1 = o.iterator();
         Iterator<T> iter2 = n.iterator();
         boolean change = false;
         while (iter1.hasNext() && iter2.hasNext()) {
-            change |= change(iter1.next(), iter2.next());
+            change |= changed(iter1.next(), iter2.next());
         }
         return change || iter1.hasNext() != iter2.hasNext();
     }
     
-    public final <K extends ASTNode, V extends ASTNode> boolean change(
+    public final <K extends ASTNode, V extends ASTNode> boolean changed(
             java.util.Map<K, V> o, java.util.Map<K, V> n) {
         Iterator<Map.Entry<K, V>> iter1 = o.entrySet().iterator();
         Iterator<Map.Entry<K, V>> iter2 = n.entrySet().iterator();
@@ -1067,8 +1088,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         while (iter1.hasNext() && iter2.hasNext()) {
             Map.Entry<K, V> e1 = iter1.next();
             Map.Entry<K, V> e2 = iter2.next();
-            change |= change(e1.getKey(), e2.getKey());
-            change |= change(e1.getValue(), e2.getValue());
+            change |= changed(e1.getKey(), e2.getKey());
+            change |= changed(e1.getValue(), e2.getValue());
         }
         return change || iter1.hasNext() != iter2.hasNext();
     }
@@ -1077,6 +1098,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     public abstract ASTNode processChildTerm(ASTNode node, ASTNode child, R childResult, P p);
     public abstract boolean visitChildren();
     public abstract boolean cache();
-    public abstract boolean copy();
-    public abstract <T extends ASTNode> boolean change(T o, T n);
+    public abstract <T extends ASTNode> T copy(T original);
+    public abstract <T extends ASTNode> boolean changed(T o, T n);
 }

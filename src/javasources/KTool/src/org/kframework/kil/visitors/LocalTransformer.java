@@ -1,5 +1,6 @@
 package org.kframework.kil.visitors;
 
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
 public class LocalTransformer extends AbstractTransformer {
@@ -14,7 +15,7 @@ public class LocalTransformer extends AbstractTransformer {
     }
 
     @Override
-    public boolean copy() {
-        return false;
+    public <T extends ASTNode> T copy(T original) {
+        return original;
     }
 }

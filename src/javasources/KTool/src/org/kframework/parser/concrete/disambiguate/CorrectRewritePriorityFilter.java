@@ -14,8 +14,8 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.LocalTransformer;
+import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -30,6 +30,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
         secondFilter = new CorrectRewriteFilter2(context);
     }
 
+    @Override
     public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         List<Term> children = new ArrayList<Term>();
         boolean klist = false;
@@ -119,6 +120,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
             super("org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter2", context);
         }
 
+        @Override
         public ASTNode visit(Rewrite ks, Void _) throws TransformerException {
             String msg = "Due to typing errors, => is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());

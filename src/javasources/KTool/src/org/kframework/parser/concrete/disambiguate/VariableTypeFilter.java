@@ -25,11 +25,12 @@ public class VariableTypeFilter extends BasicTransformer {
         this.expected = expected;
     }
 
+    @Override
     public ASTNode visit(Variable r, Void _) throws TransformerException {
         Variable correctVar = variableTypes.get(r.getName());
         if (correctVar == null)
             return r;
-        assert r.getExpectedSort() != null : "Expected sort Should not be null";
+        assert r.getExpectedSort() != null : "Expected sort Should not be null" + r;
         if (!expected && context.isSubsortedEq(r.getSort(), correctVar.getSort()) || expected && context.isSubsortedEq(r.getExpectedSort(), correctVar.getExpectedSort())) {
             Variable newV = new Variable(r);
             if (!expected)

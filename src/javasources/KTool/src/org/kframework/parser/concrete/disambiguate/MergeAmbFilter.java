@@ -24,6 +24,7 @@ public class MergeAmbFilter extends BasicTransformer {
      * 
      * if the children of every A are located in the same places (see isSimilar(...)).
      */
+    @Override
     public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
 
         java.util.List<Term> children = new ArrayList<Term>();

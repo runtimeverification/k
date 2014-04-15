@@ -34,13 +34,13 @@ public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> 
     }
 
     @Override
-    public boolean copy() {
+    public <T extends ASTNode> boolean changed(T o, T n) {
         return false;
     }
 
     @Override
-    public <T extends ASTNode> boolean change(T o, T n) {
-        return false;
+    public <T extends ASTNode> T copy(T original) {
+        return original;
     }
 
 }

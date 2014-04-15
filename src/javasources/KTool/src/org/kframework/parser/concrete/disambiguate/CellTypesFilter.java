@@ -12,8 +12,8 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.LocalTransformer;
+import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -26,14 +26,17 @@ public class CellTypesFilter extends BasicTransformer {
     }
 
     // don't do anything for configuration and syntax
-    public ASTNode visit(Configuration cell) {
+    @Override
+    public ASTNode visit(Configuration cell, Void _) {
         return cell;
     }
 
-    public ASTNode visit(Syntax cell) {
+    @Override
+    public ASTNode visit(Syntax cell, Void _) {
         return cell;
     }
 
+    @Override
     public ASTNode visit(Cell cell, Void _) throws TransformerException {
         String sort = context.cellKinds.get(cell.getLabel());
 
@@ -77,6 +80,7 @@ public class CellTypesFilter extends BasicTransformer {
             this.cellLabel = cellLabel;
         }
 
+        @Override
         public ASTNode visit(Term trm, Void _) throws TransformerException {
             if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
                 // if the found sort is not a subsort of what I was expecting

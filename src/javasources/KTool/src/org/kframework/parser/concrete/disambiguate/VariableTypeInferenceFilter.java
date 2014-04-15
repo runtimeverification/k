@@ -34,7 +34,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
         CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
         r.accept(vars);
-
+        
         Map<String, Variable> varDeclMap = new HashMap<String, Variable>();
         // for each variable name do checks or type errors
         for (Entry<String, java.util.List<Variable>> varEntry : vars.getVars().entrySet()) {
@@ -255,6 +255,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
             super(RemoveDuplicateVariables.class.toString(), context);
         }
 
+        @Override
         public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
             Set<Term> maxterms = new HashSet<Term>();
             for (Term t : amb.getContents()) {

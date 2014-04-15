@@ -16,6 +16,7 @@ public class FlattenListsFilter extends BasicTransformer {
         super("Flatten lists", context);
     }
 
+    @Override
     public ASTNode visit(Collection c, Void _) throws TransformerException {
         boolean found;
         do {

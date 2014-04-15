@@ -21,26 +21,31 @@ public class SentenceVariablesFilter extends BasicTransformer {
         super("Sentence Variable Filter", context);
     }
 
+    @Override
     public ASTNode visit(Configuration cfg, Void _) throws TransformerException {
         config = true;
         return super.visit(cfg, _);
     }
 
+    @Override
     public ASTNode visit(org.kframework.kil.Context cfg, Void _) throws TransformerException {
         config = false;
         return super.visit(cfg, _);
     }
 
+    @Override
     public ASTNode visit(Rule cfg, Void _) throws TransformerException {
         config = false;
         return super.visit(cfg, _);
     }
 
+    @Override
     public ASTNode visit(Syntax cfg, Void _) throws TransformerException {
         config = false;
         return cfg;
     }
 
+    @Override
     public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         super.visit(tc, _);
         if (tc.getProduction().isSubsort()) {
@@ -51,6 +56,7 @@ public class SentenceVariablesFilter extends BasicTransformer {
         return tc;
     }
 
+    @Override
     public ASTNode visit(Variable var, Void _) throws TransformerException {
         if (config) {
             if (!var.getName().startsWith("$")) {

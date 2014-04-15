@@ -28,7 +28,7 @@ public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode,
     }
 
     @Override
-    public <T extends ASTNode> boolean change(T o, T n) {
+    public <T extends ASTNode> boolean changed(T o, T n) {
         // TODO Auto-generated method stub
         return o != n;
     }

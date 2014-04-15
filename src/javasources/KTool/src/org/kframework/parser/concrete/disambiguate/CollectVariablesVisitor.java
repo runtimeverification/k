@@ -16,8 +16,8 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.LocalTransformer;
+import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class CollectVariablesVisitor extends BasicVisitor {
@@ -35,6 +35,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         this.vars = vars;
     }
 
+    @Override
     public Void visit(Cell c, Void _) {
         if (c.getEllipses() == Ellipses.NONE)
             if (context.cellSorts.containsKey(c.getLabel())) {
@@ -50,7 +51,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
     @Override
     public Void visit(TermCons node, Void _) {
         if (cache.containsKey(node))
-            return cache.get(node);
+            return null;
 
         for (int i = 0, j = 0; i < node.getProduction().getItems().size(); i++) {
             if (node.getProduction().getItems().get(i) instanceof Sort) {

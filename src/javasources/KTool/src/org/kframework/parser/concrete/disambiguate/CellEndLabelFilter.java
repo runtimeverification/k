@@ -16,10 +16,12 @@ public class CellEndLabelFilter extends BasicTransformer {
         super("Cell End Label", context);
     }
 
-    public ASTNode visit(Syntax cell) {
+    @Override
+    public ASTNode visit(Syntax cell, Void _) {
         return cell;
     }
 
+    @Override
     public ASTNode visit(Cell cell, Void _) throws TransformerException {
         if (!cell.getLabel().equals(cell.getEndLabel())) {
             String msg = "Cell starts with '" + cell.getLabel() + "' but ends with '" + cell.getEndLabel() + "'";

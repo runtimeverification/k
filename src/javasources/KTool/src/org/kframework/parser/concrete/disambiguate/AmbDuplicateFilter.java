@@ -14,6 +14,7 @@ public class AmbDuplicateFilter extends BasicTransformer {
         super("Remove ambiguity duplicates", context);
     }
 
+    @Override
     public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
 
         // remove duplicate ambiguities

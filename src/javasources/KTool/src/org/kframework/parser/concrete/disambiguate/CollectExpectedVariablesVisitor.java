@@ -37,8 +37,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
         }
         if (!newVars.isEmpty())
             vars = newVars;
-        visit((Term) node, _);
-        return null;
+        return visit((Term) node, _);
     }
 
     @Override
