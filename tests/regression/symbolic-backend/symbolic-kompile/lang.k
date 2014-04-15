@@ -1,3 +1,5 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+
 module LANG-SYNTAX
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
