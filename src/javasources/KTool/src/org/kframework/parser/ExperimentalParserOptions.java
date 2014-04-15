@@ -1,4 +1,4 @@
-// Copyright (C) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser;
 
 import com.beust.jcommander.Parameter;
