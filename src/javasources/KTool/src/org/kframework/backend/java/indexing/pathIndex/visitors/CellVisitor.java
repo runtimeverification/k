@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.kil.Cell;
