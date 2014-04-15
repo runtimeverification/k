@@ -1,1 +1,43 @@
-n = s = 55
+Search results:
+
+Solution 1:
+<path-condition>
+    0 <=Int #symInt(n) ==Bool false
+</path-condition>
+<T>
+    <k>
+        .K
+    </k>
+    <in>
+        ListItem(#buffer ( "\n" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "" ))
+    </out>
+    <state>
+        i |-> 0
+        n |-> #symInt(n)
+        s |-> 0
+    </state>
+</T>
+
+Solution 2:
+<path-condition>
+    0 <=Int #symInt(n) ==Bool true andBool 1 <=Int #symInt(n) ==Bool false
+</path-condition>
+<T>
+    <k>
+        .K
+    </k>
+    <in>
+        ListItem(#buffer ( "\n" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "" ))
+    </out>
+    <state>
+        i |-> 1
+        n |-> #symInt(n)
+        s |-> 0
+    </state>
+</T>
