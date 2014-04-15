@@ -549,7 +549,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
                 }
             }
             if (changed(node.baseTerms(), items)) {
-                node = DataStructureBuiltin.of(node.sort(), items.toArray(new Term[items.size()]));
+                node = node.shallowCopy(items);
             }
         }
         return visit((Term) node, p);
@@ -569,7 +569,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
                 }
             }
             if (changed(node.elements(), items)) {
-                node = CollectionBuiltin.of(node.sort(), node.baseTerms(), items);
+                node = node.shallowCopy(node.baseTerms(), items);
             }
         }
         return visit((DataStructureBuiltin) node, p);

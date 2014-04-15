@@ -35,6 +35,11 @@ public class MapBuiltin extends DataStructureBuiltin {
     public Term shallowCopy() {
         return new MapBuiltin(dataStructureSort, baseTerms, elements);
     }
+    
+    @Override
+    public DataStructureBuiltin shallowCopy(java.util.Collection<Term> baseTerms) {
+        return new MapBuiltin(dataStructureSort, baseTerms, elements);
+    }
 
     @Override
     public int hashCode() {

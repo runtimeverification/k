@@ -262,6 +262,8 @@ public abstract class DataStructureBuiltin extends Term {
     public Term shallowCopy() {
         throw new UnsupportedOperationException();
     }
+    
+    public abstract DataStructureBuiltin shallowCopy(Collection<Term> baseTerms);
 
     @Override
     public int hashCode() {

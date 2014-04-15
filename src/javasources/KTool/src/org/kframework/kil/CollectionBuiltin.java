@@ -7,7 +7,6 @@ import org.kframework.kil.visitors.Visitor;
 import java.util.Collection;
 import java.util.Collections;
 
-
 /**
  *
  *
@@ -45,6 +44,15 @@ public class CollectionBuiltin extends DataStructureBuiltin {
 
     @Override
     public Term shallowCopy() {
+        return new CollectionBuiltin(dataStructureSort, baseTerms, elements);
+    }
+    
+    @Override
+    public DataStructureBuiltin shallowCopy(Collection<Term> baseTerms) {
+        return shallowCopy(baseTerms, elements);
+    }
+    
+    public CollectionBuiltin shallowCopy(Collection<Term> baseTerms, Collection<Term> elements) {
         return new CollectionBuiltin(dataStructureSort, baseTerms, elements);
     }
 

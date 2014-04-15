@@ -28,6 +28,17 @@ public class ListBuiltin extends CollectionBuiltin {
     public Collection<Term> elementsRight() {
         return Collections.unmodifiableCollection(elementsRight);
     }
+    
+    @Override
+    public DataStructureBuiltin shallowCopy(Collection<Term> terms) {
+        return ListBuiltin.of(sort(), elementsLeft(), elementsRight(), terms);
+    }
+    
+    @Override
+    public CollectionBuiltin shallowCopy(Collection<Term> terms,
+            Collection<Term> elements) {
+        return ListBuiltin.of(sort(), elements, elementsRight(), terms);
+    }
 
     // TODO(YilongL): shouldn't elementsLeft and elementsRight have type java.util.List?
     public static ListBuiltin of(DataStructureSort sort, Collection<Term> elementsLeft, Collection<Term> elementsRight,

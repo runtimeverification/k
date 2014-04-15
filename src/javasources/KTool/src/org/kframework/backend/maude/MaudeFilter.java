@@ -250,6 +250,13 @@ public class MaudeFilter extends BackendFilter {
     }
 
     @Override
+    public Void visit(KList listOfK, Void _) {
+        this.visit((Collection) listOfK, _);
+        // throw new RuntimeException("don't know how to maudify KList");
+        return null;
+    }
+
+    @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
         for (Attribute entry : attributes.getContents()) {
@@ -316,8 +323,7 @@ public class MaudeFilter extends BackendFilter {
      */
     @Override
     public Void visit(Configuration configuration, Void _) {
-        if (cfgStr == null) 
-            return null;
+        if (cfgStr == null) return null;
         for (ConfigurationStructure cellStr : cfgStr.values()) {
             String id = cellStr.id;
             if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
@@ -376,9 +382,9 @@ public class MaudeFilter extends BackendFilter {
             declareCell(id+"-fragment",placeHolders,fragSorts, cellFragment, format);
         }
 
+        return null;
         // result.append("mb configuration ");
         // this.visit((Sentence)configuration);
-        return null;
     }
 
     private void declareCell(String id, String placeHolders, String sorts, String resultSort, String format) {
@@ -533,6 +539,13 @@ public class MaudeFilter extends BackendFilter {
         kapp.getChild().accept(this);
         result.append(")");
         return null;
+    }
+
+    @Override
+    public Void visit(KSequence ksequence, Void _) {
+        this.visit((Collection) ksequence, _);
+        return null;
+        // throw new RuntimeException("don't know how to maudify KSequence");
     }
 
     @Override
@@ -763,7 +776,7 @@ public class MaudeFilter extends BackendFilter {
         }
     }
 
-    public void visitListBuiltinElements(ListBuiltin listBuiltin) {
+    public Void visitListBuiltinElements(ListBuiltin listBuiltin) {
         // append lhs elements
         for (Term term : listBuiltin.elementsLeft()) {
             result.append(", ");
@@ -800,6 +813,7 @@ public class MaudeFilter extends BackendFilter {
             term.accept(this);
             result.append(")");
         }
+        return null;
     }
 
     private void visitMapElements(MapBuiltin map) {
@@ -814,6 +828,31 @@ public class MaudeFilter extends BackendFilter {
             result.append(")");
         }
     }
+
+    @Override
+    public Void visit(CollectionBuiltin collection, Void _) {
+        visit((DataStructureBuiltin) collection, _);
+        return null;
+    }
+
+    @Override
+    public Void visit(MapBuiltin map, Void _) {
+        visit((DataStructureBuiltin) map, _);
+        return null;
+    }
+    
+    @Override
+    public Void visit(SetBuiltin set, Void _) throws RuntimeException {
+        visit((DataStructureBuiltin) set, _);
+        return null;
+    }
+    
+    @Override
+    public Void visit(ListBuiltin set, Void _) throws RuntimeException {
+        visit((DataStructureBuiltin) set, _);
+        return null;
+    }
+
 
     @Override
     public Void visit(Hole hole, Void _) {
@@ -872,6 +911,20 @@ public class MaudeFilter extends BackendFilter {
         return null;
     }
 
+    @Override
+    public Void visit(org.kframework.kil.List list, Void _) {
+        this.visit((Collection) list, _);
+        return null;
+        // throw new RuntimeException("don't know how to maudify List");
+    }
+
+    @Override
+    public Void visit(org.kframework.kil.Map map, Void _) {
+        this.visit((Collection) map, _);
+        return null;
+        // throw new RuntimeException("don't know how to maudify Map");
+    }
+
     /**
      * Pretty printing a Bag to Maude.
      *
@@ -892,9 +945,16 @@ public class MaudeFilter extends BackendFilter {
             result.append(")");
             result.append(" ");
         }
+        return null;
 //        this.visit((Collection) bag);
         // throw new RuntimeException("don't know how to maudify Bag");
+    }
+
+    @Override
+    public Void visit(org.kframework.kil.Set set, Void _) {
+        this.visit((Collection) set, _);
         return null;
+        // throw new RuntimeException("don't know how to maudify Set");
     }
 
     @Override
@@ -927,20 +987,20 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(LiterateDefinitionComment literateDefinitionComment, Void _) {
-        // do nothing
         return null;
+        // do nothing
     }
 
     @Override
     public Void visit(LiterateModuleComment literateModuleComment, Void _) {
-        // do nothing
         return null;
+        // do nothing
     }
 
     @Override
     public Void visit(org.kframework.kil.Require require, Void _) {
-        // do nothing
         return null;
+        // do nothing
     }
 
     @Override

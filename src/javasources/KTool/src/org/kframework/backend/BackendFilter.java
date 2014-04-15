@@ -27,4 +27,9 @@ public class BackendFilter extends BasicVisitor {
     public StringBuilder getResult() {
         return result;
     }
+    
+    @Override
+    public boolean cache() {
+        return false;
+    }
 }
