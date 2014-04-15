@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import com.google.common.collect.Sets;

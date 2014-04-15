@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
