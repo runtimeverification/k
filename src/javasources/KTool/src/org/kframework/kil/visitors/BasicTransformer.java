@@ -51,7 +51,7 @@ public class BasicTransformer extends AbstractTransformer {
     }
 
     @Override
-    public ASTNode copy(ASTNode original) {
+    public <T extends ASTNode> T copy(T original) {
         return original;
     }
     

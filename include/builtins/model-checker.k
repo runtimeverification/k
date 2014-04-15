@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 require "bool.k"
 
 module LTL-SYNTAX-HOOKS
@@ -47,8 +48,11 @@ endmodule
 
 module MODEL-CHECKER-SYNTAX-HOOKS
   imports LTL-SYNTAX-HOOKS
+  syntax #ModelCheckerState
   syntax ModelCheckerState ::= #ModelCheckerState 
+  syntax #Prop
   syntax Prop ::= #Prop
+  syntax #ModelCheckResult
   syntax ModelCheckResult ::= #ModelCheckResult
   syntax LtlFormula ::= Prop
 endmodule

@@ -1,3 +1,5 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.kil;
 
 import java.util.ArrayList;
@@ -256,7 +258,6 @@ public class BuiltinList extends Collection {
                 for (int i = removeRight; i < size; i++) {
                    right.add(iterator.next());
                 }
-                right.addAll(elementsRight);
                 if (removeRight > size) {
                     removeRight -= size;
                 } else removeRight = 0;

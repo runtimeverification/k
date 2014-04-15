@@ -1,9 +1,13 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
@@ -26,6 +30,8 @@ public class Ambiguity extends Collection {
         super(sort, col);
     }
 
+    public Ambiguity(String sort, java.util.Collection<? extends Term> col) { this(sort, new ArrayList<>(col)); }
+
     @Override
     public String toString() {
         String content = "";
@@ -37,7 +43,7 @@ public class Ambiguity extends Collection {
         if (content.length() > 1)
             content = content.substring(0, content.length() - 1);
 
-        return "amb(" + content + ")";
+        return "'amb(" + content + ")";
     }
 
     @Override

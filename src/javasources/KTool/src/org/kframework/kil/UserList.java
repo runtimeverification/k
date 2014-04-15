@@ -1,6 +1,8 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.StringUtil;
 
 /**
  * A production item for a cons-list with separator, like List{UserSort,";"}. Must be the only item in a {@link Production}.
@@ -10,10 +12,13 @@ public class UserList extends ProductionItem {
     protected String separator;
     protected String listType;
 
+    public static final String ZERO_OR_MORE = "*";
+    public static final String ONE_OR_MORE = "+";
+
     public UserList(String sort, String separator) {
         this.sort = sort;
         this.separator = separator.trim();
-        this.listType = "*";
+        this.listType = ZERO_OR_MORE;
     }
 
     public UserList(String sort, String separator, String listType) {
@@ -31,10 +36,14 @@ public class UserList extends ProductionItem {
 
     @Override
     public String toString() {
-        if (listType.equals("*"))
-            return "List{" + sort + ",\"" + separator + "\"} ";
+        if (listType.equals(ZERO_OR_MORE))
+            return "List{" + sort + ",\"" + StringUtil.escape(separator) + "\"} ";
         else
-            return "NeList{" + sort + ",\"" + separator + "\"} ";
+            return "NeList{" + sort + ",\"" + StringUtil.escape(separator) + "\"} ";
+    }
+
+    public String getTerminatorKLabel() {
+        return "'.List{\"" + StringUtil.escape(separator) + "\"}";
     }
 
     public String getSort() {

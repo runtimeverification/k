@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
@@ -5,6 +6,7 @@ import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,6 +38,8 @@ public class KList extends Collection {
     public KList(List<Term> col) {
         super(KSorts.KLIST, col);
     }
+
+    public KList(Term ... terms) { this(Arrays.asList(terms)); }
 
     @Override
     public String toString() {
