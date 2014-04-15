@@ -1,0 +1,14 @@
+<tests>
+  <!-- tests for symbolic backend -->
+  <test
+      definition="symbolic-kompile/lang.k"
+      programs="symbolic-kompile/programs"
+      results="symbolic-kompile/tests"
+      extension="lang">
+    <all-programs>
+       <krun-option name="--color" value="off" />
+       <krun-option name="-cIN" value="ListItem(10)"/>
+       <krun-option name="--output" value="none" />
+    </all-programs>
+  </test>
+</tests>

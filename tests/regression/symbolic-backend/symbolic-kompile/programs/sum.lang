@@ -1,0 +1,13 @@
+int n, s, i;
+
+i = 0;
+print("n = ");
+n = read();
+s = 0;
+while(i <= n) {
+  s = s + i;
+  i = i + 1;
+}
+print("s = ");
+print(s);
+print("\n");

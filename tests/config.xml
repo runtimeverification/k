@@ -513,4 +513,10 @@
            directory="tests/regression/generalized-strictness"
            programs="tests/regression/generalized-strictness"
            results="tests/regression/generalized-strictness" />
+
+  <!-- Symbolic backend tests -->
+  <include file="regression/symbolic-backend/config.xml"
+           directory="tests/regression/symbolic-backend"
+           programs="regression/symbolic-backend"
+           results="regression/symbolic-backend" />
 </tests>
