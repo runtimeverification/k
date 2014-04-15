@@ -13,8 +13,8 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -29,7 +29,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
         secondFilter = new CorrectCastPriorityFilter2(context);
     }
 
-    public ASTNode transform(Cast cst) throws TransformerException {
+    public ASTNode visit(Cast cst, Void _) throws TransformerException {
         // removed variables and allowing only Cast
         // if I find a Cast near a variable, then I remove the cast and translate the sort restrictions to the variable
         // this should be done only if the casting is syntactic, because on semantic cast there should be another branch
@@ -44,7 +44,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
             }
         }
         cst.getContent().accept(secondFilter);
-        return super.transform(cst);
+        return super.visit(cst, _);
     }
 
     /**
@@ -55,13 +55,13 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
      * @author Radu
      * 
      */
-    public class CorrectCastPriorityFilter2 extends BasicHookWorker {
+    public class CorrectCastPriorityFilter2 extends LocalTransformer {
         public CorrectCastPriorityFilter2(Context context) {
             super("org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter2", context);
         }
 
         @Override
-        public ASTNode transform(KSequence ks) throws TransformerException {
+        public ASTNode visit(KSequence ks, Void _) throws TransformerException {
             assert ks.getContents().size() <= 2;
 
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
@@ -70,14 +70,14 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode transform(Rewrite ks) throws TransformerException {
+        public ASTNode visit(Rewrite ks, Void _) throws TransformerException {
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
         @Override
-        public ASTNode transform(TermCons tc) throws TransformerException {
+        public ASTNode visit(TermCons tc, Void _) throws TransformerException {
             assert tc.getProduction() != null : this.getClass() + ":" + " cons not found." + tc.getCons();
 
             int lastElement = tc.getProduction().getItems().size() - 1;
@@ -86,11 +86,11 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
                 KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
                 throw new PriorityException(kex);
             }
-            return super.transform(tc);
+            return super.visit(tc, _);
         }
 
         @Override
-        public ASTNode transform(Ambiguity node) throws TransformerException {
+        public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
             TransformerException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {

@@ -16,8 +16,8 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
     }
 
     @Override
-    public void visit(TermCons tc) {
-        super.visit(tc);
+    public Void visit(TermCons tc, Void _) {
+        super.visit(tc, _);
 
         if (tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -35,6 +35,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
                 }
             }
         }
+        return null;
     }
 
     /**

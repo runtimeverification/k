@@ -31,7 +31,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
             
             // get the corresponding reachability rule
@@ -98,6 +98,6 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             return newRule;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }

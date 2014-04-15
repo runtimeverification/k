@@ -16,12 +16,12 @@ public class ExtractCellContent extends BasicVisitor {
     }
 
     @Override
-    public void visit(Cell node) {
+    public Void visit(Cell node, Void _) {
 
         if (node.getLabel().equals(cellLabel)) {
             content = node.getContents();
         }
-        super.visit(node);
+        return super.visit(node, _);
     }
 
     public Term getContent() {

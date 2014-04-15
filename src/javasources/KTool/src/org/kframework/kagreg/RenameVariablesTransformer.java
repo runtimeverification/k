@@ -16,8 +16,8 @@ public class RenameVariablesTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Variable variable) throws TransformerException {
-        variable = (Variable)super.transform(variable);
+    public ASTNode visit(Variable variable, Void _) throws TransformerException {
+        variable = (Variable)super.visit(variable, _);
         String oldName = variable.getName();
         if (oldName != null && oldName.startsWith("$")) {
             variable.setName(renameStrategy.getNewName(oldName));

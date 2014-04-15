@@ -12,7 +12,7 @@ public class GetLhsPattern extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
         return node.getLeft();
     }
 

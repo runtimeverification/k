@@ -29,7 +29,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Sentence r) throws TransformerException {
+    public ASTNode visit(Sentence r, Void _) throws TransformerException {
         r = (Sentence) r.accept(new RemoveDuplicateVariables(context));
 
         CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
@@ -255,7 +255,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
             super(RemoveDuplicateVariables.class.toString(), context);
         }
 
-        public ASTNode transform(Ambiguity amb) throws TransformerException {
+        public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
             Set<Term> maxterms = new HashSet<Term>();
             for (Term t : amb.getContents()) {
                 if (t instanceof Variable) {
@@ -278,7 +278,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
             } else if (maxterms.size() > 1)
                 amb.setContents(new ArrayList<Term>(maxterms));
 
-            return super.transform(amb);
+            return super.visit(amb, _);
         }
     }
 
@@ -290,8 +290,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
         public java.util.Map<String, java.util.List<Variable>> vars = new HashMap<String, java.util.List<Variable>>();
 
         @Override
-        public void visit(Variable var) {
-            if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && !var.isUserTyped())
+        public Void visit(Variable var, Void _) {
+            if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && !var.isUserTyped()) {
                 if (vars.containsKey(var.getName()))
                     vars.get(var.getName()).add(var);
                 else {
@@ -299,6 +299,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                     varss.add(var);
                     vars.put(var.getName(), varss);
                 }
+            }
+            return null;
         }
     }
 }

@@ -123,7 +123,7 @@ public class Main {
         Configuration cfg = K.kompiled_cfg;
         ASTNode cfgCleanedNode = null;
         try {
-            cfgCleanedNode = new ConfigurationCleaner(context).transform(cfg);
+            cfgCleanedNode = cfg.accept(new ConfigurationCleaner(context));
         } catch (TransformerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

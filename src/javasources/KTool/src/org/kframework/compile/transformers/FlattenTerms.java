@@ -27,24 +27,24 @@ public class FlattenTerms extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         return node.accept(kTrans);
     }
 
     @Override
-    public ASTNode transform(KSequence node) throws TransformerException {
+    public ASTNode visit(KSequence node, Void _) throws TransformerException {
         return node.accept(kTrans);
     }
 
     @Override
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (MetaK.isComputationSort(node.getSort()))
             return node.accept(kTrans);
         return node;
     }
 
     @Override
-    public ASTNode transform(ListTerminator node) throws TransformerException {
+    public ASTNode visit(ListTerminator node, Void _) throws TransformerException {
         if (MetaK.isComputationSort(node.getSort()))
             return node.accept(kTrans);
         return node;
@@ -55,10 +55,10 @@ public class FlattenTerms extends CopyOnWriteTransformer {
      * those defined in {@link org.kframework.kil.KSort}.
      */
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         if (MetaK.isComputationSort(tc.getSort()))
             return tc.accept(kTrans);
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 
     class FlattenKSyntax extends CopyOnWriteTransformer {
@@ -70,7 +70,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(KApp node) throws TransformerException {
+        public ASTNode visit(KApp node, Void _) throws TransformerException {
             Term label = (Term) node.getLabel().accept(trans);
             Term child = (Term) node.getChild().accept(trans);
             if (child != node.getChild() || label != node.getLabel()) {
@@ -82,12 +82,12 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(Freezer node) throws TransformerException {
+        public ASTNode visit(Freezer node, Void _) throws TransformerException {
             return KApp.of(new FreezerLabel((Term) node.getTerm().accept(this)));
         }
 
         @Override
-        public ASTNode transform(TermCons tc) throws TransformerException {
+        public ASTNode visit(TermCons tc, Void _) throws TransformerException {
             if (!MetaK.isComputationSort(tc.getSort())) {
                 return KApp.of(new KInjectedLabel((Term) tc.accept(trans)));
             }
@@ -103,7 +103,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(KLabel kLabel) throws TransformerException {
+        public ASTNode visit(KLabel kLabel, Void _) throws TransformerException {
             return new KApp(
                     kLabel.getLocation(),
                     kLabel.getFilename(),
@@ -112,7 +112,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(ListTerminator emp) {
+        public ASTNode visit(ListTerminator emp, Void _) {
             String l = emp.getLocation();
             String f = emp.getFilename();
             if (!MetaK.isComputationSort(emp.getSort())) {
@@ -130,24 +130,24 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(Collection node) throws TransformerException {
+        public ASTNode visit(Collection node, Void _) throws TransformerException {
             if (node instanceof KSequence)
-                return super.transform(node);
+                return super.visit(node, _);
             return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
         }
 
         @Override
-        public ASTNode transform(CollectionItem node) throws TransformerException {
+        public ASTNode visit(CollectionItem node, Void _) throws TransformerException {
             return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
         }
 
         @Override
-        public ASTNode transform(MapItem node) throws TransformerException {
+        public ASTNode visit(MapItem node, Void _) throws TransformerException {
             return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
         }
 
         @Override
-        public ASTNode transform(CollectionBuiltin node) throws TransformerException {
+        public ASTNode visit(CollectionBuiltin node, Void _) throws TransformerException {
             /* just for LHS for now */
             assert (node.isLHSView() || node.isElementCollection());
 
@@ -171,7 +171,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(MapBuiltin node) throws TransformerException {
+        public ASTNode visit(MapBuiltin node, Void _) throws TransformerException {
             /* just for LHS for now */
             assert (node.isLHSView() || node.isElementCollection());
 
@@ -196,12 +196,12 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(Cell node) throws TransformerException {
+        public ASTNode visit(Cell node, Void _) throws TransformerException {
             return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
         }
 
         @Override
-        public ASTNode transform(Variable node) throws TransformerException {
+        public ASTNode visit(Variable node, Void _) throws TransformerException {
             if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
                 return node;
             }

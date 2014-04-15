@@ -2,7 +2,7 @@ package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.visitors.AbstractTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -10,9 +10,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerStep<T> {
     
-    Transformer t;
+    AbstractTransformer t;
 
-    public CompilerTransformerStep(Transformer t, Context context) {
+    public CompilerTransformerStep(AbstractTransformer t, Context context) {
         super(context);
         this.t = t;
     }

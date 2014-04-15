@@ -53,14 +53,14 @@ public class ParseConfigsFilter extends BasicTransformer {
     String localModule = null;
 
     @Override
-    public ASTNode transform(Module m) throws TransformerException {
+    public ASTNode visit(Module m, Void _) throws TransformerException {
         localModule = m.getName();
-        ASTNode rez = super.transform(m);
+        ASTNode rez = super.visit(m, _);
         rez.accept(new CollectStartSymbolPgmVisitor(context));
         return rez;
     }
 
-    public ASTNode transform(StringSentence ss) throws TransformerException {
+    public ASTNode visit(StringSentence ss, Void _) throws TransformerException {
         if (ss.getType().equals(Constants.CONFIG)) {
             try {
                 ASTNode config = null;

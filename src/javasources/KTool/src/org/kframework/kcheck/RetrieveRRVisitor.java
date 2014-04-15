@@ -17,9 +17,9 @@ public class RetrieveRRVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Rule node) {
+    public Void visit(Rule node, Void _) {
         rules.add(node);
-        super.visit(node);
+        return super.visit(node, _);
     }
     
     public List<ASTNode> getRules() {

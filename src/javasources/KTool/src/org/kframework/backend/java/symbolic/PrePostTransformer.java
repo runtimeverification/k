@@ -4,8 +4,6 @@ import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-
 
 /**
  * Performs transformation which includes pre-processing and post-processing.
@@ -444,12 +442,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         private final ASTNode contents;
 
         @Override
-        public ASTNode accept(org.kframework.kil.visitors.Transformer transformer) throws TransformerException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void accept(Visitor visitor) {
+        public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
             throw new UnsupportedOperationException();
         }
     }

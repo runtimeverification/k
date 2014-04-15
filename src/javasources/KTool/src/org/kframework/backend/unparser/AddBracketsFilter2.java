@@ -30,75 +30,75 @@ public class AddBracketsFilter2 extends BasicTransformer {
     private boolean atTop = true;
 
     @Override
-    public ASTNode transform(TermCons ast) throws TransformerException {
+    public ASTNode visit(TermCons ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Collection ast) throws TransformerException {
+    public ASTNode visit(Collection ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(MapItem ast) throws TransformerException {
+    public ASTNode visit(MapItem ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Cell ast) throws TransformerException {
+    public ASTNode visit(Cell ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(CollectionItem ast) throws TransformerException {
+    public ASTNode visit(CollectionItem ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(KApp ast) throws TransformerException {
+    public ASTNode visit(KApp ast, Void _) throws TransformerException {
         if (ast.getLabel() instanceof Token) return ast;
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Hole ast) throws TransformerException {
+    public ASTNode visit(Hole ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Freezer ast) throws TransformerException {
+    public ASTNode visit(Freezer ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(KInjectedLabel ast) throws TransformerException {
+    public ASTNode visit(KInjectedLabel ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
     
@@ -131,14 +131,16 @@ public class AddBracketsFilter2 extends BasicTransformer {
             super("Apply first-line location offset", context);
         }
 
-        public void visit(ASTNode ast) {
-            if (ast.getLocation().equals("generated")) return;
+        public Void visit(ASTNode ast, Void _) {
+            if (ast.getLocation().equals("generated")) 
+                return null;
             Scanner scanner = new Scanner(ast.getLocation()).useDelimiter("[,)]").skip("\\(");
             int beginLine = scanner.nextInt();
             int beginCol = scanner.nextInt();
             int endLine = scanner.nextInt();
             int endCol = scanner.nextInt();
             ast.setLocation("(" + beginLine + "," + beginCol + "," + endLine + "," + endCol + ")");
+            return null;
         }
     }
 
@@ -165,10 +167,11 @@ public class AddBracketsFilter2 extends BasicTransformer {
         private Term ast;
         public Term realTerm;
 
-        public void visit(Term t) {
+        public Void visit(Term t, Void _) {
             if (t.contains(ast)) {
                 realTerm = t;
             }
+            return null;
         }
     }
 
@@ -183,7 +186,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
         private boolean needsCast;
         private String realLocation;
 
-        public ASTNode transform(Ambiguity amb) throws TransformerException {
+        public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
             realLocation = ast.getLocation();
             for (int i = amb.getContents().size() - 1; i >= 0; i--) {
                 Term t = amb.getContents().get(i);
@@ -202,7 +205,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
             return amb;
         }
 
-        public ASTNode transform(Term t) throws TransformerException {
+        public ASTNode visit(Term t, Void _) throws TransformerException {
             if (t.equals(ast) && t.getLocation().equals(realLocation)) {
                 hasTerm = true; 
             }

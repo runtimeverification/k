@@ -23,7 +23,7 @@ public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         if (node.getLabel().toString().startsWith(AddSymbolicK.getSymbolicConstructorPrefix())) {
             String sort = node.getLabel().toString().substring(AddSymbolicK.getSymbolicConstructorPrefix().length());
             List<Term> contents = ((KList) node.getChild()).getContents();
@@ -42,7 +42,7 @@ public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
             }
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }
 

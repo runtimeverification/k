@@ -2,13 +2,13 @@ package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Visitor;
+import org.kframework.kil.visitors.AbstractVisitor;
 
 public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> implements CheckStep<T> {
 
-    Visitor t;
+    AbstractVisitor<Void, ?, RuntimeException> t;
 
-    public CheckVisitorStep(Visitor t, Context context) {
+    public CheckVisitorStep(AbstractVisitor<Void, ?, RuntimeException> t, Context context) {
         super(context);
         this.t = t;
     }

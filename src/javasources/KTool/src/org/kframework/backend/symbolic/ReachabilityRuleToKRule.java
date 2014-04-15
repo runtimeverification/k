@@ -25,7 +25,7 @@ public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!node.containsAttribute(RL_ATR)) {
             return node;
         }

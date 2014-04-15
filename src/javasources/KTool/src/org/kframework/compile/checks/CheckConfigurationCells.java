@@ -16,9 +16,9 @@ public class CheckConfigurationCells extends BasicVisitor {
     Map<String,Cell> cells = new HashMap<String,Cell>();
 
     @Override
-    public void visit(Configuration node) {
+    public Void visit(Configuration node, Void _) {
         cells.clear();
-        super.visit(node);
+        return super.visit(node, _);
     }
 
     public CheckConfigurationCells(org.kframework.kil.loader.Context context) {
@@ -26,22 +26,22 @@ public class CheckConfigurationCells extends BasicVisitor {
     }
 
     @Override
-    public void visit(Syntax node) {
-        return;
+    public Void visit(Syntax node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context node) {
-        return;
+    public Void visit(org.kframework.kil.Context node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Rule node) {
-        return;
+    public Void visit(Rule node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Cell node) {
+    public Void visit(Cell node, Void _) {
         Cell cell = cells.get(node.getId());
         if (cell != null) {
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
@@ -50,6 +50,7 @@ public class CheckConfigurationCells extends BasicVisitor {
                     getName(), node.getFilename(), node.getLocation()));
         }
         cells.put(node.getId(), node);
-        super.visit(node);
+        super.visit(node, _);
+        return null;
     }
 }

@@ -59,10 +59,11 @@ public class KRunState implements Serializable{
                 try {
                     /* collect existing free variables in the result */
                     final Set<Variable> existingFreeVariables = new HashSet<Variable>();
-                    Visitor variableCollector = new BasicVisitor(context) {
+                    BasicVisitor variableCollector = new BasicVisitor(context) {
                         @Override
-                        public void visit(Variable var) {
+                        public Void visit(Variable var, Void _) {
                             existingFreeVariables.add(var);
+                            return null;
                         }
                     };
                     result.accept(variableCollector);

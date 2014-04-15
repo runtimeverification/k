@@ -23,7 +23,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         
         if (amb.getContents().get(0) instanceof TermCons) {
             TermCons t1 = (TermCons)amb.getContents().get(0);

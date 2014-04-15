@@ -25,7 +25,7 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         return recursiveCollapseAndBool(node);
     }
     

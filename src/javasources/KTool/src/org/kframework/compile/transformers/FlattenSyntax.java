@@ -25,16 +25,16 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Definition node) throws TransformerException {
+    public ASTNode visit(Definition node, Void _) throws TransformerException {
         node = (Definition) node.accept(new FlattenTerms(context));
         //TODO:  Remove the above once we figure out how to split the two phases
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         listSeparators.clear();
-        node = (Module) super.transform(node);
+        node = (Module) super.visit(node, _);
         if (listSeparators.isEmpty())
             return node;
 
@@ -45,23 +45,23 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         if (!MetaK.isComputationSort(node.getSort().getName())) {
             isComputation = false;
-            return super.transform(node);
+            return super.visit(node, _);
         }
         isComputation = true;
-        node = (Syntax) super.transform(node);
+        node = (Syntax) super.visit(node, _);
         node.setSort(new Sort(KSorts.KLABEL));
         return node;
     }
 
     @Override
-    public ASTNode transform(Production node) throws TransformerException {
+    public ASTNode visit(Production node, Void _) throws TransformerException {
         if (node.containsAttribute("KLabelWrapper"))
             return node;
         if (!isComputation)
-            return super.transform(node);
+            return super.visit(node, _);
         if (node.isSubsort() && !node.containsAttribute("klabel"))
             return null;
         String arity = String.valueOf(node.getArity());
@@ -81,7 +81,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Sort node) throws TransformerException {
+    public ASTNode visit(Sort node, Void _) throws TransformerException {
         if (!MetaK.isComputationSort(node.getName()))
             return node;
         return new Sort("K");

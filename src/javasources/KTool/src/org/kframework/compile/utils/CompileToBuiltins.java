@@ -62,13 +62,13 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
-        ASTNode result = super.transform(node);
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
+        ASTNode result = super.visit(node, _);
         return result;
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
 
         // TODO(YilongL): how can the K label of node be an instance of TermCons?
         if (node.getLabel() instanceof TermCons) {
@@ -91,7 +91,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
                 return term.accept(this);
             }
         }
-        node = (KApp) super.transform(node);
+        node = (KApp) super.visit(node, _);
         if (node.getLabel() instanceof KLabelConstant) {
             KLabelConstant label = (KLabelConstant) node.getLabel();
             String newLabel = builtinCollectionLabels.get(label.getLabel());
@@ -103,7 +103,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(List node) throws TransformerException {
+    public ASTNode visit(List node, Void _) throws TransformerException {
 
         if (node.getContents().isEmpty()) {
             return new KApp(KLabelConstant.of("'.MyList"), KList.EMPTY);
@@ -115,7 +115,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Set node) throws TransformerException {
+    public ASTNode visit(Set node, Void _) throws TransformerException {
 
         if (node.getContents().isEmpty()) {
             return new KApp(KLabelConstant.of("'.MySet"), KList.EMPTY);
@@ -128,7 +128,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
 
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         // TODO(YilongL): why not transform the rule from /include directory? is
         // it because this will be filtered out by TagUserRules anyway? However,
         // this stage is used also by the Java backend which also uses io.k
@@ -136,12 +136,12 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
             return node;
         }
 
-        ASTNode transform = super.transform(node);
+        ASTNode transform = super.visit(node, _);
         return transform;
     }
 
     @Override
-    public ASTNode transform(Map node) throws TransformerException {
+    public ASTNode visit(Map node, Void _) throws TransformerException {
 //        System.out.println("TR: " + node);
 
         if (node.getContents().isEmpty()) {
@@ -155,12 +155,12 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(TermCons node) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _) throws TransformerException {
         String label = getLabelOf(node);
         
         // do not transform this TermCons unless it represents a Collection/CollectionItem node
         if (!(isCollection(node.getSort()) || isCollectionItem(node.getSort()))){
-            return super.transform(node);
+            return super.visit(node, _);
         }
 
         // handle map update individually because the arguments need to be reordered
@@ -222,7 +222,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(MapItem node) throws TransformerException {
+    public ASTNode visit(MapItem node, Void _) throws TransformerException {
 
 //        System.out.println(node);
 
@@ -237,14 +237,14 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListItem node) throws TransformerException {
+    public ASTNode visit(ListItem node, Void _) throws TransformerException {
         java.util.List<Term> contents = new ArrayList<>();
         contents.add((Term) node.getItem().accept(this));
         return new KApp(KLabelConstant.of("'MyListItem"), new KList(contents));
     }
 
     @Override
-    public ASTNode transform(SetItem node) throws TransformerException {
+    public ASTNode visit(SetItem node, Void _) throws TransformerException {
         java.util.List<Term> contents = new ArrayList<>();
         contents.add((Term) node.getItem().accept(this));
         return new KApp(KLabelConstant.of("'MySetItem"), new KList(contents));
@@ -266,7 +266,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
 
         if (isCollectionItem(node.getSort())) {
             // TODO:find a clever way to deal with anonymous variables for (List)Item
@@ -292,13 +292,13 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
             node.setExpectedSort(node.getSort());
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
 
-        Module result = (Module) super.transform(node);
+        Module result = (Module) super.visit(node, _);
         for (String label : undeclaredLabels) {
             // declare newly generated K labels, e.g., syntax KLabel ::= "'#MapextendMap(_,_,_,_)"
             result.addConstant(KSorts.KLABEL, label);

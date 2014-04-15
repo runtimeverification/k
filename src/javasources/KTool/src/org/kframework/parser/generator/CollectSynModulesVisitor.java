@@ -24,7 +24,7 @@ public class CollectSynModulesVisitor extends BasicVisitor {
 
     public Set<String> synModNames = new HashSet<String>();
 
-    public void visit(Definition def) {
+    public Void visit(Definition def, Void _) {
         List<String> synQue = new LinkedList<String>();
         if (def.getModulesMap().containsKey(def.getMainSyntaxModule())) {
             synQue.add(def.getMainSyntaxModule());
@@ -66,5 +66,6 @@ public class CollectSynModulesVisitor extends BasicVisitor {
                     }
             }
         }
+        return null;
     }
 }

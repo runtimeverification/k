@@ -24,7 +24,7 @@ public class MergeAmbFilter extends BasicTransformer {
      * 
      * if the children of every A are located in the same places (see isSimilar(...)).
      */
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
 
         java.util.List<Term> children = new ArrayList<Term>();
         //IStrategoTerm currentList = amb.getSubterm(0);
@@ -77,7 +77,7 @@ public class MergeAmbFilter extends BasicTransformer {
             Ambiguity amb2 = new Ambiguity(KSorts.K, newchildren);
             amb2.setLocation(amb.getLocation());
             amb2.setFilename(amb.getFilename());
-            return super.transform(amb2);
+            return super.visit(amb2, _);
         } else
             return newchildren.get(0).accept(this);
     }

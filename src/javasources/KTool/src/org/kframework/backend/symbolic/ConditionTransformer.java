@@ -29,7 +29,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         Term label = node.getLabel();
         if (label instanceof KLabelConstant) {
             Term content = node.getChild();
@@ -63,7 +63,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
             return node;
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     public List<Term> getFilteredTerms() {

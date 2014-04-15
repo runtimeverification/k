@@ -24,7 +24,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
     }
 
     @java.lang.Override
-    public org.kframework.kil.ASTNode transform(KApp kapp) throws TransformerException {
+    public ASTNode visit(KApp kapp, Void _) throws TransformerException {
         if (kapp.getLabel() instanceof Token) {
             Token node = (Token) kapp.getLabel();
 
@@ -53,6 +53,6 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             if (context.variableTokenSorts.contains(node.tokenSort()))
                 return new org.kframework.kil.Variable(node.value(), node.tokenSort());
         }
-        return super.transform(kapp);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.visit(kapp, _);    //To change body of overridden methods use File | Settings | File Templates.
     }
 }

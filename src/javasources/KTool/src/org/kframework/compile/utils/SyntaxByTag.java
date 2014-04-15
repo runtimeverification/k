@@ -17,18 +17,19 @@ public class SyntaxByTag extends BasicVisitor {
     private final boolean prefix;
 
     @Override
-    public void visit(Configuration node) { return; }
+    public Void visit(Configuration node, Void _) { return null; }
     
     @Override
-    public void visit(org.kframework.kil.Context node) { return; }
+    public Void visit(org.kframework.kil.Context node, Void _) { return null; }
     
     @Override
-    public void visit(Rule node) { return; }
+    public Void visit(Rule node, Void _) { return null; }
     
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
         if (key.equals("") || node.containsAttribute(key, prefix))
             productions.add(node);
+        return null;
     };
 
     public SyntaxByTag(String key, Context context) {

@@ -17,7 +17,7 @@ public class AddConsesVisitor extends BasicVisitor {
         super(context);
     }
 
-    public void visit(Production p) {
+    public Void visit(Production p, Void _) {
         // add cons to productions that don't have it already
         if (p.containsAttribute("bracket")) {
             // don't add cons to bracket production
@@ -76,5 +76,6 @@ public class AddConsesVisitor extends BasicVisitor {
                 }
             }
         }
+        return null;
     }
 }

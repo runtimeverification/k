@@ -50,13 +50,14 @@ public class DefinitionSDFVisitor extends BasicVisitor {
         this.ground = ground;
     }
 
-    public void visit(Syntax syn) {
+    public Void visit(Syntax syn, Void _) {
 
         userSorts.add(syn.getSort());
         processPriorities(syn.getPriorityBlocks());
+        return null;
     }
 
-    public void visit(PriorityExtended node) {
+    public Void visit(PriorityExtended node, Void _) {
         // reconstruct a syntax declaration from the syntax priorities
         List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
         for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
@@ -75,9 +76,10 @@ public class DefinitionSDFVisitor extends BasicVisitor {
         }
 
         processPriorities(priblocks);
+        return null;
     }
 
-    public void visit(PriorityExtendedAssoc node) {
+    public Void visit(PriorityExtendedAssoc node, Void _) {
         // reconstruct a syntax declaration from the syntax priorities
         List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
         PriorityBlock pb1 = new PriorityBlock();
@@ -94,6 +96,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
         priblocks.add(pb1);
 
         processPriorities(priblocks);
+        return null;
     }
 
     private void processPriorities(List<PriorityBlock> priblocks) {
@@ -192,7 +195,8 @@ public class DefinitionSDFVisitor extends BasicVisitor {
         }
     }
 
-    public void visit(Restrictions node) {
+    public Void visit(Restrictions node, Void _) {
         restrictions.add(node);
+        return null;
     }
 }

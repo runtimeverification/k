@@ -21,18 +21,20 @@ public class CheckRewrite extends BasicVisitor {
     private int rewritesNo = 0;
 
     @Override
-    public void visit(Syntax node) {
+    public Void visit(Syntax node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Configuration node) {
+    public Void visit(Configuration node, Void _) {
         inConfig = true;
-        super.visit(node);
+        super.visit(node, _);
         inConfig = false;
+        return null;
     }
 
     @Override
-    public void visit(Rule node) {
+    public Void visit(Rule node, Void _) {
         rewritesNo = 0;
         node.getBody().accept(this);
         if (rewritesNo == 0) {
@@ -50,10 +52,11 @@ public class CheckRewrite extends BasicVisitor {
             node.getEnsures().accept(this);
             inSideCondition = false;
         }
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context node) {
+    public Void visit(org.kframework.kil.Context node, Void _) {
         node.getBody().accept(this);
         if (node.getRequires() != null) {
             inSideCondition = true;
@@ -65,10 +68,11 @@ public class CheckRewrite extends BasicVisitor {
             node.getEnsures().accept(this);
             inSideCondition = false;
         }
+        return null;
     }
 
     @Override
-    public void visit(Rewrite node) {
+    public Void visit(Rewrite node, Void _) {
         if (inConfig) {
             String msg = "Rewrites are not allowed in configurations.";
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
@@ -83,7 +87,8 @@ public class CheckRewrite extends BasicVisitor {
         }
         rewritesNo++;
         inRewrite = true;
-        super.visit(node);
+        super.visit(node, _);
         inRewrite = false;
+        return null;
     }
 }

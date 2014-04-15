@@ -15,7 +15,7 @@ public class AddAutoIncludedModulesVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Definition def) {
+    public Void visit(Definition def, Void _) {
         Import importMod = new Import(Constants.AUTO_INCLUDED_MODULE);
 
         for (Entry<String, Module> e : def.getModulesMap().entrySet()) {
@@ -27,5 +27,6 @@ public class AddAutoIncludedModulesVisitor extends BasicVisitor {
                     m.getItems().add(0, importMod);
             }
         }
+        return null;
     }
 }

@@ -15,7 +15,7 @@ public class PriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         if (tc.getProduction() == null)
             System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
         if (tc.getProduction().isListDecl()) {
@@ -34,6 +34,6 @@ public class PriorityFilter extends BasicTransformer {
             }
         }
 
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 }

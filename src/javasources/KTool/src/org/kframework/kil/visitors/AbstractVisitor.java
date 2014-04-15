@@ -889,6 +889,43 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         return visit((Term) node, p);
     }
+    
+    @Override
+    public R visit(Attributes node, P p) throws E {
+        if (cache() && cache.containsKey(node)) {
+            return cache.get(node);
+        }
+        if(visitChildren()) {
+            List<Attribute> items = new ArrayList<>();
+            for (int i = 0; i < node.getContents().size(); i++) {
+                items.add((Attribute) processChildTerm(node, node.getContents().get(i), node.getContents().get(i).accept(this, p), p));
+            }
+            if (copy()) {
+                node = node.shallowCopy();
+            }
+            if (change(node.getContents(), items)) {
+                node.setContents(items);
+            }
+        }
+        return visit((ASTNode) node, p);
+    }
+    
+
+    @Override
+    public R visit(Attribute node, P p) throws E {
+        if (cache() && cache.containsKey(node)) {
+            return cache.get(node);
+        }
+        return visit((ASTNode) node, p);
+    }
+    
+    @Override
+    public R visit(ParseError node, P p) throws E {
+        if (cache() && cache.containsKey(node)) {
+            return cache.get(node);
+        }
+        return visit((ASTNode) node, p);
+    }
 
     @Override
     public R visit(Bracket node, P p) throws E {

@@ -20,7 +20,7 @@ public class ResolveSymbolicInputStream extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         
         ResolveInputStreamCell risc = new ResolveInputStreamCell(context);
         Term content = (Term) node.getBody().accept(risc);

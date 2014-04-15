@@ -17,7 +17,7 @@ public class CheckStreams extends BasicVisitor {
     }
 
     @Override
-    public void visit(Cell node) {
+    public Void visit(Cell node, Void _) {
 
         node.getContents().accept(this);
         String stream = node.getCellAttributes().get("stream");
@@ -28,5 +28,6 @@ public class CheckStreams extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), node.getFilename(), node.getLocation()));
             }
         }
+        return null;
     }
 }

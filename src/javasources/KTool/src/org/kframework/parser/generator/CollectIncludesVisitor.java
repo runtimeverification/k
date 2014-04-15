@@ -14,11 +14,13 @@ public class CollectIncludesVisitor extends BasicVisitor {
 
     private java.util.List<Import> importList = new ArrayList<Import>();
 
-    public void visit(Import i) {
+    public Void visit(Import i, Void _) {
         importList.add(i);
+        return null;
     }
 
-    public void visit(ModuleItem mi) {
+    public Void visit(ModuleItem mi, Void _) {
+        return null;
     }
 
     public java.util.List<Import> getImportList() {

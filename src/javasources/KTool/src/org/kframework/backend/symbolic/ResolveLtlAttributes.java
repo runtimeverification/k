@@ -27,7 +27,7 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
 
         if (node.getAttributes().containsKey(LTL)) {
             Term body = node.getBody();
@@ -102,6 +102,6 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
         }
 
 
-        return super.transform(node);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.visit(node, _);    //To change body of overridden methods use File | Settings | File Templates.
     }
 }

@@ -1243,13 +1243,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     @Override
-    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
-            throws TransformerException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(org.kframework.kil.visitors.Visitor visitor) {
+    public <P, R, E extends Throwable> R accept(org.kframework.kil.visitors.Visitor<P, R, E> visitor, P p) throws E {
         throw new UnsupportedOperationException();
     }
 

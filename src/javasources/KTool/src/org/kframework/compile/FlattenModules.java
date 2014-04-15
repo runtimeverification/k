@@ -36,11 +36,11 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
         private Definition result;
 
         @Override
-        public void visit(Definition d) {
+        public Void visit(Definition d, Void _) {
             result = new Definition(d);
             Set<String> included = new HashSet<String>();
             Configuration cfg = null;
-            super.visit(d);
+            super.visit(d, _);
             result.setFilename(d.getFilename());
             result.setLocation(d.getLocation());
             result.setMainFile(d.getMainFile());
@@ -85,11 +85,13 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
             }
             if (null != cfg)
                 rmod.getItems().add(cfg);
+            return null;
         }
 
         @Override
-        public void visit(Module m) {
+        public Void visit(Module m, Void _) {
             modules.put(m.getName(), m);
+            return null;
         }
 
         public Definition getResult() {

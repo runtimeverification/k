@@ -126,7 +126,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         assert node.getBody() instanceof Rewrite:
                "expected rewrite at the top of rule " + node + ". "
                + "DataStructureToLookupUpdate pass should be applied after ResolveRewrite pass.";
@@ -287,8 +287,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListBuiltin node) throws TransformerException {
-        node = (ListBuiltin) super.transform(node);
+    public ASTNode visit(ListBuiltin node, Void _) throws TransformerException {
+        node = (ListBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             assert node.isLHSView();
 
@@ -380,8 +380,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(MapBuiltin node) throws TransformerException {
-        node = (MapBuiltin) super.transform(node);
+    public ASTNode visit(MapBuiltin node, Void _) throws TransformerException {
+        node = (MapBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             assert node.isLHSView();
 
@@ -453,8 +453,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(SetBuiltin node) throws TransformerException {
-        node = (SetBuiltin) super.transform(node);
+    public ASTNode visit(SetBuiltin node, Void _) throws TransformerException {
+        node = (SetBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             assert node.isLHSView();
 
@@ -517,7 +517,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (status != Status.LHS && reverseMap.containsKey(node)) {
             return reverseMap.get(node);
         } else {

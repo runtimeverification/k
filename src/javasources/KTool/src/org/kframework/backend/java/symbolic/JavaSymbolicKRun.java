@@ -226,7 +226,7 @@ public class JavaSymbolicKRun implements KRun {
         // Change Map, List, and Set to MyMap, MyList, and MySet.
         CompileToBuiltins builtinTransformer = new CompileToBuiltins(context);
         try {
-            pattern = (org.kframework.kil.Rule)builtinTransformer.transform(pattern);
+            pattern = (org.kframework.kil.Rule)builtinTransformer.visit(pattern, null);
             cfg = (org.kframework.kil.Term)cfg.accept(builtinTransformer);
         } catch (TransformerException e) {
             e.report();

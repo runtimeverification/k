@@ -21,11 +21,13 @@ public class CollectTerminalsVisitor extends BasicVisitor {
         terminals.add(terminal);
     }
 
-    public void visit(Terminal t) {
+    public Void visit(Terminal t, Void _) {
         addTerminal(t.getTerminal());
+        return null;
     }
 
-    public void visit(UserList ul) {
+    public Void visit(UserList ul, Void _) {
         addTerminal(ul.getSeparator());
+        return null;
     }
 }

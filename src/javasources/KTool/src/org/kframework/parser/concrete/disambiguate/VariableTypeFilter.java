@@ -25,7 +25,7 @@ public class VariableTypeFilter extends BasicTransformer {
         this.expected = expected;
     }
 
-    public ASTNode transform(Variable r) throws TransformerException {
+    public ASTNode visit(Variable r, Void _) throws TransformerException {
         Variable correctVar = variableTypes.get(r.getName());
         if (correctVar == null)
             return r;

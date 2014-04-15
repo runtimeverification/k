@@ -26,7 +26,7 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
         this.startModuleName = startModuleName;
     }
 
-    public void visit(Definition def) {
+    public Void visit(Definition def, Void _) {
         List<String> synQue = new LinkedList<String>();
         synQue.add(startModuleName);
 
@@ -54,5 +54,6 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
                 }
             }
         }
+        return null;
     }
 }

@@ -47,7 +47,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         Set<Production> prods = SyntaxByTag.get(node, "binder", context);
         if (prods.isEmpty())
             return node;

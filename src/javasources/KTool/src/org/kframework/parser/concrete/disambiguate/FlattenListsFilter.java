@@ -16,7 +16,7 @@ public class FlattenListsFilter extends BasicTransformer {
         super("Flatten lists", context);
     }
 
-    public ASTNode transform(Collection c) throws TransformerException {
+    public ASTNode visit(Collection c, Void _) throws TransformerException {
         boolean found;
         do {
             found = false;
@@ -32,6 +32,6 @@ public class FlattenListsFilter extends BasicTransformer {
             c.setContents(contents);
         } while (found);
 
-        return super.transform(c);
+        return super.visit(c, _);
     }
 }

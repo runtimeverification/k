@@ -53,7 +53,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         Module transformedNode = node.shallowCopy();
         transformedNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 

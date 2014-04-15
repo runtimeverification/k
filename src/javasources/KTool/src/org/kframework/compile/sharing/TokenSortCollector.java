@@ -59,7 +59,7 @@ public class TokenSortCollector extends BasicVisitor {
     }
 
     @Override
-    public void visit(Production production) {
+    public Void visit(Production production, Void _) {
         if (kompileOptions.backend.java() || K.backend.equals("java")) {
             checkIllegalProduction(production);
         } else {
@@ -67,6 +67,7 @@ public class TokenSortCollector extends BasicVisitor {
                 tokenSorts.add(production.getSort());
             }
         }
+        return null;
     }
     
     /**
@@ -114,12 +115,18 @@ public class TokenSortCollector extends BasicVisitor {
     }
 
     @Override
-    public void visit(Rule node) { }
+    public Void visit(Rule node, Void _) { 
+        return null;
+    }
 
     @Override
-    public void visit(org.kframework.kil.Context node) { }
+    public Void visit(org.kframework.kil.Context node, Void _) { 
+        return null;
+    }
 
     @Override
-    public void visit(Configuration node) { }
+    public Void visit(Configuration node, Void _) { 
+        return null;
+    }
 
 }

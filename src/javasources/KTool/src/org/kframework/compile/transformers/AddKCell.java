@@ -34,9 +34,9 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module module) throws TransformerException {
+    public ASTNode visit(Module module, Void _) throws TransformerException {
         newRules = new ArrayList<ModuleItem>();
-        Module newModule = (Module)super.transform(module);
+        Module newModule = (Module)super.visit(module, _);
         Module returnModule;
         if (newRules.isEmpty()) {
             returnModule = newModule;
@@ -48,7 +48,7 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) {
+    public ASTNode visit(Rule node, Void _) {
         if (MetaK.isAnywhere(node)) {
             return node;
         }
@@ -78,7 +78,7 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration cfg) throws TransformerException {
+    public ASTNode visit(Configuration cfg, Void _) throws TransformerException {
         if (!intersects(MetaK.getAllCellLabels(cfg.getBody(), context), komputationCells)) {
             cfg = cfg.shallowCopy();
             Bag bag;

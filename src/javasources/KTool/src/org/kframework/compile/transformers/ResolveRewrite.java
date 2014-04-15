@@ -16,7 +16,7 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         Term body = node.getBody();
         if (body instanceof Rewrite) return node;
         node = node.shallowCopy();
@@ -28,17 +28,17 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;    //To change body of overridden methods use File | Settings | File Templates.
     }
 
@@ -56,7 +56,7 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(Rewrite node) throws TransformerException {
+        public ASTNode visit(Rewrite node, Void _) throws TransformerException {
             switch (lrhs) {
                 case LEFT:
                     return node.getLeft();

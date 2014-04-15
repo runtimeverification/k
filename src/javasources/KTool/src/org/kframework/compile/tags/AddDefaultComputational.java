@@ -13,7 +13,7 @@ public class AddDefaultComputational extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!(node.containsAttribute("structural")
                 || node.containsAttribute("anywhere")
                 || node.containsAttribute("function")

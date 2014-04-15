@@ -30,7 +30,7 @@ public class LineariseTransformer extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
         }

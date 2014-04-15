@@ -23,16 +23,17 @@ public class CellLabelCollector extends BasicVisitor {
 
     // Skip every item other than configurations
     @Override
-    public void visit(Configuration c) {
-        super.visit(c);
+    public Void visit(Configuration c, Void _) {
+        return super.visit(c, _);
     }
     @Override
-    public void visit(ModuleItem m) {        
+    public Void visit(ModuleItem m, Void _) {     
+        return null;   
     }
     
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
         cellLabels.add(cell.getLabel());
-        super.visit(cell);
+        return super.visit(cell, _);
     }    
 }

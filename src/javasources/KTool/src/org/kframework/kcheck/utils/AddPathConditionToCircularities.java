@@ -26,7 +26,7 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         
         if(node.getAttribute(AddCircularityRules.RRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
 
@@ -77,6 +77,6 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
             return newRule;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }

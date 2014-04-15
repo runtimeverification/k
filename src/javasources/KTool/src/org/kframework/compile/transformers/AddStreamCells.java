@@ -25,8 +25,8 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
-        ASTNode result = super.transform(node);
+    public ASTNode visit(Module node, Void _) throws TransformerException {
+        ASTNode result = super.visit(node, _);
         if (result == node)
             return node;
         if (generated.isEmpty()) {
@@ -42,22 +42,22 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         boolean isStream = false;
         if (node.getAttributes().containsKey("stdin")) {
             isStream = true;

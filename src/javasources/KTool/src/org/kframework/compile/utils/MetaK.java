@@ -127,18 +127,25 @@ public class MetaK {
         final List<Configuration> result = new LinkedList<Configuration>();
         node.accept(new BasicVisitor(context) {
             @Override
-            public void visit(Configuration node) {
+            public Void visit(Configuration node, Void _) {
                 result.add(node);
+                return null;
             }
 
             @Override
-            public void visit(org.kframework.kil.Context node) { }
+            public Void visit(org.kframework.kil.Context node, Void _) { 
+                return null;
+            }
 
             @Override
-            public void visit(Rule node) { }
+            public Void visit(Rule node, Void _) { 
+                return null;
+            }
 
             @Override
-            public void visit(Syntax node) { }
+            public Void visit(Syntax node, Void _) { 
+                return null;
+            }
         });
         if (result.size() == 0) {
             GlobalSettings.kem
@@ -214,10 +221,11 @@ public class MetaK {
     public static int countRewrites(Term t, org.kframework.kil.loader.Context context) {
         final List<Integer> count = new ArrayList<Integer>();
         count.add(0);
-        Visitor countVisitor = new BasicVisitor(context) {
-            @Override public void visit(Rewrite rewrite) {
+        BasicVisitor countVisitor = new BasicVisitor(context) {
+            @Override public Void visit(Rewrite rewrite, Void _) {
                 count.set(0, count.get(0) + 1);
-                super.visit(rewrite);
+                super.visit(rewrite, _);
+                return null;
             }
         };
 
@@ -228,10 +236,11 @@ public class MetaK {
     public static int countHoles(Term t, org.kframework.kil.loader.Context context) {
         final List<Integer> count = new ArrayList<Integer>();
         count.add(0);
-        Visitor countVisitor = new BasicVisitor(context) {
-            @Override public void visit(Hole hole) {
+        BasicVisitor countVisitor = new BasicVisitor(context) {
+            @Override public Void visit(Hole hole, Void _) {
                 count.set(0, count.get(0) + 1);
-                super.visit(hole);
+                super.visit(hole, _);
+                return null;
             }
         };
 
@@ -240,43 +249,44 @@ public class MetaK {
     }
 
     public static boolean hasCell(Term t, org.kframework.kil.loader.Context context) {
-        Visitor cellFinder = new BasicVisitor(context) {
+        BasicVisitor cellFinder = new BasicVisitor(context) {
             @Override
-            public void visit(KSequence node) { }
+            public Void visit(KSequence node, Void _) { return null; }
 
             @Override
-            public void visit(org.kframework.kil.List node) { }
+            public Void visit(org.kframework.kil.List node, Void _) { return null; }
 
             @Override
-            public void visit(ListItem node) { }
+            public Void visit(ListItem node, Void _) { return null; }
 
             @Override
-            public void visit(TermCons node) { }
+            public Void visit(TermCons node, Void _) { return null; }
 
             @Override
-            public void visit(org.kframework.kil.Set node) { }
+            public Void visit(org.kframework.kil.Set node, Void _) { return null; }
 
             @Override
-            public void visit(SetItem node) { }
+            public Void visit(SetItem node, Void _) { return null; }
 
             @Override
-            public void visit(KApp node) { }
+            public Void visit(KApp node, Void _) { return null; }
 
             @Override
-            public void visit(KList node) { }
+            public Void visit(KList node, Void _) { return null; }
 
             @Override
-            public void visit(Map node) { }
+            public Void visit(Map node, Void _) { return null; }
 
             @Override
-            public void visit(MapItem node) { }
+            public Void visit(MapItem node, Void _) { return null; }
 
             @Override
-            public void visit(UserList node) { }
+            public Void visit(UserList node, Void _) { return null; }
 
             @Override
-            public void visit(Cell node) {
+            public Void visit(Cell node, Void _) {
                 NonLocalExit.RETURN();
+                return null;
             }
         };
         try {
@@ -372,8 +382,9 @@ public class MetaK {
         final List<Cell> cells = new ArrayList<Cell>();
         t.accept(new BasicVisitor(context) {
             @Override
-            public void visit(Cell node) {
+            public Void visit(Cell node, Void _) {
                 cells.add(node);
+                return null;
             }
         });
         return cells;
@@ -383,9 +394,9 @@ public class MetaK {
         final List<String> cells = new ArrayList<String>();
         t.accept(new BasicVisitor(context) {
             @Override
-            public void visit(Cell node) {
+            public Void visit(Cell node, Void _) {
                 cells.add(node.getLabel());
-                super.visit(node);
+                return super.visit(node, _);
             }
         });
         return cells;

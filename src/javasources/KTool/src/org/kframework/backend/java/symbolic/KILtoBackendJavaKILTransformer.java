@@ -51,7 +51,6 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.GenericToken;
-import org.kframework.kil.Int32Builtin;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
@@ -80,9 +79,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     /**
      * Maps variables representing concrete collections to their sizes. This
      * field is set at the beginning of
-     * {@link #transform(org.kframework.kil.Rule)} and reset before that method
+     * {@link #visit(org.kframework.kil.Rule)} and reset before that method
      * returns. Moreover, it is only used in
-     * {@link #transform(org.kframework.kil.Variable)} when transforming
+     * {@link #visit(org.kframework.kil.Variable)} when transforming
      * {@code Variable}s inside that {@code Rule}.
      */
     private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize
@@ -144,7 +143,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.KApp node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.KApp node, Void _) throws TransformerException {
         if (node.getLabel() instanceof org.kframework.kil.Token) {
             if (node.getLabel() instanceof BoolBuiltin) {
                 return BoolToken.of(((BoolBuiltin) node.getLabel()).booleanValue());
@@ -170,60 +169,60 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.KItemProjection node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.KItemProjection node, Void _) throws TransformerException {
         return new KItemProjection(Kind.of(node.projectedKind()), (Term) node.getTerm().accept(this));
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.KLabelConstant node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.KLabelConstant node, Void _) throws TransformerException {
         return KLabelConstant.of(node.getLabel(), TermContext.of(definition));
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.KLabelInjection node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.KLabelInjection node, Void _) throws TransformerException {
         return new KLabelInjection((Term) node.getTerm().accept(this));
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.KInjectedLabel node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.KInjectedLabel node, Void _) throws TransformerException {
         Term term = (Term) node.getTerm().accept(this);
         return new KLabelInjection(term);
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.FreezerLabel node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.FreezerLabel node, Void _) throws TransformerException {
         Term term = (Term) node.getTerm().accept(this);
         return new KLabelFreezer(term);
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Hole node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Hole node, Void _) throws TransformerException {
         return Hole.HOLE;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.FreezerHole node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.FreezerHole node, Void _) throws TransformerException {
         return Hole.HOLE;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Token node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Token node, Void _) throws TransformerException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.List node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.List node, Void _) throws TransformerException {
         List<org.kframework.kil.Term> list = new ArrayList<>();
         KILtoBackendJavaKILTransformer.flattenList(list, node.getContents());
         if (list.isEmpty()){
             return new KList();
         }
         //TODO(OwolabiL): What should happen when the list is not empty?
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.KSequence node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.KSequence node, Void _) throws TransformerException {
         List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
         KILtoBackendJavaKILTransformer.flattenKSequence(list, node.getContents());
 
@@ -243,7 +242,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.KList node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.KList node, Void _) throws TransformerException {
         List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
         KILtoBackendJavaKILTransformer.flattenKList(list, node.getContents());
 
@@ -263,7 +262,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Cell node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Cell node, Void _) throws TransformerException {
         if (node.getContents() instanceof org.kframework.kil.Bag) {
             CellCollection cellCollection = (CellCollection) node.getContents().accept(this);
             return new Cell<CellCollection>(node.getLabel(), cellCollection);
@@ -308,7 +307,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Bag node)
+    public ASTNode visit(org.kframework.kil.Bag node, Void _)
             throws TransformerException {
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
         org.kframework.kil.Bag.flatten(contents,
@@ -336,7 +335,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.ListBuiltin node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.ListBuiltin node, Void _) throws TransformerException {
         ArrayList<Term> elementsLeft = new ArrayList<Term>(node.elementsLeft().size());
         for (org.kframework.kil.Term entry : node.elementsLeft()) {
             Term newEntry = (Term) entry.accept(this);
@@ -389,7 +388,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.SetBuiltin node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.SetBuiltin node, Void _) throws TransformerException {
         HashSet<Term> entries = new HashSet<Term>(node.elements().size());
         for (org.kframework.kil.Term entry : node.elements()) {
             Term key = (Term) entry.accept(this);
@@ -429,7 +428,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.MapBuiltin node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.MapBuiltin node, Void _) throws TransformerException {
         HashMap<Term, Term> entries = new HashMap<Term, Term>(node.elements().size());
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.elements().entrySet()) {
@@ -472,7 +471,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Map node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Map node, Void _) throws TransformerException {
     //TODO(Owolabi): Make this work for non-empty Maps.
 
 //        for(org.kframework.kil.Term term: node.getContents()){
@@ -482,7 +481,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.ListUpdate node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.ListUpdate node, Void _) throws TransformerException {
         Variable base = (Variable) node.base().accept(this);
 
         return BuiltinList.of(base, node.removeLeft().size(), node.removeRight().size(),
@@ -490,7 +489,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.SetUpdate node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.SetUpdate node, Void _) throws TransformerException {
         Variable set = (Variable) node.set().accept(this);
 
         HashSet<Term> removeSet = new HashSet<Term>(node.removeEntries().size());
@@ -502,7 +501,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
      @Override
-    public ASTNode transform(org.kframework.kil.MapUpdate node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.MapUpdate node, Void _) throws TransformerException {
         Variable map = (Variable) node.map().accept(this);
 
         HashSet<Term> removeSet = new HashSet<Term>(node.removeEntries().size());
@@ -522,7 +521,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Variable node, Void _) throws TransformerException {
         if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         }
@@ -561,7 +560,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Rule node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Rule node, Void _) throws TransformerException {
         assert node.getBody() instanceof org.kframework.kil.Rewrite;
 
         concreteCollectionSize = node.getConcreteDataStructureSize();
@@ -680,7 +679,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Definition node) {
+    public ASTNode visit(org.kframework.kil.Definition node, Void _) {
         Definition definition = new Definition(context);
         this.definition = definition;
 

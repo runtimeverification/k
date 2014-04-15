@@ -4,6 +4,7 @@ import org.kframework.kil.*;
 
 public interface Visitor<P, R, E extends Throwable> {
     public R visit(ASTNode node, P p) throws E;
+    public R visit(ParseError node, P p) throws E;
     public R visit(Definition node, P p) throws E;
     public R visit(DefinitionItem node, P p) throws E;
     // <DefinitionItems>
@@ -93,6 +94,8 @@ public interface Visitor<P, R, E extends Throwable> {
     // </Terms>
     public R visit(TermComment node, P p) throws E;
     // Others
+    public R visit(Attributes node, P p) throws E;
+    public R visit(Attribute node, P p) throws E;
     public R visit(KInjectedLabel kInjectedLabel, P p) throws E;
     public R visit(FreezerLabel freezerLabel, P p) throws E;
     public R visit(Freezer f, P p) throws E;

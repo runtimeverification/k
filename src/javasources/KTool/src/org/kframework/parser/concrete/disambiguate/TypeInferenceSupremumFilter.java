@@ -25,7 +25,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
         super("Type inference supremum", context);
     }
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         // find the groups of terms alike
 
         Set<Term> processed = new HashSet<Term>();
@@ -79,7 +79,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
         } else if (maxterms.size() > 1)
             amb.setContents(new ArrayList<Term>(maxterms));
 
-        return super.transform(amb);
+        return super.visit(amb, _);
     }
 
     private boolean isSubsorted(Production big, Production small) {

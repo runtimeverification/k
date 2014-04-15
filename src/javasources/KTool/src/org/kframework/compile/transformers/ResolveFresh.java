@@ -24,9 +24,9 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Definition node) throws TransformerException {
+    public ASTNode visit(Definition node, Void _) throws TransformerException {
         isFresh = false;
-        node = (Definition) super.transform(node);
+        node = (Definition) super.visit(node, _);
         if (!isFresh)
             return node;
 
@@ -50,7 +50,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Sentence node) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _) throws TransformerException {
         //TODO: maybe now fresh should be in the ensures part.
         if (null == node.getRequires())
             return node;
@@ -87,7 +87,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(TermCons node) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _) throws TransformerException {
         if (MetaK.Constants.freshCons.equals(node.getCons())) {
             assert(1 == node.getContents().size());
             assert(node.getContents().get(0) instanceof Variable);
@@ -98,7 +98,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
             return BoolBuiltin.TRUE;
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     private Substitution freshSubstitution(

@@ -24,7 +24,7 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Sentence node) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _) throws TransformerException {
         //TODO:  maybe now fresh belongs in the ensures?  update this accordingly if so.
         if (null == node.getRequires())
             return node;
@@ -45,7 +45,7 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(TermCons node) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _) throws TransformerException {
         if (MetaK.Constants.freshCons.equals(node.getCons())) {
             if (node.getContents().size() != 1) {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
@@ -64,7 +64,7 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
             return BoolBuiltin.TRUE;
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     private Substitution freshSubstitution(

@@ -28,7 +28,7 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
     
         List<ModuleItem> items = node.getItems();
         node = node.shallowCopy();

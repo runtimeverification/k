@@ -16,10 +16,10 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
     }
 
     @Override
-    public void visit(TermCons tc) {
+    public Void visit(TermCons tc, Void _) {
 
         // TODO: make this as a hard type checker where you throw exceptions every time you get a typing error
-        super.visit(tc);
+        super.visit(tc, _);
 
         if (tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -37,15 +37,17 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
                 }
             }
         }
+        return null;
     }
 
     @Override
-    public void visit(Collection node) {
-        super.visit(node);
+    public Void visit(Collection node, Void _) {
+        super.visit(node, _);
         for (Term t : node.getContents()) {
             if (!context.isSubsortedEq(node.getSort(), t.getSort()))
                 score += -1;
         }
+        return null;
     }
 
     /**

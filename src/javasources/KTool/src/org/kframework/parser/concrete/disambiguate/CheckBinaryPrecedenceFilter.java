@@ -28,7 +28,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
     Term parentmi = null;
 
     @Override
-    public ASTNode transform(Rewrite rw) throws TransformerException {
+    public ASTNode visit(Rewrite rw, Void _) throws TransformerException {
         if (parent != null || parentks != null || parentmi != null) {
             String msg = "Due to typing errors, rewrite is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, rw.getFilename(), rw.getLocation());
@@ -38,11 +38,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
         parent = null;
         parentks = null;
         parentmi = null;
-        return transform((Term) rw);
+        return visit((Term) rw, _);
     }
 
     @Override
-    public ASTNode transform(MapItem mi) throws TransformerException {
+    public ASTNode visit(MapItem mi, Void _) throws TransformerException {
         parent = null;
         parentks = null;
 
@@ -57,11 +57,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
         parentks = null;
         parent = null;
         parentmi = null;
-        return transform((Term) mi);
+        return visit((Term) mi, _);
     }
 
     @Override
-    public ASTNode transform(KSequence ks) throws TransformerException {
+    public ASTNode visit(KSequence ks, Void _) throws TransformerException {
         if (parent != null || parentks != null) {
             String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
@@ -82,11 +82,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
         parentks = null;
         parent = null;
         parentmi = null;
-        return transform((Term) ks);
+        return visit((Term) ks, _);
     }
 
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         if (tc.getProduction().isListDecl()) {
             Term t = tc.getContents().get(0);
             parent = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? tc : null;
@@ -117,11 +117,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
             }
         }
 
-        return transform((Term) tc);
+        return visit((Term) tc, _);
     }
 
     @Override
-    public ASTNode transform(Ambiguity node) throws TransformerException {
+    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
         TermCons lp = parent;
         KSequence ks = parentks;
         Term mi = parentmi;
@@ -151,6 +151,6 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
             return terms.get(0);
         }
         node.setContents(terms);
-        return transform((Term) node);
+        return visit((Term) node, _);
     }
 }

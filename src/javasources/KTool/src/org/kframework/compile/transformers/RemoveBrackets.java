@@ -21,7 +21,7 @@ public class RemoveBrackets extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Bracket node) throws TransformerException {
+    public ASTNode visit(Bracket node, Void _) throws TransformerException {
         // System.out.println("Remove: " + node.getFilename() + ":" + node.getLocation());
         return node.getContent().accept(this);
     }

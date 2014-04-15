@@ -17,7 +17,7 @@ public class TypeSystemFilter extends BasicTransformer {
         super("Type system", context);
     }
 
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         // choose only the allowed subsorts for a TermCons
         if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -36,11 +36,11 @@ public class TypeSystemFilter extends BasicTransformer {
             }
         }
 
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 
-    public ASTNode transform(Cast cast) throws TransformerException {
+    public ASTNode visit(Cast cast, Void _) throws TransformerException {
         cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getInnerSort(), context)));
-        return super.transform(cast);
+        return super.visit(cast, _);
     }
 }

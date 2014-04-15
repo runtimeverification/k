@@ -41,15 +41,15 @@ public class AddSortLabels extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Module module) throws TransformerException {
+    public ASTNode visit(Module module, Void _) throws TransformerException {
         if (module.isPredefined()) {
             return module;
         }
-        return super.transform(module);
+        return super.visit(module, _);
     }
     
     @Override
-    public ASTNode transform(Syntax syntax) throws TransformerException {
+    public ASTNode visit(Syntax syntax, Void _) throws TransformerException {
         if (labeledSorts.contains(syntax.getSort().getName())) {
             return syntax;
         }

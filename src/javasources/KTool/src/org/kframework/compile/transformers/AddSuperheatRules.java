@@ -24,9 +24,9 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         superHeats.clear();
-        node = (Module) super.transform(node);
+        node = (Module) super.visit(node, _);
         if (!superHeats.isEmpty()) {
             node = node.shallowCopy();
             node.setItems(new ArrayList<ModuleItem>(node.getItems()));
@@ -36,17 +36,17 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!node.containsAttribute(MetaK.Constants.heatingTag)) {
             return node;
         }
@@ -139,7 +139,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
 }

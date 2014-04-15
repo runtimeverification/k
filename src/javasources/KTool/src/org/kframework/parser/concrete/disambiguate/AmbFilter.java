@@ -17,7 +17,7 @@ public class AmbFilter extends BasicTransformer {
         super("Ambiguity filter", context);
     }
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         String msg = "Parsing ambiguity. Arbitrarily choosing the first.";
 
         for (int i = 0; i < amb.getContents().size(); i++) {

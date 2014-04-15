@@ -25,7 +25,7 @@ public class AddPCToBagVariable extends CopyOnWriteTransformer {
         this.B = B;
     }
 
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (node.getName().equals(B)) {
             Bag bag = new Bag();
             java.util.List<Term> contents = new ArrayList<Term>();
@@ -35,6 +35,6 @@ public class AddPCToBagVariable extends CopyOnWriteTransformer {
             return bag;
         }
 
-        return super.transform(node);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.visit(node, _);    //To change body of overridden methods use File | Settings | File Templates.
     }
 }

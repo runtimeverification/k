@@ -18,7 +18,7 @@ public class EliminateRRWrapper extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         if (node.getLabel().toString().equals(ReachabilityRuleToKRule.RR_COND)) {
                 KList contents = (KList) node.getChild();
                 lphi = contents.getContents().get(0);
@@ -26,7 +26,7 @@ public class EliminateRRWrapper extends CopyOnWriteTransformer {
                 return BoolBuiltin.TRUE;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     public Term getLphi() {

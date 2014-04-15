@@ -15,22 +15,23 @@ public class CollectSubsortsVisitor extends BasicVisitor {
         super(context);
     }
 
-    public void visit(Definition def) {
-        super.visit(def);
+    public Void visit(Definition def, Void _) {
+        super.visit(def, _);
         context.finalizeSubsorts();
+        return null;
     }
 
-    public void visit(Syntax syn) {
+    public Void visit(Syntax syn, Void _) {
         if (syn.getPriorityBlocks().size() == 0) {
             String sortName = syn.getSort().getName();
             if (!sortName.equals(KSorts.KITEM)) {
                 context.addSubsort(KSorts.KITEM, syn.getSort().getName());
             }
         }
-        super.visit(syn);
+        return super.visit(syn, _);
     }
 
-    public void visit(Production prd) {
+    public Void visit(Production prd, Void _) {
         if (!Sort.isBasesort(prd.getSort()))
             context.addSubsort(KSorts.KITEM, prd.getSort());
         if (prd.isSubsort()) {
@@ -53,5 +54,6 @@ public class CollectSubsortsVisitor extends BasicVisitor {
                 }
             }
         }
+        return null;
     }
 }

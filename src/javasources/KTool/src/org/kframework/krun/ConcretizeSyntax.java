@@ -19,7 +19,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp kapp) throws TransformerException {
+    public ASTNode visit(KApp kapp, Void _) throws TransformerException {
         ASTNode t = internalTransform(kapp);
         try {
             t = t.accept(new TypeSystemFilter(context));
@@ -36,7 +36,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(TermCons tcParent) throws TransformerException {
+        public ASTNode visit(TermCons tcParent, Void _) throws TransformerException {
             for (int i = 0; i < tcParent.getContents().size(); i++) {
                 Term child = tcParent.getContents().get(i);
                 internalTransform(tcParent, i, child);
@@ -109,7 +109,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                     possibleTerms.add(new TermCons(p.getSort(), cons, newContents, context));
                 }
                 if (possibleTerms.size() == 0) {
-                    return super.transform(kapp);
+                    return super.visit(kapp, null);
                 }
                 if (possibleTerms.size() == 1) {
                     return possibleTerms.get(0);
@@ -125,7 +125,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                             possibleTerms.add(new ListTerminator(sort, null));
                     }
                     if (possibleTerms.size() == 0) {
-                        return super.transform(kapp);
+                        return super.visit(kapp, null);
                     }
                     if (possibleTerms.size() == 1) {
                         return possibleTerms.get(0);
@@ -140,19 +140,19 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             assert ((KList)child).getContents().size() == 0;
             return kapp;
             }
-        return super.transform(kapp);
+        return super.visit(kapp, null);
     }
 
     @Override
-    public ASTNode transform(Cell cell) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _) throws TransformerException {
         if (cell.getLabel().matches(".*-fragment")) {
             return cell.getContents().accept(this);
         }
-        return super.transform(cell);
+        return super.visit(cell, _);
     }
 
     @Override
-    public ASTNode transform(Bag bag) throws TransformerException {
+    public ASTNode visit(Bag bag, Void _) throws TransformerException {
         List<Term> contents = new ArrayList<Term>();
         for (Term child : bag.getContents()) {
             Term accept = (Term) child.accept(this);

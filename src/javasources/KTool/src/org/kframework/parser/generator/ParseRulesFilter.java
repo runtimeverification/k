@@ -72,12 +72,12 @@ public class ParseRulesFilter extends BasicTransformer {
     String localModule = null;
 
     @Override
-    public ASTNode transform(Module m) throws TransformerException {
+    public ASTNode visit(Module m, Void _) throws TransformerException {
         localModule = m.getName();
-        return super.transform(m);
+        return super.visit(m, _);
     }
 
-    public ASTNode transform(StringSentence ss) throws TransformerException {
+    public ASTNode visit(StringSentence ss, Void _) throws TransformerException {
         if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
             long startTime = System.currentTimeMillis();
             try {

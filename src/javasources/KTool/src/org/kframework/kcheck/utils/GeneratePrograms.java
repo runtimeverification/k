@@ -25,7 +25,7 @@ public class GeneratePrograms extends BasicTransformer {
     }
     
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         
         if(node.getAttribute(AddCircularityRules.RRULE_ATTR)!= null && (node.getBody() instanceof Rewrite)) {
             
@@ -102,7 +102,7 @@ public class GeneratePrograms extends BasicTransformer {
             return newRule;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     public List<Term> getPrograms() {

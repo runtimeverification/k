@@ -39,7 +39,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(SetLookup node) throws TransformerException{
+    public ASTNode visit(SetLookup node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) node.base().accept(this));
@@ -50,7 +50,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(ListLookup node) throws TransformerException{
+    public ASTNode visit(ListLookup node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) node.base().accept(this));
@@ -61,7 +61,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(MapLookup node) throws TransformerException{
+    public ASTNode visit(MapLookup node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) node.base().accept(this));
@@ -72,7 +72,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(SetUpdate node) throws TransformerException{
+    public ASTNode visit(SetUpdate node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>(node.removeEntries());
         for(int i = 0; i < temp.size(); ++i){
@@ -92,7 +92,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(ListUpdate node) throws TransformerException{
+    public ASTNode visit(ListUpdate node, Void _) throws TransformerException{
         
         ArrayList<Term> tempLeft = new ArrayList<Term>(node.removeLeft());
         for(int i = 0; i < tempLeft.size(); ++i){
@@ -125,7 +125,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(MapUpdate node) throws TransformerException{
+    public ASTNode visit(MapUpdate node, Void _) throws TransformerException{
         
         
         HashMap<Term,Term> removeMap = new HashMap<Term,Term>(node.removeEntries());
@@ -173,7 +173,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(SetBuiltin node) throws TransformerException{
+    public ASTNode visit(SetBuiltin node, Void _) throws TransformerException{
         
         ArrayList<Term> tempBase = new ArrayList<Term>(node.baseTerms());
         for(int i = 0; i < tempBase.size(); ++i){
@@ -250,7 +250,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(ListBuiltin node) throws TransformerException{
+    public ASTNode visit(ListBuiltin node, Void _) throws TransformerException{
         
         ArrayList<Term> tempBase = new ArrayList<Term>(node.baseTerms());
         tempBase = getAllTermsInBase(tempBase);
@@ -296,7 +296,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(MapBuiltin node) throws TransformerException{
+    public ASTNode visit(MapBuiltin node, Void _) throws TransformerException{
         
         ArrayList<Term> tempBase = new ArrayList<Term>(node.baseTerms());
         for(int i = 0; i < tempBase.size(); ++i){

@@ -32,7 +32,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
         }

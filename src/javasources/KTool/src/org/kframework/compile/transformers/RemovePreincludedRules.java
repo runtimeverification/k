@@ -21,7 +21,7 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if ((!node.getFilename().startsWith(KPaths.getKBase(false) + File.separator + "include") 
                 && !node.getFilename().startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME))
                 || (node.getFilename().equals(KPaths.getKBase(false)

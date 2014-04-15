@@ -35,7 +35,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
 
         ArrayList<ModuleItem> items = new ArrayList<ModuleItem>(node.getItems());
         Module module = node.shallowCopy();

@@ -21,28 +21,28 @@ public class SentenceVariablesFilter extends BasicTransformer {
         super("Sentence Variable Filter", context);
     }
 
-    public ASTNode transform(Configuration cfg) throws TransformerException {
+    public ASTNode visit(Configuration cfg, Void _) throws TransformerException {
         config = true;
-        return super.transform(cfg);
+        return super.visit(cfg, _);
     }
 
-    public ASTNode transform(org.kframework.kil.Context cfg) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context cfg, Void _) throws TransformerException {
         config = false;
-        return super.transform(cfg);
+        return super.visit(cfg, _);
     }
 
-    public ASTNode transform(Rule cfg) throws TransformerException {
+    public ASTNode visit(Rule cfg, Void _) throws TransformerException {
         config = false;
-        return super.transform(cfg);
+        return super.visit(cfg, _);
     }
 
-    public ASTNode transform(Syntax cfg) throws TransformerException {
+    public ASTNode visit(Syntax cfg, Void _) throws TransformerException {
         config = false;
         return cfg;
     }
 
-    public ASTNode transform(TermCons tc) throws TransformerException {
-        super.transform(tc);
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+        super.visit(tc, _);
         if (tc.getProduction().isSubsort()) {
             if (tc.getContents().get(0) instanceof Variable) {
                 return tc.getContents().get(0);
@@ -51,7 +51,7 @@ public class SentenceVariablesFilter extends BasicTransformer {
         return tc;
     }
 
-    public ASTNode transform(Variable var) throws TransformerException {
+    public ASTNode visit(Variable var, Void _) throws TransformerException {
         if (config) {
             if (!var.getName().startsWith("$")) {
                 String msg = "In the configuration you can only have external variables, not: '" + var.getName() + "' (starts with '$').";

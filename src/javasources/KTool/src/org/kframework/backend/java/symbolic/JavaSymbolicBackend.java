@@ -49,7 +49,7 @@ public class JavaSymbolicBackend extends BasicBackend {
             super("Serialize Compiled Definition to XML", context);
         }
         @Override
-        public ASTNode transform(Definition node) throws TransformerException {
+        public ASTNode visit(Definition node, Void _) throws TransformerException {
             BinaryLoader.save(new File(context.dotk, "defx-java.bin").toString(), node);
 
             return node;

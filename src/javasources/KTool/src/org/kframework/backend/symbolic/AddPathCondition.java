@@ -48,7 +48,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
      * expressions and we add as side condition of the rule
      * checkSat(SC-P) =/= unsat.
      */
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
 
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;

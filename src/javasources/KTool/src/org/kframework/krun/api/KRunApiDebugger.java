@@ -305,35 +305,35 @@ public class KRunApiDebugger implements KRunDebugger {
         }
 
         @Override
-        public ASTNode transform(Cell cell) throws TransformerException {
+        public ASTNode visit(Cell cell, Void _) throws TransformerException {
             if ("stdin".equals(context.cells.get(cell.getLabel())
                 .getCellAttributes().get("stream"))) {
                 inStdin = true;
-                ASTNode result = super.transform(cell);
+                ASTNode result = super.visit(cell, _);
                 inStdin = false;
                 return result;
             }
-            return super.transform(cell);
+            return super.visit(cell, _);
         }
 
         @Override
-        public ASTNode transform(KApp kapp) throws TransformerException {
+        public ASTNode visit(KApp kapp, Void _) throws TransformerException {
             if (kapp.getLabel().equals(KLabelConstant.of("#buffer", context))) {
                 inBuffer = true;
-                ASTNode result = super.transform(kapp);
+                ASTNode result = super.visit(kapp, _);
                 inBuffer = false;
                 return result;
             }
-            return super.transform(kapp);
+            return super.visit(kapp, _);
         }
 
         @Override
-        public ASTNode transform(StringBuiltin s) throws TransformerException {
+        public ASTNode visit(StringBuiltin s, Void _) throws TransformerException {
             if (inStdin && inBuffer) {
                 succeeded = true;
                 return StringBuiltin.of(s.stringValue() + str);
             }
-            return super.transform(s);
+            return super.visit(s, _);
         }
     }
 }

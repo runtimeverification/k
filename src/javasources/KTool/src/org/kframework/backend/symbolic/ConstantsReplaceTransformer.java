@@ -27,7 +27,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         
         if (node.getLabel() instanceof Token) {
 //            Token token = ((Token) node.getLabel());
@@ -36,7 +36,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
             return newVar;
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
     
     public Map<Variable, KApp> getGeneratedSV() {

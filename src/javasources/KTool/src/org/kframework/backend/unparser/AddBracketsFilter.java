@@ -19,9 +19,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(TermCons ast) throws TransformerException {
+    public ASTNode visit(TermCons ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -29,9 +29,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(Collection ast) throws TransformerException {
+    public ASTNode visit(Collection ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -39,9 +39,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(MapItem ast) throws TransformerException {
+    public ASTNode visit(MapItem ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -49,9 +49,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(Cell ast) throws TransformerException {
+    public ASTNode visit(Cell ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -59,9 +59,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(CollectionItem ast) throws TransformerException {
+    public ASTNode visit(CollectionItem ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -69,9 +69,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(KApp ast) throws TransformerException {
+    public ASTNode visit(KApp ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -79,9 +79,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(Hole ast) throws TransformerException {
+    public ASTNode visit(Hole ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -89,9 +89,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(Freezer ast) throws TransformerException {
+    public ASTNode visit(Freezer ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -99,9 +99,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode transform(KInjectedLabel ast) throws TransformerException {
+    public ASTNode visit(KInjectedLabel ast, Void _) throws TransformerException {
         prepare(ast);
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
         if (needsParens)
             return new Bracket((Term)result, context);
@@ -281,9 +281,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             this.inner = inner;
         }
         @Override
-        public void visit(Term t) {
+        public Void visit(Term t, Void _) {
             if (t == inner) found = true;
-            super.visit(t);
+            return super.visit(t, _);
         }
         public boolean getFound() {
             return found;

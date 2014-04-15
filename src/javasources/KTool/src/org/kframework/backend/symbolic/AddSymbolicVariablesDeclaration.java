@@ -29,7 +29,7 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
     }
 
     @Override
-    public void visit(Module module) {
+    public Void visit(Module module, Void _) {
 
         if (module.getName().equals(syntaxModule) && context.kompileOptions.backend == KompileOptions.Backend.SYMBOLIC) {
 
@@ -47,7 +47,7 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
             module.setItems(itemsS);
         }
 
-        super.visit(module);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.visit(module, _);    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     private Syntax getSyntaxDeclaration(String sortName, ProductionItem pi, Attributes attributes) {

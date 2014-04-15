@@ -12,8 +12,8 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -26,15 +26,15 @@ public class CellTypesFilter extends BasicTransformer {
     }
 
     // don't do anything for configuration and syntax
-    public ASTNode transform(Configuration cell) {
+    public ASTNode visit(Configuration cell) {
         return cell;
     }
 
-    public ASTNode transform(Syntax cell) {
+    public ASTNode visit(Syntax cell) {
         return cell;
     }
 
-    public ASTNode transform(Cell cell) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _) throws TransformerException {
         String sort = context.cellKinds.get(cell.getLabel());
 
         if (sort == null) {
@@ -56,7 +56,7 @@ public class CellTypesFilter extends BasicTransformer {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
             throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
         }
-        return super.transform(cell);
+        return super.visit(cell, _);
     }
 
     /**
@@ -67,7 +67,7 @@ public class CellTypesFilter extends BasicTransformer {
      * @author Radu
      * 
      */
-    public class CellTypesFilter2 extends BasicHookWorker {
+    public class CellTypesFilter2 extends LocalTransformer {
         String expectedSort;
         String cellLabel;
 
@@ -77,7 +77,7 @@ public class CellTypesFilter extends BasicTransformer {
             this.cellLabel = cellLabel;
         }
 
-        public ASTNode transform(Term trm) throws TransformerException {
+        public ASTNode visit(Term trm, Void _) throws TransformerException {
             if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
@@ -87,20 +87,20 @@ public class CellTypesFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode transform(Bracket node) throws TransformerException {
+        public ASTNode visit(Bracket node, Void _) throws TransformerException {
             node.setContent((Term) node.getContent().accept(this));
             return node;
         }
 
         @Override
-        public ASTNode transform(Rewrite node) throws TransformerException {
+        public ASTNode visit(Rewrite node, Void _) throws TransformerException {
             Rewrite result = new Rewrite(node);
             result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
             return result;
         }
 
         @Override
-        public ASTNode transform(Ambiguity node) throws TransformerException {
+        public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
             TransformerException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {

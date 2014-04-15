@@ -18,8 +18,8 @@ public class BestFitFilter extends BasicTransformer {
 
     private GetFitnessUnitBasicVisitor getFitnessUnit;
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
-        amb = (Ambiguity) super.transform(amb);
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+        amb = (Ambiguity) super.visit(amb, _);
 
         int maximum = getFitnessUnit(amb.getContents().get(0));
 

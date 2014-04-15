@@ -81,7 +81,7 @@ public class KagregFrontEnd {
         firstDef = (Definition)firstDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("1"), context1));
         firstDef = (Definition)firstDef.accept(new RenameVariablesTransformer(new AppendRenameStrategy("1"), context1));
         CollectImportsVisitor collectImportsVisitor1 = new CollectImportsVisitor(context1, false);
-        collectImportsVisitor1.visit(firstDef);
+        firstDef.accept(collectImportsVisitor1);
         List<Import> imports1 = collectImportsVisitor1.getImports();
         
 //        GlobalSettings.symbolicEquality = false;
@@ -100,7 +100,7 @@ public class KagregFrontEnd {
         secondDef = (Definition)secondDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("2"), context2));
         secondDef = (Definition)secondDef.accept(new RenameVariablesTransformer(new AppendRenameStrategy("2"), context2));
         CollectImportsVisitor collectImportsVisitor2 = new CollectImportsVisitor(context2, false);
-        collectImportsVisitor2.visit(secondDef);
+        secondDef.accept(collectImportsVisitor2);
         List<Import> imports2 = collectImportsVisitor2.getImports();
 
         Configuration firstConf = null;
@@ -145,20 +145,20 @@ public class KagregFrontEnd {
         List<String> labeledSorts = new ArrayList<String>();
         labeledSorts.add("KResult"); // temporary bug fix for https://code.google.com/p/k-framework/issues/detail?id=541
         AddSortLabels addSortLabels1 = new AddSortLabels(context1, labeledSorts);
-        firstDef = (Definition)addSortLabels1.transform(firstDef);
+        firstDef = (Definition)firstDef.accept(addSortLabels1);
 
         AddSortLabels addSortLabels2 = new AddSortLabels(context2, labeledSorts);
-        secondDef = (Definition)addSortLabels2.transform(secondDef);
+        secondDef = (Definition)secondDef.accept(addSortLabels2);
 
         UnparserFilter unparserFirst = new UnparserFilter(context1);
         unparserFirst.setIndenter(indenter);
         unparserFirst.setForEquivalence();
-        unparserFirst.visit(firstDef);
+        firstDef.accept(unparserFirst);
         
         UnparserFilter unparserSecond = new UnparserFilter(context2);
         unparserSecond.setIndenter(indenter);
         unparserSecond.setForEquivalence();
-        unparserSecond.visit(secondDef);
+        secondDef.accept(unparserSecond);
         
         indenter.write("configuration");
         indenter.endLine();

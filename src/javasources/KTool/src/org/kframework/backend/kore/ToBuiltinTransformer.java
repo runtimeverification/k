@@ -34,7 +34,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(ListItem node) throws TransformerException{
+    public ASTNode visit(ListItem node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) node.getItem().accept(this));
@@ -44,7 +44,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(MapItem node) throws TransformerException{
+    public ASTNode visit(MapItem node, Void _) throws TransformerException{
         
         HashMap<Term,Term> temp = new HashMap<Term,Term>();
         temp.put((Term) node.getKey().accept(this), (Term) node.getValue().accept(this));
@@ -53,7 +53,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(SetItem node) throws TransformerException{
+    public ASTNode visit(SetItem node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) node.getItem().accept(this));
@@ -63,7 +63,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Set node) throws TransformerException{
+    public ASTNode visit(Set node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
         ArrayList<Term> elements = new ArrayList<Term>();
@@ -84,7 +84,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Map node) throws TransformerException{
+    public ASTNode visit(Map node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
         HashMap<Term,Term> elements = new HashMap<Term,Term>();
@@ -118,7 +118,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(List node) throws TransformerException{
+    public ASTNode visit(List node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
         ArrayList<Term> elementLeft = new ArrayList<Term>();

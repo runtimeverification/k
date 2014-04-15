@@ -48,7 +48,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
 
         location = node.getLocation();
         filename = node.getFilename();
@@ -88,22 +88,22 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
         assert false: "CompileDataStructures pass should be applied after ResolveRewrite pass";
         return node;
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         if (!(node.getLabel() instanceof KLabelConstant)) {
             /* only consider KLabel constants */
-            return super.transform(node);
+            return super.visit(node, _);
         }
         KLabelConstant kLabelConstant = (KLabelConstant) node.getLabel();
 
         if (!(node.getChild() instanceof KList)) {
             /* only consider KList constants */
-            return super.transform(node);
+            return super.visit(node, _);
         }
         KList kList = (KList) node.getChild();
 
@@ -116,13 +116,13 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
         if (context.productionsOf(kLabelConstant.getLabel()).size() != 1) {
             /* ignore KLabels associated with multiple productions */
-            return super.transform(node);
+            return super.visit(node, _);
         }
         Production production = context.productionsOf(kLabelConstant.getLabel()).iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
-            return super.transform(node);
+            return super.visit(node, _);
         }
 
         Term[] arguments = new Term[kList.getContents().size()];
@@ -159,7 +159,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         getName(),
                         filename,
                         location));
-                return super.transform(node);
+                return super.visit(node, _);
             }
         } else if (sort.type().equals(KSorts.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
@@ -173,10 +173,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                                     kList.getContents().get(2)));
                 }
             } catch (Exception e) { }
-            return super.transform(node);
+            return super.visit(node, _);
         } else {
             /* custom function */
-            return super.transform(node);
+            return super.visit(node, _);
         }
     }
 

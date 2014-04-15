@@ -2,7 +2,7 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicHookWorker;
+import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -10,7 +10,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.util.ArrayList;
 
-public class TypeSystemFilter2 extends BasicHookWorker {
+public class TypeSystemFilter2 extends LocalTransformer {
 
     private String maxSort;
 
@@ -24,7 +24,7 @@ public class TypeSystemFilter2 extends BasicHookWorker {
         this.maxSort = tsf.maxSort;
     }
 
-    public ASTNode transform(Term trm) throws TransformerException {
+    public ASTNode visit(Term trm, Void _) throws TransformerException {
         if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
                 && !trm.getSort().equals(KSorts.KRESULT)) {
             if (!context.isSubsortedEq(maxSort, trm.getSort())) {
@@ -42,7 +42,7 @@ public class TypeSystemFilter2 extends BasicHookWorker {
     }
 
     @Override
-    public ASTNode transform(Ambiguity node) throws TransformerException {
+    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
         TransformerException exception = null;
         ArrayList<Term> terms = new ArrayList<Term>();
         for (Term t : node.getContents()) {
@@ -64,13 +64,13 @@ public class TypeSystemFilter2 extends BasicHookWorker {
     }
 
     @Override
-    public ASTNode transform(Bracket node) throws TransformerException {
+    public ASTNode visit(Bracket node, Void _) throws TransformerException {
         node.setContent((Term) node.getContent().accept(this));
         return node;
     }
 
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
         Rewrite result = new Rewrite(node);
         result.replaceChildren(
                 (Term) node.getLeft().accept(this),

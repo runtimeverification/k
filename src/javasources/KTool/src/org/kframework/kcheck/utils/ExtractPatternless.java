@@ -21,7 +21,7 @@ public class ExtractPatternless extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         if (node.getLabel().toString().equals(RLBackend.INTERNAL_KLABEL)) {
             phi = ((KList) node.getChild()).getContents().get(0);
             phiPrime = ((KList) node.getChild()).getContents().get(1);
@@ -30,7 +30,7 @@ public class ExtractPatternless extends CopyOnWriteTransformer {
             return node;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     public Term getPhi() {

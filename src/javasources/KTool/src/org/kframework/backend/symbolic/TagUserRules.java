@@ -43,11 +43,11 @@ public class TagUserRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
 
         for (String nst : notSymbolicTags)
             if (node.containsAttribute(nst)) {
-                return super.transform(node);
+                return super.visit(node, _);
             }
 
         if ((!node.getFilename().startsWith(
@@ -69,7 +69,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
             // to ensure that, by default, if no rules (identified by tags)
             // are specified, then all rules are transformed by symbolic steps.
             if (!kompileOptions.experimental.symbolicRules.isEmpty() && !symAllowed) {
-                return super.transform(node);
+                return super.visit(node, _);
             }
 
             List<Attribute> attrs = node.getAttributes().getContents();
@@ -83,6 +83,6 @@ public class TagUserRules extends CopyOnWriteTransformer {
             return node;
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }

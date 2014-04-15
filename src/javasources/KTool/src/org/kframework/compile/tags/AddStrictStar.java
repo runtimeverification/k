@@ -13,7 +13,7 @@ public class AddStrictStar extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Production node) throws TransformerException {
+    public ASTNode visit(Production node, Void _) throws TransformerException {
         if (node.containsAttribute("strict") || node.containsAttribute("seqstrict"))
             node.putAttribute("strict*", "");
 

@@ -17,9 +17,9 @@ public class VariablesVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Variable node) {
+    public Void visit(Variable node, Void _) {
         variables.add(node);
-        super.visit(node);
+        return super.visit(node, _);
     }
     
     public List<Variable> getVariables() {
