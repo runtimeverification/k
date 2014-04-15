@@ -33,6 +33,7 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
+import org.kframework.backend.symbolic.krun.SymbolicKRun;
 import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
@@ -222,6 +223,8 @@ public class Main {
     private static KRun obtainKRun(Context context) {
         if (K.backend.equals("maude")) {
             return new MaudeKRun(context, sw);
+        } if (K.backend.equals("symbolic")) {
+            return new SymbolicKRun(context, sw);
         } else if (K.backend.equals("java")) {
             try {
                 return new JavaSymbolicKRun(context);
@@ -230,7 +233,7 @@ public class Main {
                 return null;
             }
         } else {
-            org.kframework.utils.Error.report("Currently supported backends are 'maude' and 'java'");
+            org.kframework.utils.Error.report("Currently supported backends are 'maude', 'java', and 'symbolic'");
             return null;
         }
     }
