@@ -63,7 +63,7 @@ public class BasicParser {
                 List<DefinitionItem> tempmi = moduleItems;
                 moduleItems = new ArrayList<DefinitionItem>();
 
-                if (GlobalSettings.javaBackend)
+                if (context.kompileOptions.backend.java())
                     file = buildCanonicalPath("autoinclude-java.k", new File(fileName));
                 else
                     file = buildCanonicalPath("autoinclude.k", new File(fileName));
