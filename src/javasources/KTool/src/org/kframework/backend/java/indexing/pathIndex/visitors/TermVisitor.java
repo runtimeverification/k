@@ -45,6 +45,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     private static final String K_ITEM_SORT = "KItem";
     private static final String EMPTY_K = "EMPTY_K";
     private static final String K_STRING = "K";
+    public static final String NO_K_CELL_PSTRING = "@.NO_K_CELL";
     private final Set<String> pStrings;
     private final Context context;
 
@@ -85,7 +86,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
 
         //needed for kool-static where some rules have no k-cell. Note that we add it last.
         if (defHasNOKCellRules){
-            pStrings.add("@.NO_K_CELL");
+            pStrings.add(NO_K_CELL_PSTRING);
         }
 
         if (K.get_indexing_stats) {
@@ -244,7 +245,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 //needed for simple typed static
                 if (context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
                     String kItemSort = kItem.sort();
-                    pStrings.add("@."+kItemSort);
+                    pStrings.add(START_STRING+kItemSort);
                 }
 
                 // added to handle a case in kool typed static. 1st element in
@@ -271,7 +272,6 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                             + EMPTY_LIST_LABEL);
                 } else {
                     if (context.isListSort(kItem.sort())) {
-//                        System.out.println("Multiple: "+kItem);
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                                 + USER_LIST_REPLACEMENT);
                         // TODO(Owolabileg): Bad hack to be removed - trying this out for fun where

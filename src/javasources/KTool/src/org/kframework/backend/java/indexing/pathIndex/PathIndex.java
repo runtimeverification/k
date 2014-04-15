@@ -246,7 +246,6 @@ public class PathIndex implements RuleIndex, Serializable{
                     IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
         }
 
-//        System.out.println("matching: "+ matchingIndices);
 //        System.out.println("rules: "+rules +"\n");
         return new ArrayList<>(rules);
     }

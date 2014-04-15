@@ -14,11 +14,12 @@ import java.util.Set;
  * 1/2/14: 7:52 PM
  */
 public class PathIndexTrie implements Trie,Serializable {
+    public static final String ROOT_SYMBOL = "@";
     private final TrieNode root;
     private final String delimiter = "\\.";
 
     public PathIndexTrie() {
-        root = new TrieNode("@");
+        root = new TrieNode(ROOT_SYMBOL);
     }
 
     /**
@@ -159,14 +160,14 @@ public class PathIndexTrie implements Trie,Serializable {
         ArrayList<String> subList = new ArrayList<>(splitList.subList(1, splitList.size()));
         TrieNode child = trieNode.getChild(firstString);
         if (child != null) {
-            if (trieNode.getValue().equals("@")) {
+            if (trieNode.getValue().equals(ROOT_SYMBOL)) {
                 if (splitList.size() == 1 && (child instanceof TrieLeaf)) {
                     return child.getIndices();
                 }
                 return retrieveSet(child, subList);
             }
         } else {
-            if (!trieNode.getValue().equals("@")) {
+            if (!trieNode.getValue().equals(ROOT_SYMBOL)) {
                 return trieNode.getIndices();
             }
         }
@@ -175,7 +176,7 @@ public class PathIndexTrie implements Trie,Serializable {
             if (child != null) {
                 return child.getIndices();
             } else {
-                if (!trieNode.getValue().equals("@")) {
+                if (!trieNode.getValue().equals(ROOT_SYMBOL)) {
                     return trieNode.getIndices();
                 }
             }

@@ -30,6 +30,7 @@ public class RuleVisitor extends LocalVisitor {
     static final String START_STRING = "@.";
     private static final String EMPTY_K = "EMPTY_K";
     private static final String K_CELL_NAME = "k";
+    public static final String NO_K_CELL_PSTRING = "@.NO_K_CELL";
     final Context context;
     String pString;
     final List<String> pStrings;
@@ -56,13 +57,13 @@ public class RuleVisitor extends LocalVisitor {
             if(!hasNOKCellRule){
                 hasNOKCellRule = true;
             }
-            pStrings.add("@.NO_K_CELL");
+            pStrings.add(NO_K_CELL_PSTRING);
         }
     }
 
     @Override
     public void visit(Cell cell) {
-        if (cell.getLabel().equals("k")){
+        if (cell.getLabel().equals(K_CELL_NAME)){
             cell.getContent().accept(this);
         } else if(cell.contentKind() == Kind.CELL_COLLECTION){
             super.visit(cell);
@@ -76,7 +77,6 @@ public class RuleVisitor extends LocalVisitor {
         if (kSequence.size() > 0) {
             //needed for env rule in fun
             if (kSequence.size() > 1){
-//                System.out.println("Greater: "+kSequence);
                 kSequence.get(0).accept(this);
                 kSequence.get(1).accept(this);
             } else{
@@ -117,9 +117,9 @@ public class RuleVisitor extends LocalVisitor {
                 String pending = pString + SEPARATOR + (position);
                 //TODO(OwolabiL): instanceof must be removed!
                 if (kList.get(i) instanceof KItem) {
-                    pStrings.add(pending + SEPARATOR + ((KItem) kList.get(i)).sort());
+                    pStrings.add(pending + SEPARATOR + (kList.get(i)).sort());
                 } else {
-                    pStrings.add(pending + SEPARATOR + ((Variable) kList.get(i)).sort());
+                    pStrings.add(pending + SEPARATOR + (kList.get(i)).sort());
                 }
             } else {
                 pString = base + SEPARATOR + position + SEPARATOR;
