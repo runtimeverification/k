@@ -411,8 +411,11 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             List<Term> items = new ArrayList<>();
-            for (int i = 0; i < node.getContents().size(); i++) {
-                items.add((Term) processChildTerm(node, node.getContents().get(i), node.getContents().get(i).accept(this, p), p));
+            for (Term item : node.getContents()) {
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((Term) result);
+                }
             }
             if (changed(node.getContents(), items)) {
                 node = copy(node);
@@ -913,8 +916,11 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             List<Term> items = new ArrayList<>();
-            for (int i = 0; i < node.getContents().size(); i++) {
-                items.add((Term) processChildTerm(node, node.getContents().get(i), node.getContents().get(i).accept(this, p), p));
+            for (Term item : node.getContents()) {
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((Term) result);
+                }
             }
             if (changed(node.getContents(), items)) {
                 node = copy(node);
@@ -931,8 +937,11 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         }
         if(visitChildren()) {
             List<Attribute> items = new ArrayList<>();
-            for (int i = 0; i < node.getContents().size(); i++) {
-                items.add((Attribute) processChildTerm(node, node.getContents().get(i), node.getContents().get(i).accept(this, p), p));
+            for (Attribute item : node.getContents()) {
+                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                if (result != null) {
+                    items.add((Attribute) result);
+                }
             }
             if (changed(node.getContents(), items)) {
                 node = copy(node);
