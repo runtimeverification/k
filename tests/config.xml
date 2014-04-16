@@ -517,6 +517,6 @@
   <!-- Symbolic backend tests -->
   <include file="regression/symbolic-backend/config.xml"
            directory="tests/regression/symbolic-backend"
-           programs="regression/symbolic-backend"
-           results="regression/symbolic-backend" />
+           programs="tests/regression/symbolic-backend"
+           results="tests/regression/symbolic-backend" />
 </tests>
