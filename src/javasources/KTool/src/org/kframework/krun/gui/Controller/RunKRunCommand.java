@@ -34,7 +34,7 @@ public class RunKRunCommand {
     protected KRunDebugger debugger;
     protected RunProcess rp;
 
-    public RunKRunCommand(Term kast, String lang, Context context) throws Exception {
+    public RunKRunCommand(Term kast, String lang, Context context) throws KRunExecutionException {
         super();
         this.context = context;
         this.KAST = kast;
@@ -46,7 +46,7 @@ public class RunKRunCommand {
         debugger = krun.debug(cfg);
     }
 
-    public RunKRunCommand(KRunState state, String lang, Context context) throws Exception {
+    public RunKRunCommand(KRunState state, String lang, Context context) {
         super();
         this.context = context;
         this.KAST = state.getRawResult();
@@ -58,15 +58,11 @@ public class RunKRunCommand {
         debugger = krun.debug(dg);
     }
 
-    public DirectedGraph<KRunState, Transition> firstStep() throws Exception {
+    public DirectedGraph<KRunState, Transition> firstStep() {
         return debugger.getGraph();
     }
 
-    public void abort() {
-        System.exit(0);
-    }
-
-    public DirectedGraph<KRunState, Transition> step(KRunState v, int steps) throws Exception {
+    public DirectedGraph<KRunState, Transition> step(KRunState v, int steps) throws KRunExecutionException {
         if (steps > 0) {
             debugger.setCurrentState(v.getStateId());
             debugger.step(steps);
@@ -74,7 +70,7 @@ public class RunKRunCommand {
         return debugger.getGraph();
     }
 
-    public DirectedGraph<KRunState, Transition> step_all(int steps, KRunState v) throws Exception {
+    public DirectedGraph<KRunState, Transition> step_all(int steps, KRunState v) throws KRunExecutionException {
         if (steps < 1)
             steps = 1;
         debugger.setCurrentState(v.getStateId());

@@ -62,7 +62,7 @@ public class KCheckOptionsParser {
                 org.kframework.utils.Error.silentReport(e.getLocalizedMessage());
             }
 
-            org.kframework.utils.Error.helpExit(help, options);
+            //org.kframework.utils.Error.helpExit(help, options);
             return null;
         }
 

@@ -15,24 +15,14 @@ public class ThreadedStreamCapturer extends Thread {
     }
 
     public void run() {
-        BufferedReader bufferedReader = null;
         String sep = System.getProperty("line.separator");
-        try {
-            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
                 content.append(line + sep);
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        } finally {
-            try {
-                bufferedReader.close();
-            } catch (IOException e) {
-                // ignore this one
-            }
         }
     }
 

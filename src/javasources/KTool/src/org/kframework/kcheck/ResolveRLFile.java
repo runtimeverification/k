@@ -25,8 +25,8 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
         // resolve reachability rules
         String rlFileContent = FileUtil.getFileContent(GlobalSettings.CHECK);
         context.kompiled = context.dotk.getAbsoluteFile();
-        ASTNode rlModule = DefinitionLoader.parseString(rlFileContent,
-                GlobalSettings.CHECK, context);
+        ASTNode rlModule = null;//DefinitionLoader.parseString(rlFileContent,
+                //GlobalSettings.CHECK, context);
         RetrieveRRVisitor rrrv = new RetrieveRRVisitor(context);
         rlModule.accept(rrrv);
         reachabilityRules = rrrv.getRules();

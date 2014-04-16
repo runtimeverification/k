@@ -67,7 +67,7 @@ public class UseSMT implements Serializable {
             context.Dispose();
         } catch (Z3Exception e) {
             e.printStackTrace();
-        } catch (RuntimeException e) {
+        } catch (UnsupportedOperationException e) {
             // TODO(AndreiS): fix this translation and the exceptions
             e.printStackTrace();
         }

@@ -5,8 +5,8 @@ public enum KSort {
 
     public static KSort getKSort(String sort) {
         try {
-            return valueOf(sort);
-        } catch (Exception e) {
+            return KSort.valueOf(sort);
+        } catch (IllegalArgumentException e) {
             return K;
         }
     }

@@ -6,8 +6,6 @@ import org.kframework.utils.maude.MaudeRun;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-
 
 public class MaudeTask extends Thread {
     // private static final String LOG_FILE = "maude.log";
@@ -34,8 +32,10 @@ public class MaudeTask extends Thread {
             writeOutput();
             writeError();
             returnValue = _maudeProcess.waitFor();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

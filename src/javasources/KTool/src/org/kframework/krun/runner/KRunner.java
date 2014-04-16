@@ -37,7 +37,7 @@ public class KRunner {
     private boolean _noServer;
     protected Context context;
 
-    public KRunner(String[] args, Context context) throws Exception {
+    public KRunner(String[] args, Context context) throws IOException {
         this.context = context;
         // boolean append = true;
         // parser.accepts("suppressio");
@@ -56,29 +56,28 @@ public class KRunner {
         try {
             options = _parser.parse(args);
             _maudeFile = options.valueOf(maudeFile);
-            _maudeFileName = _maudeFile.getCanonicalPath();
+            _maudeFileName = _maudeFile.getAbsolutePath();
             _maudeCommandFile = options.valueOf(maudeCommandFile);
-            _maudeCommandFileName = _maudeCommandFile.getCanonicalPath();
+            _maudeCommandFileName = _maudeCommandFile.getAbsolutePath();
             _port = options.valueOf(port);
             _append = options.valueOf(append);
-            _outputFileName = options.valueOf(outputFile).getCanonicalPath();
-            _errorFileName = options.valueOf(errorFile).getCanonicalPath();
+            _outputFileName = options.valueOf(outputFile).getAbsolutePath();
+            _errorFileName = options.valueOf(errorFile).getAbsolutePath();
             _maudeModule = options.valueOf(maudeModuleName);
             _createLogs = options.has(createLogs);
             _noServer = options.has(noServer);
         } catch (OptionException e) {
             System.out.println(e.getMessage() + K.lineSeparator);
-            usageError();
+            throw new AssertionError("Something is really wrong with the Maude KRunner", e);
         }
 
         startLogger();
 
         if (!_maudeFile.exists()) {
-            throw new Exception("Maude file " + _maudeFileName + " does not exist.");
+            throw new AssertionError("Something is really wrong with the Maude KRunner: Maude file " + _maudeFileName + " does not exist.");
         }
         if (!_maudeCommandFile.exists()) {
-            System.out.println("commandFileName:" + _maudeCommandFileName);
-            throw new Exception("Command file " + _maudeCommandFileName + " does not exist.");
+            throw new AssertionError("Something is really wrong with the Maude KRunner: Command file " + _maudeCommandFileName + " does not exist.");
         }
         _logger.info("Maude and command files exist.");
     }
@@ -108,7 +107,7 @@ public class KRunner {
         // Client.main(null);
     }
 
-    public int run() throws Exception {
+    public int run() {
         if (!_noServer) {
             startServer();
         }
@@ -125,18 +124,16 @@ public class KRunner {
         _logger.info("Maude started");
         _logger.info("Maude command:" + K.lineSeparator + command);
 
-        maude.join();
+        try {
+            maude.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         return maude.returnValue;
     }
 
-    public static int main(String[] args, Context context) throws Exception {
+    public static int main(String[] args, Context context) throws IOException {
         KRunner runner = new KRunner(args, context);
         return runner.run();
-    }
-
-    void usageError() throws IOException {
-        _parser.printHelpOn(System.out);
-        System.out.println("");
-        System.exit(1);
     }
 }

@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 public class PortableFileSystemTest {
 
     @Test
-    public void testReadFile() throws Exception {
+    public void testReadFile() throws IOException {
         PortableFileSystem fs = new PortableFileSystem();
         long fd = fs.open("share/test-files/fs-test.txt", "r");
         File f = fs.get(fd);

@@ -7,9 +7,10 @@ import java.util.Arrays;
 
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.Error;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 
 public class Main {
 
@@ -41,48 +42,50 @@ public class Main {
         setJavaLibraryPath();
         AnsiConsole.systemInstall();
 
+        boolean succeeded = true;
         if (args.length >= 1) {
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
-            switch (args[0]) {
-                case "-kompile":
-                    org.kframework.kompile.KompileFrontEnd.main(args2);
-                    break;
-                case "-kagreg":
-                    org.kframework.kagreg.KagregFrontEnd.kagreg(args2);
-                    break;
-                case "-kcheck":
-                    org.kframework.kcheck.KCheckFrontEnd.kcheck(args2);
-                    break;
-                case "-ktest":
-                    org.kframework.ktest.KTest.main(args2);
-                    break;
-                case "-kast":
-                    org.kframework.kast.KastFrontEnd.kast(args2);
-                    break;
-                case "-krun":
-                    // unable to load commandlineOptions since it loads K class
-                    // K loads Color which sets headless field in GraphicsEnvironment
-                    // and since this can be set only once we can not reset it by java.awt.headless
-                    for (String s : args) {
-                        if (s.contains("debug-gui")) {
-                            System.setProperty("java.awt.headless", "false");
-                            //force headless filed to be instantiated
-                            java.awt.GraphicsEnvironment.isHeadless();
-                            break;
-                        }
-                    }
-                    org.kframework.krun.Main.execute_Krun(args2);
-                    break;
-                case "-kpp":
-                    Kpp.codeClean(args2);
-                    break;
-                default:
-                    Error.report("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
-                    break;
+            try {
+                switch (args[0]) {
+                    case "-kompile":
+                        org.kframework.kompile.KompileFrontEnd.main(args2);
+                        break;
+                    case "-kagreg":
+                        org.kframework.kagreg.KagregFrontEnd.kagreg(args2);
+                        break;
+                    case "-kcheck":
+                        succeeded = org.kframework.kcheck.KCheckFrontEnd.kcheck(args2);
+                        break;
+                    case "-ktest":
+                        succeeded = org.kframework.ktest.KTest.main(args2);
+                        break;
+                    case "-kast":
+                        succeeded = org.kframework.kast.KastFrontEnd.kast(args2);
+                        break;
+                    case "-krun":
+                        succeeded = org.kframework.krun.Main.execute_Krun(args2);
+                        break;
+                    case "-kpp":
+                        Kpp.codeClean(args2);
+                        break;
+                    default:
+                        invalidJarArguments();
+                        break;
+                }
+            } catch (KEMException e) {
+                // terminated with errors, so we need to return nonzero error code.
+                GlobalSettings.kem.print();
+                System.exit(1);
             }
-            
-            System.exit(0);
-        } else
-            Error.report("There must be a first argument to K3: try -kompile, -kast, -krun or -kpp.");
+             
+            GlobalSettings.kem.print();
+            System.exit(succeeded ? 0 : 1);
+        }
+        invalidJarArguments();
+    }
+    
+    private static void invalidJarArguments() {
+        System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
+        System.exit(1);
     }
 }

@@ -417,7 +417,7 @@ public class ColorUtil {
             // Find the field and value of colorName
             Field field = Class.forName("java.awt.Color").getField(colorName);
             return (Color)field.get(null);
-        } catch (Exception e) {
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
             return null;
         }
     }

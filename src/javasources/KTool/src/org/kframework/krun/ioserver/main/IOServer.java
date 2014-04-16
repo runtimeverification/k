@@ -3,6 +3,11 @@ package org.kframework.krun.ioserver.main;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.commands.*;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -42,9 +47,7 @@ public class IOServer {
             serverSocket = new ServerSocket(port);
             this.port = serverSocket.getLocalPort();
         } catch (IOException e) {
-            _logger.severe("Could not listen on port: " + port);
-            _logger.severe("This program will exit with error code: 1");
-            System.exit(1);
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "IO Server could not listen on port " + port));
         }
     }
 
@@ -170,17 +173,17 @@ public class IOServer {
                 Constructor cons = commandStat.getDeclaredConstructor(argTypes);
                 Object[] arguments = {args, socket, logger, fs};
                 return (Command) cons.newInstance(arguments);
-            //wow, this is ridiculous. I think I see what Pat means
-            } catch (ClassNotFoundException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (NoSuchMethodException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (InstantiationException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (IllegalAccessException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
                 return new CommandUnknown(args, socket, logger, fs);
             } catch (InvocationTargetException e) {
-                return new CommandUnknown(args, socket, logger, fs);
+                Throwable t = e.getTargetException();
+                if (t instanceof Error) {
+                    throw (Error)t;
+                } else if (t instanceof RuntimeException) {
+                    throw (RuntimeException)t;
+                } else {
+                    throw new AssertionError("should not throw checked exceptions from unreachable code", e);
+                }
             }
         }
         if (command.equals("end")) {
@@ -216,7 +219,7 @@ public class IOServer {
             // close everything
             output.close();
             socket.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

@@ -91,7 +91,7 @@ public class RunProcess {
 
     }
 
-    public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) throws IOException {
+    public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) {
         try {
             return runParser(parser, pgm, isPgm, startSymbol, context);
         } catch (TransformerException e) {

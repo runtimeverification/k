@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.io.GraphIOException;
 import edu.uci.ics.jung.io.graphml.EdgeMetadata;
 import edu.uci.ics.jung.io.graphml.GraphMetadata;
 import edu.uci.ics.jung.io.graphml.GraphMLReader2;
@@ -81,19 +82,22 @@ public class MaudeKRun implements KRun {
                 returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() },
                         context);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Runner threw exception", e);
-        }
-        if (errFile.exists()) {
-            String content = FileUtil.getFileContent(K.maude_err);
-            if (content.length() > 0) {
-                throw new KRunExecutionException(content);
+            if (errFile.exists()) {
+                String content = FileUtil.getFileContent(K.maude_err);
+                if (content.length() > 0) {
+                    throw new KRunExecutionException(content);
+                }
             }
+            if (returnValue != 0) {
+                org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
+            }
+        } catch (IOException e) {
+            if (context.globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    "IO error detected when calling maude"));
         }
-        if (returnValue != 0) {
-            org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
-        }
-
     }
 
     public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
@@ -210,10 +214,12 @@ public class MaudeKRun implements KRun {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + K.maude_output.replaceAll("/krun[0-9]*/", "/krun/")));
         }
     }
+    
+    private static class InvalidMaudeXMLException extends Exception {}
 
-    private static void assertXMLTerm(boolean assertion) throws Exception {
+    private static void assertXMLTerm(boolean assertion) throws InvalidMaudeXMLException {
         if (!assertion) {
-            throw new Exception();
+            throw new InvalidMaudeXMLException();
         }
     }
 
@@ -380,7 +386,7 @@ public class MaudeKRun implements KRun {
                     return new Ambiguity(sort, possibleTerms);
                 }
             }
-        } catch (Exception e) {
+        } catch (InvalidMaudeXMLException e) {
             return new BackendTerm(sort, flattenXML(xml));
         }
     }
@@ -461,12 +467,17 @@ public class MaudeKRun implements KRun {
             KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
       result.setRawOutput(FileUtil.getFileContent(K.maude_out));
             return result;
-        } catch (Exception e) {
-            throw new RuntimeException("Pretty-printer threw exception", e);
+        } catch (IOException e) {
+            if (context.globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    "IO error detected reading maude output"));
+            throw new AssertionError("unreachable");
         }
     }
 
-    private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
+    private DirectedGraph<KRunState, Transition> parseSearchGraph() throws IOException {
         try (
             Scanner scanner = new Scanner(new File(K.maude_output));
             Writer writer = new OutputStreamWriter(new BufferedOutputStream(
@@ -549,7 +560,11 @@ public class MaudeKRun implements KRun {
             GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
                 = new GraphMLReader2<>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
                 edgeTransformer, hyperEdgeTransformer);
-            return graphmlParser.readGraph();
+            try {
+                return graphmlParser.readGraph();
+            } catch (GraphIOException e) {
+                throw new IOException(e);
+            }
         }
     }
 

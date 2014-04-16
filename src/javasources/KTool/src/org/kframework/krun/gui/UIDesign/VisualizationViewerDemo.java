@@ -79,22 +79,15 @@ public class VisualizationViewerDemo {
         VertexLabelAsShapeRenderer<KRunState, Transition> shapeRenderer = new VertexLabelAsShapeRenderer<KRunState, Transition>(
                 vv.getRenderContext());
 
-        Transformer stringer = new Transformer() {
-            public String transform(Object e) {
-                try {
-                    Integer id = ((KRunState) e).getStateId();
-                    if (!oldIds.contains(id)) {
-                        oldIds.add(id);
-                        if (getLayout().getGraph().getSuccessorCount((KRunState) e) == 0)
-                            vv.getPickedVertexState().pick((KRunState) e, true);
-                    }
-                    return "<html><center>Config<p> " + id;
-                } catch (ClassCastException exc) {
-                    String result = "Configs[";
-                    result += clusteredGraphComponents("", e);
-                    result += "]";
-                    return result;
+        Transformer<KRunState, String> stringer = new Transformer<KRunState, String>() {
+            public String transform(KRunState e) {
+                Integer id = e.getStateId();
+                if (!oldIds.contains(id)) {
+                    oldIds.add(id);
+                    if (getLayout().getGraph().getSuccessorCount((KRunState) e) == 0)
+                        vv.getPickedVertexState().pick((KRunState) e, true);
                 }
+                return "<html><center>Config<p> " + id;
             }
         };
         vv.getRenderContext().setVertexLabelTransformer(stringer);
@@ -106,17 +99,6 @@ public class VisualizationViewerDemo {
         vv.setVertexToolTipTransformer(new ToStringLabeller<KRunState>());
         vv.getRenderContext().setVertexShapeTransformer(
                 new ClusterVertexShapeFunction<KRunState>());
-    }
-
-    public String clusteredGraphComponents(String result, Object e) {
-        for (Object vertex : ((DirectedSparseGraph<?, ?>) e).getVertices()) {
-            try {
-                result += ((KRunState) vertex).getStateId() + ", ";
-            } catch (Exception exc) {
-                result += clusteredGraphComponents("", vertex);
-            }
-        }
-        return result;
     }
 
     public void setEdgeProperties() {
@@ -158,15 +140,12 @@ public class VisualizationViewerDemo {
             public void mouseClicked(MouseEvent me) {
                 if (getSelectedEdges().size() == 1) {
                     for (Object edge : getSelectedEdges()) {
-                        try {
                             KRunState dest = (KRunState) layout.getGraph().getDest(
                                     (Transition) edge);
                             KRunState src = (KRunState) layout.getGraph().getSource(
                                     (Transition) edge);
                             parent.showCompareFrame(src, dest, (Transition) edge);
                             resetEdgeSelection();
-                        } catch (Exception e) {
-                        }
                     }
                 }
             }

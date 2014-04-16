@@ -102,7 +102,7 @@ public class DefinitionLoader {
 
             // transfer information from the BasicParser object, to the Definition object
             org.kframework.kil.Definition def = new org.kframework.kil.Definition();
-            def.setMainFile(mainFile.getCanonicalPath());
+            def.setMainFile(mainFile.getAbsolutePath());
             def.setMainModule(mainModule);
             def.setModulesMap(bparser.getModulesMap());
             def.setItems(bparser.getModuleItems());
@@ -126,7 +126,7 @@ public class DefinitionLoader {
             //This following line was commented out to make the latex backend 
             //parse files importing from other files
             def = (Definition) def.accept(new RemoveUnusedModules(context, autoinclude));
-
+            
             // HERE: add labels to sorts
 
             def.preprocess(context);
@@ -140,11 +140,18 @@ public class DefinitionLoader {
             Stopwatch.instance().printIntermediate("Checks");
 
             // ------------------------------------- generate files
-            ResourceExtractor.ExtractDefSDF(new File(context.dotk + "/def"));
-            ResourceExtractor.ExtractGroundSDF(new File(context.dotk + "/ground"));
-
-            ResourceExtractor.ExtractProgramSDF(new File(context.dotk + "/pgm"));
-
+            try {
+                ResourceExtractor.ExtractDefSDF(new File(context.dotk + "/def"));
+                ResourceExtractor.ExtractGroundSDF(new File(context.dotk + "/ground"));
+    
+                ResourceExtractor.ExtractProgramSDF(new File(context.dotk + "/pgm"));
+            } catch (IOException e) {
+                if (context.globalOptions.debug) {
+                    e.printStackTrace();
+                }
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                        "IO error detected writing to " + context.dotk.getAbsolutePath()));
+            }
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
             if (!context.kompileOptions.backend.documentation()) {
@@ -182,13 +189,19 @@ public class DefinitionLoader {
 
             if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
                     || !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
-                // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                if (!context.kompileOptions.backend.documentation()) {
-                    Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
-                    t2.join();
+                try {
+                    // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
+                    Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
+                    if (!context.kompileOptions.backend.documentation()) {
+                        Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
+                        t2.join();
+                    }
+                    t1.join();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                            "Thread was interrupted trying to run SDF2Table"));
                 }
-                t1.join();
                 Stopwatch.instance().printIntermediate("Generate TBLDef");
             }
             if (!context.experimentalParserOptions.fastKast) { // ------------------------------------- import files in Stratego
@@ -217,12 +230,9 @@ public class DefinitionLoader {
             Stopwatch.instance().printIntermediate("Parsing Rules");
 
             return def;
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (TransformerException e) {
+            throw new AssertionError("should not throw TransformerException", e);
         }
-        return null;
     }
 
     /**
@@ -236,39 +246,33 @@ public class DefinitionLoader {
      *            - the context for disambiguation purposes.
      * @return A lightweight Definition element which contain all the definition items found in the string.
      */
-    public static Definition parseString(String content, String filename, Context context) {
-        try {
-            List<DefinitionItem> di = Basic.parse(filename, content, context);
+    public static Definition parseString(String content, String filename, Context context) throws TransformerException {
+        List<DefinitionItem> di = Basic.parse(filename, content, context);
 
-            org.kframework.kil.Definition def = new org.kframework.kil.Definition();
-            def.setItems(di);
+        org.kframework.kil.Definition def = new org.kframework.kil.Definition();
+        def.setItems(di);
 
-            // ------------------------------------- import files in Stratego
-            org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getAbsolutePath() + "/def/Concrete.tbl");
+        // ------------------------------------- import files in Stratego
+        org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getAbsolutePath() + "/def/Concrete.tbl");
 
-            // ------------------------------------- parse configs
-            JavaClassesFactory.startConstruction(context);
-            def = (Definition) def.accept(new ParseConfigsFilter(context, false));
-            JavaClassesFactory.endConstruction();
+        // ------------------------------------- parse configs
+        JavaClassesFactory.startConstruction(context);
+        def = (Definition) def.accept(new ParseConfigsFilter(context, false));
+        JavaClassesFactory.endConstruction();
 
-            // ----------------------------------- parse rules
-            JavaClassesFactory.startConstruction(context);
-            def = (Definition) def.accept(new ParseRulesFilter(context, false));
-            def = (Definition) def.accept(new CorrectConstantsTransformer(context));
+        // ----------------------------------- parse rules
+        JavaClassesFactory.startConstruction(context);
+        def = (Definition) def.accept(new ParseRulesFilter(context, false));
+        def = (Definition) def.accept(new CorrectConstantsTransformer(context));
 
-            JavaClassesFactory.endConstruction();
+        JavaClassesFactory.endConstruction();
 
-            return def;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return def;
     }
 
     public static Term parseCmdString(String content, String filename, String startSymbol, Context context) throws TransformerException {
         if (!context.initialized) {
-            System.err.println("You need to load the definition before you call parsePattern!");
-            System.exit(1);
+            assert false : "You need to load the definition before you call parsePattern!";
         }
         String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
         Document doc = XmlLoader.getXMLDoc(parsed);
@@ -318,8 +322,7 @@ public class DefinitionLoader {
 
     public static ASTNode parsePattern(String pattern, String filename, String startSymbol, Context context) throws TransformerException {
         if (!context.initialized) {
-            System.err.println("You need to load the definition before you call parsePattern!");
-            System.exit(1);
+            assert false : "You need to load the definition before you call parsePattern!";
         }
 
         String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);
@@ -372,8 +375,7 @@ public class DefinitionLoader {
 
     public static ASTNode parsePatternAmbiguous(String pattern, Context context) throws TransformerException {
         if (!context.initialized) {
-            System.err.println("You need to load the definition before you call parsePattern!");
-            System.exit(1);
+            assert false : "You need to load the definition before you call parsePattern!";
         }
 
         String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);

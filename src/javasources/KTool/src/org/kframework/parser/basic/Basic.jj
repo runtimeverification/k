@@ -396,7 +396,7 @@ public class Basic {
     SimpleCharStream s = new SimpleCharStream(new StringReader(str), line, column);
     try {
       for (int i = 0; i <= index; i++) { s.readChar(); }
-    } catch (IOException e) { /* Impossible */ e.printStackTrace(); System.exit(1); }
+    } catch (IOException e) { throw new AssertionError("did not expect IOException", e); }
     return s.getEndLine();
   }
 
@@ -406,7 +406,7 @@ public class Basic {
     SimpleCharStream s = new SimpleCharStream(new StringReader(str), line, column);
     try {
       for (int i = 0; i <= index; i++) { s.readChar(); }
-    } catch (IOException e) { /* Impossible */ e.printStackTrace(); System.exit(1); }
+    } catch (IOException e) { throw new AssertionError("did not expect IOException", e); }
     return s.getEndColumn();
   }
 

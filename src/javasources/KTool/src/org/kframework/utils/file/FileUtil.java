@@ -91,15 +91,10 @@ public class FileUtil {
 
     // create a file with the specified name, create parent directory if it doesn't exist
     public static File createFile(String file) {
-        try {
             File file1 = new File(file);
             File f2 = new File(file1.getParent());
             f2.mkdirs();
             return file1;
-        } catch (Exception e) {
-            org.kframework.utils.Error.report("Error while creating file " + file);
-        }
-        return null;
     }
 
     // generate an unique name for a folder with the name dirName

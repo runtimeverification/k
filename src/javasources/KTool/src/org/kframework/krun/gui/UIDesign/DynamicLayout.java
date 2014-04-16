@@ -114,16 +114,10 @@ public class DynamicLayout<V, E> extends AbstractLayout<V, E> {
         Collection<V> mda = (Collection<V>) graph.getVertices();
         V root = null;
         for (V v : mda) {
-            try {
                 // replaced (Vertex)v).isRoot()
                 if (graph.getPredecessors(v) == null || graph.getPredecessors(v).isEmpty()) {
                     roots.add((V) v);
                 }
-            } catch (Exception e) {
-                if (root == null)
-                    root = v;
-            }
-            ;
         }
         if (roots.isEmpty()) {
             if (root != null) {

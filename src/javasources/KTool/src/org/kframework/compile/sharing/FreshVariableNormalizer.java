@@ -75,7 +75,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                     substitution.put(
                             variable,
                             new Variable("GeneratedFreshVar" + counter++, variable.getSort()));
-                } catch (Exception e) { }
+                } catch (NumberFormatException e) { }
             }
         }
 
