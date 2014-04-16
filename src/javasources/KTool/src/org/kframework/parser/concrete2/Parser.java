@@ -1,8 +1,6 @@
 // Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.Ambiguity;
@@ -22,6 +20,7 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
+import org.kframework.utils.algorithms.AutoVivifyingBiMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
