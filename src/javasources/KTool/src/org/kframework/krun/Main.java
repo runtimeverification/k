@@ -29,7 +29,6 @@ import jline.SimpleCompletor;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.io.FilenameUtils;
-import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
@@ -513,7 +512,7 @@ public class Main {
                 }
                 
                 if (!cmd.hasOption("output-file")) {
-                    AnsiConsole.out.println(output);
+                    System.out.println(output);
                 } else {
                     writeStringToFile(new File(K.output), output);
                 }
@@ -522,8 +521,7 @@ public class Main {
                     System.out.println(K.lineSeparator + "The search graph is:"
                             + K.lineSeparator);
                     KRunResult<SearchResults> searchResult = (KRunResult<SearchResults>) result;
-                    AnsiConsole.out
-                            .println(searchResult.getResult().getGraph());
+                    System.out.println(searchResult.getResult().getGraph());
                     // offer the user the possibility to turn execution into
                     // debug mode
                     while (true) {
@@ -619,8 +617,7 @@ public class Main {
                     debugger = krun.debug(t);
                     System.out
                             .println("After running one step of execution the result is:");
-                    AnsiConsole.out.println(debugger.printState(debugger
-                            .getCurrentState()));
+                    System.out.println(debugger.printState(debugger.getCurrentState()));
                 } else {
                     debugger = krun.debug(state.getResult().getGraph());
                 }
@@ -680,8 +677,7 @@ public class Main {
                     if (cmd.hasOption("resume")) {
                         try {
                             debugger.resume();
-                            AnsiConsole.out.println(debugger
-                                    .printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (IllegalStateException e) {
                             org.kframework.utils.Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
@@ -701,8 +697,7 @@ public class Main {
                         try {
                             int steps = Integer.parseInt(arg);
                             debugger.step(steps);
-                            AnsiConsole.out.println(debugger
-                                    .printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to step must be an integer.");
                         } catch (IllegalStateException e) {
@@ -722,7 +717,7 @@ public class Main {
                         try {
                             int steps = Integer.parseInt(arg);
                             SearchResults states = debugger.stepAll(steps);
-                            AnsiConsole.out.println(states);
+                            System.out.println(states);
 
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to step-all must be an integer.");
@@ -739,8 +734,7 @@ public class Main {
                         try {
                             int stateNum = Integer.parseInt(arg);
                             debugger.setCurrentState(stateNum);
-                            AnsiConsole.out.println(debugger
-                                    .printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to select must bean integer.");
                         } catch (IllegalArgumentException e) {
@@ -758,8 +752,7 @@ public class Main {
                         String nodeId = cmd.getOptionValue("show-node").trim();
                         try {
                             int stateNum = Integer.parseInt(nodeId);
-                            AnsiConsole.out.println(debugger
-                                    .printState(stateNum));
+                            System.out.println(debugger.printState(stateNum));
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to select node to show must be an integer.");
                         } catch (IllegalArgumentException e) {
@@ -774,8 +767,7 @@ public class Main {
                         try {
                             int state1 = Integer.parseInt(vals[0].trim());
                             int state2 = Integer.parseInt(vals[1].trim());
-                            AnsiConsole.out.println(debugger.printEdge(state1,
-                                    state2));
+                            System.out.println(debugger.printEdge(state1, state2));
                         } catch (ArrayIndexOutOfBoundsException e) {
                             org.kframework.utils.Error.silentReport("Must specify two nodes with an edge between them.");
                         } catch (NumberFormatException e) {
@@ -804,8 +796,7 @@ public class Main {
                         try {
                             debugger.readFromStdin(StringBuiltin.valueOf("\"" +
                                     cmd.getOptionValue("read") + "\"").stringValue());
-                            AnsiConsole.out.println(
-                                    debugger.printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (IllegalStateException e) {
                             org.kframework.utils.Error.silentReport(e.getMessage());
                         }
