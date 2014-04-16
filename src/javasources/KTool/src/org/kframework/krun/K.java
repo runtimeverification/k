@@ -58,7 +58,7 @@ public class K {
 
     // the default values for jkrun commandline options
     public static String pgm;
-    public static String term = null;
+    public static boolean term = false;
     public static String directory = null;
     public static String main_module;
     public static String syntax_module;

@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import org.apache.commons.cli.*;
@@ -90,7 +91,7 @@ public class CommandlineOptions {
         // Experimental options
         addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());
         addOptionE(OptionBuilder.withLongOpt("statistics").hasArg().withArgName("[on|off]").withDescription("Print Maude's rewrite statistics. (Default: ...).").create());
-        addOptionE(OptionBuilder.withLongOpt("term").hasArg().withArgName("string").withDescription("Input argument will be parsed with the specified parser and used as the sole input to krun.").create());
+        addOptionE(OptionBuilder.withLongOpt("term").withDescription("Input argument will be parsed with the specified parser and used as the sole input to krun.").create());
         addOptionE(OptionBuilder.withLongOpt("maude-cmd").hasArg().withArgName("string").withDescription("Maude command used to execute the definition.").create());
 
         addOptionE(OptionBuilder.withLongOpt("log-io").hasArg().withArgName("[on|off]").withDescription("Make the IO server create logs. (Default: disabled).").create());

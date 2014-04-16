@@ -189,6 +189,7 @@ public class TestSuite {
                 Proc<TestCase> p = new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(),
                         strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
                 ps.add(p);
+                p.setWorkingDir(tc.getWorkingDir());
                 tpe.execute(p);
             } else {
                 successfulTests.add(tc);
