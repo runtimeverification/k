@@ -1,5 +1,5 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2;
+package org.kframework.utils.algorithms;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

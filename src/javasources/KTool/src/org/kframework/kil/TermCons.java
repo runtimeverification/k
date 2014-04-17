@@ -1,9 +1,9 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;

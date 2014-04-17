@@ -3,7 +3,7 @@
 // https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
 // which is licensed under the Unlicense http://unlicense.org/UNLICENSE
 
-package org.kframework.parser.concrete2;
+package org.kframework.utils.algorithms;
 
 import java.util.*;
 

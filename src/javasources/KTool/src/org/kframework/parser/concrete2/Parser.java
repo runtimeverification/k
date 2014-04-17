@@ -1,8 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.Ambiguity;
@@ -22,6 +20,7 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
+import org.kframework.utils.algorithms.AutoVivifyingBiMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -655,19 +654,8 @@ public class Parser {
      * @return the result of parsing, as a Term
      */
     public Term parse(NonTerminal nt, int position) {
-        // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2
-        // TODO: can we do away with the <start> non-terminal?
-        NonTerminal startNt = new NonTerminal("<start>");
-        NonTerminalState state = new NonTerminalState("<start>", startNt, nt, false);
-        startNt.entryState.next.add(state);
-        state.next.add(startNt.exitState);
-
-        startNt.entryState.orderingInfo = new State.OrderingInfo(Integer.MIN_VALUE);
-        startNt.exitState.orderingInfo = new State.OrderingInfo(Integer.MAX_VALUE);
-        state.orderingInfo = new State.OrderingInfo(Integer.MAX_VALUE - 1);
-
         activateStateCall(s.stateCalls.get(new StateCall.Key(s.ntCalls.get(
-            new NonTerminalCall.Key(startNt, position)), position, startNt.entryState)),
+            new NonTerminalCall.Key(nt, position)), position, nt.entryState)),
             Function.IDENTITY);
 
         for (StateReturn stateReturn;
