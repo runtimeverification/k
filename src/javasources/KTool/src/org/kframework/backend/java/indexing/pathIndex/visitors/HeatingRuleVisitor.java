@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.kil.*;
@@ -10,7 +11,10 @@ import java.util.*;
  * Author: OwolabiL
  * Date: 1/20/14
  * Time: 10:25 AM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
+@Deprecated
 public class HeatingRuleVisitor extends RuleVisitor {
     private final Context context;
     private String currentLabel = null;
@@ -69,8 +73,9 @@ public class HeatingRuleVisitor extends RuleVisitor {
             pStrings.add(pStringStack.peek() + counter + "." + sort);
         } else {
             if (productions.size() > 1) {
-                //TODO(OwolabiL): find the exact sort of this variable before it was transformed
-                // as part of this rule
+                //TODO(OwolabiL): Fix needed!! find the exact sort of this variable before it was transformed
+                // as part of this rule. This affects fun where other kItems apart from User defined
+                // lists can have multiple productions.
                 pStrings.add(pStringStack.peek() + counter + "." + "UserList");
             }
         }

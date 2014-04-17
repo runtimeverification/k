@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex;
 
 import org.apache.commons.collections15.MultiMap;
@@ -29,7 +30,11 @@ import java.util.ArrayList;
  *
  * Author: Owolabi Legunsen
  * 1/8/14: 10:08 AM
+ *
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
+@Deprecated
 public class PathIndex implements RuleIndex, Serializable{
     private final Map<Integer, Rule> indexedRules;
     private final Definition definition;
@@ -37,6 +42,7 @@ public class PathIndex implements RuleIndex, Serializable{
     private final Set<Integer> outputRuleIndices = new LinkedHashSet<>();
     private final Set<Integer> inputRuleIndices = new LinkedHashSet<>();
     private TermVisitor termVisitor;
+    private boolean hasNOKCellRules;
 
     public enum RuleType {
         COOLING,
@@ -46,6 +52,13 @@ public class PathIndex implements RuleIndex, Serializable{
         OTHER
     }
 
+    /**
+     * Builds an index for a given definition using the path indexing algorithm
+     * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+     *              the future
+     *
+     */
+    @Deprecated
     public PathIndex(Definition definition) {
         this.definition = definition;
         this.indexedRules = new LinkedHashMap<>();
@@ -160,6 +173,7 @@ public class PathIndex implements RuleIndex, Serializable{
         rule.accept(ruleVisitor);
 
         pStrings.putAll(n, ruleVisitor.getpStrings());
+        hasNOKCellRules |= ruleVisitor.isHasNOKCellRule();
         return pStrings;
     }
 
@@ -171,6 +185,7 @@ public class PathIndex implements RuleIndex, Serializable{
      * @return a list of rules that can possibly match
      */
     @Override
+    @Deprecated
     public List<Rule> getRules(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
@@ -211,21 +226,24 @@ public class PathIndex implements RuleIndex, Serializable{
                 }
             }
 
-            if (matchingIndices.isEmpty()) {
-                matchingIndices = currentMatch;
-            } else {
-                //should it be an intersection?
-                matchingIndices.addAll(currentMatch);
+            if (currentMatch != null) {
+                if (matchingIndices.isEmpty()) {
+                    matchingIndices = currentMatch;
+                } else {
+                    //should it be an intersection?
+                        matchingIndices.addAll(currentMatch);
+                }
             }
         }
 
-        if (termVisitor.isAddOutputRules()) {
-            matchingIndices.addAll(outputRuleIndices);
-        }
+            if (matchingIndices != null && termVisitor.isAddOutputRules()) {
+                matchingIndices.addAll(outputRuleIndices);
+            }
 
-        if (termVisitor.isAddInputRules()) {
-            matchingIndices.addAll(inputRuleIndices);
-        }
+            if (matchingIndices != null && termVisitor.isAddInputRules()) {
+                matchingIndices.addAll(inputRuleIndices);
+            }
+
 
         // this check is needed because of .K which now has  a pString of @.EMPTY_K, but may not
         // have any rules so indexed in some simpler languages like IMP
@@ -241,7 +259,6 @@ public class PathIndex implements RuleIndex, Serializable{
                     IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
         }
 
-//        System.out.println("matching: "+ matchingIndices + "\n");
 //        System.out.println("rules: "+rules +"\n");
         return new ArrayList<>(rules);
     }
@@ -249,11 +266,13 @@ public class PathIndex implements RuleIndex, Serializable{
     /**
      * Takes as input the term that is currently  being rewritten, traverses it and return a set
      * of strings that are used to query the index structure for finding possibly matching rules.
+     *
+     *
      * @param term  the term that is to be traversed
      * @return a set of positions that can be used to query the path index
      */
     private Set<String> getPStringsFromTerm(Term term) {
-        termVisitor = new TermVisitor(definition.context());
+        termVisitor = new TermVisitor(definition.context(), hasNOKCellRules);
         term.accept(termVisitor);
         return termVisitor.getpStrings();
     }

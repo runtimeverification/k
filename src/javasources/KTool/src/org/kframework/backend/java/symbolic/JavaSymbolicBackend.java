@@ -66,7 +66,6 @@ public class JavaSymbolicBackend extends BasicBackend {
         org.kframework.backend.java.kil.Definition definition =
                 new KILtoBackendJavaKILTransformer(context, true).transformDefinition(javaDef);
 
-        //TODO(OwolabiLeg): Add a way to measure how long it takes to build an index
         if (options.experimental.ruleIndex == IndexingAlgorithm.RULE_TABLE) {
             definition.setIndex(new IndexingTable(definition));
         } else if (options.experimental.ruleIndex == IndexingAlgorithm.PATH) {

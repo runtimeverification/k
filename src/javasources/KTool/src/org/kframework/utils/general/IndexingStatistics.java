@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.utils.general;
 
 import com.google.common.base.Stopwatch;
@@ -18,6 +19,7 @@ public class IndexingStatistics {
     //TODO(OwolabiL): Make this a Singleton class instead
     public static Stopwatch totalRewriteStopwatch = new Stopwatch();
     public static Stopwatch totalKrunStopwatch = new Stopwatch();
+    public static Stopwatch totalSearchStopwatch = new Stopwatch();
     public static Stopwatch indexConstructionStopWatch = new Stopwatch();
     public static Stopwatch getRulesForTermStopWatch = new Stopwatch();
     public static Stopwatch getPStringFromTermStopWatch = new Stopwatch();
@@ -27,9 +29,7 @@ public class IndexingStatistics {
     public static Stopwatch preProcessStopWatch = new Stopwatch();
     public static Stopwatch kilTransformationStopWatch = new Stopwatch();
     public static Stopwatch getPStringStopwatch = new Stopwatch();
-    public static Stopwatch cellCheckingStopwatch = new Stopwatch();
     public static Stopwatch traverseCellsStopwatch = new Stopwatch();
-    public static Stopwatch LookupMultiCellStopwatch = new Stopwatch();
 
     public static List<Number> timesForRuleSelection = new ArrayList<>();
     public static List<Number> timesForGettingPStringsFromTerm = new ArrayList<>();
@@ -39,12 +39,12 @@ public class IndexingStatistics {
     public static List<Number> rulesSelectedAtEachStep = new ArrayList<>();
     public static List<Number> getPStringTimes = new ArrayList<>();
     public static List<Number> traverseCellsTimes = new ArrayList<>();
-    public static List<Long> cellCheckingTimes = new ArrayList<>();
-    public static List<Long> lookupMultiCellTimes = new ArrayList<>();
+    public static List<Number> rulesTried = new ArrayList<>();
 
     public static void print() {
         System.err.println("=====================================================");
         System.err.println("Total KRun time: " + totalKrunStopwatch);
+        System.err.println("Total Search time: " + totalSearchStopwatch);
         System.err.println("Total KRun Preprocessing time: " + preProcessStopWatch);
         System.err.println("\tTime for constructing Index: " + indexConstructionStopWatch);
         System.err.println("\tTime for transforming KIL: " + kilTransformationStopWatch);
@@ -79,6 +79,9 @@ public class IndexingStatistics {
                 computeMin(rulesSelectedAtEachStep));
         System.err.println("Max. Number of rules selected at each step: " +
                 computeMax(rulesSelectedAtEachStep));
+        System.err.println("Total number of rules tried: " + findTotal(rulesTried));
+        System.err.println("Average number of rules tried: " + computeAverage(rulesTried));
+        System.err.println("Number of rules tried: " + rulesTried);
 //        System.err.println("Times For Rule selection: " + timesForRuleSelection);
 //        System.err.println("Times For Rewrite Steps: " + timesForRewriteSteps);
 //        System.err.println("Rules selected at each step: " + rulesSelectedAtEachStep);
@@ -111,6 +114,14 @@ public class IndexingStatistics {
             sum += (Long) time;
         }
         return ((double) sum) / 1000;
+    }
+
+    private static double findTotal(List<Number> times) {
+        long sum = 0;
+        for (Number time : times) {
+            sum += (Integer) time;
+        }
+        return sum;
     }
 
     private static double computeAverage(List<Number> times) {
