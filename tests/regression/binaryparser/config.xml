@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<tests>
+  <test
+    definition="test.k"
+    programs="."
+    results="."
+    posixInitScript="init.sh"
+    extension="test">
+    <all-programs>
+      <krun-option name="--parser" value="kast --parser binary" />
+      <krun-option name="--term" />
+    </all-programs>
+  </test>
+</tests>

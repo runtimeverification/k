@@ -137,6 +137,9 @@ public class Proc<T> implements Runnable {
     public void run() {
         // TODO: what happens when a process is run multiple times?
         ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
+        pb.environment().put("kompile", ExecNames.getKompile());
+        pb.environment().put("krun", ExecNames.getKrun());
+        pb.environment().put("kast", ExecNames.getKast());
 
         try {
             long startTime = System.currentTimeMillis();

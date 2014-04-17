@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest;
 
 import java.io.File;
@@ -18,6 +19,10 @@ public class ExecNames {
 
     public static String getKrun() {
         return getExecutable("krun");
+    }
+    
+    public static String getKast() {
+        return getExecutable("kast");
     }
 
     private static String getKHome() {
