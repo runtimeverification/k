@@ -33,7 +33,6 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
-import org.kframework.backend.symbolic.krun.SymbolicKRun;
 import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
