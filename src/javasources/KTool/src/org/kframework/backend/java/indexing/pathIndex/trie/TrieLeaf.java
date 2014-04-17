@@ -9,7 +9,9 @@ import java.util.Set;
  * A leaf node in the trie, i.e., one that has no children
  * <p/>
  * Author: Owolabi Legunsen
- * 1/2/14: 7:30 PM
+ *
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public class TrieLeaf extends TrieNode implements Serializable{
     public Set<Integer> getIndices() {

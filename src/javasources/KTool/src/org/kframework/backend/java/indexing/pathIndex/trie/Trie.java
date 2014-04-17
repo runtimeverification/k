@@ -9,6 +9,8 @@ import java.util.Set;
  *
  * Author: Owolabi Legunsen
  * 1/2/14: 4:34 PM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public interface Trie {
     public void addIndex(TrieNode trie, String pString, int value);

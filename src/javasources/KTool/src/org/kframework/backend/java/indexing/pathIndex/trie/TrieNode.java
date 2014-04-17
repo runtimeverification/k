@@ -10,7 +10,8 @@ import java.util.Set;
  * A single node in the trie.
  * <p/>
  * Author: Owolabi Legunsen
- * 1/2/14: 7:23 PM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public class TrieNode implements Serializable{
     private final String value;

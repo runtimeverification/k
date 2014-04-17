@@ -13,6 +13,8 @@ import java.util.Set;
  * Indexing technique.
  * Author: Owolabi Legunsen
  * 1/2/14: 7:52 PM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public class PathIndexTrie implements Trie,Serializable {
     public static final String ROOT_SYMBOL = "@";
