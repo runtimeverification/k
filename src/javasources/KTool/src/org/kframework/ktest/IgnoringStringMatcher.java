@@ -5,9 +5,6 @@ public class IgnoringStringMatcher implements StringMatcher {
 
     private final boolean ignoreWS;
     private final boolean ignoreBalancedParens;
-
-    private String lastPattern;
-    private String lastActual;
     
     public IgnoringStringMatcher(boolean ignoreWS, boolean ignoreBalancedParens) {
         this.ignoreWS = ignoreWS;
@@ -15,10 +12,7 @@ public class IgnoringStringMatcher implements StringMatcher {
     }
 
     @Override
-    public boolean matches(String pattern, String actual) {
-        lastPattern = pattern;
-        lastActual = actual;
-        
+    public void matches(String pattern, String actual) throws MatchFailure {
         // algorithm copied from old ktest; I'm not convinced that they work correctly in all cases
         if (ignoreWS) {
             pattern = pattern.replaceAll("\\r|\\s|\\n","");
@@ -33,7 +27,10 @@ public class IgnoringStringMatcher implements StringMatcher {
             pattern = removeAllBalanced(pattern);
             actual = removeAllBalanced(actual);
         }
-        return pattern.trim().compareTo(actual.trim()) == 0;
+        if (pattern.trim().compareTo(actual.trim()) != 0) {
+            throw new StringMatcher.MatchFailure(
+                    String.format("Expected:%n%s%n%nbut found:%n%s%n", pattern, actual));
+        }
     }
 
     private static String removeAllBalanced(String s1) {
@@ -46,10 +43,4 @@ public class IgnoringStringMatcher implements StringMatcher {
             return removeAllBalanced(s2);
         }
     }
-    
-    @Override
-    public String errorMessage() {
-        return String.format("Expected:%n%s%n%nbut found:%n%s%n", lastPattern, lastActual);
-    }
-
 }
