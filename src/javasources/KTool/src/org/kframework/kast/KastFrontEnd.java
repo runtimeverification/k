@@ -157,6 +157,7 @@ public class KastFrontEnd {
                 kompileOptions.global = globalOptions;
                 kompileOptions.experimental.parser = parserOptions;
                 context = new Context(kompileOptions);
+                context.kompiled = compiledFile;
 
                 javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
                 javaDef = new FlattenModules(context).compile(javaDef, null);
