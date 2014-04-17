@@ -1,4 +1,4 @@
-// Copyright (C) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.utils.general;
 
 import com.google.common.base.Stopwatch;
