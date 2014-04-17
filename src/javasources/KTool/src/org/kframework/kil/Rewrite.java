@@ -20,7 +20,7 @@ public class Rewrite extends Term {
     private Term left;
     private Term right;
 
-    public Rewrite(Element element) {
+    public Rewrite(Element element, Context context) {
         super(element);
 
         Element temp = XML.getChildrenElementsByTagName(element, Constants.LEFT).get(0);
@@ -29,14 +29,16 @@ public class Rewrite extends Term {
         temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
         temp = XML.getChildrenElements(temp).get(0);
         right = (Term) JavaClassesFactory.getTerm(temp);
+        recomputeSort(context);
     }
 
-    public Rewrite(ATermAppl atm) {
+    public Rewrite(ATermAppl atm, Context context) {
         super(atm);
         this.sort = StringUtil.getSortNameFromCons(atm.getName());
 
         left = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
         right = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
+        recomputeSort(context);
     }
 
     public Rewrite(Rewrite node) {
@@ -59,7 +61,7 @@ public class Rewrite extends Term {
         if (left instanceof Ambiguity || right instanceof Ambiguity)
             super.getSort();
         else
-            sort = context.getLUBSort(ImmutableSet.of(left.getSort(), right.getSort()));
+            sort = context.getLUBSort(left.getSort(), right.getSort());
     }
 
     public Term getLeft() {
