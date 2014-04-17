@@ -1,4 +1,4 @@
-// Copyright (C) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 require "string.k"
 
 module ID-SYNTAX-HOOKS

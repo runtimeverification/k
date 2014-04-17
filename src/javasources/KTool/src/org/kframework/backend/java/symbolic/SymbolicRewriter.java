@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_BOUND_FREEVARS;
@@ -238,6 +238,7 @@ public class SymbolicRewriter {
     }
 
     private void computeRewriteStep(ConstrainedTerm constrainedSubject, int successorBound) {
+        int rulesTried = 0;
         if (K.get_indexing_stats){
             IndexingStatistics.rewriteStepStopWatch.reset();
             IndexingStatistics.rewriteStepStopWatch.start();
@@ -264,6 +265,7 @@ public class SymbolicRewriter {
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
+                rulesTried++;
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
 
@@ -280,7 +282,10 @@ public class SymbolicRewriter {
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
                     if (K.get_indexing_stats){
-                        IndexingStatistics.rewritingStopWatch.stop();
+                        IndexingStatistics.rulesTried.add(rulesTried);
+                        if (IndexingStatistics.rewritingStopWatch.isRunning()){
+                            IndexingStatistics.rewritingStopWatch.stop();
+                        }
                         IndexingStatistics.timesForRewriting.add(
                                 IndexingStatistics.rewritingStopWatch.elapsed(TimeUnit.MICROSECONDS));
                     }

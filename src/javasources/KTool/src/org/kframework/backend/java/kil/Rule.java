@@ -1,3 +1,5 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.kil;
 
 import java.util.Collection;
@@ -40,7 +42,6 @@ public class Rule extends JavaSymbolicObject {
     private final boolean isSortPredicate;
     private final String predSort;
     private final KItem sortPredArg;
-    private int hashCode = 0;
 
     public Rule(
             String label,

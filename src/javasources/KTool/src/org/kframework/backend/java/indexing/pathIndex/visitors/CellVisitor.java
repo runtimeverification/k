@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.kil.Cell;
@@ -16,7 +17,11 @@ import java.util.List;
  * Author: OwolabiL
  * Date: 2/26/14
  * Time: 12:56 PM
+ *
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
+@Deprecated
 class CellVisitor extends BottomUpVisitor {
     private Context context;
     private Cell inCell;
