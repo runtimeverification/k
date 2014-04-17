@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.UIDesign;
 
 import java.awt.Color;
