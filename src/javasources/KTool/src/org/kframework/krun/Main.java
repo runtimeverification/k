@@ -221,10 +221,8 @@ public class Main {
     }
 
     private static KRun obtainKRun(Context context) {
-        if (K.backend.equals("maude")) {
+        if (K.backend.equals("maude") || K.backend.equals("symbolic")) {
             return new MaudeKRun(context, sw);
-        } if (K.backend.equals("symbolic")) {
-            return new SymbolicKRun(context, sw);
         } else if (K.backend.equals("java")) {
             try {
                 return new JavaSymbolicKRun(context);
