@@ -1,3 +1,5 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Joiner;
@@ -132,7 +134,10 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        return equalities.hashCode();
+        if (hashCode == 0) {
+            hashCode = equalities.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

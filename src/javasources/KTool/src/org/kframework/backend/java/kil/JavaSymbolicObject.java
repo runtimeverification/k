@@ -1,6 +1,12 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.*;
+import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
+import org.kframework.backend.java.symbolic.SubstitutionTransformer;
+import org.kframework.backend.java.symbolic.Transformable;
+import org.kframework.backend.java.symbolic.VariableCollector;
+import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
@@ -16,6 +22,11 @@ import java.util.Set;
  */
 public abstract class JavaSymbolicObject extends ASTNode
         implements Transformable, Visitable, Serializable {
+
+    /**
+     * Field used for cashing the hash code
+     */
+    protected int hashCode = 0;
 
     /**
      * AndreiS: serializing this field causes a NullPointerException when hashing a de-serialized
