@@ -16,6 +16,7 @@ import java.util.Set;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 public class PathIndexTrie implements Trie,Serializable {
     public static final String ROOT_SYMBOL = "@";
     private final TrieNode root;

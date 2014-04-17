@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 public class TermVisitor extends LocalVisitor implements Serializable {
     private static final String K_RESULT = "KResult";
     private static final String EMPTY_LIST_LABEL = "'.List{\",\"}";

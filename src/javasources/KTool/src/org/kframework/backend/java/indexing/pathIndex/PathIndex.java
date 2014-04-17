@@ -34,6 +34,7 @@ import java.util.ArrayList;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 public class PathIndex implements RuleIndex, Serializable{
     private final Map<Integer, Rule> indexedRules;
     private final Definition definition;

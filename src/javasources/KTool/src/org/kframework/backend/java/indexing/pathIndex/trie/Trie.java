@@ -12,6 +12,7 @@ import java.util.Set;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 public interface Trie {
     public void addIndex(TrieNode trie, String pString, int value);
 

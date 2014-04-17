@@ -21,6 +21,7 @@ import java.util.List;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 class CellVisitor extends BottomUpVisitor {
     private Context context;
     private Cell inCell;

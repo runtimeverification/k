@@ -29,6 +29,7 @@ import java.util.List;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 public class RuleVisitor extends LocalVisitor {
     static final String SEPARATOR = ".";
     static final String START_STRING = "@.";

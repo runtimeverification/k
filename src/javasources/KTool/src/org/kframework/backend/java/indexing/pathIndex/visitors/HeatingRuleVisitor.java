@@ -14,6 +14,7 @@ import java.util.*;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 public class HeatingRuleVisitor extends RuleVisitor {
     private final Context context;
     private String currentLabel = null;

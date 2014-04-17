@@ -13,6 +13,7 @@ import java.util.Set;
  * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
  *              the future
  */
+@Deprecated
 public class TrieLeaf extends TrieNode implements Serializable{
     public Set<Integer> getIndices() {
         return indices;
