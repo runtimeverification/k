@@ -11,6 +11,8 @@ import java.util.*;
  * Author: OwolabiL
  * Date: 1/20/14
  * Time: 10:25 AM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public class HeatingRuleVisitor extends RuleVisitor {
     private final Context context;

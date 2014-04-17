@@ -30,6 +30,9 @@ import java.util.ArrayList;
  *
  * Author: Owolabi Legunsen
  * 1/8/14: 10:08 AM
+ *
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public class PathIndex implements RuleIndex, Serializable{
     private final Map<Integer, Rule> indexedRules;
@@ -48,6 +51,13 @@ public class PathIndex implements RuleIndex, Serializable{
         OTHER
     }
 
+    /**
+     * Builds an index for a given definition using the path indexing algorithm
+     * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+     *              the future
+     *
+     */
+    @Deprecated
     public PathIndex(Definition definition) {
         this.definition = definition;
         this.indexedRules = new LinkedHashMap<>();
@@ -174,6 +184,7 @@ public class PathIndex implements RuleIndex, Serializable{
      * @return a list of rules that can possibly match
      */
     @Override
+    @Deprecated
     public List<Rule> getRules(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);

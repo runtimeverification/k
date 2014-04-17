@@ -12,6 +12,8 @@ import java.util.ArrayList;
  * Author: OwolabiL
  * Date: 1/20/14
  * Time: 12:40 PM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public class CoolingRuleVisitor extends RuleVisitor {
     private static final String K_RESULT_STRING = "KResult";

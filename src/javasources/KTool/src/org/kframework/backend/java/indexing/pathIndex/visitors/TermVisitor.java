@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
  * Author: OwolabiL
  * Date: 1/21/14
  * Time: 12:05 PM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
 public class TermVisitor extends LocalVisitor implements Serializable {
     private static final String K_RESULT = "KResult";
