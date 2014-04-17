@@ -514,9 +514,20 @@
            programs="tests/regression/generalized-strictness"
            results="tests/regression/generalized-strictness" />
 
-  <!-- Symbolic backend tests -->
-  <include file="regression/symbolic-backend/config.xml"
-           directory="tests/regression/symbolic-backend"
-           programs="tests/regression/symbolic-backend"
-           results="tests/regression/symbolic-backend" />
+  <!-- tests for symbolic backend -->
+  <test
+      definition="tutorial/1_k/4_imp++/lesson_7/imp.k"
+      programs="tests/regression/symbolic-backend/test1/programs"
+      results="tests/regression/symbolic-backend/test1/tests"
+      extension="imp">
+    <kompile-option name="--backend" value="symbolic" />
+    <all-programs>
+       <krun-option name="--color" value="off" />
+       <krun-option name="--search" />
+       <krun-option name="--bound" value="2" />
+       <krun-option name="-c" key="IN" value="ListItem(#symInt(n))"/>
+       <krun-option name="-c" key="PC" value="true" />
+    </all-programs>
+  </test>
+
 </tests>

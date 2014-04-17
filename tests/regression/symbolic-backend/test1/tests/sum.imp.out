@@ -1,0 +1,67 @@
+Search results:
+
+Solution 1:
+<path-condition>
+    0 <=Int #symInt(n) ==Bool false
+</path-condition>
+<T>
+    <in>
+        ListItem(#buffer ( "\n" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                i |-> #symNat(3)
+                n |-> #symNat(1)
+                s |-> #symNat(2)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> #symInt(n)
+        #symNat(2) |-> 0
+        #symNat(3) |-> 0
+    </store>
+</T>
+
+Solution 2:
+<path-condition>
+    0 <=Int #symInt(n) ==Bool true andBool 1 <=Int #symInt(n) ==Bool false
+</path-condition>
+<T>
+    <in>
+        ListItem(#buffer ( "\n" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                i |-> #symNat(3)
+                n |-> #symNat(1)
+                s |-> #symNat(2)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> #symInt(n)
+        #symNat(2) |-> 0
+        #symNat(3) |-> 1
+    </store>
+</T>
