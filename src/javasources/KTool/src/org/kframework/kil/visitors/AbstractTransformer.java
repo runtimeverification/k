@@ -5,6 +5,15 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * A helper class designed to encapsulate functionality shared between 
+ * {@link LocalTransformer}, {@link BasicTransformer}, and {@link CopyOnWriteTransformer}.
+ * 
+ * This class serves to replace the Transformable interface that existed before, and implements
+ * functionality specific to visitors which transform terms.
+ * @author dwightguth
+ *
+ */
 public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode, TransformerException> {
 
     public AbstractTransformer(String name, Context context) {
@@ -13,13 +22,11 @@ public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode,
 
     @Override
     public ASTNode defaultReturnValue(ASTNode node, Void _) {
-        // TODO Auto-generated method stub
         return node;
     }
 
     @Override
-    public ASTNode processChildTerm(ASTNode node, ASTNode child,
-            ASTNode childResult, Void _) {
+    public ASTNode processChildTerm(ASTNode child, ASTNode childResult) {
         return childResult;
     }
 
@@ -30,7 +37,6 @@ public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode,
 
     @Override
     public <T extends ASTNode> boolean changed(T o, T n) {
-        // TODO Auto-generated method stub
         return o != n;
     }
 

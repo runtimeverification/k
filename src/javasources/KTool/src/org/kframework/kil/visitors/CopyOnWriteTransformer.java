@@ -4,7 +4,12 @@ package org.kframework.kil.visitors;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
-
+/**
+ * A transformer useful for performing compilation steps on ASTs. When a term is modified, it is replaced in the 
+ * tree to avoid affecting other code with references to that AST.
+ * @author dwightguth
+ *
+ */
 public class CopyOnWriteTransformer extends AbstractTransformer {
 
     public CopyOnWriteTransformer(String name, Context context) {

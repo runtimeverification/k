@@ -20,7 +20,27 @@ import java.util.Map;
  * To use as a visitor, override this class and implement the methods you want to perform
  * an action on. To apply to a term, use {@link ASTNode#accept(Visitor, Object) ASTNode.accept}.
  * 
- * To use this class as a transformer, see {@link BasicTransformer}.
+ * To use this class as a transformer, see {@link AbstractTransformer}.
+ * 
+ * The algorithm used to implement each of the visitors for each of the different visit methods
+ * is as follows:
+ * 
+ * <ol>
+ * <li>Check if we are caching terms and we have seen the term already in the {@link #cache}. 
+ * If yes, return the result of visiting that term previously.</li>
+ * <li>Check if we are visiting child terms. If not, call the {@code visit} method for the superclass,
+ * and return the result. Otherwise, proceed to next step.</li>
+ * <li>Visit each child term, and collect the result of calling {@link #processChildTerm(ASTNode, Object)}
+ * on each one. If it returns null on the element of a collection or the key or value of a
+ * map, delete the entry.</li>
+ * <li>Call {@link #changed(ASTNode, ASTNode)} on each child term, and if any are modified, replace
+ * them in the tree. If {@link #copy(ASTNode)} returns {@code true} or the node is immutable, 
+ * also clone the node itself.</li>
+ * <li>Call {@code visit} for the superclass of the term being visited. Once you reach
+ * {@link #visit(ASTNode, Object)}, put the result of visiting the object in the cache
+ * (if the cache is enabled), and return the result of calling {@link #defaultReturnValue(ASTNode, Object)}
+ * on the node.</li>
+ * 
  * @author dwightguth
  *
  * @param <P> The parameter to pass to each visit method. Use {@link Void} if not needed, and call
@@ -55,7 +75,9 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     @Override
     public R visit(ASTNode node, P p) throws E {
         R ret = defaultReturnValue(node, p);
-        cache.put(node, ret);
+        if (cache()) {
+            cache.put(node, ret);
+        }
         return ret;
     }
 
@@ -67,7 +89,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<DefinitionItem> items = new ArrayList<>();
             for (DefinitionItem item : node.getItems()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((DefinitionItem) result);
                 }
@@ -104,7 +126,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<ModuleItem> items = new ArrayList<>();
             for (ModuleItem item : node.getItems()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((ModuleItem) result);
                 }
@@ -155,13 +177,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term body = (Term) processChildTerm(node, node.getBody(), node.getBody().accept(this, p), p);
+            Term body = (Term) processChildTerm(node.getBody(), node.getBody().accept(this, p));
             Term requires = node.getRequires();
             if (requires != null)
-                requires = (Term) processChildTerm(node, requires, requires.accept(this, p), p);
+                requires = (Term) processChildTerm(requires, requires.accept(this, p));
             Term ensures = node.getEnsures();
             if (ensures != null)
-                ensures = (Term) processChildTerm(node, ensures, ensures.accept(this, p), p);
+                ensures = (Term) processChildTerm(ensures, ensures.accept(this, p));
             if (changed(node.getBody(), body)) {
                 node = copy(node);
                 node.setBody(body);
@@ -208,10 +230,10 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Sort sort = (Sort)processChildTerm(node, node.getSort(), node.getSort().accept(this, p), p);
+            Sort sort = (Sort)processChildTerm(node.getSort(), node.getSort().accept(this, p));
             List<PriorityBlock> items = new ArrayList<>();
             for (PriorityBlock item : node.getPriorityBlocks()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((PriorityBlock) result);
                 }
@@ -236,7 +258,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<PriorityBlockExtended> items = new ArrayList<>();
             for (PriorityBlockExtended item : node.getPriorityBlocks()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((PriorityBlockExtended) result);
                 }
@@ -257,7 +279,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<KLabelConstant> items = new ArrayList<>();
             for (KLabelConstant item : node.getTags()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((KLabelConstant) result);
                 }
@@ -278,7 +300,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<Production> items = new ArrayList<>();
             for (Production item : node.getProductions()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((Production) result);
                 }
@@ -299,7 +321,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<KLabelConstant> items = new ArrayList<>();
             for (KLabelConstant item : node.getProductions()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((KLabelConstant) result);
                 }
@@ -320,7 +342,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<ProductionItem> items = new ArrayList<>();
             for (ProductionItem item : node.getItems()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((ProductionItem) result);
                 }
@@ -395,7 +417,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term)processChildTerm(node, node.getContents(), node.getContents().accept(this, p), p);
+            Term item = (Term)processChildTerm(node.getContents(), node.getContents().accept(this, p));
             if (changed(node.getContents(), item)) {
                 node = copy(node);
                 node.setContents(item);
@@ -412,7 +434,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<Term> items = new ArrayList<>();
             for (Term item : node.getContents()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((Term) result);
                 }
@@ -487,7 +509,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term)processChildTerm(node, node.getItem(), node.getItem().accept(this, p), p);
+            Term item = (Term)processChildTerm(node.getItem(), node.getItem().accept(this, p));
             if (changed(node.getItem(), item)) {
                 node = copy(node);
                 node.setItem(item);
@@ -518,7 +540,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term) processChildTerm(node, node.getKey(), node.getKey().accept(this, p), p);
+            Term item = (Term) processChildTerm(node.getKey(), node.getKey().accept(this, p));
             if (changed(node.getKey(), item)) {
                 node = copy(node);
                 node.setKey(item);
@@ -543,7 +565,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             java.util.Collection<Term> items = new ArrayList<>();
             for (Term item : node.baseTerms()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((Term) result);
                 }
@@ -563,7 +585,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             java.util.Collection<Term> items = new ArrayList<>();
             for (Term item : node.elements()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((Term) result);
                 }
@@ -589,8 +611,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Variable base = (Variable) processChildTerm(node, node.base(), node.base().accept(this, p), p);
-            Term key = (Term) processChildTerm(node, node.key(), node.key().accept(this, p), p);
+            Variable base = (Variable) processChildTerm(node.base(), node.base().accept(this, p));
+            Term key = (Term) processChildTerm(node.key(), node.key().accept(this, p));
             if (changed(node.base(), base) || changed(node.key(), key)) {
                 node = new SetLookup(base, key, node.choice());
             }
@@ -604,10 +626,10 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Variable set = (Variable) processChildTerm(node, node.set(), node.set().accept(this, p), p);
+            Variable set = (Variable) processChildTerm(node.set(), node.set().accept(this, p));
             java.util.Collection<Term> items = new ArrayList<>();
             for (Term item : node.removeEntries()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((Term) result);
                 }
@@ -628,13 +650,13 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             java.util.Collection<Term> elementsLeft = new ArrayList<>();
             java.util.Collection<Term> elementsRight = new ArrayList<>();
             for (Term item : node.elementsLeft()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     elementsLeft.add((Term) result);
                 }
             }
             for (Term item : node.elementsRight()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     elementsRight.add((Term) result);
                 }
@@ -652,9 +674,9 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Variable base = (Variable) processChildTerm(node, node.base(), node.base().accept(this, p), p);
-            Term key = (Term) processChildTerm(node, node.key(), node.key().accept(this, p), p);
-            Term value = (Term) processChildTerm(node, node.value(), node.value().accept(this, p), p);
+            Variable base = (Variable) processChildTerm(node.base(), node.base().accept(this, p));
+            Term key = (Term) processChildTerm(node.key(), node.key().accept(this, p));
+            Term value = (Term) processChildTerm(node.value(), node.value().accept(this, p));
             if (changed(node.base(), base) || changed(node.key(), key)) {
                 node = new ListLookup(base, key, value, node.kind());
             }
@@ -668,17 +690,17 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Variable base = (Variable) processChildTerm(node, node.base(), node.base().accept(this, p), p);
+            Variable base = (Variable) processChildTerm(node.base(), node.base().accept(this, p));
             java.util.Collection<Term> removeLeft = new ArrayList<>();
             java.util.Collection<Term> removeRight = new ArrayList<>();
             for (Term item : node.removeLeft()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     removeLeft.add((Term) result);
                 }
             }
             for (Term item : node.removeRight()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     removeRight.add((Term) result);
                 }
@@ -699,8 +721,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             Map<Term, Term> items = new HashMap<>();
             for (Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-                Term key = (Term) processChildTerm(node, entry.getKey(), entry.getKey().accept(this, p), p);
-                Term value = (Term) processChildTerm(node, entry.getValue(), entry.getValue().accept(this, p), p);
+                Term key = (Term) processChildTerm(entry.getKey(), entry.getKey().accept(this, p));
+                Term value = (Term) processChildTerm(entry.getValue(), entry.getValue().accept(this, p));
                 if (key != null && value != null) {
                     items.put(key, value);
                 }
@@ -718,9 +740,9 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Variable base = (Variable) processChildTerm(node, node.base(), node.base().accept(this, p), p);
-            Term key = (Term) processChildTerm(node, node.key(), node.key().accept(this, p), p);
-            Term value = (Term) processChildTerm(node, node.value(), node.value().accept(this, p), p);
+            Variable base = (Variable) processChildTerm(node.base(), node.base().accept(this, p));
+            Term key = (Term) processChildTerm(node.key(), node.key().accept(this, p));
+            Term value = (Term) processChildTerm(node.value(), node.value().accept(this, p));
             if (changed(node.base(), base) || changed(node.key(), key)) {
                 node = new MapLookup(base, key, value, node.kind(), node.choice());
             }
@@ -734,19 +756,19 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Variable map = (Variable) processChildTerm(node, node.map(), node.map().accept(this, p), p);
+            Variable map = (Variable) processChildTerm(node.map(), node.map().accept(this, p));
             Map<Term, Term> removeEntries = new HashMap<>();
             Map<Term, Term> updateEntries = new HashMap<>();
             for (java.util.Map.Entry<Term, Term> entry : node.removeEntries().entrySet()) {
-                Term key = (Term) processChildTerm(node, entry.getKey(), entry.getKey().accept(this, p), p);
-                Term value = (Term) processChildTerm(node, entry.getValue(), entry.getValue().accept(this, p), p);
+                Term key = (Term) processChildTerm(entry.getKey(), entry.getKey().accept(this, p));
+                Term value = (Term) processChildTerm(entry.getValue(), entry.getValue().accept(this, p));
                 if (key != null && value != null) {
                     removeEntries.put(key, value);
                 }
             }
             for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
-                Term key = (Term) processChildTerm(node, entry.getKey(), entry.getKey().accept(this, p), p);
-                Term value = (Term) processChildTerm(node, entry.getValue(), entry.getValue().accept(this, p), p);
+                Term key = (Term) processChildTerm(entry.getKey(), entry.getKey().accept(this, p));
+                Term value = (Term) processChildTerm(entry.getValue(), entry.getValue().accept(this, p));
                 if (key != null && value != null) {
                     updateEntries.put(key, value);
                 }
@@ -829,8 +851,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term label = (Term) processChildTerm(node, node.getLabel(), node.getLabel().accept(this, p), p);
-            Term child = (Term) processChildTerm(node, node.getChild(), node.getChild().accept(this, p), p);
+            Term label = (Term) processChildTerm(node.getLabel(), node.getLabel().accept(this, p));
+            Term child = (Term) processChildTerm(node.getChild(), node.getChild().accept(this, p));
             if (changed(node.getLabel(), label)) {
                 node = copy(node);
                 node.setLabel(label);
@@ -849,7 +871,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
+            Term item = (Term) processChildTerm(node.getTerm(), node.getTerm().accept(this, p));
             if (changed(node.getTerm(), item)) {
                 node = copy(node);
                 node.setTerm(item);
@@ -880,7 +902,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
+            Term item = (Term) processChildTerm(node.getTerm(), node.getTerm().accept(this, p));
             if (changed(node.getTerm(), item)) {
                 node = copy(node);
                 node.setTerm(item);
@@ -895,8 +917,8 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term left = (Term) processChildTerm(node, node.getLeft(), node.getLeft().accept(this, p), p);
-            Term right = (Term) processChildTerm(node, node.getRight(), node.getRight().accept(this, p), p);
+            Term left = (Term) processChildTerm(node.getLeft(), node.getLeft().accept(this, p));
+            Term right = (Term) processChildTerm(node.getRight(), node.getRight().accept(this, p));
             if (changed(node.getLeft(), left)) {
                 node = copy(node);
                 node.setLeft(left, context);
@@ -917,7 +939,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<Term> items = new ArrayList<>();
             for (Term item : node.getContents()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((Term) result);
                 }
@@ -938,7 +960,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if(visitChildren()) {
             List<Attribute> items = new ArrayList<>();
             for (Attribute item : node.getContents()) {
-                ASTNode result = processChildTerm(node, item, item.accept(this, p), p);
+                ASTNode result = processChildTerm(item, item.accept(this, p));
                 if (result != null) {
                     items.add((Attribute) result);
                 }
@@ -974,7 +996,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term)processChildTerm(node, node.getContent(), node.getContent().accept(this, p), p);
+            Term item = (Term)processChildTerm(node.getContent(), node.getContent().accept(this, p));
             if (changed(node.getContent(), item)) {
                 node = copy(node);
                 node.setContent(item);
@@ -989,7 +1011,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term)processChildTerm(node, node.getContent(), node.getContent().accept(this, p), p);
+            Term item = (Term)processChildTerm(node.getContent(), node.getContent().accept(this, p));
             if (changed(node.getContent(), item)) {
                 node = copy(node);
                 node.setContent(item);
@@ -1028,7 +1050,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
+            Term item = (Term) processChildTerm(node.getTerm(), node.getTerm().accept(this, p));
             if (changed(node.getTerm(), item)) {
                 node = copy(node);
                 node.setTerm(item);
@@ -1051,7 +1073,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
+            Term item = (Term) processChildTerm(node.getTerm(), node.getTerm().accept(this, p));
             if (changed(node.getTerm(), item)) {
                 node = copy(node);
                 node.setTerm(item);
@@ -1066,7 +1088,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             return cache.get(node);
         }
         if(visitChildren()) {
-            Term item = (Term) processChildTerm(node, node.getTerm(), node.getTerm().accept(this, p), p);
+            Term item = (Term) processChildTerm(node.getTerm(), node.getTerm().accept(this, p));
             if (changed(node.getTerm(), item)) {
                 node = copy(node);
                 node.setTerm(item);
@@ -1079,6 +1101,27 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         return name;
     }
     
+    /**
+     * Helper method to abstract details of how to decide whether a child term needs to
+     * be replaced in the tree.
+     * 
+     * Right now any object which is not identical to the object that was there before counts as
+     * "changed". Theoretically we could inline this method everywhere, but by centralizing it here,
+     * that mechanism can be changed later much more easily if we so desire.
+     * @param oldObj The child node before potentially being replaced.
+     * @param newObj The child node after having potentially been replaced.
+     * @return
+     */
+    public <T extends ASTNode> boolean changed(T oldObj, T newObj) {
+        return oldObj != newObj;
+    }
+    
+    /**
+     * Helper method to check {@link #changed(ASTNode, ASTNode)} on collections of terms.
+     * @param o
+     * @param n
+     * @return
+     */
     public final <T extends ASTNode> boolean changed(java.util.Collection<T> o,
             java.util.Collection<T> n) {
         Iterator<T> iter1 = o.iterator();
@@ -1090,6 +1133,12 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         return change || iter1.hasNext() != iter2.hasNext();
     }
     
+    /**
+     * Helper method to check {@link #changed(ASTNode, ASTNode)} on maps of terms.
+     * @param o
+     * @param n
+     * @return
+     */
     public final <K extends ASTNode, V extends ASTNode> boolean changed(
             java.util.Map<K, V> o, java.util.Map<K, V> n) {
         Iterator<Map.Entry<K, V>> iter1 = o.entrySet().iterator();
@@ -1104,10 +1153,51 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         return change || iter1.hasNext() != iter2.hasNext();
     }
     
+    /**
+     * The value this transformer returns by default from a {@link #visit(ASTNode, Object)} 
+     * or {@link Visitable#accept(Visitor, Object)} invocation if not overriden by the implementation
+     * of the visitor. For example, for {@link BasicVisitor}, which returns void, this method returns
+     * {@code null}, whereas for {@link AbstractTransformer}, which returns {@link ASTNode}, this
+     * method returns {@code node}.
+     * @param node The node being visited
+     * @param p The optional parameter for the visitor
+     * @return The value to return from the visit to this node.
+     */
     public abstract R defaultReturnValue(ASTNode node, P p);
-    public abstract ASTNode processChildTerm(ASTNode node, ASTNode child, R childResult, P p);
+    
+    /**
+     * Determines, based on the information provided from visiting a child term, what term should be
+     * reinserted into the tree after the child term is visited. For a visitor which does not transform,
+     * this is a no-op, returning {@code node}. For a visitor which transforms its children and
+     * replaces them, {@code R} is an {@link ASTNode}, so it returns {@code childResult}.
+     * @param child The child term before being visited.
+     * @param childResult The result from visiting the child term.
+     * @return The term to be reinserted as the new child in the tree.
+     */
+    public abstract ASTNode processChildTerm(ASTNode child, R childResult);
+    
+    /**
+     * Returns true if this visitor should visit the children of the term being visited, false
+     * if only the term itself should be visited.
+     * @return
+     */
     public abstract boolean visitChildren();
+    
+    /**
+     * Returns true if the result of visiting the tree should be cached by object identity; 
+     * false if every term should be visited regardless of sharing.
+     * @return
+     */
     public abstract boolean cache();
+    
+    /**
+     * Returns the object to pass to the visitor to the parent class of the class being visited. 
+     * By combining this field with {@link #defaultReturnValue(ASTNode, Object)}, it is possible
+     * to decide whether a visitor should make copies of any terms it modifies. This is used to
+     * distinguish {@link BasicTransformer}, which modifies nodes in-place in the tree, and 
+     * {@link CopyOnWriteTransformer}, which creates a copy of the tree to return if a node is changed.
+     * @param original The node being visited.
+     * @return The node as it will be passed to the visit method for its parent class.
+     */
     public abstract <T extends ASTNode> T copy(T original);
-    public abstract <T extends ASTNode> boolean changed(T o, T n);
 }

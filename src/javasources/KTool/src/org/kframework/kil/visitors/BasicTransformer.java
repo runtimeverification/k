@@ -13,7 +13,11 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 /**
- * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
+ * A transformer useful for processing parse forests (i.e. trees with ambiguity nodes).
+ * 
+ * To remove a branch of an ambiguity, throw {@link TransformerException} from the visit method.
+ * @author dwightguth
+ *
  */
 public class BasicTransformer extends AbstractTransformer {
 

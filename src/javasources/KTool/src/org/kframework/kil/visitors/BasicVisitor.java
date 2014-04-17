@@ -4,6 +4,11 @@ package org.kframework.kil.visitors;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
+/**
+ * A basic visitor pattern which takes no extra parameters, returns nothing, and throws no checked exceptions.
+ * @author dwightguth
+ *
+ */
 public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> {
     
     public BasicVisitor(Context context) {
@@ -20,7 +25,7 @@ public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> 
     }
 
     @Override
-    public ASTNode processChildTerm(ASTNode node, ASTNode child, Void _, Void __) {
+    public ASTNode processChildTerm(ASTNode child, Void _) {
         return child;
     }
     
