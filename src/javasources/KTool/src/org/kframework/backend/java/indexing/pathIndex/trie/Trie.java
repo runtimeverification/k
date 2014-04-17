@@ -1,4 +1,4 @@
-// Copyright (C) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex.trie;
 
 import java.util.Set;
