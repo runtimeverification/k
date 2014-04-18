@@ -3,4 +3,6 @@ module TEST
 
 syntax A ::= "a"
 
+syntax B ::= Id | B "+" B
+
 endmodule
