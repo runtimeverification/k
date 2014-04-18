@@ -3,7 +3,7 @@ package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
 import org.kframework.krun.K;
 import org.kframework.utils.ColorUtil;
@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class UnparserFilter extends BasicVisitor {
+public class UnparserFilter extends NonCachingVisitor {
     protected Indenter indenter = new Indenter();
     private boolean firstPriorityBlock = false;
     private boolean firstProduction = false;
