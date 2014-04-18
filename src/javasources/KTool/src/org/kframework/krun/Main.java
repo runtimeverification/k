@@ -215,7 +215,7 @@ public class Main {
     }
 
     private static KRun obtainKRun(Context context) {
-        if (K.backend.equals("maude")) {
+        if (K.backend.equals("maude") || K.backend.equals("symbolic")) {
             return new MaudeKRun(context, sw);
         } else if (K.backend.equals("java")) {
             try {
@@ -225,7 +225,7 @@ public class Main {
                 return null;
             }
         } else {
-            org.kframework.utils.Error.report("Currently supported backends are 'maude' and 'java'");
+            org.kframework.utils.Error.report("Currently supported backends are 'maude', 'java', and 'symbolic'");
             return null;
         }
     }
