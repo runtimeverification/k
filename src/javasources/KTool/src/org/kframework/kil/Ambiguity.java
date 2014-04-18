@@ -7,7 +7,6 @@ import org.w3c.dom.Element;
 import aterm.ATermAppl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
@@ -67,6 +66,6 @@ public class Ambiguity extends Collection {
 
     @Override
     public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.visit(this, p);
+        return visitor.complete(this, visitor.visit(this, p));
     }
 }

@@ -130,9 +130,9 @@ public class Sentence extends ModuleItem {
     public void setEnsures(Term ensures) {
         this.ensures = ensures;
     }
-    
+
     @Override
     public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.visit(this, p);
+        return visitor.complete(this, visitor.visit(this, p));
     }
 }

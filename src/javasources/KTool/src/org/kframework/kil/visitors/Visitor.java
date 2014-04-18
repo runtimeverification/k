@@ -101,4 +101,15 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(FreezerLabel freezerLabel, P p) throws E;
     public R visit(Freezer f, P p) throws E;
     public R visit(BackendTerm term, P p) throws E;
+    
+    /**
+     * This method must be called by {@link Visitable#accept(Visitor, Object)} with the ASTNode
+     * and the result of transforming the ASTNode. Its purpose is to factor out functionality
+     * which must be performed by the visitor for correctness regardless of whether the visit
+     * methods are overridden.
+     * @param node Should be the {@code this} of the ASTNode.
+     * @param Should be the result of visiting the ASTNode.
+     * @return Implementations should return {@code r}.
+     */
+    public R complete(ASTNode node, R r);
 }

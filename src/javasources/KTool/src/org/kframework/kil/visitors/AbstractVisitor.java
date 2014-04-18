@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-//TODO(dwightguth): 
 /**
  * A super-visitor class designed to support all use cases for visiting K and KAST syntax.
  * 
@@ -71,13 +70,10 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         this(context);
         this.name = name;
     }
-
+    
     @Override
     public R visit(ASTNode node, P p) throws E {
         R ret = defaultReturnValue(node, p);
-        if (cache()) {
-            cache.put(node, ret);
-        }
         return ret;
     }
 
@@ -1099,6 +1095,12 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
 
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public R complete(ASTNode node, R r) {
+        cache.put(node, r);
+        return r;
     }
     
     /**

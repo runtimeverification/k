@@ -81,9 +81,9 @@ public class Restrictions extends ModuleItem {
     public void setPattern(String pattern) {
         this.pattern = pattern;
     }
-    
+
     @Override
     public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.visit(this, p);
+        return visitor.complete(this, visitor.visit(this, p));
     }
 }
