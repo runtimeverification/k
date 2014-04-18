@@ -7,9 +7,12 @@
     results="."
     posixInitScript="init.sh"
     extension="test">
-    <all-programs>
+    <program name="1.test">
       <krun-option name="--parser" value="kast --parser binary" />
       <krun-option name="--term" />
-    </all-programs>
+    </program>
+    <program name="2.test">
+      <krun-option name="--parser" value="kast --sort K" />
+    </program>
   </test>
 </tests>
