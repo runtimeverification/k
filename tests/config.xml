@@ -498,10 +498,10 @@
     </all-programs>
   </test>
 
-  <include file="regression/binaryparser/config.xml"
-    directory="tests/regression/binaryparser"
-    programs="tests/regression/binaryparser"
-    results="tests/regression/binaryparser" />
+  <include file="regression/kast/config.xml"
+    directory="tests/regression/kast"
+    programs="tests/regression/kast"
+    results="tests/regression/kast" />
 
   <test
       definition="tests/regression/profiler/test.k"
