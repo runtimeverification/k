@@ -1,4 +1,4 @@
-// make && java -jar wrapperAndServer.jar --maudefile blah
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.runner;
 
 import joptsimple.OptionException;
