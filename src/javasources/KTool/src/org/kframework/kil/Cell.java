@@ -102,7 +102,7 @@ public class Cell extends Term {
                                                                                     // !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.ENDLABEL_label_ATTR)) {
-                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unescapeK("\"" + its.item(i).getNodeValue() + "\""));
+                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteString("\"" + its.item(i).getNodeValue() + "\""));
             }
         }
     }
@@ -138,7 +138,7 @@ public class Cell extends Term {
         while (!list.isEmpty()) {
             String key = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(0)).getName();
             String value = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(1)).getName();
-            cellAttributes.put(key, StringUtil.unescapeK(value));
+            cellAttributes.put(key, StringUtil.unquoteString(value));
             list = list.getNext();
         }
 

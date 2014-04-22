@@ -108,7 +108,7 @@ public final class StringToken extends Token {
      */
     @Override
     public String value() {
-        return StringUtil.escapeK(value);
+        return StringUtil.enquoteString(value);
     }
 
     @Override

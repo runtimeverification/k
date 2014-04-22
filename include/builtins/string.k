@@ -4,11 +4,9 @@ require "float.k"
 
 module STRING-SYNTAX-HOOKS
   imports #STRING-INTERFACE
-  syntax #String
-  syntax String ::= #String
-  // TODO(Radu): replace the above with bellow
-  //   syntax String ::= Token{"\"" ((~[\"\n\r\\])|([\\]~[\n\r]))* "'"}
 
+  syntax #String ::= Token{"\"" ((~[\"\n\r\\])|([\\]~[\n\r]))* "\""} [regex("[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][^\\n\\r]))*[\\\"]")]
+  syntax String ::= #String
 endmodule
 
 module STRING-HOOKS

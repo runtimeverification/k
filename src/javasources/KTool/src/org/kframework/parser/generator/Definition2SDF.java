@@ -185,7 +185,7 @@ public class Definition2SDF {
         sdf.append("\n");
         sdf.append("    DzDzINT        -> DzDzInt\n");
         //sdf.append("    DzDzID        -> DzDzId\n");
-        sdf.append("    DzDzSTRING    -> DzDzString\n");
+        //sdf.append("    DzDzSTRING    -> DzDzString\n");
         sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
 
         sdf.append("\n");

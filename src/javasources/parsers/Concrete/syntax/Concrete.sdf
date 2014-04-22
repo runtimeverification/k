@@ -49,7 +49,7 @@ context-free syntax
 	Set		-> CellContents %%{cons("Set")}
 	List	-> CellContents %%{cons("List")}
 
-	DzDzID "=" DzDzSTRING -> CellProperty {cons("CellProperty")}
+	DzDzID "=" DzStringDz -> CellProperty {cons("CellProperty")}
 	CellLabel "=>" CellLabel	-> CellLabel {non-assoc, cons("CellLabelRewrite")}
 
 	TagDz					-> TagListDz
@@ -58,7 +58,7 @@ context-free syntax
 
 	KEYDz							-> TagDz {cons("Tag")}
 	KEYDz "(" TAGCONTENTDz ")"		-> TagDz {cons("TagParam")}
-	KEYDz "(" DzDzSTRING ")"		-> TagDz {cons("TagString")}
+	KEYDz "(" DzStringDz ")"		-> TagDz {cons("TagString")}
 lexical syntax
 	[a-z] [A-Za-z\-0-9]*	-> KEYDz
 	TCDz*					-> TAGCONTENTDz

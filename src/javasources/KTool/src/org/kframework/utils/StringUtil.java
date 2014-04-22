@@ -105,8 +105,17 @@ public class StringUtil {
         return -1;
     }
 
-    public static String unescapeK(String str) {
+    /**
+     * Removes the first and last double-quote characters and unescapes special characters.
+     * @param str double-quoted string
+     * @return unescaped and unquoted string
+     */
+    public static String unquoteString(String str) {
         StringBuilder sb = new StringBuilder();
+        assert str.charAt(0) == '"' :
+                "Expected to find double quote at the beginning of string: " + str;
+        assert str.charAt(str.length() - 1) == '"' :
+                "Expected to find double quote at the end of string: " + str;
         for (int i = 1; i < str.length() - 1; i++) {
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '"') {
@@ -152,8 +161,12 @@ public class StringUtil {
         return sb.toString();
     }
 
-    
-    public static String escapeK(String value) {
+    /**
+     * Adds double-quote at the beginning and end of the string and escapes special characters.
+     * @param value any string
+     * @return C like textual representation of the string
+     */
+    public static String enquoteString(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
         result.append("\"");
@@ -186,25 +199,6 @@ public class StringUtil {
         }
         result.append("\"");
         return result.toString();
-    }
-
-    /**
-     * Use this function to print XML directly as string, and not when using DOM.
-     * 
-     * @param str
-     * @return
-     *
-
-    public static String escapeToXmlAttribute(String str) {
-        str = str.replaceAll("\\", "\\\\");
-        str = str.replaceAll("\n", "\\n");
-        str = str.replaceAll("\r", "\\r");
-        str = str.replaceAll("\t", "\\t");
-        str = str.replaceAll("&", "&amp;");
-        str = str.replaceAll("<", "&lt;");
-        str = str.replaceAll(">", "&gt;");
-        str = str.replaceAll("\"", "&quot;");
-        return str;
     }
 
     /**
