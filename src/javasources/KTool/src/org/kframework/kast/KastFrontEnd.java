@@ -77,6 +77,10 @@ public class KastFrontEnd {
         if (cmd.hasOption("verbose")) {
             globalOptions.verbose = true;
         }
+
+        if (cmd.hasOption("debug")) {
+            globalOptions.debug = true;
+        }
         
         globalOptions.initialize();
 

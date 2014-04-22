@@ -551,7 +551,7 @@ public class Main {
                         }
                         if (input.equals("y")) {
                             K.debug = true;
-                            debugExecution(KAST, lang, searchResult, context);
+                            debugExecution(KAST, searchResult, context);
                         } else if (input.equals("n")) {
                             K.debug = false;
                             K.guidebug = false;
@@ -598,19 +598,18 @@ public class Main {
         return true;
     }
 
-    // execute krun in debug mode (i.e. step by step execution)
-    // isSwitch variable is true if we enter in debug execution from normal
-    // execution (we use the search command with --graph option)
     /**
-     * 
-     * @param kast
-     * @param lang
-     * @param state
-     * @param context
+     *  execute krun in debug mode (i.e. step by step execution)
+     * isSwitch variable is true if we enter in debug execution from normal
+     * execution (we use the search command with --graph option)
+     * @param kast The term parsed from the program or term passed on the command line as the
+     * primary argument to krun.
+     * @param state An optional set of search results to initialize with the initial state of the debugger.
+     * @param context The definition context loaded from the compiled definition.
      * @return true if the application completed normally; false otherwise
      */
     @SuppressWarnings("unchecked")
-    public static boolean debugExecution(Term kast, String lang,
+    public static boolean debugExecution(Term kast,
                                       KRunResult<SearchResults> state, org.kframework.kil.loader.Context context) {
 
         ConsoleReader reader;
@@ -638,8 +637,6 @@ public class Main {
             completors.add(new ArgumentCompletor(argCompletor));
             reader.addCompletor(new MultiCompletor(completors));
 
-            new File(K.compiled_def + K.fileSeparator + "main.maude")
-                    .getAbsolutePath();
             RunProcess rp = new RunProcess();
             KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
@@ -1026,6 +1023,10 @@ public class Main {
         // set verbose
         if (cmd.hasOption("verbose")) {
             globalOptions.verbose = true;
+        }
+        
+        if (cmd.hasOption("debug")) {
+            globalOptions.debug = true;
         }
         
         globalOptions.initialize();
@@ -1483,7 +1484,7 @@ public class Main {
                 if (K.guidebug)
                     return guiDebugExecution(KAST, lang, null, context);
                 else
-                    debugExecution(KAST, lang, null, context);
+                    debugExecution(KAST, null, context);
             }
         } catch (IOException e) {
             e.printStackTrace();

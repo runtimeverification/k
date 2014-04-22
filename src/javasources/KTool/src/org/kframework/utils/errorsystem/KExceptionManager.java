@@ -33,7 +33,7 @@ public class KExceptionManager {
     }
     
     /**
-     * Thrown to indicate that the K Exception manager has terminated the applciation due to an error.
+     * Thrown to indicate that the K Exception manager has terminated the application due to an error.
      * @author dwightguth
      */
     public static class KEMException extends RuntimeException {

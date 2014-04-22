@@ -102,7 +102,12 @@ public class DefinitionLoader {
 
             // transfer information from the BasicParser object, to the Definition object
             org.kframework.kil.Definition def = new org.kframework.kil.Definition();
-            def.setMainFile(mainFile.getAbsolutePath());
+            try {
+                def.setMainFile(mainFile.getCanonicalPath());
+            } catch (IOException e) {
+                // this isn't worth crashing the application over, so just use the absolute path
+                def.setMainFile(mainFile.getAbsolutePath());
+            }
             def.setMainModule(mainModule);
             def.setModulesMap(bparser.getModulesMap());
             def.setItems(bparser.getModuleItems());
@@ -126,7 +131,7 @@ public class DefinitionLoader {
             //This following line was commented out to make the latex backend 
             //parse files importing from other files
             def = (Definition) def.accept(new RemoveUnusedModules(context, autoinclude));
-            
+
             // HERE: add labels to sorts
 
             def.preprocess(context);
