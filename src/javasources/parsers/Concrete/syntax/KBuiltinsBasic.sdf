@@ -1,3 +1,4 @@
+%% Copyright (c) 2014 K Team. All Rights Reserved.
 %% Grammar for the K language
 module KBuiltinsBasic
 imports Common %% For Comments and whitespace
