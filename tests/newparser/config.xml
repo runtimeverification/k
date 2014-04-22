@@ -8,7 +8,7 @@
 		  extension="test"
 		  results="01-list/">
 		<all-programs>
-			<krun-option name="-parser" value="kast.bat -parser newprogram" />
+			<krun-option name="-parser" value="kast -parser newprogram" />
 		</all-programs>
 	</test>
 
@@ -18,7 +18,7 @@
 		  extension="test"
 		  results="02-arithmetic-expressions/">
 		<all-programs>
-			<krun-option name="-parser" value="kast.bat -parser newprogram" />
+			<krun-option name="-parser" value="kast -parser newprogram" />
 		</all-programs>
 	</test>
 
@@ -28,7 +28,7 @@
 		  extension="test"
 		  results="03-arithmetic-expressions-amb/">
 		<all-programs>
-			<krun-option name="-parser" value="kast.bat -parser newprogram" />
+			<krun-option name="-parser" value="kast -parser newprogram" />
 		</all-programs>
 	</test>
 
@@ -38,7 +38,7 @@
 		  extension="test"
 		  results="04-ambiguous-constructor/">
 		<all-programs>
-			<krun-option name="-parser" value="kast.bat -parser newprogram" />
+			<krun-option name="-parser" value="kast -parser newprogram" />
 		</all-programs>
 	</test>
 

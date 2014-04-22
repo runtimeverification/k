@@ -31,9 +31,9 @@
 
   <!-- Include the tests for the new parser. -->
   <include file="newparser/config.xml"
-           directory="newparser"
-           programs="newparser"
-           results="newparser" />
+           directory="tests/newparser"
+           programs="tests/newparser"
+           results="tests/newparser" />
 <!--
   QUINE
 -->
