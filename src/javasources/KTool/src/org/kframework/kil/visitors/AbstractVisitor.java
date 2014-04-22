@@ -70,7 +70,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         this(context);
         this.name = name;
     }
-    
+
     @Override
     public R visit(ASTNode node, P p) throws E {
         R ret = defaultReturnValue(node, p);

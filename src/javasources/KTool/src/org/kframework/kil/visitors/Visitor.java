@@ -106,7 +106,10 @@ public interface Visitor<P, R, E extends Throwable> {
      * This method must be called by {@link Visitable#accept(Visitor, Object)} with the ASTNode
      * and the result of transforming the ASTNode. Its purpose is to factor out functionality
      * which must be performed by the visitor for correctness regardless of whether the visit
-     * methods are overridden.
+     * methods are overridden. For example, a visitor may override a method in such a way that 
+     * children are not accepted, or so that the parent class's visit method is not called.
+     * This method serves to guarantee that certain functionality will occur regardless of whether
+     * this is the case.
      * @param node Should be the {@code this} of the ASTNode.
      * @param Should be the result of visiting the ASTNode.
      * @return Implementations should return {@code r}.
