@@ -22,24 +22,12 @@
 		</all-programs>
 	</test>
 
-	<test
-		  definition="03-arithmetic-expressions-amb/test.k"
-		  programs="03-arithmetic-expressions-amb/"
-		  extension="test"
-		  results="03-arithmetic-expressions-amb/">
-		<all-programs>
-			<krun-option name="-parser" value="kast -parser newprogram" />
-		</all-programs>
-	</test>
+	
+	<!-- TODO(Radu): once ktest can call kast, add programs for tests. See issue 
+		https://github.com/kframework/k/pull/397
+	-->
+	<test definition="03-arithmetic-expressions-amb/test.k" />
 
-	<test
-		  definition="04-ambiguous-constructor/test.k"
-		  programs="04-ambiguous-constructor/"
-		  extension="test"
-		  results="04-ambiguous-constructor/">
-		<all-programs>
-			<krun-option name="-parser" value="kast -parser newprogram" />
-		</all-programs>
-	</test>
+	<test definition="04-ambiguous-constructor/test.k" />
 
 </tests>
