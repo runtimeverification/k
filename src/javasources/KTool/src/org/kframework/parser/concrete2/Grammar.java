@@ -1,4 +1,4 @@
-// Copyright (C) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
 import java.io.Serializable;
@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import org.kframework.kil.KSorts;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
+import org.kframework.utils.algorithms.SCCTarjan;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 <tests>
 
 <!-- begin Java Rewrite Engine tests -->
@@ -14,7 +14,8 @@
       results="tutorial/2_languages/1_simple/1_untyped/tests/"
       >
     <kompile-option name="--backend" value="java" />
-    <all-programs>
+    <kompile-option name="--rule-index" value="path" />
+      <all-programs>
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
     </all-programs>
@@ -27,6 +28,7 @@
       results="tutorial/2_languages/1_simple/2_typed/1_static/tests/"
       >
     <kompile-option name="--backend" value="java" />
+    <kompile-option name="--rule-index" value="path" />
     <all-programs>
       <krun-option name="--smt" value="none" />
       <krun-option name="--search" />
@@ -42,6 +44,7 @@
       results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests/"
       >
     <kompile-option name="--backend" value="java" />
+    <kompile-option name="--rule-index" value="path" />
     <all-programs>
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
@@ -56,6 +59,7 @@
       results="tutorial/2_languages/2_kool/1_untyped/tests/"
       >
     <kompile-option name="--backend" value="java" />
+    <kompile-option name="--rule-index" value="path" />
     <all-programs>
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
@@ -70,6 +74,7 @@
       results="tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/"
       >
     <kompile-option name="--backend" value="java" />
+    <kompile-option name="--rule-index" value="path" />
     <all-programs>
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
@@ -85,6 +90,7 @@
       results="tutorial/2_languages/2_kool/2_typed/2_static/tests/"
       >
     <kompile-option name="--backend" value="java" />
+      <kompile-option name="--rule-index" value="path" />
     <all-programs>
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
@@ -101,6 +107,7 @@
       results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests"
       >
     <kompile-option name="--backend" value="java" />
+    <kompile-option name="--rule-index" value="path" />
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />

@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 
 package org.kframework.backend.java.symbolic;
 
@@ -167,8 +167,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         public static final String SEPARATOR = " =? ";
 
-        private Term leftHandSide;
-        private Term rightHandSide;
+        private final Term leftHandSide;
+        private final Term rightHandSide;
 
         private Equality(Term leftHandSide, Term rightHandSide) {
             if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
@@ -297,53 +297,61 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         /**
-         * Substitutes this equality with according to a specified substitution
-         * map.
-         * 
+         * Returns an {@code Equality} obtained by applying the {@code substitution} on
+         * {@code this} equality.
+         *
          * @param substitution
          *            the specified substitution map
          */
-        private void substitute(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
-            rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
-        }
-        
-        /**
-         * Substitutes this equality with according to a specified substitution
-         * map and evaluates pending functions.
-         * 
-         * @param substitution
-         *            the specified substitution map
-         */
-        public void substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
-            rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
+        private Equality substitute(Map<Variable, ? extends Term> substitution) {
+            Term returnLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
+            Term returnRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
+            if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
+                return new Equality(returnLeftHandSide, returnRightHandSide);
+            } else {
+                return this;
+            }
         }
 
-        // YilongL: no need to override equals() and hashCode() because all we
-        // need to compare two equalities is identity check
-        //        @Override
-//        public boolean equals(Object object) {
-//            if (this == object) {
-//                return true;
-//            }
-//
-//            if (!(object instanceof Equality)) {
-//                return false;
-//            }
-//
-//            Equality equality = (Equality) object;
-//            return leftHandSide.equals(equality.leftHandSide)
-//                   && rightHandSide.equals(equality.rightHandSide);
-//        }
-//        
-//        @Override
-//        public int hashCode() {
-//            int hash = 1;
-//            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
-//            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
-//            return hash;
-//        }
+        /**
+         * Returns an {@code Equality} obtained by applying the {@code substitution} on
+         * {@code this} equality and then evaluating pending functions.
+         *
+         * @param substitution
+         *            the specified substitution map
+         */
+        private Equality substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
+            Term returnLeftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
+            Term returnRightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
+            if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
+                return new Equality(returnLeftHandSide, returnRightHandSide);
+            } else {
+                return this;
+            }
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            if (!(object instanceof Equality)) {
+                return false;
+            }
+
+            Equality equality = (Equality) object;
+            return leftHandSide.equals(equality.leftHandSide)
+                    && rightHandSide.equals(equality.rightHandSide);
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
+            return hashCode;
+        }
 
         @Override
         public String toString() {
@@ -963,21 +971,21 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }        
         recursiveNormalize = false;
     }
-    
+
     private void renormalize() {
         isNormal = true;
         equalities.addAll(equalityBuffer);
         equalityBuffer.clear();
-                
-        Set<Equality> equalitiesToRemove = new HashSet<Equality>();
-        for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
-            Equality equality = iterator.next();
-            
+
+        Set<Equality> equalitiesToRemove = new HashSet<>();
+        for (int i = 0; i < equalities.size(); ++i) {
             // YilongL: no need to evaluate after substitution because the LHS
             // of the rule and the subject term should have no function symbol
             // inside; in other words, only side conditions need to be evaluated
             // and they should have been taken care of in method add(Term,Term)
-            equality.substitute(substitution);
+            Equality equality = equalities.get(i).substitute(substitution);
+            equalities.set(i, equality);
+
             if (equality.isTrue()) {
                 equalitiesToRemove.add(equality);
                 continue;
@@ -1010,18 +1018,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 continue;
             }
 
+            equalitiesToRemove.add(equality);
+
             Map<Variable, Term> tempSubst = Collections.singletonMap(variable, term);
             composeSubstitution(tempSubst, context, false);
             if (truthValue == TruthValue.FALSE) {
                 return;
             }
 
-            for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
-                Equality previousEquality = previousIterator.next();
-                if (previousEquality == equality) {
-                    break;
-                }
-                
+            for (int j = 0; j < i; ++j) {
+                Equality previousEquality = equalities.get(j);
                 /*
                  * Do not modify the previousEquality if it has been added to
                  * the HashSet equalitiesToRemove since this may result in
@@ -1038,9 +1044,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     }
                 }
             }
-            equalitiesToRemove.add(equality);
         }
-        
+
         equalities.removeAll(equalitiesToRemove);
     }
 
@@ -1103,8 +1108,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             entry.setValue(entry.getValue().substituteWithBinders(freshSubstitution, context));
         }
 
-        for (Equality equality : equalities) {
-            equality.substitute(freshSubstitution);
+        for (int i = 0; i < equalities.size(); ++i) {
+            equalities.set(i, equalities.get(i).substitute(freshSubstitution));
         }
 
         return freshSubstitution;
@@ -1201,10 +1206,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     @Override
     public int hashCode() {
         // TODO(YilongL): normalize and sort equalities?
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + equalities.hashCode();
-        hash = hash * Utils.HASH_PRIME + substitution.hashCode();
-        return hash;
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + equalities.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
+        return hashCode;
     }
 
     @Override

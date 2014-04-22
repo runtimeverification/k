@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.ksimulation;
 
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
-import org.fusesource.jansi.AnsiConsole;
 
 public class Adjuster {
     

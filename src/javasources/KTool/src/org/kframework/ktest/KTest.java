@@ -1,10 +1,9 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
-import org.fusesource.jansi.AnsiConsole;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.CmdArgs.CmdArgParser;
 import org.kframework.ktest.CmdArgs.Constants;
@@ -99,7 +98,6 @@ public class KTest {
     }
 
     public static void main(String[] args) {
-        AnsiConsole.systemInstall();
         try {
             System.exit(new KTest(args).run());
         } catch (ParseException | InvalidArgumentException | SAXException |

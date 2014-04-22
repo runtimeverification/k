@@ -1,13 +1,9 @@
-// Copyright (C) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.SMTSolver;
@@ -196,10 +192,10 @@ public final class KompileOptions implements Serializable {
         public boolean noPrelude = false;
         
         @Parameter(names="--symbolic-rules", converter=TagListConverter.class, description="Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public Set<String> symbolicRules;
+        public Set<String> symbolicRules = new HashSet<>();
         
         @Parameter(names="--non-symbolic-rules", converter=TagListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public Set<String> nonSymbolicRules;
+        public Set<String> nonSymbolicRules = new HashSet<>();
         
         @Parameter(names="--test-gen", description="Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.")
         public boolean testGen = false;

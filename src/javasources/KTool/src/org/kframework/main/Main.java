@@ -1,10 +1,11 @@
-// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.main;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.Error;
 import org.kframework.utils.Stopwatch;
@@ -38,6 +39,7 @@ public class Main {
     public static void main(String[] args) throws IOException, TransformerException {
         Stopwatch.instance();
         setJavaLibraryPath();
+        AnsiConsole.systemInstall();
 
         if (args.length >= 1) {
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);

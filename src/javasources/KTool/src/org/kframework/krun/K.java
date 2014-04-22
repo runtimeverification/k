@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import org.kframework.kil.loader.Context;
@@ -58,7 +58,7 @@ public class K {
 
     // the default values for jkrun commandline options
     public static String pgm;
-    public static String term = null;
+    public static boolean term = false;
     public static String directory = null;
     public static String main_module;
     public static String syntax_module;

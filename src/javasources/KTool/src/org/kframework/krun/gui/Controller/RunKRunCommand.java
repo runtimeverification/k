@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.Controller;
 
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
@@ -42,7 +42,7 @@ public class RunKRunCommand {
         rp = new RunProcess();
         this.krun = createKrun(context);
         Term cfg;
-        cfg = Main.makeConfiguration(KAST, null, rp, K.term != null, context);
+        cfg = Main.makeConfiguration(KAST, null, rp, K.term, context);
         debugger = krun.debug(cfg);
     }
 

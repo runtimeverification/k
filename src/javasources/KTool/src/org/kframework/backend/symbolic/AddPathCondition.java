@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -108,7 +108,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             
             Attributes atts = node.getAttributes();
             Term cond = condition;
-            if (context.kompileOptions.experimental.smt == SMTSolver.NONE) {
+            if (context.kompileOptions.experimental.smt != SMTSolver.NONE) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition, context));

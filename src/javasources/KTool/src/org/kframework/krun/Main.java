@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import static org.apache.commons.io.FileUtils.deleteDirectory;
@@ -29,7 +29,6 @@ import jline.SimpleCompletor;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.io.FilenameUtils;
-import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
@@ -152,11 +151,7 @@ public class Main {
                                          RunProcess rp, boolean hasTerm, Context context) throws TransformerException, IOException {
 
         if (hasTerm) {
-            if (kast == null) {
-                return rp.runParserOrDie(K.getProgramParser(), K.term, false, null, context);
-            } else {
-                org.kframework.utils.Error.report("You cannot specify both the term and the configuration\nvariables.");
-            }
+            return kast;
         }
 
         HashMap<String, Term> output = new HashMap<String, Term>();
@@ -220,7 +215,7 @@ public class Main {
     }
 
     private static KRun obtainKRun(Context context) {
-        if (K.backend.equals("maude")) {
+        if (K.backend.equals("maude") || K.backend.equals("symbolic")) {
             return new MaudeKRun(context, sw);
         } else if (K.backend.equals("java")) {
             try {
@@ -230,7 +225,7 @@ public class Main {
                 return null;
             }
         } else {
-            org.kframework.utils.Error.report("Currently supported backends are 'maude' and 'java'");
+            org.kframework.utils.Error.report("Currently supported backends are 'maude', 'java', and 'symbolic'");
             return null;
         }
     }
@@ -309,7 +304,7 @@ public class Main {
                                     K.searchType,
                                     patternRule,
                                     makeConfiguration(KAST, buffer, rp,
-                                            (K.term != null), context), steps);
+                                            K.term, context), steps);
                         } else{
                             result = krun.search(
                                     bound,
@@ -317,7 +312,7 @@ public class Main {
                                     K.searchType,
                                     patternRule,
                                     makeConfiguration(KAST, buffer, rp,
-                                            (K.term != null), context), steps);
+                                            K.term, context), steps);
                         }
 
                         sw.printTotal("Search total");
@@ -345,7 +340,7 @@ public class Main {
                             .modelCheck(
                                     KAST1,
                                     makeConfiguration(KAST, null, rp,
-                                            (K.term != null), context));
+                                            K.term, context));
 
                     sw.printTotal("Model checking total");
                 } else if (K.prove.length() > 0) {
@@ -359,18 +354,18 @@ public class Main {
                     Module mod = parsed.getSingletonModule();
                     Term cfg = null;
                     if (KAST != null) {
-                        cfg = makeConfiguration(KAST, null, rp, (K.term != null), context);
+                        cfg = makeConfiguration(KAST, null, rp, K.term, context);
                     }
                     result = krun.prove(mod, cfg);
                 } else if (cmd.hasOption("depth")) {
                     int depth = Integer.parseInt(K.depth);
                     result = krun.step(makeConfiguration(KAST, null, rp,
-                            (K.term != null), context), depth);
+                            K.term, context), depth);
 
                     sw.printTotal("Bounded execution total");
                 } else {
                     result = krun.run(makeConfiguration(KAST, null, rp,
-                            (K.term != null), context));
+                            K.term, context));
 
                     sw.printTotal("Normal execution total");
                 }
@@ -513,7 +508,7 @@ public class Main {
                 }
                 
                 if (!cmd.hasOption("output-file")) {
-                    AnsiConsole.out.println(output);
+                    System.out.println(output);
                 } else {
                     writeStringToFile(new File(K.output), output);
                 }
@@ -522,8 +517,7 @@ public class Main {
                     System.out.println(K.lineSeparator + "The search graph is:"
                             + K.lineSeparator);
                     KRunResult<SearchResults> searchResult = (KRunResult<SearchResults>) result;
-                    AnsiConsole.out
-                            .println(searchResult.getResult().getGraph());
+                    System.out.println(searchResult.getResult().getGraph());
                     // offer the user the possibility to turn execution into
                     // debug mode
                     while (true) {
@@ -615,12 +609,11 @@ public class Main {
             KRunDebugger debugger;
             try {
                 if (state == null) {
-                    Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
+                    Term t = makeConfiguration(kast, "", rp, K.term, context);
                     debugger = krun.debug(t);
                     System.out
                             .println("After running one step of execution the result is:");
-                    AnsiConsole.out.println(debugger.printState(debugger
-                            .getCurrentState()));
+                    System.out.println(debugger.printState(debugger.getCurrentState()));
                 } else {
                     debugger = krun.debug(state.getResult().getGraph());
                 }
@@ -680,8 +673,7 @@ public class Main {
                     if (cmd.hasOption("resume")) {
                         try {
                             debugger.resume();
-                            AnsiConsole.out.println(debugger
-                                    .printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (IllegalStateException e) {
                             org.kframework.utils.Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
@@ -701,8 +693,7 @@ public class Main {
                         try {
                             int steps = Integer.parseInt(arg);
                             debugger.step(steps);
-                            AnsiConsole.out.println(debugger
-                                    .printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to step must be an integer.");
                         } catch (IllegalStateException e) {
@@ -722,7 +713,7 @@ public class Main {
                         try {
                             int steps = Integer.parseInt(arg);
                             SearchResults states = debugger.stepAll(steps);
-                            AnsiConsole.out.println(states);
+                            System.out.println(states);
 
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to step-all must be an integer.");
@@ -739,8 +730,7 @@ public class Main {
                         try {
                             int stateNum = Integer.parseInt(arg);
                             debugger.setCurrentState(stateNum);
-                            AnsiConsole.out.println(debugger
-                                    .printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to select must bean integer.");
                         } catch (IllegalArgumentException e) {
@@ -758,8 +748,7 @@ public class Main {
                         String nodeId = cmd.getOptionValue("show-node").trim();
                         try {
                             int stateNum = Integer.parseInt(nodeId);
-                            AnsiConsole.out.println(debugger
-                                    .printState(stateNum));
+                            System.out.println(debugger.printState(stateNum));
                         } catch (NumberFormatException e) {
                             org.kframework.utils.Error.silentReport("Argument to select node to show must be an integer.");
                         } catch (IllegalArgumentException e) {
@@ -774,8 +763,7 @@ public class Main {
                         try {
                             int state1 = Integer.parseInt(vals[0].trim());
                             int state2 = Integer.parseInt(vals[1].trim());
-                            AnsiConsole.out.println(debugger.printEdge(state1,
-                                    state2));
+                            System.out.println(debugger.printEdge(state1, state2));
                         } catch (ArrayIndexOutOfBoundsException e) {
                             org.kframework.utils.Error.silentReport("Must specify two nodes with an edge between them.");
                         } catch (NumberFormatException e) {
@@ -804,8 +792,7 @@ public class Main {
                         try {
                             debugger.readFromStdin(StringBuiltin.valueOf("\"" +
                                     cmd.getOptionValue("read") + "\"").stringValue());
-                            AnsiConsole.out.println(
-                                    debugger.printState(debugger.getCurrentState()));
+                            System.out.println(debugger.printState(debugger.getCurrentState()));
                         } catch (IllegalStateException e) {
                             org.kframework.utils.Error.silentReport(e.getMessage());
                         }
@@ -929,7 +916,7 @@ public class Main {
             KAST = null;
         }
 
-        if (K.term != null) {
+        if (K.term) {
             if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                 if (K.backend.equals("java")) {
                     K.parser = "kast --parser rule";
@@ -940,7 +927,7 @@ public class Main {
         }
         
         org.kframework.kil.Term term = makeConfiguration(KAST, null, rp,
-                (K.term != null), context);
+                K.term, context);
         return term;
     }
 
@@ -1040,7 +1027,7 @@ public class Main {
                 K.customParser = cmd.getOptionValue("parser");
             }
             if (cmd.hasOption("term")) {
-                K.term = cmd.getOptionValue("term");
+                K.term = true;
             }
             if (cmd.hasOption("io")) {
                 String v = cmd.getOptionValue("io");
@@ -1173,7 +1160,7 @@ public class Main {
             }
             if (cmd.hasOption("c")) {
 
-                if (K.term != null) {
+                if (K.term) {
                     org.kframework.utils.Error.report("You cannot specify both the term and the configuration\nvariables.");
                 }
 
@@ -1408,7 +1395,7 @@ public class Main {
 
             sw.printIntermediate("Kast process");
 
-            if (K.term != null) {
+            if (K.term) {
                 if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                     if (K.backend.equals("java")) {
                         K.parser = "kast --parser rule";

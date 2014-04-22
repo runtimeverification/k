@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
@@ -123,7 +123,7 @@ public class ConfigFileParser {
      */
     private boolean isValidTestCase(Element testNode) {
         // posixOnly attribute is valid only on Posix-compliant OS
-        return testNode.getAttributes().getNamedItem("posixOnly") == null
+        return testNode.getAttributes().getNamedItem("posixInitScript") == null
                 || GlobalSettings.isPosix();
     }
 
@@ -264,7 +264,7 @@ public class ConfigFileParser {
         String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
         String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
         Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
-        String posixOnly = parsePosixOnly(testAttrs.getNamedItem("posixOnly"));
+        String posixOnly = parsePosixOnly(testAttrs.getNamedItem("posixInitScript"));
 
         // handle children of `test' node
         NodeList childNodes = testNode.getChildNodes();

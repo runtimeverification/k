@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex.trie;
 
 
@@ -12,13 +13,17 @@ import java.util.Set;
  * Indexing technique.
  * Author: Owolabi Legunsen
  * 1/2/14: 7:52 PM
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
+@Deprecated
 public class PathIndexTrie implements Trie,Serializable {
+    public static final String ROOT_SYMBOL = "@";
     private final TrieNode root;
     private final String delimiter = "\\.";
 
     public PathIndexTrie() {
-        root = new TrieNode("@");
+        root = new TrieNode(ROOT_SYMBOL);
     }
 
     /**
@@ -159,14 +164,14 @@ public class PathIndexTrie implements Trie,Serializable {
         ArrayList<String> subList = new ArrayList<>(splitList.subList(1, splitList.size()));
         TrieNode child = trieNode.getChild(firstString);
         if (child != null) {
-            if (trieNode.getValue().equals("@")) {
+            if (trieNode.getValue().equals(ROOT_SYMBOL)) {
                 if (splitList.size() == 1 && (child instanceof TrieLeaf)) {
                     return child.getIndices();
                 }
                 return retrieveSet(child, subList);
             }
         } else {
-            if (!trieNode.getValue().equals("@")) {
+            if (!trieNode.getValue().equals(ROOT_SYMBOL)) {
                 return trieNode.getIndices();
             }
         }
@@ -175,12 +180,12 @@ public class PathIndexTrie implements Trie,Serializable {
             if (child != null) {
                 return child.getIndices();
             } else {
-                if (!trieNode.getValue().equals("@")) {
+                if (!trieNode.getValue().equals(ROOT_SYMBOL)) {
                     return trieNode.getIndices();
                 }
             }
 
-        } else if (splitList.size() > 1) {
+        } else if (splitList.size() > 1 && child != null) {
             return retrieveSet(child, subList);
         }
 

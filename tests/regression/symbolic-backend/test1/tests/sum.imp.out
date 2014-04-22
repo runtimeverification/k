@@ -1,0 +1,2 @@
+<path\-condition>\s*0 <=Int #symInt\(n\) ==Bool false\s*</path\-condition>
+<path\-condition>\s*0 <=Int #symInt\(n\) ==Bool true andBool 1 <=Int #symInt\(n\) ==Bool false\s*</path\-condition>

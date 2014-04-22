@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
@@ -189,6 +189,7 @@ public class TestSuite {
                 Proc<TestCase> p = new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(),
                         strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
                 ps.add(p);
+                p.setWorkingDir(tc.getWorkingDir());
                 tpe.execute(p);
             } else {
                 successfulTests.add(tc);

@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kast;
 
 import java.io.*;
@@ -12,6 +12,7 @@ import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.K;
 import org.kframework.krun.Main;
 import org.kframework.main.GlobalOptions;
@@ -44,7 +45,7 @@ public class KastFrontEnd {
     public static void kast(String[] args) {
         GlobalOptions globalOptions = new GlobalOptions();
         ExperimentalParserOptions parserOptions = new ExperimentalParserOptions();
-        Context context = new Context(globalOptions, parserOptions);
+        //Context context = new Context(globalOptions, parserOptions);
         KastOptionsParser op = new KastOptionsParser();
         CommandLine cmd = op.parse(args);
         if (cmd == null) {
@@ -109,6 +110,7 @@ public class KastFrontEnd {
         } else {
             directory = new File(System.getProperty("user.dir")).getAbsolutePath();
         }
+        File compiledFile = null;
         {
             // search for the definition
             File[] dirs = new File(directory).listFiles(new FilenameFilter() {
@@ -120,34 +122,42 @@ public class KastFrontEnd {
 
             for (int i = 0; i < dirs.length; i++) {
                 if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
-                    if (context.kompiled != null) {
+                    if (compiledFile != null) {
                         String msg = "Multiple compiled definitions found.";
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
                     } else {
-                        context.kompiled = dirs[i];
+                        compiledFile = dirs[i];
                     }
                 }
             }
-            if (context.kompiled == null && System.getenv("KRUN_COMPILED_DEF") != null) {
-                context.kompiled = new File(System.getenv("KRUN_COMPILED_DEF"));
+            if (compiledFile == null && System.getenv("KRUN_COMPILED_DEF") != null) {
+                compiledFile = new File(System.getenv("KRUN_COMPILED_DEF"));
             }
 
-            if (context.kompiled == null) {
+            if (compiledFile == null) {
                 String msg = "Could not find a compiled definition. Use --directory to specify one.";
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
             }
         }
+        Context context;
         try {
-            if (context.kompiled.exists()) {
-                File defXml = new File(context.kompiled.getCanonicalPath() + "/defx-maude.bin");
+            if (compiledFile.exists()) {
+                File defXml = new File(compiledFile.getCanonicalPath() + "/defx-maude.bin");
                 if (!defXml.exists()) {
                     //TODO(dwightguth): detect this based on kompile options
-                    defXml = new File(context.kompiled.getCanonicalPath() + "/defx-java.bin");
+                    defXml = new File(compiledFile.getCanonicalPath() + "/defx-java.bin");
                     if (!defXml.exists()) {
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line",
                                 defXml.getAbsolutePath()));
                     }
                 }
+                
+                KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
+                //merge krun options into kompile options object
+                kompileOptions.global = globalOptions;
+                kompileOptions.experimental.parser = parserOptions;
+                context = new Context(kompileOptions);
+                context.kompiled = compiledFile;
 
                 javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
                 javaDef = new FlattenModules(context).compile(javaDef, null);
@@ -158,11 +168,14 @@ public class KastFrontEnd {
             } else {
                 String msg = "Could not find a valid compiled definition. Use --directory to specify one.";
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
+                return;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         } catch (TransformerException e) {
             e.printStackTrace();
+            return;
         }
 
         boolean prettyPrint = false;

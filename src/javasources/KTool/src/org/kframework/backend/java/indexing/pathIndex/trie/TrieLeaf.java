@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex.trie;
 
 import java.io.Serializable;
@@ -8,8 +9,11 @@ import java.util.Set;
  * A leaf node in the trie, i.e., one that has no children
  * <p/>
  * Author: Owolabi Legunsen
- * 1/2/14: 7:30 PM
+ *
+ * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in
+ *              the future
  */
+@Deprecated
 public class TrieLeaf extends TrieNode implements Serializable{
     public Set<Integer> getIndices() {
         return indices;

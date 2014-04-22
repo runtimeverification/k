@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (C) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 
 <!--
   Use these tags for comments.  To test only one language,
@@ -498,6 +498,11 @@
     </all-programs>
   </test>
 
+  <include file="regression/kast/config.xml"
+    directory="tests/regression/kast"
+    programs="tests/regression/kast"
+    results="tests/regression/kast" />
+
   <test
       definition="tests/regression/profiler/test.k"
       programs="tests/regression/profiler"
@@ -513,4 +518,23 @@
            directory="tests/regression/generalized-strictness"
            programs="tests/regression/generalized-strictness"
            results="tests/regression/generalized-strictness" />
+
+  <!-- tests for symbolic backend -->
+  <test
+      definition="tutorial/1_k/4_imp++/lesson_7/imp.k"
+      programs="tests/regression/symbolic-backend/test1/programs"
+      results="tests/regression/symbolic-backend/test1/tests"
+      extension="imp">
+    <kompile-option name="--backend" value="symbolic" />
+    <kompile-option name="--directory" value="tutorial/1_k/4_imp++/lesson_7/imp-symbolic-kompile" />
+    <all-programs regex="true">
+       <krun-option name="--color" value="off" />
+       <krun-option name="--search" />
+       <krun-option name="--bound" value="2" />
+       <krun-option name="-c" key="IN" value="ListItem(#symInt(n))"/>
+       <krun-option name="-c" key="PC" value="true" />
+       <krun-option name="--directory" value="tutorial/1_k/4_imp++/lesson_7/imp-symbolic-kompile" />
+    </all-programs>
+  </test>
+
 </tests>
