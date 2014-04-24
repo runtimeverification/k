@@ -72,7 +72,7 @@ public class StringUtil {
             throw new IllegalArgumentException(Integer.toHexString(codePoint) +
                     " is not in the accepted unicode range.");
         }
-        if (codePoint >= 0x10ffff)
+        if (codePoint >= 0x110000)
             throw new IllegalArgumentException(Integer.toHexString(codePoint) +
                     " is not in the accepted unicode range.");
     }
