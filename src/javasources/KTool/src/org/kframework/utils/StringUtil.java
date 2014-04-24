@@ -69,8 +69,12 @@ public class StringUtil {
         if (codePoint >= 0xd800 && codePoint <= 0xdfff) {
             //we are trying to encode a surrogate pair, which the unicode
             //standard forbids
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(Integer.toHexString(codePoint) +
+                    " is not in the accepted unicode range.");
         }
+        if (codePoint >= 0x10ffff)
+            throw new IllegalArgumentException(Integer.toHexString(codePoint) +
+                    " is not in the accepted unicode range.");
     }
 
     public static int lastIndexOfAny(String str, String search, int offset) {
