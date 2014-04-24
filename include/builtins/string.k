@@ -8,12 +8,12 @@ module STRING-SYNTAX-HOOKS
   // Double Quoted Strings are of the form:
   // DoubleQuote StringChar* DoubleQuote
   // StringChar ::= ~[\"\n\r\\] // anything except for Newline, DoubleQuote and Backslash
-  //              | [\\][nrtf\"] // Backslash followed by either 'nrtf' or DoubleQuote
+  //              | [\\][nrtf\"\\] // Backslash followed by either 'nrtf', DoubleQuote or Backslash
   //              | [\\][x] 2*Hex // "\xFF" Backslash 'x' followed by two hexadecimal characters
   //              | [\\][u] 4*Hex // "\xFF" Backslash 'u' followed by four hexadecimal characters
   //              | [\\][U] 8*Hex // "\xFF" Backslash 'U' followed by eight hexadecimal characters
-  syntax #String ::= Token{"\"" ((~[\"\n\r\\]) | (((([\\][nrtf\"]) | ([\\][x][0-9a-fA-F][0-9a-fA-F])) | ([\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])) | ([\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))* "\""}
-                    [regex("[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"])|([\\\\][x][0-9a-fA-F][0-9a-fA-F])|([\\\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])|([\\\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*[\\\"]")]
+  syntax #String ::= Token{"\"" ((~[\"\n\r\\]) | (((([\\][nrtf\"\\]) | ([\\][x][0-9a-fA-F][0-9a-fA-F])) | ([\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])) | ([\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))* "\""}
+                    [regex("[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F][0-9a-fA-F])|([\\\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])|([\\\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*[\\\"]")]
   syntax String ::= #String
 endmodule
 
