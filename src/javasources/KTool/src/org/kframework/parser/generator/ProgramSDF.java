@@ -23,9 +23,6 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
- * 
- * @author RaduFmse
- * 
  */
 public class ProgramSDF {
 
