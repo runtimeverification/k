@@ -25,7 +25,6 @@ public class StringUtil {
                     sb.append('\f');
                 else if (str.charAt(i + 1) == '"')
                     sb.append('"');
-                // TODO: else, I think it should throw an exception
                 i++;
             } else
                 sb.append(str.charAt(i));
@@ -157,7 +156,6 @@ public class StringUtil {
                     sb.append(Character.toChars(codePoint));
                     i += 9;
                 }
-                // TODO: else, I think it should throw an exception
             } else {
                 sb.append(str.charAt(i));
             }
