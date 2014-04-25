@@ -1,4 +1,4 @@
-// This is a heavily commented K definition, part of the K tutorial.
+// Copyright (c) 2010-2014 K Team. All Rights Reserved.
 
 /*!
 \setlength{\parindent}{1em}
@@ -297,13 +297,13 @@ them is chosen first. */
 
 //@ \subsubsection{Arithmetic constructs}
 
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
 
 //@ \subsubsection{Boolean constructs}
 
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule ! T:Bool => notBool T
+  rule I1 <= I2 => I1 <=Int I2
+  rule ! T => notBool T
   rule true && B => B
   rule false && _ => false
 
@@ -327,7 +327,7 @@ sequentialize a syntactic list of statements ``s1 s2 ... sn.. into the
 corresponding computation ``s1 ~> s2 ~> ... ~> sn''. */
 
    rule .Stmts => .
-   rule S Ss => S ~> Ss  [structural]
+   rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
 
 //@ \subsubsection{Conditional statement}
 
@@ -352,7 +352,7 @@ uses the already existing addition symbol \texttt{+} from IMP) by
 reduction to the built-in string concatenation operation. */
 
   syntax KResult ::= String
-  rule Str1:String + Str2:String => Str1 +String Str2
+  rule Str1 + Str2 => Str1 +String Str2
 
 /*@ \subsubsection{Variable increment}
 Like variable lookup, this is also meant to be a supercool transition: we
@@ -376,7 +376,7 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => . ...</in>  [read]
+       <in> ListItem(I:Int) => .List ...</in>  [read]
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement is strict, so all its arguments are
@@ -398,7 +398,7 @@ count as a computational step. */
   syntax Printable ::= Int | String
   syntax AExp ::= Printable
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <out>... . => ListItem(P) </out>  [print]
+       <out>... .List => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]
 
 /*@ \subsubsection{Halt}
@@ -479,15 +479,15 @@ below can be structural, because what it effectively does is to take a
 snapshot of the current environment; this operation is arguably not a
 computational step. */
 
-  rule <k> {Ss} => Ss ~> env(Rho) ...</k> <env> Rho </env>  [structural]
+  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>  [structural]
 
 /*@ \subsubsection{Variable declaration}
 We allocate a fresh location for each newly declared variable and
 initialize it with 0. */
 
-  rule <k> int (X:Id,Xs => Xs); ...</k>
-       <env> Rho => Rho[N/X] </env>
-       <store>... . => N|->0 ...</store>
+  rule <k> int (X,Xs => Xs); ...</k>
+       <env> Rho => Rho[X <- N] </env>
+       <store>... .Map => N |-> 0 ...</store>
     when fresh(N:Nat)
   rule int .Ids; => .  [structural]
 
@@ -498,13 +498,12 @@ recovery.  Its role is to discard the current environment in the
 This rule is structural: we do not want them to count as computational
 steps in the transition system of a program. */
 
-  syntax K ::= env(Map)
-  rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
 
 /*@ If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule
 \begin{verbatim}
- rule (env(_) => .) ~> env(_)  [structural]
+ rule (_:Map => .) ~> _:Map  [structural]
 \end{verbatim}
 This rule acts like a ``tail recursion'' optimization, but for blocks. */
 endmodule
