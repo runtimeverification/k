@@ -160,32 +160,11 @@ public class IOServer {
         if (command.equals("writebytes")) {
             return new CommandWritebytes(args, socket, logger, fs); //, maudeId);
         }
-        if (command.equals("stat") || command.equals("opendir")) {
-            String cls;
-            if (command.equals("stat")) {
-                cls = "org.kframework.krun.ioserver.commands.CommandStat";
-            } else {
-                cls = "org.kframework.krun.ioserver.commands.CommandOpendir";
-            }
-            try {
-                Class commandStat = Class.forName(cls);
-                Class[] argTypes = {String[].class, Socket.class, Logger.class, FileSystem.class};
-                @SuppressWarnings("unchecked")
-                Constructor cons = commandStat.getDeclaredConstructor(argTypes);
-                Object[] arguments = {args, socket, logger, fs};
-                return (Command) cons.newInstance(arguments);
-            } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (InvocationTargetException e) {
-                Throwable t = e.getTargetException();
-                if (t instanceof Error) {
-                    throw (Error)t;
-                } else if (t instanceof RuntimeException) {
-                    throw (RuntimeException)t;
-                } else {
-                    throw new AssertionError("should not throw checked exceptions from unreachable code", e);
-                }
-            }
+        if (command.equals("stat")) {
+            return new CommandStat(args, socket, logger, fs);
+        }
+        if (command.equals("opendir")) {
+            return new CommandOpendir(args, socket, logger, fs);
         }
         if (command.equals("end")) {
             CommandEnd c = new CommandEnd(args, socket, logger, fs);
