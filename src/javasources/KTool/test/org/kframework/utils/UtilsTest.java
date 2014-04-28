@@ -8,10 +8,10 @@ public class UtilsTest {
 
     @Test
     public void StringUtilUnquote() throws Exception {
-        Assert.assertTrue(StringUtil.unquoteString("\"\n\"").equals("\n"));
-        Assert.assertTrue(StringUtil.unquoteString("\"\r\"").equals("\r"));
-        Assert.assertTrue(StringUtil.unquoteString("\"\f\"").equals("\f"));
-        Assert.assertTrue(StringUtil.unquoteString("\"\t\"").equals("\t"));
+        Assert.assertTrue(StringUtil.unquoteString("\"\\n\"").equals("\n"));
+        Assert.assertTrue(StringUtil.unquoteString("\"\\r\"").equals("\r"));
+        Assert.assertTrue(StringUtil.unquoteString("\"\\f\"").equals("\f"));
+        Assert.assertTrue(StringUtil.unquoteString("\"\\t\"").equals("\t"));
 
         Assert.assertTrue(StringUtil.unquoteString("\"\\x20\"").equals(" "));
         Assert.assertTrue(StringUtil.unquoteString("\"\\u0020\"").equals(" "));
