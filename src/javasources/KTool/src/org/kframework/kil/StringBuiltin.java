@@ -1,9 +1,9 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -86,8 +86,7 @@ public class StringBuiltin extends Token {
     public static StringBuiltin valueOf(String value) {
         assert value.charAt(0) == '"';
         assert value.charAt(value.length() - 1) == '"';
-        String stringValue = StringUtil.unescapeK(
-            value);
+        String stringValue = StringUtil.unquoteString(value);
         return StringBuiltin.of(stringValue);
     }
 
@@ -104,7 +103,7 @@ public class StringBuiltin extends Token {
         super(element);
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
         try {
-            value = StringUtil.unescapeK(s);
+            value = StringUtil.unquoteString(s);
         } catch (IllegalArgumentException e) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, encodingErrorMsg, this.getLocation(), this.getFilename()));
             throw e; //unreachable
@@ -115,7 +114,7 @@ public class StringBuiltin extends Token {
         super(atm);
         String s = ((ATermAppl) atm.getArgument(0)).getName();
         try {
-            value = StringUtil.unescapeK(s);
+            value = StringUtil.unquoteString(s);
         } catch (IllegalArgumentException e) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, encodingErrorMsg, this.getLocation(), this.getFilename()));
             throw e; //unreachable
@@ -148,7 +147,7 @@ public class StringBuiltin extends Token {
      */
     @Override
     public String value() {
-        return StringUtil.escapeK(value);
+        return StringUtil.enquoteString(value);
     }
 
     @Override

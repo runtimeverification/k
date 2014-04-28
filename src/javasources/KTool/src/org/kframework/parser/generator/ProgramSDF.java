@@ -19,12 +19,10 @@ import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
- *
- * @author RaduFmse
- *
  */
 public class ProgramSDF {
 
@@ -110,8 +108,8 @@ public class ProgramSDF {
 
         sdf.append("\n");
         sdf.append("    DzDzINT        -> DzDzInt\n");
-        sdf.append("    DzDzID        -> DzDzId\n");
-        sdf.append("    DzDzSTRING    -> DzDzString\n");
+        //sdf.append("    DzDzID        -> DzDzId\n");
+        //sdf.append("    DzDzSTRING    -> DzDzString\n");
         sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
         sdf.append("\n");
 
@@ -147,7 +145,7 @@ public class ProgramSDF {
 
         for (String t : ctv.terminals) {
             if (t.matches("[a-zA-Z\\_][a-zA-Z0-9\\_]*")) {
-                sdf.append("    \"" + StringUtil.escape(t) + "\" -> DzDzID {reject}\n");
+                sdf.append("    \"" + StringUtil.escape(t) + "\" -> IdDz {reject}\n");
             }
         }
 

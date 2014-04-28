@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import java.util.HashSet;
@@ -185,7 +186,7 @@ public class Definition2SDF {
         sdf.append("\n");
         sdf.append("    DzDzINT        -> DzDzInt\n");
         //sdf.append("    DzDzID        -> DzDzId\n");
-        sdf.append("    DzDzSTRING    -> DzDzString\n");
+        //sdf.append("    DzDzSTRING    -> DzDzString\n");
         sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
 
         sdf.append("\n");

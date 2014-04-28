@@ -29,6 +29,11 @@
            programs="."
            results="." />
 
+  <!-- Include the tests for the new parser. -->
+  <include file="newparser/config.xml"
+           directory="tests/newparser"
+           programs="tests/newparser"
+           results="tests/newparser" />
 <!--
   QUINE
 -->
