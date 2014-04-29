@@ -23,11 +23,11 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     public ASTNode visit(KApp kapp, Void _) throws TransformerException {
         ASTNode t = internalTransform(kapp);
         try {
-            t = t.accept(new TypeSystemFilter(context));
+            t = new TypeSystemFilter(context).visitNode(t);
         } catch (TransformerException e) {
             //type error, so don't disambiguate
         }
-        t = t.accept(new RemoveEmptyLists(context));
+        t = new RemoveEmptyLists(context).visitNode(t);
         return t;
     }
 
@@ -72,11 +72,11 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         if (label instanceof KInjectedLabel && child.equals(KList.EMPTY)) {
             if (label instanceof FreezerLabel) {
                 FreezerLabel l = (FreezerLabel) label;
-                return new Freezer((Term)l.getTerm().accept(this));
+                return new Freezer((Term) this.visitNode(l.getTerm()));
             }
             Term injected = ((KInjectedLabel)label).getTerm();
 //            if (injected instanceof Token) {
-                return (Term)injected.accept(this);
+                return (Term) this.visitNode(injected);
 //            }
         } else if (label instanceof KLabelConstant) {
             String klabel = ((KLabelConstant) label).getLabel();
@@ -88,7 +88,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             }
             if (conses != null) {    
                 for (int i = 0; i < contents.size(); i++) {
-                    contents.set(i, (Term)contents.get(i).accept(this));
+                    contents.set(i, (Term) this.visitNode(contents.get(i)));
                 }
                 for (String cons : conses) {
                     Production p = context.conses.get(cons);
@@ -147,7 +147,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Cell cell, Void _) throws TransformerException {
         if (cell.getLabel().matches(".*-fragment")) {
-            return cell.getContents().accept(this);
+            return this.visitNode(cell.getContents());
         }
         return super.visit(cell, _);
     }
@@ -156,7 +156,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     public ASTNode visit(Bag bag, Void _) throws TransformerException {
         List<Term> contents = new ArrayList<Term>();
         for (Term child : bag.getContents()) {
-            Term accept = (Term) child.accept(this);
+            Term accept = (Term) this.visitNode(child);
             if (accept instanceof ListTerminator) {
                 ListTerminator empty = (ListTerminator) accept;
                 if (!empty.getSort().equals("Bag")) {

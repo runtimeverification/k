@@ -73,7 +73,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                 return v;
             }
         };
-        Term result = (Term)term.accept(transformer);
+        Term result = (Term) transformer.visitNode(term);
         list.add(0, v);
         list.add(0, result);
         return list;
@@ -103,12 +103,12 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         if (term == null) {
             return null;
         }
-        return (Term)term.accept(substitution);
+        return (Term) substitution.visitNode(term);
     }
 
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
-        Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables(context));
+        Term body = (Term) new ResolveAnonymousVariables(context).visitNode(node.getBody());
         int countHoles = MetaK.countHoles(body, context);
         if (countHoles == 0) {
             GlobalSettings.kem.register(

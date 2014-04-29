@@ -49,11 +49,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
 
         Term t = mi.getKey();
         parentmi = t instanceof Rewrite || t instanceof Ambiguity ? mi : null;
-        mi.setKey((Term) t.accept(this));
+        mi.setKey((Term) this.visitNode(t));
 
         t = mi.getValue();
         parentmi = t instanceof Rewrite || t instanceof Ambiguity ? mi : null;
-        mi.setValue((Term) t.accept(this));
+        mi.setValue((Term) this.visitNode(t));
 
         parentks = null;
         parent = null;
@@ -74,11 +74,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
 
         Term t = ks.getContents().get(0);
         parentks = t instanceof Rewrite || t instanceof Ambiguity ? ks : null;
-        ks.getContents().set(0, (Term) t.accept(this));
+        ks.getContents().set(0, (Term) this.visitNode(t));
 
         t = ks.getContents().get(1);
         parentks = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? ks : null;
-        ks.getContents().set(1, (Term) t.accept(this));
+        ks.getContents().set(1, (Term) this.visitNode(t));
 
         parentks = null;
         parent = null;
@@ -93,12 +93,12 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
             parent = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? tc : null;
             parentks = null;
             parentmi = null;
-            tc.getContents().set(0, (Term) t.accept(this));
+            tc.getContents().set(0, (Term) this.visitNode(t));
 
             t = tc.getContents().get(1);
             parent = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? tc : null;
             parentks = null;
-            tc.getContents().set(1, (Term) t.accept(this));
+            tc.getContents().set(1, (Term) this.visitNode(t));
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof Sort) {
@@ -107,11 +107,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
                     if ((i == 0 || i == tc.getProduction().getItems().size() - 1) && (t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence)) {
                         parent = tc;
                         parentks = null;
-                        tc.getContents().set(j, (Term) t.accept(this));
+                        tc.getContents().set(j, (Term) this.visitNode(t));
                     } else {
                         parent = null;
                         parentks = null;
-                        tc.getContents().set(j, (Term) t.accept(this));
+                        tc.getContents().set(j, (Term) this.visitNode(t));
                     }
                     j++;
                 }
@@ -137,7 +137,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
                     parentmi = mi;
                 }
 
-                result = t.accept(this);
+                result = this.visitNode(t);
                 terms.add((Term) result);
             } catch (TransformerException e) {
                 exception = e;

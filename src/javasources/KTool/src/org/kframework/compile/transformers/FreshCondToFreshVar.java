@@ -31,14 +31,14 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
             return node;
 
         vars.clear();
-        ASTNode condNode = node.getRequires().accept(this);
+        ASTNode condNode = this.visitNode(node.getRequires());
         if (vars.isEmpty())
             return node;
 
         node = node.shallowCopy();
         node.setRequires((Term) condNode);
 
-        ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars));
+        ASTNode bodyNode = freshSubstitution(vars).visitNode(node.getBody());
         assert(bodyNode instanceof Term);
         node.setBody((Term)bodyNode);
         

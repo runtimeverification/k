@@ -79,8 +79,19 @@ public class CollectionBuiltin extends DataStructureBuiltin {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Collection<Term> getChildren(
+            DataStructureBuiltin.ListChildren type) {
+        switch (type) {
+            case ELEMENTS:
+                return elements;
+            default:
+                return super.getChildren(type);
+        }
     }
 
 }

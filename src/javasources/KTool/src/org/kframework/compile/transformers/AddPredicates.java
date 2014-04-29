@@ -249,7 +249,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", context);
-        node.accept(mv);
+        mv.visitNode(node);
         retNode.getItems().addAll(mv.getResult());
 
         if (retNode.getItems().size() != node.getItems().size())

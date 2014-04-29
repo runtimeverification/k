@@ -151,8 +151,8 @@ public class KastFrontEnd {
 
                 javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
                 javaDef = new FlattenModules(context).compile(javaDef, null);
-                javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig(
-                        context));
+                javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(context)
+                        .visitNode(javaDef);
                 // This is essential for generating maude
                 javaDef.preprocess(context);
             } else {
@@ -218,11 +218,11 @@ public class KastFrontEnd {
             StringBuilder kast;
             if (prettyPrint) {
                 KastFilter kastFilter = new KastFilter(indentationOptions, nextline, context);
-                out.accept(kastFilter);
+                kastFilter.visitNode(out);
                 kast = kastFilter.getResult();
             } else {
                 MaudeFilter maudeFilter = new MaudeFilter(context);
-                out.accept(maudeFilter);
+                maudeFilter.visitNode(out);
                 kast = maudeFilter.getResult();
                 kast.append(K.lineSeparator);
             }

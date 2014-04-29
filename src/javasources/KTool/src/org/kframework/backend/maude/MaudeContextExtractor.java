@@ -30,7 +30,7 @@ public class MaudeContextExtractor extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
-        node.accept(maudeFilter);
+        maudeFilter.visitNode(node);
         return null;
     }
 

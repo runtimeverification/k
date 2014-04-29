@@ -81,7 +81,7 @@ public class MergeAmbFilter extends BasicTransformer {
             amb2.setFilename(amb.getFilename());
             return super.visit(amb2, _);
         } else
-            return newchildren.get(0).accept(this);
+            return this.visitNode(newchildren.get(0));
     }
 
     /**

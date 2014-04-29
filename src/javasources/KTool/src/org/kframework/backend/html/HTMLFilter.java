@@ -95,7 +95,7 @@ public class HTMLFilter extends BackendFilter {
     
     @Override
     public Void visit(Definition def, Void _) {
-        def.accept(patternsVisitor);
+        patternsVisitor.visitNode(def);
         title = def.getMainModule();
         return super.visit(def, _);
 
@@ -151,7 +151,7 @@ public class HTMLFilter extends BackendFilter {
             for (ProductionItem pi : p.getItems()) {
                 if (!(pi instanceof Terminal)) {
                     termFilter.setResult("");
-                    pi.accept(termFilter);
+                    termFilter.visitNode(pi);
                     pattern = pattern.replace("{#" + n++ + "}", isLatex ? "\\)" + termFilter.getResult() + "\\(" : termFilter.getResult());
                 }
             }
@@ -161,7 +161,7 @@ public class HTMLFilter extends BackendFilter {
         } else {
             super.visit(p, _);
         }
-        p.getAttributes().accept(this);
+        this.visitNode(p.getAttributes());
         result.append("</td> </tr>" + endl);
         return _;
     }
@@ -259,7 +259,7 @@ public class HTMLFilter extends BackendFilter {
             } else {
                 result.append(str);
             }
-            trm.accept(this);
+            this.visitNode(trm);
         }
     }
     
@@ -293,17 +293,17 @@ public class HTMLFilter extends BackendFilter {
         }
         result.append("> RULE </span>");
         result.append("<div class=\"cell\"> ");
-        rule.getBody().accept(this);
+        this.visitNode(rule.getBody());
         result.append("</div> ");
         if (rule.getRequires() != null) {
             result.append(" when ");
-            rule.getRequires().accept(this);
+            this.visitNode(rule.getRequires());
         }
         if (rule.getEnsures() != null) {
             result.append(" ensures ");
-            rule.getEnsures().accept(this);
+            this.visitNode(rule.getEnsures());
         }
-        rule.getAttributes().accept(this);
+        this.visitNode(rule.getAttributes());
         result.append("</div> <br />" + endl);
         return _;
     }
@@ -311,16 +311,16 @@ public class HTMLFilter extends BackendFilter {
     @Override
     public Void visit(org.kframework.kil.Context cxt, Void _) {
         result.append("<div> CONTEXT ");
-        cxt.getBody().accept(this);
+        this.visitNode(cxt.getBody());
         if (cxt.getRequires() != null) {
             result.append(" when ");
-            cxt.getRequires().accept(this);
+            this.visitNode(cxt.getRequires());
         }
         if (cxt.getEnsures() != null) {
             result.append(" ensures ");
-            cxt.getEnsures().accept(this);
+            this.visitNode(cxt.getEnsures());
         }
-        cxt.getAttributes().accept(this);
+        this.visitNode(cxt.getAttributes());
         result.append("</div> <br />" + endl);
         return _;
     }
@@ -335,9 +335,9 @@ public class HTMLFilter extends BackendFilter {
     public Void visit(Rewrite rew, Void _) {
         
         result.append("<table class=\"rewrite\"> <tr class='rewriteLeft'> <td> <em>");
-        rew.getLeft().accept(this);
+        this.visitNode(rew.getLeft());
         result.append("</em></td></tr> <tr class='rewriteRight'> <td><em>");
-        rew.getRight().accept(this);
+        this.visitNode(rew.getRight());
         result.append("</em> </td> </tr> </table>");
         return _;
     }
@@ -349,7 +349,7 @@ public class HTMLFilter extends BackendFilter {
         else {
             String pattern = getBracketPattern(trm);
             HTMLFilter termFilter = new HTMLFilter(includePath, context);
-            trm.getContent().accept(termFilter);
+            termFilter.visitNode(trm.getContent());
             pattern = pattern.replace("{#1}", "<span>" + termFilter.getResult() + "</span>");
             result.append(pattern);
         }
@@ -367,7 +367,7 @@ public class HTMLFilter extends BackendFilter {
         if(type == null)
         {
             Production pr = context.conses.get(trm.getCons());
-            pr.accept(patternsVisitor);
+            patternsVisitor.visitNode(pr);
             type = patternsVisitor.getPatternType(trm.getCons());
         }
         /* This condition pretty much is : "Does this term have a Latex or HTML attribute?" */
@@ -380,7 +380,7 @@ public class HTMLFilter extends BackendFilter {
             HTMLFilter termFilter = new HTMLFilter(includePath, context);
             for (Term t : trm.getContents()) {
                 termFilter.setResult("");
-                t.accept(termFilter);
+                termFilter.visitNode(t);
                 if(type == HTMLPatternType.LATEX)
                     pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");
                 else
@@ -403,20 +403,20 @@ public class HTMLFilter extends BackendFilter {
             if (pr.getItems().size() > 0) {
                 if (pr.getItems().get(0) instanceof UserList) {
                     String separator = ((UserList) pr.getItems().get(0)).getSeparator();
-                    trm.getContents().get(0).accept(this);
+                    this.visitNode(trm.getContents().get(0));
                     result.append(" " + separator + " ");
-                    trm.getContents().get(1).accept(this);
+                    this.visitNode(trm.getContents().get(1));
                     result.append(" ");
                     empty = false;
                 } else
                     for (int i = 0, j = 0; i < pr.getItems().size(); i++) {
                         ProductionItem pi = pr.getItems().get(i);
                         if (pi instanceof Terminal) {
-                            pi.accept(this);
+                            this.visitNode(pi);
                             empty = false;
                         } else if (pi instanceof Sort) {
                             Term t = trm.getContents().get(j++);
-                            t.accept(this);    
+                            this.visitNode(t);    
                             empty = false;
                         }
                     }
@@ -429,9 +429,9 @@ public class HTMLFilter extends BackendFilter {
 
     @Override
     public Void visit(MapItem mi, Void _) {
-        mi.getKey().accept(this);
+        this.visitNode(mi.getKey());
         result.append("<span text-size=\"large\"> &#x21a6; </span>");
-        return mi.getItem().accept(this);
+        return this.visitNode(mi.getItem());
     }
 
     @Override
@@ -449,9 +449,9 @@ public class HTMLFilter extends BackendFilter {
         if (app.getLabel() instanceof Token) {
             result.append("<span title =\"" + ((Token)app.getLabel()).tokenSort() + "\"> " + makeGreek(((Token)app.getLabel()).value()) + " </span> ");
         } else {
-            app.getLabel().accept(this);
+            this.visitNode(app.getLabel());
             result.append("(");
-            app.getChild().accept(this);
+            this.visitNode(app.getChild());
             result.append(")");
         }
         return _;
@@ -495,7 +495,7 @@ public class HTMLFilter extends BackendFilter {
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
         for (Attribute entry : attributes.getContents()) {
-            entry.accept(this);
+            this.visitNode(entry);
         }
         if(!firstAttribute)
             result.append("</span> ]");

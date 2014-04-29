@@ -56,7 +56,7 @@ public class ParseConfigsFilter extends BasicTransformer {
     public ASTNode visit(Module m, Void _) throws TransformerException {
         localModule = m.getName();
         ASTNode rez = super.visit(m, _);
-        rez.accept(new CollectStartSymbolPgmVisitor(context));
+        new CollectStartSymbolPgmVisitor(context).visitNode(rez);
         return rez;
     }
 
@@ -69,8 +69,8 @@ public class ParseConfigsFilter extends BasicTransformer {
                     config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
                     int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
                     int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
-                    config.accept(new UpdateLocationVisitor(context, startLine, startCol));
-                    config.accept(new ReportErrorsVisitor(context, "configuration"));
+                    new UpdateLocationVisitor(context, startLine, startCol).visitNode(config);
+                    new ReportErrorsVisitor(context, "configuration").visitNode(config);
 
                     Sentence st = (Sentence) config;
                     config = new Configuration(st);
@@ -101,29 +101,29 @@ public class ParseConfigsFilter extends BasicTransformer {
                 }
 
                 // disambiguate configs
-                config = config.accept(new SentenceVariablesFilter(context));
-                config = config.accept(new CellEndLabelFilter(context));
+                config = new SentenceVariablesFilter(context).visitNode(config);
+                config = new CellEndLabelFilter(context).visitNode(config);
                 if (checkInclusion)
-                    config = config.accept(new InclusionFilter(localModule, context));
-                // config = config.accept(new CellTypesFilter()); not the case on configs
-                // config = config.accept(new CorrectRewritePriorityFilter());
-                config = config.accept(new CorrectKSeqFilter(context));
-                config = config.accept(new CorrectCastPriorityFilter(context));
-                // config = config.accept(new CheckBinaryPrecedenceFilter());
-                config = config.accept(new PriorityFilter(context));
+                    config = new InclusionFilter(localModule, context).visitNode(config);
+                // config = new CellTypesFilter().visitNode(config); not the case on configs
+                // config = new CorrectRewritePriorityFilter().visitNode(config);
+                config = new CorrectKSeqFilter(context).visitNode(config);
+                config = new CorrectCastPriorityFilter(context).visitNode(config);
+                // config = new CheckBinaryPrecedenceFilter().visitNode(config);
+                config = new PriorityFilter(context).visitNode(config);
                 if (experimentalParserOptions.fastKast)
-                    config = config.accept(new MergeAmbFilter(context));
-                config = config.accept(new VariableTypeInferenceFilter(context));
-                // config = config.accept(new AmbDuplicateFilter(context));
-                // config = config.accept(new TypeSystemFilter(context));
-                // config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-                // config = config.accept(new TypeInferenceSupremumFilter(context));
-                config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
-                config = config.accept(new PreferAvoidFilter(context));
-                config = config.accept(new FlattenListsFilter(context));
-                config = config.accept(new AmbDuplicateFilter(context));
+                    config = new MergeAmbFilter(context).visitNode(config);
+                config = new VariableTypeInferenceFilter(context).visitNode(config);
+                // config = new AmbDuplicateFilter(context).visitNode(config);
+                // config = new TypeSystemFilter(context).visitNode(config);
+                // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
+                // config = new TypeInferenceSupremumFilter(context).visitNode(config);
+                config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
+                config = new PreferAvoidFilter(context).visitNode(config);
+                config = new FlattenListsFilter(context).visitNode(config);
+                config = new AmbDuplicateFilter(context).visitNode(config);
                 // last resort disambiguation
-                config = config.accept(new AmbFilter(context));
+                config = new AmbFilter(context).visitNode(config);
 
                 return config;
             } catch (TransformerException te) {

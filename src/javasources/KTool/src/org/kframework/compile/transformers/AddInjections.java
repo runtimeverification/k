@@ -167,7 +167,7 @@ public class AddInjections extends CopyOnWriteTransformer{
         boolean change = false;
         List<Term> transformedContents = new ArrayList<>();
         for (Term term : node.getContents()) {
-            Term transformedTerm = (Term) term.accept(this);
+            Term transformedTerm = (Term) this.visitNode(term);
             assert transformedTerm != null;
 
             if (transformedTerm.getSort().equals(KSorts.KLABEL)

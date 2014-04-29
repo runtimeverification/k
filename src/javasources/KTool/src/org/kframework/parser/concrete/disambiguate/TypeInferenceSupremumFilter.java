@@ -77,7 +77,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
         }
 
         if (maxterms.size() == 1) {
-            return maxterms.iterator().next().accept(this);
+            return this.visitNode(maxterms.iterator().next());
         } else if (maxterms.size() > 1)
             amb.setContents(new ArrayList<Term>(maxterms));
 

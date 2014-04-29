@@ -1248,7 +1248,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(org.kframework.kil.visitors.Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(org.kframework.kil.visitors.Visitor<P, R, E> visitor, P p) throws E {
         throw new UnsupportedOperationException();
     }
 

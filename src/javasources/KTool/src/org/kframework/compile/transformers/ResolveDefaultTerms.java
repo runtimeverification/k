@@ -36,7 +36,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
     
     @Override
     public ASTNode visit(Rewrite node, Void _) throws TransformerException {
-        ASTNode right = node.getRight().accept(new DefaultTermsResolver(context));
+        ASTNode right = new DefaultTermsResolver(context).visitNode(node.getRight());
         if (right != node.getRight()) {
             node = node.shallowCopy();
             node.setRight((Term)right, context);

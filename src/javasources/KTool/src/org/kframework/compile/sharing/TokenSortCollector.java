@@ -47,7 +47,7 @@ public class TokenSortCollector extends BasicVisitor {
      */
     public static Set<String> collectTokenSorts(Definition definition, Context context) {
         TokenSortCollector collector = new TokenSortCollector(context);
-        definition.accept(collector);
+        collector.visitNode(definition);
         return collector.tokenSorts;
     }
     

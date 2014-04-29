@@ -20,7 +20,7 @@ public class CheckStreams extends BasicVisitor {
     @Override
     public Void visit(Cell node, Void _) {
 
-        node.getContents().accept(this);
+        this.visitNode(node.getContents());
         String stream = node.getCellAttributes().get("stream");
         if (stream != null) {
             String sortName = node.getContents().getSort();

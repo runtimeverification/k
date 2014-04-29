@@ -57,14 +57,14 @@ public class ResolveFresh extends CopyOnWriteTransformer {
             return node;
 
         vars.clear();
-        ASTNode condNode = node.getRequires().accept(this);
+        ASTNode condNode = this.visitNode(node.getRequires());
         if (vars.isEmpty())
             return node;
 
         node = node.shallowCopy();
         node.setRequires((Term) condNode);
         Variable freshVar = Variable.getFreshVar("Int");
-        ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars, freshVar));
+        ASTNode bodyNode = freshSubstitution(vars, freshVar).visitNode(node.getBody());
         assert(bodyNode instanceof Term);
         Bag bag;
         if (bodyNode instanceof Bag) {

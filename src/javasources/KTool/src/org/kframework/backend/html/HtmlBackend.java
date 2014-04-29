@@ -23,7 +23,7 @@ public class HtmlBackend extends BasicBackend {
         String fileSep = System.getProperty("file.separator");
         String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
         HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath, context);
-        definition.accept(htmlFilter);
+        htmlFilter.visitNode(definition);
 
         String html = htmlFilter.getHTML();
 

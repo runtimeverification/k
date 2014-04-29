@@ -49,7 +49,7 @@ public class PriorityFilter2 extends LocalTransformer {
         for (Term t : node.getContents()) {
             ASTNode result = null;
             try {
-                result = t.accept(this);
+                result = this.visitNode(t);
                 terms.add((Term) result);
             } catch (TransformerException e) {
                 exception = e;

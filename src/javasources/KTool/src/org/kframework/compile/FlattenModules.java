@@ -24,7 +24,7 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
     @Override
     public Definition compile(Definition def, String stepName) {
         FlattenModulesVisitor fm = new FlattenModulesVisitor(context);
-        def.accept(fm);
+        fm.visitNode(def);
         return fm.getResult();
     }
 

@@ -50,6 +50,6 @@ public class PreferAvoidFilter extends BasicTransformer {
         if (result == amb)
             return super.visit(result, _);
         else
-            return result.accept(this);
+            return this.visitNode(result);
     }
 }

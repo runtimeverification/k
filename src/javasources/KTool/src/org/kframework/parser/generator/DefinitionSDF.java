@@ -32,8 +32,8 @@ public class DefinitionSDF {
 
         DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false, context);
         CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(context);
-        def.accept(psdfv);
-        def.accept(terminals);
+        psdfv.visitNode(def);
+        terminals.visitNode(def);
 
         for (Production p1 : psdfv.listProds)
             for (Production p2 : psdfv.listProds)

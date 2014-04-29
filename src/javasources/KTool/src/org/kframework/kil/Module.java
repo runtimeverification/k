@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /** A module. */
-public class Module extends DefinitionItem {
+public class Module extends DefinitionItem implements Interfaces.MutableList<ModuleItem, Enum<?>> {
     private String name;
     private List<ModuleItem> items = new ArrayList<ModuleItem>();
 
@@ -92,7 +92,7 @@ public class Module extends DefinitionItem {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
 
@@ -170,6 +170,16 @@ public class Module extends DefinitionItem {
             }
         }
         return productions;
+    }
+
+    @Override
+    public List<ModuleItem> getChildren(Enum<?> _) {
+        return items;
+    }
+    
+    @Override
+    public void setChildren(List<ModuleItem> children, Enum<?> _) {
+        this.items = children;
     }
 
 }

@@ -61,7 +61,7 @@ public class ProgramLoader {
             //out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
             JavaClassesFactory.startConstruction(context);
             out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content, filename);
-            out.accept(new ReportErrorsVisitor(context, "file"));
+            new ReportErrorsVisitor(context, "file").visitNode(out);
             JavaClassesFactory.endConstruction();
         } else {
             org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
@@ -76,14 +76,14 @@ public class ProgramLoader {
             JavaClassesFactory.endConstruction();
         }
 
-        out = out.accept(new PriorityFilter(context));
-        out = out.accept(new PreferAvoidFilter(context));
-        out = out.accept(new CorrectConstantsTransformer(context));
-        out = out.accept(new AmbFilter(context));
-        out = out.accept(new RemoveBrackets(context));
+        out = new PriorityFilter(context).visitNode(out);
+        out = new PreferAvoidFilter(context).visitNode(out);
+        out = new CorrectConstantsTransformer(context).visitNode(out);
+        out = new AmbFilter(context).visitNode(out);
+        out = new RemoveBrackets(context).visitNode(out);
 
         if (kappize)
-            out = out.accept(new FlattenTerms(context));
+            out = new FlattenTerms(context).visitNode(out);
 
         return out;
     }
@@ -107,16 +107,16 @@ public class ProgramLoader {
             if (whatParser == GlobalSettings.ParserType.GROUND) {
                 org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
                 out = DefinitionLoader.parseCmdString(content, filename, startSymbol, context);
-                out = out.accept(new RemoveBrackets(context));
-                out = out.accept(new AddEmptyLists(context));
-                out = out.accept(new RemoveSyntacticCasts(context));
-                out = out.accept(new FlattenTerms(context));
+                out = new RemoveBrackets(context).visitNode(out);
+                out = new AddEmptyLists(context).visitNode(out);
+                out = new RemoveSyntacticCasts(context).visitNode(out);
+                out = new FlattenTerms(context).visitNode(out);
             } else if (whatParser == GlobalSettings.ParserType.RULES) {
                 org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
                 out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
-                out = out.accept(new RemoveBrackets(context));
-                out = out.accept(new AddEmptyLists(context));
-                out = out.accept(new RemoveSyntacticCasts(context));
+                out = new RemoveBrackets(context).visitNode(out);
+                out = new AddEmptyLists(context).visitNode(out);
+                out = new RemoveSyntacticCasts(context).visitNode(out);
                 try {
                     out = new RuleCompilerSteps(def, context).compile(
                             new Rule((Sentence) out),
@@ -138,7 +138,7 @@ public class ProgramLoader {
                 if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
                     System.out.println("Raw: " + out + "\n");
                 try {
-                    out = out.accept(new TreeCleanerVisitor(context));
+                    out = new TreeCleanerVisitor(context).visitNode(out);
                     if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
                         System.out.println("Clean: " + out + "\n");
                 } catch (TransformerException te) {
@@ -154,7 +154,7 @@ public class ProgramLoader {
                 }
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
-                out = out.accept(new ResolveVariableAttribute(context));
+                out = new ResolveVariableAttribute(context).visitNode(out);
             }
             Stopwatch.instance().printIntermediate("Parsing Program");
 

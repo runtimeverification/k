@@ -43,7 +43,7 @@ import aterm.ATermList;
  * <p>
  * Cell attributes are in {@link #cellAttributes}, not {@link #attributes}.
  */
-public class Cell extends Term {
+public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     /** Possible values for the multiplicity attribute */
     public enum Multiplicity {
         ONE, MAYBE, ANY, SOME,
@@ -325,7 +325,17 @@ public class Cell extends Term {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return contents;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.contents = child;
     }
 }

@@ -23,7 +23,7 @@ public class AddAutoIncludedModulesVisitor extends BasicVisitor {
             Module m = e.getValue();
             if (!m.isPredefined()) {
                 CollectIncludesVisitor getIncludes = new CollectIncludesVisitor(context);
-                m.accept(getIncludes);
+                getIncludes.visitNode(m);
                 if (!getIncludes.getImportList().contains(importMod))
                     m.getItems().add(0, importMod);
             }

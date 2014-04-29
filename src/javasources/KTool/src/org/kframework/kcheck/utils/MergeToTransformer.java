@@ -30,7 +30,7 @@ public class MergeToTransformer extends CopyOnWriteTransformer {
         // retrieve the content of the left hand side
         ExtractCellContent ecc = new ExtractCellContent(context,
                 node.getLabel());
-        toMerge.accept(ecc);
+        ecc.visitNode(toMerge);
         Term lcontent = ecc.getContent();
 
         if (lcontent != null) {

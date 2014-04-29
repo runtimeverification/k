@@ -293,7 +293,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 
     private static boolean contains(Term outer, Term inner, org.kframework.kil.loader.Context context) {
         ContainsVisitor visit = new ContainsVisitor(inner, context);
-        outer.accept(visit);
+        visit.visitNode(outer);
         return visit.getFound();
     }
 

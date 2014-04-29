@@ -51,7 +51,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
         if (children.size() == 0 || children.size() == amb.getContents().size())
             return super.visit(amb, _);
         if (children.size() == 1)
-            return children.get(0).accept(this);
+            return this.visitNode(children.get(0));
         amb.setContents(children);
         return super.visit(amb, _);
     }
@@ -59,8 +59,8 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
     @Override
     public ASTNode visit(KSequence ks, Void _) throws TransformerException {
         if (ks.getContents().size() == 2) {
-            ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
-            ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
+            ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
+            ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
         }
         assert ks.getContents().size() <= 2;
 
@@ -70,8 +70,8 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
     @Override
     public ASTNode visit(KList ks, Void _) throws TransformerException {
         if (ks.getContents().size() == 2) {
-            ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
-            ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
+            ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
+            ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
         }
         assert ks.getContents().size() <= 2;
 
@@ -80,8 +80,8 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
 
     @Override
     public ASTNode visit(MapItem mi, Void _) throws TransformerException {
-        mi.setKey((Term) mi.getKey().accept(secondFilter));
-        mi.setValue((Term) mi.getValue().accept(secondFilter));
+        mi.setKey((Term) secondFilter.visitNode(mi.getKey()));
+        mi.setValue((Term) secondFilter.visitNode(mi.getValue()));
 
         return super.visit(mi, _);
     }
@@ -91,14 +91,14 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
         if (tc.getProduction() == null)
             System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
         if (tc.getProduction().isListDecl()) {
-            tc.getContents().set(0, (Term) tc.getContents().get(0).accept(secondFilter));
-            tc.getContents().set(1, (Term) tc.getContents().get(1).accept(secondFilter));
+            tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
+            tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof Sort) {
                     // look for the outermost element
                     if (i == 0 || i == tc.getProduction().getItems().size() - 1) {
-                        tc.getContents().set(j, (Term) tc.getContents().get(j).accept(secondFilter));
+                        tc.getContents().set(j, (Term) secondFilter.visitNode(tc.getContents().get(j)));
                     }
                     j++;
                 }
@@ -135,7 +135,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
-                    result = t.accept(this);
+                    result = this.visitNode(t);
                     terms.add((Term) result);
                 } catch (TransformerException e) {
                     exception = e;

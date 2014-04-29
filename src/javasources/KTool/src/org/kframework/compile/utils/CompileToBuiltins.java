@@ -77,7 +77,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
             TermCons cons = (TermCons) node.getLabel();
             String label = getLabelOf(cons);
             if (label.equals("Set2KLabel_")) {
-                return cons.getContents().get(0).accept(this);
+                return this.visitNode(cons.getContents().get(0));
             }
 
         }
@@ -89,7 +89,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
                 // e.g., when node = "# Env : Map ()", return "Env : MyMap";
                 // or when node = "# GeneratedFreshVar704:SetItem ()", return "'MySetItem(GeneratedFreshVar557:KItem)"
                 // note: node like "# C:Bag ()" is left to be transformed in later pass
-                return term.accept(this);
+                return this.visitNode(term);
             }
         }
         node = (KApp) super.visit(node, _);
@@ -196,7 +196,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     private java.util.List<Term> transformTerms(java.util.List<Term> terms) throws TransformerException {
         java.util.List<Term> contents = new ArrayList<>();
         for(Term t : terms) {
-            Term tnew = (Term)t.accept(this);
+            Term tnew = (Term) this.visitNode(t);
             if (tnew != null) {
                 contents.add(tnew);
             }
@@ -227,8 +227,8 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
 
 //        System.out.println(node);
 
-        Term key = (Term) node.getKey().accept(this);
-        Term value = (Term) node.getValue().accept(this);
+        Term key = (Term) this.visitNode(node.getKey());
+        Term value = (Term) this.visitNode(node.getValue());
 
         java.util.List<Term> contents = new ArrayList<>();
         contents.add(key);
@@ -240,14 +240,14 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(ListItem node, Void _) throws TransformerException {
         java.util.List<Term> contents = new ArrayList<>();
-        contents.add((Term) node.getItem().accept(this));
+        contents.add((Term) this.visitNode(node.getItem()));
         return new KApp(KLabelConstant.of("'MyListItem"), new KList(contents));
     }
 
     @Override
     public ASTNode visit(SetItem node, Void _) throws TransformerException {
         java.util.List<Term> contents = new ArrayList<>();
-        contents.add((Term) node.getItem().accept(this));
+        contents.add((Term) this.visitNode(node.getItem()));
         return new KApp(KLabelConstant.of("'MySetItem"), new KList(contents));
     }
 

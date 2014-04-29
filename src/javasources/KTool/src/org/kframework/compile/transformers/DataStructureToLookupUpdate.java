@@ -144,16 +144,16 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
          * patterns.
          */
         status = Status.LHS;
-        Term lhs = (Term) rewrite.getLeft().accept(this);
+        Term lhs = (Term) this.visitNode(rewrite.getLeft());
 
         /*
          * Update the data structure uses in the right-hand side and condition with update
          * operations on the map variables introduced in the left-hand side in the previous step.
          */
         status = Status.RHS;
-        Term rhs = (Term) rewrite.getRight().accept(this);
+        Term rhs = (Term) this.visitNode(rewrite.getRight());
         status = Status.CONDITION;
-        Term requires = node.getRequires() != null ? (Term) node.getRequires().accept(this) : null;
+        Term requires = node.getRequires() != null ? (Term) this.visitNode(node.getRequires()) : null;
         Term ensures = node.getEnsures();
         //TODO: Handle Ensures as well.
 

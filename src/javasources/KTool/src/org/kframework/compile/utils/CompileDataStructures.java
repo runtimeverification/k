@@ -60,13 +60,13 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
         Rewrite rewrite = (Rewrite) node.getBody();
         status = Status.LHS;
-        Term lhs = (Term) rewrite.getLeft().accept(this);
+        Term lhs = (Term) this.visitNode(rewrite.getLeft());
         status = Status.RHS;
-        Term rhs = (Term) rewrite.getRight().accept(this);
+        Term rhs = (Term) this.visitNode(rewrite.getRight());
         Term requires;
         if (node.getRequires() != null) {
             status = Status.CONDITION;
-            requires = (Term) node.getRequires().accept(this);
+            requires = (Term) this.visitNode(node.getRequires());
         } else {
             requires = null;
         }
@@ -128,7 +128,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
         Term[] arguments = new Term[kList.getContents().size()];
         for (int i = 0; i < kList.getContents().size(); ++i) {
-            arguments[i] = (Term) kList.getContents().get(i).accept(this);
+            arguments[i] = (Term) this.visitNode(kList.getContents().get(i));
         }
 
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {

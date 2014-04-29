@@ -6,7 +6,7 @@ package org.kframework.kil;
  *
  * @author TraianSF
  */
-public abstract class BuiltinLookup extends Term {
+public abstract class BuiltinLookup extends Term implements Interfaces.Parent<Term, BuiltinLookup.Children> {
     /** {@link Term} representation of a key */
     private final Term key;
 
@@ -18,6 +18,10 @@ public abstract class BuiltinLookup extends Term {
 
     /** True if the key of this lookup is not determined, and this lookup can choose one */
     private final boolean choice;
+    
+    public static enum Children {
+        KEY, BASE, VALUE
+    }
 
     protected BuiltinLookup(Variable base, Term key, KSort kind, boolean choice) {
         this.base = base;
@@ -43,5 +47,19 @@ public abstract class BuiltinLookup extends Term {
     }
 
     public abstract Term value();
+    
+    @Override
+    public Term getChild(Children type) {
+        switch (type) {
+            case BASE:
+                return base;
+            case KEY:
+                return key;
+            default:
+                throw new IllegalArgumentException("not a valid child type for class " + getClass().getSimpleName());
+        }
+    }
+    
+    public abstract BuiltinLookup shallowCopy(Variable base, Term key);
     
 }

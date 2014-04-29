@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 import aterm.ATermAppl;
 
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
-public class Cast extends Term {
+public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     public enum CastType {
         /**
          * Casting of the form _:Sort. Sort restrictions are imposed for both the inner term, as well as the outer term.
@@ -163,7 +163,17 @@ public class Cast extends Term {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return content;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.content = child;
     }
 }

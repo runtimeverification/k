@@ -23,7 +23,7 @@ public class TreeCleanerVisitor extends BasicTransformer {
 
     @Override
     public ASTNode visit(KApp node, Void _) throws TransformerException {
-        ASTNode rez = node.getChild().accept(this);
+        ASTNode rez = this.visitNode(node.getChild());
         assert rez != null;
         if (rez instanceof KList)
             node.setChild((KList) rez);
@@ -39,7 +39,7 @@ public class TreeCleanerVisitor extends BasicTransformer {
     public ASTNode visit(KList node, Void _) throws TransformerException {
         java.util.List<Term> contents = new ArrayList<>();
         for (Term t : node.getContents()) {
-            ASTNode transformed = t.accept(this);
+            ASTNode transformed = this.visitNode(t);
             if (transformed != null)
                 contents.add((Term) transformed);
         }

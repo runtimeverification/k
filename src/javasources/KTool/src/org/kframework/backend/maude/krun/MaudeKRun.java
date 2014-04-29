@@ -98,7 +98,7 @@ public class MaudeKRun implements KRun {
 
     public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
         MaudeFilter maudeFilter = new MaudeFilter(context);
-        cfg.accept(maudeFilter);
+        maudeFilter.visitNode(cfg);
         StringBuilder cmd = new StringBuilder();
 
         if(K.trace) {
@@ -431,15 +431,15 @@ public class MaudeKRun implements KRun {
             cmd.append("[,").append(depth).append("] ");
         }
         MaudeFilter maudeFilter = new MaudeFilter(context);
-        cfg.accept(maudeFilter);
+        maudeFilter.visitNode(cfg);
         cmd.append(maudeFilter.getResult()).append(" ");
         MaudeFilter patternBody = new MaudeFilter(context);
-        pattern.getBody().accept(patternBody);
+        patternBody.visitNode(pattern.getBody());
         String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
         //TODO: consider replacing Requires with Ensures here.
         if (pattern.getRequires() != null) {
             MaudeFilter patternCondition = new MaudeFilter(context);
-            pattern.getRequires().accept(patternCondition);
+            patternCondition.visitNode(pattern.getRequires());
             patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
         }
         cmd.append(patternString).append(" .");
@@ -580,8 +580,8 @@ public class MaudeKRun implements KRun {
             }
 
             try {
-                Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution,
-                        context));
+                Term rawResult = (Term) new SubstitutionFilter(rawSubstitution, context)
+                        .visitNode(pattern.getBody());
                 KRunState state = new KRunState(rawResult, context);
                 state.setStateId(stateNum + K.stateCounter);
                 SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo,
@@ -599,9 +599,9 @@ public class MaudeKRun implements KRun {
 
     public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
         MaudeFilter formulaFilter = new MaudeFilter(context);
-        formula.accept(formulaFilter);
+        formulaFilter.visitNode(formula);
         MaudeFilter cfgFilter = new MaudeFilter(context);
-        cfg.accept(cfgFilter);
+        cfgFilter.visitNode(cfg);
 
         StringBuilder cmd = new StringBuilder()
             .append("mod MCK is").append(K.lineSeparator)

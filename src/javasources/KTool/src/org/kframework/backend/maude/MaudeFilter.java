@@ -43,7 +43,7 @@ public class MaudeFilter extends BackendFilter {
         // TODO: remove hack for token membership predicates
 
         for (DefinitionItem di : definition.getItems()) {
-            di.accept(this);
+            this.visitNode(di);
             result.append(" \n");
         }
         if (!(unusedTransitions.isEmpty())) {
@@ -78,7 +78,7 @@ public class MaudeFilter extends BackendFilter {
           result.append("op #token : #String #String -> KLabel .\n");
 
           for (ModuleItem mi : mod.getItems()) {
-            mi.accept(this);
+            this.visitNode(mi);
             result.append("\n");
           }
 
@@ -149,7 +149,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append(syn.getSort());
                         if (!isEmptyAttributes(p.getAttributes())) {
                             result.append(" [metadata \"");
-                            p.getAttributes().accept(this);
+                            this.visitNode(p.getAttributes());
                             result.append("\"]");
                         }
                         result.append(" .\n");
@@ -162,7 +162,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append("op _");
                         result.append(StringUtil.escapeMaude(list.getSeparator()));
                         result.append("_ : K K -> K [prec 120 metadata \"");
-                        p.getAttributes().accept(this);
+                        this.visitNode(p.getAttributes());
                         result.append(" hybrid=()");
                         result.append("\"] .\n");
                         result.append("op .List`{\"");
@@ -182,12 +182,12 @@ public class MaudeFilter extends BackendFilter {
                         result.append("op ");
                         result.append(StringUtil.escapeMaude(maudelabel));
                         result.append(" : ");
-                        p.accept(this);
+                        this.visitNode(p);
                         result.append(" -> ");
                         result.append(syn.getSort());
                         // if (!isEmptyAttributes(p.getCellAttributes())) {
                         result.append(" [metadata \"");
-                        p.getAttributes().accept(this);
+                        this.visitNode(p.getAttributes());
                         result.append("\"]");
                         // }
                         result.append(" .\n");
@@ -219,7 +219,7 @@ public class MaudeFilter extends BackendFilter {
                 first = false;
             }
             if (pi instanceof Sort) {
-                pi.accept(this);
+                this.visitNode(pi);
             }
         }
         return null;
@@ -261,7 +261,7 @@ public class MaudeFilter extends BackendFilter {
         firstAttribute = true;
         for (Attribute entry : attributes.getContents()) {
             if (!entry.getKey().equals("klabel")) {
-                entry.accept(this);
+                this.visitNode(entry);
             }
         }
         return null;
@@ -414,7 +414,7 @@ public class MaudeFilter extends BackendFilter {
         String id = cell.getId();
         result.append("<_>_</_>(" + id + ", ");
         if (cell.getContents() != null) {
-            cell.getContents().accept(this);
+            this.visitNode(cell.getContents());
         } else {
             result.append("null");
         }
@@ -424,7 +424,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(Variable variable, Void _) {
-        if (MetaK.isBuiltinSort(variable.getSort())
+         if (MetaK.isBuiltinSort(variable.getSort())
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
             if (context.getDataStructureSorts().containsKey(variable.getSort())) {
@@ -502,17 +502,17 @@ public class MaudeFilter extends BackendFilter {
         } else {
             result.append("eq ");
         }
-        body.getLeft().accept(this);
+        this.visitNode(body.getLeft());
         if (isTransition) {
             result.append(" => ");
         } else {
             result.append(" = ");
         }
-        body.getRight().accept(this);
+        this.visitNode(body.getRight());
 
         if (null != condition) {
             result.append(" if ");
-            condition.accept(this);
+            this.visitNode(condition);
             result.append(" = _`(_`)(# true, .KList)");
         }
         if (null != rule.getAttributes()) {
@@ -525,7 +525,7 @@ public class MaudeFilter extends BackendFilter {
                 result.append("metadata");
             }
             result.append(" \"");
-            rule.getAttributes().accept(this);
+            this.visitNode(rule.getAttributes());
             result.append("\"] .\n");
         }
         return null;
@@ -534,9 +534,9 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(KApp kapp, Void _) {
         result.append("_`(_`)(");
-        kapp.getLabel().accept(this);
+        this.visitNode(kapp.getLabel());
         result.append(", ");
-        kapp.getChild().accept(this);
+        this.visitNode(kapp.getChild());
         result.append(")");
         return null;
     }
@@ -569,7 +569,7 @@ public class MaudeFilter extends BackendFilter {
                 first = false;
             }
             if (term != null) {
-                term.accept(this);
+                this.visitNode(term);
             } else {
                 result.append("null");
             }
@@ -582,11 +582,11 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(Sentence sentence, Void _) {
-        sentence.getBody().accept(this);
+        this.visitNode(sentence.getBody());
         result.append(" ");
         if (sentence.getRequires() != null) {
             result.append("when ");
-            sentence.getRequires().accept(this);
+            this.visitNode(sentence.getRequires());
         }
         assert sentence.getEnsures() == null : "Maude does not support conditions on the right hand side";
 
@@ -602,7 +602,7 @@ public class MaudeFilter extends BackendFilter {
             result.append("metadata");
         }
         result.append(" \"");
-        sentence.getAttributes().accept(this);
+        this.visitNode(sentence.getAttributes());
         result.append("\"] .");
         return null;
     }
@@ -613,13 +613,13 @@ public class MaudeFilter extends BackendFilter {
         if (rewrite.getLeft() == null) {
             result.append("null");
         } else {
-            rewrite.getLeft().accept(this);
+            this.visitNode(rewrite.getLeft());
         }
         result.append(",");
         if (rewrite.getRight() == null) {
             result.append("null");
         } else {
-            rewrite.getRight().accept(this);
+            this.visitNode(rewrite.getRight());
         }
         result.append(")");
 
@@ -660,9 +660,9 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Collection collection, Void _) {
         if (collection.getContents().size() == 0) {
-            new ListTerminator(collection.getSort(), null).accept(this);
+            this.visitNode(new ListTerminator(collection.getSort(), null));
         } else if (collection.getContents().size() == 1) {
-            collection.getContents().get(0).accept(this);
+            this.visitNode(collection.getContents().get(0));
         } else {
             String constructor = getMaudeConstructor(collection.getSort());
             result.append(constructor);
@@ -679,7 +679,7 @@ public class MaudeFilter extends BackendFilter {
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
                             + ".", collection.getFilename(), collection.getLocation()));
                 }
-                term.accept(this);
+                this.visitNode(term);
             }
 
             result.append(")");
@@ -695,7 +695,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(BagItem bagItem, Void _) {
         result.append("BagItem(");
-        bagItem.getItem().accept(this);
+        this.visitNode(bagItem.getItem());
         result.append(")");
         return null;
     }
@@ -703,7 +703,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(ListItem listItem, Void _) {
         result.append("ListItem(");
-        listItem.getItem().accept(this);
+        this.visitNode(listItem.getItem());
         result.append(")");
         return null;
     }
@@ -711,7 +711,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(SetItem setItem, Void _) {
         result.append("SetItem(");
-        setItem.getItem().accept(this);
+        this.visitNode(setItem.getItem());
         result.append(")");
         return null;
     }
@@ -719,9 +719,9 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(MapItem mapItem, Void _) {
         result.append("_|->_(");
-        mapItem.getKey().accept(this);
+        this.visitNode(mapItem.getKey());
         result.append(",");
-        mapItem.getValue().accept(this);
+        this.visitNode(mapItem.getValue());
         result.append(")");
         return null;
     }
@@ -752,7 +752,7 @@ public class MaudeFilter extends BackendFilter {
                 Variable variable = new Variable(
                         dataStructure.viewBase().getName(),
                         dataStructure.sort().type());
-                variable.accept(this);
+                this.visitNode(variable);
             }
 
             result.append(")");
@@ -771,7 +771,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(DataStructureSort.LABELS.get(collection.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            term.accept(this);
+            this.visitNode(term);
             result.append(")");
         }
     }
@@ -783,7 +783,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            term.accept(this);
+            this.visitNode(term);
             result.append(")");
         }
 
@@ -794,12 +794,12 @@ public class MaudeFilter extends BackendFilter {
                 Variable variable = new Variable(
                         listBuiltin.viewBase().getName(),
                         listBuiltin.sort().type());
-                variable.accept(this);
+                this.visitNode(variable);
             } else {
                 result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
                         DataStructureSort.Label.ELEMENT));
                 result.append("(");
-                    term.accept(this);
+                    this.visitNode(term);
                     result.append(")");
             }
         }
@@ -810,7 +810,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            term.accept(this);
+            this.visitNode(term);
             result.append(")");
         }
         return null;
@@ -822,9 +822,9 @@ public class MaudeFilter extends BackendFilter {
             result.append(DataStructureSort.LABELS.get(map.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            entry.getKey().accept(this);
+            this.visitNode(entry.getKey());
             result.append(", ");
-            entry.getValue().accept(this);
+            this.visitNode(entry.getValue());
             result.append(")");
         }
     }
@@ -880,7 +880,7 @@ public class MaudeFilter extends BackendFilter {
         } else {
             result.append("#_(");
         }
-        term.accept(this);
+        this.visitNode(term);
         result.append(")");
         return null;
     }
@@ -889,14 +889,14 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(FreezerLabel freezerLabel, Void _) {
         Term term = freezerLabel.getTerm();
         result.append("#freezer_(");
-        term.accept(this);
+        this.visitNode(term);
         result.append(")");
         return null;
     }
 
     @Override
     public Void visit(Freezer freezer, Void _) {
-        freezer.getTerm().accept(this);
+        this.visitNode(freezer.getTerm());
         return null;
     }
 
@@ -935,13 +935,13 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Bag bag, Void _) {
         if (bag.getContents().isEmpty()) {
-            new ListTerminator(KSorts.BAG, null).accept(this);
+            this.visitNode(new ListTerminator(KSorts.BAG, null));
             return null;
         }
         for (Term item: bag.getContents()) {
             if (item instanceof TermComment) continue;
             result.append("(");
-            item.accept(this);
+            this.visitNode(item);
             result.append(")");
             result.append(" ");
         }
@@ -968,7 +968,7 @@ public class MaudeFilter extends BackendFilter {
                 first = false;
             }
             if (term != null) {
-                term.accept(this);
+                this.visitNode(term);
             } else {
                 result.append("null");
             }
@@ -1011,7 +1011,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(Bracket term, Void _) {
-        term.getContent().accept(this);
+        this.visitNode(term.getContent());
         return null;
     }
 
@@ -1027,18 +1027,18 @@ public class MaudeFilter extends BackendFilter {
         result.append("remove(");
         result.append(term.map().getName() + ":Map , (.Map ");
         for (java.util.Map.Entry<Term, Term> t : term.removeEntries().entrySet()) {
-            t.getKey().accept(this);
+            this.visitNode(t.getKey());
             result.append(" |-> ");
-            t.getValue().accept(this);
+            this.visitNode(t.getValue());
             result.append(" ");
         }
         result.append(")), ");
 
         result.append("(.Map ");
         for (java.util.Map.Entry<Term, Term> t : term.updateEntries().entrySet()) {
-            t.getKey().accept(this);
+            this.visitNode(t.getKey());
             result.append(" |-> ");
-            t.getValue().accept(this);
+            this.visitNode(t.getValue());
             result.append(" ");
         }
         result.append("))");

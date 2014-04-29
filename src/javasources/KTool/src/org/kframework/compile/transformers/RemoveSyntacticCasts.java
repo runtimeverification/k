@@ -18,7 +18,7 @@ public class RemoveSyntacticCasts extends CopyOnWriteTransformer {
         // System.out.println("Remove: " + node.getFilename() + ":" + node.getLocation());
         // TODO (RaduM): remove only syntactic casts when variable type inference is updated
         //if (node.isSyntactic())
-        return node.getContent().accept(this);
+        return this.visitNode(node.getContent());
         //return super.transform(node);
     }
 }

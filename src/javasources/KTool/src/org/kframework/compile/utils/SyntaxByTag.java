@@ -53,7 +53,7 @@ public class SyntaxByTag extends BasicVisitor {
 
     public static Set<Production> get(ASTNode node, String key, boolean prefix, Context context) {
         SyntaxByTag visitor = new SyntaxByTag(key, prefix, context);
-        node.accept(visitor);
+        visitor.visitNode(node);
         return visitor.getProductions();
     }
     

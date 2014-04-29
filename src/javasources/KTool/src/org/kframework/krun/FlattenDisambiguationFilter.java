@@ -41,7 +41,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
                 }
                 return new KApp(
                         KLabelConstant.of(t1.getProduction().getKLabel(), context),
-                        (Term) new KList(t1.getContents()).accept(this));
+                        (Term) this.visitNode(new KList(t1.getContents())));
             }
         } else if (amb.getContents().get(0) instanceof ListTerminator) {
             ListTerminator t1 = (ListTerminator)amb.getContents().get(0);

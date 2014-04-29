@@ -18,7 +18,7 @@ import aterm.ATermList;
 /**
  * Applications that are not in sort K, or have not yet been flattened.
  */
-public class TermCons extends Term {
+public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<?>> {
     /** A unique identifier corresponding to a production, matching the SDF cons */
     protected final String cons;
     protected java.util.List<Term> contents;
@@ -143,7 +143,7 @@ public class TermCons extends Term {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
 
@@ -215,6 +215,16 @@ public class TermCons extends Term {
     @Override
     public TermCons shallowCopy() {
         return new TermCons(this);
+    }
+
+    @Override
+    public List<Term> getChildren(Enum<?> type) {
+        return contents;
+    }
+
+    @Override
+    public void setChildren(List<Term> children, Enum<?> cls) {
+        this.contents = children;
     }
 
 }

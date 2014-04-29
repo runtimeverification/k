@@ -4,7 +4,7 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 
 /** A frozen term. Contains a {@link FreezerHole}. */
-public class Freezer extends Term {
+public class Freezer extends Term implements Interfaces.MutableParent<Term, Enum<?>>{
 
     private Term term;
 
@@ -62,7 +62,17 @@ public class Freezer extends Term {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return term;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.term = child; 
     }
 }

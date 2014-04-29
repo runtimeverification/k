@@ -6,6 +6,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
+import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
@@ -750,13 +751,12 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     private static String getXmlFromKrunState(KRunState pick, Context definitionHelper) {
         Term term = pick.getResult();
         try {
-            term = (Term) term.accept(new ConcretizeSyntax(definitionHelper));
-            term = (Term) term.accept(new TypeInferenceSupremumFilter(definitionHelper));
-            term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(
-                    definitionHelper), definitionHelper));
+            term = (Term) new ConcretizeSyntax(definitionHelper).visitNode(term);
+            term = (Term) new TypeInferenceSupremumFilter(definitionHelper).visitNode(term);
+            term = (Term) new BestFitFilter(
+                    new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper).visitNode(term);
             // as a last resort, undo concretization
-            term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(
-                    definitionHelper));
+            term = (Term) new FlattenDisambiguationFilter(definitionHelper).visitNode(term);
         } catch (TransformerException e) {
             e.printStackTrace();
         }
@@ -768,23 +768,21 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
         // set the color map
         ColorVisitor cv = new ColorVisitor(definitionHelper);
-        term.accept(cv);
+        cv.visitNode(term);
 
         XmlUnparseFilter unparser = new XmlUnparseFilter(true, false, definitionHelper);
-        term.accept(unparser);
+        unparser.visitNode(term);
         return unparser.getResult();
     }
 
     private static String getStrFromKrunState(KRunState pick, Context definitionHelper) {
         Term term = pick.getResult();
         try {
-            term = (Term) term.accept(new ConcretizeSyntax(definitionHelper));
-            term = (Term) term.accept(new TypeInferenceSupremumFilter(definitionHelper));
-            term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(
-                    definitionHelper), definitionHelper));
+            term = (Term) new ConcretizeSyntax(definitionHelper).visitNode(term);
+            term = (Term) new TypeInferenceSupremumFilter(definitionHelper).visitNode(term);
+            term = (Term) new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper).visitNode(term);
             // as a last resort, undo concretization
-            term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(
-                    definitionHelper));
+            term = (Term) new org.kframework.krun.FlattenDisambiguationFilter(definitionHelper).visitNode(term);
         } catch (TransformerException e) {
             e.printStackTrace();
         }
@@ -796,10 +794,10 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
         // set the color map
         ColorVisitor cv = new ColorVisitor(definitionHelper);
-        term.accept(cv);
+        cv.visitNode(term);
 
         UnparserFilter unparser = new UnparserFilter(true, false, definitionHelper);
-        term.accept(unparser);
+        unparser.visitNode(term);
         return unparser.getResult();
     }
 

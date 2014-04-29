@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.Interfaces.MutableParent;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
@@ -15,12 +16,16 @@ import aterm.ATermAppl;
  * {@link #body} and {@link #requires}, which have different
  * interpretations in the subclasses.
  */
-public class Sentence extends ModuleItem {
+public class Sentence extends ModuleItem implements MutableParent<Term, Sentence.Children> {
     /** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
     String label = "";
     Term body;
     Term requires = null;
     Term ensures = null;
+    
+    public static enum Children {
+        BODY, REQUIRES, ENSURES;
+    }
 
     public Sentence(Sentence s) {
         super(s);
@@ -132,7 +137,38 @@ public class Sentence extends ModuleItem {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Children type) {
+        switch(type) {
+            case BODY:
+                return getBody();
+            case ENSURES:
+                return getEnsures();
+            case REQUIRES:
+                return getRequires();
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
+    @Override
+    public void setChild(Term child, Children type) {
+        switch(type) {
+            case BODY:
+                setBody(child);
+                break;
+            case ENSURES:
+                setEnsures(child);
+                break;
+            case REQUIRES:
+                setRequires(child);
+                break;
+            default:
+                throw new AssertionError("unreachable");
+        }
     }
 }

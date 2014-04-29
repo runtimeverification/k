@@ -24,7 +24,7 @@ public class ColorVisitor extends BasicVisitor {
                 ColorTagMap.addColorToTag(cell.getLabel(), c);
             }
         }
-        cell.getContents().accept(this);
+        this.visitNode(cell.getContents());
         return null;
     }
 }

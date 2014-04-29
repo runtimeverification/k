@@ -121,7 +121,7 @@ public class Transition implements Serializable{
         if (type == TransitionType.RULE) {
             Attributes a = rule.getAttributes();
             UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-            a.accept(unparser);
+            unparser.visitNode(a);
             return "\nRule tagged " + unparser.getResult() + " ";
         } else if (type == TransitionType.LABEL) {
             return "\nRule labelled " + label + " ";

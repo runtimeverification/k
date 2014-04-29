@@ -22,7 +22,7 @@ public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerSte
     public T compile(T def, String stepName) {
         ASTNode result = null;
         try {
-            result = def.accept(t);
+            result = t.visitNode(def);
         } catch (TransformerException e) {
             e.printStackTrace();
         }

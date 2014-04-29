@@ -126,7 +126,7 @@ public class MetaK {
 
     public static Configuration getConfiguration(Definition node, org.kframework.kil.loader.Context context) {
         final List<Configuration> result = new LinkedList<Configuration>();
-        node.accept(new BasicVisitor(context) {
+        new BasicVisitor(context) {
             @Override
             public Void visit(Configuration node, Void _) {
                 result.add(node);
@@ -147,7 +147,7 @@ public class MetaK {
             public Void visit(Syntax node, Void _) { 
                 return null;
             }
-        });
+        }.visitNode(node);
         if (result.size() == 0) {
             GlobalSettings.kem
                     .register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Internal compiler error --- Cannot find configuration.", node.getFilename(), node.getLocation()));
@@ -230,7 +230,7 @@ public class MetaK {
             }
         };
 
-        t.accept(countVisitor);
+        countVisitor.visitNode(t);
         return count.get(0);
     }
 
@@ -245,7 +245,7 @@ public class MetaK {
             }
         };
 
-        t.accept(countVisitor);
+        countVisitor.visitNode(t);
         return count.get(0);
     }
 
@@ -291,7 +291,7 @@ public class MetaK {
             }
         };
         try {
-            t.accept(cellFinder);
+            cellFinder.visitNode(t);
         } catch (NonLocalExit e) {
             return true;
         }
@@ -381,25 +381,25 @@ public class MetaK {
 
     public static List<Cell> getTopCells(Term t, org.kframework.kil.loader.Context context) {
         final List<Cell> cells = new ArrayList<Cell>();
-        t.accept(new BasicVisitor(context) {
+        new BasicVisitor(context) {
             @Override
             public Void visit(Cell node, Void _) {
                 cells.add(node);
                 return null;
             }
-        });
+        }.visitNode(t);
         return cells;
     }
 
     public static List<String> getAllCellLabels(Term t, org.kframework.kil.loader.Context context) {
         final List<String> cells = new ArrayList<String>();
-        t.accept(new BasicVisitor(context) {
+        new BasicVisitor(context) {
             @Override
             public Void visit(Cell node, Void _) {
                 cells.add(node.getLabel());
                 return super.visit(node, _);
             }
-        });
+        }.visitNode(t);
         return cells;
     }
 

@@ -21,8 +21,8 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
         Term body = node.getBody();
         if (body instanceof Rewrite) return node;
         node = node.shallowCopy();
-        Term left = (Term) body.accept(new OneSideTransformer(LRHS.LEFT, context));
-        Term right = (Term) body.accept(new OneSideTransformer(LRHS.RIGHT, context));
+        Term left = (Term) new OneSideTransformer(LRHS.LEFT, context).visitNode(body);
+        Term right = (Term) new OneSideTransformer(LRHS.RIGHT, context).visitNode(body);
         Rewrite rewrite = new Rewrite(left, right, context);
         node.setBody(rewrite);
         return node;

@@ -2,6 +2,7 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -19,12 +20,17 @@ public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode,
     public AbstractTransformer(String name, Context context) {
         super(name, context);
     }
+    
+    public AbstractTransformer(Context context) {
+        super(context);
+    }
 
     @Override
     public ASTNode defaultReturnValue(ASTNode node, Void _) {
         return node;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ASTNode processChildTerm(ASTNode child, ASTNode childResult) {
         return childResult;

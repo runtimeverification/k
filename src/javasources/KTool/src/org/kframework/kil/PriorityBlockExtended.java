@@ -4,10 +4,11 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /** A group within a {@code syntax priorities} declaration.
  * @see PriorityExtended */
-public class PriorityBlockExtended extends ASTNode {
+public class PriorityBlockExtended extends ASTNode implements Interfaces.MutableList<KLabelConstant, Enum<?>> {
 
     java.util.List<KLabelConstant> productions = new ArrayList<KLabelConstant>();
 
@@ -46,7 +47,7 @@ public class PriorityBlockExtended extends ASTNode {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
 
@@ -84,4 +85,15 @@ public class PriorityBlockExtended extends ASTNode {
     public PriorityBlockExtended shallowCopy() {
         return new PriorityBlockExtended(this);
     }
+
+    @Override
+    public List<KLabelConstant> getChildren(Enum<?> _) {
+        return productions;
+    }
+    
+    @Override
+    public void setChildren(List<KLabelConstant> children, Enum<?> _) {
+        this.productions = children;
+    }
+
 }

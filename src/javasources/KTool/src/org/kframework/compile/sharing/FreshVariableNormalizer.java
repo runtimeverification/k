@@ -31,7 +31,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
     public Rule visit(Rule rule, Void _) {
         counter = 0;
         substitution.clear();
-        rule.accept(visitor);
+        visitor.visitNode(rule);
         if (substitution.isEmpty()) {
             // no fresh variables in this rule
             return rule;
@@ -46,7 +46,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
 
     @Override
     public Variable visit(Variable variable, Void _) {
-        Variable substituteVariable = substitution.get(variable);
+         Variable substituteVariable = substitution.get(variable);
         if (substituteVariable != null) {
             return substituteVariable;
         } else {

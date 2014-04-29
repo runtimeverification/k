@@ -33,8 +33,9 @@ public class KilTransformer {
     public String kilToKore(ASTNode node){
 
         try {
-            node.accept(builtinTrans).accept(kappTrans).accept(koreTrans);
-            //node.accept(kappTrans).accept(koreTrans);
+            node = builtinTrans.visitNode(node);
+            node = kappTrans.visitNode(node);
+            koreTrans.visitNode(node);
         } catch (TransformerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

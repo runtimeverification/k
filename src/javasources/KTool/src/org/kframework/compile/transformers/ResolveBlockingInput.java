@@ -34,7 +34,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
     @Override
     public ASTNode visit(Definition node, Void _) throws TransformerException {
         Configuration config = MetaK.getConfiguration(node, context);
-        config.accept(new BasicVisitor(context) {
+        new BasicVisitor(context) {
             @Override
             public Void visit(Cell node, Void _) {
                 String stream = node.getCellAttributes().get("stream");
@@ -48,7 +48,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
                 return super.visit(node, _);
             }
 
-        });
+        }.visitNode(config);
         return super.visit(node, _);
     }
     

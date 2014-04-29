@@ -2,6 +2,7 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
 
 /**
@@ -25,7 +26,7 @@ public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> 
     }
 
     @Override
-    public ASTNode processChildTerm(ASTNode child, Void _) {
+    public <T extends ASTNode> T processChildTerm(T child, Void _) {
         return child;
     }
     

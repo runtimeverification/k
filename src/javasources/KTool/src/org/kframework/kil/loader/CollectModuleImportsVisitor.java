@@ -4,9 +4,9 @@ package org.kframework.kil.loader;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.Module;
-import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.NonCachingVisitor;
 
-public class CollectModuleImportsVisitor extends BasicVisitor {
+public class CollectModuleImportsVisitor extends NonCachingVisitor {
 
     public CollectModuleImportsVisitor(Context context) {
         super(context);

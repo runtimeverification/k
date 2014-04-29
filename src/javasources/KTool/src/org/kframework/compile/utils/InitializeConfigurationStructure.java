@@ -22,7 +22,7 @@ public class InitializeConfigurationStructure extends BasicCompilerStep<Definiti
     public Definition compile(Definition def, String stepName) throws CompilerStepDone {
         ConfigurationStructureVisitor cfgStrVisitor =
                 new ConfigurationStructureVisitor(context);
-        def.accept(cfgStrVisitor);
+        cfgStrVisitor.visitNode(def);
         context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
         return def;
     }

@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * A production. Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
  */
-public class Production extends ASTNode {
+public class Production extends ASTNode implements Interfaces.MutableList<ProductionItem, Enum<?>> {
 
     /*
      * Andrei S: It appears that the cons attribute is mandatory for all new production added during compilation, otherwise a null pointer exception can be thrown in one of the later compilation
@@ -200,7 +200,7 @@ public class Production extends ASTNode {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
 
@@ -341,5 +341,15 @@ public class Production extends ASTNode {
 
     public void setBinderMap(Multimap<Integer, Integer> binderMap) {
         this.binderMap = binderMap;
+    }
+
+    @Override
+    public List<ProductionItem> getChildren(Enum<?> _) {
+        return items;
+    }
+    
+    @Override
+    public void setChildren(List<ProductionItem> children, Enum<?> _) {
+        this.items = children;
     }
 }

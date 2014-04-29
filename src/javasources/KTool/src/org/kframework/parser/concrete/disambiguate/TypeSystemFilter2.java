@@ -50,7 +50,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
         for (Term t : node.getContents()) {
             ASTNode result = null;
             try {
-                result = t.accept(this);
+                result = this.visitNode(t);
                 terms.add((Term) result);
             } catch (TransformerException e) {
                 exception = e;
@@ -67,7 +67,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
 
     @Override
     public ASTNode visit(Bracket node, Void _) throws TransformerException {
-        node.setContent((Term) node.getContent().accept(this));
+        node.setContent((Term) this.visitNode(node.getContent()));
         return node;
     }
 
@@ -75,8 +75,8 @@ public class TypeSystemFilter2 extends LocalTransformer {
     public ASTNode visit(Rewrite node, Void _) throws TransformerException {
         Rewrite result = new Rewrite(node);
         result.replaceChildren(
-                (Term) node.getLeft().accept(this),
-                (Term) node.getRight().accept(this),
+                (Term) this.visitNode(node.getLeft()),
+                (Term) this.visitNode(node.getRight()),
                 context);
         return result;
     }

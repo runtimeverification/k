@@ -35,7 +35,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
         for (ProductionItem pitem : prod.getItems()) {
             if (pitem instanceof Terminal) continue;
             t = termIt.next();
-            ASTNode resultAST = t.accept(this);
+            ASTNode resultAST = this.visitNode(t);
             if (resultAST != t) change = true;
             if (resultAST != null) {
                 if (!(resultAST instanceof Term)) {

@@ -31,7 +31,7 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
         if (vars.isEmpty())
             return node;
 
-        ASTNode bodyNode = node.accept(freshSubstitution(vars));
+        ASTNode bodyNode = freshSubstitution(vars).visitNode(node);
         assert(bodyNode instanceof Sentence);
 
         return bodyNode;

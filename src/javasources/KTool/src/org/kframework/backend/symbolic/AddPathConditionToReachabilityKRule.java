@@ -46,7 +46,7 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
                 KApp appCondition = (KApp) condition;
                 
                 EliminateRRWrapper errw = new EliminateRRWrapper(context);
-                Term newCond = (Term) appCondition.accept(errw);
+                Term newCond = (Term) errw.visitNode(appCondition);
                  
                 Term lphi = errw.getLphi();
                 Term rphi = errw.getRphi();

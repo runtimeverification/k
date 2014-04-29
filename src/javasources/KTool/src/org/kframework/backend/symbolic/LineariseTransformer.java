@@ -41,7 +41,7 @@ public class LineariseTransformer extends BasicTransformer {
             VariableReplaceTransformer vrt = new VariableReplaceTransformer(context);
             Rewrite rew = (Rewrite) node.getBody();
             Term transformedLeft = rew.getLeft();
-            transformedLeft = (Term) transformedLeft.accept(vrt);
+            transformedLeft = (Term) vrt.visitNode(transformedLeft);
             rew.shallowCopy();
             rew.setLeft(transformedLeft, context);
 

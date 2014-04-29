@@ -37,7 +37,7 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
             // extract phi and phi'
             Term cnd = node.getRequires();
             ExtractPatternless ep = new ExtractPatternless(context, false);
-            cnd = (Term) cnd.accept(ep);
+            cnd = (Term) ep.visitNode(cnd);
             
             // separate left and right
             Rewrite ruleBody = (Rewrite) node.getBody();

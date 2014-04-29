@@ -84,9 +84,9 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(KList listOfK, Void _) {
         if (listOfK.getContents().size() == 0) {
-            new ListTerminator(listOfK.getSort(), null).accept(this);
+            this.visitNode(new ListTerminator(listOfK.getSort(), null));
         } else if (listOfK.getContents().size() == 1) {
-            listOfK.getContents().get(0).accept(this);
+            this.visitNode(listOfK.getContents().get(0));
         } else {
             boolean first = true;
             for (Term term : listOfK.getContents()) {
@@ -102,7 +102,7 @@ public class KastFilter extends BasicVisitor {
                             "NULL Term encountered when KastFilter ran on collection " + listOfK.getContents() + ".", 
                             listOfK.getFilename(), listOfK.getLocation()));                
                 }    
-                term.accept(this);
+                this.visitNode(term);
             }
         }
         return null;
@@ -167,7 +167,7 @@ public class KastFilter extends BasicVisitor {
             } 
             result.write(token.toString());
         } else {
-            kapp.getLabel().accept(this);
+            this.visitNode(kapp.getLabel());
             result.write("(");
             boolean stopnextline = false;
             if (kapp.getChild() instanceof KList) {
@@ -187,7 +187,7 @@ public class KastFilter extends BasicVisitor {
             } else {
                 result.indentToCurrent();
             }
-            kapp.getChild().accept(this);
+            this.visitNode(kapp.getChild());
             result.write(")");
             if (!nextline || !stopnextline) {
                 result.unindent();
@@ -272,7 +272,7 @@ public class KastFilter extends BasicVisitor {
         } else {
             result.write("#_(");
         }
-        term.accept(this);
+        this.visitNode(term);
         result.write(")");
         return null;
     }

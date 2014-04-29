@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * AST representation a term of sort K explicitly constructed as an application of a KLabel to a KList.
  */
-public class KApp extends Term {
+public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Children> {
     /**
      * A KLabel represented as a non-null instance of {@link KLabel}, {@link Variable} of sort KLabel, or {@link Ambiguity}.
      */
@@ -24,6 +24,10 @@ public class KApp extends Term {
      * A KList represented as a non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     private Term child;
+    
+    public static enum Children {
+        LABEL, CHILD;
+    }
 
     /**
      * Constructs the application of the given KLabel to a KList with the given elements.
@@ -166,7 +170,33 @@ public class KApp extends Term {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Children type) {
+        switch (type) {
+            case LABEL:
+                return label;
+            case CHILD:
+                return child;
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
+    @Override
+    public void setChild(Term child, Children type) {
+        switch (type) {
+            case LABEL:
+                this.label = child;
+                break;
+            case CHILD:
+                this.child = child;
+                break;
+            default:
+                throw new AssertionError("unreachable");
+        }
     }
 }

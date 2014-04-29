@@ -47,7 +47,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Definition def, Void _) {
-        def.accept(patternsVisitor);
+        patternsVisitor.visitNode(def);
         result.append("\\begin{kdefinition}" + endl + "\\maketitle" + endl);
         super.visit(def, _);
         result.append("\\end{kdefinition}" + endl);
@@ -110,7 +110,7 @@ public class LatexFilter extends BackendFilter {
             for (ProductionItem pi : p.getItems()) {
                 if (!(pi instanceof Terminal)) {
                     termFilter.setResult(new StringBuilder());
-                    pi.accept(termFilter);
+                    termFilter.visitNode(pi);
                     pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
                 }
             }
@@ -119,7 +119,7 @@ public class LatexFilter extends BackendFilter {
             super.visit(p, _);
         }
         result.append("}{");
-        p.getAttributes().accept(this);
+        this.visitNode(p.getAttributes());
         result.append("}");
         return null;
     }
@@ -142,7 +142,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(UserList ul, Void _) {
         result.append("List\\{");
-        new Sort(ul.getSort()).accept(this);
+        this.visitNode(new Sort(ul.getSort()));
         result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
         terminalBefore = false;
         return null;
@@ -226,7 +226,7 @@ public class LatexFilter extends BackendFilter {
             } else {
                 result.append(str);
             }
-            trm.accept(this);
+            this.visitNode(trm);
         }
     }
 
@@ -283,17 +283,17 @@ public class LatexFilter extends BackendFilter {
             result.append("[" + rule.getLabel() + "]");
         }
         result.append("{" + endl);
-        rule.getBody().accept(this);
+        this.visitNode(rule.getBody());
         result.append("}{");
         if (rule.getRequires() != null) {
-            rule.getRequires().accept(this);
+            this.visitNode(rule.getRequires());
         }
         result.append("}{");
         if (rule.getEnsures() != null) {
-            rule.getEnsures().accept(this);
+            this.visitNode(rule.getEnsures());
         }
         result.append("}{");
-        rule.getAttributes().accept(this);
+        this.visitNode(rule.getAttributes());
         result.append("}");
         result.append("{");
         // if (termComment) result.append("large");
@@ -306,17 +306,17 @@ public class LatexFilter extends BackendFilter {
     public Void visit(org.kframework.kil.Context cxt, Void _) {
         result.append("\\kcontext");
         result.append("{" + endl);
-        cxt.getBody().accept(this);
+        this.visitNode(cxt.getBody());
         result.append("}{");
         if (cxt.getRequires() != null) {
-            cxt.getRequires().accept(this);
+            this.visitNode(cxt.getRequires());
         }
         result.append("}{");
         if (cxt.getEnsures() != null) {
-            cxt.getEnsures().accept(this);
+            this.visitNode(cxt.getEnsures());
         }
         result.append("}{");
-        cxt.getAttributes().accept(this);
+        this.visitNode(cxt.getAttributes());
         result.append("}" + endl);
         return null;
     }
@@ -331,9 +331,9 @@ public class LatexFilter extends BackendFilter {
     public Void visit(Rewrite rew, Void _) {
         wantParens.push(Boolean.TRUE);
         result.append("\\reduce{");
-        rew.getLeft().accept(this);
+        this.visitNode(rew.getLeft());
         result.append("}{");
-        rew.getRight().accept(this);
+        this.visitNode(rew.getRight());
         result.append("}");
         wantParens.pop();
         return null;
@@ -347,7 +347,7 @@ public class LatexFilter extends BackendFilter {
             String pattern = "\\left({#1}\\right)";
             LatexFilter termFilter = new LatexFilter(context);
             termFilter.getWantParens().push(Boolean.FALSE);
-            trm.getContent().accept(termFilter);
+            termFilter.visitNode(trm.getContent());
             pattern = pattern.replace("{#1}", "{" + termFilter.getResult() + "}");
             result.append(pattern);
         }
@@ -359,14 +359,14 @@ public class LatexFilter extends BackendFilter {
         String pattern = patternsVisitor.getPatterns().get(trm.getCons());
         if (pattern == null) {
             Production pr = context.conses.get(trm.getCons());
-            pr.accept(patternsVisitor);
+            patternsVisitor.visitNode(pr);
             pattern = patternsVisitor.getPatterns().get(trm.getCons());
         }
         int n = 1;
         LatexFilter termFilter = new LatexFilter(context);
         for (Term t : trm.getContents()) {
             termFilter.setResult(new StringBuilder());
-            t.accept(termFilter);
+            termFilter.visitNode(t);
             pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
         }
         result.append(pattern);
@@ -387,9 +387,9 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(MapItem mi, Void _) {
-        mi.getKey().accept(this);
+        this.visitNode(mi.getKey());
         result.append("\\mapsto");
-        mi.getItem().accept(this);
+        this.visitNode(mi.getItem());
         return null;
     }
 
@@ -406,9 +406,9 @@ public class LatexFilter extends BackendFilter {
         if (app.getLabel() instanceof Token) {
             result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
         } else {
-            app.getLabel().accept(this);
+            this.visitNode(app.getLabel());
             result.append("(");
-            app.getChild().accept(this);
+            this.visitNode(app.getChild());
             result.append(")");
         }
         return null;
@@ -479,7 +479,7 @@ public class LatexFilter extends BackendFilter {
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
         for (Attribute entry : attributes.getContents()) {
-            entry.accept(this);
+            this.visitNode(entry);
         }
         return null;
     }

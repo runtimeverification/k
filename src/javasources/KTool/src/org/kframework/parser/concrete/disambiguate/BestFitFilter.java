@@ -48,7 +48,7 @@ public class BestFitFilter extends BasicTransformer {
 
     private int getFitnessUnit(Term t) {
         GetFitnessUnitBasicVisitor fitnessVisitor = getFitnessUnit.getInstance();
-        t.accept(fitnessVisitor);
+        fitnessVisitor.visitNode(t);
         return fitnessVisitor.getScore();
     }
 }

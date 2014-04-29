@@ -60,7 +60,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         Rule rule = (Rule) super.visit(node, _);
         
         SplitByLevelVisitor visitor = new SplitByLevelVisitor(-1, context);
-        rule.getBody().accept(visitor);
+        visitor.visitNode(rule.getBody());
         
         int min = visitor.max;
         for (int i=visitor.max-1; i>0; i--) {
@@ -131,7 +131,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         
         if (confCell.sons.isEmpty()) return cell;
         SplitByLevelVisitor visitor = new SplitByLevelVisitor(confCell.level, context);
-        cell.getContents().accept(visitor);
+        visitor.visitNode(cell.getContents());
         int min = 0;
         if (visitor.max>min) change = true;
         bringToLevel(visitor, min);

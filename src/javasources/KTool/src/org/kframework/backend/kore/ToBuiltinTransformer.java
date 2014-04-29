@@ -38,7 +38,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(ListItem node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>();
-        temp.add((Term) node.getItem().accept(this));
+        temp.add((Term) this.visitNode(node.getItem()));
         return new ListBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
                 new ArrayList<Term>(),temp,new ArrayList<Term>());
 
@@ -48,7 +48,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(MapItem node, Void _) throws TransformerException{
         
         HashMap<Term,Term> temp = new HashMap<Term,Term>();
-        temp.put((Term) node.getKey().accept(this), (Term) node.getValue().accept(this));
+        temp.put((Term) this.visitNode(node.getKey()), (Term) this.visitNode(node.getValue()));
         
         return new MapBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT),new ArrayList<Term>(),temp);
     }
@@ -57,7 +57,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(SetItem node, Void _) throws TransformerException{
         
         ArrayList<Term> temp = new ArrayList<Term>();
-        temp.add((Term) node.getItem().accept(this));
+        temp.add((Term) this.visitNode(node.getItem()));
         
         return new SetBuiltin(new DataStructureSort(DataStructureSort.DEFAULT_SET_SORT, KSorts.SET, DataStructureSort.DEFAULT_SET_LABEL, 
                 DataStructureSort.DEFAULT_SET_ITEM_LABEL, DataStructureSort.DEFAULT_SET_UNIT_LABEL, new HashMap<String,String>()),new ArrayList<Term>(),temp);
@@ -73,9 +73,9 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
         for(int i = 0; i < temp.size(); ++i){
             
             if(temp.get(i) instanceof SetItem){
-                elements.add((Term) ((SetItem)temp.get(i)).getItem().accept(this));
+                elements.add((Term) this.visitNode(((SetItem)temp.get(i)).getItem()));
             } else {
-                baseTerms.add((Term) temp.get(i).accept(this));
+                baseTerms.add((Term) this.visitNode(temp.get(i)));
             }
         }
         
@@ -94,10 +94,10 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
         for(int i = 0;i < temp.size(); ++i){
             
             if(temp.get(i) instanceof MapItem){
-                elements.put((Term)((MapItem)temp.get(i)).getKey().accept(this),
-                        (Term)((MapItem)temp.get(i)).getValue().accept(this));
+                elements.put((Term) this.visitNode(((MapItem)temp.get(i)).getKey()),
+                        (Term) this.visitNode(((MapItem)temp.get(i)).getValue()));
             } else {
-                baseTerms.add((Term) temp.get(i).accept(this));
+                baseTerms.add((Term) this.visitNode(temp.get(i)));
             }
         }
         return new MapBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT)
@@ -110,7 +110,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
         for( ;index <= right; ++index){
             
             if(list.get(index) instanceof ListItem){
-                elementRight.add((Term) ((ListItem)list.get(index)).getItem().accept(this));
+                elementRight.add((Term) this.visitNode(((ListItem)list.get(index)).getItem()));
             } else {
                 break;
             }
@@ -130,7 +130,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
         for( ;i < temp.size(); ++i){
             
             if(temp.get(i) instanceof ListItem){
-                elementLeft.add((Term) ((ListItem)temp.get(i)).getItem().accept(this));
+                elementLeft.add((Term) this.visitNode(((ListItem)temp.get(i)).getItem()));
             } else {
                 break;
             }
@@ -140,7 +140,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
         for( ;j >= i; --j){
             
             if(temp.get(j) instanceof ListItem){
-                elementRight.add((Term) ((ListItem)temp.get(j)).getItem().accept(this));
+                elementRight.add((Term) this.visitNode(((ListItem)temp.get(j)).getItem()));
             } else {
                 break;
             }
@@ -150,7 +150,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
             
             ArrayList<Term> tempBase = new ArrayList<Term>();
             ArrayList<Term> newRight = new ArrayList<Term>();
-            tempBase.add((Term) temp.get(i).accept(this));
+            tempBase.add((Term) this.visitNode(temp.get(i)));
             i++;
             i=this.dealWithBaseItem(newRight, temp, i, j);
             baseTerms.add(new ListBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),

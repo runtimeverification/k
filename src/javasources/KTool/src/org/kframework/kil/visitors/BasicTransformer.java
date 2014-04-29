@@ -34,7 +34,7 @@ public class BasicTransformer extends AbstractTransformer {
         for (Term t : node.getContents()) {
             ASTNode result;
             try {
-                result = t.accept(this, null);
+                result = this.visitNode(t);
                 terms.add((Term) result);
             } catch (TransformerException e) {
                 exception = e;

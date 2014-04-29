@@ -2,8 +2,8 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.AbstractVisitor;
 
 public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> implements CheckStep<T> {
 
@@ -17,7 +17,7 @@ public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> im
     @Override
     public boolean check(T def) {
         try {
-            def.accept(t);
+            t.visitNode(def);
             if (sw != null) {
                 sw.printIntermediate(getName());
             }

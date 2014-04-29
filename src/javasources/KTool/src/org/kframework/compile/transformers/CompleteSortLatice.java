@@ -153,9 +153,9 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             }
         }
         /* add conses to new syntactic lists */
-        transformedNode.accept(new AddConsesVisitor(context));
+        new AddConsesVisitor(context).visitNode(transformedNode);
         /* update syntactic lists conses information in the context */
-        transformedNode.accept(new CollectConsesVisitor(context));
+        new CollectConsesVisitor(context).visitNode(transformedNode);
 
         /*
          * Subsort one syntactic list to another syntactic list with the same separator if the

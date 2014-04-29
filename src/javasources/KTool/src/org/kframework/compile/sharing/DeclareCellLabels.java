@@ -25,7 +25,7 @@ public class DeclareCellLabels extends BasicCompilerStep<Definition> {
         Module module = def.getSingletonModule();        
 
         CellLabelCollector labels = new CellLabelCollector(context);
-        module.accept(labels);
+        labels.visitNode(module);
         
         for (String cellLabel : labels.cellLabels) {
             module.addProduction("CellLabel", new Terminal(cellLabel));

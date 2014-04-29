@@ -28,7 +28,7 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
         ASTNode rlModule = DefinitionLoader.parseString(rlFileContent,
                 GlobalSettings.CHECK, context);
         RetrieveRRVisitor rrrv = new RetrieveRRVisitor(context);
-        rlModule.accept(rrrv);
+        rrrv.visitNode(rlModule);
         reachabilityRules = rrrv.getRules();
 
         // resolve pgm if any

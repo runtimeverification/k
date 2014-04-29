@@ -41,7 +41,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         if (c.getEllipses() == Ellipses.NONE)
             if (context.cellSorts.containsKey(c.getLabel())) {
                 try {
-                    c.setContents((Term) c.getContents().accept(new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel()))));
+                    c.setContents((Term) new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel())).visitNode(c.getContents()));
                 } catch (TransformerException e) {
                     e.printStackTrace();
                 }
@@ -58,24 +58,24 @@ public class CollectVariablesVisitor extends BasicVisitor {
             if (node.getProduction().getItems().get(i) instanceof Sort) {
                 Term t = node.getContents().get(j);
                 try {
-                    t.accept(new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()));
+                    new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()).visitNode(t);
                 } catch (TransformerException e) {
                     e.printStackTrace();
                 }
-                t.accept(this);
+                this.visitNode(t);
                 j++;
             } else if (node.getProduction().getItems().get(i) instanceof UserList) {
                 UserList ul = (UserList) node.getProduction().getItems().get(i);
                 Term t1 = node.getContents().get(0);
                 Term t2 = node.getContents().get(1);
                 try {
-                    t1.accept(new CollectVariablesVisitor2(context, ul.getSort()));
-                    t2.accept(new CollectVariablesVisitor2(context, node.getProduction().getSort()));
+                    new CollectVariablesVisitor2(context, ul.getSort()).visitNode(t1);
+                    new CollectVariablesVisitor2(context, node.getProduction().getSort()).visitNode(t2);
                 } catch (TransformerException e) {
                     e.printStackTrace();
                 }
-                t1.accept(this);
-                t2.accept(this);
+                this.visitNode(t1);
+                this.visitNode(t2);
             }
         }
 
@@ -136,7 +136,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         @Override
         public ASTNode visit(Rewrite node, Void _) throws TransformerException {
             Rewrite result = new Rewrite(node);
-            result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
+            result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
             return visit((Term) result, _);
         }
 
@@ -147,7 +147,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
-                    result = t.accept(this);
+                    result = this.visitNode(t);
                     terms.add((Term) result);
                 } catch (TransformerException e) {
                     exception = e;
@@ -164,7 +164,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
         @Override
         public ASTNode visit(Bracket node, Void _) throws TransformerException {
-            node.setContent((Term) node.getContent().accept(this));
+            node.setContent((Term) this.visitNode(node.getContent()));
             return visit((Term) node, _);
         }
     }

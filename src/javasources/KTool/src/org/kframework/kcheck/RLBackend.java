@@ -145,7 +145,7 @@ public class RLBackend extends BasicBackend implements Backend {
         }
         MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(
                 maudeHooks, specialMaudeHooks, context);
-        javaDef.accept(builtinsFilter);
+        builtinsFilter.visitNode(javaDef);
         final String mainModule = javaDef.getMainModule();
         StringBuilder builtins = new StringBuilder().append("mod ")
             .append(mainModule).append("-BUILTINS is\n")
@@ -190,7 +190,7 @@ public class RLBackend extends BasicBackend implements Backend {
          ****************/
 
         UnparserFilter unparserFilter = new UnparserFilter(context);
-        javaDef.accept(unparserFilter);
+        unparserFilter.visitNode(javaDef);
 
         String unparsedText = unparserFilter.getResult();
 
@@ -311,7 +311,7 @@ public class RLBackend extends BasicBackend implements Backend {
         
         Term context = icontext.shallowCopy();
         MergeToTransformer mtt = new MergeToTransformer(this.context, lpgm);
-        context = (Term) context.accept(mtt);
+        context = (Term) mtt.visitNode(context);
         
         return context;
     }

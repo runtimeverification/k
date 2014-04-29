@@ -26,7 +26,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
         Set<VarHashMap> newVars = new HashSet<VarHashMap>();
         for (Term t : node.getContents()) {
             CollectExpectedVariablesVisitor viz = new CollectExpectedVariablesVisitor(context);
-            t.accept(viz);
+            viz.visitNode(t);
             // create the split
             for (VarHashMap elem : vars) { // for every local type restrictions
                 for (VarHashMap elem2 : viz.vars) { // create a combination with every ambiguity detected

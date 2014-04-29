@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @see ASTNode
  */
-public class Attributes extends ASTNode {
+public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute, Enum<?>> {
 
     protected java.util.List<Attribute> contents;
 
@@ -155,7 +155,17 @@ public class Attributes extends ASTNode {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public List<Attribute> getChildren(Enum<?> _) {
+        return contents;
+    }
+
+    @Override
+    public void setChildren(List<Attribute> children, Enum<?> _) {
+        this.contents = children;
     }
 }

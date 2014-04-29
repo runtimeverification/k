@@ -133,7 +133,7 @@ public class XmlUnparseFilter extends BasicVisitor {
                 + StringEscapeUtils.escapeXml(syn.getSort().getName()));
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {
-                pb.accept(this);
+                this.visitNode(pb);
             }
         buffer.append("\n");
         return postpare();
@@ -166,12 +166,12 @@ public class XmlUnparseFilter extends BasicVisitor {
         firstProduction = false;
         for (int i = 0; i < prod.getItems().size(); ++i) {
             ProductionItem pi = prod.getItems().get(i);
-            pi.accept(this);
+            this.visitNode(pi);
             if (i != prod.getItems().size() - 1) {
                 buffer.append(" ");
             }
         }
-        prod.getAttributes().accept(this);
+        this.visitNode(prod.getAttributes());
         buffer.append("\n");
         return postpare();
     }
@@ -211,7 +211,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         prepare(listOfK);
         java.util.List<Term> termList = listOfK.getContents();
         for (int i = 0; i < termList.size(); ++i) {
-            termList.get(i).accept(this);
+            this.visitNode(termList.get(i));
             if (i != termList.size() - 1) {
                 buffer.append(",, ");
             }
@@ -245,7 +245,7 @@ public class XmlUnparseFilter extends BasicVisitor {
             buffer.append(" ");
             buffer.append("[");
             for (int i = 0; i < attributeList.size(); ++i) {
-                attributeList.get(i).accept(this);
+                this.visitNode(attributeList.get(i));
                 if (i != attributeList.size() - 1) {
                     buffer.append(", ");
                 }
@@ -275,7 +275,7 @@ public class XmlUnparseFilter extends BasicVisitor {
             buffer.append("configuration");
             buffer.append("\n");
             inConfiguration = true;
-            configuration.getBody().accept(this);
+            this.visitNode(configuration.getBody());
             inConfiguration = false;
             buffer.append("\n");
             buffer.append("\n");
@@ -306,7 +306,7 @@ public class XmlUnparseFilter extends BasicVisitor {
                 buffer.append(" ");
             }
         }
-        cell.getContents().accept(this);
+        this.visitNode(cell.getContents());
         buffer.append(colorCode);
         if (inConfiguration && inTerm == 0) {
             buffer.append("\n");
@@ -352,16 +352,16 @@ public class XmlUnparseFilter extends BasicVisitor {
                     + "]: ");
         }
         variableList.clear();
-        rule.getBody().accept(this);
+        this.visitNode(rule.getBody());
         if (rule.getRequires() != null) {
             buffer.append(" when ");
-            rule.getRequires().accept(this);
+            this.visitNode(rule.getRequires());
         }
         if (rule.getEnsures() != null) {
             buffer.append(" ensures ");
-            rule.getEnsures().accept(this);
+            this.visitNode(rule.getEnsures());
         }
-        rule.getAttributes().accept(this);
+        this.visitNode(rule.getAttributes());
         buffer.append("\n");
         buffer.append("\n");
         return postpare();
@@ -378,9 +378,9 @@ public class XmlUnparseFilter extends BasicVisitor {
             assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
             buffer.append(StringEscapeUtils.escapeXml(((Token) label).value()));
         } else {
-            label.accept(this);
+            this.visitNode(label);
             buffer.append("(");
-            child.accept(this);
+            this.visitNode(child);
             buffer.append(")");
         }
         return postpare();
@@ -393,7 +393,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         java.util.List<Term> contents = ksequence.getContents();
         if (!contents.isEmpty()) {
             for (int i = 0; i < contents.size(); i++) {
-                contents.get(i).accept(this);
+                this.visitNode(contents.get(i));
                 if (i != contents.size() - 1) {
                     buffer.append(StringEscapeUtils.escapeXml(" ~> "));
                 }
@@ -414,15 +414,15 @@ public class XmlUnparseFilter extends BasicVisitor {
             UserList userList = (UserList) production.getItems().get(0);
             String separator = userList.getSeparator();
             java.util.List<Term> contents = termCons.getContents();
-            contents.get(0).accept(this);
+            this.visitNode(contents.get(0));
             buffer.append(StringEscapeUtils.escapeXml(separator) + " ");
-            contents.get(1).accept(this);
+            this.visitNode(contents.get(1));
         } else {
             int where = 0;
             for (int i = 0; i < production.getItems().size(); ++i) {
                 ProductionItem productionItem = production.getItems().get(i);
                 if (!(productionItem instanceof Terminal)) {
-                    termCons.getContents().get(where++).accept(this);
+                    this.visitNode(termCons.getContents().get(where++));
                 } else {
                     buffer.append(StringEscapeUtils
                             .escapeXml(((Terminal) productionItem)
@@ -441,9 +441,9 @@ public class XmlUnparseFilter extends BasicVisitor {
     public Void visit(Rewrite rewrite, Void _) {
 
         prepare(rewrite);
-        rewrite.getLeft().accept(this);
+        this.visitNode(rewrite.getLeft());
         buffer.append(StringEscapeUtils.escapeXml(" => "));
-        rewrite.getRight().accept(this);
+        this.visitNode(rewrite.getRight());
         return postpare();
     }
 
@@ -463,7 +463,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         prepare(collection);
         java.util.List<Term> contents = collection.getContents();
         for (int i = 0; i < contents.size(); ++i) {
-            contents.get(i).accept(this);
+            this.visitNode(contents.get(i));
             if (i != contents.size() - 1) {
                 if (inConfiguration && inTerm == 0) {
                     buffer.append("\n");
@@ -521,9 +521,9 @@ public class XmlUnparseFilter extends BasicVisitor {
     public Void visit(MapItem mapItem, Void _) {
 
         prepare(mapItem);
-        mapItem.getKey().accept(this);
+        this.visitNode(mapItem.getKey());
         buffer.append(StringEscapeUtils.escapeXml(" |-> "));
-        mapItem.getValue().accept(this);
+        this.visitNode(mapItem.getValue());
         return postpare();
     }
 
@@ -546,7 +546,7 @@ public class XmlUnparseFilter extends BasicVisitor {
     public Void visit(Freezer freezer, Void _) {
 
         prepare(freezer);
-        freezer.getTerm().accept(this);
+        this.visitNode(freezer.getTerm());
         return postpare();
     }
 
@@ -562,7 +562,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         } else {
             buffer.append("# ");
         }
-        term.accept(this);
+        this.visitNode(term);
         return postpare();
     }
 
@@ -626,7 +626,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         buffer.append("\n");
         java.util.List<Term> contents = ambiguity.getContents();
         for (int i = 0; i < contents.size(); ++i) {
-            contents.get(i).accept(this);
+            this.visitNode(contents.get(i));
             if (i != contents.size() - 1) {
                 buffer.append(",");
                 buffer.append("\n");
@@ -643,16 +643,16 @@ public class XmlUnparseFilter extends BasicVisitor {
         prepare(context);
         buffer.append("context ");
         variableList.clear();
-        context.getBody().accept(this);
+        this.visitNode(context.getBody());
         if (context.getRequires() != null) {
             buffer.append(" when ");
-            context.getRequires().accept(this);
+            this.visitNode(context.getRequires());
         }
         if (context.getEnsures() != null) {
             buffer.append(" ensures ");
-            context.getEnsures().accept(this);
+            this.visitNode(context.getEnsures());
         }
-        context.getAttributes().accept(this);
+        this.visitNode(context.getAttributes());
         buffer.append("\n");
         buffer.append("\n");
         return postpare();
@@ -693,7 +693,7 @@ public class XmlUnparseFilter extends BasicVisitor {
 
         prepare(br);
         buffer.append("(");
-        br.getContent().accept(this);
+        this.visitNode(br.getContent());
         buffer.append(")");
         return postpare();
     }
@@ -702,7 +702,7 @@ public class XmlUnparseFilter extends BasicVisitor {
     public Void visit(Cast c, Void _) {
 
         prepare(c);
-        c.getContent().accept(this);
+        this.visitNode(c.getContent());
         buffer.append(" :");
         if (c.isSyntactic()) {
             buffer.append(":");

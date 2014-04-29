@@ -110,7 +110,7 @@ public class UnparserFilter extends NonCachingVisitor {
         indenter.indentToCurrent();
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {
-                pb.accept(this);
+                this.visitNode(pb);
             }
         indenter.unindent();
         indenter.endLine();
@@ -142,12 +142,12 @@ public class UnparserFilter extends NonCachingVisitor {
         firstProduction = false;
         for (int i = 0; i < prod.getItems().size(); ++i) {
             ProductionItem pi = prod.getItems().get(i);
-            pi.accept(this);
+            this.visitNode(pi);
             if (i != prod.getItems().size() - 1) {
                 indenter.write(" ");
             }
         }
-        prod.getAttributes().accept(this);
+        this.visitNode(prod.getAttributes());
         indenter.endLine();
         return postpare();
     }
@@ -181,7 +181,7 @@ public class UnparserFilter extends NonCachingVisitor {
         prepare(listOfK);
         java.util.List<Term> termList = listOfK.getContents();
         for (int i = 0; i < termList.size(); ++i) {
-            termList.get(i).accept(this);
+            this.visitNode(termList.get(i));
             if (i != termList.size() - 1) {
                 indenter.write(",, ");
             }
@@ -214,7 +214,7 @@ public class UnparserFilter extends NonCachingVisitor {
             indenter.write(" ");
             indenter.write("[");
             for (int i = 0; i < attributeList.size(); ++i) {
-                attributeList.get(i).accept(this);
+                this.visitNode(attributeList.get(i));
                 if (i != attributeList.size() - 1) {
                     indenter.write(", ");
                 }
@@ -242,7 +242,7 @@ public class UnparserFilter extends NonCachingVisitor {
             indenter.endLine();
             indenter.indent(TAB);
             inConfiguration = true;
-            configuration.getBody().accept(this);
+            this.visitNode(configuration.getBody());
             inConfiguration = false;
             indenter.unindent();
             indenter.endLine();
@@ -284,7 +284,7 @@ public class UnparserFilter extends NonCachingVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        cell.getContents().accept(this);
+        this.visitNode(cell.getContents());
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();
@@ -331,16 +331,16 @@ public class UnparserFilter extends NonCachingVisitor {
             indenter.write("[" + rule.getLabel() + "]: ");
         }
         variableList.clear();
-        rule.getBody().accept(this);
+        this.visitNode(rule.getBody());
         if (rule.getRequires() != null) {
             indenter.write(" when ");
-            rule.getRequires().accept(this);
+            this.visitNode(rule.getRequires());
         }
         if (rule.getEnsures() != null) {
             indenter.write(" ensures ");
-            rule.getEnsures().accept(this);
+            this.visitNode(rule.getEnsures());
         }
-        rule.getAttributes().accept(this);
+        this.visitNode(rule.getAttributes());
         indenter.endLine();
         indenter.endLine();
         return postpare();
@@ -372,7 +372,7 @@ public class UnparserFilter extends NonCachingVisitor {
                         if (i > 0) {
                             indenter.write(" ");
                         }
-                        termList.get(i).accept(this);
+                        this.visitNode(termList.get(i));
                         if (i < termList.size() - 1) {
                             indenter.write(" ");
                         }
@@ -383,14 +383,14 @@ public class UnparserFilter extends NonCachingVisitor {
             else {
                 // child is a KList variable
                 indenter.write("(");
-                child.accept(this);
+                this.visitNode(child);
                 indenter.write(")");
             }
         }
         else {
-            label.accept(this);
+            this.visitNode(label);
             indenter.write("(");
-            child.accept(this);
+            this.visitNode(child);
             indenter.write(")");
         }
         return postpare();
@@ -402,7 +402,7 @@ public class UnparserFilter extends NonCachingVisitor {
         java.util.List<Term> contents = ksequence.getContents();
         if (!contents.isEmpty()) {
             for (int i = 0; i < contents.size(); i++) {
-                contents.get(i).accept(this);
+                this.visitNode(contents.get(i));
                 if (i != contents.size() - 1) {
                     indenter.write(" ~> ");
                 }
@@ -422,17 +422,17 @@ public class UnparserFilter extends NonCachingVisitor {
             UserList userList = (UserList) production.getItems().get(0);
             String separator = userList.getSeparator();
             java.util.List<Term> contents = termCons.getContents();
-            contents.get(0).accept(this);
+            this.visitNode(contents.get(0));
             if (!(contents.get(1) instanceof ListTerminator)) {
                 indenter.write(separator + " ");
-                contents.get(1).accept(this);
+                this.visitNode(contents.get(1));
             }
         } else {
             int where = 0;
             for (int i = 0; i < production.getItems().size(); ++i) {
                 ProductionItem productionItem = production.getItems().get(i);
                 if (!(productionItem instanceof Terminal)) {
-                    termCons.getContents().get(where++).accept(this);
+                    this.visitNode(termCons.getContents().get(where++));
                 } else {
                     indenter.write(((Terminal) productionItem).getTerminal());
                 }
@@ -449,9 +449,9 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Rewrite rewrite, Void _) {
         prepare(rewrite);
-        rewrite.getLeft().accept(this);
+        this.visitNode(rewrite.getLeft());
         indenter.write(" => ");
-        rewrite.getRight().accept(this);
+        this.visitNode(rewrite.getRight());
         return postpare();
     }
 
@@ -467,7 +467,7 @@ public class UnparserFilter extends NonCachingVisitor {
         prepare(collection);
         java.util.List<Term> contents = collection.getContents();
         for (int i = 0; i < contents.size(); ++i) {
-            contents.get(i).accept(this);
+            this.visitNode(contents.get(i));
             if (i != contents.size() - 1) {
                 if (inConfiguration && inTerm == 0) {
                     indenter.endLine();
@@ -519,9 +519,9 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(MapItem mapItem, Void _) {
         prepare(mapItem);
-        mapItem.getKey().accept(this);
+        this.visitNode(mapItem.getKey());
         indenter.write(" |-> ");
-        mapItem.getValue().accept(this);
+        this.visitNode(mapItem.getValue());
         return postpare();
     }
 
@@ -542,7 +542,7 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Freezer freezer, Void _) {
         prepare(freezer);
-        freezer.getTerm().accept(this);
+        this.visitNode(freezer.getTerm());
         return postpare();
     }
 
@@ -556,7 +556,7 @@ public class UnparserFilter extends NonCachingVisitor {
         } else {
             indenter.write("# ");
         }
-        term.accept(this);
+        this.visitNode(term);
         return postpare();
     }
 
@@ -614,7 +614,7 @@ public class UnparserFilter extends NonCachingVisitor {
         indenter.indent(TAB);
         java.util.List<Term> contents = ambiguity.getContents();
         for (int i = 0; i < contents.size(); ++i) {
-            contents.get(i).accept(this);
+            this.visitNode(contents.get(i));
             if (i != contents.size() - 1) {
                 indenter.write(",");
                 indenter.endLine();
@@ -631,16 +631,16 @@ public class UnparserFilter extends NonCachingVisitor {
         prepare(context);
         indenter.write("context ");
         variableList.clear();
-        context.getBody().accept(this);
+        this.visitNode(context.getBody());
         if (context.getRequires() != null) {
             indenter.write(" when ");
-            context.getRequires().accept(this);
+            this.visitNode(context.getRequires());
         }
         if (context.getEnsures() != null) {
             indenter.write(" ensures ");
-            context.getEnsures().accept(this);
+            this.visitNode(context.getEnsures());
         }
-        context.getAttributes().accept(this);
+        this.visitNode(context.getAttributes());
         indenter.endLine();
         indenter.endLine();
         return postpare();
@@ -675,7 +675,7 @@ public class UnparserFilter extends NonCachingVisitor {
     public Void visit(Bracket br, Void _) {
         prepare(br);
         indenter.write("(");
-        br.getContent().accept(this);
+        this.visitNode(br.getContent());
         indenter.write(")");
         return postpare();
     }
@@ -683,7 +683,7 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Cast c, Void _) {
         prepare(c);
-        c.getContent().accept(this);
+        this.visitNode(c.getContent());
         indenter.write(" :");
         if (c.isSyntactic()) {
             indenter.write(":");

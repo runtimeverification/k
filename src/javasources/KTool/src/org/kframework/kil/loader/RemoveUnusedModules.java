@@ -30,7 +30,7 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
         
         initialModules.add(def.getMainModule());
         CollectReachableModulesVisitor fm = new CollectReachableModulesVisitor(context, initialModules);
-        def.accept(fm);
+        fm.visitNode(def);
         ArrayList<DefinitionItem> reachableModulesList = new ArrayList<>();
         HashMap<String, Module> reachableModulesMap = fm.getResult();
 //        System.out.println(reachableModulesMap.keySet());

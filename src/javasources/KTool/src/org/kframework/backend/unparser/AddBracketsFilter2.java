@@ -112,16 +112,16 @@ public class AddBracketsFilter2 extends BasicTransformer {
             return result;
         }
         UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, false, true, context);
-        ast.accept(unparser);
+        unparser.visitNode(ast);
         String unparsed = unparser.getResult();
         try {
             ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, context);
             Term reparsed = ((Sentence)rule).getBody();
-            reparsed.accept(new AdjustLocations(context));
+            new AdjustLocations(context).visitNode(reparsed);
             if (!reparsed.contains(ast)) {
                 return replaceWithVar(ast);
             }
-            return ast.accept(new AddBracketsFilter2(reparsed, context));
+            return new AddBracketsFilter2(reparsed, context).visitNode(ast);
         } catch (TransformerException e) {
             return replaceWithVar(ast);
         }
@@ -153,7 +153,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 
     private ASTNode addBracketsIfNeeded(Term ast) throws TransformerException {
         TraverseForest trans = new TraverseForest(ast, context);
-        reparsed = (Term)reparsed.accept(trans);
+        reparsed = (Term) trans.visitNode(reparsed);
         if (trans.needsParens) {
             return new Bracket(ast.getLocation(), ast.getFilename(), ast, context);
         }
@@ -193,7 +193,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
                 Term t = amb.getContents().get(i);
                 boolean tmp = hasTerm;
                 hasTerm = false;
-                t.accept(this);
+                this.visitNode(t);
                 if (!hasTerm) {
                     needsParens = true;
                     amb.getContents().remove(i);

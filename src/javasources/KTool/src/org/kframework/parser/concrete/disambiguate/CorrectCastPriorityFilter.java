@@ -45,7 +45,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
                 return var;
             }
         }
-        cst.getContent().accept(secondFilter);
+        secondFilter.visitNode(cst.getContent());
         return super.visit(cst, _);
     }
 
@@ -98,7 +98,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
-                    result = t.accept(this);
+                    result = this.visitNode(t);
                     terms.add((Term) result);
                 } catch (TransformerException e) {
                     exception = e;

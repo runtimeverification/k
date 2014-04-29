@@ -51,7 +51,7 @@ public class KRunApiDebugger implements KRunDebugger {
                     KSorts.BAG,
                     context);
             CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-            pattern.accept(vars);
+            vars.visitNode(pattern);
             defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
@@ -222,7 +222,7 @@ public class KRunApiDebugger implements KRunDebugger {
     public String printState(int stateNum) {
         KRunState state = getState(stateNum);
         UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-        state.getResult().accept(unparser);
+        unparser.visitNode(state.getResult());
         return state.toString() + ":\n" + unparser.getResult();
     }
 
@@ -239,7 +239,7 @@ public class KRunApiDebugger implements KRunDebugger {
         String rule;
         if (edge.getType() == TransitionType.RULE) {
             UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-            edge.getRule().accept(unparser);
+            unparser.visitNode(edge.getRule());
             rule = unparser.getResult();
         } else if (edge.getType() == TransitionType.LABEL) {
             rule = "rule [" + edge.getLabel() + "]: ...";
@@ -260,7 +260,7 @@ public class KRunApiDebugger implements KRunDebugger {
         AppendToStdin transformer = new AppendToStdin(s, context);
         Term result;
         try {
-            result = (Term)configuration.accept(transformer);
+            result = (Term) transformer.visitNode(configuration);
         } catch (TransformerException e) {
             assert false;
             result = null; //for static purposes

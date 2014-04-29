@@ -7,7 +7,6 @@ import java.util.Set;
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Visitable;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -21,7 +20,7 @@ import aterm.ATermList;
  * @see Visitable
  * @see Transformable
  */
-public abstract class ASTNode implements Visitable, Serializable {
+public abstract class ASTNode implements Serializable {
     /**
      * 
      */
@@ -282,9 +281,6 @@ public abstract class ASTNode implements Visitable, Serializable {
      * @return a copy of the ASTNode containing the same fields.
      */
     public abstract ASTNode shallowCopy();
-
-    @Override
-    public <R, E extends Throwable> R accept(Visitor<Void, R, E> visitor) throws E {
-        return this.accept(visitor, null);
-    }
+    
+    protected abstract <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E;
 }

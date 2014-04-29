@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * Abstract class representing a data structure (bag, list, map or set) AST node.
  *
@@ -35,8 +34,14 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public abstract class DataStructureBuiltin extends Term {
+public abstract class DataStructureBuiltin extends Term implements Interfaces.Collection<Term, DataStructureBuiltin.ListChildren> {
 
+    public static enum ListChildren {
+        BASE_TERMS,
+        ELEMENTS,
+        ELEMENTS_RIGHT
+    }
+    
     public static DataStructureBuiltin empty(DataStructureSort sort) {
         if (sort.type().equals(KSorts.BAG)
                 || sort.type().equals(KSorts.SET)) {
@@ -286,5 +291,15 @@ public abstract class DataStructureBuiltin extends Term {
         DataStructureBuiltin dataStructureBuiltin = (DataStructureBuiltin) object;
         return sort.equals(dataStructureBuiltin.sort)
                && baseTerms.equals(dataStructureBuiltin.baseTerms);
+    }
+    
+    @Override
+    public Collection<Term> getChildren(ListChildren type) {
+        switch (type) {
+        case BASE_TERMS:
+            return baseTerms;
+        default:
+            throw new AssertionError("unexpected child type " + type.name());
+        }
     }
 }

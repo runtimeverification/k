@@ -26,7 +26,7 @@ public class MaudeRuleExtractor extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule node, Void _) throws TransformerException {
-        node.accept(maudeFilter);
+        maudeFilter.visitNode(node);
         return null;
     }
 

@@ -55,7 +55,7 @@ public class CellTypesFilter extends BasicTransformer {
         }
 
         if (sort != null) {
-            cell.setContents((Term) cell.getContents().accept(new CellTypesFilter2(context, sort, cell.getLabel())));
+            cell.setContents((Term) new CellTypesFilter2(context, sort, cell.getLabel()).visitNode(cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
             throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
@@ -93,14 +93,14 @@ public class CellTypesFilter extends BasicTransformer {
 
         @Override
         public ASTNode visit(Bracket node, Void _) throws TransformerException {
-            node.setContent((Term) node.getContent().accept(this));
+            node.setContent((Term) this.visitNode(node.getContent()));
             return node;
         }
 
         @Override
         public ASTNode visit(Rewrite node, Void _) throws TransformerException {
             Rewrite result = new Rewrite(node);
-            result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
+            result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
             return result;
         }
 
@@ -111,7 +111,7 @@ public class CellTypesFilter extends BasicTransformer {
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
-                    result = t.accept(this);
+                    result = this.visitNode(t);
                     terms.add((Term) result);
                 } catch (TransformerException e) {
                     exception = e;

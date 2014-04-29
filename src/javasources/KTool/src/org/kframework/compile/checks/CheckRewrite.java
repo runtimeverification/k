@@ -37,7 +37,7 @@ public class CheckRewrite extends BasicVisitor {
     @Override
     public Void visit(Rule node, Void _) {
         rewritesNo = 0;
-        node.getBody().accept(this);
+        this.visitNode(node.getBody());
         if (rewritesNo == 0) {
             String msg = "Rules must have at least one rewrite.";
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
@@ -45,12 +45,12 @@ public class CheckRewrite extends BasicVisitor {
 
         if (node.getRequires() != null) {
             inSideCondition = true;
-            node.getRequires().accept(this);
+            this.visitNode(node.getRequires());
             inSideCondition = false;
         }
         if (node.getEnsures() != null) {
             inSideCondition = true;
-            node.getEnsures().accept(this);
+            this.visitNode(node.getEnsures());
             inSideCondition = false;
         }
         return null;
@@ -58,15 +58,15 @@ public class CheckRewrite extends BasicVisitor {
 
     @Override
     public Void visit(org.kframework.kil.Context node, Void _) {
-        node.getBody().accept(this);
+        this.visitNode(node.getBody());
         if (node.getRequires() != null) {
             inSideCondition = true;
-            node.getRequires().accept(this);
+            this.visitNode(node.getRequires());
             inSideCondition = false;
         }
         if (node.getEnsures() != null) {
             inSideCondition = true;
-            node.getEnsures().accept(this);
+            this.visitNode(node.getEnsures());
             inSideCondition = false;
         }
         return null;

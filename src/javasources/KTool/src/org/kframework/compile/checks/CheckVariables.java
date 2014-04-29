@@ -53,9 +53,9 @@ public class CheckVariables extends BasicVisitor {
 
     @Override
     public Void visit(Rewrite node, Void _) {
-        node.getLeft().accept(this);
+        this.visitNode(node.getLeft());
         current = right;
-        node.getRight().accept(this);
+        this.visitNode(node.getRight());
         current = left;
         return null;
     }
@@ -140,11 +140,11 @@ public class CheckVariables extends BasicVisitor {
         right.clear();
         fresh.clear();
         current = left;
-        node.getBody().accept(this);
+        this.visitNode(node.getBody());
         if (node.getRequires() != null) {
             current = right;
             inCondition = true;
-            node.getRequires().accept(this);
+            this.visitNode(node.getRequires());
         }
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {

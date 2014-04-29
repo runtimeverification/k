@@ -15,6 +15,10 @@ public class CopyOnWriteTransformer extends AbstractTransformer {
     public CopyOnWriteTransformer(String name, Context context) {
         super(name, context);
     }
+    
+    public CopyOnWriteTransformer(Context context) {
+        super(context);
+    }
 
     @Override
     public boolean visitChildren() {

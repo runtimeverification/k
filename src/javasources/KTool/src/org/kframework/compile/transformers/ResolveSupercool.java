@@ -32,7 +32,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rewrite node, Void _) throws TransformerException {
-        Term right = (Term)node.getRight().accept(this);
+        Term right = (Term) this.visitNode(node.getRight());
         if (right != node.getRight()) {
             node = node.shallowCopy();
             node.setRight(right, context);

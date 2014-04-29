@@ -31,7 +31,7 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
         top.setLabel(MetaK.Constants.generatedCfgAbsTopCellLabel);
         top.setId(MetaK.Constants.generatedCfgAbsTopCellLabel);
         top.setContents(t);
-        top.accept(this);
+        this.visitNode(top);
         return null;
     }
     

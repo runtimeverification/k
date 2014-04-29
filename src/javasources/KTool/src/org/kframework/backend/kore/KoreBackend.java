@@ -185,7 +185,7 @@ class KoreFilter extends BasicVisitor {
         for (int i = 0; i < node.getContents().size() ; ++i){
             Term term=node.getContents().get(i);
             if (term != null){
-                term.accept(this);
+                this.visitNode(term);
                 if(i!=node.getContents().size()-1){
                     indenter.write(",");
                 }
@@ -210,7 +210,7 @@ class KoreFilter extends BasicVisitor {
         indenter.write("[");
         for (int i = 0; i < node.getContents().size() ; ++i){
             Attribute term=node.getContents().get(i);
-                term.accept(this);
+                this.visitNode(term);
                 if(i!=node.getContents().size()-1){
                     indenter.write(", ");
             }
@@ -235,14 +235,14 @@ class KoreFilter extends BasicVisitor {
         
         for(int i = 0;i < node.getContents().size(); ++i){
             Term term = node.getContents().get(i);
-            term.accept(this);
+            this.visitNode(term);
         }
         return null;
     }
     
     @Override
     public Void visit(BagItem node, Void _) {
-        node.getItem().accept(this);
+        this.visitNode(node.getItem());
         return null;
     }
     
@@ -255,7 +255,7 @@ class KoreFilter extends BasicVisitor {
     @Override
     public Void visit(Bracket node, Void _) {
         indenter.write("(");
-        node.getContent().accept(this);
+        this.visitNode(node.getContent());
         indenter.write(")");
         return null;
     }
@@ -263,7 +263,7 @@ class KoreFilter extends BasicVisitor {
     @Override
     public Void visit(Cast node, Void _) {
         indenter.write("(");
-        node.getContent().accept(this);
+        this.visitNode(node.getContent());
         indenter.write(" :");
         if (node.isSyntactic()) {
             indenter.write(":");
@@ -306,7 +306,7 @@ class KoreFilter extends BasicVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        cell.getContents().accept(this);
+        this.visitNode(cell.getContents());
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();
@@ -329,7 +329,7 @@ class KoreFilter extends BasicVisitor {
     @Override
     public Void visit(Configuration node, Void _) {
         indenter.write("  configuration ");
-        node.getBody().accept(this) ;
+        this.visitNode(node.getBody()) ;
         indenter.write(" ");
         indenter.endLine();
         return null;
@@ -338,9 +338,9 @@ class KoreFilter extends BasicVisitor {
     @Override
     public Void visit(org.kframework.kil.Context node, Void _) {
         indenter.write("  context ");
-        node.getBody().accept(this);
+        this.visitNode(node.getBody());
         indenter.write(" ");
-        node.getAttributes().accept(this);
+        this.visitNode(node.getAttributes());
         return null;
     }
     
@@ -352,7 +352,7 @@ class KoreFilter extends BasicVisitor {
     @Override
     public Void visit(Definition node, Void _) {
         for (DefinitionItem di : node.getItems()) {
-            di.accept(this);
+            this.visitNode(di);
         }
         return null;
     }
@@ -360,7 +360,7 @@ class KoreFilter extends BasicVisitor {
     @Override
     public Void visit(Freezer node, Void _) {
         indenter.write("#freezer");
-        node.getTerm().accept(this);
+        this.visitNode(node.getTerm());
         indenter.write("(.KList)");
         return null;
     }
@@ -388,7 +388,7 @@ class KoreFilter extends BasicVisitor {
         if (nodes.size() == 0) { this.indenter.write(empty); }
         else {
           for (int i = 0; i < nodes.size(); i++) {
-            nodes.get(i).accept(this);
+            this.visitNode(nodes.get(i));
             if (i != (nodes.size() - 1)) { indenter.write(sep); }
           }
         }
@@ -426,9 +426,9 @@ class KoreFilter extends BasicVisitor {
         
         @Override
         public Void visit(KApp node, Void _) {
-              node.getLabel().accept(this);
+              this.visitNode(node.getLabel());
               this.indenter.write("(");
-              node.getChild().accept(this);
+              this.visitNode(node.getChild());
               this.indenter.write(")");
               return null;
         }
@@ -448,7 +448,7 @@ class KoreFilter extends BasicVisitor {
             } else {
                 indenter.write("# ");
             }
-            term.accept(this);
+            this.visitNode(term);
             return null;
         }
         
@@ -481,7 +481,7 @@ class KoreFilter extends BasicVisitor {
             indenter.write("module " + mod.getName() + "\n");
             for (ModuleItem i : mod.getItems()){
                 
-                i.accept(this);
+                this.visitNode(i);
             }
             indenter.write("\nendmodule");
             return null;
@@ -497,7 +497,7 @@ class KoreFilter extends BasicVisitor {
         public Void visit(Production node, Void _) {
             for (ProductionItem i : node.getItems()){
                 
-                i.accept(this);
+                this.visitNode(i);
                 indenter.write(" ");
             }
             return null;
@@ -512,7 +512,7 @@ class KoreFilter extends BasicVisitor {
             
             for (int i = 0; i < node.getProductions().size(); ++i){
                 Production production = node.getProductions().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getProductions().size()-1){
                     indenter.write("\n     | ");
                 }
@@ -525,7 +525,7 @@ class KoreFilter extends BasicVisitor {
             
             for (int i = 0; i < node.getProductions().size(); ++i){
                 KLabelConstant production = node.getProductions().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getProductions().size()-1){
                     indenter.write(" ");
                 }
@@ -539,7 +539,7 @@ class KoreFilter extends BasicVisitor {
             indenter.write("  syntax priorities" );
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlockExtended production = node.getPriorityBlocks().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getPriorityBlocks().size()-1){
                     indenter.write("\n     > ");
                 }
@@ -554,7 +554,7 @@ class KoreFilter extends BasicVisitor {
             indenter.write("  syntax "+node.getAssoc() );
             for (int i = 0; i < node.getTags().size(); ++i){
                 KLabelConstant production = node.getTags().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getTags().size()-1){
                     indenter.write(" ");
                 }
@@ -575,9 +575,9 @@ class KoreFilter extends BasicVisitor {
         public Void visit(Restrictions node, Void _) {
             indenter.write("  syntax ");
             if(node.getSort()!=null){
-                node.getSort().accept(this);
+                this.visitNode(node.getSort());
             } else {
-                node.getTerminal().accept(this);
+                this.visitNode(node.getTerminal());
             }
             indenter.write(" -/- " + node.getPattern());
             indenter.endLine();
@@ -586,9 +586,9 @@ class KoreFilter extends BasicVisitor {
         
         @Override
         public Void visit(Rewrite rewrite, Void _) {
-            rewrite.getLeft().accept(this);
+            this.visitNode(rewrite.getLeft());
             indenter.write(" => ");
-            rewrite.getRight().accept(this);
+            this.visitNode(rewrite.getRight());
             indenter.endLine();
             return null;
         }
@@ -600,20 +600,20 @@ class KoreFilter extends BasicVisitor {
             if (node.getLabel() != null && !node.getLabel().equals(""))
                 indenter.write("[" + node.getLabel() + "]: ");
 
-            node.getBody().accept(this);
+            this.visitNode(node.getBody());
             indenter.write(" ");
             
             if (node.getRequires() != null) {
                 indenter.write("requires ");
-                node.getRequires().accept(this);
+                this.visitNode(node.getRequires());
                 indenter.write(" ");
             }
             if (node.getEnsures() != null) {
                 indenter.write("requires ");
-                node.getEnsures().accept(this);
+                this.visitNode(node.getEnsures());
                 indenter.write(" ");
             }
-            node.getAttributes().accept(this);
+            this.visitNode(node.getAttributes());
             indenter.endLine();
             return null;
         }
@@ -624,20 +624,20 @@ class KoreFilter extends BasicVisitor {
             if (node.getLabel() != null && !node.getLabel().equals(""))
                 indenter.write("[" + node.getLabel() + "]: ");
 
-            node.getBody().accept(this);
+            this.visitNode(node.getBody());
             indenter.write(" ");
             
             if (node.getRequires() != null) {
                 indenter.write("requires ");
-                node.getRequires().accept(this);
+                this.visitNode(node.getRequires());
                 indenter.write(" ");
             }
             if (node.getEnsures() != null) {
                 indenter.write("requires ");
-                node.getEnsures().accept(this);
+                this.visitNode(node.getEnsures());
                 indenter.write(" ");
             }
-            node.getAttributes().accept(this);
+            this.visitNode(node.getAttributes());
             indenter.endLine();
             return null;
         }
@@ -658,11 +658,11 @@ class KoreFilter extends BasicVisitor {
         public Void visit(Syntax node, Void _) {
             
             indenter.write("  syntax ");
-            node.getSort().accept(this);
+            this.visitNode(node.getSort());
             indenter.write(" ::=");
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlock production = node.getPriorityBlocks().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getPriorityBlocks().size()-1){
                     indenter.write("\n     > ");
                 }
@@ -697,7 +697,7 @@ class KoreFilter extends BasicVisitor {
         
         @Override
         public Void visit(TermCons node, Void _){
-            (new KApp(new KLabelConstant(node.getProduction().getKLabel()),new KList(node.getContents()))).accept(this);
+            this.visitNode(new KApp(new KLabelConstant(node.getProduction().getKLabel()),new KList(node.getContents())));
             return null;
         }
 }

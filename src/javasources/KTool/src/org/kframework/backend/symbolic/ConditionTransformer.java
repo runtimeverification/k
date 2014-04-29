@@ -40,7 +40,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                     List<Term> remainingTerms = new ArrayList<Term>();
                     for (Term t : terms) {
                         CheckSmtLibByAddingPredicates csv = new CheckSmtLibByAddingPredicates(context);
-                        t.accept(csv);
+                        csv.visitNode(t);
                         if (csv.smtValid()) {
                             filteredTerms.add(t.shallowCopy());
                             generatedPredicates.addAll(csv.getContents());
@@ -51,7 +51,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                 }
             } else {
                 CheckSmtLibByAddingPredicates csv = new CheckSmtLibByAddingPredicates(context);
-                content.accept(csv);
+                csv.visitNode(content);
                 if (csv.smtValid()) {
                     filteredTerms.add(content.shallowCopy());
                     generatedPredicates.addAll(csv.getContents());

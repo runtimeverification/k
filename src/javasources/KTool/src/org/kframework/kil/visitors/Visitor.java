@@ -60,6 +60,7 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(SetItem node, P p) throws E;
     // </CollectionItems>
     // <BuiltinDataStructure>
+    public R visit(BuiltinLookup node, P p) throws E;
     public R visit(DataStructureBuiltin node, P p) throws E;
     public R visit(CollectionBuiltin node, P p) throws E;
     public R visit(ListBuiltin node, P p) throws E;
@@ -102,6 +103,27 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(Freezer f, P p) throws E;
     public R visit(BackendTerm term, P p) throws E;
     
+    /**
+     * Visit an AST tree. This is the main entry point whenever you want to apply a visitor to an ASTNode.
+     * 
+     * @param node The node to visit.
+     * @param p The optional parameter to pass to the visit methods.
+     * @return The value returned from visiting the entire ASTNode tree.
+     * @throws E if the visitor implementation raises an exception.
+     */
+    public R visitNode(ASTNode node, P p) throws E;
+    
+    /**
+     * Visit an AST tree with {@code p} equal to null. Useful if {@code <P>} is {@link Void}. 
+     * 
+     * This method should be implemented by calling {@code visitNode(node, null)}.
+     * 
+     * @param node The node to visit.
+     * @return The value returned from visiting the entire ASTNode tree.
+     * @throws E if the visitor implementation raises an exception.
+     */
+    public R visitNode(ASTNode node) throws E;
+
     /**
      * This method must be called by {@link Visitable#accept(Visitor, Object)} with the ASTNode
      * and the result of transforming the ASTNode. Its purpose is to factor out functionality

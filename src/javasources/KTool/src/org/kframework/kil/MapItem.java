@@ -70,7 +70,7 @@ public class MapItem extends CollectionItem {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
 
@@ -102,6 +102,23 @@ public class MapItem extends CollectionItem {
     @Override
     public int hashCode() {
         return key.hashCode() * 31 + value.hashCode();
+    }
+    
+    @Override
+    public Term getChild(Children type) {
+        if (type == Children.KEY) {
+            return key;
+        }
+        return super.getChild(type);
+    }
+    
+    @Override
+    public void setChild(Term child, Children type) {
+        if (type == Children.KEY) {
+            this.key = child;
+        } else {
+            super.setChild(child, type);
+        }
     }
 
 }

@@ -7,7 +7,7 @@ import org.kframework.kil.visitors.Visitor;
 /**
  * @author AndreiS
  */
-public class KItemProjection extends Term {
+public class KItemProjection extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
 
     private Term term;
 
@@ -66,7 +66,17 @@ public class KItemProjection extends Term {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return term;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.term = child;
     }
 }

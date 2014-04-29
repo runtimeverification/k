@@ -64,7 +64,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 
 //        System.out.println("Before: " + context.conses);
         AddConsesVisitor acv = new AddConsesVisitor(context);
-        production.accept(acv);
+        acv.visitNode(production);
 //        System.out.println("After: " + context.conses);
 //        acv.visit(production);
         List<PriorityBlock> priorityBlocks = syntax.getPriorityBlocks();

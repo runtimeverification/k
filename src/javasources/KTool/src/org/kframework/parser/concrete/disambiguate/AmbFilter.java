@@ -30,11 +30,11 @@ public class AmbFilter extends BasicTransformer {
                 msg += tc.getProduction().toString();
             }
             UnparserFilter unparserFilter = new UnparserFilter(context);
-            amb.getContents().get(i).accept(unparserFilter);
+            unparserFilter.visitNode(amb.getContents().get(i));
             msg += "\n   " + unparserFilter.getResult().replace("\n", "\n   ");
         }
         GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, getName(), amb.getFilename(), amb.getLocation()));
 
-        return amb.getContents().get(0).accept(this);
+        return this.visitNode(amb.getContents().get(0));
     }
 }

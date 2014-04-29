@@ -12,7 +12,7 @@ import java.util.Collection;
  *
  * @author TraianSF (refactoring from {@link org.kframework.kil.MapUpdate})
  */
-public class SetUpdate extends Term {
+public class SetUpdate extends Term implements Interfaces.Collection<Term, Enum<?>>, Interfaces.Parent<Variable, Enum<?>> {
 
     /** {@link org.kframework.kil.Variable} name of the set */
     private final Variable set;
@@ -62,7 +62,17 @@ public class SetUpdate extends Term {
     }
 
     @Override
-    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Variable getChild(Enum<?> type) {
+        return set;
+    }
+
+    @Override
+    public Collection<Term> getChildren(Enum<?> cls) {
+        return removeEntries;
     }
 }

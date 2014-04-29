@@ -27,7 +27,7 @@ public class DocumentationFilter extends LatexFilter {
         if (cache.containsKey(mod))
             return null;
         for (ModuleItem mi : mod.getItems()) {
-            mi.accept(this);
+            this.visitNode(mi);
         }
         visit((DefinitionItem) mod, _);
         result.append("\\end{module}" + endl);

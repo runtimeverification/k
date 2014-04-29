@@ -89,7 +89,7 @@ public class JavaSymbolicKRun implements KRun {
                 new BackendJavaKILtoKILTransformer(context));
         KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, context));
         UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-        kilTerm.accept(unparser);
+        unparser.visitNode(kilTerm);
         returnResult.setRawOutput(unparser.getResult());
         return returnResult;
     }
@@ -126,12 +126,12 @@ public class JavaSymbolicKRun implements KRun {
             cfg = run(cfg).getResult().getRawResult();
             ConfigurationSubstitutionVisitor configurationSubstitutionVisitor =
                     new ConfigurationSubstitutionVisitor(context);
-            cfg.accept(configurationSubstitutionVisitor);
+            configurationSubstitutionVisitor.visitNode(cfg);
             substitution = configurationSubstitutionVisitor.getSubstitution();
 //            System.out.println(substitution);
             Module mod = module;
             try {
-                mod = (Module) module.accept(new Substitution(substitution,context));
+                mod = (Module) new Substitution(substitution,context).visitNode(module);
 //                System.out.println(mod.toString());
             } catch (TransformerException e) {
                 assert false : "This should not have happened!";
@@ -153,7 +153,7 @@ public class JavaSymbolicKRun implements KRun {
                 assert moduleItem instanceof org.kframework.kil.Rule;
 
                 Rule rule = transformer.transformRule(
-                        (org.kframework.kil.Rule) moduleItem.accept(mapTransformer),
+                        (org.kframework.kil.Rule) mapTransformer.visitNode(moduleItem),
                         definition);
                 Rule freshRule = rule.getFreshRule(termContext);
 //                System.out.println(freshRule.toString());
@@ -176,7 +176,7 @@ public class JavaSymbolicKRun implements KRun {
                         kilEnsures,
                         context);
                 Rule dummyRule = transformer.transformRule(
-                        (org.kframework.kil.Rule) kilDummyRule.accept(mapTransformer),
+                        (org.kframework.kil.Rule) mapTransformer.visitNode(kilDummyRule),
                         definition);
 
                 SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
@@ -231,7 +231,7 @@ public class JavaSymbolicKRun implements KRun {
         CompileToBuiltins builtinTransformer = new CompileToBuiltins(context);
         try {
             pattern = (org.kframework.kil.Rule)builtinTransformer.visit(pattern, null);
-            cfg = (org.kframework.kil.Term)cfg.accept(builtinTransformer);
+            cfg = (org.kframework.kil.Term) builtinTransformer.visitNode(cfg);
         } catch (TransformerException e) {
             e.report();
         }
@@ -273,8 +273,8 @@ public class JavaSymbolicKRun implements KRun {
             try {
                 // Apply the substitution to the pattern
                 org.kframework.kil.Term rawResult =
-                        (org.kframework.kil.Term) pattern.getBody().accept(
-                                new SubstitutionFilter(substitutionMap, context));
+                        (org.kframework.kil.Term) new SubstitutionFilter(substitutionMap, context)
+                            .visitNode(pattern.getBody());
 
                 searchResults.add(new SearchResult(
                         new KRunState(rawResult, context),
