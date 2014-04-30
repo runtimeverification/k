@@ -7,7 +7,7 @@ if [ -z "$K_OPTS" ];
 fi
 if "$(dirname $0)/../lib/scripts/checkJava";
 then
-  java $K_OPTS -ea -jar "$(dirname $0)/../lib/java/k3.jar" -krun "$@"
+  java -Djava.awt.headless=true $K_OPTS -ea -jar "$(dirname $0)/../lib/java/k3.jar" -krun "$@"
 else
   exit 1
 fi

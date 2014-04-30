@@ -12,25 +12,34 @@ import java.util.HashMap;
 
 public class ColorUtil {
 
-    public final static Map<String, Color> colors = initColors();
+    private static Map<String, Color> colors;
 
     /**
      * Terminal code corresponding to closest color for this one, from the list of basic 8
      * terminal codes only.
      */
-    private final static Map<Color, String> ansiColorsToTerminalCodes = initAnsiColors();
+    private static Map<Color, String> ansiColorsToTerminalCodes;
 
     /**
      * Terminal code corresponding to closest color for this one, from the list of 216 colors supported by
      * linux terminals.
      */
-    private final static Map<Color, String> eightBitColorsToTerminalCodes = initEightBitColors();
+    private static Map<Color, String> eightBitColorsToTerminalCodes;
 
     /**
      * A cache to avoid computing the closest terminal color for a given color each time it is needed.
      */
-    private final static Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache
-        = initColorToCodeConvertCache();
+    private static Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache;
+
+    public static Map<String, Color> colors() {
+        if (colors == null) {
+            colors = initColors();
+            ansiColorsToTerminalCodes = initAnsiColors();
+            eightBitColorsToTerminalCodes = initEightBitColors();
+            colorToCodeConvertCache = initColorToCodeConvertCache();
+        }
+        return colors;
+    }
 
     private static HashMap<Map<Color, String>, Map<Color, String>> initColorToCodeConvertCache() {
         HashMap<Map<Color, String>, Map<Color, String>> map = new HashMap<>();

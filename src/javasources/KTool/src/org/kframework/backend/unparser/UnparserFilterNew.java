@@ -269,7 +269,7 @@ public class UnparserFilterNew extends BasicVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors.get(declaredColor), color);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color);
                 indenter.write(colorCode);
             }
         }

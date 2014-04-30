@@ -5,12 +5,14 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -1005,6 +1007,10 @@ public class Main {
             printKRunUsageS(cmd_options);
             return false;
         }
+        
+        if (cmd.hasOption("debug-gui")) {
+            System.setProperty("java.awt.headless", "false");
+        }
 
         if (!cmd.hasOption("debug-info")) {
             Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -1131,6 +1137,8 @@ public class Main {
                 } else {
                     org.kframework.utils.Error.report("Invalid terminal color: " + v);
                 }
+            } else {
+                K.terminalColor = ColorUtil.getColorByName("black");
             }
 
             //testcase generation
