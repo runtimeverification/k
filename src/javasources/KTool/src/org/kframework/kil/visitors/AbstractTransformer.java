@@ -32,8 +32,8 @@ public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode,
 
     @SuppressWarnings("unchecked")
     @Override
-    public ASTNode processChildTerm(ASTNode child, ASTNode childResult) {
-        return childResult;
+    public <T extends ASTNode> T processChildTerm(T child, ASTNode childResult) {
+        return (T)childResult;
     }
 
     @Override
