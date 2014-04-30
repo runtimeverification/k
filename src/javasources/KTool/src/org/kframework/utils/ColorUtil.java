@@ -326,7 +326,7 @@ public class ColorUtil {
 
         //We remove the background terminal color, so that K cells would never be colored in this,
         //but rather in the next closest color
-        map.remove(K.terminalColor);
+        map.remove(K.getTerminalColor());
 
         return Collections.unmodifiableMap(map);
     }
@@ -364,7 +364,7 @@ public class ColorUtil {
 
         //We remove the background terminal color, so that K cells would never be colored in this,
         //but rather in the next closest color
-        map.remove(K.terminalColor);
+        map.remove(K.getTerminalColor());
 
         return Collections.unmodifiableMap(map);
     }
@@ -377,6 +377,7 @@ public class ColorUtil {
     }
 
     public static String RgbToAnsi(Color rgb, ColorSetting colorSetting) {
+        colors(); //init static maps if needed
         switch(colorSetting) {
             case OFF:
                 return "";
@@ -393,7 +394,7 @@ public class ColorUtil {
         if (rgb == null)
             return "";
         if (colorToCodeConvertCache.get(codesMap).get(rgb) == null) {
-            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap, K.terminalColor));
+            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap, K.getTerminalColor()));
         }
         return colorToCodeConvertCache.get(codesMap).get(rgb);
     }

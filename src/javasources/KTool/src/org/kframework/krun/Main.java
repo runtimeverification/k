@@ -1133,12 +1133,10 @@ public class Main {
                 String v = cmd.getOptionValue("terminal-color");
                 Color terminalColor = ColorUtil.getColorByName(v);
                 if (terminalColor != null) {
-                    K.terminalColor = terminalColor;
+                    K.setTerminalColor(terminalColor);
                 } else {
                     org.kframework.utils.Error.report("Invalid terminal color: " + v);
                 }
-            } else {
-                K.terminalColor = ColorUtil.getColorByName("black");
             }
 
             //testcase generation
