@@ -43,7 +43,7 @@ public class RunKRunCommand {
         rp = new RunProcess();
         this.krun = createKrun(context);
         Term cfg;
-        cfg = Main.makeConfiguration(KAST, null, rp, K.term != null, context);
+        cfg = Main.makeConfiguration(KAST, null, rp, K.term, context);
         debugger = krun.debug(cfg);
     }
 

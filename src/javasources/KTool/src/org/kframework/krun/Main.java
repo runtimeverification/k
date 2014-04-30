@@ -151,11 +151,7 @@ public class Main {
                                          RunProcess rp, boolean hasTerm, Context context) throws TransformerException, IOException {
 
         if (hasTerm) {
-            if (kast == null) {
-                return rp.runParserOrDie(K.getProgramParser(), K.term, false, null, context);
-            } else {
-                org.kframework.utils.Error.report("You cannot specify both the term and the configuration\nvariables.");
-            }
+            return kast;
         }
 
         HashMap<String, Term> output = new HashMap<String, Term>();
@@ -219,7 +215,7 @@ public class Main {
     }
 
     private static KRun obtainKRun(Context context) {
-        if (K.backend.equals("maude")) {
+        if (K.backend.equals("maude") || K.backend.equals("symbolic")) {
             return new MaudeKRun(context, sw);
         } else if (K.backend.equals("java")) {
             try {
@@ -229,7 +225,7 @@ public class Main {
                 return null;
             }
         } else {
-            org.kframework.utils.Error.report("Currently supported backends are 'maude' and 'java'");
+            org.kframework.utils.Error.report("Currently supported backends are 'maude', 'java', and 'symbolic'");
             return null;
         }
     }
@@ -308,7 +304,7 @@ public class Main {
                                     K.searchType,
                                     patternRule,
                                     makeConfiguration(KAST, buffer, rp,
-                                            (K.term != null), context), steps);
+                                            K.term, context), steps);
                         } else{
                             result = krun.search(
                                     bound,
@@ -316,7 +312,7 @@ public class Main {
                                     K.searchType,
                                     patternRule,
                                     makeConfiguration(KAST, buffer, rp,
-                                            (K.term != null), context), steps);
+                                            K.term, context), steps);
                         }
 
                         sw.printTotal("Search total");
@@ -344,7 +340,7 @@ public class Main {
                             .modelCheck(
                                     KAST1,
                                     makeConfiguration(KAST, null, rp,
-                                            (K.term != null), context));
+                                            K.term, context));
 
                     sw.printTotal("Model checking total");
                 } else if (K.prove.length() > 0) {
@@ -358,18 +354,18 @@ public class Main {
                     Module mod = parsed.getSingletonModule();
                     Term cfg = null;
                     if (KAST != null) {
-                        cfg = makeConfiguration(KAST, null, rp, (K.term != null), context);
+                        cfg = makeConfiguration(KAST, null, rp, K.term, context);
                     }
                     result = krun.prove(mod, cfg);
                 } else if (cmd.hasOption("depth")) {
                     int depth = Integer.parseInt(K.depth);
                     result = krun.step(makeConfiguration(KAST, null, rp,
-                            (K.term != null), context), depth);
+                            K.term, context), depth);
 
                     sw.printTotal("Bounded execution total");
                 } else {
                     result = krun.run(makeConfiguration(KAST, null, rp,
-                            (K.term != null), context));
+                            K.term, context));
 
                     sw.printTotal("Normal execution total");
                 }
@@ -613,7 +609,7 @@ public class Main {
             KRunDebugger debugger;
             try {
                 if (state == null) {
-                    Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
+                    Term t = makeConfiguration(kast, "", rp, K.term, context);
                     debugger = krun.debug(t);
                     System.out
                             .println("After running one step of execution the result is:");
@@ -919,7 +915,7 @@ public class Main {
             KAST = null;
         }
 
-        if (K.term != null) {
+        if (K.term) {
             if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                 if (K.backend.equals("java")) {
                     K.parser = "kast --parser rule";
@@ -930,7 +926,7 @@ public class Main {
         }
         
         org.kframework.kil.Term term = makeConfiguration(KAST, null, rp,
-                (K.term != null), context);
+                K.term, context);
         return term;
     }
 
@@ -1030,7 +1026,7 @@ public class Main {
                 K.customParser = cmd.getOptionValue("parser");
             }
             if (cmd.hasOption("term")) {
-                K.term = cmd.getOptionValue("term");
+                K.term = true;
             }
             if (cmd.hasOption("io")) {
                 String v = cmd.getOptionValue("io");
@@ -1163,7 +1159,7 @@ public class Main {
             }
             if (cmd.hasOption("c")) {
 
-                if (K.term != null) {
+                if (K.term) {
                     org.kframework.utils.Error.report("You cannot specify both the term and the configuration\nvariables.");
                 }
 
@@ -1397,7 +1393,7 @@ public class Main {
 
             sw.printIntermediate("Kast process");
 
-            if (K.term != null) {
+            if (K.term) {
                 if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                     if (K.backend.equals("java")) {
                         K.parser = "kast --parser rule";

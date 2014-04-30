@@ -3,6 +3,7 @@ package org.kframework.ktest;
 
 import org.apache.commons.io.IOUtils;
 import org.kframework.krun.ColorSetting;
+import org.kframework.ktest.StringMatcher.MatchFailure;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -136,6 +137,9 @@ public class Proc<T> implements Runnable {
     public void run() {
         // TODO: what happens when a process is run multiple times?
         ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
+        pb.environment().put("kompile", ExecNames.getKompile());
+        pb.environment().put("krun", ExecNames.getKrun());
+        pb.environment().put("kast", ExecNames.getKast());
 
         try {
             long startTime = System.currentTimeMillis();
@@ -257,23 +261,26 @@ public class Proc<T> implements Runnable {
                 if (verbose)
                     System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
                 doGenerateOut = true;
-            } else if (!strComparator.matches(expectedOut.getObj(), pgmOut)) {
-                // outputs don't match
-                System.out.format(
-                        "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
-                        red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
-                reportOutMatch();
-                if (verbose)
-                    System.out.println(getReason());
-                doGenerateOut = true;
-            }
-            else {
-                // outputs match
-                success = true;
-                if (verbose)
-                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
-            }
+            } else {
+                try {
+                    strComparator.matches(expectedOut.getObj(), pgmOut);
 
+                    // outputs match
+                    success = true;
+                    if (verbose)
+                        System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
+                } catch (MatchFailure e) {
+                    // outputs don't match
+                    System.out.format(
+                            "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
+                            red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
+                    reportOutMatch(e.getMessage());
+                    if (verbose)
+                        System.out.println(getReason());
+                    doGenerateOut = true;
+                }
+            }
+            
             if (updateOut && outputFile != null) {
                 IOUtils.write(pgmOut, new FileOutputStream(new File(outputFile)));
                 System.out.println("Updating output file: " + outputFile);
@@ -301,19 +308,20 @@ public class Proc<T> implements Runnable {
                 if (verbose)
                     System.out.format("error was: %s%n", pgmErr);
                 reportErr(pgmErr);
-            }
-            else if (strComparator.matches(expectedErr.getObj(), pgmErr)) {
-                // error outputs match
-                success = true;
-                if (verbose)
-                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
-            }
-            else {
-                // error outputs don't match
-                System.out.format(
-                        "%sERROR: [%s] throwed error, but expected error message doesn't match "+
-                                "(time: %d ms)%s%n", red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
-                reportErrMatch();
+            } else {
+                try {
+                    strComparator.matches(expectedErr.getObj(), pgmErr);
+                    // error outputs match
+                    success = true;
+                    if (verbose)
+                        System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);   
+                } catch (MatchFailure e) {
+                    // error outputs don't match
+                    System.out.format(
+                            "%sERROR: [%s] throwed error, but expected error message doesn't match "+
+                                    "(time: %d ms)%s%n", red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
+                    reportErrMatch(e.getMessage());
+                }
             }
         }
     }
@@ -323,14 +331,14 @@ public class Proc<T> implements Runnable {
         reason = err;
     }
 
-    private void reportErrMatch() {
+    private void reportErrMatch(String message) {
         assert reason == null;
-        reason = "Unexpected program error:\n" + strComparator.errorMessage();
+        reason = "Unexpected program error:\n" + message;
     }
 
-    private void reportOutMatch() {
+    private void reportOutMatch(String message) {
         assert reason == null;
-        reason = "Unexpected program output:\n" + strComparator.errorMessage();
+        reason = "Unexpected program output:\n" + message;
     }
 
     private void reportTimeout() {
