@@ -951,7 +951,9 @@ public class Main {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     try {
-                        deleteDirectory(new File(K.krunTempDir));
+                        if (K.krunTempDir != null) {
+                            deleteDirectory(new File(K.krunTempDir));
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
