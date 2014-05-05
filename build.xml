@@ -65,11 +65,15 @@
 	<target name="makeversion">
 		<property name="version.file" value="./lib/version.txt" />
 
-		<exec executable="git" outputproperty="version.out">
+		<exec executable="git" outputproperty="version.out" failifexecutionfails="false">
 			<arg value="rev-parse" />
 			<arg value="--short" />
 			<arg value="HEAD^" />
 		</exec>
+		
+		<condition property="version.out" value="Failed to execute Git in command line.">
+			<isset property="version.out" />
+		</condition>
 
 		<tstamp>
 			<format property="date" pattern="EEE MMM d HH:mm:ss z yyyy" />
