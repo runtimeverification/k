@@ -135,11 +135,11 @@ public class ProgramLoader {
 
                 Parser parser = new Parser(content);
                 out = parser.parse(grammar.get(startSymbol), 0);
-                if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                if (context.globalOptions.debug)
                     System.out.println("Raw: " + out + "\n");
                 try {
                     out = new TreeCleanerVisitor(context).visitNode(out);
-                    if (context.globalOptions.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                    if (context.globalOptions.debug)
                         System.out.println("Clean: " + out + "\n");
                 } catch (TransformerException te) {
                     ParseError perror = parser.getErrors();

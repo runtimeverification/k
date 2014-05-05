@@ -1,7 +1,10 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.general;
 
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.KPaths;
 
 import java.io.File;
@@ -25,9 +28,9 @@ public class GlobalSettings {
                 f.setExecutable(true, false);
                 break;
             default:
-                System.err.println("Unknown OS type. " + System.getProperty("os.name") + " not recognized.");
-                // abort
-                System.exit(1);
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                        "Unknown OS type. " + System.getProperty("os.name") + " not recognized. " +
+                        "Please contact K developers with details of your OS."));
         }
 
         return f;

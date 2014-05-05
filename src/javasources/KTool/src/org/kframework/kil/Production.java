@@ -85,9 +85,16 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     }
 
     public boolean isConstant() {
+        // TODO(Radu): properly determine if a production is a constant or not, just like below
         return isTerminal() && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
     }
-    
+
+    public boolean isConstant(org.kframework.kil.loader.Context context) {
+        return isTerminal() && (sort.startsWith("#") ||
+                                sort.equals(KSorts.KLABEL) ||
+                                context.getTokenSorts().contains(this.getSort()));
+    }
+
     public boolean isBracket() {
         return getArity() == 1 && getAttribute(Attribute.BRACKET.getKey()) != null;
     }
@@ -98,7 +105,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
      * @return the Terminal object
      */
     public Terminal getConstant() {
-        assert isConstant();
+        assert isTerminal(); // should be at least a single terminal
         return (Terminal) items.get(0);
     }
 

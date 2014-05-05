@@ -125,7 +125,7 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visitNode(ASTNode node) throws E;
 
     /**
-     * This method must be called by {@link Visitable#accept(Visitor, Object)} with the ASTNode
+     * This method must be called by {@link ASTNode#accept(Visitor, Object)} with the ASTNode
      * and the result of transforming the ASTNode. Its purpose is to factor out functionality
      * which must be performed by the visitor for correctness regardless of whether the visit
      * methods are overridden. For example, a visitor may override a method in such a way that 

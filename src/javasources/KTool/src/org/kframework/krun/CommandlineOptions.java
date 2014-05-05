@@ -59,6 +59,7 @@ public class CommandlineOptions {
         addOptionS(OptionBuilder.withLongOpt("help").withDescription("Print this help message.").create("h"));
         addOptionS(OptionBuilder.withLongOpt("version").withDescription("Print version information.").create());
         addOptionS(OptionBuilder.withLongOpt("verbose").withDescription("Verbose output.").create("v"));
+        addOptionS(OptionBuilder.withLongOpt("debug").withDescription("Debug messages").create());
 
         // Common K options
         addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the kompiled K definition resides. The default is the current directory.").create("d"));

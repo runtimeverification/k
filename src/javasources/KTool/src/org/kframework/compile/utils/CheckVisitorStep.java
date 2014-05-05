@@ -16,14 +16,9 @@ public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> im
 
     @Override
     public boolean check(T def) {
-        try {
-            t.visitNode(def);
-            if (sw != null) {
-                sw.printIntermediate(getName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        t.visitNode(def);
+        if (sw != null) {
+            sw.printIntermediate(getName());
         }
         return true;
     }

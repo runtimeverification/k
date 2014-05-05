@@ -156,9 +156,6 @@ public class KompileFrontEnd {
         if (context.globalOptions.verbose) {
             context.printStatistics();
         }
-        GlobalSettings.kem.print();
-        if (context.kompileOptions.experimental.loud)
-            System.out.println("Done.");
     }
 
 

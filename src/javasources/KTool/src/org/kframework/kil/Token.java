@@ -47,7 +47,7 @@ public abstract class Token extends KLabel {
         } else if (sort.equals(IntBuiltin.SORT_NAME)) {
             return IntBuiltin.kAppOf(value);
         } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            return StringBuiltin.kAppOf(value);
+            return StringBuiltin.kAppOf(StringUtil.unquoteString(value));
         } else {
             return GenericToken.kAppOf(sort, value);
         }
@@ -141,7 +141,7 @@ public abstract class Token extends KLabel {
     @Override
     public String toString() {
         // TODO (BUG): has extra quotations when #Sort string
-        return "#token(\"" + tokenSort() + "\", " + StringUtil.escapeK(value()) + ")";
+        return "#token(\"" + tokenSort() + "\", " + StringUtil.enquoteString(value()) + ")";
     }
 
 }

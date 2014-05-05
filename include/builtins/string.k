@@ -4,11 +4,18 @@ require "float.k"
 
 module STRING-SYNTAX-HOOKS
   imports #STRING-INTERFACE
-  syntax #String
-  syntax String ::= #String
-  // TODO(Radu): replace the above with bellow
-  //   syntax String ::= Token{"\"" ((~[\"\n\r\\])|([\\]~[\n\r]))* "'"}
 
+  // Double Quoted Strings are of the form:
+  // DoubleQuote StringChar* DoubleQuote
+  // StringChar ::= ~[\"\n\r\\] // anything except for Newline, DoubleQuote and Backslash
+  //              | [\\][nrtf\"\\] // Backslash followed by either 'nrtf', DoubleQuote or Backslash
+  //              | [\\][x] 2*Hex // "\xFF"       Backslash 'x' followed by two   hexadecimal characters
+  //              | [\\][u] 4*Hex // "\uFFFF"     Backslash 'u' followed by four  hexadecimal characters
+  //              | [\\][U] 8*Hex // "\UFFffFFff" Backslash 'U' followed by eight hexadecimal characters
+  //                              // the code must not be in the range [0xdfff, 0xd800] or exceed 0x10ffff
+  syntax #String ::= Token{"\"" ((~[\"\n\r\\]) | (((([\\][nrtf\"\\]) | ([\\][x][0-9a-fA-F][0-9a-fA-F])) | ([\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])) | ([\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))* "\""}
+                    [regex("[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F][0-9a-fA-F])|([\\\\][u][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])|([\\\\][U][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*[\\\"]")]
+  syntax String ::= #String
 endmodule
 
 module STRING-HOOKS

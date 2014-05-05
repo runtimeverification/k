@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import java.io.IOException;
@@ -48,8 +49,6 @@ public class BuiltinIOOperations {
             return IntToken.of(fs(context).get(term.longValue()).getc() & 0xff);
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
-        } catch (RuntimeException e) {
-            throw e;
         }
     }
 

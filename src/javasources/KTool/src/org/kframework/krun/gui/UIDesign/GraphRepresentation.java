@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.UIDesign;
 
 import org.kframework.backend.unparser.UnparserFilter;
@@ -7,6 +8,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
+import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
@@ -17,6 +19,11 @@ import org.kframework.krun.gui.helper.HelpFrame;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.awt.BorderLayout;
@@ -92,7 +99,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     // keep track of number of selection
     private int nonKrunStateSelection;
 
-    public GraphRepresentation(RunKRunCommand command) throws Exception {
+    public GraphRepresentation(RunKRunCommand command) {
         this.definitionHelper = command.getContext();
         tabbedPane = new JTabbedPane();
         initCommandProcessor(command);
@@ -113,17 +120,9 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         this.commandProcessor = command;
     }
 
-    public void initGraph() throws Exception {
+    public void initGraph() {
         Graph graph = null;
-        try {
-            graph = commandProcessor.firstStep();
-        } catch (IOException e) {
-            e.printStackTrace();
-            MainWindow.showAndExit(e);
-        } catch (Exception e) {
-            e.printStackTrace();
-            MainWindow.showAndExit(e);
-        }
+        graph = commandProcessor.firstStep();
         vvd = new VisualizationViewerDemo(graph, this);
     }
 
@@ -217,9 +216,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                                 {
                                     selectActionStepResults(pick, 0, noOfSteps);
                                 }
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            } catch (Exception e1) {
+                            } catch (KRunExecutionException e1) {
                                 e1.printStackTrace();
                             }
                         }
@@ -280,9 +277,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                                     selectActionStepAllResults(pick, 0, noOfSteps);
                                 }
 
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            } catch (Exception e1) {
+                            } catch (KRunExecutionException e1) {
                                 e1.printStackTrace();
                             }
                         }
@@ -368,7 +363,9 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     public void addActionForExit() {
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                synchronized(MainWindow.instance().lock) {
+                    MainWindow.instance().lock.notify();
+                }
             }
         });
     }
@@ -482,12 +479,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
 
     public void redrawGraphAndResetScroll() {
         Graph newGrapg = null;
-        try {
-            newGrapg = commandProcessor.getCurrentGraph();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            return;
-        }
+        newGrapg = commandProcessor.getCurrentGraph();
         Graph oldGraph = vvd.getLayout().getGraph();
         for (Object v : newGrapg.getVertices()) {
             if (vvd.verifyExistingVertex(v) == null)
@@ -716,14 +708,8 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
     }
 
-    private KRunState loadConf(File f) throws Exception {
-        FileInputStream in = new FileInputStream(f);
-        ObjectInputStream s = new ObjectInputStream(in);
-        Object readObj = s.readObject();
-        s.close();
-        if (!(readObj instanceof KRunState))
-            throw new Exception("Wrong config file.");
-        return (KRunState) readObj;
+    private KRunState loadConf(File f) throws IOException {
+        return BinaryLoader.load(KRunState.class, f.getAbsolutePath());
     }
 
     public void loadConf() {
@@ -741,7 +727,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                 MainWindow.addDebugTab(new GraphRepresentation(new RunKRunCommand(conf,
                         commandProcessor.getLang(), definitionHelper)),
                         "Tab resulted from loading :" + file.getName());
-            } catch (Exception e) {
+            } catch (IOException | ClassCastException e) {
                 showMessage("Unable to load configuration from file");
             }
         }

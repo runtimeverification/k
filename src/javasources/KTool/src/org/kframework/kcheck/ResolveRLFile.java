@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck;
 
 import java.io.IOException;
@@ -25,8 +26,8 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
         // resolve reachability rules
         String rlFileContent = FileUtil.getFileContent(GlobalSettings.CHECK);
         context.kompiled = context.dotk.getAbsoluteFile();
-        ASTNode rlModule = DefinitionLoader.parseString(rlFileContent,
-                GlobalSettings.CHECK, context);
+        ASTNode rlModule = null;//DefinitionLoader.parseString(rlFileContent,
+                //GlobalSettings.CHECK, context);
         RetrieveRRVisitor rrrv = new RetrieveRRVisitor(context);
         rrrv.visitNode(rlModule);
         reachabilityRules = rrrv.getRules();

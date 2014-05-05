@@ -46,6 +46,7 @@ public class KastOptionsParser {
         addOptionS(OptionBuilder.withLongOpt("help").withDescription("Print this help message.").create("h"));
         addOptionS(OptionBuilder.withLongOpt("version").withDescription("Print version information.").create());
         addOptionS(OptionBuilder.withLongOpt("verbose").withDescription("Verbose output.").create("v"));
+        addOptionS(OptionBuilder.withLongOpt("debug").withDescription("Debug messages").create());
 
         addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the kompiled K definition resides. The default is the current directory.").create("d"));
         addOptionS(OptionBuilder.withLongOpt("expression").hasArg().withArgName("string").withDescription("An expression to parse passed on the command line. Note that positional arguments are ignored when this option is given.").create("e"));

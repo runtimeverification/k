@@ -254,8 +254,6 @@ public class RLBackend extends BasicBackend implements Backend {
                 icontext = res.getResult().getRawResult();//.getResult();
             } catch (KRunExecutionException e1) {
                 e1.printStackTrace();
-            } catch (TransformerException e) {
-                e.printStackTrace();
             }
         }
         /****************

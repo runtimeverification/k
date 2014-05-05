@@ -163,7 +163,7 @@ public class ConfigFileParser {
         ConfigFileParser configFileParser;
         try {
             configFileParser = new ConfigFileParser(new File(file), cmdArgs1);
-        } catch (Exception e) {
+        } catch (TransformerException | IOException | SAXException | ParserConfigurationException e) {
             // I'm not happy with that part ...
             throw new InvalidConfigError("error occured while parsing included file " + file +
                     ":\n" + e.getMessage(), location);
