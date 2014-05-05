@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.UIDesign;
 
 import java.awt.Color;
@@ -19,7 +20,7 @@ public class ColorVisitor extends BasicVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                Color c = ColorUtil.colors.get(declaredColor);
+                Color c = ColorUtil.colors().get(declaredColor);
                 ColorTagMap.addColorToTag(cell.getLabel(), c);
             }
         }

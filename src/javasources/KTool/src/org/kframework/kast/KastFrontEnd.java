@@ -42,7 +42,12 @@ public class KastFrontEnd {
         org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
     }
 
-    public static void kast(String[] args) {
+    /**
+     * 
+     * @param args
+     * @return true if the application terminated normally; false otherwise
+     */
+    public static boolean kast(String[] args) {
         GlobalOptions globalOptions = new GlobalOptions();
         ExperimentalParserOptions parserOptions = new ExperimentalParserOptions();
         //Context context = new Context(globalOptions, parserOptions);
@@ -50,27 +55,31 @@ public class KastFrontEnd {
         CommandLine cmd = op.parse(args);
         if (cmd == null) {
             printUsageS(op);
-            System.exit(1);
+            return false;
         }
 
         if (cmd.hasOption("help")) {
             printUsageS(op);
-            System.exit(0);
+            return true;
         }
         if (cmd.hasOption("help-experimental")) {
             printUsageE(op);
-            System.exit(0);
+            return true;
         }
 
         if (cmd.hasOption("version")) {
             String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
             System.out.println(msg);
-            System.exit(0);
+            return true;
         }
 
         // set verbose
         if (cmd.hasOption("verbose")) {
             globalOptions.verbose = true;
+        }
+
+        if (cmd.hasOption("debug")) {
+            globalOptions.debug = true;
         }
         
         globalOptions.initialize();
@@ -168,14 +177,14 @@ public class KastFrontEnd {
             } else {
                 String msg = "Could not find a valid compiled definition. Use --directory to specify one.";
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
-                return;
+                return false;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return;
+            return false;
         } catch (TransformerException e) {
             e.printStackTrace();
-            return;
+            return false;
         }
 
         boolean prettyPrint = false;
@@ -253,10 +262,10 @@ public class KastFrontEnd {
 
             Stopwatch.instance().printIntermediate("Maudify Program");
             Stopwatch.instance().printTotal("Total");
-            GlobalSettings.kem.print();
         } catch (TransformerException e) {
             e.report();
         }
+        return true;
     }
 }
 

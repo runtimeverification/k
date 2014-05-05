@@ -1,9 +1,10 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
-
 
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
@@ -55,7 +56,7 @@ public class KRunApiDebugger implements KRunDebugger {
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
             defaultPattern = (Rule) pattern;
-        } catch (Exception e) {
+        } catch (TransformerException | CompilerStepDone e) {
             e.printStackTrace();
         }
 
@@ -123,7 +124,7 @@ public class KRunApiDebugger implements KRunDebugger {
         return state;
     }
 
-    private void steppingLoop(Integer steps) throws Exception {
+    private void steppingLoop(Integer steps) throws KRunExecutionException {
         if (currentState == null) {
             throw new IllegalStateException("Cannot step without a current state to step from.");
         }
@@ -152,15 +153,15 @@ public class KRunApiDebugger implements KRunDebugger {
         }
     }
 
-    public void step(int steps) throws Exception {
+    public void step(int steps) throws KRunExecutionException {
         steppingLoop(steps);
     }
 
-    public void resume() throws Exception {
+    public void resume() throws KRunExecutionException {
         steppingLoop(null);
     }
 
-    public SearchResults stepAll(int steps) throws Exception {
+    public SearchResults stepAll(int steps) throws KRunExecutionException {
         if (currentState == null) {
             throw new IllegalStateException("Cannot step without a current state to step from.");
         }

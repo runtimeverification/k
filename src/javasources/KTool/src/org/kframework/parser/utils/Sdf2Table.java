@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.utils;
 
 import java.io.File;
@@ -33,10 +34,7 @@ public class Sdf2Table {
             String s = errorStreamHandler.getContent().toString();
             // if some errors occurred (if something was written on the stderr stream)
             if (!s.equals("")) {
-                System.out.println("Some errors occurred..");
-                System.out.println(s);
-                // abort the compilation
-                System.exit(1);
+                assert false : "SDF2Table returned errors: " + s;
             }
         } catch (IOException e) {
             e.printStackTrace();

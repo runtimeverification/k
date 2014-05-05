@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck;
 
 import org.apache.commons.cli.CommandLine;
@@ -62,7 +63,7 @@ public class KCheckOptionsParser {
                 org.kframework.utils.Error.silentReport(e.getLocalizedMessage());
             }
 
-            org.kframework.utils.Error.helpExit(help, options);
+            //org.kframework.utils.Error.helpExit(help, options);
             return null;
         }
 

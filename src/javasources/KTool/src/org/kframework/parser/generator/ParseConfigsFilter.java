@@ -128,9 +128,6 @@ public class ParseConfigsFilter extends BasicTransformer {
                 return config;
             } catch (TransformerException te) {
                 te.printStackTrace();
-            } catch (Exception e) {
-                String msg = "Cannot parse configuration: " + e.getLocalizedMessage();
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getFilename(), ss.getLocation()));
             }
         }
         return ss;

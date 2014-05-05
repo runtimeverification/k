@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
@@ -163,16 +164,15 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             }
         } else if (sort.type().equals(KSorts.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
-            try {
-                if (sort.operatorLabels().get("update").equals(kLabelConstant.getLabel())) {
-                    return new MapUpdate(
-                            (Variable) kList.getContents().get(0),
-                            Collections.<Term, Term>emptyMap(),
-                            Collections.singletonMap(
-                                    kList.getContents().get(1),
-                                    kList.getContents().get(2)));
-                }
-            } catch (Exception e) { }
+            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update")) 
+                    && kList.getContents().size() >= 3) {
+                return new MapUpdate(
+                        (Variable) kList.getContents().get(0),
+                        Collections.<Term, Term>emptyMap(),
+                        Collections.singletonMap(
+                                kList.getContents().get(1),
+                                kList.getContents().get(2)));
+            }
             return super.transform(node);
         } else {
             /* custom function */

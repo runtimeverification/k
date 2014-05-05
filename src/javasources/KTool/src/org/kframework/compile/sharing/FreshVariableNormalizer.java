@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
 import org.kframework.kil.Rule;
@@ -75,7 +76,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                     substitution.put(
                             variable,
                             new Variable("GeneratedFreshVar" + counter++, variable.getSort()));
-                } catch (Exception e) { }
+                } catch (NumberFormatException e) { }
             }
         }
 

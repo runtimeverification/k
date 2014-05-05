@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MetaK;
@@ -264,7 +265,7 @@ public class UnparserFilter extends BasicVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors.get(declaredColor), color);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color);
                 indenter.write(colorCode);
             }
         }
