@@ -35,7 +35,7 @@ public class ProgramSDF {
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
         CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context);
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
             m.accept(psdfv);

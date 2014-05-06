@@ -463,6 +463,7 @@ public class Grammar implements Serializable {
     public abstract static class PrimitiveState extends NextableState {
         /** The sort of the KApp */
         public final String sort;
+        public final Set<String> rejects;
         public static class MatchResult {
             final public int matchEnd;
             public MatchResult(int matchEnd) {
@@ -476,10 +477,11 @@ public class Grammar implements Serializable {
          */
         abstract Set<MatchResult> matches(CharSequence text, int startPosition);
 
-        public PrimitiveState(String name, NonTerminal nt, String sort) {
+        public PrimitiveState(String name, NonTerminal nt, String sort, Set<String> rejects) {
             super(name, nt, true);
             assert sort != null;
             this.sort = sort;
+            this.rejects = rejects;
         }
 
         /**
@@ -501,7 +503,13 @@ public class Grammar implements Serializable {
         public final Pattern pattern;
 
         public RegExState(String name, NonTerminal nt, Pattern pattern, String sort) {
-            super(name, nt, sort);
+            super(name, nt, sort, new HashSet<String>());
+            assert pattern != null;
+            this.pattern = pattern;
+        }
+
+        public RegExState(String name, NonTerminal nt, Pattern pattern, String sort, Set<String> rejects) {
+            super(name, nt, sort, rejects);
             assert pattern != null;
             this.pattern = pattern;
         }
@@ -514,7 +522,9 @@ public class Grammar implements Serializable {
             matcher.useTransparentBounds(true);
             Set<MatchResult> results = new HashSet<>();
             if (matcher.lookingAt()) {
-                results.add(new MatchResult(matcher.end()));
+                // reject keywords
+                if (!rejects.contains(matcher.group()))
+                    results.add(new MatchResult(matcher.end()));
             }
             return results;
         }
