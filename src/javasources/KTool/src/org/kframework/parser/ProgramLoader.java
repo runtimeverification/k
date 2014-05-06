@@ -133,6 +133,10 @@ public class ProgramLoader {
                     out = new TreeCleanerVisitor(context).visitNode(out);
                     if (context.globalOptions.debug)
                         System.out.println("Clean: " + out + "\n");
+                    out = out.accept(new PriorityFilter(context));
+                    out = out.accept(new PreferAvoidFilter(context));
+                    if (context.globalOptions.debug)
+                        System.out.println("Filtered: " + out + "\n");
                 } catch (TransformerException te) {
                     ParseError perror = parser.getErrors();
 
