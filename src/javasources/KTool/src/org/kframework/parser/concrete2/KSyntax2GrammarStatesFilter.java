@@ -1,6 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.kframework.kil.Configuration;
@@ -32,8 +35,9 @@ import org.kframework.parser.concrete2.Rule.WrapLabelRule;
  * will be referenced each time a NonTerminalState is created.
  */
 public class KSyntax2GrammarStatesFilter extends BasicVisitor {
-    public KSyntax2GrammarStatesFilter(Context context) {
+    public KSyntax2GrammarStatesFilter(Context context, Set<String> terminals) {
         super(KSyntax2GrammarStatesFilter.class.getName(), context);
+        this.terminals = terminals;
 
         // create a NonTerminal for every declared sort
         for (String sort : context.definedSorts) {
@@ -42,6 +46,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     }
 
     private Grammar grammar = new Grammar();
+    private Set<String> terminals;
 
     @Override
     public void visit(Production prd) {
@@ -164,8 +169,17 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             String pattern = prd.containsAttribute(Constants.REGEX) ?
                                 prd.getAttribute(Constants.REGEX) :
                                 lx.getLexicalRule();
+            // check to see which terminals match the current regular expression and send it to
+            // the PrimitiveState for rejection
+            Set<String> rejects = new HashSet<>();
+            Pattern p = Pattern.compile(pattern);
+            for (String keyword : terminals) {
+                Matcher m = p.matcher(keyword);
+                if (m.matches())
+                    rejects.add(keyword);
+            }
             PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
-                nt, Pattern.compile(pattern), prd.getSort());
+                nt, Pattern.compile(pattern), prd.getSort(), rejects);
             previous.next.add(pstate);
             previous = pstate;
         } else if (prd.isConstant(context)) { // TODO(Radu): properly determine if a production is a constant or not
