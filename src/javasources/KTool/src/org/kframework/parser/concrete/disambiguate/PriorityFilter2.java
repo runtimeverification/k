@@ -17,16 +17,24 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 public class PriorityFilter2 extends LocalTransformer {
 
-    private TermCons parent;
+    /**
+     * Specifies whether the current node is the left most or the right most child of the parent.
+     * This is useful because associativity can be checked at the same time with priorities.
+     */
+    public static enum Side {LEFT, RIGHT}
+    private final TermCons parent;
+    private final Side side;
 
-    public PriorityFilter2(TermCons parent, Context context) {
-        super("Type system", context);
+    public PriorityFilter2(TermCons parent, Side side, Context context) {
+        super("Type system2", context);
         this.parent = parent;
+        this.side = side;
     }
 
     public PriorityFilter2(PriorityFilter2 pf, Context context) {
-        super("Type system", context);
+        super("Type system2", context);
         this.parent = pf.parent;
+        this.side = pf.side;
     }
 
     @Override

@@ -133,6 +133,10 @@ public class ProgramLoader {
                     out = new TreeCleanerVisitor(context).visitNode(out);
                     if (context.globalOptions.debug)
                         System.out.println("Clean: " + out + "\n");
+                    out = new PriorityFilter(context).visitNode(out);
+                    out = new PreferAvoidFilter(context).visitNode(out);
+                    if (context.globalOptions.debug)
+                        System.out.println("Filtered: " + out + "\n");
                 } catch (ParseFailedException te) {
                     ParseError perror = parser.getErrors();
 
@@ -140,12 +144,10 @@ public class ProgramLoader {
                         "Parse error: unexpected end of file." :
                         "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
                     String loc = "(" + perror.line + "," + perror.column + "," +
-                            perror.line + "," + (perror.column + 1) + ")";
+                                       perror.line + "," + (perror.column + 1) + ")";
                     throw new ParseFailedException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
-                out = new PriorityFilter(context).visitNode(out);
-                out = new PreferAvoidFilter(context).visitNode(out);
                 out = new AmbFilter(context).visitNode(out);
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
