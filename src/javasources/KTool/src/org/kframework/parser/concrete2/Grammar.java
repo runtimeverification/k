@@ -463,7 +463,6 @@ public class Grammar implements Serializable {
     public abstract static class PrimitiveState extends NextableState {
         /** The sort of the KApp */
         public final String sort;
-        public final Set<String> rejects;
         public static class MatchResult {
             final public int matchEnd;
             public MatchResult(int matchEnd) {
@@ -477,11 +476,10 @@ public class Grammar implements Serializable {
          */
         abstract Set<MatchResult> matches(CharSequence text, int startPosition);
 
-        public PrimitiveState(String name, NonTerminal nt, String sort, Set<String> rejects) {
+        public PrimitiveState(String name, NonTerminal nt, String sort) {
             super(name, nt, true);
             assert sort != null;
             this.sort = sort;
-            this.rejects = rejects;
         }
 
         /**
@@ -501,17 +499,21 @@ public class Grammar implements Serializable {
     public static class RegExState extends PrimitiveState {
         /** The java regular expression pattern. */
         public final Pattern pattern;
+        /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
+        public final Set<String> rejects;
 
         public RegExState(String name, NonTerminal nt, Pattern pattern, String sort) {
-            super(name, nt, sort, new HashSet<String>());
+            super(name, nt, sort);
             assert pattern != null;
             this.pattern = pattern;
+            this.rejects = new HashSet<>();
         }
 
         public RegExState(String name, NonTerminal nt, Pattern pattern, String sort, Set<String> rejects) {
-            super(name, nt, sort, rejects);
+            super(name, nt, sort);
             assert pattern != null;
             this.pattern = pattern;
+            this.rejects = rejects;
         }
 
         // Position is an 'int' offset into the text because CharSequence uses 'int'
