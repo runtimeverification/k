@@ -152,6 +152,8 @@ public class ProgramLoader {
                     throw new TransformerException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
+                out = out.accept(new PriorityFilter(context));
+                out = out.accept(new PreferAvoidFilter(context));
                 out = out.accept(new AmbFilter(context));
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);

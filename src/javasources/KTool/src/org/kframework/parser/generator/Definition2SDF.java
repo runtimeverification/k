@@ -184,10 +184,10 @@ public class Definition2SDF {
         }
 
         sdf.append("\n");
-        sdf.append("    DzDzINT        -> DzDzInt\n");
+        //sdf.append("    DzDzINT        -> DzDzInt\n");
         //sdf.append("    DzDzID        -> DzDzId\n");
         //sdf.append("    DzDzSTRING    -> DzDzString\n");
-        sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
+        //sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
 
         sdf.append("\n");
 
@@ -224,7 +224,7 @@ public class Definition2SDF {
 
         sdf.append("lexical restrictions\n");
         sdf.append("%% some restrictions to ensure greedy matching for user defined constants\n");
-        sdf.append("    DzDzInt -/- [0-9]\n");
+        //sdf.append("    DzDzInt -/- [0-9]\n");
         sdf.append("    \"is\" -/- [\\#A-Z]\n");
         sdf.append("\n");
 
