@@ -5,14 +5,12 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 import java.awt.Color;
-import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -75,7 +73,6 @@ import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.ColorUtil;
@@ -999,7 +996,6 @@ public class Main {
      */
     public static boolean execute_Krun(String cmds[]) {
         GlobalOptions globalOptions = new GlobalOptions();
-        ExperimentalParserOptions parserOptions = new ExperimentalParserOptions();
 
         CommandlineOptions cmd_options = new CommandlineOptions();
         CommandLine cmd = cmd_options.parse(cmds);
@@ -1036,11 +1032,6 @@ public class Main {
         }
         
         globalOptions.initialize();
-
-        // set fast-kast
-        if (cmd.hasOption("fast-kast")) {
-            parserOptions.fastKast = true;
-        }
 
         sw.printIntermediate("Deleting temporary krun directory");
 
@@ -1277,8 +1268,8 @@ public class Main {
                 K.simulationProgLeft=temp[2];
                 K.simulationProgRight=temp[3];
                 
-                Context contextLeft = new Context(globalOptions, parserOptions);
-                Context contextRight = new Context(globalOptions, parserOptions);
+                Context contextLeft = new Context(globalOptions);
+                Context contextRight = new Context(globalOptions);
                 Term leftInitTerm = null;
                 Term rightInitTerm = null;
                 Waitor runSimulation = null;
@@ -1378,7 +1369,6 @@ public class Main {
             KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
             //merge krun options into kompile options object
             kompileOptions.global = globalOptions;
-            kompileOptions.experimental.parser = parserOptions;
             //merge kompile options into K static object
             //TODO(dwightguth): fix this when org.kframework.krun.K is deleted
             if (!cmd.hasOption("backend")) {

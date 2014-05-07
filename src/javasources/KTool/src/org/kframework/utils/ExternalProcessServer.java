@@ -1,7 +1,5 @@
 package org.kframework.utils;
 
-import org.kframework.utils.general.GlobalSettings;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -32,7 +30,7 @@ public class ExternalProcessServer {
     /** Start the server process */
     public void init() throws IOException {
         if (!firstTime) return;
-        File f = GlobalSettings.getNativeExecutable(executable);
+        File f = OS.current().getNativeExecutable(executable);
 
         ProcessBuilder pb = new ProcessBuilder(f.getAbsolutePath());
         pb.redirectError(Redirect.INHERIT);

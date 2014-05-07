@@ -35,7 +35,6 @@ import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -209,11 +208,9 @@ public class DefinitionLoader {
                 }
                 Stopwatch.instance().printIntermediate("Generate TBLDef");
             }
-            if (!context.experimentalParserOptions.fastKast) { // ------------------------------------- import files in Stratego
-                org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
+            org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
-                Stopwatch.instance().printIntermediate("Importing Files");
-            }
+            Stopwatch.instance().printIntermediate("Importing Files");
             // ------------------------------------- parse configs
             JavaClassesFactory.startConstruction(context);
             def = (Definition) def.accept(new ParseConfigsFilter(context));
@@ -301,8 +298,6 @@ public class DefinitionLoader {
         config = config.accept(new CorrectCastPriorityFilter(context));
         // config = config.accept(new CheckBinaryPrecedenceFilter());
         config = config.accept(new PriorityFilter(context));
-        if (context.experimentalParserOptions.fastKast)
-            config = config.accept(new MergeAmbFilter(context));
         config = config.accept(new VariableTypeInferenceFilter(context));
         try {
             config = config.accept(new TypeSystemFilter(context));
@@ -354,8 +349,6 @@ public class DefinitionLoader {
         config = config.accept(new CorrectCastPriorityFilter(context));
         // config = config.accept(new CheckBinaryPrecedenceFilter());
         config = config.accept(new PriorityFilter(context));
-        if (context.experimentalParserOptions.fastKast)
-            config = config.accept(new MergeAmbFilter(context));
         config = config.accept(new VariableTypeInferenceFilter(context));
         try {
             config = config.accept(new TypeSystemFilter(context));

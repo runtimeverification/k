@@ -353,7 +353,7 @@ public class KCheckMainWindow extends JFrame implements KeyListener, ActionListe
         switch (cmd) {
             case BROWSE_FILE:
                 selectFile(file);
-                GlobalSettings.CHECK = file.getText();
+                //GlobalSettings.CHECK = file.getText();
                 break;
             case BROWSE_PGM:
                 selectFile(pgm);

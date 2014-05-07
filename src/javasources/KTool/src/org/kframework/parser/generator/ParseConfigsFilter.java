@@ -17,24 +17,15 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.InclusionFilter;
-import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
-import org.kframework.parser.utils.ReportErrorsVisitor;
-import org.kframework.parser.utils.Sglr;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.XmlLoader;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -64,41 +55,28 @@ public class ParseConfigsFilter extends BasicTransformer {
         if (ss.getType().equals(Constants.CONFIG)) {
             try {
                 ASTNode config = null;
-                if (experimentalParserOptions.fastKast) {
-                    // TODO(RaduM): load directly from ATerms
-                    config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
-                    int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
-                    int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
-                    config.accept(new UpdateLocationVisitor(context, startLine, startCol));
-                    config.accept(new ReportErrorsVisitor(context, "configuration"));
+                String parsed = null;
+                if (ss.containsAttribute("kore")) {
+                    long startTime = System.currentTimeMillis();
+                    parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+                    if (globalOptions.verbose)
+                        System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
+                } else
+                    parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                Document doc = XmlLoader.getXMLDoc(parsed);
 
-                    Sentence st = (Sentence) config;
-                    config = new Configuration(st);
-                    ((Sentence) config).setAttributes(ss.getAttributes());
-                } else {
-                    String parsed = null;
-                    if (ss.containsAttribute("kore")) {
-                        long startTime = System.currentTimeMillis();
-                        parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                        if (globalOptions.verbose)
-                            System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
-                    } else
-                        parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-                    Document doc = XmlLoader.getXMLDoc(parsed);
+                // replace the old xml node with the newly parsed sentence
+                Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+                XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
+                XmlLoader.addFilename(xmlTerm, ss.getFilename());
+                XmlLoader.reportErrors(doc, ss.getType());
 
-                    // replace the old xml node with the newly parsed sentence
-                    Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-                    XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
-                    XmlLoader.addFilename(xmlTerm, ss.getFilename());
-                    XmlLoader.reportErrors(doc, ss.getType());
-
-                    Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
-                    config = new Configuration(st);
-                    assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
-                    st.setLabel(ss.getLabel());
-                    //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
-                    st.setAttributes(ss.getAttributes());
-                }
+                Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
+                config = new Configuration(st);
+                assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+                st.setLabel(ss.getLabel());
+                //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+                st.setAttributes(ss.getAttributes());
 
                 // disambiguate configs
                 config = config.accept(new SentenceVariablesFilter(context));
@@ -111,8 +89,6 @@ public class ParseConfigsFilter extends BasicTransformer {
                 config = config.accept(new CorrectCastPriorityFilter(context));
                 // config = config.accept(new CheckBinaryPrecedenceFilter());
                 config = config.accept(new PriorityFilter(context));
-                if (experimentalParserOptions.fastKast)
-                    config = config.accept(new MergeAmbFilter(context));
                 config = config.accept(new VariableTypeInferenceFilter(context));
                 // config = config.accept(new AmbDuplicateFilter(context));
                 // config = config.accept(new TypeSystemFilter(context));

@@ -15,7 +15,6 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ExperimentalParserOptions;
 
 
 /**
@@ -27,14 +26,12 @@ public class BasicTransformer implements Transformer {
     
     protected KompileOptions kompileOptions;
     protected GlobalOptions globalOptions;
-    protected ExperimentalParserOptions experimentalParserOptions;
 
     public BasicTransformer(String name, Context context) {
         this.name = name;
         this.context = context;
         this.kompileOptions = context.kompileOptions;
         this.globalOptions = context.globalOptions;
-        this.experimentalParserOptions = context.experimentalParserOptions;
     }
 
     @Override

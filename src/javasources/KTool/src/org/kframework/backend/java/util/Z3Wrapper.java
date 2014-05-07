@@ -1,8 +1,9 @@
 package org.kframework.backend.java.util;
 
 import com.microsoft.z3.Z3Exception;
+
+import org.kframework.utils.OS;
 import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 
@@ -14,7 +15,7 @@ public class Z3Wrapper {
     public static com.microsoft.z3.Context newContext() throws Z3Exception {
         if (!initialized) {
             String libz3 = "libz3";
-            switch (GlobalSettings.os()) {
+            switch (OS.current()) {
                 case WIN:
                     libz3 += ".dll";
                     break;

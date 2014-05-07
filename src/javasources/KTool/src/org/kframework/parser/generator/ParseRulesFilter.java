@@ -21,25 +21,16 @@ import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.InclusionFilter;
-import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
-import org.kframework.parser.utils.ReportErrorsVisitor;
-import org.kframework.parser.utils.Sglr;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.XmlLoader;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -83,60 +74,36 @@ public class ParseRulesFilter extends BasicTransformer {
             try {
                 ASTNode config;
 
-                if (experimentalParserOptions.fastKast) {
-                    // TODO(RaduM): load directly from ATerms
-                    ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+                String parsed = null;
+                if (ss.containsAttribute("kore")) {
 
-                    int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
-                    int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
-                    anode.accept(new UpdateLocationVisitor(context, startLine, startCol));
-                    anode.accept(new ReportErrorsVisitor(context, "rule"));
+                    long koreStartTime = System.currentTimeMillis();
+                    parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+                    if (globalOptions.verbose)
+                        System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
+                } else
+                    parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                Document doc = XmlLoader.getXMLDoc(parsed);
 
-                    Sentence st = (Sentence) anode;
-                    if (ss.getType().equals(Constants.CONTEXT))
-                        config = new org.kframework.kil.Context(st);
-                    else if (ss.getType().equals(Constants.RULE))
-                        config = new Rule(st);
-                    else { // should not reach here
-                        config = null;
-                        assert false : "Only context and rules have been implemented.";
-                    }
+                // replace the old xml node with the newly parsed sentence
+                Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+                XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
+                XmlLoader.addFilename(xmlTerm, ss.getFilename());
+                XmlLoader.reportErrors(doc, ss.getType());
 
-                    ((Sentence) config).setLabel(ss.getLabel());
-                    //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
-                    ((Sentence) config).setAttributes(ss.getAttributes());
-                } else {
-                    String parsed = null;
-                    if (ss.containsAttribute("kore")) {
-
-                        long koreStartTime = System.currentTimeMillis();
-                        parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                        if (globalOptions.verbose)
-                            System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
-                    } else
-                        parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-                    Document doc = XmlLoader.getXMLDoc(parsed);
-
-                    // replace the old xml node with the newly parsed sentence
-                    Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-                    XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
-                    XmlLoader.addFilename(xmlTerm, ss.getFilename());
-                    XmlLoader.reportErrors(doc, ss.getType());
-
-                    if (ss.getType().equals(Constants.CONTEXT))
-                        config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-                    else if (ss.getType().equals(Constants.RULE))
-                        config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-                    else { // should not reach here
-                        config = null;
-                        assert false : "Only context and rules have been implemented.";
-                    }
-                    Sentence st = (Sentence) config;
-                    assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
-                    st.setLabel(ss.getLabel());
-                    //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
-                    st.setAttributes(ss.getAttributes());
+                if (ss.getType().equals(Constants.CONTEXT))
+                    config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
+                else if (ss.getType().equals(Constants.RULE))
+                    config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
+                else { // should not reach here
+                    config = null;
+                    assert false : "Only context and rules have been implemented.";
                 }
+                Sentence st = (Sentence) config;
+                assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+                st.setLabel(ss.getLabel());
+                //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+                st.setAttributes(ss.getAttributes());
                 // disambiguate rules
                 if (config.getFilename().endsWith("test.k")) {
                     // this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
@@ -154,8 +121,6 @@ public class ParseRulesFilter extends BasicTransformer {
                 config = config.accept(new CorrectCastPriorityFilter(context));
                 // config = config.accept(new CheckBinaryPrecedenceFilter());
                 config = config.accept(new PriorityFilter(context));
-                if (experimentalParserOptions.fastKast)
-                    config = config.accept(new MergeAmbFilter(context));
                 config = config.accept(new VariableTypeInferenceFilter(context));
                 // config = config.accept(new AmbDuplicateFilter(context));
                 // config = config.accept(new TypeSystemFilter(context));

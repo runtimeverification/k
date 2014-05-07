@@ -24,7 +24,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.krun.K;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
@@ -47,9 +46,9 @@ public class KompileFrontEnd {
         try {
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kompile");
-            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class, ExperimentalParserOptions.class));
+            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class));
             
-            if (options.help) {
+            if (options.global.help) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
@@ -63,7 +62,7 @@ public class KompileFrontEnd {
                 return;    
             }
             
-            if (options.version) {
+            if (options.global.version) {
                 String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.print(msg);
                 return;
