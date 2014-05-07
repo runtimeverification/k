@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.gui;
 
 import org.apache.commons.io.FilenameUtils;

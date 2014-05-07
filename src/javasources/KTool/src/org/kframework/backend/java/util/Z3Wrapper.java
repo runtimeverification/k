@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
 import com.microsoft.z3.Z3Exception;
