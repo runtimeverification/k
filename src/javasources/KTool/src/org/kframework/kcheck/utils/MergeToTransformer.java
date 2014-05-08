@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.LinkedList;
@@ -24,12 +25,12 @@ public class MergeToTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
+    public ASTNode visit(Cell node, Void _) throws TransformerException {
 
         // retrieve the content of the left hand side
         ExtractCellContent ecc = new ExtractCellContent(context,
                 node.getLabel());
-        toMerge.accept(ecc);
+        ecc.visitNode(toMerge);
         Term lcontent = ecc.getContent();
 
         if (lcontent != null) {
@@ -72,7 +73,7 @@ public class MergeToTransformer extends CopyOnWriteTransformer {
         }
         // System.out.println("Node: " + node + "\nLL: " + lcontent + "\n\n");
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
     
 }

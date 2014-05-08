@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -19,7 +20,7 @@ public class InclusionFilter extends BasicTransformer {
     String localModule = null;
 
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         String consFile = tc.getProduction().getFilename();
         String consModule = tc.getProduction().getOwnerModuleName();
 //        Trying to fix issue 651, by removing file inclusion check
@@ -38,6 +39,6 @@ public class InclusionFilter extends BasicTransformer {
             throw new PriorityException(kex);
         }
 
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 }

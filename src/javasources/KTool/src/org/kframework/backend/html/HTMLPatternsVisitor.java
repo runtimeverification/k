@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.html;
 
 import org.kframework.kil.Production;
@@ -44,9 +45,9 @@ public class HTMLPatternsVisitor extends BasicVisitor {
     }
 
     @Override 
-    public void visit(Production p) {
+    public Void visit(Production p, Void _) {
         if (!p.containsAttribute("cons")) {
-            return;
+            return _;
         }
         if(p.containsAttribute("latex") || p.containsAttribute("html")) {
             if (p.containsAttribute("latex")) {
@@ -69,12 +70,14 @@ public class HTMLPatternsVisitor extends BasicVisitor {
             type.put(p.getAttribute("cons"), HTMLPatternType.DEFAULT);
             //super.visit(p);
         }
+        return _;
         
     }
 
 
     @Override
-    public void visit(Sort sort) {
+    public Void visit(Sort sort, Void _) {
+        return _;
         /*if (prevNonTerm) pattern += "\\mathrel{}";
         pattern += "{#" + nonTerm++ + "}";
         prevNonTerm = true;*/
@@ -82,7 +85,8 @@ public class HTMLPatternsVisitor extends BasicVisitor {
     
     
     @Override
-    public void visit(UserList sort) {
+    public Void visit(UserList sort, Void _) {
+        return _;
         //Should be only nonterminal in a production, so prevNonTerm has no effect
         /*pattern += "{#" + nonTerm++ + "}";
         pattern += "\\mathpunct{\\terminalNoSpace{" + StringUtil.latexify(sort.getSeparator()) + "}}";
@@ -91,7 +95,8 @@ public class HTMLPatternsVisitor extends BasicVisitor {
     
     
     @Override
-    public void visit(Terminal pi) {
+    public Void visit(Terminal pi, Void _) {
+        return _;
         /*String terminal = pi.getTerminal();
         if (terminal.isEmpty()) return;
         if (context.isSpecialTerminal(terminal)) {

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.parser.utils;
 
 import org.kframework.kil.ASTNode;
@@ -17,7 +18,7 @@ public class ReportErrorsVisitor extends BasicTransformer {
         this.fromWhere = fromWhere;
     }
 
-    public ASTNode transform(ParseError pe) throws TransformerException {
+    public ASTNode visit(ParseError pe, Void _) throws TransformerException {
         String msg = pe.getMessage();
         if (msg.equals("Parse error: eof unexpected"))
             msg = "Parse error: Unexpected end of " + fromWhere;

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -14,7 +15,8 @@ public class AmbDuplicateFilter extends BasicTransformer {
         super("Remove ambiguity duplicates", context);
     }
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    @Override
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
 
         // remove duplicate ambiguities
         // should be applied after updating something like variable declarations
@@ -30,8 +32,8 @@ public class AmbDuplicateFilter extends BasicTransformer {
 
         if (children.size() > 1) {
             amb.setContents(children);
-            return super.transform(amb);
+            return super.visit(amb, _);
         } else
-            return super.transform(children.get(0));
+            return super.visit(children.get(0), _);
     }
 }

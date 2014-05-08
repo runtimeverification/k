@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -7,14 +8,14 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicHookWorker;
+import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class PriorityFilter2 extends BasicHookWorker {
+public class PriorityFilter2 extends LocalTransformer {
 
     private TermCons parent;
 
@@ -28,7 +29,8 @@ public class PriorityFilter2 extends BasicHookWorker {
         this.parent = pf.parent;
     }
 
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    @Override
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         String parentLabel = parent.getProduction().getKLabel();
         String localLabel = tc.getProduction().getKLabel();
         if (context.isPriorityWrong(parentLabel, localLabel)) {
@@ -41,13 +43,13 @@ public class PriorityFilter2 extends BasicHookWorker {
     }
 
     @Override
-    public ASTNode transform(Ambiguity node) throws TransformerException {
+    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
         TransformerException exception = null;
         ArrayList<Term> terms = new ArrayList<Term>();
         for (Term t : node.getContents()) {
             ASTNode result = null;
             try {
-                result = t.accept(this);
+                result = this.visitNode(t);
                 terms.add((Term) result);
             } catch (TransformerException e) {
                 exception = e;
@@ -63,7 +65,7 @@ public class PriorityFilter2 extends BasicHookWorker {
     }
 
     @Override
-    public ASTNode transform(Term node) throws TransformerException {
+    public ASTNode visit(Term node, Void _) throws TransformerException {
         return node;
     }
 }

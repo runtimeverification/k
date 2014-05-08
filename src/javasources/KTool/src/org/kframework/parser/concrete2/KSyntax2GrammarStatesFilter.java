@@ -49,9 +49,9 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     private Set<String> terminals;
 
     @Override
-    public void visit(Production prd) {
+    public Void visit(Production prd, Void _) {
         if (prd.containsAttribute("notInPrograms"))
-            return;
+            return null;
         NonTerminal nt = grammar.get(prd.getSort());
         assert nt != null : "Could not find in the grammar the required sort: " + prd.getSort();
         NextableState previous = nt.entryState;
@@ -224,21 +224,25 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         previous = locRule;
 
         previous.next.add(nt.exitState);
+        return null;
     }
 
     @Override
-    public void visit(Rule s) {
+    public Void visit(Rule s, Void _) {
         // skip visiting rules, contexts and configurations
+        return null;
     }
 
     @Override
-    public void visit(Configuration s) {
+    public Void visit(Configuration s, Void _) {
         // skip visiting rules, contexts and configurations
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context s) {
+    public Void visit(org.kframework.kil.Context s, Void _) {
         // skip visiting rules, contexts and configurations
+        return null;
     }
 
     public Grammar getGrammar() {

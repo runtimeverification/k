@@ -49,7 +49,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
      * expressions and we add as side condition of the rule
      * checkSat(SC-P) =/= unsat.
      */
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
 
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
@@ -63,10 +63,10 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         Term condition = node.getRequires();
 //        Term originalCondition = condition.shallowCopy();
         CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(context);
-        condition = (Term) node.getRequires().accept(cnft);
+        condition = (Term) cnft.visitNode(node.getRequires());
 
         ConditionTransformer ct = new ConditionTransformer(context);
-        condition = (Term) condition.accept(ct);
+        condition = (Term) ct.visitNode(condition);
         
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();

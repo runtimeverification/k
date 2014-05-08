@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
@@ -41,20 +42,20 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
-    public Definition transform(Definition definition) throws TransformerException {
+    public Definition visit(Definition definition, Void _) throws TransformerException {
         state = TransformationState.TRANSFORM_PRODUCTIONS;
-        definition = (Definition) super.transform(definition);
+        definition = (Definition) super.visit(definition, _);
         state = TransformationState.TRANSFORM_TERMS;
-        definition = (Definition) super.transform(definition);
+        definition = (Definition) super.visit(definition, _);
         state = TransformationState.REMOVE_REDUNDANT_INJECTIONS;
-        definition = (Definition) super.transform(definition);
+        definition = (Definition) super.visit(definition, _);
         return definition;
     }
 
     /* Phase one: transform productions such that each user-defined production has sort subsorted to KItem and each
      * not-terminal has sort subsorted to K */
     @Override
-    public Syntax transform(Syntax node) throws TransformerException {
+    public Syntax visit(Syntax node, Void _) throws TransformerException {
         if (state != TransformationState.TRANSFORM_PRODUCTIONS) {
             return node;
         }
@@ -69,7 +70,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
         String sort = node.getSort().getName();
         Production production = node.getPriorityBlocks().get(0).getProductions().get(0);
-        production = (Production) transform(production);
+        production = (Production) visit(production, _);
 
         if ((sort.equals(KSorts.KLABEL) && production.containsAttribute(Attribute.FUNCTION_KEY))
                 || sort.equals(KSorts.K) || sort.equals(KSorts.KLIST)) {
@@ -102,7 +103,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     /** Transforms {@code Sort} instances occurring as part of
      * {@link org.kframework.kil.ProductionItem}. Other instances are not changed. */
     @Override
-    public Sort transform(Sort node) {
+    public Sort visit(Sort node, Void _) {
         assert state == TransformationState.TRANSFORM_PRODUCTIONS;
 
         if (node.getName().equals(KSorts.KLABEL) || node.getName().equals(KSorts.KLIST)) {
@@ -117,7 +118,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
     /* Phase two: transform terms such that each term respects the transform productions */
     @Override
-    public Rule transform(Rule node) throws TransformerException {
+    public Rule visit(Rule node, Void _) throws TransformerException {
         // TODO(AndreiS): remove this check when include files do not contain the old List, Map, and Set
         if (node.containsAttribute("nojava")) {
             return node;
@@ -127,7 +128,7 @@ public class AddInjections extends CopyOnWriteTransformer{
             return node;
         }
 
-        Rule transformedNode = (Rule) super.transform(node);
+        Rule transformedNode = (Rule) super.visit(node, _);
         if (!node.containsAttribute(Attribute.FUNCTION_KEY)) {
             return transformedNode;
         }
@@ -149,7 +150,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
-    public ASTNode transform(TermCons node) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _) throws TransformerException {
         // TODO(AndreiS): find out why the assertion is failing
         // assert state == TransformationState.TRANSFORM_TERMS;
         if (state != TransformationState.TRANSFORM_TERMS) {
@@ -166,7 +167,7 @@ public class AddInjections extends CopyOnWriteTransformer{
         boolean change = false;
         List<Term> transformedContents = new ArrayList<>();
         for (Term term : node.getContents()) {
-            Term transformedTerm = (Term) term.accept(this);
+            Term transformedTerm = (Term) this.visitNode(term);
             assert transformedTerm != null;
 
             if (transformedTerm.getSort().equals(KSorts.KLABEL)

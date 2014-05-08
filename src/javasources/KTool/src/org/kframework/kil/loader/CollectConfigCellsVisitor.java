@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import org.kframework.kil.Cell;
@@ -11,17 +12,18 @@ public class CollectConfigCellsVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Configuration config) {
-        super.visit((Sentence) config);
+    public Void visit(Configuration config, Void _) {
+        return super.visit((Sentence) config, _);
     }
 
     @Override
-    public void visit(Sentence s) {
+    public Void visit(Sentence s, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
         context.addCellDecl(cell);
-        super.visit(cell);
+        return super.visit(cell, _);
     }
 }

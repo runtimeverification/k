@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class JavaClassesFactory {
         if (Constants.SENTENCE.equals(element.getNodeName()))
             return new Sentence(element);
         if (Constants.REWRITE.equals(element.getNodeName()))
-            return new Rewrite(element);
+            return new Rewrite(element, context);
         if (Constants.TERM.equals(element.getNodeName())) {
             assert context != null;
             return new TermCons(element, context);
@@ -194,7 +195,7 @@ public class JavaClassesFactory {
             if (appl.getName().endsWith("Ensures"))
                 return storeNode(atm.getUniqueIdentifier(), new Sentence(appl));
             if (appl.getName().endsWith("Rewrite"))
-                return storeNode(atm.getUniqueIdentifier(), new Rewrite(appl));
+                return storeNode(atm.getUniqueIdentifier(), new Rewrite(appl, context));
             if (appl.getName().endsWith("Syn")) {
                 if (appl.getName().endsWith("ListSyn") && appl.getArgument(0) instanceof ATermList) {
                     ATermList list = (ATermList) appl.getArgument(0);

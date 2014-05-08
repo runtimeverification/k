@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ public class VariablesVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Variable node) {
+    public Void visit(Variable node, Void _) {
         variables.add(node);
-        super.visit(node);
+        return super.visit(node, _);
     }
     
     public List<Variable> getVariables() {

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import com.google.common.collect.Sets;
@@ -126,7 +127,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         assert node.getBody() instanceof Rewrite:
                "expected rewrite at the top of rule " + node + ". "
                + "DataStructureToLookupUpdate pass should be applied after ResolveRewrite pass.";
@@ -143,16 +144,16 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
          * patterns.
          */
         status = Status.LHS;
-        Term lhs = (Term) rewrite.getLeft().accept(this);
+        Term lhs = (Term) this.visitNode(rewrite.getLeft());
 
         /*
          * Update the data structure uses in the right-hand side and condition with update
          * operations on the map variables introduced in the left-hand side in the previous step.
          */
         status = Status.RHS;
-        Term rhs = (Term) rewrite.getRight().accept(this);
+        Term rhs = (Term) this.visitNode(rewrite.getRight());
         status = Status.CONDITION;
-        Term requires = node.getRequires() != null ? (Term) node.getRequires().accept(this) : null;
+        Term requires = node.getRequires() != null ? (Term) this.visitNode(node.getRequires()) : null;
         Term ensures = node.getEnsures();
         //TODO: Handle Ensures as well.
 
@@ -287,8 +288,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(ListBuiltin node) throws TransformerException {
-        node = (ListBuiltin) super.transform(node);
+    public ASTNode visit(ListBuiltin node, Void _) throws TransformerException {
+        node = (ListBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             assert node.isLHSView();
 
@@ -380,8 +381,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(MapBuiltin node) throws TransformerException {
-        node = (MapBuiltin) super.transform(node);
+    public ASTNode visit(MapBuiltin node, Void _) throws TransformerException {
+        node = (MapBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             assert node.isLHSView();
 
@@ -453,8 +454,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(SetBuiltin node) throws TransformerException {
-        node = (SetBuiltin) super.transform(node);
+    public ASTNode visit(SetBuiltin node, Void _) throws TransformerException {
+        node = (SetBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             assert node.isLHSView();
 
@@ -517,7 +518,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (status != Status.LHS && reverseMap.containsKey(node)) {
             return reverseMap.get(node);
         } else {

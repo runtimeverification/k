@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kagreg;
 
 import java.util.ArrayList;
@@ -20,21 +21,23 @@ public class CollectImportsVisitor extends BasicVisitor {
     }
     
     @Override
-    public void visit(Module module) {
+    public Void visit(Module module, Void _) {
         if (module.isPredefined()) {
             inPredefined++;
         }
-        super.visit(module);
+        super.visit(module, _);
         if (module.isPredefined()) {
             inPredefined--;
         }
+        return null;
     }
     
     @Override
-    public void visit(Import node) {
+    public Void visit(Import node, Void _) {
         if (collectPredefined || inPredefined == 0) {
             imports.add(node);
         }
+        return null;
     }
     
     public List<Import> getImports() {

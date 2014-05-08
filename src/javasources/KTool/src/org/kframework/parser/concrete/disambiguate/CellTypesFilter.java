@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicHookWorker;
+import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -26,15 +27,18 @@ public class CellTypesFilter extends BasicTransformer {
     }
 
     // don't do anything for configuration and syntax
-    public ASTNode transform(Configuration cell) {
+    @Override
+    public ASTNode visit(Configuration cell, Void _) {
         return cell;
     }
 
-    public ASTNode transform(Syntax cell) {
+    @Override
+    public ASTNode visit(Syntax cell, Void _) {
         return cell;
     }
 
-    public ASTNode transform(Cell cell) throws TransformerException {
+    @Override
+    public ASTNode visit(Cell cell, Void _) throws TransformerException {
         String sort = context.cellKinds.get(cell.getLabel());
 
         if (sort == null) {
@@ -51,12 +55,12 @@ public class CellTypesFilter extends BasicTransformer {
         }
 
         if (sort != null) {
-            cell.setContents((Term) cell.getContents().accept(new CellTypesFilter2(context, sort, cell.getLabel())));
+            cell.setContents((Term) new CellTypesFilter2(context, sort, cell.getLabel()).visitNode(cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
             throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
         }
-        return super.transform(cell);
+        return super.visit(cell, _);
     }
 
     /**
@@ -67,7 +71,7 @@ public class CellTypesFilter extends BasicTransformer {
      * @author Radu
      * 
      */
-    public class CellTypesFilter2 extends BasicHookWorker {
+    public class CellTypesFilter2 extends LocalTransformer {
         String expectedSort;
         String cellLabel;
 
@@ -77,7 +81,8 @@ public class CellTypesFilter extends BasicTransformer {
             this.cellLabel = cellLabel;
         }
 
-        public ASTNode transform(Term trm) throws TransformerException {
+        @Override
+        public ASTNode visit(Term trm, Void _) throws TransformerException {
             if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
@@ -87,26 +92,26 @@ public class CellTypesFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode transform(Bracket node) throws TransformerException {
-            node.setContent((Term) node.getContent().accept(this));
+        public ASTNode visit(Bracket node, Void _) throws TransformerException {
+            node.setContent((Term) this.visitNode(node.getContent()));
             return node;
         }
 
         @Override
-        public ASTNode transform(Rewrite node) throws TransformerException {
+        public ASTNode visit(Rewrite node, Void _) throws TransformerException {
             Rewrite result = new Rewrite(node);
-            result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
+            result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
             return result;
         }
 
         @Override
-        public ASTNode transform(Ambiguity node) throws TransformerException {
+        public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
             TransformerException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
-                    result = t.accept(this);
+                    result = this.visitNode(t);
                     terms.add((Term) result);
                 } catch (TransformerException e) {
                     exception = e;

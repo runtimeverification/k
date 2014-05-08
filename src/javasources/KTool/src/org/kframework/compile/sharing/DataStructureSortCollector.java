@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
 import org.kframework.kil.Attribute;
@@ -63,32 +64,32 @@ public class DataStructureSortCollector extends BasicVisitor {
     }
 
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
         String sort = node.getSort();
 
         String hookAttribute = node.getAttribute(Attribute.HOOK_KEY);
         if (hookAttribute == null) {
             /* not a builtin */
-            return;
+            return null;
         }
 
         String[] strings = hookAttribute.split(":");
         if (strings.length != 2) {
             /* TODO: print error message */
-            return;
+            return null;
         }
 
         String type = strings[0];
         String operator = strings[1];
         if (!DataStructureSort.TYPES.contains(type)) {
             /* not a builtin collection */
-            return;
+            return null;
         }
 
         if (types.containsKey(sort)) {
             if (!types.get(sort).equals(type)) {
                 /* TODO: print error message */
-                return;
+                return null;
             }
         } else {
             types.put(sort, type);
@@ -100,21 +101,21 @@ public class DataStructureSortCollector extends BasicVisitor {
         if (operator.equals(labels.get(DataStructureSort.Label.CONSTRUCTOR))) {
             if (constructorLabels.containsKey(sort)) {
                 /* TODO: print error message */
-                return;
+                return null;
             }
 
             constructorLabels.put(sort, node.getKLabel());
         } else if (operator.equals(labels.get(DataStructureSort.Label.ELEMENT))) {
             if (elementLabels.containsKey(sort)) {
                 /* TODO: print error message */
-                return;
+                return null;
             }
 
             elementLabels.put(sort, node.getKLabel());
         } else if (operator.equals(labels.get(DataStructureSort.Label.UNIT))) {
             if (unitLabels.containsKey(sort)) {
                 /* TODO: print error message */
-                return;
+                return null;
             }
 
             unitLabels.put(sort, node.getKLabel());
@@ -123,6 +124,7 @@ public class DataStructureSortCollector extends BasicVisitor {
             operatorLabels.get(sort).put(operator, node.getKLabel());
         }
 
+        return null;
     }
 
 }

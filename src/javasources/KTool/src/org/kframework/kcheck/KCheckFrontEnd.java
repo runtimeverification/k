@@ -139,7 +139,7 @@ public class KCheckFrontEnd {
         org.kframework.kil.Definition javaDef;
         Stopwatch.instance().start();
         javaDef = null;//DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
-        javaDef.accept(new CountNodesVisitor(context));
+        new CountNodesVisitor(context).visitNode(javaDef);
 
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 

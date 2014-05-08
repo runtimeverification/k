@@ -1,8 +1,9 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.visitors.AbstractTransformer;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,7 +22,7 @@ public class InitializeConfigurationStructure extends BasicCompilerStep<Definiti
     public Definition compile(Definition def, String stepName) throws CompilerStepDone {
         ConfigurationStructureVisitor cfgStrVisitor =
                 new ConfigurationStructureVisitor(context);
-        def.accept(cfgStrVisitor);
+        cfgStrVisitor.visitNode(def);
         context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
         return def;
     }

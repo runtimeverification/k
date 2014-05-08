@@ -16,6 +16,8 @@ import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Sets;
+
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -259,6 +261,10 @@ public class Context implements Serializable {
      */
     public String getLUBSort(Set<String> sorts) {
         return subsorts.getLUB(sorts);
+    }
+    
+    public String getLUBSort(String... sorts) {
+        return subsorts.getLUB(Sets.newHashSet(sorts));
     }
 
     /**

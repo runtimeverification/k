@@ -30,7 +30,7 @@ public class SearchLTLState extends BasicVisitor {
     }
 
     @Override
-    public void visit(Rule node) {
+    public Void visit(Rule node, Void _) {
         Term body = node.getBody();
         if (body instanceof Rewrite) {
             // isolate the left hand side of the rule and search for '_|=Ltl_
@@ -48,11 +48,12 @@ public class SearchLTLState extends BasicVisitor {
                         // Extract the components of the '|=Ltl KApp body
                         KList rewriteLHSContents = (KList) rewriteLHSBody.getChild();
                         ltlState = rewriteLHSContents.getContents().get(0);
-                        return;
+                        return null;
                     }
                 }
             }
         }
+        return null;
     }
 
     public Term getLtlState() {

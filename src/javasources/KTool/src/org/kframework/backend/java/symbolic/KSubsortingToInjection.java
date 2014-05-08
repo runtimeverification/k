@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.kil.KList;
@@ -19,12 +20,12 @@ public class KSubsortingToInjection extends CopyOnWriteTransformer {
     }
 
     @Override
-    public TermCons transform(TermCons termCons) {
+    public TermCons visit(TermCons termCons, Void _) {
         return termCons;
     }
 
     @Override
-    public KList transform(KList kList) {
+    public KList visit(KList kList, Void _) {
         return kList;
     }
 

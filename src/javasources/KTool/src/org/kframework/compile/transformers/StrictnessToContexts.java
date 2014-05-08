@@ -38,7 +38,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         //collect the productions which have the attributes strict and seqstrict
         Set<Production> prods = SyntaxByTag.get(node, "strict", true, context);
         prods.addAll(SyntaxByTag.get(node, "seqstrict", true, context));

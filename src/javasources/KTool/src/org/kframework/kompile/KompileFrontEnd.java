@@ -165,7 +165,7 @@ public class KompileFrontEnd {
         javaDef = DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 backend.autoinclude(), context);
         
-        javaDef.accept(new CountNodesVisitor(context));
+        new CountNodesVisitor(context).visitNode(javaDef);
         
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 

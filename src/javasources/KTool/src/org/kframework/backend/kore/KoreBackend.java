@@ -179,93 +179,102 @@ class KoreFilter extends BasicVisitor {
     }
     
     @Override
-    public void visit(Ambiguity node) {
+    public Void visit(Ambiguity node, Void _) {
 
         indenter.write("amb(");
         for (int i = 0; i < node.getContents().size() ; ++i){
             Term term=node.getContents().get(i);
             if (term != null){
-                term.accept(this);
+                this.visitNode(term);
                 if(i!=node.getContents().size()-1){
                     indenter.write(",");
                 }
             }
         }
         indenter.write(")");
+        return null;
     }
     
     @Override
-    public void visit(Attribute node) {
+    public Void visit(Attribute node, Void _) {
         indenter.write(" "+node.getKey()+"("+node.getValue()+")");
+        return null;
     }
     
     @Override
-    public void visit(Attributes node) {
+    public Void visit(Attributes node, Void _) {
         
         if(node.isEmpty()){
-            return;
+            return null;
         }
         indenter.write("[");
         for (int i = 0; i < node.getContents().size() ; ++i){
             Attribute term=node.getContents().get(i);
-                term.accept(this);
+                this.visitNode(term);
                 if(i!=node.getContents().size()-1){
                     indenter.write(", ");
             }
         }
         indenter.write("]");
+        return null;
     }
     
     @Override
-    public void visit(BackendTerm node) {
+    public Void visit(BackendTerm node, Void _) {
         indenter.write(node.getValue());
+        return null;
     }
     
     @Override
-    public void visit(Collection node) {
+    public Void visit(Collection node, Void _) {
         
         if(node.getContents().size()==0){
             indenter.write("."+node.getSort());
-            return;
+            return null;
         }
         
         for(int i = 0;i < node.getContents().size(); ++i){
             Term term = node.getContents().get(i);
-            term.accept(this);
+            this.visitNode(term);
         }
+        return null;
     }
     
     @Override
-    public void visit(BagItem node) {
-        node.getItem().accept(this);
+    public Void visit(BagItem node, Void _) {
+        this.visitNode(node.getItem());
+        return null;
     }
     
     @Override
-    public void visit(Token node) {
+    public Void visit(Token node, Void _) {
         indenter.write("#token(\"" + node.tokenSort() + "\", \"" + node.value() + "\")");
+        return null;
     }
     
     @Override
-    public void visit(Bracket node) {
+    public Void visit(Bracket node, Void _) {
         indenter.write("(");
-        node.getContent().accept(this);
+        this.visitNode(node.getContent());
         indenter.write(")");
+        return null;
     }
     
     @Override
-    public void visit(Cast node) {
+    public Void visit(Cast node, Void _) {
         indenter.write("(");
-        node.getContent().accept(this);
+        this.visitNode(node.getContent());
         indenter.write(" :");
         if (node.isSyntactic()) {
             indenter.write(":");
         }
         indenter.write(node.getSort());
         indenter.write(")");
+        return null;
     }
     
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
 
         String attributes = "";
         for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
@@ -297,7 +306,7 @@ class KoreFilter extends BasicVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        cell.getContents().accept(this);
+        this.visitNode(cell.getContents());
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();
@@ -314,108 +323,124 @@ class KoreFilter extends BasicVisitor {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
 
+        return null;
     }
     
     @Override
-    public void visit(Configuration node) {
+    public Void visit(Configuration node, Void _) {
         indenter.write("  configuration ");
-        node.getBody().accept(this) ;
+        this.visitNode(node.getBody()) ;
         indenter.write(" ");
         indenter.endLine();
+        return null;
     }
     
     @Override
-    public void visit(org.kframework.kil.Context node) {
+    public Void visit(org.kframework.kil.Context node, Void _) {
         indenter.write("  context ");
-        node.getBody().accept(this);
+        this.visitNode(node.getBody());
         indenter.write(" ");
-        node.getAttributes().accept(this);
+        this.visitNode(node.getAttributes());
+        return null;
     }
     
-    public void visit(DataStructureSort node) {
+    public Void visit(DataStructureSort node, Void _) {
         indenter.write(node.name());
+        return null;
     }
     
     @Override
-    public void visit(Definition node) {
+    public Void visit(Definition node, Void _) {
         for (DefinitionItem di : node.getItems()) {
-            di.accept(this);
+            this.visitNode(di);
         }
+        return null;
     }
     
     @Override
-    public void visit(Freezer node) {
+    public Void visit(Freezer node, Void _) {
         indenter.write("#freezer");
-        node.getTerm().accept(this);
+        this.visitNode(node.getTerm());
         indenter.write("(.KList)");
+        return null;
     }
     
     @Override
-    public void visit(FreezerHole hole) {
+    public Void visit(FreezerHole hole, Void _) {
         indenter.write("HOLE(" + hole.getIndex() + ")");
+        return null;
     }
     
     @Override
-    public void visit(Hole hole) {
+    public Void visit(Hole hole, Void _) {
         indenter.write("HOLE");
+        return null;
     }
 
     @Override
-    public void visit(Import node) {
+    public Void visit(Import node, Void _) {
         indenter.write("  imports " +node.getName());
         indenter.endLine();
+        return null;
     }
   
     private void visitList(List<? extends ASTNode> nodes, String sep, String empty) {
         if (nodes.size() == 0) { this.indenter.write(empty); }
         else {
           for (int i = 0; i < nodes.size(); i++) {
-            nodes.get(i).accept(this);
+            this.visitNode(nodes.get(i));
             if (i != (nodes.size() - 1)) { indenter.write(sep); }
           }
         }
       }
 
           @Override
-        public void visit(KSequence node) { 
+        public Void visit(KSequence node, Void _) { 
             visitList(node.getContents(), " ~> ", ".K");
+            return null;
         }
 
           @Override
-        public void visit(KList node) {
+        public Void visit(KList node, Void _) {
               visitList(node.getContents(), ", ", ".KList");
+              return null;
         }
 
           @Override
-        public void visit(BoolBuiltin node) {
+        public Void visit(BoolBuiltin node, Void _) {
               this.indenter.write(node.value()); // TODO: true() vs #"true"()
+              return null;
         }
 
         @Override
-        public void visit(IntBuiltin node) {
+        public Void visit(IntBuiltin node, Void _) {
             this.indenter.write(node.value()); // TODO: true() vs #"true"()
+            return null;
         }
 
         @Override
-        public void visit(StringBuiltin node) {
+        public Void visit(StringBuiltin node, Void _) {
             this.indenter.write(node.value());
+            return null;
         }
         
         @Override
-        public void visit(KApp node) {
-              node.getLabel().accept(this);
+        public Void visit(KApp node, Void _) {
+              this.visitNode(node.getLabel());
               this.indenter.write("(");
-              node.getChild().accept(this);
+              this.visitNode(node.getChild());
               this.indenter.write(")");
+              return null;
         }
 
         @Override
-        public void visit(KLabelConstant node) {
+        public Void visit(KLabelConstant node, Void _) {
             this.indenter.write(node.getLabel().replaceAll("\\(", "`(").replaceAll("\\)", "`)")); // TODO: escape the label
+            return null;
         }
         
         @Override
-        public void visit(KInjectedLabel kInjectedLabel) {
+        public Void visit(KInjectedLabel kInjectedLabel, Void _) {
             Term term = kInjectedLabel.getTerm();
             if (MetaK.isKSort(term.getSort())) {
                 indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
@@ -423,55 +448,63 @@ class KoreFilter extends BasicVisitor {
             } else {
                 indenter.write("# ");
             }
-            term.accept(this);
+            this.visitNode(term);
+            return null;
         }
         
         @Override
-        public void visit(Lexical node) {
+        public Void visit(Lexical node, Void _) {
             this.indenter.write("Lexical{"+node.getLexicalRule()+"}");
+            return null;
         }
   
         @Override
-        public void visit(ListTerminator node) {
+        public Void visit(ListTerminator node, Void _) {
             this.indenter.write(node.toString());
+            return null;
         }
         
         @Override
-        public void visit(LiterateModuleComment node) {
+        public Void visit(LiterateModuleComment node, Void _) {
             indenter.write(node.toString());
+            return null;
         }
         
         @Override
-        public void visit(LiterateDefinitionComment node) {
+        public Void visit(LiterateDefinitionComment node, Void _) {
             indenter.write(node.toString());
+            return null;
         }
           
         @Override
-        public void visit(Module mod) {
+        public Void visit(Module mod, Void _) {
             indenter.write("module " + mod.getName() + "\n");
             for (ModuleItem i : mod.getItems()){
                 
-                i.accept(this);
+                this.visitNode(i);
             }
             indenter.write("\nendmodule");
+            return null;
         }
 
         @Override
-        public void visit(ParseError node) {
+        public Void visit(ParseError node, Void _) {
             indenter.write("Parse error: " + node.getMessage());
+            return null;
         }
         
         @Override
-        public void visit(Production node) {
+        public Void visit(Production node, Void _) {
             for (ProductionItem i : node.getItems()){
                 
-                i.accept(this);
+                this.visitNode(i);
                 indenter.write(" ");
             }
+            return null;
         }
         
         @Override
-        public void visit(PriorityBlock node) {
+        public Void visit(PriorityBlock node, Void _) {
             
             if (node.getAssoc() != null && !node.getAssoc().equals("")){
                 indenter.write(node.getAssoc()+": ");
@@ -479,176 +512,192 @@ class KoreFilter extends BasicVisitor {
             
             for (int i = 0; i < node.getProductions().size(); ++i){
                 Production production = node.getProductions().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getProductions().size()-1){
                     indenter.write("\n     | ");
                 }
             }
+            return null;
         }
         
         @Override
-        public void visit(PriorityBlockExtended node) {
+        public Void visit(PriorityBlockExtended node, Void _) {
             
             for (int i = 0; i < node.getProductions().size(); ++i){
                 KLabelConstant production = node.getProductions().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getProductions().size()-1){
                     indenter.write(" ");
                 }
             }
+            return null;
         }
         
         @Override
-        public void visit(PriorityExtended node) {
+        public Void visit(PriorityExtended node, Void _) {
             
             indenter.write("  syntax priorities" );
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlockExtended production = node.getPriorityBlocks().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getPriorityBlocks().size()-1){
                     indenter.write("\n     > ");
                 }
             }
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(PriorityExtendedAssoc node) {
+        public Void visit(PriorityExtendedAssoc node, Void _) {
             
             indenter.write("  syntax "+node.getAssoc() );
             for (int i = 0; i < node.getTags().size(); ++i){
                 KLabelConstant production = node.getTags().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getTags().size()-1){
                     indenter.write(" ");
                 }
             }
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(Require node) {
+        public Void visit(Require node, Void _) {
             
             indenter.write(node.toString());
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(Restrictions node) {
+        public Void visit(Restrictions node, Void _) {
             indenter.write("  syntax ");
             if(node.getSort()!=null){
-                node.getSort().accept(this);
+                this.visitNode(node.getSort());
             } else {
-                node.getTerminal().accept(this);
+                this.visitNode(node.getTerminal());
             }
             indenter.write(" -/- " + node.getPattern());
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(Rewrite rewrite) {
-            rewrite.getLeft().accept(this);
+        public Void visit(Rewrite rewrite, Void _) {
+            this.visitNode(rewrite.getLeft());
             indenter.write(" => ");
-            rewrite.getRight().accept(this);
+            this.visitNode(rewrite.getRight());
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(Rule node) {
+        public Void visit(Rule node, Void _) {
             indenter.write("  rule ");
 
             if (node.getLabel() != null && !node.getLabel().equals(""))
                 indenter.write("[" + node.getLabel() + "]: ");
 
-            node.getBody().accept(this);
+            this.visitNode(node.getBody());
             indenter.write(" ");
             
             if (node.getRequires() != null) {
                 indenter.write("requires ");
-                node.getRequires().accept(this);
+                this.visitNode(node.getRequires());
                 indenter.write(" ");
             }
             if (node.getEnsures() != null) {
                 indenter.write("requires ");
-                node.getEnsures().accept(this);
+                this.visitNode(node.getEnsures());
                 indenter.write(" ");
             }
-            node.getAttributes().accept(this);
+            this.visitNode(node.getAttributes());
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(Sentence node) {
+        public Void visit(Sentence node, Void _) {
 
             if (node.getLabel() != null && !node.getLabel().equals(""))
                 indenter.write("[" + node.getLabel() + "]: ");
 
-            node.getBody().accept(this);
+            this.visitNode(node.getBody());
             indenter.write(" ");
             
             if (node.getRequires() != null) {
                 indenter.write("requires ");
-                node.getRequires().accept(this);
+                this.visitNode(node.getRequires());
                 indenter.write(" ");
             }
             if (node.getEnsures() != null) {
                 indenter.write("requires ");
-                node.getEnsures().accept(this);
+                this.visitNode(node.getEnsures());
                 indenter.write(" ");
             }
-            node.getAttributes().accept(this);
+            this.visitNode(node.getAttributes());
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(Sort node) {
+        public Void visit(Sort node, Void _) {
             indenter.write(node.toString());
+            return null;
         }
 
         @Override
-        public void visit(StringSentence node) {
+        public Void visit(StringSentence node, Void _) {
             indenter.write(node.toString());
+            return null;
         }
         
         @Override
-        public void visit(Syntax node) {
+        public Void visit(Syntax node, Void _) {
             
             indenter.write("  syntax ");
-            node.getSort().accept(this);
+            this.visitNode(node.getSort());
             indenter.write(" ::=");
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlock production = node.getPriorityBlocks().get(i);
-                production.accept(this);
+                this.visitNode(production);
                 if(i!=node.getPriorityBlocks().size()-1){
                     indenter.write("\n     > ");
                 }
             }
             indenter.endLine();
+            return null;
         }
         
         @Override
-        public void visit(TermComment node) {
+        public Void visit(TermComment node, Void _) {
             indenter.write(node.toString());
+            return null;
         }
   
         @Override
-        public void visit(Terminal node) {
+        public Void visit(Terminal node, Void _) {
             indenter.write(node.toString());
+            return null;
         }
         
         @Override
-        public void visit(UserList node) {
+        public Void visit(UserList node, Void _) {
             indenter.write(node.toString());
+            return null;
         }
 
         @Override
-        public void visit(Variable node) {
+        public Void visit(Variable node, Void _) {
             this.indenter.write(node.getName() + ":" + node.getSort());
+            return null;
         }
         
         @Override
-        public void visit(TermCons node){
-            (new KApp(new KLabelConstant(node.getProduction().getKLabel()),new KList(node.getContents()))).accept(this);
-
+        public Void visit(TermCons node, Void _){
+            this.visitNode(new KApp(new KLabelConstant(node.getProduction().getKLabel()),new KList(node.getContents())));
+            return null;
         }
 }

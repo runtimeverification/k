@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kagreg;
 
 import org.kframework.kil.Cell;
@@ -16,10 +17,10 @@ public class RenameCellsTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Cell cell) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _) throws TransformerException {
         //assert cell.getLabel().equals(cell.getEndLabel());
         //System.out.println("found cell " + cell.getLabel() + " - " + cell.getEndLabel());
-        cell = (Cell)super.transform(cell);
+        cell = (Cell)super.visit(cell, _);
         String oldName = cell.getLabel();
         String oldNameEnd = cell.getEndLabel();
         if (oldName != null) {

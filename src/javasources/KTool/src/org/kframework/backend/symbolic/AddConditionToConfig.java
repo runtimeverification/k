@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
 
         // create the path condition cell
         Cell cell = new Cell();
@@ -147,8 +148,8 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
-        ASTNode result = super.transform(node);
+    public ASTNode visit(Module node, Void _) throws TransformerException {
+        ASTNode result = super.visit(node, _);
         if (result == node)
             return node;
         if (result == null) {

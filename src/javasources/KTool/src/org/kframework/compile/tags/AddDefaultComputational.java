@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
@@ -13,7 +14,7 @@ public class AddDefaultComputational extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!(node.containsAttribute("structural")
                 || node.containsAttribute("anywhere")
                 || node.containsAttribute("function")

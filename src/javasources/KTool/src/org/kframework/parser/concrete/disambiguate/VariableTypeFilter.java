@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -25,11 +26,12 @@ public class VariableTypeFilter extends BasicTransformer {
         this.expected = expected;
     }
 
-    public ASTNode transform(Variable r) throws TransformerException {
+    @Override
+    public ASTNode visit(Variable r, Void _) throws TransformerException {
         Variable correctVar = variableTypes.get(r.getName());
         if (correctVar == null)
             return r;
-        assert r.getExpectedSort() != null : "Expected sort Should not be null";
+        assert r.getExpectedSort() != null : "Expected sort Should not be null" + r;
         if (!expected && context.isSubsortedEq(r.getSort(), correctVar.getSort()) || expected && context.isSubsortedEq(r.getExpectedSort(), correctVar.getExpectedSort())) {
             Variable newV = new Variable(r);
             if (!expected)

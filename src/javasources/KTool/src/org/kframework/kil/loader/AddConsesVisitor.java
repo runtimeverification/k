@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import org.kframework.kil.Attribute;
@@ -17,7 +18,7 @@ public class AddConsesVisitor extends BasicVisitor {
         super(context);
     }
 
-    public void visit(Production p) {
+    public Void visit(Production p, Void _) {
         // add cons to productions that don't have it already
         if (p.containsAttribute("bracket")) {
             // don't add cons to bracket production
@@ -76,5 +77,6 @@ public class AddConsesVisitor extends BasicVisitor {
                 }
             }
         }
+        return null;
     }
 }

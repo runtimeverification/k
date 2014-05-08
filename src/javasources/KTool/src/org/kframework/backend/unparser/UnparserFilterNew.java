@@ -3,7 +3,7 @@ package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
 import org.kframework.krun.K;
 import org.kframework.utils.ColorUtil;
@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class UnparserFilterNew extends BasicVisitor {
+public class UnparserFilterNew extends NonCachingVisitor {
     protected Indenter indenter = new Indenter();
     private boolean firstPriorityBlock = false;
     private boolean firstProduction = false;
@@ -69,24 +69,24 @@ public class UnparserFilterNew extends BasicVisitor {
     }
 
     @Override
-    public void visit(Definition def) {
+    public Void visit(Definition def, Void _) {
         prepare(def);
-        super.visit(def);
-        postpare();
+        super.visit(def, _);
+        return postpare();
     }
 
     @Override
-    public void visit(Import imp) {
+    public Void visit(Import imp, Void _) {
         prepare(imp);
         if (!forEquivalence) {
             indenter.write("imports " + imp.getName());
             indenter.endLine();
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Module mod) {
+    public Void visit(Module mod, Void _) {
         prepare(mod);
         if (!mod.isPredefined()) {
             if (!forEquivalence) {
@@ -95,7 +95,7 @@ public class UnparserFilterNew extends BasicVisitor {
                 indenter.endLine();
                 indenter.indent(TAB);
             }
-            super.visit(mod);
+            super.visit(mod, _);
             if (!forEquivalence) {
                 indenter.unindent();
                 indenter.write("endmodule");
@@ -103,26 +103,26 @@ public class UnparserFilterNew extends BasicVisitor {
                 indenter.endLine();
             }
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Syntax syn) {
+    public Void visit(Syntax syn, Void _) {
         prepare(syn);
         firstPriorityBlock = true;
         indenter.write("syntax " + syn.getSort().getName());
         indenter.indentToCurrent();
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {
-                pb.accept(this);
+                this.visitNode(pb);
             }
         indenter.unindent();
         indenter.endLine();
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(PriorityBlock priorityBlock) {
+    public Void visit(PriorityBlock priorityBlock, Void _) {
         prepare(priorityBlock);
         if (firstPriorityBlock) {
             indenter.write(" ::=");
@@ -131,12 +131,12 @@ public class UnparserFilterNew extends BasicVisitor {
         }
         firstPriorityBlock = false;
         firstProduction = true;
-        super.visit(priorityBlock);
-        postpare();
+        super.visit(priorityBlock, _);
+        return postpare();
     }
 
     @Override
-    public void visit(Production prod) {
+    public Void visit(Production prod, Void _) {
         prepare(prod);
         if (firstProduction) {
             indenter.write(" ");
@@ -146,46 +146,46 @@ public class UnparserFilterNew extends BasicVisitor {
         firstProduction = false;
         for (int i = 0; i < prod.getItems().size(); ++i) {
             ProductionItem pi = prod.getItems().get(i);
-            pi.accept(this);
+            this.visitNode(pi);
             if (i != prod.getItems().size() - 1) {
                 indenter.write(" ");
             }
         }
-        prod.getAttributes().accept(this);
+        this.visitNode(prod.getAttributes());
         indenter.endLine();
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Sort sort) {
+    public Void visit(Sort sort, Void _) {
         prepare(sort);
         indenter.write(sort.getName());
-        super.visit(sort);
-        postpare();
+        super.visit(sort, _);
+        return postpare();
     }
 
     @Override
-    public void visit(Terminal terminal) {
+    public Void visit(Terminal terminal, Void _) {
         prepare(terminal);
         indenter.write("\"" + terminal.getTerminal() + "\"");
-        super.visit(terminal);
-        postpare();
+        super.visit(terminal, _);
+        return postpare();
     }
 
     @Override
-    public void visit(UserList userList) {
+    public Void visit(UserList userList, Void _) {
         prepare(userList);
         indenter.write("List{" + userList.getSort() + ",\"" + userList.getSeparator() + "\"}");
-        super.visit(userList);
-        postpare();
+        super.visit(userList, _);
+        return postpare();
     }
 
     @Override
-    public void visit(KList listOfK) {
+    public Void visit(KList listOfK, Void _) {
         prepare(listOfK);
         java.util.List<Term> termList = listOfK.getContents();
         for (int i = 0; i < termList.size(); ++i) {
-            termList.get(i).accept(this);
+            this.visitNode(termList.get(i));
             if (i != termList.size() - 1) {
                 indenter.write(",, ");
             }
@@ -193,11 +193,11 @@ public class UnparserFilterNew extends BasicVisitor {
         if (termList.size() == 0) {
             indenter.write(".KList");
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Attributes attributes) {
+    public Void visit(Attributes attributes, Void _) {
         prepare(attributes);
         java.util.List<String> reject = new LinkedList<String>();
         reject.add("cons");
@@ -218,45 +218,45 @@ public class UnparserFilterNew extends BasicVisitor {
             indenter.write(" ");
             indenter.write("[");
             for (int i = 0; i < attributeList.size(); ++i) {
-                attributeList.get(i).accept(this);
+                this.visitNode(attributeList.get(i));
                 if (i != attributeList.size() - 1) {
                     indenter.write(", ");
                 }
             }
             indenter.write("]");
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Attribute attribute) {
+    public Void visit(Attribute attribute, Void _) {
         prepare(attribute);
         indenter.write(attribute.getKey());
         if (!attribute.getValue().equals("")) {
             indenter.write("(" + attribute.getValue() + ")");
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Configuration configuration) {
+    public Void visit(Configuration configuration, Void _) {
         prepare(configuration);
         if (!forEquivalence) {
             indenter.write("configuration");
             indenter.endLine();
             indenter.indent(TAB);
             inConfiguration = true;
-            configuration.getBody().accept(this);
+            this.visitNode(configuration.getBody());
             inConfiguration = false;
             indenter.unindent();
             indenter.endLine();
             indenter.endLine();
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
         prepare(cell);
         String attributes = "";
         for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
@@ -288,7 +288,7 @@ public class UnparserFilterNew extends BasicVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        cell.getContents().accept(this);
+        this.visitNode(cell.getContents());
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();
@@ -304,11 +304,11 @@ public class UnparserFilterNew extends BasicVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Variable variable) {
+    public Void visit(Variable variable, Void _) {
         prepare(variable);
         if (variable.isFresh())
             indenter.write("?");
@@ -317,41 +317,41 @@ public class UnparserFilterNew extends BasicVisitor {
             indenter.write(":" + variable.getSort());
             variableList.add(variable.getName());
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(ListTerminator terminator) {
+    public Void visit(ListTerminator terminator, Void _) {
         prepare(terminator);
         indenter.write(terminator.toString());
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Rule rule) {
+    public Void visit(Rule rule, Void _) {
         prepare(rule);
         indenter.write("rule ");
         if (!"".equals(rule.getLabel())) {
             indenter.write("[" + rule.getLabel() + "]: ");
         }
         variableList.clear();
-        rule.getBody().accept(this);
+        this.visitNode(rule.getBody());
         if (rule.getRequires() != null) {
             indenter.write(" when ");
-            rule.getRequires().accept(this);
+            this.visitNode(rule.getRequires());
         }
         if (rule.getEnsures() != null) {
             indenter.write(" ensures ");
-            rule.getEnsures().accept(this);
+            this.visitNode(rule.getEnsures());
         }
-        rule.getAttributes().accept(this);
+        this.visitNode(rule.getAttributes());
         indenter.endLine();
         indenter.endLine();
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(KApp kapp) {
+    public Void visit(KApp kapp, Void _) {
         prepare(kapp);
         Term child = kapp.getChild();
         Term label = kapp.getLabel();
@@ -400,7 +400,7 @@ public class UnparserFilterNew extends BasicVisitor {
                         if (i > 0) {
                             indenter.write(" ");
                         }
-                        termList.get(i).accept(this);
+                        this.visitNode(termList.get(i));
                     }
                     indenter.write(rawLabelList[i]);
                 }
@@ -408,26 +408,26 @@ public class UnparserFilterNew extends BasicVisitor {
             else {
                 // child is a KList variable
                 indenter.write("(");
-                child.accept(this);
+                this.visitNode(child);
                 indenter.write(")");
             }
         }
         else {
-            label.accept(this);
+            this.visitNode(label);
             indenter.write("(");
-            child.accept(this);
+            this.visitNode(child);
             indenter.write(")");
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(KSequence ksequence) {
+    public Void visit(KSequence ksequence, Void _) {
         prepare(ksequence);
         java.util.List<Term> contents = ksequence.getContents();
         if (!contents.isEmpty()) {
             for (int i = 0; i < contents.size(); i++) {
-                contents.get(i).accept(this);
+                this.visitNode(contents.get(i));
                 if (i != contents.size() - 1) {
                     indenter.write(" ~> ");
                 }
@@ -435,7 +435,7 @@ public class UnparserFilterNew extends BasicVisitor {
         } else {
             indenter.write(".K");
         }
-        postpare();
+        return postpare();
     }
 
     /*
@@ -446,7 +446,7 @@ public class UnparserFilterNew extends BasicVisitor {
      * We will also delete the final ListTerminator if the input mode is pretty printing. 
      */
     @Override
-    public void visit(TermCons termCons) {
+    public Void visit(TermCons termCons, Void _) {
         //prepare(termCons);
         List<Terminal> temp = this.findRightSyntax(termCons.getSort());
         if(!temp.isEmpty()){
@@ -458,11 +458,11 @@ public class UnparserFilterNew extends BasicVisitor {
             UserList userList = (UserList) production.getItems().get(0);
             String separator = userList.getSeparator();
             java.util.List<Term> contents = termCons.getContents();
-            contents.get(0).accept(this);
+            this.visitNode(contents.get(0));
             if (!(contents.get(1) instanceof ListTerminator) 
                     || (! (K.output_mode.equals(K.PRETTY)) && ! (K.output_mode.equals(K.KORE)))) {
                 indenter.write(separator + " ");
-                contents.get(1).accept(this);
+                this.visitNode(contents.get(1));
             }
         } else {
             int where = 0;
@@ -470,7 +470,7 @@ public class UnparserFilterNew extends BasicVisitor {
                 ProductionItem productionItem = production.getItems().get(i);
                 if (!(productionItem instanceof Terminal)) {
                     if(!(termCons.getContents().get(where) instanceof ListTerminator) || (! (K.output_mode.equals(K.PRETTY)) && ! (K.output_mode.equals(K.KORE)))){
-                            termCons.getContents().get(where++).accept(this);
+                            this.visitNode(termCons.getContents().get(where++));
                     } else {
                         where++;
                     }
@@ -488,31 +488,31 @@ public class UnparserFilterNew extends BasicVisitor {
             
             indenter.write(temp.get(1).getTerminal());
         }
-        //postpare();
+        return null;
     }
 
     @Override
-    public void visit(Rewrite rewrite) {
+    public Void visit(Rewrite rewrite, Void _) {
         prepare(rewrite);
-        rewrite.getLeft().accept(this);
+        this.visitNode(rewrite.getLeft());
         indenter.write(" => ");
-        rewrite.getRight().accept(this);
-        postpare();
+        this.visitNode(rewrite.getRight());
+        return postpare();
     }
 
     @Override
-    public void visit(KLabelConstant kLabelConstant) {
+    public Void visit(KLabelConstant kLabelConstant, Void _) {
         prepare(kLabelConstant);
         indenter.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Collection collection) {
+    public Void visit(Collection collection, Void _) {
         prepare(collection);
         java.util.List<Term> contents = collection.getContents();
         for (int i = 0; i < contents.size(); ++i) {
-            contents.get(i).accept(this);
+            this.visitNode(contents.get(i));
             if (i != contents.size() - 1) {
                 if (inConfiguration && inTerm == 0) {
                     indenter.endLine();
@@ -524,75 +524,75 @@ public class UnparserFilterNew extends BasicVisitor {
         if (contents.size() == 0) {
             indenter.write("." + collection.getSort());
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(CollectionItem collectionItem) {
+    public Void visit(CollectionItem collectionItem, Void _) {
         prepare(collectionItem);
-        super.visit(collectionItem);
-        postpare();
+        super.visit(collectionItem, _);
+        return postpare();
     }
 
     @Override
-    public void visit(BagItem bagItem) {
+    public Void visit(BagItem bagItem, Void _) {
         prepare(bagItem);
         indenter.write("BagItem(");
-        super.visit(bagItem);
+        super.visit(bagItem, _);
         indenter.write(")");
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(ListItem listItem) {
+    public Void visit(ListItem listItem, Void _) {
         prepare(listItem);
         indenter.write("ListItem(");
-        super.visit(listItem);
+        super.visit(listItem, _);
         indenter.write(")");
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(SetItem setItem) {
+    public Void visit(SetItem setItem, Void _) {
         prepare(setItem);
         indenter.write("SetItem(");
-        super.visit(setItem);
+        super.visit(setItem, _);
         indenter.write(")");
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(MapItem mapItem) {
+    public Void visit(MapItem mapItem, Void _) {
         prepare(mapItem);
-        mapItem.getKey().accept(this);
+        this.visitNode(mapItem.getKey());
         indenter.write(" |-> ");
-        mapItem.getValue().accept(this);
-        postpare();
+        this.visitNode(mapItem.getValue());
+        return postpare();
     }
 
     @Override
-    public void visit(Hole hole) {
+    public Void visit(Hole hole, Void _) {
         prepare(hole);
         indenter.write("HOLE");
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(FreezerHole hole) {
+    public Void visit(FreezerHole hole, Void _) {
         prepare(hole);
         indenter.write("HOLE(" + hole.getIndex() + ")");
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Freezer freezer) {
+    public Void visit(Freezer freezer, Void _) {
         prepare(freezer);
-        freezer.getTerm().accept(this);
-        postpare();
+        this.visitNode(freezer.getTerm());
+        return postpare();
     }
 
     @Override
-    public void visit(KInjectedLabel kInjectedLabel) {
+    public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
         if (MetaK.isKSort(term.getSort())) {
@@ -601,65 +601,65 @@ public class UnparserFilterNew extends BasicVisitor {
         } else {
             indenter.write("# ");
         }
-        term.accept(this);
-        postpare();
+        this.visitNode(term);
+        return postpare();
     }
 
     @Override
-    public void visit(KLabel kLabel) {
+    public Void visit(KLabel kLabel, Void _) {
         prepare(kLabel);
         indenter.endLine();
         indenter.write("Don't know how to pretty print KLabel");
         indenter.endLine();
-        super.visit(kLabel);
-        postpare();
+        super.visit(kLabel, _);
+        return postpare();
     }
 
     @Override
-    public void visit(TermComment termComment) {
+    public Void visit(TermComment termComment, Void _) {
         prepare(termComment);
         indenter.write("<br/>");
-        super.visit(termComment);
-        postpare();
+        super.visit(termComment, _);
+        return postpare();
     }
 
     @Override
-    public void visit(org.kframework.kil.List list) {
+    public Void visit(org.kframework.kil.List list, Void _) {
         prepare(list);
-        super.visit(list);
-        postpare();
+        super.visit(list, _);
+        return postpare();
     }
 
     @Override
-    public void visit(org.kframework.kil.Map map) {
+    public Void visit(org.kframework.kil.Map map, Void _) {
         prepare(map);
-        super.visit(map);
-        postpare();
+        super.visit(map, _);
+        return postpare();
     }
 
     @Override
-    public void visit(Bag bag) {
+    public Void visit(Bag bag, Void _) {
         prepare(bag);
-        super.visit(bag);
-        postpare();
+        super.visit(bag, _);
+        return postpare();
     }
 
     @Override
-    public void visit(org.kframework.kil.Set set) {
+    public Void visit(org.kframework.kil.Set set, Void _) {
         prepare(set);
-        super.visit(set);
-        postpare();
+        super.visit(set, _);
+        return postpare();
     }
 
     @Override
-    public void visit(org.kframework.kil.Ambiguity ambiguity) {
+    public Void visit(org.kframework.kil.Ambiguity ambiguity, Void _) {
         prepare(ambiguity);
         indenter.write("amb(");
         indenter.endLine();
         indenter.indent(TAB);
         java.util.List<Term> contents = ambiguity.getContents();
         for (int i = 0; i < contents.size(); ++i) {
-            contents.get(i).accept(this);
+            this.visitNode(contents.get(i));
             if (i != contents.size() - 1) {
                 indenter.write(",");
                 indenter.endLine();
@@ -668,80 +668,80 @@ public class UnparserFilterNew extends BasicVisitor {
         indenter.endLine();
         indenter.unindent();
         indenter.write(")");
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(org.kframework.kil.Context context) {
+    public Void visit(org.kframework.kil.Context context, Void _) {
         prepare(context);
         indenter.write("context ");
         variableList.clear();
-        context.getBody().accept(this);
+        this.visitNode(context.getBody());
         if (context.getRequires() != null) {
             indenter.write(" when ");
-            context.getRequires().accept(this);
+            this.visitNode(context.getRequires());
         }
         if (context.getEnsures() != null) {
             indenter.write(" ensures ");
-            context.getEnsures().accept(this);
+            this.visitNode(context.getEnsures());
         }
-        context.getAttributes().accept(this);
+        this.visitNode(context.getAttributes());
         indenter.endLine();
         indenter.endLine();
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(LiterateDefinitionComment literateDefinitionComment) {
+    public Void visit(LiterateDefinitionComment literateDefinitionComment, Void _) {
         prepare(literateDefinitionComment);
         // indenter.write(literateDefinitionComment.getValue());
         // indenter.endLine();
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Require require) {
+    public Void visit(Require require, Void _) {
         prepare(require);
         if (!forEquivalence) {
             indenter.write("require \"" + require.getValue() + "\"");
             indenter.endLine();
         }
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(BackendTerm term) {
+    public Void visit(BackendTerm term, Void _) {
         prepare(term);
         indenter.write(term.getValue());
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Bracket br) {
+    public Void visit(Bracket br, Void _) {
         prepare(br);
         indenter.write("(");
-        br.getContent().accept(this);
+        this.visitNode(br.getContent());
         indenter.write(")");
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Cast c) {
+    public Void visit(Cast c, Void _) {
         prepare(c);
-        c.getContent().accept(this);
+        this.visitNode(c.getContent());
         indenter.write(" :");
         if (c.isSyntactic()) {
             indenter.write(":");
         }
         indenter.write(c.getSort());
-        postpare();
+        return postpare();
     }
 
     @Override
-    public void visit(Token t) {
+    public Void visit(Token t, Void _) {
         prepare(t);
         indenter.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
-        postpare();
+        return postpare();
     }
 
     protected void prepare(ASTNode astNode) {
@@ -756,7 +756,7 @@ public class UnparserFilterNew extends BasicVisitor {
         }
     }
 
-    protected void postpare() {
+    protected Void postpare() {
         ASTNode astNode = stack.pop();
         if (!stack.empty()) {
             if (needsParenthesis(stack.peek(), astNode)) {
@@ -769,6 +769,7 @@ public class UnparserFilterNew extends BasicVisitor {
                 astNode.setLocation(loc + "," + indenter.getLineNo() + "," + indenter.getColNo() + ")");
             }
         }
+        return null;
     }
     
     private List<Terminal> findRightSyntax(String sort){

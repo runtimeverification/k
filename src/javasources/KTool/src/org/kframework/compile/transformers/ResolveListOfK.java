@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
@@ -20,12 +21,12 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
     
     
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(TermCons node) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _) throws TransformerException {
         boolean change = false;
         ArrayList<Term> terms = new ArrayList<Term>();
         Production prod = context.conses.get(node.getCons());
@@ -34,7 +35,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
         for (ProductionItem pitem : prod.getItems()) {
             if (pitem instanceof Terminal) continue;
             t = termIt.next();
-            ASTNode resultAST = t.accept(this);
+            ASTNode resultAST = this.visitNode(t);
             if (resultAST != t) change = true;
             if (resultAST != null) {
                 if (!(resultAST instanceof Term)) {
@@ -59,7 +60,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
             node = node.shallowCopy();
             node.setContents(terms);
         }
-        return transform((Term) node);
+        return visit((Term) node, _);
     }
 
 }

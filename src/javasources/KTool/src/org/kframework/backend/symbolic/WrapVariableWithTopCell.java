@@ -34,12 +34,13 @@ public class WrapVariableWithTopCell extends CopyOnWriteTransformer {
         this.ltlVarStateName = ltlVarStateName;
     }
 
-    public ASTNode transform(Variable node) throws TransformerException {
+    @Override
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (node.getName().equals(ltlVarStateName)) {
             return wrapPCAndVarWithGeneratedTop(pathCondition, node);
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     /**

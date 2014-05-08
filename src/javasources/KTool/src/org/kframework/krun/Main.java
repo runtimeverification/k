@@ -121,7 +121,7 @@ public class Main {
         Configuration cfg = K.kompiled_cfg;
         ASTNode cfgCleanedNode = null;
         try {
-            cfgCleanedNode = new ConfigurationCleaner(context).transform(cfg);
+            cfgCleanedNode = new ConfigurationCleaner(context).visitNode(cfg);
         } catch (TransformerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -142,8 +142,8 @@ public class Main {
         sw.printIntermediate("Plug configuration variables");
 
         try {
-            Term configuration = (Term) cfgCleaned.accept(new SubstitutionFilter(args, context));
-            configuration = (Term) configuration .accept(new Cell2DataStructure(context));
+            Term configuration = (Term) new SubstitutionFilter(args, context).visitNode(cfgCleaned);
+            configuration = (Term) new Cell2DataStructure(context).visitNode(configuration);
             return configuration;
         } catch (TransformerException e) {
             throw new AssertionError("should not have thrown TransformerException", e);
@@ -174,7 +174,7 @@ public class Main {
                 }
                 parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
                 try {
-                    parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
+                    parsed = (Term) new ResolveVariableAttribute(context).visitNode(parsed);
                 } catch (TransformerException e) {
                     throw new AssertionError("should not have thrown TransformerException", e);
                 }
@@ -269,7 +269,7 @@ public class Main {
                             KSorts.BAG,
                             context);
                     CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-                    pattern.accept(vars);
+                    vars.visitNode(pattern);
                     //varNames = vars.getVars().keySet();
 
                     try {
@@ -421,7 +421,7 @@ public class Main {
                 if(result.getResult() instanceof KRunState){
                     
                     UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
-                    ((KRunState)(result.getResult())).getResult().accept(printer);
+                    printer.visitNode(((KRunState)(result.getResult())).getResult());
                     output = printer.getResult();
                 } else if (result.getResult() instanceof SearchResults) {
                     
@@ -430,7 +430,7 @@ public class Main {
                         Map<String, Term> substitution = solution.getSubstitution();
                         if (((SearchResults)result.getResult()).isDefaultPattern()) {
                             UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
-                            substitution.get("B:Bag").accept(unparser);
+                            unparser.visitNode(substitution.get("B:Bag"));
                             solutionStrings.add("\n" + unparser.getResult());
                         } else {
                             boolean empty = true;
@@ -438,7 +438,7 @@ public class Main {
                             StringBuilder varStringBuilder = new StringBuilder();
                             for (String variable : substitution.keySet()) {
                                 UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
-                                substitution.get(variable).accept(unparser);
+                                unparser.visitNode(substitution.get(variable));
                                 varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
                                 empty = false;
                             }
@@ -474,7 +474,7 @@ public class Main {
                         
                         UnparserFilterNew t = new UnparserFilterNew(true, K.color, K.parens, context);
                         Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
-                        concretePgm.accept(t);
+                        t.visitNode(concretePgm);
                         // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
                         sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
                         sb.append("\nResult:");
@@ -482,7 +482,7 @@ public class Main {
 
                         if (((TestGenResults)result.getResult()).isDefaultPattern()) {
                             UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
-                            substitution.get("B:Bag").accept(unparser);
+                            unparser.visitNode(substitution.get("B:Bag"));
                             sb.append("\n" + unparser.getResult());
                         } else {
                             boolean empty = true;
@@ -490,7 +490,7 @@ public class Main {
                             for (String variable : substitution.keySet()) {
                                 UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
                                 sb.append("\n" + variable + " -->");
-                                substitution.get(variable).accept(unparser);
+                                unparser.visitNode(substitution.get(variable));
                                 sb.append("\n" + unparser.getResult());
                                 empty = false;
                             }
@@ -948,8 +948,7 @@ public class Main {
             javaDef = new FlattenModules(context).compile(javaDef, null);
 
             try {
-                javaDef = (Definition) javaDef
-                        .accept(new AddTopCellConfig(context));
+                javaDef = (Definition) new AddTopCellConfig(context).visitNode(javaDef);
             } catch (TransformerException e) {
                 e.report();
             }
@@ -1422,8 +1421,7 @@ public class Main {
                 sw.printIntermediate("Flattening modules");
 
                 try {
-                    javaDef = (Definition) javaDef
-                            .accept(new AddTopCellConfig(context));
+                    javaDef = (Definition) new AddTopCellConfig(context).visitNode(javaDef);
                 } catch (TransformerException e) {
                     e.report();
                 }

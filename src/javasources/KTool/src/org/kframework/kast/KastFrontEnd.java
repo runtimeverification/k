@@ -94,8 +94,8 @@ public class KastFrontEnd {
             try {
                 javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
                 javaDef = new FlattenModules(context).compile(javaDef, null);
-                javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig(
-                        context));
+                javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
+                        context).visitNode(javaDef);
             } catch (TransformerException e) {
                 throw new AssertionError("should not have thrown TransformerException", e);
             }
@@ -110,11 +110,11 @@ public class KastFrontEnd {
                     IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(), 
                             options.experimental.auxTabSize, options.experimental.tabSize);
                     KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
-                    out.accept(kastFilter);
+                    kastFilter.visitNode(out);
                     kast = kastFilter.getResult();
                 } else {
                     MaudeFilter maudeFilter = new MaudeFilter(context);
-                    out.accept(maudeFilter);
+                    maudeFilter.visitNode(out);
                     kast = maudeFilter.getResult();
                     kast.append(K.lineSeparator);
                 }

@@ -1,10 +1,7 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * Abstract class representing a data structure (bag, list, map or set) AST node.
@@ -38,8 +34,14 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public abstract class DataStructureBuiltin extends Term {
+public abstract class DataStructureBuiltin extends Term implements Interfaces.Collection<Term, DataStructureBuiltin.ListChildren> {
 
+    public static enum ListChildren {
+        BASE_TERMS,
+        ELEMENTS,
+        ELEMENTS_RIGHT
+    }
+    
     public static DataStructureBuiltin empty(DataStructureSort sort) {
         if (sort.type().equals(KSorts.BAG)
                 || sort.type().equals(KSorts.SET)) {
@@ -265,6 +267,8 @@ public abstract class DataStructureBuiltin extends Term {
     public Term shallowCopy() {
         throw new UnsupportedOperationException();
     }
+    
+    public abstract DataStructureBuiltin shallowCopy(Collection<Term> baseTerms);
 
     @Override
     public int hashCode() {
@@ -288,20 +292,14 @@ public abstract class DataStructureBuiltin extends Term {
         return sort.equals(dataStructureBuiltin.sort)
                && baseTerms.equals(dataStructureBuiltin.baseTerms);
     }
-
+    
     @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
+    public Collection<Term> getChildren(ListChildren type) {
+        switch (type) {
+        case BASE_TERMS:
+            return baseTerms;
+        default:
+            throw new AssertionError("unexpected child type " + type.name());
+        }
     }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
 }

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -14,7 +15,7 @@ public class ResolveAnonymousVariables extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (MetaK.isAnonVar(node))
             return Variable.getFreshVar(node.getSort());
         return node;

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.*;
@@ -27,12 +28,13 @@ public class ConfigurationSubstitutionVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
         if (cell.getContents() instanceof Bag) {
-            super.visit(cell);
+            super.visit(cell, _);
         } else {
             substitution.put(new Variable(cell.getLabel().toUpperCase(), cell.getContents().getSort()),
                     cell.getContents());
         }
+        return null;
     }
 }

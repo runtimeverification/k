@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -17,12 +18,13 @@ public class TypeSystemFilter extends BasicTransformer {
         super("Type system", context);
     }
 
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    @Override
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         // choose only the allowed subsorts for a TermCons
         if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
-            tc.getContents().set(0, (Term) tc.getContents().get(0).accept(new TypeSystemFilter2(ulist.getSort(), context)));
-            tc.getContents().set(1, (Term) tc.getContents().get(1).accept(new TypeSystemFilter2(tc.getProduction().getSort(), context)));
+            tc.getContents().set(0, (Term) new TypeSystemFilter2(ulist.getSort(), context).visitNode(tc.getContents().get(0)));
+            tc.getContents().set(1, (Term) new TypeSystemFilter2(tc.getProduction().getSort(), context).visitNode(tc.getContents().get(1)));
         } else {
             int j = 0;
             Production prd = tc.getProduction();
@@ -30,17 +32,18 @@ public class TypeSystemFilter extends BasicTransformer {
                 if (prd.getItems().get(i) instanceof Sort) {
                     Sort sort = (Sort) prd.getItems().get(i);
                     Term child = (Term) tc.getContents().get(j);
-                    tc.getContents().set(j, (Term) child.accept(new TypeSystemFilter2(sort.getName(), context)));
+                    tc.getContents().set(j, (Term) new TypeSystemFilter2(sort.getName(), context).visitNode(child));
                     j++;
                 }
             }
         }
 
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 
-    public ASTNode transform(Cast cast) throws TransformerException {
-        cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getInnerSort(), context)));
-        return super.transform(cast);
+    @Override
+    public ASTNode visit(Cast cast, Void _) throws TransformerException {
+        cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), context).visitNode(cast.getContent()));
+        return super.visit(cast, _);
     }
 }

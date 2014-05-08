@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -22,8 +23,8 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
-        ASTNode result = super.transform(node);
+    public ASTNode visit(Module node, Void _) throws TransformerException {
+        ASTNode result = super.visit(node, _);
         if (result == node) return node;
         if (result == null) { 
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
@@ -51,24 +52,24 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Rule node) {
+    public ASTNode visit(Rule node, Void _) {
         return node;
     }
 
     @Override
-    public ASTNode transform(Configuration node) {
+    public ASTNode visit(Configuration node, Void _) {
         node = node.shallowCopy();
         node.setBody(MetaK.wrap(node.getBody(),MetaK.Constants.generatedTopCellLabel,Ellipses.NONE));
         return node;
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) {
         return node;
     }
 
     @Override
-    public ASTNode transform(Syntax node) {
+    public ASTNode visit(Syntax node, Void _) {
         return node;
     }
 

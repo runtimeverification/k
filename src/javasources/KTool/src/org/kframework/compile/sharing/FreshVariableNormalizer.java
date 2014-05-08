@@ -28,25 +28,25 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public Rule transform(Rule rule) {
+    public Rule visit(Rule rule, Void _) {
         counter = 0;
         substitution.clear();
-        rule.accept(visitor);
+        visitor.visitNode(rule);
         if (substitution.isEmpty()) {
             // no fresh variables in this rule
             return rule;
         }
 
         try {
-            return (Rule) super.transform(rule);
+            return (Rule) super.visit(rule, _);
         } catch (TransformerException e) {
             return rule;
         }
     }
 
     @Override
-    public Variable transform(Variable variable) {
-        Variable substituteVariable = substitution.get(variable);
+    public Variable visit(Variable variable, Void _) {
+         Variable substituteVariable = substitution.get(variable);
         if (substituteVariable != null) {
             return substituteVariable;
         } else {
@@ -65,9 +65,9 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
         }
 
         @Override
-        public void visit(Variable variable) {
+        public Void visit(Variable variable, Void _) {
             if (substitution.containsKey(variable)) {
-                return;
+                return null;
             }
 
             if (variable.getName().startsWith("GeneratedFreshVar")) {
@@ -78,6 +78,8 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                             new Variable("GeneratedFreshVar" + counter++, variable.getSort()));
                 } catch (NumberFormatException e) { }
             }
+
+            return null;
         }
 
     }

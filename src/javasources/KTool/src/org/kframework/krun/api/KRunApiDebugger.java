@@ -51,7 +51,7 @@ public class KRunApiDebugger implements KRunDebugger {
                     KSorts.BAG,
                     context);
             CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-            pattern.accept(vars);
+            vars.visitNode(pattern);
             defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
@@ -222,7 +222,7 @@ public class KRunApiDebugger implements KRunDebugger {
     public String printState(int stateNum) {
         KRunState state = getState(stateNum);
         UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-        state.getResult().accept(unparser);
+        unparser.visitNode(state.getResult());
         return state.toString() + ":\n" + unparser.getResult();
     }
 
@@ -239,7 +239,7 @@ public class KRunApiDebugger implements KRunDebugger {
         String rule;
         if (edge.getType() == TransitionType.RULE) {
             UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-            edge.getRule().accept(unparser);
+            unparser.visitNode(edge.getRule());
             rule = unparser.getResult();
         } else if (edge.getType() == TransitionType.LABEL) {
             rule = "rule [" + edge.getLabel() + "]: ...";
@@ -260,7 +260,7 @@ public class KRunApiDebugger implements KRunDebugger {
         AppendToStdin transformer = new AppendToStdin(s, context);
         Term result;
         try {
-            result = (Term)configuration.accept(transformer);
+            result = (Term) transformer.visitNode(configuration);
         } catch (TransformerException e) {
             assert false;
             result = null; //for static purposes
@@ -306,35 +306,35 @@ public class KRunApiDebugger implements KRunDebugger {
         }
 
         @Override
-        public ASTNode transform(Cell cell) throws TransformerException {
+        public ASTNode visit(Cell cell, Void _) throws TransformerException {
             if ("stdin".equals(context.cells.get(cell.getLabel())
                 .getCellAttributes().get("stream"))) {
                 inStdin = true;
-                ASTNode result = super.transform(cell);
+                ASTNode result = super.visit(cell, _);
                 inStdin = false;
                 return result;
             }
-            return super.transform(cell);
+            return super.visit(cell, _);
         }
 
         @Override
-        public ASTNode transform(KApp kapp) throws TransformerException {
+        public ASTNode visit(KApp kapp, Void _) throws TransformerException {
             if (kapp.getLabel().equals(KLabelConstant.of("#buffer", context))) {
                 inBuffer = true;
-                ASTNode result = super.transform(kapp);
+                ASTNode result = super.visit(kapp, _);
                 inBuffer = false;
                 return result;
             }
-            return super.transform(kapp);
+            return super.visit(kapp, _);
         }
 
         @Override
-        public ASTNode transform(StringBuiltin s) throws TransformerException {
+        public ASTNode visit(StringBuiltin s, Void _) throws TransformerException {
             if (inStdin && inBuffer) {
                 succeeded = true;
                 return StringBuiltin.of(s.stringValue() + str);
             }
-            return super.transform(s);
+            return super.visit(s, _);
         }
     }
 }

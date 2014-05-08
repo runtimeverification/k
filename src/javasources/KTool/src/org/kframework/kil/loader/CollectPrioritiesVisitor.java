@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import java.util.Set;
@@ -19,12 +20,13 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
         super(context);
     }
 
-    public void visit(Definition def) {
-        super.visit(def);
+    public Void visit(Definition def, Void _) {
+        super.visit(def, _);
         context.finalizePriority();
+        return null;
     }
 
-    public void visit(Syntax node) {
+    public Void visit(Syntax node, Void _) {
         for (int i = 0; i < node.getPriorityBlocks().size() - 1; i++) {
             PriorityBlock pb1 = node.getPriorityBlocks().get(i);
             PriorityBlock pb2 = node.getPriorityBlocks().get(i + 1);
@@ -43,9 +45,10 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                 }
             }
         }
+        return null;
     }
 
-    public void visit(PriorityExtended node) {
+    public Void visit(PriorityExtended node, Void _) {
         for (int i = 0; i < node.getPriorityBlocks().size() - 1; i++) {
             PriorityBlockExtended pb1 = node.getPriorityBlocks().get(i);
             PriorityBlockExtended pb2 = node.getPriorityBlocks().get(i + 1);
@@ -70,5 +73,6 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                 }
             }
         }
+        return null;
     }
 }

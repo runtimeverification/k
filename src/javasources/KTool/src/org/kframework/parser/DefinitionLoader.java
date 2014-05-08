@@ -35,6 +35,7 @@ import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -129,7 +130,7 @@ public class DefinitionLoader {
 
             //This following line was commented out to make the latex backend 
             //parse files importing from other files
-            def = (Definition) def.accept(new RemoveUnusedModules(context, autoinclude));
+            def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
 
             // HERE: add labels to sorts
 
@@ -176,9 +177,9 @@ public class DefinitionLoader {
                 }
             }
 
-            def.accept(new AddAutoIncludedModulesVisitor(context));
-            // def.accept(new CheckModulesAndFilesImportsDecl(context));
-            def.accept(new CollectModuleImportsVisitor(context));
+            new AddAutoIncludedModulesVisitor(context).visitNode(def);
+            // new CheckModulesAndFilesImportsDecl(context).visitNode(def);
+            new CollectModuleImportsVisitor(context).visitNode(def);
 
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
@@ -213,9 +214,9 @@ public class DefinitionLoader {
             Stopwatch.instance().printIntermediate("Importing Files");
             // ------------------------------------- parse configs
             JavaClassesFactory.startConstruction(context);
-            def = (Definition) def.accept(new ParseConfigsFilter(context));
+            def = (Definition) new ParseConfigsFilter(context).visitNode(def);
             JavaClassesFactory.endConstruction();
-            def.accept(new CollectConfigCellsVisitor(context));
+            new CollectConfigCellsVisitor(context).visitNode(def);
 
             // sort List in streaming cells
             new CheckVisitorStep<Definition>(new CheckStreams(context), context).check(def);
@@ -224,9 +225,9 @@ public class DefinitionLoader {
 
             // ----------------------------------- parse rules
             JavaClassesFactory.startConstruction(context);
-            def = (Definition) def.accept(new ParseRulesFilter(context));
+            def = (Definition) new ParseRulesFilter(context).visitNode(def);
             JavaClassesFactory.endConstruction();
-            def = (Definition) def.accept(new CorrectConstantsTransformer(context));
+            def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
 
 
             Stopwatch.instance().printIntermediate("Parsing Rules");
@@ -259,13 +260,13 @@ public class DefinitionLoader {
 
         // ------------------------------------- parse configs
         JavaClassesFactory.startConstruction(context);
-        def = (Definition) def.accept(new ParseConfigsFilter(context, false));
+        def = (Definition) new ParseConfigsFilter(context, false).visitNode(def);
         JavaClassesFactory.endConstruction();
 
         // ----------------------------------- parse rules
         JavaClassesFactory.startConstruction(context);
-        def = (Definition) def.accept(new ParseRulesFilter(context, false));
-        def = (Definition) def.accept(new CorrectConstantsTransformer(context));
+        def = (Definition) new ParseRulesFilter(context, false).visitNode(def);
+        def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
 
         JavaClassesFactory.endConstruction();
 
@@ -287,35 +288,35 @@ public class DefinitionLoader {
         JavaClassesFactory.endConstruction();
 
         // TODO: reject rewrites
-        config = config.accept(new SentenceVariablesFilter(context));
-        config = config.accept(new CellEndLabelFilter(context));
+        config = new SentenceVariablesFilter(context).visitNode(config);
+        config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
-        //    config = config.accept(new InclusionFilter(localModule, context));
-        config = config.accept(new TypeSystemFilter2(startSymbol, context));
-        config = config.accept(new CellTypesFilter(context));
-        config = config.accept(new CorrectRewritePriorityFilter(context));
-        config = config.accept(new CorrectKSeqFilter(context));
-        config = config.accept(new CorrectCastPriorityFilter(context));
-        // config = config.accept(new CheckBinaryPrecedenceFilter());
-        config = config.accept(new PriorityFilter(context));
-        config = config.accept(new VariableTypeInferenceFilter(context));
+        //    config = new InclusionFilter(localModule, context).visitNode(config);
+        config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
+        config = new CellTypesFilter(context).visitNode(config);
+        config = new CorrectRewritePriorityFilter(context).visitNode(config);
+        config = new CorrectKSeqFilter(context).visitNode(config);
+        config = new CorrectCastPriorityFilter(context).visitNode(config);
+        // config = new CheckBinaryPrecedenceFilter().visitNode(config);
+        config = new PriorityFilter(context).visitNode(config);
+        config = new VariableTypeInferenceFilter(context).visitNode(config);
         try {
-            config = config.accept(new TypeSystemFilter(context));
-            config = config.accept(new TypeInferenceSupremumFilter(context));
+            config = new TypeSystemFilter(context).visitNode(config);
+            config = new TypeInferenceSupremumFilter(context).visitNode(config);
         } catch (TransformerException e) {
             e.report();
         }
-        // config = config.accept(new AmbDuplicateFilter(context));
-        // config = config.accept(new TypeSystemFilter(context));
-        // config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-        // config = config.accept(new TypeInferenceSupremumFilter(context));
-        config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
-        config = config.accept(new PreferAvoidFilter(context));
-        config = config.accept(new CorrectConstantsTransformer(context));
-        config = config.accept(new FlattenListsFilter(context));
-        config = config.accept(new AmbDuplicateFilter(context));
+        // config = new AmbDuplicateFilter(context).visitNode(config);
+        // config = new TypeSystemFilter(context).visitNode(config);
+        // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
+        // config = new TypeInferenceSupremumFilter(context).visitNode(config);
+        config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
+        config = new PreferAvoidFilter(context).visitNode(config);
+        config = new CorrectConstantsTransformer(context).visitNode(config);
+        config = new FlattenListsFilter(context).visitNode(config);
+        config = new AmbDuplicateFilter(context).visitNode(config);
         // last resort disambiguation
-        config = config.accept(new AmbFilter(context));
+        config = new AmbFilter(context).visitNode(config);
 
         return (Term) config;
     }
@@ -338,35 +339,35 @@ public class DefinitionLoader {
         JavaClassesFactory.endConstruction();
 
         // TODO: reject rewrites
-        config = config.accept(new SentenceVariablesFilter(context));
-        config = config.accept(new CellEndLabelFilter(context));
+        config = new SentenceVariablesFilter(context).visitNode(config);
+        config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
-        //    config = config.accept(new InclusionFilter(localModule, context));
-        config = config.accept(new TypeSystemFilter2(startSymbol, context));
-        config = config.accept(new CellTypesFilter(context));
-        config = config.accept(new CorrectRewritePriorityFilter(context));
-        config = config.accept(new CorrectKSeqFilter(context));
-        config = config.accept(new CorrectCastPriorityFilter(context));
-        // config = config.accept(new CheckBinaryPrecedenceFilter());
-        config = config.accept(new PriorityFilter(context));
-        config = config.accept(new VariableTypeInferenceFilter(context));
+        //    config = new InclusionFilter(localModule, context).visitNode(config);
+        config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
+        config = new CellTypesFilter(context).visitNode(config);
+        config = new CorrectRewritePriorityFilter(context).visitNode(config);
+        config = new CorrectKSeqFilter(context).visitNode(config);
+        config = new CorrectCastPriorityFilter(context).visitNode(config);
+        // config = new CheckBinaryPrecedenceFilter().visitNode(config);
+        config = new PriorityFilter(context).visitNode(config);
+        config = new VariableTypeInferenceFilter(context).visitNode(config);
         try {
-            config = config.accept(new TypeSystemFilter(context));
-            config = config.accept(new TypeInferenceSupremumFilter(context));
+            config = new TypeSystemFilter(context).visitNode(config);
+            config = new TypeInferenceSupremumFilter(context).visitNode(config);
         } catch (TransformerException e) {
             e.report();
         }
-        // config = config.accept(new AmbDuplicateFilter(context));
-        // config = config.accept(new TypeSystemFilter(context));
-        // config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-        // config = config.accept(new TypeInferenceSupremumFilter(context));
-        config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
-        config = config.accept(new PreferAvoidFilter(context));
-        config = config.accept(new CorrectConstantsTransformer(context));
-        config = config.accept(new FlattenListsFilter(context));
-        config = config.accept(new AmbDuplicateFilter(context));
+        // config = new AmbDuplicateFilter(context).visitNode(config);
+        // config = new TypeSystemFilter(context).visitNode(config);
+        // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
+        // config = new TypeInferenceSupremumFilter(context).visitNode(config);
+        config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
+        config = new PreferAvoidFilter(context).visitNode(config);
+        config = new CorrectConstantsTransformer(context).visitNode(config);
+        config = new FlattenListsFilter(context).visitNode(config);
+        config = new AmbDuplicateFilter(context).visitNode(config);
         // last resort disambiguation
-        config = config.accept(new AmbFilter(context));
+        config = new AmbFilter(context).visitNode(config);
 
         return config;
     }
@@ -389,27 +390,27 @@ public class DefinitionLoader {
         JavaClassesFactory.endConstruction();
 
         // TODO: don't allow rewrites
-        config = config.accept(new SentenceVariablesFilter(context));
-        config = config.accept(new CellEndLabelFilter(context));
-        config = config.accept(new CellTypesFilter(context));
-        // config = config.accept(new CorrectRewritePriorityFilter());
-        config = config.accept(new CorrectKSeqFilter(context));
-        config = config.accept(new CorrectCastPriorityFilter(context));
-        // config = config.accept(new CheckBinaryPrecedenceFilter());
-        // config = config.accept(new InclusionFilter(localModule));
-        // config = config.accept(new VariableTypeInferenceFilter());
-        config = config.accept(new AmbDuplicateFilter(context));
-        config = config.accept(new TypeSystemFilter(context));
-        // config = config.accept(new PriorityFilter());
-        config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-        config = config.accept(new TypeInferenceSupremumFilter(context));
-        config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
-        // config = config.accept(new PreferAvoidFilter());
-        config = config.accept(new CorrectConstantsTransformer(context));
-        config = config.accept(new FlattenListsFilter(context));
-        config = config.accept(new AmbDuplicateFilter(context));
+        config = new SentenceVariablesFilter(context).visitNode(config);
+        config = new CellEndLabelFilter(context).visitNode(config);
+        config = new CellTypesFilter(context).visitNode(config);
+        // config = new CorrectRewritePriorityFilter().visitNode(config);
+        config = new CorrectKSeqFilter(context).visitNode(config);
+        config = new CorrectCastPriorityFilter(context).visitNode(config);
+        // config = new CheckBinaryPrecedenceFilter().visitNode(config);
+        // config = new InclusionFilter(localModule).visitNode(config);
+        // config = new VariableTypeInferenceFilter().visitNode(config);
+        config = new AmbDuplicateFilter(context).visitNode(config);
+        config = new TypeSystemFilter(context).visitNode(config);
+        // config = new PriorityFilter().visitNode(config);
+        config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
+        config = new TypeInferenceSupremumFilter(context).visitNode(config);
+        config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
+        // config = new PreferAvoidFilter().visitNode(config);
+        config = new CorrectConstantsTransformer(context).visitNode(config);
+        config = new FlattenListsFilter(context).visitNode(config);
+        config = new AmbDuplicateFilter(context).visitNode(config);
         // last resort disambiguation
-        // config = config.accept(new AmbFilter());
+        // config = new AmbFilter().visitNode(config);
         return config;
     }
 }

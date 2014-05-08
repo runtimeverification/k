@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import org.kframework.kil.*;
@@ -30,75 +31,75 @@ public class AddBracketsFilter2 extends BasicTransformer {
     private boolean atTop = true;
 
     @Override
-    public ASTNode transform(TermCons ast) throws TransformerException {
+    public ASTNode visit(TermCons ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Collection ast) throws TransformerException {
+    public ASTNode visit(Collection ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(MapItem ast) throws TransformerException {
+    public ASTNode visit(MapItem ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Cell ast) throws TransformerException {
+    public ASTNode visit(Cell ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(CollectionItem ast) throws TransformerException {
+    public ASTNode visit(CollectionItem ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(KApp ast) throws TransformerException {
+    public ASTNode visit(KApp ast, Void _) throws TransformerException {
         if (ast.getLabel() instanceof Token) return ast;
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Hole ast) throws TransformerException {
+    public ASTNode visit(Hole ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(Freezer ast) throws TransformerException {
+    public ASTNode visit(Freezer ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
 
     @Override
-    public ASTNode transform(KInjectedLabel ast) throws TransformerException {
+    public ASTNode visit(KInjectedLabel ast, Void _) throws TransformerException {
         boolean tmp = atTop;
         atTop = false;
-        ASTNode result = super.transform(ast);
+        ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
     
@@ -111,16 +112,16 @@ public class AddBracketsFilter2 extends BasicTransformer {
             return result;
         }
         UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, false, true, context);
-        ast.accept(unparser);
+        unparser.visitNode(ast);
         String unparsed = unparser.getResult();
         try {
             ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, context);
             Term reparsed = ((Sentence)rule).getBody();
-            reparsed.accept(new AdjustLocations(context));
+            new AdjustLocations(context).visitNode(reparsed);
             if (!reparsed.contains(ast)) {
                 return replaceWithVar(ast);
             }
-            return ast.accept(new AddBracketsFilter2(reparsed, context));
+            return new AddBracketsFilter2(reparsed, context).visitNode(ast);
         } catch (TransformerException e) {
             return replaceWithVar(ast);
         }
@@ -131,14 +132,16 @@ public class AddBracketsFilter2 extends BasicTransformer {
             super("Apply first-line location offset", context);
         }
 
-        public void visit(ASTNode ast) {
-            if (ast.getLocation().equals("generated")) return;
+        public Void visit(ASTNode ast, Void _) {
+            if (ast.getLocation().equals("generated")) 
+                return null;
             Scanner scanner = new Scanner(ast.getLocation()).useDelimiter("[,)]").skip("\\(");
             int beginLine = scanner.nextInt();
             int beginCol = scanner.nextInt();
             int endLine = scanner.nextInt();
             int endCol = scanner.nextInt();
             ast.setLocation("(" + beginLine + "," + beginCol + "," + endLine + "," + endCol + ")");
+            return null;
         }
     }
 
@@ -150,7 +153,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 
     private ASTNode addBracketsIfNeeded(Term ast) throws TransformerException {
         TraverseForest trans = new TraverseForest(ast, context);
-        reparsed = (Term)reparsed.accept(trans);
+        reparsed = (Term) trans.visitNode(reparsed);
         if (trans.needsParens) {
             return new Bracket(ast.getLocation(), ast.getFilename(), ast, context);
         }
@@ -165,10 +168,11 @@ public class AddBracketsFilter2 extends BasicTransformer {
         private Term ast;
         public Term realTerm;
 
-        public void visit(Term t) {
+        public Void visit(Term t, Void _) {
             if (t.contains(ast)) {
                 realTerm = t;
             }
+            return null;
         }
     }
 
@@ -183,13 +187,13 @@ public class AddBracketsFilter2 extends BasicTransformer {
         private boolean needsCast;
         private String realLocation;
 
-        public ASTNode transform(Ambiguity amb) throws TransformerException {
+        public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
             realLocation = ast.getLocation();
             for (int i = amb.getContents().size() - 1; i >= 0; i--) {
                 Term t = amb.getContents().get(i);
                 boolean tmp = hasTerm;
                 hasTerm = false;
-                t.accept(this);
+                this.visitNode(t);
                 if (!hasTerm) {
                     needsParens = true;
                     amb.getContents().remove(i);
@@ -202,7 +206,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
             return amb;
         }
 
-        public ASTNode transform(Term t) throws TransformerException {
+        public ASTNode visit(Term t, Void _) throws TransformerException {
             if (t.equals(ast) && t.getLocation().equals(realLocation)) {
                 hasTerm = true; 
             }

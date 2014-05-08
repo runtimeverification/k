@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         
         if (!node.containsAttribute(ReachabilityRuleToKRule.RL_ATR)) {
             return node;
@@ -45,7 +46,7 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
                 KApp appCondition = (KApp) condition;
                 
                 EliminateRRWrapper errw = new EliminateRRWrapper(context);
-                Term newCond = (Term) appCondition.accept(errw);
+                Term newCond = (Term) errw.visitNode(appCondition);
                  
                 Term lphi = errw.getLphi();
                 Term rphi = errw.getRphi();

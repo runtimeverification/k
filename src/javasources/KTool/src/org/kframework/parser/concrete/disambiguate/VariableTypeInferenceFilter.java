@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -29,11 +30,11 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Sentence r) throws TransformerException {
-        r = (Sentence) r.accept(new RemoveDuplicateVariables(context));
+    public ASTNode visit(Sentence r, Void _) throws TransformerException {
+        r = (Sentence) new RemoveDuplicateVariables(context).visitNode(r);
 
         CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-        r.accept(vars);
+        vars.visitNode(r);
 
         Map<String, Variable> varDeclMap = new HashMap<String, Variable>();
         // for each variable name do checks or type errors
@@ -62,9 +63,9 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
         }
         // after finding all of the variable declarations traverse the tree to disambiguate
         try {
-            r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, false, context));
-            r = (Sentence) r.accept(new TypeSystemFilter(context));
-            r = (Sentence) r.accept(new TypeInferenceSupremumFilter(context));
+            r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
+            r = (Sentence) new TypeSystemFilter(context).visitNode(r);
+            r = (Sentence) new TypeInferenceSupremumFilter(context).visitNode(r);
         } catch (TransformerException e) {
             e.report();
         }
@@ -72,7 +73,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
         boolean varTypeInference = true;
         if (varTypeInference) {
             CollectExpectedVariablesVisitor vars2 = new CollectExpectedVariablesVisitor(context);
-            r.accept(vars2);
+            vars2.visitNode(r);
 
             Set<VarHashMap> solutions = new HashSet<VarHashMap>();
             String fails = null;
@@ -150,13 +151,13 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                         varDeclMap.put(entry.getKey(), var);
                     }
                     try {
-                        r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, true, context));
+                        r = (Sentence) new VariableTypeFilter(varDeclMap, true, context).visitNode(r);
                     } catch (TransformerException e) {
                         e.report();
                     }
                     // correct the sorts for each variable after type inference
                     CollectRemainingVarsVisitor vars3 = new CollectRemainingVarsVisitor(context);
-                    r.accept(vars3);
+                    vars3.visitNode(r);
 
                     varDeclMap.clear();
                     // for each variable name do checks or type inference
@@ -202,7 +203,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!varDeclMap.isEmpty()) {
                         try {
-                            r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, false, context));
+                            r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
                         } catch (TransformerException e) {
                             e.report();
                         }
@@ -255,7 +256,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
             super(RemoveDuplicateVariables.class.toString(), context);
         }
 
-        public ASTNode transform(Ambiguity amb) throws TransformerException {
+        @Override
+        public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
             Set<Term> maxterms = new HashSet<Term>();
             for (Term t : amb.getContents()) {
                 if (t instanceof Variable) {
@@ -274,11 +276,11 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
             }
 
             if (maxterms.size() == 1) {
-                return maxterms.iterator().next().accept(this);
+                return this.visitNode(maxterms.iterator().next());
             } else if (maxterms.size() > 1)
                 amb.setContents(new ArrayList<Term>(maxterms));
 
-            return super.transform(amb);
+            return super.visit(amb, _);
         }
     }
 
@@ -290,8 +292,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
         public java.util.Map<String, java.util.List<Variable>> vars = new HashMap<String, java.util.List<Variable>>();
 
         @Override
-        public void visit(Variable var) {
-            if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && !var.isUserTyped())
+        public Void visit(Variable var, Void _) {
+            if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && !var.isUserTyped()) {
                 if (vars.containsKey(var.getName()))
                     vars.get(var.getName()).add(var);
                 else {
@@ -299,6 +301,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                     varss.add(var);
                     vars.put(var.getName(), varss);
                 }
+            }
+            return null;
         }
     }
 }

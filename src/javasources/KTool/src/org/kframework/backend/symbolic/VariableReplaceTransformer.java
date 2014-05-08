@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import org.kframework.compile.utils.MetaK;
@@ -30,7 +31,7 @@ public class VariableReplaceTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (MetaK.isBuiltinSort(node.getSort()))
             return node;
 

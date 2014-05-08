@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.ConfigurationStructure;
@@ -28,14 +29,14 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (MetaK.isAnywhere(node)) return node;
-        return super.transform(node);
+        return super.visit(node, _);
     }
     
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
-        ASTNode right = node.getRight().accept(new DefaultTermsResolver(context));
+    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
+        ASTNode right = new DefaultTermsResolver(context).visitNode(node.getRight());
         if (right != node.getRight()) {
             node = node.shallowCopy();
             node.setRight((Term)right, context);
@@ -44,17 +45,17 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;
     }
     
@@ -66,8 +67,8 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
         }
         
         @Override
-        public ASTNode transform(Cell node) throws TransformerException {
-            Cell cell = (Cell) super.transform(node);
+        public ASTNode visit(Cell node, Void _) throws TransformerException {
+            Cell cell = (Cell) super.visit(node, _);
             if (cell.getEllipses() == Ellipses.NONE) return cell;
             cell = cell.shallowCopy();
             cell.setCellAttributes(new HashMap<String, String>(cell.getCellAttributes()));
@@ -108,7 +109,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
                     if (! sonCfg.sons.isEmpty()) { 
                         son.setContents(new Bag());
                         son.setEllipses(Ellipses.BOTH);
-                        son = (Cell)transform(son);
+                        son = (Cell)visit(son, _);
                     }
                     bag.getContents().add(son);
                     change = true;

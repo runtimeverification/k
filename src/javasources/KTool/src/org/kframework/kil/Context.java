@@ -1,8 +1,7 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
 /**
@@ -37,15 +36,10 @@ public class Context extends Sentence {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
+    
     @Override
     public Context shallowCopy() {
         return new Context(this);

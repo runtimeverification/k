@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import org.kframework.kil.ASTNode;
@@ -18,7 +19,7 @@ public class RemoveLabel extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(TermCons node) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _) throws TransformerException {
         
         if (node.getProduction().containsAttribute(LABEL) && !removed) {
             Term stmt = node.getContents().get(node.getContents().size() - 1);
@@ -26,6 +27,6 @@ public class RemoveLabel extends CopyOnWriteTransformer {
             return stmt;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }

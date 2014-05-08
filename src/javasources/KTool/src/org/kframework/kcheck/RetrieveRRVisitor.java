@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck;
 
 import java.util.LinkedList;
@@ -17,9 +18,9 @@ public class RetrieveRRVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Rule node) {
+    public Void visit(Rule node, Void _) {
         rules.add(node);
-        super.visit(node);
+        return super.visit(node, _);
     }
     
     public List<ASTNode> getRules() {

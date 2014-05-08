@@ -1,12 +1,10 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /** A frozen term. Contains a {@link FreezerHole}. */
-public class Freezer extends Term {
+public class Freezer extends Term implements Interfaces.MutableParent<Term, Enum<?>>{
 
     private Term term;
 
@@ -28,20 +26,6 @@ public class Freezer extends Term {
         this.term = term;
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
 
     @Override
     public Freezer shallowCopy() {
@@ -77,4 +61,18 @@ public class Freezer extends Term {
         return term.hashCode();
     }
 
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return term;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.term = child; 
+    }
 }

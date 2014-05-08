@@ -52,22 +52,23 @@ public class CheckVariables extends BasicVisitor {
     boolean inCondition = false;
 
     @Override
-    public void visit(Rewrite node) {
-        node.getLeft().accept(this);
+    public Void visit(Rewrite node, Void _) {
+        this.visitNode(node.getLeft());
         current = right;
-        node.getRight().accept(this);
+        this.visitNode(node.getRight());
         current = left;
+        return null;
     }
 
     @Override
-    public void visit(Variable node) {
+    public Void visit(Variable node, Void _) {
         if (node.isFresh()) {
              if (current == right  && !inCondition) {
                  Integer i = fresh.get(node);
                  if (i == null) i = new Integer(1);
                  else i = new Integer(i.intValue());
                  fresh.put(node, i);
-                 return;
+                 return null;
              }
              //nodes are ok to be found in rhs
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
@@ -85,23 +86,24 @@ public class CheckVariables extends BasicVisitor {
             i = new Integer(i.intValue() + 1);
         }
         current.put(node, i);
+        return null;
     }
 
     @Override
-    public void visit(Configuration node) {
-        return;
+    public Void visit(Configuration node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Syntax node) {
-        return;
+    public Void visit(Syntax node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(TermCons node) {
+    public Void visit(TermCons node, Void _) {
         if (!node.getCons().equals(MetaK.Constants.freshCons)) {
-            super.visit(node);
-            return;
+            super.visit(node, _);
+            return null;
         }
         if (!inCondition) {
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
@@ -128,20 +130,21 @@ public class CheckVariables extends BasicVisitor {
             }
         }
         left.put(v, new Integer(1));
+        return null;
     }
 
     @Override
-    public void visit(Sentence node) {
+    public Void visit(Sentence node, Void _) {
         inCondition = false;
         left.clear();
         right.clear();
         fresh.clear();
         current = left;
-        node.getBody().accept(this);
+        this.visitNode(node.getBody());
         if (node.getRequires() != null) {
             current = right;
             inCondition = true;
-            node.getRequires().accept(this);
+            this.visitNode(node.getRequires());
         }
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {
@@ -189,5 +192,6 @@ public class CheckVariables extends BasicVisitor {
                         getName(), key.getFilename(), key.getLocation()));
             }
         }
+        return null;
     }
 }

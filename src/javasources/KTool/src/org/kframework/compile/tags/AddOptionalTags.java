@@ -18,7 +18,7 @@ public class AddOptionalTags extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Attributes node) throws TransformerException {
+    public ASTNode visit(Attributes node, Void _) throws TransformerException {
 
         for (String tag : options.transition)
             if (node.containsKey(tag))

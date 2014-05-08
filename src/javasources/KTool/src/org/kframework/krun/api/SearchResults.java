@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -32,7 +33,7 @@ public class SearchResults {
             Map<String, Term> substitution = solution.getSubstitution();
             if (isDefaultPattern) {
                 UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-                substitution.get("B:Bag").accept(unparser);
+                unparser.visitNode(substitution.get("B:Bag"));
                 solutionStrings.add("\n" + unparser.getResult());
             } else {
                 boolean empty = true;
@@ -40,7 +41,7 @@ public class SearchResults {
                 StringBuilder varStringBuilder = new StringBuilder();
                 for (String variable : substitution.keySet()) {
                     UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-                    substitution.get(variable).accept(unparser);
+                    unparser.visitNode(substitution.get(variable));
                     varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
                     empty = false;
                 }

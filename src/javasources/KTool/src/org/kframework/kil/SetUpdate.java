@@ -1,21 +1,18 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Collections;
 import java.util.Collection;
-
 
 /**
  * Builtin set update operation.
  *
  * @author TraianSF (refactoring from {@link org.kframework.kil.MapUpdate})
  */
-public class SetUpdate extends Term {
+public class SetUpdate extends Term implements Interfaces.Collection<Term, Enum<?>>, Interfaces.Parent<Variable, Enum<?>> {
 
     /** {@link org.kframework.kil.Variable} name of the set */
     private final Variable set;
@@ -65,18 +62,17 @@ public class SetUpdate extends Term {
     }
 
     @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    public Variable getChild(Enum<?> type) {
+        return set;
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public Collection<Term> getChildren(Enum<?> cls) {
+        return removeEntries;
     }
-
 }
