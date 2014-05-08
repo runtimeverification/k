@@ -2,11 +2,9 @@
 package org.kframework.kompile;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
@@ -23,7 +21,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
-import org.kframework.krun.K;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -34,6 +31,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
@@ -47,7 +45,7 @@ public class KompileFrontEnd {
         try {
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kompile");
-            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class));
+            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class, SMTOptions.class));
             
             if (options.global.help) {
                 StringBuilder sb = new StringBuilder();
@@ -76,12 +74,10 @@ public class KompileFrontEnd {
     }
 
     private static void kompile(KompileOptions options) throws IOException {
-        K.do_kompilation = true;
-        org.kframework.utils.Error.checkIfOutputDirectory(options.directory);
 
         final Context context = new Context(options);
         
-        context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
+        context.dotk = new File(".k", FileUtil.generateUniqueFolderName("kompile"));
         context.dotk.mkdirs();
         
         // default for documentation backends is to store intermediate outputs in temp directory
@@ -102,53 +98,61 @@ public class KompileFrontEnd {
         Backend backend = null;
         switch (options.backend) {
             case PDF:
+                checkIsFile(options.output());
                 backend = new PdfBackend(Stopwatch.instance(), context);
                 break;
             case LATEX:
+                checkIsFile(options.output());
                 backend = new LatexBackend(Stopwatch.instance(), context);
                 break;
             case DOC:
+                checkIsFile(options.output());
                 backend = new LatexBackend(Stopwatch.instance(), context, true);                
                 break;
             case HTML:
+                checkIsFile(options.output());
                 backend = new HtmlBackend(Stopwatch.instance(), context);
                 break;
             case KORE:
+                checkIsFile(options.output());
                 backend = new KoreBackend(Stopwatch.instance(), context);
                 backend.run(DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                         backend.autoinclude(), context));
                 return;
             case MAUDE:
                 backend = new KompileBackend(Stopwatch.instance(), context);
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.kompiled);
+                context.kompiled = options.output();
+                checkIsDirectory(context.kompiled);
                 context.kompiled.mkdirs();
                 break;
             case JAVA:
                 backend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.kompiled);
+                context.kompiled = options.output();
+                checkIsDirectory(context.kompiled);
                 context.kompiled.mkdirs();
                 break;
             case UNPARSE:
+                checkIsFile(options.output());
                 backend = new UnparserBackend(Stopwatch.instance(), context);
                 break;
             case UNFLATTEN:
+                checkIsFile(options.output());
                 backend = new UnparserBackend(Stopwatch.instance(), context, true);
                 break;
             case UNFLATTEN_JAVA:
+                checkIsFile(options.output());
                 // TODO(YilongL): make it general to all backends; add info about
                 // this backend in KompileOptionsParser
                 Backend innerBackend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.kompiled);
+                context.kompiled = options.output();
+                checkIsDirectory(context.kompiled);
                 context.kompiled.mkdirs();
                 backend = new UnflattenBackend(Stopwatch.instance(), context, innerBackend);
                 break;
             case SYMBOLIC:
                 backend = new SymbolicBackend(Stopwatch.instance(), context);
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.kompiled);
+                context.kompiled = options.output();
+                checkIsDirectory(context.kompiled);
                 context.kompiled.mkdirs();
                 break;
             default:
@@ -201,22 +205,23 @@ public class KompileFrontEnd {
         
     }
 
-    private static void checkAnotherKompiled(File kompiled) {
-        File[] kompiledList = kompiled.getParentFile().listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File current, String name) {
-                File f = new File(current, name);
-                return f.isDirectory() && f.getAbsolutePath().endsWith("-kompiled");
-            }
-        });
-        for (File aKompiledList : kompiledList) {
-            if (!aKompiledList.getName().equals(kompiled.getName())) {
-                String msg = "Creating multiple kompiled definition in the same directory " +
-                        "is not allowed.";
+    private static void checkIsDirectory(File kompiled) throws IOException {
+        if (kompiled.exists() && !kompiled.isDirectory()) {
+                String msg = "Cannot write compiled definition to " + kompiled.getCanonicalPath()
+                        + "; file already exists and is not a directory.";
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.CRITICAL, msg, "command line",
-                        aKompiledList.getAbsolutePath()));
-            }
+                        KExceptionGroup.CRITICAL, msg, null,
+                        kompiled.getCanonicalPath()));
+        }
+    }
+    
+    private static void checkIsFile(File kompiled) throws IOException {
+        if (kompiled.exists() && kompiled.isDirectory()) {
+                String msg = "Cannot write output to " + kompiled.getCanonicalPath()
+                        + "; file already exists and is a directory.";
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                        KExceptionGroup.CRITICAL, msg, null,
+                        kompiled.getCanonicalPath()));
         }
     }
 }

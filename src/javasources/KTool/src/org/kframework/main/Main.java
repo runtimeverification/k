@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.fusesource.jansi.AnsiConsole;
+import org.kframework.krun.K;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 import org.kframework.utils.file.KPaths;
@@ -46,24 +47,31 @@ public class Main {
             try {
                 switch (args[0]) {
                     case "-kompile":
+                        K.setTool(K.Tool.KOMPILE);
                         org.kframework.kompile.KompileFrontEnd.main(args2);
                         break;
                     case "-kagreg":
+                        K.setTool(K.Tool.OTHER);
                         org.kframework.kagreg.KagregFrontEnd.kagreg(args2);
                         break;
                     case "-kcheck":
+                        K.setTool(K.Tool.OTHER);
                         succeeded = org.kframework.kcheck.KCheckFrontEnd.kcheck(args2);
                         break;
                     case "-ktest":
+                        K.setTool(K.Tool.KTEST);
                         succeeded = org.kframework.ktest.KTest.main(args2);
                         break;
                     case "-kast":
+                        K.setTool(K.Tool.KAST);
                         succeeded = org.kframework.kast.KastFrontEnd.kast(args2);
                         break;
                     case "-krun":
+                        K.setTool(K.Tool.KRUN);
                         succeeded = org.kframework.krun.Main.execute_Krun(args2);
                         break;
                     case "-kpp":
+                        K.setTool(K.Tool.OTHER);
                         Kpp.codeClean(args2);
                         break;
                     default:

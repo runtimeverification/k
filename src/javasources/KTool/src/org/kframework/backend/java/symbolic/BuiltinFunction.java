@@ -83,7 +83,7 @@ public class BuiltinFunction {
                          * exclude hook from evaluation during compilation if the hook is dynamic
                          * in nature (is related to I/O or to meta properties).
                          * */
-                        if (K.do_kompilation && hookMetaModules.contains(hookPrefix)) {
+                        if (K.tool() == K.Tool.KOMPILE && hookMetaModules.contains(hookPrefix)) {
                             continue;
                         }
 

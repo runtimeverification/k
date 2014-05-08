@@ -10,7 +10,6 @@ import javax.swing.JScrollPane;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;

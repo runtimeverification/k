@@ -117,7 +117,7 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
 
-        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.green : Color.red, colorSetting);
+        String colorCode = ColorUtil.RgbToAnsi(ret ? "green" : "red", colorSetting, Color.BLACK);
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
@@ -461,7 +461,7 @@ public class TestSuite {
         if (condition)
             System.out.println("SUCCESS");
         else
-            System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL" + ColorUtil
+            System.out.println(ColorUtil.RgbToAnsi("red", colorSetting, Color.BLACK) + "FAIL" + ColorUtil
                     .ANSI_NORMAL);
     }
 

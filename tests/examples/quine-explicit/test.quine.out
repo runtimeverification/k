@@ -5,11 +5,11 @@
         (\texttt{radu.mereuta@info.uaic.ro})}
 \organization{University of Al. I. Cuza, Ia\c{s}i}
 */
-//@Usage: kompile and then run with krun --output none
+//@Usage: kompile and then run with krun -cPGM='""' --output none
 module QUINE-EXPLICIT
 
   configuration
-    <k> "" ~> "" </k>
+    <k> $PGM ~> $PGM </k>
     <out stream="stdout"> .List </out>
     <prefix>
         "// Copyright (c) 2013-2014 K Team. All Rights Reserved." ~>
@@ -19,11 +19,11 @@ module QUINE-EXPLICIT
         "        (\\texttt{radu.mereuta@info.uaic.ro})}" ~>
         "\\organization{University of Al. I. Cuza, Ia\\c{s}i}" ~>
         "*/" ~>
-        "//@Usage: kompile and then run with krun --output none" ~>
+        "//@Usage: kompile and then run with krun -cPGM='\"\"' --output none" ~>
         "module QUINE-EXPLICIT" ~>
         "" ~>
         "  configuration" ~>
-        "    <k> \"\" ~> \"\" </k>" ~>
+        "    <k> $PGM ~> $PGM </k>" ~>
         "    <out stream=\"stdout\"> .List </out>" ~>
         "    <prefix>" ~>
         .K

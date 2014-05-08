@@ -17,8 +17,8 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Cell;
-import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
+import org.kframework.utils.options.SMTSolver;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
@@ -58,7 +58,7 @@ public class Adjuster {
             return false;
         }
         
-        if(K.smt.equals("none")){
+        if(impl.getDefinition().context().smtOptions.smt == SMTSolver.NONE){
             
             return implside.term().equals(specside.term());
         }

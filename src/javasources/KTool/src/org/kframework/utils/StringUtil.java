@@ -117,10 +117,12 @@ public class StringUtil {
      */
     public static String unquoteString(String str) {
         StringBuilder sb = new StringBuilder();
-        assert str.charAt(0) == '"' :
-                "Expected to find double quote at the beginning of string: " + str;
-        assert str.charAt(str.length() - 1) == '"' :
-                "Expected to find double quote at the end of string: " + str;
+        if (str.charAt(0) != '"') {
+            throw new IllegalArgumentException("Expected to find double quote at the beginning of string: " + str);
+        }
+        if (str.charAt(str.length() - 1) != '"') {
+            throw new IllegalArgumentException("Expected to find double quote at the end of string: " + str);
+        }
         for (int i = 1; i < str.length() - 1; i++) {
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '"') {

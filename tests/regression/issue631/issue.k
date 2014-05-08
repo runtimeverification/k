@@ -8,7 +8,7 @@ module ISSUE
 	syntax Ints ::= List{Int,","}
 	syntax Exp ::= f(Ints)
 	configuration
-			<k> f( 1, .Ints ) </k>
+			<k> $PGM:K </k>
 			<out stream="stdout"> .List </out>
 	
 	// X must be of type Int to be completed with .Ints

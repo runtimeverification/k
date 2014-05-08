@@ -61,8 +61,8 @@ public class LatexBackend extends BasicBackend {
     }
 
     public void copyFiles() throws IOException {
-        FileUtils.copyFile(latexFile, new File(options.directory, latexFile.getName()));
-        FileUtils.copyFile(latexStyleFile, new File(options.directory, latexStyleFile.getName()));
+        FileUtils.copyFile(latexFile, options.output());
+        FileUtils.copyFile(latexStyleFile, new File(options.output().getCanonicalFile().getParent(), latexStyleFile.getName()));
     }
 
     @Override

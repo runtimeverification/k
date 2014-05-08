@@ -26,8 +26,7 @@ import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.K;
+import org.kframework.utils.options.SMTSolver;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +49,6 @@ import com.microsoft.z3.Sort;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Symbol;
 import com.microsoft.z3.Z3Exception;
-
 
 /**
  * A conjunction of equalities between terms (with variables).
@@ -235,7 +233,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
-            if (!K.do_testgen) {
+            if (!termContext().definition().context().javaExecutionOptions.generateTests) {
                 if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
                     return !leftHandSide.sort().equals(rightHandSide.sort());
                 } else if (leftHandSide.isExactSort()) {
@@ -564,7 +562,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean checkUnsat() {
-        if (!K.smt.equals("z3")) {
+        if (termContext().definition().context().smtOptions.smt != SMTSolver.Z3) {
             return false;
         }
 
@@ -696,7 +694,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private static boolean impliesSMT(SymbolicConstraint left, SymbolicConstraint right) {
         boolean result = false;
-        if (K.smt.equals("gappa")) {
+        assert left.termContext().definition().context() == right.termContext().definition().context();
+        if (left.termContext().definition().context().smtOptions.smt == SMTSolver.GAPPA) {
 
             GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(left);
             String gterm1 = premises.result;
@@ -723,7 +722,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 result = true;
 
 //            System.out.println(constraint);
-        } else if (K.smt.equals("z3")) {
+        } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
             Set<Variable> rightHandSideVariables = new HashSet<Variable>(right.variableSet());
             rightHandSideVariables.removeAll(left.variableSet());
 

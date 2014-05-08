@@ -3,24 +3,22 @@ package org.kframework.krun.api;
 
 import org.kframework.backend.unparser.AddBracketsFilter;
 import org.kframework.backend.unparser.AddBracketsFilter2;
-import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
-import org.kframework.krun.K;
 import org.kframework.krun.SubstitutionFilter;
+import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 
 import java.io.Serializable;
@@ -41,13 +39,24 @@ public class KRunState implements Serializable{
     The raw term associated with this state, as suitable for further rewriting
     */
     private Term rawResult;
-    private Integer stateId;
+    
+    /**
+     * A state ID corresponding to this state. The contract of a {@link KRun} object
+     * demands that no two distinct states have the same ID. However, it does not
+     * guarantee the inverse: it is the responsibility of any callers who wish
+     * to ensure that the mapping is one-to-one to maintain a cache of states
+     * and canonicalize the output of the KRun object.
+     */
+    private int stateId;
+    
+    private static int nextState = 0;
     
     protected Context context;
 
     public KRunState(Term rawResult, Context context) {
         this.context = context;
         this.rawResult = rawResult;
+        this.stateId = nextState++;
     }
 
     public static Term concretize(Term result, Context context) {
@@ -55,7 +64,7 @@ public class KRunState implements Serializable{
             result = (Term) new ConcretizeSyntax(context).visitNode(result);
             result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
             result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
-            if (!K.parens) {
+            if (context.krunOptions.output == OutputMode.SMART) {
                 result = (Term) new AddBracketsFilter(context).visitNode(result);
                 try {
                     /* collect existing free variables in the result */
@@ -106,25 +115,19 @@ public class KRunState implements Serializable{
         return result;
     }
 
-    public KRunState(Term rawResult, int stateId, Context context) {
-        this(rawResult, context);
-        this.stateId = stateId;
-    }
-
     @Override
     public String toString() {
-        if (stateId == null) {
-            UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-            KilTransformer trans = new KilTransformer(true, K.color, context);
-            if(K.output_mode.equals("kore")){
-                return trans.kilToKore(getResult());
-            } else {
-                unparser.visitNode(getResult());
-            }
-            return unparser.getResult();
-        } else {
-            return "Node " + stateId;
+        return toString(false);
+    }
+    
+    public String toString(boolean includeStateId) {
+        UnparserFilterNew printer = new UnparserFilterNew(true, context.krunOptions.color(), 
+                context.krunOptions.output, false, context);
+        printer.visitNode(getResult());
+        if (includeStateId) {
+            return "Node " + stateId + ":\n" + printer.getResult();
         }
+        return printer.getResult();
     }
 
     public Term getResult() {

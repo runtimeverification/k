@@ -27,8 +27,8 @@ public class HtmlBackend extends BasicBackend {
 
         String html = htmlFilter.getHTML();
 
-        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".html", html);
-        FileUtil.save(options.directory.getPath() + File.separator + "k-definition.css",
+        FileUtil.save(options.output().getAbsolutePath(), html);
+        FileUtil.save(new File(options.output().getCanonicalFile().getParent(), "k-definition.css").getCanonicalPath(),
                 FileUtil.getFileContent(htmlIncludePath + "k-definition.css"));
 
         sw.printIntermediate("Generating HTML");

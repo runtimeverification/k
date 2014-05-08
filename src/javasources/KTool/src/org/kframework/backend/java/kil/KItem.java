@@ -76,7 +76,7 @@ public final class KItem extends Term {
             Set<String> sorts = new HashSet<>();
             Set<String> possibleMinimalSorts = new HashSet<>();
 
-            if (!K.do_kompilation) {
+            if (K.tool() != K.Tool.KOMPILE) {
                 /**
                  * Sort checks in the Java engine are not implemented as
                  * rewrite rules, so we need to precompute the sort of
@@ -320,7 +320,7 @@ public final class KItem extends Term {
                 }
 
                 Map<Variable, Term> solution = solutions.iterator().next();
-                if (K.do_kompilation || K.do_concrete_exec) {
+                if (K.tool() == K.Tool.KOMPILE || definition.context().javaExecutionOptions.concreteExecution()) {
                     assert solutions.size() <= 1 :
                          "[non-deterministic function definition]: more than one way to apply the rule\n"
                             + rule + "\nagainst the function\n" + this;
@@ -340,7 +340,8 @@ public final class KItem extends Term {
                 rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
 
                 /* update the constraint */
-                if (K.do_kompilation || K.do_concrete_exec) {
+                if (K.tool() == K.Tool.KOMPILE 
+                        || (definition.context().javaExecutionOptions.concreteExecution())) {
                     // in kompilation and concrete execution mode, the
                     // evaluation of user-defined functions will not create
                     // new constraints
@@ -365,7 +366,7 @@ public final class KItem extends Term {
                         owiseResults.add(rightHandSide);
                     }
                 } else {
-                    if (K.do_concrete_exec) {
+                    if (definition.context().javaExecutionOptions.concreteExecution()) {
                         assert result == null || result.equals(rightHandSide):
                                 "[non-deterministic function definition]: more than one rule can apply to the function\n" + this;
                     }
@@ -376,7 +377,8 @@ public final class KItem extends Term {
                  * If the function definitions do not need to be deterministic, try them in order
                  * and apply the first one that matches.
                  */
-                if (!K.deterministic_functions && result != null) {
+                if (!context.definition().context().javaExecutionOptions.deterministicFunctions 
+                        && result != null) {
                     return result;
                 }
             }

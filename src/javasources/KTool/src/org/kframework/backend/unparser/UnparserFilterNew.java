@@ -5,9 +5,11 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
-import org.kframework.krun.K;
+import org.kframework.krun.KRunOptions;
+import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.utils.ColorUtil;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +23,8 @@ public class UnparserFilterNew extends NonCachingVisitor {
     private boolean addParentheses;
     private int inTerm = 0;
     private ColorSetting color = ColorSetting.OFF;
+    private Color terminalColor = Color.black;
+    private final KRunOptions.OutputMode outputMode;
     private boolean annotateLocation;
     public static int TAB = 4;
     private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
@@ -45,22 +49,26 @@ public class UnparserFilterNew extends NonCachingVisitor {
     }
 
     public UnparserFilterNew(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, true, context);
+        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, OutputMode.PRETTY, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color, addParentheses, false, false, context);
+    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, OutputMode outputMode, org.kframework.kil.loader.Context context) {
+        this(inConfiguration, color, outputMode, false, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, boolean wrapLine, org.kframework.kil.loader.Context context) {
+    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, OutputMode outputMode, boolean annotateLocation, org.kframework.kil.loader.Context context) {
         super(context);
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
-        this.addParentheses = addParentheses;
+        this.addParentheses = outputMode != OutputMode.SMART;
         this.annotateLocation = annotateLocation;
-        if (!wrapLine) {
+        this.outputMode = outputMode;
+        if (outputMode == OutputMode.NO_WRAP) {
             indenter.setWidth(-1);
+        }
+        if (context.krunOptions != null) {
+            terminalColor = context.krunOptions.terminalColor();
         }
     }
 
@@ -240,7 +248,6 @@ public class UnparserFilterNew extends NonCachingVisitor {
 
     @Override
     public Void visit(Configuration configuration, Void _) {
-        prepare(configuration);
         if (!forEquivalence) {
             indenter.write("configuration");
             indenter.endLine();
@@ -269,7 +276,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color);
+                colorCode = ColorUtil.RgbToAnsi(declaredColor, color, terminalColor);
                 indenter.write(colorCode);
             }
         }
@@ -372,7 +379,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 
                 indenter.write(temp.get(1).getTerminal());
             }
-        } else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
+        } else if ((outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
             
             String rawLabel = null;
             List<Terminal> temp = this.findRightSyntax(label.getSort());
@@ -464,7 +471,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
             java.util.List<Term> contents = termCons.getContents();
             this.visitNode(contents.get(0));
             if (!(contents.get(1) instanceof ListTerminator) 
-                    || (! (K.output_mode.equals(K.PRETTY)) && ! (K.output_mode.equals(K.KORE)))) {
+                    || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))) {
                 indenter.write(separator + " ");
                 this.visitNode(contents.get(1));
             }
@@ -473,7 +480,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
             for (int i = 0; i < production.getItems().size(); ++i) {
                 ProductionItem productionItem = production.getItems().get(i);
                 if (!(productionItem instanceof Terminal)) {
-                    if(!(termCons.getContents().get(where) instanceof ListTerminator) || (! (K.output_mode.equals(K.PRETTY)) && ! (K.output_mode.equals(K.KORE)))){
+                    if(!(termCons.getContents().get(where) instanceof ListTerminator) || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))){
                             this.visitNode(termCons.getContents().get(where++));
                     } else {
                         where++;

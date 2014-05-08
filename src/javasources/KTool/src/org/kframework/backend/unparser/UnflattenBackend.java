@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.compile.utils.CompilerSteps;
@@ -11,7 +10,6 @@ import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 
-import java.io.File;
 import java.io.IOException;
 
 public class UnflattenBackend extends BasicBackend {
@@ -49,7 +47,7 @@ public class UnflattenBackend extends BasicBackend {
 
         FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
-        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + ".unparsed.k", unparsedText);
+        FileUtil.save(options.output().getAbsolutePath(), unparsedText);
     }
 
     @Override

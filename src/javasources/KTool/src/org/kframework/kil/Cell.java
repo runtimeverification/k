@@ -109,6 +109,14 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.cellAttributes = node.cellAttributes;
         this.contents = node.contents;
     }
+    
+    public Cell(String label, Term contents) {
+        super("BagItem");
+        this.label = label;
+        this.endLabel = label;
+        this.cellAttributes = new HashMap<String, String>();
+        this.contents = contents;
+    }
 
     public Cell() {
         super("BagItem");

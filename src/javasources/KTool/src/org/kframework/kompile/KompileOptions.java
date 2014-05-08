@@ -6,10 +6,10 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.backend.SMTSolver;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.options.BaseEnumConverter;
+import org.kframework.utils.options.SMTOptions;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
@@ -65,8 +65,35 @@ public final class KompileOptions implements Serializable {
     /**
      * Directory in which the compiled definition should be put.
      */
-    @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the current directory.")
-    public File directory = new File(".");
+    @Parameter(names={"--output", "-o"}, description="Path to the file in which to place the output. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is <file>-kompiled for executable backends, where <file> is the name of the file being compiled, without file extension. The defaults for the pdf, latex, and html backends are <file>.pdf, <file>.tex, and <file>.html respectively.")
+    private File output;
+    
+    public File output() {
+        if (output == null) {
+            String name = FilenameUtils.removeExtension(mainDefinitionFile().getName());
+            switch (backend) {
+            case HTML:
+                return new File(".", name + ".html");
+            case DOC:
+                return new File(".", name + "-doc.tex");
+            case LATEX:
+                return new File(".", name + ".tex");
+            case PDF:
+                return new File(".", name + ".pdf");
+            case UNFLATTEN_JAVA:
+            case UNFLATTEN:
+            case UNPARSE:
+                return new File(".", name + ".unparsed.k");
+            case KORE:
+                return null; // does not use this option
+            case MAUDE:
+            case JAVA:
+            case SYMBOLIC:
+                return new File(".", name + "-kompiled");
+            }
+        }
+        return output;
+    }
     
     @Parameter(names="--backend", converter=BackendConverter.class, description="Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics. Experimental: 'doc' generates a .tex document, omitting rules unless specified.")
     public Backend backend = Backend.MAUDE;
@@ -148,7 +175,7 @@ public final class KompileOptions implements Serializable {
     public static final String DEFAULT_TRANSITION = "transition";
     
     @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
-    public Boolean helpExperimental = false;
+    public boolean helpExperimental = false;
     
     @ParametersDelegate
     public Experimental experimental = new Experimental();
@@ -168,16 +195,8 @@ public final class KompileOptions implements Serializable {
         @Parameter(names="--k-cells", description="Cells which contain komputations.")
         public List<String> kCells = Arrays.asList("k");
         
-        @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|none]. (Default: z3). This only has an effect with '--backend symbolic'.")
-        public SMTSolver smt = SMTSolver.Z3;
-        
-        public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> {
-
-            @Override
-            public Class<SMTSolver> enumClass() {
-                return SMTSolver.class;
-            }
-        }
+        @ParametersDelegate
+        public SMTOptions smt = new SMTOptions();
         
         @Parameter(names="--no-prelude", description="Do not include anything automatically.")
         public boolean noPrelude = false;

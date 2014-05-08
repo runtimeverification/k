@@ -32,13 +32,15 @@ public class KRunner {
     private boolean _append;
     private String _outputFileName;
     private String _errorFileName;
+    private String _xmlOutFileName;
     private String _maudeModule;
     private boolean _createLogs;
     private boolean _noServer;
     protected Context context;
 
-    public KRunner(String[] args, Context context) throws IOException {
+    public KRunner(String[] args, Context context, File xmlOutFile) throws IOException {
         this.context = context;
+        this._xmlOutFileName = xmlOutFile.getAbsolutePath();
         // boolean append = true;
         // parser.accepts("suppressio");
 
@@ -120,7 +122,7 @@ public class KRunner {
             _maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");*/
             
             String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
-            MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName);
+            MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _xmlOutFileName);
     
             maude.start();
             _logger.info("Maude started");
@@ -139,8 +141,8 @@ public class KRunner {
         }
     }
 
-    public static int main(String[] args, Context context) throws IOException {
-        KRunner runner = new KRunner(args, context);
+    public static int main(String[] args, Context context, File xmlOutFile) throws IOException {
+        KRunner runner = new KRunner(args, context, xmlOutFile);
         return runner.run();
     }
 }
