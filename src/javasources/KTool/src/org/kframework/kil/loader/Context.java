@@ -33,7 +33,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -165,20 +164,14 @@ public class Context implements Serializable {
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
-    public transient ExperimentalParserOptions experimentalParserOptions;
     
     public Context(GlobalOptions globalOptions) {
         this.globalOptions = globalOptions;
         initSubsorts();
     }
     
-    public Context(GlobalOptions globalOptions, ExperimentalParserOptions experimentalParserOptions) {
-        this(globalOptions);
-        this.experimentalParserOptions = experimentalParserOptions;
-    }
-    
     public Context(KompileOptions kompileOptions) {
-        this(kompileOptions.global, kompileOptions.experimental.parser);
+        this(kompileOptions.global);
         this.kompileOptions = kompileOptions;
     }
 

@@ -8,7 +8,7 @@
 		  extension="test"
 		  results="01-list/">
 		<all-programs>
-			<krun-option name="-parser" value="kast -parser newprogram" />
+			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
 	</test>
 
@@ -18,7 +18,7 @@
 		  extension="test"
 		  results="02-arithmetic-expressions/">
 		<all-programs>
-			<krun-option name="-parser" value="kast -parser newprogram" />
+			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
 	</test>
 
@@ -36,7 +36,7 @@
 		  extension="test"
 		  results="05-reject-keywords/">
 		<all-programs>
-			<krun-option name="-parser" value="kast -parser newprogram" />
+			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
 	</test>
 

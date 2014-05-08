@@ -8,7 +8,6 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ExperimentalParserOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +58,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     protected org.kframework.kil.loader.Context context;
     protected KompileOptions kompileOptions;
     protected GlobalOptions globalOptions;
-    protected ExperimentalParserOptions experimentalParserOptions;
     String name;
     
     protected IdentityHashMap<ASTNode, R> cache = new IdentityHashMap<>();
@@ -69,7 +67,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         if (context != null) {
             this.kompileOptions = context.kompileOptions;
             this.globalOptions = context.globalOptions;
-            this.experimentalParserOptions = context.experimentalParserOptions;
         }
         this.name = this.getClass().toString();
     }

@@ -64,41 +64,28 @@ public class ParseConfigsFilter extends ParseForestTransformer {
         if (ss.getType().equals(Constants.CONFIG)) {
             try {
                 ASTNode config = null;
-                if (experimentalParserOptions.fastKast) {
-                    // TODO(RaduM): load directly from ATerms
-                    config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
-                    int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
-                    int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
-                    new UpdateLocationVisitor(context, startLine, startCol).visitNode(config);
-                    new ReportErrorsVisitor(context, "configuration").visitNode(config);
+                String parsed = null;
+                if (ss.containsAttribute("kore")) {
+                    long startTime = System.currentTimeMillis();
+                    parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+                    if (globalOptions.verbose)
+                        System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
+                } else
+                    parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                Document doc = XmlLoader.getXMLDoc(parsed);
 
-                    Sentence st = (Sentence) config;
-                    config = new Configuration(st);
-                    ((Sentence) config).setAttributes(ss.getAttributes());
-                } else {
-                    String parsed = null;
-                    if (ss.containsAttribute("kore")) {
-                        long startTime = System.currentTimeMillis();
-                        parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                        if (globalOptions.verbose)
-                            System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
-                    } else
-                        parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-                    Document doc = XmlLoader.getXMLDoc(parsed);
+                // replace the old xml node with the newly parsed sentence
+                Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+                XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
+                XmlLoader.addFilename(xmlTerm, ss.getFilename());
+                XmlLoader.reportErrors(doc, ss.getType());
 
-                    // replace the old xml node with the newly parsed sentence
-                    Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-                    XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
-                    XmlLoader.addFilename(xmlTerm, ss.getFilename());
-                    XmlLoader.reportErrors(doc, ss.getType());
-
-                    Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
-                    config = new Configuration(st);
-                    assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
-                    st.setLabel(ss.getLabel());
-                    //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
-                    st.setAttributes(ss.getAttributes());
-                }
+                Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
+                config = new Configuration(st);
+                assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+                st.setLabel(ss.getLabel());
+                //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+                st.setAttributes(ss.getAttributes());
 
                 // disambiguate configs
                 config = new SentenceVariablesFilter(context).visitNode(config);
@@ -111,8 +98,6 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 config = new CorrectCastPriorityFilter(context).visitNode(config);
                 // config = new CheckBinaryPrecedenceFilter().visitNode(config);
                 config = new PriorityFilter(context).visitNode(config);
-                if (experimentalParserOptions.fastKast)
-                    config = new MergeAmbFilter(context).visitNode(config);
                 config = new VariableTypeInferenceFilter(context).visitNode(config);
                 // config = new AmbDuplicateFilter(context).visitNode(config);
                 // config = new TypeSystemFilter(context).visitNode(config);

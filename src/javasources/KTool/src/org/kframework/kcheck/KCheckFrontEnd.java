@@ -75,7 +75,7 @@ public class KCheckFrontEnd {
             if (!cmd.hasOption("prove")) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
             } else {
-                GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
+                //GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
             }
 
 

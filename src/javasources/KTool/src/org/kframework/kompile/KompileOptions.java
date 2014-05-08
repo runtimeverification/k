@@ -9,7 +9,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.SMTSolver;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.IStringConverter;
@@ -59,12 +58,6 @@ public final class KompileOptions implements Serializable {
         return new File(parameters.get(0));
     }
     
-    @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
-    public boolean help = false;  
-    
-    @Parameter(names="--version", description="Print version information")
-    public boolean version = false;
-    
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
     
@@ -78,11 +71,11 @@ public final class KompileOptions implements Serializable {
     @Parameter(names="--backend", converter=BackendConverter.class, description="Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics. Experimental: 'doc' generates a .tex document, omitting rules unless specified.")
     public Backend backend = Backend.MAUDE;
     
-    public static class BackendConverter extends BaseEnumConverter<Backend> implements IStringConverter<Backend> {
+    public static class BackendConverter extends BaseEnumConverter<Backend> {
 
         @Override
-        public Backend convert(String arg0) {
-            return convert(Backend.class, arg0);
+        public Class<Backend> enumClass() {
+            return Backend.class;
         }
     }
     
@@ -177,16 +170,13 @@ public final class KompileOptions implements Serializable {
         @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|none]. (Default: z3). This only has an effect with '--backend symbolic'.")
         public SMTSolver smt = SMTSolver.Z3;
         
-        public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> implements IStringConverter<SMTSolver> {
+        public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> {
 
             @Override
-            public SMTSolver convert(String arg0) {
-                return convert(SMTSolver.class, arg0);
+            public Class<SMTSolver> enumClass() {
+                return SMTSolver.class;
             }
         }
-        
-        @ParametersDelegate
-        public transient ExperimentalParserOptions parser = new ExperimentalParserOptions();
         
         @Parameter(names="--no-prelude", description="Do not include anything automatically.")
         public boolean noPrelude = false;
@@ -212,11 +202,11 @@ public final class KompileOptions implements Serializable {
         @Parameter(names="--rule-index", converter=RuleIndexConveter.class, description="Choose a technique for indexing the rules. <rule-index> is one of [table|path]. (Default: table). This only has effect with '--backend java'.")
         public IndexingAlgorithm ruleIndex = IndexingAlgorithm.RULE_TABLE;
         
-        public static class RuleIndexConveter extends BaseEnumConverter<IndexingAlgorithm> implements IStringConverter<IndexingAlgorithm> {
+        public static class RuleIndexConveter extends BaseEnumConverter<IndexingAlgorithm> {
 
             @Override
-            public IndexingAlgorithm convert(String arg0) {
-                return convert(IndexingAlgorithm.class, arg0);
+            public Class<IndexingAlgorithm> enumClass() {
+                return IndexingAlgorithm.class;
             }
         }
     }

@@ -209,11 +209,9 @@ public class DefinitionLoader {
                 }
                 Stopwatch.instance().printIntermediate("Generate TBLDef");
             }
-            if (!context.experimentalParserOptions.fastKast) { // ------------------------------------- import files in Stratego
-                org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
+            org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
-                Stopwatch.instance().printIntermediate("Importing Files");
-            }
+            Stopwatch.instance().printIntermediate("Importing Files");
             // ------------------------------------- parse configs
             JavaClassesFactory.startConstruction(context);
             def = (Definition) new ParseConfigsFilter(context).visitNode(def);
@@ -301,8 +299,6 @@ public class DefinitionLoader {
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
-        if (context.experimentalParserOptions.fastKast)
-            config = new MergeAmbFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
         try {
             config = new TypeSystemFilter(context).visitNode(config);
@@ -354,8 +350,6 @@ public class DefinitionLoader {
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
-        if (context.experimentalParserOptions.fastKast)
-            config = new MergeAmbFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
         try {
             config = new TypeSystemFilter(context).visitNode(config);

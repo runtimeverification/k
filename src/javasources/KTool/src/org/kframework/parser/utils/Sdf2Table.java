@@ -5,9 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.kframework.utils.OS;
 import org.kframework.utils.ThreadedStreamCapturer;
-import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
 
 public class Sdf2Table {
 
@@ -15,7 +14,7 @@ public class Sdf2Table {
         ThreadedStreamCapturer errorStreamHandler;
 
         try {
-            File f = GlobalSettings.getNativeExecutable("sdf2table");
+            File f = OS.current().getNativeExecutable("sdf2table");
 
             // create process
             ProcessBuilder pb = new ProcessBuilder(f.getAbsolutePath(), "-c", "-m", mainFile, "-o", mainFile + ".tbl");

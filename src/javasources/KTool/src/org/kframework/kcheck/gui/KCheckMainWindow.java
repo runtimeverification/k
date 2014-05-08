@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.gui;
 
 import org.apache.commons.io.FilenameUtils;
@@ -353,7 +354,7 @@ public class KCheckMainWindow extends JFrame implements KeyListener, ActionListe
         switch (cmd) {
             case BROWSE_FILE:
                 selectFile(file);
-                GlobalSettings.CHECK = file.getText();
+                //GlobalSettings.CHECK = file.getText();
                 break;
             case BROWSE_PGM:
                 selectFile(pgm);
