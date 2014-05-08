@@ -29,7 +29,7 @@ public class CommandParse extends Command {
     public void run() {
         try {
             RunProcess rp = new RunProcess();
-            Term kast = rp.runParser(K.parser, stringToParse, true, sort, context);
+            Term kast = rp.runParser(K.getProgramParser(), stringToParse, true, sort, context);
             MaudeFilter mf = new MaudeFilter(context);
             mf.visitNode(kast);
             succeed(mf.getResult().toString());
