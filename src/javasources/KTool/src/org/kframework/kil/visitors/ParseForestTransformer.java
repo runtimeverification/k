@@ -19,9 +19,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
  * @author dwightguth
  *
  */
-public class BasicTransformer extends AbstractTransformer<ParseFailedException> {
+public class ParseForestTransformer extends AbstractTransformer<ParseFailedException> {
 
-    public BasicTransformer(String name, Context context) {
+    public ParseForestTransformer(String name, Context context) {
         super(name, context);
     }
 

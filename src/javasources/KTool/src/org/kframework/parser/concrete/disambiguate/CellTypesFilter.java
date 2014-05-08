@@ -14,13 +14,13 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CellTypesFilter extends BasicTransformer {
+public class CellTypesFilter extends ParseForestTransformer {
 
     public CellTypesFilter(org.kframework.kil.loader.Context context) {
         super("Cell types", context);

@@ -4,7 +4,7 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
 import org.kframework.utils.errorsystem.KException;
@@ -13,7 +13,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.util.Map;
 
-public class VariableTypeFilter extends BasicTransformer {
+public class VariableTypeFilter extends ParseForestTransformer {
 
     private Map<String, Variable> variableTypes = null;
     // if expected is true, then do disambiguation on the expected sort.

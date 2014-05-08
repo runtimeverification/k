@@ -9,12 +9,12 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 import java.util.ArrayList;
 
-public class CorrectConstantsTransformer extends BasicTransformer {
+public class CorrectConstantsTransformer extends ParseForestTransformer {
     public CorrectConstantsTransformer(Context context) {
         super(CorrectConstantsTransformer.class.getName(), context);
     }

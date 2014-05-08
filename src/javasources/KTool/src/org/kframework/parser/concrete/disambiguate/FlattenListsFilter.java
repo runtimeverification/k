@@ -5,13 +5,13 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 import java.util.ArrayList;
 
 
-public class FlattenListsFilter extends BasicTransformer {
+public class FlattenListsFilter extends ParseForestTransformer {
 
     public FlattenListsFilter(Context context) {
         super("Flatten lists", context);

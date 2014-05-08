@@ -7,10 +7,10 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
-public class PriorityFilter extends BasicTransformer {
+public class PriorityFilter extends ParseForestTransformer {
     public PriorityFilter(Context context) {
         super("Priority filter", context);
     }

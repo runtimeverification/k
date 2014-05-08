@@ -12,14 +12,14 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CorrectKSeqFilter extends BasicTransformer {
+public class CorrectKSeqFilter extends ParseForestTransformer {
     private CorrectKSeqFilter2 secondFilter;
 
     public CorrectKSeqFilter(Context context) {

@@ -2,7 +2,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
 import org.kframework.utils.errorsystem.KException;
@@ -15,7 +15,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
  * @author radu
  * 
  */
-public class SentenceVariablesFilter extends BasicTransformer {
+public class SentenceVariablesFilter extends ParseForestTransformer {
     private boolean config = false;
 
     public SentenceVariablesFilter(org.kframework.kil.loader.Context context) {

@@ -5,12 +5,12 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 import java.util.ArrayList;
 
-public class AmbDuplicateFilter extends BasicTransformer {
+public class AmbDuplicateFilter extends ParseForestTransformer {
     public AmbDuplicateFilter(Context context) {
         super("Remove ambiguity duplicates", context);
     }

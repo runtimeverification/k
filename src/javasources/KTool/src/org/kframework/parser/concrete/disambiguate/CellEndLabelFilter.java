@@ -5,13 +5,13 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CellEndLabelFilter extends BasicTransformer {
+public class CellEndLabelFilter extends ParseForestTransformer {
 
     public CellEndLabelFilter(Context context) {
         super("Cell End Label", context);

@@ -4,13 +4,13 @@ package org.kframework.parser.utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.ParseError;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class ReportErrorsVisitor extends BasicTransformer {
+public class ReportErrorsVisitor extends ParseForestTransformer {
     String fromWhere = null;
 
     public ReportErrorsVisitor(Context context, String fromWhere) {

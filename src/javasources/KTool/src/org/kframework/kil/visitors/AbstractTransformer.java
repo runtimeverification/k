@@ -7,7 +7,7 @@ import org.kframework.kil.loader.Context;
 
 /**
  * A helper class designed to encapsulate functionality shared between 
- * {@link LocalTransformer}, {@link BasicTransformer}, and {@link CopyOnWriteTransformer}.
+ * {@link LocalTransformer}, {@link ParseForestTransformer}, and {@link CopyOnWriteTransformer}.
  * 
  * This class serves to replace the Transformable interface that existed before, and implements
  * functionality specific to visitors which transform terms.

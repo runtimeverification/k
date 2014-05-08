@@ -16,14 +16,14 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CorrectRewritePriorityFilter extends BasicTransformer {
+public class CorrectRewritePriorityFilter extends ParseForestTransformer {
     private CorrectRewriteFilter2 secondFilter;
 
     public CorrectRewritePriorityFilter(Context context) {

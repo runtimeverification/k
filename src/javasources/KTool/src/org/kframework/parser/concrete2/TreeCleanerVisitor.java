@@ -9,14 +9,14 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 /**
  * Remove parsing artifacts such as single element ambiguities.
  */
 // TODO: simplify by removing left over "null" checks and recheck this code
-public class TreeCleanerVisitor extends BasicTransformer {
+public class TreeCleanerVisitor extends ParseForestTransformer {
     public TreeCleanerVisitor(Context context) {
         super(TreeCleanerVisitor.class.getName(), context);
     }

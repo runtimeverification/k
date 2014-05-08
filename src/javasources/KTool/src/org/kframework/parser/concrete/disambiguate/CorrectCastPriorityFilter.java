@@ -15,14 +15,14 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CorrectCastPriorityFilter extends BasicTransformer {
+public class CorrectCastPriorityFilter extends ParseForestTransformer {
     private CorrectCastPriorityFilter2 secondFilter;
 
     public CorrectCastPriorityFilter(Context context) {

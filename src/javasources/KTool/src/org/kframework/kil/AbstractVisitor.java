@@ -2,7 +2,7 @@
 package org.kframework.kil; // in main kil package to avoid access restriction violations
 
 import org.kframework.kil.visitors.AbstractTransformer;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitor;
@@ -934,7 +934,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
      * Returns the object to pass to the visitor to the parent class of the class being visited. 
      * By combining this field with {@link #defaultReturnValue(ASTNode, Object)}, it is possible
      * to decide whether a visitor should make copies of any terms it modifies. This is used to
-     * distinguish {@link BasicTransformer}, which modifies nodes in-place in the tree, and 
+     * distinguish {@link ParseForestTransformer}, which modifies nodes in-place in the tree, and 
      * {@link CopyOnWriteTransformer}, which creates a copy of the tree to return if a node is changed.
      * @param original The node being visited.
      * @return The node as it will be passed to the visit method for its parent class.

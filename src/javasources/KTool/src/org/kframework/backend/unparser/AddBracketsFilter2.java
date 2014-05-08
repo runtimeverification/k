@@ -4,7 +4,7 @@ package org.kframework.backend.unparser;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ColorSetting;
 import org.kframework.parser.DefinitionLoader;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class AddBracketsFilter2 extends BasicTransformer {
+public class AddBracketsFilter2 extends ParseForestTransformer {
 
     public AddBracketsFilter2(Context context) throws IOException {
         super("Add more brackets", context);
@@ -176,7 +176,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
         }
     }
 
-    private class TraverseForest extends BasicTransformer {
+    private class TraverseForest extends ParseForestTransformer {
         public TraverseForest(Term ast, org.kframework.kil.loader.Context context) {
             super("Determine if term needs parentheses", context);
             this.ast = ast;

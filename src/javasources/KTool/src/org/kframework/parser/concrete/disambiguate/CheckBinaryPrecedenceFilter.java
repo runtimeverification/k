@@ -12,14 +12,14 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CheckBinaryPrecedenceFilter extends BasicTransformer {
+public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
     public CheckBinaryPrecedenceFilter(Context context) {
         super("Check precedence for => and ~>", context);
     }

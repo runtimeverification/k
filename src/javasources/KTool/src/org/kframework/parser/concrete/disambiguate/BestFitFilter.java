@@ -5,12 +5,12 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 import java.util.ArrayList;
 
-public class BestFitFilter extends BasicTransformer {
+public class BestFitFilter extends ParseForestTransformer {
 
     public BestFitFilter(GetFitnessUnitBasicVisitor gfubv, Context context) {
         super("Best fit filter", context);

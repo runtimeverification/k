@@ -15,7 +15,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
@@ -23,7 +23,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-public class VariableTypeInferenceFilter extends BasicTransformer {
+public class VariableTypeInferenceFilter extends ParseForestTransformer {
 
     public VariableTypeInferenceFilter(Context context) {
         super("Variable type inference", context);
@@ -251,7 +251,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
      * @author Radu
      *
      */
-    public class RemoveDuplicateVariables extends BasicTransformer {
+    public class RemoveDuplicateVariables extends ParseForestTransformer {
         public RemoveDuplicateVariables(Context context) {
             super(RemoveDuplicateVariables.class.toString(), context);
         }

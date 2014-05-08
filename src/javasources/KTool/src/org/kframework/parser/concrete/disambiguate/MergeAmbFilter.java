@@ -10,10 +10,10 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
-public class MergeAmbFilter extends BasicTransformer {
+public class MergeAmbFilter extends ParseForestTransformer {
     public MergeAmbFilter(Context context) {
         super("Remove ambiguity duplicates", context);
     }
