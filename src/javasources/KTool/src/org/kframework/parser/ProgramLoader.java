@@ -100,7 +100,10 @@ public class ProgramLoader {
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
         Stopwatch.instance().printIntermediate("Importing Files");
-        assert context.definedSorts.contains(startSymbol) : "The start symbol must be declared in the definition. Found: " + startSymbol;
+        if (!context.definedSorts.contains(startSymbol)) {
+            throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                    "The start symbol must be declared in the definition. Found: " + startSymbol));
+        }
 
         try {
             ASTNode out;

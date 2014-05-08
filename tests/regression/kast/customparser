@@ -1,8 +1,0 @@
-#!/bin/sh
-
-if [ "$1" = "foo" ]
-then
-  echo ".K"
-else
-  kast --parser ground "$@"
-fi
