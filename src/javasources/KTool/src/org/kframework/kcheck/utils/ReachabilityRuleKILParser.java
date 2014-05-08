@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import org.kframework.kil.Rewrite;
@@ -17,7 +18,7 @@ public class ReachabilityRuleKILParser extends BasicVisitor {
         super(context);
     }
 
-    public void visit(Sentence node) {
+    public Void visit(Sentence node, Void _) {
         
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();
@@ -27,6 +28,7 @@ public class ReachabilityRuleKILParser extends BasicVisitor {
         
         phi = node.getRequires();
         phi_prime = node.getEnsures();
+        return null;
     }
 
     public Term getPi() {

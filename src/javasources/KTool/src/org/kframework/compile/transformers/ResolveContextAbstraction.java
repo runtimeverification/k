@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.ConfigurationStructure;
@@ -30,36 +31,36 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         if (config.isEmpty()) return node;
-        return super.transform(node);
+        return super.visit(node, _);
     }
     
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;
     }
     
     
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (MetaK.isAnywhere(node)) return node;
         boolean change = false;        
         if (MetaK.getTopCells(node.getBody(), context).isEmpty()) return node;
-        Rule rule = (Rule) super.transform(node);
+        Rule rule = (Rule) super.visit(node, _);
         
         SplitByLevelVisitor visitor = new SplitByLevelVisitor(-1, context);
-        rule.getBody().accept(visitor);
+        visitor.visitNode(rule.getBody());
         
         int min = visitor.max;
         for (int i=visitor.max-1; i>0; i--) {
@@ -115,9 +116,9 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
+    public ASTNode visit(Cell node, Void _) throws TransformerException {
         boolean change = false;
-        Cell cell = (Cell)super.transform(node);
+        Cell cell = (Cell)super.visit(node, _);
         if (cell.getEllipses() == Ellipses.NONE) return cell;
         ConfigurationStructure confCell = config.get(cell);
         if (confCell == null)
@@ -130,7 +131,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         
         if (confCell.sons.isEmpty()) return cell;
         SplitByLevelVisitor visitor = new SplitByLevelVisitor(confCell.level, context);
-        cell.getContents().accept(visitor);
+        visitor.visitNode(cell.getContents());
         int min = 0;
         if (visitor.max>min) change = true;
         bringToLevel(visitor, min);
@@ -249,7 +250,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         }
         
         @Override
-        public void visit(Cell node) {
+        public Void visit(Cell node, Void _) {
             int level = config.get(node).level - this.level;
             if (level < 0) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
@@ -260,30 +261,35 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
             }
             if (max<level) max = level;
             levels.get(level).add(node);
+            return null;
         }
 
         @Override
-        public void visit(KLabelConstant node) {
+        public Void visit(KLabelConstant node, Void _) {
             levels.get(0).add(node);
+            return null;
         }
 
         @Override
-        public void visit(Token node) {
+        public Void visit(Token node, Void _) {
             levels.get(0).add(node);
+            return null;
         }
         
         @Override
-        public void visit(TermCons node) {
+        public Void visit(TermCons node, Void _) {
             levels.get(0).add(node);
+            return null;
         }
         
         @Override
-        public void visit(Variable node) {
+        public Void visit(Variable node, Void _) {
             levels.get(0).add(node);
+            return null;
         }
         
         @Override
-        public void visit(Rewrite node) {
+        public Void visit(Rewrite node, Void _) {
             List<Cell> cells = MetaK.getTopCells(node, context);
             int level = 0;
             if (!cells.isEmpty()) {
@@ -305,6 +311,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
                     }
             }
             levels.get(level).add(node);
+            return null;
         }
     }
 

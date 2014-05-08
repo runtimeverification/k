@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -18,8 +19,9 @@ public class BestFitFilter extends BasicTransformer {
 
     private GetFitnessUnitBasicVisitor getFitnessUnit;
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
-        amb = (Ambiguity) super.transform(amb);
+    @Override
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+        amb = (Ambiguity) super.visit(amb, _);
 
         int maximum = getFitnessUnit(amb.getContents().get(0));
 
@@ -46,7 +48,7 @@ public class BestFitFilter extends BasicTransformer {
 
     private int getFitnessUnit(Term t) {
         GetFitnessUnitBasicVisitor fitnessVisitor = getFitnessUnit.getInstance();
-        t.accept(fitnessVisitor);
+        fitnessVisitor.visitNode(t);
         return fitnessVisitor.getScore();
     }
 }

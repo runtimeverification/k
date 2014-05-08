@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
         }
@@ -43,7 +44,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
             Rewrite rew = (Rewrite) node.getBody();
             Term left = rew.getLeft().shallowCopy();
 //            System.out.println("LEFT : " + node);
-            rew.setLeft((Term) left.accept(crt), context);
+            rew.setLeft((Term) crt.visitNode(left), context);
             Map<Variable, KApp> newGeneratedSV = crt.getGeneratedSV();
             Term condition = node.getRequires();
 

@@ -15,7 +15,7 @@ public class ColorVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
         Cell declaredCell = context.cells.get(cell.getLabel());
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
@@ -24,6 +24,7 @@ public class ColorVisitor extends BasicVisitor {
                 ColorTagMap.addColorToTag(cell.getLabel(), c);
             }
         }
-        cell.getContents().accept(this);
+        this.visitNode(cell.getContents());
+        return null;
     }
 }

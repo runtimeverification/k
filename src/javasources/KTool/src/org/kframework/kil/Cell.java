@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.ArrayList;
@@ -9,10 +9,7 @@ import java.util.Map.Entry;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -46,7 +43,7 @@ import aterm.ATermList;
  * <p>
  * Cell attributes are in {@link #cellAttributes}, not {@link #attributes}.
  */
-public class Cell extends Term {
+public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     /** Possible values for the multiplicity attribute */
     public enum Multiplicity {
         ONE, MAYBE, ANY, SOME,
@@ -265,21 +262,6 @@ public class Cell extends Term {
         this.label = label;
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
-    }
-
     public void setDefaultAttributes() {
         cellAttributes = new HashMap<String, String>();
     }
@@ -341,5 +323,19 @@ public class Cell extends Term {
         }
         return cells;
     }
-    
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return contents;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.contents = child;
+    }
 }

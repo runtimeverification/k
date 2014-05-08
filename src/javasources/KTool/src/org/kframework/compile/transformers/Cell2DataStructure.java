@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.CellMap;
@@ -44,18 +45,18 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration configuration) {
+    public ASTNode visit(Configuration configuration, Void _) {
         return configuration;
     }
 
     @Override
-    public ASTNode transform(Cell cell) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _) throws TransformerException {
         // TODO(AndreiS): should only be applied once
         makeCellDataStructures();
 
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
-            return super.transform(cell);
+            return super.visit(cell, _);
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());

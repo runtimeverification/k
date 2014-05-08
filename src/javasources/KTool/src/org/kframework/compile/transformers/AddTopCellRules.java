@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -14,7 +15,7 @@ public class AddTopCellRules extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Rule node) {
+    public ASTNode visit(Rule node, Void _) {
         if (MetaK.isAnywhere(node)) return node;
         if (!MetaK.hasCell(node.getBody(), context)) return node;
         node = node.shallowCopy();
@@ -23,17 +24,17 @@ public class AddTopCellRules extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Configuration node) {
+    public ASTNode visit(Configuration node, Void _) {
         return node;
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) {
         return node;
     }
 
     @Override
-    public ASTNode transform(Syntax node) {
+    public ASTNode visit(Syntax node, Void _) {
         return node;
     }
 

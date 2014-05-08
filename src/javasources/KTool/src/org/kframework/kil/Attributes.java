@@ -1,9 +1,8 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -21,7 +20,7 @@ import java.util.List;
  *
  * @see ASTNode
  */
-public class Attributes extends ASTNode {
+public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute, Enum<?>> {
 
     protected java.util.List<Attribute> contents;
 
@@ -149,19 +148,24 @@ public class Attributes extends ASTNode {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
     public Attributes shallowCopy() {
         Attributes result = new Attributes();
         result.contents.addAll(contents);
         return result;
+    }
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public List<Attribute> getChildren(Enum<?> _) {
+        return contents;
+    }
+
+    @Override
+    public void setChildren(List<Attribute> children, Enum<?> _) {
+        this.contents = children;
     }
 }

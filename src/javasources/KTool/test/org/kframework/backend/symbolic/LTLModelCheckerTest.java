@@ -103,7 +103,7 @@ public class LTLModelCheckerTest {
         // test ResolverLTLAttributes transformer
         ResolveLtlAttributes resolveLtlAttributes = new ResolveLtlAttributes(context);
         try {
-            rule = (Rule) rule.accept(resolveLtlAttributes);
+            rule = (Rule) resolveLtlAttributes.visitNode(rule);
             Assert.assertEquals(rule.getBody(), outputRule.getBody());
             Assert.assertEquals(rule.getRequires(), outputRule.getRequires());
             Assert.assertEquals(rule.getEnsures(), outputRule.getEnsures());

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -16,17 +17,19 @@ public class CellEndLabelFilter extends BasicTransformer {
         super("Cell End Label", context);
     }
 
-    public ASTNode transform(Syntax cell) {
+    @Override
+    public ASTNode visit(Syntax cell, Void _) {
         return cell;
     }
 
-    public ASTNode transform(Cell cell) throws TransformerException {
+    @Override
+    public ASTNode visit(Cell cell, Void _) throws TransformerException {
         if (!cell.getLabel().equals(cell.getEndLabel())) {
             String msg = "Cell starts with '" + cell.getLabel() + "' but ends with '" + cell.getEndLabel() + "'";
             // String msg = "Variable " + r.getName() + " cannot have sort " + r.getSort() + " at this location. Expected sort " + correctSort + ".";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getFilename(), cell.getLocation());
             throw new TransformerException(kex);
         }
-        return super.transform(cell);
+        return super.visit(cell, _);
     }
 }

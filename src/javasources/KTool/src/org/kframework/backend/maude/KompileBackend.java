@@ -33,7 +33,7 @@ public class KompileBackend extends BasicBackend {
             e.printStackTrace();
         }
         MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(maudeHooks, specialMaudeHooks, context);
-        javaDef.accept(builtinsFilter);
+        builtinsFilter.visitNode(javaDef);
         final String mainModule = javaDef.getMainModule();
         StringBuilder builtins = new StringBuilder()
             .append("mod ").append(mainModule).append("-BUILTINS is\n").append(" including ")
@@ -42,8 +42,8 @@ public class KompileBackend extends BasicBackend {
         FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
         sw.printIntermediate("Generating equations for hooks");
         try {
-            javaDef = (Definition) javaDef.accept(new DeleteFunctionRules(maudeHooks
-                    .stringPropertyNames(), context));
+            javaDef = (Definition) new DeleteFunctionRules(maudeHooks.stringPropertyNames(), context)
+                .visitNode(javaDef);
         } catch (TransformerException e) {
             e.printStackTrace();
         }

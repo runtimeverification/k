@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.io.Serializable;
@@ -6,8 +7,7 @@ import java.util.Set;
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformable;
-import org.kframework.kil.visitors.Visitable;
+import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
@@ -20,7 +20,7 @@ import aterm.ATermList;
  * @see Visitable
  * @see Transformable
  */
-public abstract class ASTNode implements Visitable, Transformable, Serializable {
+public abstract class ASTNode implements Serializable {
     /**
      * 
      */
@@ -281,4 +281,6 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
      * @return a copy of the ASTNode containing the same fields.
      */
     public abstract ASTNode shallowCopy();
+    
+    protected abstract <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E;
 }

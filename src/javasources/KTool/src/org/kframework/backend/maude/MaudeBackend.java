@@ -25,10 +25,10 @@ public class MaudeBackend extends BasicBackend {
     @Override
     public void run(Definition definition) throws IOException {
         try {
-            definition = (Definition) definition.accept(new FreshVariableNormalizer(context));
+            definition = (Definition) new FreshVariableNormalizer(context).visitNode(definition);
         } catch (TransformerException e) { }
         MaudeFilter maudeFilter = new MaudeFilter(context);
-        definition.accept(maudeFilter);
+        maudeFilter.visitNode(definition);
 
         final String mainModule = definition.getMainModule();
         StringBuilder maudified = maudeFilter.getResult();

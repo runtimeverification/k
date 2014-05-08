@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class LineariseTransformer extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
         }
@@ -40,7 +41,7 @@ public class LineariseTransformer extends BasicTransformer {
             VariableReplaceTransformer vrt = new VariableReplaceTransformer(context);
             Rewrite rew = (Rewrite) node.getBody();
             Term transformedLeft = rew.getLeft();
-            transformedLeft = (Term) transformedLeft.accept(vrt);
+            transformedLeft = (Term) vrt.visitNode(transformedLeft);
             rew.shallowCopy();
             rew.setLeft(transformedLeft, context);
 

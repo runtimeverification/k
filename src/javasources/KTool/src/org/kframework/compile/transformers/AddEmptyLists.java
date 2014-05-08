@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
@@ -33,7 +34,7 @@ public class AddEmptyLists extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         // traverse
         Production p = tc.getProduction();
 
@@ -79,7 +80,7 @@ public class AddEmptyLists extends BasicTransformer {
             }
         }
 
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 
     private boolean isUserListElement(String listSort, Term element, Context context) {

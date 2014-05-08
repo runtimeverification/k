@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -18,7 +18,8 @@ public class PreferAvoidFilter extends BasicTransformer {
         super("Ambiguity filter", context);
     }
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    @Override
+    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
         java.util.List<Term> prefer = new ArrayList<Term>();
         java.util.List<Term> avoid = new ArrayList<Term>();
 
@@ -56,8 +57,8 @@ public class PreferAvoidFilter extends BasicTransformer {
         }
 
         if (result == amb)
-            return super.transform(result);
+            return super.visit(result, _);
         else
-            return result.accept(this);
+            return this.visitNode(result);
     }
 }

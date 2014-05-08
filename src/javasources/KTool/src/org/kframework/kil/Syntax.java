@@ -1,9 +1,8 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -14,7 +13,8 @@ import java.util.List;
  * Contains {@link Production}s, grouped into a list {@link PriorityBlock}
  * according to precedence marked by {@code >} in the declaration.
  */
-public class Syntax extends ModuleItem {
+public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort, Enum<?>>, 
+        Interfaces.MutableList<PriorityBlock, Enum<?>> {
     /** The sort being declared. */
     Sort sort;
     java.util.List<PriorityBlock> priorityBlocks;
@@ -97,13 +97,8 @@ public class Syntax extends ModuleItem {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
@@ -142,5 +137,25 @@ public class Syntax extends ModuleItem {
     @Override
     public Syntax shallowCopy() {
         return new Syntax(this);
+    }
+
+    @Override
+    public Sort getChild(Enum<?> type) {
+        return sort;
+    }
+
+    @Override
+    public List<PriorityBlock> getChildren(Enum<?> type) {
+        return priorityBlocks;
+    }
+
+    @Override
+    public void setChildren(List<PriorityBlock> children, Enum<?> cls) {
+        this.priorityBlocks = children;
+    }
+
+    @Override
+    public void setChild(Sort child, Enum<?> type) {
+        this.sort = child;
     }
 }

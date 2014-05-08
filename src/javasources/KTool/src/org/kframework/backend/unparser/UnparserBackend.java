@@ -31,14 +31,14 @@ public class UnparserBackend extends BasicBackend {
         if (unflattenFirst) {
             ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
             try {
-                definition = (Definition)definition.accept(concretizeSyntax);
+                definition = (Definition) concretizeSyntax.visitNode(definition);
             } catch (TransformerException e) {
                 System.err.println("Error unflattening syntax:");
                 e.printStackTrace();
             }
         }
         UnparserFilter unparserFilter = new UnparserFilter(context);
-        definition.accept(unparserFilter);
+        unparserFilter.visitNode(definition);
 
         String unparsedText = unparserFilter.getResult();
 

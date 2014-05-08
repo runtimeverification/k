@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -26,7 +27,7 @@ public class CorrectConstantsTransformer extends BasicTransformer {
      * the filter will be applied in every parser call.
      */
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
         if (context.getTokenSorts().contains(tc.getSort())) {
             Production p = (Production) tc.getProduction();
             if (p.getItems().size() == 1 && p.getItems().get(0) instanceof Terminal) {
@@ -37,6 +38,6 @@ public class CorrectConstantsTransformer extends BasicTransformer {
                 return trm;
             }
         }
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 }

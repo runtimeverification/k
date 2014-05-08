@@ -9,6 +9,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
+import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.Main;
@@ -116,13 +117,12 @@ public class RunKRunCommand {
 
     public static String transformTerm(Term term, Context context) {
         try {
-            term = (Term) term.accept(new ConcretizeSyntax(context));
-            term = (Term) term.accept(new TypeInferenceSupremumFilter(context));
-            term = (Term) term.accept(new BestFitFilter(
-                    new GetFitnessUnitTypeCheckVisitor(context), context));
+            term = (Term) new ConcretizeSyntax(context).visitNode(term);
+            term = (Term) new TypeInferenceSupremumFilter(context).visitNode(term);
+            term = (Term) new BestFitFilter(
+                    new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(term);
             // as a last resort, undo concretization
-            term = (Term) term
-                    .accept(new org.kframework.krun.FlattenDisambiguationFilter(context));
+            term = (Term) new FlattenDisambiguationFilter(context).visitNode(term);
         } catch (TransformerException e) {
             e.printStackTrace();
         }
@@ -134,7 +134,7 @@ public class RunKRunCommand {
         }
 
         UnparserFilter unparser = new UnparserFilter(true, false, context);
-        term.accept(unparser);
+        unparser.visitNode(term);
         return unparser.getResult();
     }
 

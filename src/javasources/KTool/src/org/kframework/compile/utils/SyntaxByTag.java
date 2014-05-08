@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
@@ -17,18 +18,19 @@ public class SyntaxByTag extends BasicVisitor {
     private final boolean prefix;
 
     @Override
-    public void visit(Configuration node) { return; }
+    public Void visit(Configuration node, Void _) { return null; }
     
     @Override
-    public void visit(org.kframework.kil.Context node) { return; }
+    public Void visit(org.kframework.kil.Context node, Void _) { return null; }
     
     @Override
-    public void visit(Rule node) { return; }
+    public Void visit(Rule node, Void _) { return null; }
     
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
         if (key.equals("") || node.containsAttribute(key, prefix))
             productions.add(node);
+        return null;
     };
 
     public SyntaxByTag(String key, Context context) {
@@ -51,7 +53,7 @@ public class SyntaxByTag extends BasicVisitor {
 
     public static Set<Production> get(ASTNode node, String key, boolean prefix, Context context) {
         SyntaxByTag visitor = new SyntaxByTag(key, prefix, context);
-        node.accept(visitor);
+        visitor.visitNode(node);
         return visitor.getProductions();
     }
     

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -25,9 +26,9 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         superCools.clear();
-        node = (Module) super.transform(node);
+        node = (Module) super.visit(node, _);
         if (!superCools.isEmpty()) {
             node = node.shallowCopy();
             node.setItems(new ArrayList<ModuleItem>(node.getItems()));
@@ -37,17 +38,17 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         if (!node.containsAttribute(MetaK.Constants.coolingTag)) {
             return node;
         }
@@ -107,7 +108,7 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
 }

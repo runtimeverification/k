@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.Map;
@@ -25,11 +26,11 @@ public class ResolveInputStreamCell extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
+    public ASTNode visit(Cell node, Void _) throws TransformerException {
         
         Map<String, String> attributes = node.getCellAttributes();
         if (!attributes.containsKey("stream"))
-            return super.transform(node);
+            return super.visit(node, _);
         
         if (node.getCellAttributes().get("stream").equals(Constants.STDIN) && notSet){
 
@@ -43,6 +44,6 @@ public class ResolveInputStreamCell extends CopyOnWriteTransformer {
         }
         
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }

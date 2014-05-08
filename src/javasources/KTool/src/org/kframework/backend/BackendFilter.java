@@ -3,6 +3,7 @@ package org.kframework.backend;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.kompile.KompileOptions;
 
 /**
@@ -11,7 +12,7 @@ import org.kframework.kompile.KompileOptions;
  * Date: 12/17/12
  * Time: 6:24 PM
  */
-public class BackendFilter extends BasicVisitor {
+public class BackendFilter extends NonCachingVisitor {
     protected StringBuilder result;
     protected KompileOptions options;
 

@@ -21,18 +21,18 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         for (String cool : kompileOptions.supercool) {
             if (node.containsAttribute(cool)) {
-                return super.transform(node);
+                return super.visit(node, _);
             }
         }
         return node;
     }
 
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
-        Term right = (Term)node.getRight().accept(this);
+    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
+        Term right = (Term) this.visitNode(node.getRight());
         if (right != node.getRight()) {
             node = node.shallowCopy();
             node.setRight(right, context);
@@ -41,9 +41,9 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
+    public ASTNode visit(Cell node, Void _) throws TransformerException {
         if (!node.getLabel().equals("k") ) {
-            return super.transform(node);
+            return super.visit(node, _);
         }
         node = node.shallowCopy();
         if (node.getContents() instanceof KSequence) {
@@ -60,17 +60,17 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
 }

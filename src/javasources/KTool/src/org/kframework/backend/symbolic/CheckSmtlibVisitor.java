@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import org.kframework.kil.KApp;
@@ -29,13 +30,13 @@ public class CheckSmtlibVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(KApp node) {
+    public Void visit(KApp node, Void _) {
         Term klabel = node.getLabel();
 
         if (klabel instanceof KLabelConstant) {
             if (klabel.equals(KLabelConstant.KEQ)) {
                 smtValid = true;
-                return;
+                return null;
             }
 
             Set<Production> prods = context.productions.get(((KLabelConstant) klabel).getLabel());
@@ -56,6 +57,6 @@ public class CheckSmtlibVisitor extends BasicVisitor {
                 }
             }
         }
-        super.visit(node);
+        return super.visit(node, _);
     }
 }

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
@@ -25,8 +26,8 @@ public class DesugarStreams extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
-        ASTNode result = super.transform(node);
+    public ASTNode visit(Cell node, Void _) throws TransformerException {
+        ASTNode result = super.visit(node, _);
         if (!(result instanceof Cell)) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
                     KExceptionGroup.INTERNAL, 
@@ -131,17 +132,17 @@ public class DesugarStreams extends CopyOnWriteTransformer {
     }        
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) {
         return node;
     }
     
     @Override
-    public ASTNode transform(Rule node) {
+    public ASTNode visit(Rule node, Void _) {
         return node;
     }
     
     @Override
-    public ASTNode transform(Syntax node) {
+    public ASTNode visit(Syntax node, Void _) {
         return node;
     }
     

@@ -38,7 +38,7 @@ public class UnflattenBackend extends BasicBackend {
         /* first unflatten the syntax */
         ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
         try {
-            definition = (Definition)definition.accept(concretizeSyntax);
+            definition = (Definition) concretizeSyntax.visitNode(definition);
         } catch (TransformerException e) {
             System.err.println("Error unflattening syntax:");
             e.printStackTrace();
@@ -49,7 +49,7 @@ public class UnflattenBackend extends BasicBackend {
         // to unparse it since two differently kompiled definition may look the
         // same after unparsing (e.g., empty list)
         UnparserFilter unparserFilter = new UnparserFilter(context);
-        definition.accept(unparserFilter);
+        unparserFilter.visitNode(definition);
 
         String unparsedText = unparserFilter.getResult();
 

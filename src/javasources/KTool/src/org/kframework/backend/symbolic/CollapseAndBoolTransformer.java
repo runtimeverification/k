@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         return recursiveCollapseAndBool(node);
     }
     

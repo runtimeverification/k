@@ -3,9 +3,7 @@ package org.kframework.kil;
 
 import com.google.common.collect.Multimap;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +11,7 @@ import java.util.List;
 /**
  * A production. Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
  */
-public class Production extends ASTNode {
+public class Production extends ASTNode implements Interfaces.MutableList<ProductionItem, Enum<?>> {
 
     /*
      * Andrei S: It appears that the cons attribute is mandatory for all new production added during compilation, otherwise a null pointer exception can be thrown in one of the later compilation
@@ -209,13 +207,8 @@ public class Production extends ASTNode {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     public String getSort() {
@@ -355,5 +348,15 @@ public class Production extends ASTNode {
 
     public void setBinderMap(Multimap<Integer, Integer> binderMap) {
         this.binderMap = binderMap;
+    }
+
+    @Override
+    public List<ProductionItem> getChildren(Enum<?> _) {
+        return items;
+    }
+    
+    @Override
+    public void setChildren(List<ProductionItem> children, Enum<?> _) {
+        this.items = children;
     }
 }

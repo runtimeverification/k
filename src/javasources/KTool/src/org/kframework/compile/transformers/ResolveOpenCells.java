@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -20,8 +21,8 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
-        node = (Cell) super.transform(node);
+    public ASTNode visit(Cell node, Void _) throws TransformerException {
+        node = (Cell) super.visit(node, _);
         Ellipses ellipses = node.getEllipses();
         if (ellipses == Ellipses.NONE) 
             return node;
@@ -87,17 +88,17 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
         return node;
     }
 

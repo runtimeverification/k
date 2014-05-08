@@ -1,7 +1,7 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.matchers.Matchable;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 
@@ -12,11 +12,10 @@ import aterm.ATermAppl;
 
 import org.w3c.dom.Element;
 
-
 /**
  * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
  */
-public abstract class Term extends ASTNode implements Matchable, Comparable<Term> {
+public abstract class Term extends ASTNode implements Comparable<Term> {
     protected String sort;
 
     protected Term() {
@@ -74,12 +73,13 @@ public abstract class Term extends ASTNode implements Matchable, Comparable<Term
      */
     public Set<Variable> variables() {
         final Set<Variable> result = new HashSet<Variable>();
-        this.accept(new BasicVisitor(null) {
+        new BasicVisitor(null) {
             @Override
-            public void visit(Variable node) {
+            public Void visit(Variable node, Void _) {
                 result.add(node);
+                return null;
             }
-        });
+        }.visitNode(this);
         return result;
     }
 

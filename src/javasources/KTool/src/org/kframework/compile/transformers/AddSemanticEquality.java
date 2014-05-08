@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
@@ -42,7 +43,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
     private Map<String, String> equalities = new HashMap<String, String>();
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import org.kframework.kil.ASTNode;
@@ -19,12 +20,12 @@ public class SetCellContent extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
+    public ASTNode visit(Cell node, Void _) throws TransformerException {
         if (node.getLabel().equals(cell)){
             Cell newCell = node.shallowCopy();
             newCell.setContents(term);
             return newCell;
         }
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }

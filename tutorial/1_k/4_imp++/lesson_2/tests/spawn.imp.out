@@ -1,8 +1,7 @@
 <T>
     <k>
-        "x = " ~> ( HOLE,.List{","} ) ~> print ( HOLE ) ; ~> x = read ( ) 
-          ; ~> spawn (x = (x / 2) ;) ~> spawn (x = (x + 10) ;) ~> print ( (x, 
-          "\n") ) ;
+        "x = " ~> HOLE ~> print ( HOLE ) ; ~> x = (read ( )) ; ~> spawn x 
+          = (x / 2) ; ~> spawn x = (x + 10) ; ~> print ( x, "\n" ) ;
     </k>
     <store>
         #symNat(1) |-> 0

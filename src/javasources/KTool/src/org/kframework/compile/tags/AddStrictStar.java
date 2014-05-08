@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
@@ -13,7 +14,7 @@ public class AddStrictStar extends BasicTransformer {
     }
 
     @Override
-    public ASTNode transform(Production node) throws TransformerException {
+    public ASTNode visit(Production node, Void _) throws TransformerException {
         if (node.containsAttribute("strict") || node.containsAttribute("seqstrict"))
             node.putAttribute("strict*", "");
 

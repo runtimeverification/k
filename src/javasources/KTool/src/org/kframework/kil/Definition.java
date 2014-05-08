@@ -1,11 +1,10 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.compile.sharing.DataStructureSortCollector;
 import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.loader.*;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -26,7 +25,7 @@ import java.util.Map;
  * Includes contents from all {@code required}-d files.
  * @see DefinitionLoader
  */
-public class Definition extends ASTNode {
+public class Definition extends ASTNode implements Interfaces.MutableList<DefinitionItem, Enum<?>> {
 
     private List<DefinitionItem> items;
     private String mainFile;
@@ -67,6 +66,8 @@ public class Definition extends ASTNode {
 
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
     }
+    
+    
 
     public void setItems(List<DefinitionItem> items) {
         this.items = items;
@@ -100,31 +101,21 @@ public class Definition extends ASTNode {
         return mainSyntaxModule;
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
     public void preprocess(org.kframework.kil.loader.Context context) {
         // Collect information
         // this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
-        this.accept(new UpdateReferencesVisitor(context));
-        this.accept(new AddConsesVisitor(context));
-        this.accept(new UpdateAssocVisitor(context));
-        this.accept(new CollectConsesVisitor(context));
-        this.accept(new CollectBracketsVisitor(context));
-        this.accept(new CollectSubsortsVisitor(context));
-        this.accept(new CollectPrioritiesVisitor(context));
-        this.accept(new CollectStartSymbolPgmVisitor(context));
-        this.accept(new CollectConfigCellsVisitor(context));
-        this.accept(new CollectLocationsVisitor(context));
-        this.accept(new CountNodesVisitor(context));
-        this.accept(new CollectVariableTokens(context));
+        new UpdateReferencesVisitor(context).visitNode(this);
+        new AddConsesVisitor(context).visitNode(this);
+        new UpdateAssocVisitor(context).visitNode(this);
+        new CollectConsesVisitor(context).visitNode(this);
+        new CollectBracketsVisitor(context).visitNode(this);
+        new CollectSubsortsVisitor(context).visitNode(this);
+        new CollectPrioritiesVisitor(context).visitNode(this);
+        new CollectStartSymbolPgmVisitor(context).visitNode(this);
+        new CollectConfigCellsVisitor(context).visitNode(this);
+        new CollectLocationsVisitor(context).visitNode(this);
+        new CountNodesVisitor(context).visitNode(this);
+        new CollectVariableTokens(context).visitNode(this);
 
         /* collect lexical token sorts */
         context.setTokenSorts(TokenSortCollector.collectTokenSorts(this, context));
@@ -132,7 +123,7 @@ public class Definition extends ASTNode {
         /* collect the data structure sorts */
         DataStructureSortCollector dataStructureSortCollector
                 = new DataStructureSortCollector(context);
-        this.accept(dataStructureSortCollector);
+        dataStructureSortCollector.visitNode(this);
         context.setDataStructureSorts(dataStructureSortCollector.getSorts());
 
         /* set the initialized flag */
@@ -185,5 +176,20 @@ public class Definition extends ASTNode {
         if (result == null)
             throw new ConfigurationNotFound();
         return result;
+    }
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+    
+    @Override
+    public List<DefinitionItem> getChildren(Enum<?> _) {
+        return items;
+    }
+    
+    @Override
+    public void setChildren(List<DefinitionItem> children, Enum<?> _) {
+        this.items = children;
     }
 }

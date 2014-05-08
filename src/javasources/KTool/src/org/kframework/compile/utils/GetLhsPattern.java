@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
@@ -12,7 +13,7 @@ public class GetLhsPattern extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
         return node.getLeft();
     }
 

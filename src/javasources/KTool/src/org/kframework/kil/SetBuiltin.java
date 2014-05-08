@@ -1,13 +1,9 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.Visitor;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
-import static java.util.Collections.emptySet;
 
 /**
  * A builtin set
@@ -20,7 +16,18 @@ public class SetBuiltin extends CollectionBuiltin {
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+    
+    @Override
+    public DataStructureBuiltin shallowCopy(Collection<Term> baseTerms) {
+        return new SetBuiltin(sort(), baseTerms, elements());
+    }
+    
+    @Override
+    public CollectionBuiltin shallowCopy(Collection<Term> baseTerms,
+            Collection<Term> elements) {
+        return new SetBuiltin(sort(), baseTerms, elements);
     }
 }

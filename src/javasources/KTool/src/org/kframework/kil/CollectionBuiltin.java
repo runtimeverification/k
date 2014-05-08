@@ -1,13 +1,11 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Collection;
 import java.util.Collections;
-
 
 /**
  *
@@ -48,6 +46,15 @@ public class CollectionBuiltin extends DataStructureBuiltin {
     public Term shallowCopy() {
         return new CollectionBuiltin(dataStructureSort, baseTerms, elements);
     }
+    
+    @Override
+    public DataStructureBuiltin shallowCopy(Collection<Term> baseTerms) {
+        return shallowCopy(baseTerms, elements);
+    }
+    
+    public CollectionBuiltin shallowCopy(Collection<Term> baseTerms, Collection<Term> elements) {
+        return new CollectionBuiltin(dataStructureSort, baseTerms, elements);
+    }
 
     @Override
     public int hashCode() {
@@ -72,13 +79,19 @@ public class CollectionBuiltin extends DataStructureBuiltin {
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public Collection<Term> getChildren(
+            DataStructureBuiltin.ListChildren type) {
+        switch (type) {
+            case ELEMENTS:
+                return elements;
+            default:
+                return super.getChildren(type);
+        }
     }
 
 }

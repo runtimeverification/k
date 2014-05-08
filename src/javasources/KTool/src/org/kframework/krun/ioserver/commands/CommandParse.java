@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.ioserver.commands;
 
 import org.kframework.backend.maude.MaudeFilter;
@@ -30,7 +31,7 @@ public class CommandParse extends Command {
             RunProcess rp = new RunProcess();
             Term kast = rp.runParser(K.parser, stringToParse, true, sort, context);
             MaudeFilter mf = new MaudeFilter(context);
-            kast.accept(mf);
+            mf.visitNode(kast);
             succeed(mf.getResult().toString());
         } catch (TransformerException e) {
             fail("noparse");

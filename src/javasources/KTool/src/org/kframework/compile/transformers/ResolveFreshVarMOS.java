@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.Substitution;
@@ -24,25 +25,25 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Sentence node) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _) throws TransformerException {
         vars.clear();
-        super.transform(node);
+        super.visit(node, _);
         if (vars.isEmpty())
             return node;
 
-        ASTNode bodyNode = node.accept(freshSubstitution(vars));
+        ASTNode bodyNode = freshSubstitution(vars).visitNode(node);
         assert(bodyNode instanceof Sentence);
 
         return bodyNode;
     }
     
     @Override
-    public ASTNode transform(Variable node) throws TransformerException {
+    public ASTNode visit(Variable node, Void _) throws TransformerException {
         if (node.isFresh()) {
             this.vars.add(node);
             return node;
         }
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     private Substitution freshSubstitution(Set<Variable> vars) {

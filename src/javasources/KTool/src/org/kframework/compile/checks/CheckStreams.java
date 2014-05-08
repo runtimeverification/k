@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import org.kframework.kil.Cell;
@@ -17,9 +18,9 @@ public class CheckStreams extends BasicVisitor {
     }
 
     @Override
-    public void visit(Cell node) {
+    public Void visit(Cell node, Void _) {
 
-        node.getContents().accept(this);
+        this.visitNode(node.getContents());
         String stream = node.getCellAttributes().get("stream");
         if (stream != null) {
             String sortName = node.getContents().getSort();
@@ -28,5 +29,6 @@ public class CheckStreams extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), node.getFilename(), node.getLocation()));
             }
         }
+        return null;
     }
 }

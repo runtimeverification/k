@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -16,7 +17,8 @@ public class FlattenListsFilter extends BasicTransformer {
         super("Flatten lists", context);
     }
 
-    public ASTNode transform(Collection c) throws TransformerException {
+    @Override
+    public ASTNode visit(Collection c, Void _) throws TransformerException {
         boolean found;
         do {
             found = false;
@@ -32,6 +34,6 @@ public class FlattenListsFilter extends BasicTransformer {
             c.setContents(contents);
         } while (found);
 
-        return super.transform(c);
+        return super.visit(c, _);
     }
 }

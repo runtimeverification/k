@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
 import org.kframework.backend.unparser.AddBracketsFilter;
@@ -51,25 +52,26 @@ public class KRunState implements Serializable{
 
     public static Term concretize(Term result, Context context) {
         try {
-            result = (Term) result.accept(new ConcretizeSyntax(context));
-            result = (Term) result.accept(new TypeInferenceSupremumFilter(context));
-            result = (Term) result.accept(new FlattenDisambiguationFilter(context));
+            result = (Term) new ConcretizeSyntax(context).visitNode(result);
+            result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
+            result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
             if (!K.parens) {
-                result = (Term) result.accept(new AddBracketsFilter(context));
+                result = (Term) new AddBracketsFilter(context).visitNode(result);
                 try {
                     /* collect existing free variables in the result */
                     final Set<Variable> existingFreeVariables = new HashSet<Variable>();
-                    Visitor variableCollector = new BasicVisitor(context) {
+                    BasicVisitor variableCollector = new BasicVisitor(context) {
                         @Override
-                        public void visit(Variable var) {
+                        public Void visit(Variable var, Void _) {
                             existingFreeVariables.add(var);
+                            return null;
                         }
                     };
-                    result.accept(variableCollector);
+                    variableCollector.visitNode(result);
                     
                     /* add brackets */
                     AddBracketsFilter2 filter = new AddBracketsFilter2(context);
-                    result = (Term) result.accept(filter);
+                    result = (Term) filter.visitNode(result);
                     
                     /* initialize the substitution map of the filter using existing free variables */
                     Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
@@ -77,7 +79,7 @@ public class KRunState implements Serializable{
                         subst.put(var.getName(), var);
                     }
                     while (true) {
-                        Term newResult = (Term) result.accept(new SubstitutionFilter(subst, context));
+                        Term newResult = (Term) new SubstitutionFilter(subst, context).visitNode(result);
                         if (newResult.equals(result)) {
                             break;
                         }
@@ -90,7 +92,7 @@ public class KRunState implements Serializable{
                         "Could not load parser: brackets may be unsound"));
                 }
             }
-            result = (Term) result.accept(new TokenVariableToSymbolic(context));
+            result = (Term) new TokenVariableToSymbolic(context).visitNode(result);
         } catch (TransformerException e) {
             assert false : "Concretization threw a TransformerException";
         }
@@ -117,7 +119,7 @@ public class KRunState implements Serializable{
             if(K.output_mode.equals("kore")){
                 return trans.kilToKore(getResult());
             } else {
-                getResult().accept(unparser);
+                unparser.visitNode(getResult());
             }
             return unparser.getResult();
         } else {

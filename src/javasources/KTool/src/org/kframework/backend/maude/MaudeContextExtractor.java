@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude;
 
 import org.kframework.kil.*;
@@ -23,23 +24,23 @@ public class MaudeContextExtractor extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
-        node.accept(maudeFilter);
+    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
+        maudeFilter.visitNode(node);
         return null;
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;    //To change body of overridden methods use File | Settings | File Templates.
     }
 }

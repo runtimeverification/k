@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class AddCheckConstants extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _) throws TransformerException {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 

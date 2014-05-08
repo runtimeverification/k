@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 
@@ -18,17 +19,17 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
     
     
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _) throws TransformerException {
         return node;
     }
     
     @Override
-    public ASTNode transform(Sentence node) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _) throws TransformerException {
         boolean change = false;
         Set<Variable> vars = node.getBody().variables();
         KList ands = new KList();

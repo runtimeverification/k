@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.ArrayList;
@@ -6,10 +6,7 @@ import java.util.List;
 
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
@@ -21,7 +18,7 @@ import aterm.ATermList;
 /**
  * Applications that are not in sort K, or have not yet been flattened.
  */
-public class TermCons extends Term {
+public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<?>> {
     /** A unique identifier corresponding to a production, matching the SDF cons */
     protected final String cons;
     protected java.util.List<Term> contents;
@@ -146,18 +143,8 @@ public class TermCons extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
@@ -228,6 +215,16 @@ public class TermCons extends Term {
     @Override
     public TermCons shallowCopy() {
         return new TermCons(this);
+    }
+
+    @Override
+    public List<Term> getChildren(Enum<?> type) {
+        return contents;
+    }
+
+    @Override
+    public void setChildren(List<Term> children, Enum<?> cls) {
+        this.contents = children;
     }
 
 }

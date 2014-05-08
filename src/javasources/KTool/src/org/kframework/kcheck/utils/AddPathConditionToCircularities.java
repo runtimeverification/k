@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) throws TransformerException {
         
         if(node.getAttribute(AddCircularityRules.RRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
 
@@ -36,7 +37,7 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
             // extract phi and phi'
             Term cnd = node.getRequires();
             ExtractPatternless ep = new ExtractPatternless(context, false);
-            cnd = (Term) cnd.accept(ep);
+            cnd = (Term) ep.visitNode(cnd);
             
             // separate left and right
             Rewrite ruleBody = (Rewrite) node.getBody();
@@ -77,6 +78,6 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
             return newRule;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }
