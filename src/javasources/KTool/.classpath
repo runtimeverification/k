@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="lib/resources"/>
-	<classpathentry kind="lib" path="../../../lib/java/aterm-java.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/com.microsoft.z3.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/collections-generic-4.01.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/commons-cli-1.2.jar"/>

@@ -7,8 +7,6 @@ import java.util.List;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Represents the contents (all of sort KItem) joined by ~>. */
 public class KSequence extends Collection {
 
@@ -20,10 +18,6 @@ public class KSequence extends Collection {
 
     public KSequence(KSequence node) {
         super(node);
-    }
-
-    public KSequence(ATermAppl atm) {
-        super(atm);
     }
 
     public KSequence() {

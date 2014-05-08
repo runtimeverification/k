@@ -8,8 +8,6 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * A rule, configuration declaration, or context.
  * Each parses as a term, this class declares common members
@@ -38,21 +36,6 @@ public class Sentence extends ModuleItem implements MutableParent<Term, Sentence
     public Sentence() {
         super();
         attributes = new Attributes();
-    }
-
-    public Sentence(ATermAppl atm) {
-        setLocation(atm);
-
-        if (atm.getName().equals("Ensures")) {
-            ensures = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
-        }
-        atm = (ATermAppl) atm.getArgument(0);
-
-        body = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-
-        if (atm.getName().equals("RequiresSentence")) {
-            requires = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
-        }
     }
 
     public Sentence(Element element) {

@@ -6,8 +6,6 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 import java.util.Map;
 import java.util.HashMap;
 
@@ -68,12 +66,6 @@ public class GenericToken extends Token {
         super(element);
         this.tokenSort = element.getAttribute(Constants.SORT_sort_ATTR);
         this.value = element.getAttribute(Constants.VALUE_value_ATTR);
-    }
-
-    protected GenericToken(ATermAppl atm) {
-        super(atm);
-        this.tokenSort = StringUtil.getSortNameFromCons(atm.getName());
-        this.value = ((ATermAppl) atm.getArgument(0)).getName();
     }
 
     /**

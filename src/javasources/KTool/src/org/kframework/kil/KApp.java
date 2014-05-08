@@ -6,8 +6,6 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -80,14 +78,6 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
         } else {
             setChild(term);
         }
-    }
-
-    public KApp(ATermAppl atm) {
-        super(atm);
-        this.sort = KSorts.KITEM;
-
-        label = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-        child = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
     }
 
     private KApp(KApp node) {

@@ -8,8 +8,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     public enum CastType {
@@ -55,22 +53,6 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
     public Cast(Term t, Context context) {
         super(t.getSort());
         this.content = t;
-    }
-
-    public Cast(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-        String atmtype = ((ATermAppl) atm.getArgument(1)).getName();
-        if (atmtype.equals("Semantic"))
-            this.type = CastType.SEMANTIC;
-        else if (atmtype.equals("Syntactic"))
-            this.type = CastType.SYNTACTIC;
-        else if (atmtype.equals("Inner"))
-            this.type = CastType.INNER;
-        else if (atmtype.equals("Outer"))
-            this.type = CastType.OUTER;
-
-        content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
     }
 
     public Cast(String location, String filename, String sort) {

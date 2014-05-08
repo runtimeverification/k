@@ -4,8 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * Represents a <br />
  * occurring for formatting in a bag of cells
@@ -18,10 +16,6 @@ public class TermComment extends Term {
 
     public TermComment(TermComment termComment) {
         super(termComment);
-    }
-
-    public TermComment(ATermAppl element) {
-        super(element);
     }
 
     @Override

@@ -8,8 +8,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
 
@@ -51,13 +49,6 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
     public Bracket(Element element) {
         super(element);
         this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
-    }
-
-    public Bracket(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-
-        content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
     }
 
     public Bracket(String sort) {

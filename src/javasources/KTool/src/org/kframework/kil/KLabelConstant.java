@@ -15,8 +15,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * AST representation of a KLabel constant.
  */
@@ -125,13 +123,6 @@ public class KLabelConstant extends KLabel {
     public KLabelConstant(Element element) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = (List<Production>) Collections.EMPTY_LIST;
-    }
-
-    @SuppressWarnings("unchecked")
-    public KLabelConstant(ATermAppl atm) {
-        super(atm);
-        label = StringUtil.unescapeMaude(((ATermAppl) atm.getArgument(0)).getName());
         productions = (List<Production>) Collections.EMPTY_LIST;
     }
 

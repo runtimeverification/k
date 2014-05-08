@@ -6,8 +6,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * Abstract class representing a {@link KLabel} of the form #token("SORT", "VALUE").
  */
@@ -72,27 +70,10 @@ public abstract class Token extends KLabel {
         }
     }
 
-    public static KApp kAppOf(ATermAppl atm) {
-        String sort = StringUtil.getSortNameFromCons(atm.getName());
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
-            return KApp.of(new BoolBuiltin(atm));
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
-            return KApp.of(new IntBuiltin(atm));
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            return KApp.of(new StringBuiltin(atm));
-        } else {
-            return KApp.of(new GenericToken(atm));
-        }
-    }
-
     protected Token() {
     }
 
     protected Token(Element element) {
-        super(element);
-    }
-
-    protected Token(ATermAppl element) {
         super(element);
     }
 

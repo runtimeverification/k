@@ -7,8 +7,6 @@ import java.util.List;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Set contents have sort Set or SetItem */
 public class Set extends Collection {
 
@@ -16,10 +14,6 @@ public class Set extends Collection {
 
     public Set(Element element) {
         super(element);
-    }
-
-    public Set(ATermAppl atm) {
-        super(atm);
     }
 
     public Set(Set node) {

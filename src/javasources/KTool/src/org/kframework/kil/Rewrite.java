@@ -9,8 +9,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -29,15 +27,6 @@ public class Rewrite extends Term {
         temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
         temp = XML.getChildrenElements(temp).get(0);
         right = (Term) JavaClassesFactory.getTerm(temp);
-        recomputeSort(context);
-    }
-
-    public Rewrite(ATermAppl atm, Context context) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-
-        left = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-        right = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
         recomputeSort(context);
     }
 
