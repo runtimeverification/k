@@ -17,7 +17,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.mockito.Mockito;
 
 import java.util.Map;
@@ -102,14 +102,10 @@ public class LTLModelCheckerTest {
 
         // test ResolverLTLAttributes transformer
         ResolveLtlAttributes resolveLtlAttributes = new ResolveLtlAttributes(context);
-        try {
-            rule = (Rule) resolveLtlAttributes.visitNode(rule);
-            Assert.assertEquals(rule.getBody(), outputRule.getBody());
-            Assert.assertEquals(rule.getRequires(), outputRule.getRequires());
-            Assert.assertEquals(rule.getEnsures(), outputRule.getEnsures());
-        } catch (TransformerException e) {
-            Assert.fail();
-        }
+        rule = (Rule) resolveLtlAttributes.visitNode(rule);
+        Assert.assertEquals(rule.getBody(), outputRule.getBody());
+        Assert.assertEquals(rule.getRequires(), outputRule.getRequires());
+        Assert.assertEquals(rule.getEnsures(), outputRule.getEnsures());
     }
 
 }

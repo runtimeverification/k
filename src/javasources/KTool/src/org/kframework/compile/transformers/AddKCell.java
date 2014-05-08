@@ -10,7 +10,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddKCell extends CopyOnWriteTransformer {
     /*
@@ -35,7 +34,7 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module module, Void _) throws TransformerException {
+    public ASTNode visit(Module module, Void _)  {
         newRules = new ArrayList<ModuleItem>();
         Module newModule = (Module)super.visit(module, _);
         Module returnModule;
@@ -79,7 +78,7 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration cfg, Void _) throws TransformerException {
+    public ASTNode visit(Configuration cfg, Void _)  {
         if (!intersects(MetaK.getAllCellLabels(cfg.getBody(), context), komputationCells)) {
             cfg = cfg.shallowCopy();
             Bag bag;

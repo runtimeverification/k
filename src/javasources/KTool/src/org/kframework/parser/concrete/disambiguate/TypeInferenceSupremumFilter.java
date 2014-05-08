@@ -18,7 +18,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 public class TypeInferenceSupremumFilter extends BasicTransformer {
 
@@ -27,7 +27,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         // find the groups of terms alike
 
         Set<Term> processed = new HashSet<Term>();

@@ -33,7 +33,7 @@ public class CompilerSteps<T extends ASTNode> extends BasicCompilerStep<T> {
         steps.add(t);
     }
 
-    public void add(AbstractTransformer t) {
+    public void add(AbstractTransformer<RuntimeException> t) {
         steps.add(new CompilerTransformerStep<T>(t, context));
     }
 

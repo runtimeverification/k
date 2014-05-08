@@ -19,7 +19,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 
@@ -32,7 +31,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
             
             // get the corresponding reachability rule

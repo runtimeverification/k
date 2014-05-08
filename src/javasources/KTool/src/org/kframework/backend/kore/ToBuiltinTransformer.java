@@ -19,7 +19,6 @@ import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /*
  * this class will translate List,Set,Map to Builtins
@@ -35,7 +34,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(ListItem node, Void _) throws TransformerException{
+    public ASTNode visit(ListItem node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.getItem()));
@@ -45,7 +44,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(MapItem node, Void _) throws TransformerException{
+    public ASTNode visit(MapItem node, Void _) {
         
         HashMap<Term,Term> temp = new HashMap<Term,Term>();
         temp.put((Term) this.visitNode(node.getKey()), (Term) this.visitNode(node.getValue()));
@@ -54,7 +53,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(SetItem node, Void _) throws TransformerException{
+    public ASTNode visit(SetItem node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.getItem()));
@@ -64,7 +63,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Set node, Void _) throws TransformerException{
+    public ASTNode visit(Set node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
         ArrayList<Term> elements = new ArrayList<Term>();
@@ -85,7 +84,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Map node, Void _) throws TransformerException{
+    public ASTNode visit(Map node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
         HashMap<Term,Term> elements = new HashMap<Term,Term>();
@@ -104,7 +103,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
                 ,baseTerms,elements);
     }
     
-    private int dealWithBaseItem(ArrayList<Term> elementRight,ArrayList<Term> list,int left,int right) throws TransformerException{
+    private int dealWithBaseItem(ArrayList<Term> elementRight,ArrayList<Term> list,int left,int right) {
         
         int index = left;
         for( ;index <= right; ++index){
@@ -119,7 +118,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(List node, Void _) throws TransformerException{
+    public ASTNode visit(List node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
         ArrayList<Term> elementLeft = new ArrayList<Term>();

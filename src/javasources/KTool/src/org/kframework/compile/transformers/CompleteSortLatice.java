@@ -13,14 +13,12 @@ import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 
 /**
  * Completes the sort lattice as follows:
@@ -54,7 +52,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         Module transformedNode = node.shallowCopy();
         transformedNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 

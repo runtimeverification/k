@@ -18,7 +18,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -32,7 +32,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         List<Term> children = new ArrayList<Term>();
         boolean klist = false;
         Term krw = null;
@@ -57,7 +57,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(KSequence ks, Void _) throws TransformerException {
+    public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
         if (ks.getContents().size() == 2) {
             ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
             ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
@@ -68,7 +68,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(KList ks, Void _) throws TransformerException {
+    public ASTNode visit(KList ks, Void _) throws ParseFailedException {
         if (ks.getContents().size() == 2) {
             ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
             ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
@@ -79,7 +79,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(MapItem mi, Void _) throws TransformerException {
+    public ASTNode visit(MapItem mi, Void _) throws ParseFailedException {
         mi.setKey((Term) secondFilter.visitNode(mi.getKey()));
         mi.setValue((Term) secondFilter.visitNode(mi.getValue()));
 
@@ -87,7 +87,7 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         if (tc.getProduction() == null)
             System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
         if (tc.getProduction().isListDecl()) {
@@ -122,22 +122,22 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode visit(Rewrite ks, Void _) throws TransformerException {
+        public ASTNode visit(Rewrite ks, Void _) throws ParseFailedException {
             String msg = "Due to typing errors, => is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
-            TransformerException exception = null;
+        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+            ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
                     result = this.visitNode(t);
                     terms.add((Term) result);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     exception = e;
                 }
             }

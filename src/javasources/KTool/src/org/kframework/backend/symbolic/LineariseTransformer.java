@@ -15,8 +15,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 /**
  * Replace each variable X in the left hand side with a new one Y
@@ -24,14 +23,14 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  *
  * @author andreiarusoaie
  */
-public class LineariseTransformer extends BasicTransformer {
+public class LineariseTransformer extends CopyOnWriteTransformer {
 
     public LineariseTransformer(Context context) {
         super("Linearise Rules", context);
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
         }

@@ -5,7 +5,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class RenameVariablesTransformer extends CopyOnWriteTransformer {
     protected RenameStrategy renameStrategy;
@@ -17,7 +16,7 @@ public class RenameVariablesTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Variable variable, Void _) throws TransformerException {
+    public ASTNode visit(Variable variable, Void _)  {
         variable = (Variable)super.visit(variable, _);
         String oldName = variable.getName();
         if (oldName != null && oldName.startsWith("$")) {

@@ -18,7 +18,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
@@ -51,7 +51,7 @@ public class ProgramLoader {
      *            If true, then apply KAppModifier to AST.
      */
     public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, Context context) throws IOException,
-            TransformerException {
+            ParseFailedException {
         File tbl = new File(context.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
         // ------------------------------------- import files in Stratego
@@ -88,7 +88,7 @@ public class ProgramLoader {
         return out;
     }
 
-    public static ASTNode loadPgmAst(String content, String filename, String startSymbol, Context context) throws IOException, TransformerException {
+    public static ASTNode loadPgmAst(String content, String filename, String startSymbol, Context context) throws IOException, ParseFailedException {
         return loadPgmAst(content, filename, true, startSymbol, context);
     }
 
@@ -98,7 +98,7 @@ public class ProgramLoader {
      * Save it in kompiled cache under pgm.maude.
      */
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
-            Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
+            Context context, GlobalSettings.ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         assert context.definedSorts.contains(startSymbol) : "The start symbol must be declared in the definition. Found: " + startSymbol;
 
@@ -141,7 +141,7 @@ public class ProgramLoader {
                     out = new TreeCleanerVisitor(context).visitNode(out);
                     if (context.globalOptions.debug)
                         System.out.println("Clean: " + out + "\n");
-                } catch (TransformerException te) {
+                } catch (ParseFailedException te) {
                     ParseError perror = parser.getErrors();
 
                     String msg = content.length() == perror.position ?
@@ -149,7 +149,7 @@ public class ProgramLoader {
                         "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
                     String loc = "(" + perror.line + "," + perror.column + "," +
                             perror.line + "," + (perror.column + 1) + ")";
-                    throw new TransformerException(new KException(
+                    throw new ParseFailedException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
                 out = new PriorityFilter(context).visitNode(out);
@@ -164,7 +164,7 @@ public class ProgramLoader {
             return (Term) out;
         } catch (IOException e) {
             String msg = "Cannot parse program: " + e.getLocalizedMessage();
-            throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, "File system."));
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, "File system."));
         }
     }
 }

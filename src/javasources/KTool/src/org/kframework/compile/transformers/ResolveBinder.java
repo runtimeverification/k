@@ -20,8 +20,6 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -32,7 +30,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class ResolveBinder extends CopyOnWriteTransformer {
 
@@ -51,7 +48,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         Set<Production> prods = SyntaxByTag.get(node, "binder", context);
         if (prods.isEmpty())
             return node;

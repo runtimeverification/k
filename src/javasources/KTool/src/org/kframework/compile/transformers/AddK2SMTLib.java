@@ -17,7 +17,6 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 
@@ -45,7 +44,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 

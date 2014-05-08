@@ -6,7 +6,6 @@ import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 
 public class FreshCondToFreshVar extends CopyOnWriteTransformer {
 
@@ -25,7 +23,7 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Sentence node, Void _) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _)  {
         //TODO:  maybe now fresh belongs in the ensures?  update this accordingly if so.
         if (null == node.getRequires())
             return node;
@@ -46,7 +44,7 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(TermCons node, Void _) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _)  {
         if (MetaK.Constants.freshCons.equals(node.getCons())) {
             if (node.getContents().size() != 1) {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,

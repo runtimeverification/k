@@ -4,7 +4,7 @@ package org.kframework.krun.ioserver.commands;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.K;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
@@ -33,7 +33,7 @@ public class CommandParse extends Command {
             MaudeFilter mf = new MaudeFilter(context);
             mf.visitNode(kast);
             succeed(mf.getResult().toString());
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             fail("noparse");
         }
     }

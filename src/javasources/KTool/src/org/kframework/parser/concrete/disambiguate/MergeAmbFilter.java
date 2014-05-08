@@ -11,7 +11,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 public class MergeAmbFilter extends BasicTransformer {
     public MergeAmbFilter(Context context) {
@@ -26,7 +26,7 @@ public class MergeAmbFilter extends BasicTransformer {
      * if the children of every A are located in the same places (see isSimilar(...)).
      */
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
 
         java.util.List<Term> children = new ArrayList<Term>();
         //IStrategoTerm currentList = amb.getSubterm(0);

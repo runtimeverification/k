@@ -8,7 +8,6 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.file.KPaths;
 
 import java.io.File;
@@ -43,7 +42,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
 
         for (String nst : notSymbolicTags)
             if (node.containsAttribute(nst)) {

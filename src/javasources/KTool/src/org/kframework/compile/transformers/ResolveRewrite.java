@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Initially created by: Traian Florin Serbanuta
@@ -17,7 +16,7 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         Term body = node.getBody();
         if (body instanceof Rewrite) return node;
         node = node.shallowCopy();
@@ -29,17 +28,17 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;    //To change body of overridden methods use File | Settings | File Templates.
     }
 
@@ -57,7 +56,7 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(Rewrite node, Void _) throws TransformerException {
+        public ASTNode visit(Rewrite node, Void _)  {
             switch (lrhs) {
                 case LEFT:
                     return node.getLeft();

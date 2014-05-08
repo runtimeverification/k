@@ -3,7 +3,6 @@ package org.kframework.compile;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
@@ -20,7 +19,7 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _) throws TransformerException {
+    public ASTNode visit(Cell node, Void _)  {
         if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
             if (node.variables().isEmpty()) {
                 return new Bag();

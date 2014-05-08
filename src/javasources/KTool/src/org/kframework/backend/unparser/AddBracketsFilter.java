@@ -6,7 +6,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -20,7 +19,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(TermCons ast, Void _) throws TransformerException {
+    public ASTNode visit(TermCons ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -30,7 +29,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(Collection ast, Void _) throws TransformerException {
+    public ASTNode visit(Collection ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -40,7 +39,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(MapItem ast, Void _) throws TransformerException {
+    public ASTNode visit(MapItem ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -50,7 +49,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(Cell ast, Void _) throws TransformerException {
+    public ASTNode visit(Cell ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -60,7 +59,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(CollectionItem ast, Void _) throws TransformerException {
+    public ASTNode visit(CollectionItem ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -70,7 +69,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(KApp ast, Void _) throws TransformerException {
+    public ASTNode visit(KApp ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -80,7 +79,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(Hole ast, Void _) throws TransformerException {
+    public ASTNode visit(Hole ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -90,7 +89,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(Freezer ast, Void _) throws TransformerException {
+    public ASTNode visit(Freezer ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -100,7 +99,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(KInjectedLabel ast, Void _) throws TransformerException {
+    public ASTNode visit(KInjectedLabel ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
         boolean needsParens = postpare();
@@ -389,7 +388,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     private Stack<Term> leftCapture = new Stack<Term>(), rightCapture = new Stack<Term>();
     private Stack<Boolean> parens = new Stack<Boolean>();
 
-    private void prepare(Term ast) throws TransformerException {
+    private void prepare(Term ast)  {
         if (!stack.empty()) {
             Term lc = null, rc = null;
             Term outer = stack.peek();
@@ -444,7 +443,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return false;
     }
 
-    private boolean needsParentheses(Term inner, Term outer, Term leftCapture, Term rightCapture) throws TransformerException {
+    private boolean needsParentheses(Term inner, Term outer, Term leftCapture, Term rightCapture)  {
         try {
             boolean priority = isPriorityWrong(outer, inner);
             boolean inversePriority = isPriorityWrong(inner, outer);

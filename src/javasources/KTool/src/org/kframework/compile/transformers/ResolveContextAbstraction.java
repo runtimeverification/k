@@ -9,7 +9,6 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -31,29 +30,29 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         if (config.isEmpty()) return node;
         return super.visit(node, _);
     }
     
     @Override
-    public ASTNode visit(Configuration node, Void _) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
     
     @Override
-    public ASTNode visit(Syntax node, Void _) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
     
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
     
     
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if (MetaK.isAnywhere(node)) return node;
         boolean change = false;        
         if (MetaK.getTopCells(node.getBody(), context).isEmpty()) return node;
@@ -116,7 +115,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _) throws TransformerException {
+    public ASTNode visit(Cell node, Void _)  {
         boolean change = false;
         Cell cell = (Cell)super.visit(node, _);
         if (cell.getEllipses() == Ellipses.NONE) return cell;

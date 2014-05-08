@@ -15,7 +15,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /*
  * Add to each sort a labeled production for that sort.
@@ -42,7 +41,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Module module, Void _) throws TransformerException {
+    public ASTNode visit(Module module, Void _)  {
         if (module.isPredefined()) {
             return module;
         }
@@ -50,7 +49,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Syntax syntax, Void _) throws TransformerException {
+    public ASTNode visit(Syntax syntax, Void _)  {
         if (labeledSorts.contains(syntax.getSort().getName())) {
             return syntax;
         }

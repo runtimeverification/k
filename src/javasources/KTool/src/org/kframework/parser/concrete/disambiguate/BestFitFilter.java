@@ -6,7 +6,7 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 import java.util.ArrayList;
 
@@ -20,7 +20,7 @@ public class BestFitFilter extends BasicTransformer {
     private GetFitnessUnitBasicVisitor getFitnessUnit;
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         amb = (Ambiguity) super.visit(amb, _);
 
         int maximum = getFitnessUnit(amb.getContents().get(0));

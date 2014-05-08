@@ -5,7 +5,7 @@ import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.KRunExecutionException;
@@ -395,11 +395,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     }
 
     public void showCompareFrame(KRunState first, KRunState second, Transition transition) {
-        try {
-            new DiffFrame(first, second, null, definitionHelper).setVisible(true);
-        } catch (TransformerException e1) {
-            showMessage("Unable to compare configurations due to : \n" + e1.getMessage());
-        }
+        new DiffFrame(first, second, null, definitionHelper).setVisible(true);
     }
 
     public void addActionForEdit() {
@@ -736,16 +732,6 @@ public class GraphRepresentation extends JPanel implements ItemListener {
 
     private static String getXmlFromKrunState(KRunState pick, Context definitionHelper) {
         Term term = pick.getResult();
-        try {
-            term = (Term) new ConcretizeSyntax(definitionHelper).visitNode(term);
-            term = (Term) new TypeInferenceSupremumFilter(definitionHelper).visitNode(term);
-            term = (Term) new BestFitFilter(
-                    new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper).visitNode(term);
-            // as a last resort, undo concretization
-            term = (Term) new FlattenDisambiguationFilter(definitionHelper).visitNode(term);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
         if (term.getClass() == Cell.class) {
             Cell generatedTop = (Cell) term;
             if (generatedTop.getLabel().equals("generatedTop")) {
@@ -760,32 +746,5 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         unparser.visitNode(term);
         return unparser.getResult();
     }
-
-    private static String getStrFromKrunState(KRunState pick, Context definitionHelper) {
-        Term term = pick.getResult();
-        try {
-            term = (Term) new ConcretizeSyntax(definitionHelper).visitNode(term);
-            term = (Term) new TypeInferenceSupremumFilter(definitionHelper).visitNode(term);
-            term = (Term) new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper).visitNode(term);
-            // as a last resort, undo concretization
-            term = (Term) new org.kframework.krun.FlattenDisambiguationFilter(definitionHelper).visitNode(term);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
-        if (term.getClass() == Cell.class) {
-            Cell generatedTop = (Cell) term;
-            if (generatedTop.getLabel().equals("generatedTop")) {
-                term = generatedTop.getContents();
-            }
-        }
-        // set the color map
-        ColorVisitor cv = new ColorVisitor(definitionHelper);
-        cv.visitNode(term);
-
-        UnparserFilter unparser = new UnparserFilter(true, false, definitionHelper);
-        unparser.visitNode(term);
-        return unparser.getResult();
-    }
-
 }
 

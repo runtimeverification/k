@@ -8,7 +8,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 public class PriorityFilter extends BasicTransformer {
     public PriorityFilter(Context context) {
@@ -16,7 +16,7 @@ public class PriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         if (tc.getProduction() == null)
             System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
         if (tc.getProduction().isListDecl()) {

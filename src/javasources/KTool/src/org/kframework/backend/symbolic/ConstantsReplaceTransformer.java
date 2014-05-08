@@ -11,7 +11,6 @@ import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Replace data constants with symbolic values and
@@ -28,7 +27,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(KApp node, Void _) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         
         if (node.getLabel() instanceof Token) {
 //            Token token = ((Token) node.getLabel());

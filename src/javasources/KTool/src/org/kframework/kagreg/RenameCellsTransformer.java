@@ -5,7 +5,6 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class RenameCellsTransformer extends CopyOnWriteTransformer {
     protected RenameStrategy renameStrategy;
@@ -17,7 +16,7 @@ public class RenameCellsTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Cell cell, Void _) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _)  {
         //assert cell.getLabel().equals(cell.getEndLabel());
         //System.out.println("found cell " + cell.getLabel() + " - " + cell.getEndLabel());
         cell = (Cell)super.visit(cell, _);

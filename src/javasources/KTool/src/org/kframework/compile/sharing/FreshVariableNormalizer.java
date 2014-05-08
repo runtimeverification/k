@@ -6,11 +6,9 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * Class implementing a transformation which normalizes the fresh variable indices in rules
@@ -37,11 +35,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
             return rule;
         }
 
-        try {
-            return (Rule) super.visit(rule, _);
-        } catch (TransformerException e) {
-            return rule;
-        }
+        return (Rule) super.visit(rule, _);
     }
 
     @Override

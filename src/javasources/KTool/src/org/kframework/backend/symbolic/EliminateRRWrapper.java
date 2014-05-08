@@ -8,7 +8,6 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class EliminateRRWrapper extends CopyOnWriteTransformer {
 
@@ -19,7 +18,7 @@ public class EliminateRRWrapper extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp node, Void _) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         if (node.getLabel().toString().equals(ReachabilityRuleToKRule.RR_COND)) {
                 KList contents = (KList) node.getChild();
                 lphi = contents.getContents().get(0);

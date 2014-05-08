@@ -5,7 +5,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,7 +25,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         builtinSorts.clear();
         super.visit(node, _);
         if (builtinSorts.isEmpty()) return node;
@@ -66,24 +65,24 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Sort node, Void _) throws TransformerException {
+    public ASTNode visit(Sort node, Void _)  {
         if (MetaK.isBuiltinSort(node.getName()))
                 builtinSorts.add(node.getName());
         return node;
     }
     
     @Override
-    public ASTNode visit(Configuration node, Void _) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         return node;
     }
 

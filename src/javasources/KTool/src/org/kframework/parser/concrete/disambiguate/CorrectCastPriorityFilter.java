@@ -17,7 +17,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -31,7 +31,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Cast cst, Void _) throws TransformerException {
+    public ASTNode visit(Cast cst, Void _) throws ParseFailedException {
         // removed variables and allowing only Cast
         // if I find a Cast near a variable, then I remove the cast and translate the sort restrictions to the variable
         // this should be done only if the casting is syntactic, because on semantic cast there should be another branch
@@ -63,7 +63,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode visit(KSequence ks, Void _) throws TransformerException {
+        public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
             assert ks.getContents().size() <= 2;
 
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
@@ -72,14 +72,14 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode visit(Rewrite ks, Void _) throws TransformerException {
+        public ASTNode visit(Rewrite ks, Void _) throws ParseFailedException {
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
         @Override
-        public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+        public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
             assert tc.getProduction() != null : this.getClass() + ":" + " cons not found." + tc.getCons();
 
             int lastElement = tc.getProduction().getItems().size() - 1;
@@ -92,15 +92,15 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
-            TransformerException exception = null;
+        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+            ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
                     result = this.visitNode(t);
                     terms.add((Term) result);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     exception = e;
                 }
             }

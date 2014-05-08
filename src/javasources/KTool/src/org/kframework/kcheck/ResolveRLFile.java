@@ -9,8 +9,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.DefinitionLoader;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
@@ -41,8 +40,8 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
                         GlobalSettings.CHECK, "K", context);
             } catch (IOException e1) {
                 e1.printStackTrace();
-            } catch (TransformerException e1) {
-                e1.printStackTrace();
+            } catch (ParseFailedException e1) {
+                e1.report();
             }
         }
     }

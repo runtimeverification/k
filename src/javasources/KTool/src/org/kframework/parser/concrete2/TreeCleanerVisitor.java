@@ -10,7 +10,7 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 /**
  * Remove parsing artifacts such as single element ambiguities.
@@ -22,7 +22,7 @@ public class TreeCleanerVisitor extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp node, Void _) throws TransformerException {
+    public ASTNode visit(KApp node, Void _) throws ParseFailedException {
         ASTNode rez = this.visitNode(node.getChild());
         assert rez != null;
         if (rez instanceof KList)
@@ -36,7 +36,7 @@ public class TreeCleanerVisitor extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(KList node, Void _) throws TransformerException {
+    public ASTNode visit(KList node, Void _) throws ParseFailedException {
         java.util.List<Term> contents = new ArrayList<>();
         for (Term t : node.getContents()) {
             ASTNode transformed = this.visitNode(t);

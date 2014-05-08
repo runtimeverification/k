@@ -14,7 +14,7 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -29,7 +29,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
     Term parentmi = null;
 
     @Override
-    public ASTNode visit(Rewrite rw, Void _) throws TransformerException {
+    public ASTNode visit(Rewrite rw, Void _) throws ParseFailedException {
         if (parent != null || parentks != null || parentmi != null) {
             String msg = "Due to typing errors, rewrite is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, rw.getFilename(), rw.getLocation());
@@ -43,7 +43,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(MapItem mi, Void _) throws TransformerException {
+    public ASTNode visit(MapItem mi, Void _) throws ParseFailedException {
         parent = null;
         parentks = null;
 
@@ -62,7 +62,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(KSequence ks, Void _) throws TransformerException {
+    public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
         if (parent != null || parentks != null) {
             String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
@@ -87,7 +87,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         if (tc.getProduction().isListDecl()) {
             Term t = tc.getContents().get(0);
             parent = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? tc : null;
@@ -122,11 +122,11 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
         TermCons lp = parent;
         KSequence ks = parentks;
         Term mi = parentmi;
-        TransformerException exception = null;
+        ParseFailedException exception = null;
         ArrayList<Term> terms = new ArrayList<Term>();
         for (Term t : node.getContents()) {
             ASTNode result = null;
@@ -139,7 +139,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
 
                 result = this.visitNode(t);
                 terms.add((Term) result);
-            } catch (TransformerException e) {
+            } catch (ParseFailedException e) {
                 exception = e;
             }
             parent = null;

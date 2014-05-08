@@ -17,7 +17,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -30,7 +30,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Sentence r, Void _) throws TransformerException {
+    public ASTNode visit(Sentence r, Void _) throws ParseFailedException {
         r = (Sentence) new RemoveDuplicateVariables(context).visitNode(r);
 
         CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
@@ -48,7 +48,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                         if (v1 != v2)
                             if (!v1.getSort().equals(v2.getSort())) {
                                 String msg = "Variable '" + v1.getName() + "' declared with two different sorts: " + v1.getSort() + " and " + v2.getSort();
-                                throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getFilename(), v1.getLocation()));
+                                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getFilename(), v1.getLocation()));
                             }
                     // if there are more than one declaration then prefer the one that is semantically typed
                     if (!v1.isSyntactic()) {
@@ -66,7 +66,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
             r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
             r = (Sentence) new TypeSystemFilter(context).visitNode(r);
             r = (Sentence) new TypeInferenceSupremumFilter(context).visitNode(r);
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             e.report();
         }
 
@@ -131,7 +131,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                 if (solutions.size() == 0) {
                     if (fails != null) {
                         String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
-                        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
                     } else {
                         // Failure when in the same solution I can't find a unique sort for a specific variable.
                         String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
@@ -139,7 +139,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                         for (String vv1 : failsAmb)
                             msg += vv1 + ", ";
                         msg = msg.substring(0, msg.length() - 2);
-                        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
 
                     }
                 } else if (solutions.size() == 1) {
@@ -152,7 +152,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                     }
                     try {
                         r = (Sentence) new VariableTypeFilter(varDeclMap, true, context).visitNode(r);
-                    } catch (TransformerException e) {
+                    } catch (ParseFailedException e) {
                         e.report();
                     }
                     // correct the sorts for each variable after type inference
@@ -204,7 +204,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                     if (!varDeclMap.isEmpty()) {
                         try {
                             r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
-                        } catch (TransformerException e) {
+                        } catch (ParseFailedException e) {
                             e.report();
                         }
                     }
@@ -225,7 +225,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
                             for (String vv1 : s.getValue())
                                 msg += vv1 + ", ";
                             msg = msg.substring(0, msg.length() - 2);
-                            throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
                         }
                     }
                     // The above loop looks for variables that can have multiple sorts, collected from multiple solutions.
@@ -257,7 +257,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+        public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
             Set<Term> maxterms = new HashSet<Term>();
             for (Term t : amb.getContents()) {
                 if (t instanceof Variable) {

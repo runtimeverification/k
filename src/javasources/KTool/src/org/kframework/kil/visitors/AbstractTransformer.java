@@ -4,7 +4,6 @@ package org.kframework.kil.visitors;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * A helper class designed to encapsulate functionality shared between 
@@ -15,7 +14,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * @author dwightguth
  *
  */
-public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode, TransformerException> {
+public abstract class AbstractTransformer<E extends Throwable> extends AbstractVisitor<Void, ASTNode, E> {
 
     public AbstractTransformer(String name, Context context) {
         super(name, context);

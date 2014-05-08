@@ -10,7 +10,7 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 public class TypeSystemFilter extends BasicTransformer {
 
@@ -19,7 +19,7 @@ public class TypeSystemFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         // choose only the allowed subsorts for a TermCons
         if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -42,7 +42,7 @@ public class TypeSystemFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Cast cast, Void _) throws TransformerException {
+    public ASTNode visit(Cast cast, Void _) throws ParseFailedException {
         cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), context).visitNode(cast.getContent()));
         return super.visit(cast, _);
     }

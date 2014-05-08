@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -21,12 +20,12 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
     
     
     @Override
-    public ASTNode visit(Syntax node, Void _) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
     
     @Override
-    public ASTNode visit(TermCons node, Void _) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _)  {
         boolean change = false;
         ArrayList<Term> terms = new ArrayList<Term>();
         Production prod = context.conses.get(node.getCons());

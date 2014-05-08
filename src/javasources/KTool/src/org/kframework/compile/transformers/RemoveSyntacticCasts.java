@@ -5,7 +5,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class RemoveSyntacticCasts extends CopyOnWriteTransformer {
 
@@ -14,7 +13,7 @@ public class RemoveSyntacticCasts extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cast node, Void _) throws TransformerException {
+    public ASTNode visit(Cast node, Void _)  {
         // System.out.println("Remove: " + node.getFilename() + ":" + node.getLocation());
         // TODO (RaduM): remove only syntactic casts when variable type inference is updated
         //if (node.isSyntactic())

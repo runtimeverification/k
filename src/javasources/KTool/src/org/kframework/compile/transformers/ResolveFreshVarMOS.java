@@ -8,13 +8,11 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 
 public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
 
@@ -25,7 +23,7 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Sentence node, Void _) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _)  {
         vars.clear();
         super.visit(node, _);
         if (vars.isEmpty())
@@ -38,7 +36,7 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Variable node, Void _) throws TransformerException {
+    public ASTNode visit(Variable node, Void _)  {
         if (node.isFresh()) {
             this.vars.add(node);
             return node;

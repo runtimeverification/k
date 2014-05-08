@@ -5,7 +5,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ColorSetting;
 import org.kframework.parser.DefinitionLoader;
 
@@ -31,7 +31,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     private boolean atTop = true;
 
     @Override
-    public ASTNode visit(TermCons ast, Void _) throws TransformerException {
+    public ASTNode visit(TermCons ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
@@ -39,7 +39,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Collection ast, Void _) throws TransformerException {
+    public ASTNode visit(Collection ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
@@ -47,7 +47,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(MapItem ast, Void _) throws TransformerException {
+    public ASTNode visit(MapItem ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
@@ -55,7 +55,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell ast, Void _) throws TransformerException {
+    public ASTNode visit(Cell ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
@@ -63,7 +63,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(CollectionItem ast, Void _) throws TransformerException {
+    public ASTNode visit(CollectionItem ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
@@ -71,7 +71,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp ast, Void _) throws TransformerException {
+    public ASTNode visit(KApp ast, Void _) throws ParseFailedException {
         if (ast.getLabel() instanceof Token) return ast;
         boolean tmp = atTop;
         atTop = false;
@@ -80,7 +80,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Hole ast, Void _) throws TransformerException {
+    public ASTNode visit(Hole ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
@@ -88,7 +88,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Freezer ast, Void _) throws TransformerException {
+    public ASTNode visit(Freezer ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
@@ -96,14 +96,14 @@ public class AddBracketsFilter2 extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(KInjectedLabel ast, Void _) throws TransformerException {
+    public ASTNode visit(KInjectedLabel ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
         ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
     
-    private ASTNode postpare(Term ast, boolean atTop) throws TransformerException {
+    private ASTNode postpare(Term ast, boolean atTop) throws ParseFailedException {
         if (reparsed != null) {
             ASTNode result = addBracketsIfNeeded(ast);
             if (atTop && result instanceof Bracket) {
@@ -122,7 +122,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
                 return replaceWithVar(ast);
             }
             return new AddBracketsFilter2(reparsed, context).visitNode(ast);
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             return replaceWithVar(ast);
         }
     }
@@ -151,7 +151,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
         return var;
     }
 
-    private ASTNode addBracketsIfNeeded(Term ast) throws TransformerException {
+    private ASTNode addBracketsIfNeeded(Term ast) throws ParseFailedException {
         TraverseForest trans = new TraverseForest(ast, context);
         reparsed = (Term) trans.visitNode(reparsed);
         if (trans.needsParens) {
@@ -187,7 +187,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
         private boolean needsCast;
         private String realLocation;
 
-        public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+        public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
             realLocation = ast.getLocation();
             for (int i = amb.getContents().size() - 1; i >= 0; i--) {
                 Term t = amb.getContents().get(i);
@@ -206,7 +206,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
             return amb;
         }
 
-        public ASTNode visit(Term t, Void _) throws TransformerException {
+        public ASTNode visit(Term t, Void _) throws ParseFailedException {
             if (t.equals(ast) && t.getLocation().equals(realLocation)) {
                 hasTerm = true; 
             }

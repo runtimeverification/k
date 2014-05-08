@@ -5,7 +5,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -27,7 +27,7 @@ public class VariableTypeFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable r, Void _) throws TransformerException {
+    public ASTNode visit(Variable r, Void _) throws ParseFailedException {
         Variable correctVar = variableTypes.get(r.getName());
         if (correctVar == null)
             return r;

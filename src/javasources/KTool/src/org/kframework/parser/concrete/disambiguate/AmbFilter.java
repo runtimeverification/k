@@ -7,7 +7,7 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -19,7 +19,7 @@ public class AmbFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         String msg = "Parsing ambiguity. Arbitrarily choosing the first.";
 
         for (int i = 0; i < amb.getContents().size(); i++) {

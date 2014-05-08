@@ -6,9 +6,6 @@ import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.AbstractTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -31,14 +28,14 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         return ((Module)super.visit(node, _)).addModuleItems(rules);
     }
     
     /* assumes term has exactly one rewrite and returns the list 
      * C[v], v, t1, t2 such that
      * v is a fresh variable and term = C[t1 => t2] */
-    private List<Term> splitRewrite(Term term) throws TransformerException {
+    private List<Term> splitRewrite(Term term)  {
         final Variable v;
         if (kompileOptions.backend.java()) {
             /* the java rewrite engine only supports heating/cooling on KItem */
@@ -66,7 +63,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
             v = Variable.getFreshVar(KSorts.K);
         }
         final List<Term> list = new ArrayList<Term>();
-        AbstractTransformer transformer = new CopyOnWriteTransformer("splitter", context) {
+        CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("splitter", context) {
             @Override public ASTNode visit(Rewrite rewrite, Void _) {
                 list.add(rewrite.getLeft());
                 list.add(rewrite.getRight());
@@ -79,24 +76,19 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         return list;
     }
     
-    private Term substituteHole(Term term, Term replacement) throws TransformerException {
+    private Term substituteHole(Term term, Term replacement)  {
         return substituteSubstitutable(term, Hole.KITEM_HOLE, replacement);
     }
 
     public Term freeze(Term term) {
-        try {
-            return new Freezer(substituteHole(term, new FreezerHole(0)));
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return new Freezer(substituteHole(term, new FreezerHole(0)));
     }
 
-    private Term substituteVariable(Term term, Variable variable, Term replacement) throws TransformerException {
+    private Term substituteVariable(Term term, Variable variable, Term replacement)  {
         return substituteSubstitutable(term, variable, replacement);
    }
 
-    private Term substituteSubstitutable(Term term, Term variable, Term replacement) throws TransformerException {
+    private Term substituteSubstitutable(Term term, Term variable, Term replacement)  {
         HashMap<Term, Term> hashMap = new HashMap<Term, Term>();
         hashMap.put(variable, replacement);
         Substitution substitution = new Substitution(hashMap, context);
@@ -107,7 +99,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context node, Void _) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         Term body = (Term) new ResolveAnonymousVariables(context).visitNode(node.getBody());
         int countHoles = MetaK.countHoles(body, context);
         if (countHoles == 0) {

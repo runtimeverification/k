@@ -5,7 +5,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.ParseError;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -18,12 +18,12 @@ public class ReportErrorsVisitor extends BasicTransformer {
         this.fromWhere = fromWhere;
     }
 
-    public ASTNode visit(ParseError pe, Void _) throws TransformerException {
+    public ASTNode visit(ParseError pe, Void _) throws ParseFailedException {
         String msg = pe.getMessage();
         if (msg.equals("Parse error: eof unexpected"))
             msg = "Parse error: Unexpected end of " + fromWhere;
         String file = pe.getFilename();
         String location = pe.getLocation();
-        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
+        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
     }
 }

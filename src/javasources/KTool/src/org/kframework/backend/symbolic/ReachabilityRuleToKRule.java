@@ -11,7 +11,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
 
@@ -26,7 +25,7 @@ public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if (!node.containsAttribute(RL_ATR)) {
             return node;
         }

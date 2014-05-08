@@ -18,7 +18,6 @@ import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Replace each (data) constant with a symbolic value 
@@ -33,7 +32,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
         }

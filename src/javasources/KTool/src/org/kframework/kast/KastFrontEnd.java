@@ -11,7 +11,7 @@ import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.K;
 import org.kframework.krun.Main;
@@ -182,9 +182,6 @@ public class KastFrontEnd {
         } catch (IOException e) {
             e.printStackTrace();
             return false;
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            return false;
         }
 
         boolean prettyPrint = false;
@@ -262,7 +259,7 @@ public class KastFrontEnd {
 
             Stopwatch.instance().printIntermediate("Maudify Program");
             Stopwatch.instance().printTotal("Total");
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             e.report();
         }
         return true;

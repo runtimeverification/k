@@ -3,7 +3,7 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -23,31 +23,31 @@ public class SentenceVariablesFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration cfg, Void _) throws TransformerException {
+    public ASTNode visit(Configuration cfg, Void _) throws ParseFailedException {
         config = true;
         return super.visit(cfg, _);
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Context cfg, Void _) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context cfg, Void _) throws ParseFailedException {
         config = false;
         return super.visit(cfg, _);
     }
 
     @Override
-    public ASTNode visit(Rule cfg, Void _) throws TransformerException {
+    public ASTNode visit(Rule cfg, Void _) throws ParseFailedException {
         config = false;
         return super.visit(cfg, _);
     }
 
     @Override
-    public ASTNode visit(Syntax cfg, Void _) throws TransformerException {
+    public ASTNode visit(Syntax cfg, Void _) throws ParseFailedException {
         config = false;
         return cfg;
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         super.visit(tc, _);
         if (tc.getProduction().isSubsort()) {
             if (tc.getContents().get(0) instanceof Variable) {
@@ -58,7 +58,7 @@ public class SentenceVariablesFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable var, Void _) throws TransformerException {
+    public ASTNode visit(Variable var, Void _) throws ParseFailedException {
         if (config) {
             if (!var.getName().startsWith("$")) {
                 String msg = "In the configuration you can only have external variables, not: '" + var.getName() + "' (starts with '$').";

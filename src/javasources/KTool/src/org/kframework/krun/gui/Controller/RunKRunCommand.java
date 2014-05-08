@@ -7,7 +7,7 @@ import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.K;
@@ -116,16 +116,7 @@ public class RunKRunCommand {
     }
 
     public static String transformTerm(Term term, Context context) {
-        try {
-            term = (Term) new ConcretizeSyntax(context).visitNode(term);
-            term = (Term) new TypeInferenceSupremumFilter(context).visitNode(term);
-            term = (Term) new BestFitFilter(
-                    new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(term);
-            // as a last resort, undo concretization
-            term = (Term) new FlattenDisambiguationFilter(context).visitNode(term);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
+        term = KRunState.concretize(term, context);
         if (term.getClass() == Cell.class) {
             Cell generatedTop = (Cell) term;
             if (generatedTop.getLabel().equals("generatedTop")) {

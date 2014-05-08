@@ -7,7 +7,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -15,19 +15,19 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 /**
  * A transformer useful for processing parse forests (i.e. trees with ambiguity nodes).
  * 
- * To remove a branch of an ambiguity, throw {@link TransformerException} from the visit method.
+ * To remove a branch of an ambiguity, throw {@link ParseFailedException} from the visit method.
  * @author dwightguth
  *
  */
-public class BasicTransformer extends AbstractTransformer {
+public class BasicTransformer extends AbstractTransformer<ParseFailedException> {
 
     public BasicTransformer(String name, Context context) {
         super(name, context);
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
-        TransformerException exception = new TransformerException(new KException(
+    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        ParseFailedException exception = new ParseFailedException(new KException(
                 ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, 
                 "Parse forest contains no trees!", node.getFilename(), node.getLocation()));
         java.util.List<Term> terms = new ArrayList<>();
@@ -36,7 +36,7 @@ public class BasicTransformer extends AbstractTransformer {
             try {
                 result = this.visitNode(t);
                 terms.add((Term) result);
-            } catch (TransformerException e) {
+            } catch (ParseFailedException e) {
                 exception = e;
             }
         }

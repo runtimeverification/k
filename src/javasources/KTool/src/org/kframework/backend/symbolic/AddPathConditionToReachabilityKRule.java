@@ -19,7 +19,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer {
 
@@ -28,7 +27,7 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         
         if (!node.containsAttribute(ReachabilityRuleToKRule.RL_ATR)) {
             return node;

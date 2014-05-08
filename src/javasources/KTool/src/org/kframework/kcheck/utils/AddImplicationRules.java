@@ -16,7 +16,6 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddImplicationRules extends CopyOnWriteTransformer {
 
@@ -29,7 +28,7 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
     
         List<ModuleItem> items = node.getItems();
         node = node.shallowCopy();

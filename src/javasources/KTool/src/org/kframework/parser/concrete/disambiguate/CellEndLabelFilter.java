@@ -6,7 +6,7 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -23,12 +23,12 @@ public class CellEndLabelFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
         if (!cell.getLabel().equals(cell.getEndLabel())) {
             String msg = "Cell starts with '" + cell.getLabel() + "' but ends with '" + cell.getEndLabel() + "'";
             // String msg = "Variable " + r.getName() + " cannot have sort " + r.getSort() + " at this location. Expected sort " + correctSort + ".";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getFilename(), cell.getLocation());
-            throw new TransformerException(kex);
+            throw new ParseFailedException(kex);
         }
         return super.visit(cell, _);
     }

@@ -14,7 +14,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
@@ -72,12 +72,12 @@ public class ParseRulesFilter extends BasicTransformer {
     String localModule = null;
 
     @Override
-    public ASTNode visit(Module m, Void _) throws TransformerException {
+    public ASTNode visit(Module m, Void _) throws ParseFailedException {
         localModule = m.getName();
         return super.visit(m, _);
     }
 
-    public ASTNode visit(StringSentence ss, Void _) throws TransformerException {
+    public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {
         if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
             long startTime = System.currentTimeMillis();
             try {
@@ -173,7 +173,7 @@ public class ParseRulesFilter extends BasicTransformer {
                     f.flush();
                 }
                 return config;
-            } catch (TransformerException te) {
+            } catch (ParseFailedException te) {
                 te.printStackTrace();
             }
         }
