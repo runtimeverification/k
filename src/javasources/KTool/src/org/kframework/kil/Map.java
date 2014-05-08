@@ -4,8 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -17,10 +15,6 @@ public class Map extends Collection {
 
     public Map(Element element) {
         super(element);
-    }
-
-    public Map(ATermAppl atm) {
-        super(atm);
     }
 
     public Map(String location, String filename) {

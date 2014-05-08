@@ -4,8 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * Configuration declaration.
  * The term {@code body} is the intial configuration as a bag of cells,
@@ -19,10 +17,6 @@ public class Configuration extends Sentence {
     }
 
     public Configuration(Element element) {
-        super(element);
-    }
-
-    public Configuration(ATermAppl element) {
         super(element);
     }
 

@@ -4,8 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 import java.util.Collections;
 
 
@@ -16,10 +14,6 @@ public class List extends Collection {
 
     public List(Element element) {
         super(element);
-    }
-
-    public List(ATermAppl atm) {
-        super(atm);
     }
 
     public List(List node) {

@@ -3,8 +3,6 @@ package org.kframework.kil;
 
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Subclasses wrap a term as an item in the corresponding collection */
 public abstract class CollectionItem extends Term implements Interfaces.MutableParent<Term, CollectionItem.Children> {
 
@@ -25,10 +23,6 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
 
     public CollectionItem(Element element) {
         super(element);
-    }
-
-    public CollectionItem(ATermAppl atm) {
-        super(atm);
     }
 
     public CollectionItem(String sort) {

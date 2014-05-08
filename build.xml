@@ -140,8 +140,6 @@
 				<include name="k/lib/maude/binaries/maude.linux64" />
 				<include name="k/lib/native/linux/sdf2table" />
 				<include name="k/lib/native/macosx/sdf2table" />
-				<include name="k/lib/native/linux/sglr-server" />
-				<include name="k/lib/native/macosx/sglr-server" />
 				<include name="k/lib/native/linux/gappa" />
 				<include name="k/lib/native/macosx/gappa" />
 				<include name="k/lib/scripts/checkJava" />
@@ -159,8 +157,6 @@
 				<exclude name="k/bin/maude/binaries/maude.linux64" />
 				<exclude name="k/bin/native/linux/sdf2table" />
 				<exclude name="k/bin/native/macosx/sdf2table" />
-				<exclude name="k/bin/native/linux/sglr-server" />
-				<exclude name="k/bin/native/macosx/sglr-server" />
 				<exclude name="k/bin/native/linux/gappa" />
 				<exclude name="k/bin/native/macosx/gappa" />
 				<exclude name="k/lib/scripts/checkJava" />

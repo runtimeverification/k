@@ -90,7 +90,6 @@ public class CommandlineOptions {
         addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
         
         // Experimental options
-        addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());
         addOptionE(OptionBuilder.withLongOpt("statistics").hasArg().withArgName("[on|off]").withDescription("Print Maude's rewrite statistics. (Default: ...).").create());
         addOptionE(OptionBuilder.withLongOpt("term").withDescription("Input argument will be parsed with the specified parser and used as the sole input to krun.").create());
         addOptionE(OptionBuilder.withLongOpt("maude-cmd").hasArg().withArgName("string").withDescription("Maude command used to execute the definition.").create());

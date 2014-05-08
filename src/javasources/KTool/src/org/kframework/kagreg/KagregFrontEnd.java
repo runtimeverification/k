@@ -19,7 +19,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
 import org.kframework.utils.Error;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;

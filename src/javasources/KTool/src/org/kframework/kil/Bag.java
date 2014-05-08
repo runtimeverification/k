@@ -4,8 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,10 +22,6 @@ public class Bag extends Collection {
 
     public Bag(Element element) {
         super(element);
-    }
-
-    public Bag(ATermAppl atm) {
-        super(atm);
     }
 
     public Bag(Bag node) {

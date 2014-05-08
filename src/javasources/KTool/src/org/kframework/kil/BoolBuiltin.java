@@ -5,8 +5,6 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * Class representing a builtin boolean token.
  */
@@ -81,16 +79,6 @@ public class BoolBuiltin extends Token {
     protected BoolBuiltin(Element element) {
         super(element);
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
-
-        checkValue(s);
-
-        value = Boolean.valueOf(s);
-    }
-
-    protected BoolBuiltin(ATermAppl atm) {
-        super(atm);
-        // TODO: get first child and then get the value
-        String s = ((ATermAppl) atm.getArgument(0)).getName();
 
         checkValue(s);
 

@@ -3,12 +3,9 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import aterm.ATermAppl;
 
 import org.w3c.dom.Element;
 
@@ -34,11 +31,6 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
     public Term(Element element) {
         super(element);
         this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
-    }
-
-    public Term(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
     }
 
     public Term(String sort) {

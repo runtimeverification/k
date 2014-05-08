@@ -5,7 +5,6 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 
-import aterm.ATermAppl;
 import org.w3c.dom.Element;
 
 /**
@@ -33,12 +32,6 @@ public class ListTerminator extends Term {
     public ListTerminator(Element element, String separator) {
         super(element);
         this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
-                this.separator = separator;
-    }
-
-    public ListTerminator(ATermAppl atm, String separator) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
                 this.separator = separator;
     }
 

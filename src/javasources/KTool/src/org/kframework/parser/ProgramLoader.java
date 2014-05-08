@@ -27,8 +27,6 @@ import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.Parser;
 import org.kframework.parser.concrete2.Parser.ParseError;
 import org.kframework.parser.concrete2.TreeCleanerVisitor;
-import org.kframework.parser.utils.ReportErrorsVisitor;
-import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -36,7 +34,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
