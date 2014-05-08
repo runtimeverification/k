@@ -24,7 +24,7 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
         super("Parse RL input file", context);
 
         // resolve reachability rules
-        String rlFileContent = FileUtil.getFileContent(GlobalSettings.CHECK);
+        String rlFileContent = null;//FileUtil.getFileContent(GlobalSettings.CHECK);
         context.kompiled = context.dotk.getAbsoluteFile();
         ASTNode rlModule = null;//DefinitionLoader.parseString(rlFileContent,
                 //GlobalSettings.CHECK, context);
@@ -35,15 +35,15 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
         // resolve pgm if any
         if (RLBackend.PGM != null) {
             String pgmContent = FileUtil.getFileContent(pgmFilePath);
-            try {
+            //try {
                 context.kompiled = context.dotk.getAbsoluteFile();
-                program = (Term) ProgramLoader.loadPgmAst(pgmContent,
-                        GlobalSettings.CHECK, "K", context);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            } catch (TransformerException e1) {
-                e1.printStackTrace();
-            }
+                //program = (Term) ProgramLoader.loadPgmAst(pgmContent,
+                //        GlobalSettings.CHECK, "K", context);
+            //} catch (IOException e1) {
+            //    e1.printStackTrace();
+            //} catch (TransformerException e1) {
+            //    e1.printStackTrace();
+            //}
         }
     }
 

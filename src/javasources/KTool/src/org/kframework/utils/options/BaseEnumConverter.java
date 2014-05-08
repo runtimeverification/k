@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.ParameterException;
 
 /**
@@ -14,13 +15,14 @@ import com.beust.jcommander.ParameterException;
  * @author dwightguth
  *
  */
-public class BaseEnumConverter<T extends Enum<T>> {
+public abstract class BaseEnumConverter<T extends Enum<T>> implements IStringConverter<T> {
 
-    public T convert(Class<T> cls, String arg) {
+    @Override
+    public T convert(String arg) {
         try {
-            return Enum.valueOf(cls, arg.toUpperCase().replaceAll("-", "_"));
+            return Enum.valueOf(enumClass(), arg.toUpperCase().replaceAll("-", "_"));
         } catch (IllegalArgumentException e) {
-            EnumSet<T> values = EnumSet.allOf(cls);
+            EnumSet<T> values = EnumSet.allOf(enumClass());
             Set<String> validValues = new HashSet<>();
             for (T value : values) {
                 validValues.add(friendlyName(value));
@@ -30,7 +32,9 @@ public class BaseEnumConverter<T extends Enum<T>> {
         }
     }
     
-    public static String friendlyName(Enum arg) {
+    public abstract Class<T> enumClass();
+    
+    public static String friendlyName(Enum<?> arg) {
         return arg.name().toLowerCase().replaceAll("_", "-");
     }
 }

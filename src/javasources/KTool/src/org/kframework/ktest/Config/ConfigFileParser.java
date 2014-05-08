@@ -9,7 +9,7 @@ import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.OS;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -124,7 +124,7 @@ public class ConfigFileParser {
     private boolean isValidTestCase(Element testNode) {
         // posixOnly attribute is valid only on Posix-compliant OS
         return testNode.getAttributes().getNamedItem("posixInitScript") == null
-                || GlobalSettings.isPosix();
+                || OS.current().isPosix;
     }
 
     /**

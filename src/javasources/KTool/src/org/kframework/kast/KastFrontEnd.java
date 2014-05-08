@@ -3,7 +3,6 @@ package org.kframework.kast;
 
 import java.io.*;
 
-import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
@@ -13,34 +12,24 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.krun.K;
-import org.kframework.krun.Main;
-import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.OptionComparator;
+import org.kframework.utils.options.SortedParameterDescriptions;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 
 public class KastFrontEnd {
-
-    private static final String USAGE = "kast [options] <file>" + System.getProperty("line.separator");
-    private static final String HEADER_STANDARD = "";
-    private static final String FOOTER_STANDARD = "";
-    private static final String HEADER_EXPERIMENTAL = "Experimental options:";
-    private static final String FOOTER_EXPERIMENTAL = Main.FOOTER_EXPERIMENTAL;
-    public static void printUsageS(KastOptionsParser op) {
-        org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
-    }
-    public static void printUsageE(KastOptionsParser op) {
-        org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
-    }
 
     /**
      * 
@@ -48,224 +37,109 @@ public class KastFrontEnd {
      * @return true if the application terminated normally; false otherwise
      */
     public static boolean kast(String[] args) {
-        GlobalOptions globalOptions = new GlobalOptions();
-        ExperimentalParserOptions parserOptions = new ExperimentalParserOptions();
-        //Context context = new Context(globalOptions, parserOptions);
-        KastOptionsParser op = new KastOptionsParser();
-        CommandLine cmd = op.parse(args);
-        if (cmd == null) {
-            printUsageS(op);
-            return false;
-        }
-
-        if (cmd.hasOption("help")) {
-            printUsageS(op);
-            return true;
-        }
-        if (cmd.hasOption("help-experimental")) {
-            printUsageE(op);
-            return true;
-        }
-
-        if (cmd.hasOption("version")) {
-            String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-            System.out.println(msg);
-            return true;
-        }
-
-        // set verbose
-        if (cmd.hasOption("verbose")) {
-            globalOptions.verbose = true;
-        }
-
-        if (cmd.hasOption("debug")) {
-            globalOptions.debug = true;
-        }
-        
-        globalOptions.initialize();
-
-        // set fast kast option
-        if (cmd.hasOption("fast-kast")) {
-            parserOptions.fastKast = true;
-        }
-
-        String pgm = null;
-        String path;
-
-        if (cmd.hasOption("expression")) {
-            pgm = cmd.getOptionValue("expression");
-            path = "Command line";
-        } else {
-            {
-                String[] restArgs = cmd.getArgs();
-                if (restArgs.length < 1) {
-                    String msg = "You have to provide a file in order to kast a program!.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
-                } else
-                    pgm = restArgs[0];
-            }
-            File mainFile = new File(pgm);
-            path = mainFile.getAbsolutePath();
-            if (!mainFile.exists())
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
-            pgm = FileUtil.getFileContent(mainFile.getAbsolutePath());
-        }
-
-        org.kframework.kil.Definition javaDef = null;
-        String directory;
-        if (cmd.hasOption("directory")) {
-            directory = new File(cmd.getOptionValue("directory")).getAbsolutePath();
-            org.kframework.utils.Error.checkIfInputDirectory(directory);
-        } else {
-            directory = new File(System.getProperty("user.dir")).getAbsolutePath();
-        }
-        File compiledFile = null;
-        {
-            // search for the definition
-            File[] dirs = new File(directory).listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File current, String name) {
-                    return new File(current, name).isDirectory();
-                }
-            });
-
-            for (int i = 0; i < dirs.length; i++) {
-                if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
-                    if (compiledFile != null) {
-                        String msg = "Multiple compiled definitions found.";
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
-                    } else {
-                        compiledFile = dirs[i];
-                    }
-                }
-            }
-            if (compiledFile == null && System.getenv("KRUN_COMPILED_DEF") != null) {
-                compiledFile = new File(System.getenv("KRUN_COMPILED_DEF"));
-            }
-
-            if (compiledFile == null) {
-                String msg = "Could not find a compiled definition. Use --directory to specify one.";
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
-            }
-        }
-        Context context;
+        KastOptions options = new KastOptions();
+        options.global.initialize();
         try {
-            if (compiledFile.exists()) {
-                File defXml = new File(compiledFile.getCanonicalPath() + "/defx-maude.bin");
-                if (!defXml.exists()) {
-                    //TODO(dwightguth): detect this based on kompile options
-                    defXml = new File(compiledFile.getCanonicalPath() + "/defx-java.bin");
-                    if (!defXml.exists()) {
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line",
-                                defXml.getAbsolutePath()));
-                    }
-                }
-                
-                KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
-                //merge krun options into kompile options object
-                kompileOptions.global = globalOptions;
-                kompileOptions.experimental.parser = parserOptions;
-                context = new Context(kompileOptions);
-                context.kompiled = compiledFile;
+            JCommander jc = new JCommander(options, args);
+            jc.setProgramName("kast");
+            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KastOptions.Experimental.class));
+            
+            if (options.global.help) {
+                StringBuilder sb = new StringBuilder();
+                jc.usage(sb);
+                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
+                return true;
+            }
+            
+            if (options.helpExperimental) {
+                StringBuilder sb = new StringBuilder();
+                jc.usage(sb);
+                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
+                return true;    
+            }
+            
+            if (options.global.version) {
+                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+                System.out.print(msg);
+                return true;
+            }
 
+            String stringToParse = options.stringToParse();
+            String source = options.source();
+
+        
+            org.kframework.kil.Definition javaDef = null;
+            File compiledFile = options.directory();
+            Context context;
+            KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
+            
+            File defXml;
+            if (kompileOptions.backend == Backend.MAUDE) {
+                defXml = new File(compiledFile.getAbsolutePath() + "/defx-maude.bin");
+            } else if (kompileOptions.backend == Backend.JAVA) {
+                defXml = new File(compiledFile.getAbsolutePath() + "/defx-java.bin");
+            } else {
+                throw new AssertionError("currently only two execution backends are supported: MAUDE and JAVA");
+            }
+            if (!defXml.exists()) {
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                        "Could not find the compiled definition.", null, defXml.getAbsolutePath()));
+            }
+            
+            //merge kast options into kompile options object
+            kompileOptions.global = options.global;
+            context = new Context(kompileOptions);
+            context.kompiled = compiledFile;
+            
+            try {
                 javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
                 javaDef = new FlattenModules(context).compile(javaDef, null);
-                javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(context)
-                        .visitNode(javaDef);
-                // This is essential for generating maude
-                javaDef.preprocess(context);
-            } else {
-                String msg = "Could not find a valid compiled definition. Use --directory to specify one.";
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
-                return false;
+                javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
+                        context).visitNode(javaDef);
+            } catch (TransformerException e) {
+                throw new AssertionError("should not have thrown TransformerException", e);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            return false;
-        }
+            javaDef.preprocess(context);
 
-        boolean prettyPrint = false;
-        boolean nextline = false;
-        IndentationOptions indentationOptions = new IndentationOptions();
-        if (cmd.hasOption("pretty")) {
-            prettyPrint = true;
-            if (cmd.hasOption("tabsize")) {
-                indentationOptions.setTabSize(new Integer(cmd.getOptionValue("tabsize")));
-            } else {
-                indentationOptions.setTabSize(4);
-            }
-            if (cmd.hasOption("maxwidth")) {
-                indentationOptions.setWidth(new Integer(cmd.getOptionValue("maxwidth")));
-            } else {
-                indentationOptions.setWidth(Integer.MAX_VALUE);
-            }
-            if (cmd.hasOption("aux-tabsize")) {
-                indentationOptions.setAuxTabSize(new Integer(cmd.getOptionValue("auxtabsize")));
-            }
-            if (cmd.hasOption("nextline")) {
-                nextline = true;
-            }
-        }
-
-        if (cmd.hasOption("parser")) {
-            String parser = cmd.getOptionValue("parser");
-            if (parser.equals("program")) {
-                GlobalSettings.whatParser = GlobalSettings.ParserType.PROGRAM;
-            } else if (parser.equals("newprogram")) {
-                GlobalSettings.whatParser = GlobalSettings.ParserType.NEWPROGRAM;
-            } else if (parser.equals("ground")) {
-                GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
-            } else if (parser.equals("rule")) {
-                GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
-            } else if (parser.equals("binary")) {
-                GlobalSettings.whatParser = GlobalSettings.ParserType.BINARY;
-            } else {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Invalid parser: " + parser, "", ""));
-            }
-        }
-
-        String sort = context.startSymbolPgm;
-        if (System.getenv("KRUN_SORT") != null) {
-            sort = System.getenv("KRUN_SORT");
-        }
-        if (cmd.hasOption("sort")) {
-            sort = cmd.getOptionValue("sort");
-        }
-
-        try {
-            ASTNode out = ProgramLoader.processPgm(pgm, path, javaDef, sort, context, GlobalSettings.whatParser);
-            StringBuilder kast;
-            if (prettyPrint) {
-                KastFilter kastFilter = new KastFilter(indentationOptions, nextline, context);
-                kastFilter.visitNode(out);
-                kast = kastFilter.getResult();
-            } else {
-                MaudeFilter maudeFilter = new MaudeFilter(context);
-                maudeFilter.visitNode(out);
-                kast = maudeFilter.getResult();
-                kast.append(K.lineSeparator);
-            }
+            String sort = options.sort(context);
 
             try {
-                Writer outWriter = new OutputStreamWriter(System.out);
-                try {
-                    FileUtil.toWriter(kast, outWriter);
-                } finally {
-                    outWriter.flush();
+                ASTNode out = ProgramLoader.processPgm(stringToParse, source, javaDef, sort, context, options.parser);
+                StringBuilder kast;
+                if (options.experimental.pretty) {
+                    IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(), 
+                            options.experimental.auxTabSize, options.experimental.tabSize);
+                    KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
+                    kastFilter.visitNode(out);
+                    kast = kastFilter.getResult();
+                } else {
+                    MaudeFilter maudeFilter = new MaudeFilter(context);
+                    maudeFilter.visitNode(out);
+                    kast = maudeFilter.getResult();
+                    kast.append(K.lineSeparator);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+    
+                try {
+                    Writer outWriter = new OutputStreamWriter(System.out);
+                    try {
+                        FileUtil.toWriter(kast, outWriter);
+                    } finally {
+                        outWriter.flush();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+    
+                Stopwatch.instance().printIntermediate("Maudify Program");
+                Stopwatch.instance().printTotal("Total");
+            } catch (TransformerException e) {
+                e.report();
             }
-
-            Stopwatch.instance().printIntermediate("Maudify Program");
-            Stopwatch.instance().printTotal("Total");
-        } catch (TransformerException e) {
-            e.report();
+            return true;
+        } catch (ParameterException ex) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
+            return false;
         }
-        return true;
     }
 }
 
