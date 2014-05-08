@@ -30,4 +30,14 @@
 
 	<test definition="04-ambiguous-constructor/test.k" />
 
+	<test
+		  definition="05-reject-keywords/test.k"
+		  programs="05-reject-keywords/"
+		  extension="test"
+		  results="05-reject-keywords/">
+		<all-programs>
+			<krun-option name="-parser" value="kast -parser newprogram" />
+		</all-programs>
+	</test>
+
 </tests>

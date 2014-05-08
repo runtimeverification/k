@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KApp;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -28,6 +30,13 @@ public class PreferAvoidFilter extends BasicTransformer {
                     prefer.add(tc);
                 if (tc.getProduction().getAttributes().containsKey("avoid"))
                     avoid.add(tc);
+            } else if (variant instanceof KApp) {
+                // Adding int tokens to the prefer container in order to disambiguate between
+                // negative numbers and unary minus.
+                KApp kapp = (KApp) variant;
+                if (kapp.getLabel() instanceof IntBuiltin) {
+                    prefer.add(kapp);
+                }
             }
         }
 

@@ -35,7 +35,7 @@ public class ProgramSDF {
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
         CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context);
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
             psdfv.visitNode(m);
@@ -107,10 +107,10 @@ public class ProgramSDF {
         }
 
         sdf.append("\n");
-        sdf.append("    DzDzINT        -> DzDzInt\n");
+        //sdf.append("    DzDzINT        -> DzDzInt\n");
         //sdf.append("    DzDzID        -> DzDzId\n");
         //sdf.append("    DzDzSTRING    -> DzDzString\n");
-        sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
+        //sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
         sdf.append("\n");
 
         sdf.append("\n%% start symbols subsorts\n");
