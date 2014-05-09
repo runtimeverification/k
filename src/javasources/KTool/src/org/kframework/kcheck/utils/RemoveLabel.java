@@ -6,7 +6,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class RemoveLabel extends CopyOnWriteTransformer {
 
@@ -19,7 +18,7 @@ public class RemoveLabel extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons node, Void _) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _)  {
         
         if (node.getProduction().containsAttribute(LABEL) && !removed) {
             Term stmt = node.getContents().get(node.getContents().size() - 1);

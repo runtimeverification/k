@@ -10,8 +10,8 @@ import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class ParseConfigsFilter extends BasicTransformer {
+public class ParseConfigsFilter extends ParseForestTransformer {
     public ParseConfigsFilter(Context context) {
         super("Parse Configurations", context);
     }
@@ -44,14 +44,14 @@ public class ParseConfigsFilter extends BasicTransformer {
     String localModule = null;
 
     @Override
-    public ASTNode visit(Module m, Void _) throws TransformerException {
+    public ASTNode visit(Module m, Void _) throws ParseFailedException {
         localModule = m.getName();
         ASTNode rez = super.visit(m, _);
         new CollectStartSymbolPgmVisitor(context).visitNode(rez);
         return rez;
     }
 
-    public ASTNode visit(StringSentence ss, Void _) throws TransformerException {
+    public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {
         if (ss.getType().equals(Constants.CONFIG)) {
             try {
                 ASTNode config = null;
@@ -102,7 +102,7 @@ public class ParseConfigsFilter extends BasicTransformer {
                 config = new AmbFilter(context).visitNode(config);
 
                 return config;
-            } catch (TransformerException te) {
+            } catch (ParseFailedException te) {
                 te.printStackTrace();
             }
         }

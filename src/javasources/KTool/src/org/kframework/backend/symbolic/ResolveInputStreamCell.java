@@ -9,7 +9,6 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Add variable $IN if the current cell is marked as being 
@@ -26,7 +25,7 @@ public class ResolveInputStreamCell extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Cell node, Void _) throws TransformerException {
+    public ASTNode visit(Cell node, Void _)  {
         
         Map<String, String> attributes = node.getCellAttributes();
         if (!attributes.containsKey("stream"))

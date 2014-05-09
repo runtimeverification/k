@@ -10,7 +10,7 @@ import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.krun.K;
@@ -91,14 +91,10 @@ public class KastFrontEnd {
             context = new Context(kompileOptions);
             context.kompiled = compiledFile;
             
-            try {
-                javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
-                javaDef = new FlattenModules(context).compile(javaDef, null);
-                javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
-                        context).visitNode(javaDef);
-            } catch (TransformerException e) {
-                throw new AssertionError("should not have thrown TransformerException", e);
-            }
+            javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
+            javaDef = new FlattenModules(context).compile(javaDef, null);
+            javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
+                    context).visitNode(javaDef);
             javaDef.preprocess(context);
 
             String sort = options.sort(context);
@@ -132,10 +128,11 @@ public class KastFrontEnd {
     
                 Stopwatch.instance().printIntermediate("Maudify Program");
                 Stopwatch.instance().printTotal("Total");
-            } catch (TransformerException e) {
+                return true;
+            } catch (ParseFailedException e) {
                 e.report();
+                return false;
             }
-            return true;
         } catch (ParameterException ex) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
             return false;

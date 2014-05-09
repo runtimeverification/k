@@ -4,11 +4,10 @@ package org.kframework.compile.tags;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kompile.KompileOptions;
 
-public class AddOptionalTags extends BasicTransformer {
+public class AddOptionalTags extends CopyOnWriteTransformer {
 
     private KompileOptions options;
     
@@ -18,7 +17,7 @@ public class AddOptionalTags extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Attributes node, Void _) throws TransformerException {
+    public ASTNode visit(Attributes node, Void _) {
 
         for (String tag : options.transition)
             if (node.containsKey(tag))

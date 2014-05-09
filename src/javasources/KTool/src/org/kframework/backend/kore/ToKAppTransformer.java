@@ -22,7 +22,6 @@ import org.kframework.kil.SetUpdate;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /*
  * 
@@ -40,7 +39,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(SetLookup node, Void _) throws TransformerException{
+    public ASTNode visit(SetLookup node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.base()));
@@ -51,7 +50,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(ListLookup node, Void _) throws TransformerException{
+    public ASTNode visit(ListLookup node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.base()));
@@ -62,7 +61,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(MapLookup node, Void _) throws TransformerException{
+    public ASTNode visit(MapLookup node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>();
         temp.add((Term) this.visitNode(node.base()));
@@ -73,7 +72,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(SetUpdate node, Void _) throws TransformerException{
+    public ASTNode visit(SetUpdate node, Void _) {
         
         ArrayList<Term> temp = new ArrayList<Term>(node.removeEntries());
         for(int i = 0; i < temp.size(); ++i){
@@ -93,7 +92,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(ListUpdate node, Void _) throws TransformerException{
+    public ASTNode visit(ListUpdate node, Void _) {
         
         ArrayList<Term> tempLeft = new ArrayList<Term>(node.removeLeft());
         for(int i = 0; i < tempLeft.size(); ++i){
@@ -126,7 +125,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(MapUpdate node, Void _) throws TransformerException{
+    public ASTNode visit(MapUpdate node, Void _) {
         
         
         HashMap<Term,Term> removeMap = new HashMap<Term,Term>(node.removeEntries());
@@ -174,7 +173,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(SetBuiltin node, Void _) throws TransformerException{
+    public ASTNode visit(SetBuiltin node, Void _) {
         
         ArrayList<Term> tempBase = new ArrayList<Term>(node.baseTerms());
         for(int i = 0; i < tempBase.size(); ++i){
@@ -216,7 +215,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
      * a helper function to parse all baseterm in ListBultin into a list of terms
      * which are translated into k-label form
      */
-    private ArrayList<Term> getAllTermsInBase(ArrayList<Term> base) throws TransformerException{
+    private ArrayList<Term> getAllTermsInBase(ArrayList<Term> base) {
         
         ArrayList<Term> result = new ArrayList<Term>();
         for(int i = 0; i < base.size(); ++i){
@@ -251,7 +250,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(ListBuiltin node, Void _) throws TransformerException{
+    public ASTNode visit(ListBuiltin node, Void _) {
         
         ArrayList<Term> tempBase = new ArrayList<Term>(node.baseTerms());
         tempBase = getAllTermsInBase(tempBase);
@@ -297,7 +296,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(MapBuiltin node, Void _) throws TransformerException{
+    public ASTNode visit(MapBuiltin node, Void _) {
         
         ArrayList<Term> tempBase = new ArrayList<Term>(node.baseTerms());
         for(int i = 0; i < tempBase.size(); ++i){

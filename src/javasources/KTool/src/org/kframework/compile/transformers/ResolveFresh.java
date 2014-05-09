@@ -7,13 +7,11 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 public class ResolveFresh extends CopyOnWriteTransformer {
 
@@ -25,7 +23,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Definition node, Void _) throws TransformerException {
+    public ASTNode visit(Definition node, Void _)  {
         isFresh = false;
         node = (Definition) super.visit(node, _);
         if (!isFresh)
@@ -51,7 +49,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Sentence node, Void _) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _)  {
         //TODO: maybe now fresh should be in the ensures part.
         if (null == node.getRequires())
             return node;
@@ -88,7 +86,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(TermCons node, Void _) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _)  {
         if (MetaK.Constants.freshCons.equals(node.getCons())) {
             assert(1 == node.getContents().size());
             assert(node.getContents().get(0) instanceof Variable);

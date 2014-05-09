@@ -20,10 +20,8 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -46,7 +44,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
 
         // create the path condition cell
         Cell cell = new Cell();
@@ -148,7 +146,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         ASTNode result = super.visit(node, _);
         if (result == node)
             return node;

@@ -17,7 +17,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +49,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _)  {
         // TODO(AndreiS): should only be applied once
         makeCellDataStructures();
 

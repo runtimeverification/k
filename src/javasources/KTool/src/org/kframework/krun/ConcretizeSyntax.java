@@ -5,7 +5,7 @@ import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 
 import java.util.ArrayList;
@@ -20,11 +20,11 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp kapp, Void _) throws TransformerException {
+    public ASTNode visit(KApp kapp, Void _)  {
         ASTNode t = internalTransform(kapp);
         try {
             t = new TypeSystemFilter(context).visitNode(t);
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             //type error, so don't disambiguate
         }
         t = new RemoveEmptyLists(context).visitNode(t);
@@ -37,7 +37,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(TermCons tcParent, Void _) throws TransformerException {
+        public ASTNode visit(TermCons tcParent, Void _)  {
             for (int i = 0; i < tcParent.getContents().size(); i++) {
                 Term child = tcParent.getContents().get(i);
                 internalTransform(tcParent, i, child);
@@ -64,7 +64,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
 
-    public ASTNode internalTransform(KApp kapp) throws TransformerException {
+    public ASTNode internalTransform(KApp kapp)  {
         Term label = kapp.getLabel();
         Term child = kapp.getChild();
         child = child.shallowCopy();
@@ -145,7 +145,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _)  {
         if (cell.getLabel().matches(".*-fragment")) {
             return this.visitNode(cell.getContents());
         }
@@ -153,7 +153,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Bag bag, Void _) throws TransformerException {
+    public ASTNode visit(Bag bag, Void _)  {
         List<Term> contents = new ArrayList<Term>();
         for (Term child : bag.getContents()) {
             Term accept = (Term) this.visitNode(child);

@@ -14,13 +14,13 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CellTypesFilter extends BasicTransformer {
+public class CellTypesFilter extends ParseForestTransformer {
 
     public CellTypesFilter(org.kframework.kil.loader.Context context) {
         super("Cell types", context);
@@ -38,7 +38,7 @@ public class CellTypesFilter extends BasicTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell cell, Void _) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
         String sort = context.cellKinds.get(cell.getLabel());
 
         if (sort == null) {
@@ -58,7 +58,7 @@ public class CellTypesFilter extends BasicTransformer {
             cell.setContents((Term) new CellTypesFilter2(context, sort, cell.getLabel()).visitNode(cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
-            throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
         }
         return super.visit(cell, _);
     }
@@ -82,38 +82,38 @@ public class CellTypesFilter extends BasicTransformer {
         }
 
         @Override
-        public ASTNode visit(Term trm, Void _) throws TransformerException {
+        public ASTNode visit(Term trm, Void _) throws ParseFailedException {
             if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
-                throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
+                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
             }
             return trm;
         }
 
         @Override
-        public ASTNode visit(Bracket node, Void _) throws TransformerException {
+        public ASTNode visit(Bracket node, Void _) throws ParseFailedException {
             node.setContent((Term) this.visitNode(node.getContent()));
             return node;
         }
 
         @Override
-        public ASTNode visit(Rewrite node, Void _) throws TransformerException {
+        public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
             Rewrite result = new Rewrite(node);
             result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
             return result;
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
-            TransformerException exception = null;
+        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+            ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
                     result = this.visitNode(t);
                     terms.add((Term) result);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     exception = e;
                 }
             }

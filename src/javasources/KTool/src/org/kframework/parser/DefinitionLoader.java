@@ -21,7 +21,7 @@ import org.kframework.kil.loader.CollectModuleImportsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.RemoveUnusedModules;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.basic.Basic;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -233,7 +233,7 @@ public class DefinitionLoader {
             Stopwatch.instance().printIntermediate("Parsing Rules");
 
             return def;
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             throw new AssertionError("should not throw TransformerException", e);
         }
     }
@@ -249,7 +249,7 @@ public class DefinitionLoader {
      *            - the context for disambiguation purposes.
      * @return A lightweight Definition element which contain all the definition items found in the string.
      */
-    public static Definition parseString(String content, String filename, Context context) throws TransformerException {
+    public static Definition parseString(String content, String filename, Context context) throws ParseFailedException {
         List<DefinitionItem> di = Basic.parse(filename, content, context);
 
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
@@ -273,7 +273,7 @@ public class DefinitionLoader {
         return def;
     }
 
-    public static Term parseCmdString(String content, String filename, String startSymbol, Context context) throws TransformerException {
+    public static Term parseCmdString(String content, String filename, String startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
@@ -303,7 +303,7 @@ public class DefinitionLoader {
         try {
             config = new TypeSystemFilter(context).visitNode(config);
             config = new TypeInferenceSupremumFilter(context).visitNode(config);
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             e.report();
         }
         // config = new AmbDuplicateFilter(context).visitNode(config);
@@ -321,7 +321,7 @@ public class DefinitionLoader {
         return (Term) config;
     }
 
-    public static ASTNode parsePattern(String pattern, String filename, String startSymbol, Context context) throws TransformerException {
+    public static ASTNode parsePattern(String pattern, String filename, String startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
@@ -354,7 +354,7 @@ public class DefinitionLoader {
         try {
             config = new TypeSystemFilter(context).visitNode(config);
             config = new TypeInferenceSupremumFilter(context).visitNode(config);
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             e.report();
         }
         // config = new AmbDuplicateFilter(context).visitNode(config);
@@ -372,7 +372,7 @@ public class DefinitionLoader {
         return config;
     }
 
-    public static ASTNode parsePatternAmbiguous(String pattern, Context context) throws TransformerException {
+    public static ASTNode parsePatternAmbiguous(String pattern, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }

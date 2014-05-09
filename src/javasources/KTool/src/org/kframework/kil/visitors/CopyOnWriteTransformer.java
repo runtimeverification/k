@@ -10,7 +10,7 @@ import org.kframework.kil.loader.Context;
  * @author dwightguth
  *
  */
-public class CopyOnWriteTransformer extends AbstractTransformer {
+public class CopyOnWriteTransformer extends AbstractTransformer<RuntimeException> {
 
     public CopyOnWriteTransformer(String name, Context context) {
         super(name, context);

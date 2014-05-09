@@ -2,7 +2,6 @@
 package org.kframework.backend;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.kompile.KompileOptions;
 

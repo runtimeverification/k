@@ -8,7 +8,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringBuilderUtil;
 import org.kframework.utils.file.FileUtil;
@@ -24,9 +23,7 @@ public class MaudeBackend extends BasicBackend {
 
     @Override
     public void run(Definition definition) throws IOException {
-        try {
-            definition = (Definition) new FreshVariableNormalizer(context).visitNode(definition);
-        } catch (TransformerException e) { }
+        definition = (Definition) new FreshVariableNormalizer(context).visitNode(definition);
         MaudeFilter maudeFilter = new MaudeFilter(context);
         maudeFilter.visitNode(definition);
 

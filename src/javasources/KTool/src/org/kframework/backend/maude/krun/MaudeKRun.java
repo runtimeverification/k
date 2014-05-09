@@ -6,7 +6,6 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
@@ -594,17 +593,13 @@ public class MaudeKRun implements KRun {
                 rawSubstitution.put(child.get(0).getAttribute("op"), result);
             }
 
-            try {
-                Term rawResult = (Term) new SubstitutionFilter(rawSubstitution, context)
-                        .visitNode(pattern.getBody());
-                KRunState state = new KRunState(rawResult, context);
-                state.setStateId(stateNum + K.stateCounter);
-                SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo,
-                        context);
-                results.add(result);
-            } catch (TransformerException e) {
-                e.report(); //this should never happen, so I want it to blow up
-            }
+            Term rawResult = (Term) new SubstitutionFilter(rawSubstitution, context)
+                    .visitNode(pattern.getBody());
+            KRunState state = new KRunState(rawResult, context);
+            state.setStateId(stateNum + K.stateCounter);
+            SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo,
+                    context);
+            results.add(result);
         }
         list = doc.getElementsByTagName("result");
         nod = list.item(1);

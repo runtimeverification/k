@@ -4,14 +4,14 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class InclusionFilter extends BasicTransformer {
+public class InclusionFilter extends ParseForestTransformer {
     public InclusionFilter(String localModule, Context context) {
         super("Inclusion filter", context);
         this.localModule = localModule;
@@ -20,7 +20,7 @@ public class InclusionFilter extends BasicTransformer {
     String localModule = null;
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         String consFile = tc.getProduction().getFilename();
         String consModule = tc.getProduction().getOwnerModuleName();
 //        Trying to fix issue 651, by removing file inclusion check

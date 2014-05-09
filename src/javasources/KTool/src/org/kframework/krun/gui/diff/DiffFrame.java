@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.diff;
 
 import java.awt.Dimension;
@@ -9,7 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
@@ -30,11 +31,9 @@ public class DiffFrame extends javax.swing.JFrame {
 
     /**
      * Creates new form DiffFrame
-     * 
-     * @throws TransformerException
      */
     public DiffFrame(KRunState srcState, KRunState destState, Transition transition,
-            Context context) throws TransformerException {
+            Context context) {
         initComponents("");
         String htmlDiff;
         htmlDiff = Diff.comparableTest(

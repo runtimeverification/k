@@ -13,7 +13,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class MergeToTransformer extends CopyOnWriteTransformer {
 
@@ -25,7 +24,7 @@ public class MergeToTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _) throws TransformerException {
+    public ASTNode visit(Cell node, Void _)  {
 
         // retrieve the content of the left hand side
         ExtractCellContent ecc = new ExtractCellContent(context,

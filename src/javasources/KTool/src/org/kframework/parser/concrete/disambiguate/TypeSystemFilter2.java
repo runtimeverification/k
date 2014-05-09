@@ -4,7 +4,7 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -26,7 +26,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Term trm, Void _) throws TransformerException {
+    public ASTNode visit(Term trm, Void _) throws ParseFailedException {
         if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
                 && !trm.getSort().equals(KSorts.KRESULT)) {
             if (!context.isSubsortedEq(maxSort, trm.getSort())) {
@@ -37,22 +37,22 @@ public class TypeSystemFilter2 extends LocalTransformer {
                                 + "', expected sort '" + maxSort + "'.",
                         trm.getFilename(),
                         trm.getLocation());
-                throw new TransformerException(kex);
+                throw new ParseFailedException(kex);
             }
         }
         return trm;
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
-        TransformerException exception = null;
+    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        ParseFailedException exception = null;
         ArrayList<Term> terms = new ArrayList<Term>();
         for (Term t : node.getContents()) {
             ASTNode result = null;
             try {
                 result = this.visitNode(t);
                 terms.add((Term) result);
-            } catch (TransformerException e) {
+            } catch (ParseFailedException e) {
                 exception = e;
             }
         }
@@ -66,13 +66,13 @@ public class TypeSystemFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Bracket node, Void _) throws TransformerException {
+    public ASTNode visit(Bracket node, Void _) throws ParseFailedException {
         node.setContent((Term) this.visitNode(node.getContent()));
         return node;
     }
 
     @Override
-    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
         Rewrite result = new Rewrite(node);
         result.replaceChildren(
                 (Term) this.visitNode(node.getLeft()),

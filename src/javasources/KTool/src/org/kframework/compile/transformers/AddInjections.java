@@ -18,7 +18,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +41,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
-    public Definition visit(Definition definition, Void _) throws TransformerException {
+    public Definition visit(Definition definition, Void _)  {
         state = TransformationState.TRANSFORM_PRODUCTIONS;
         definition = (Definition) super.visit(definition, _);
         state = TransformationState.TRANSFORM_TERMS;
@@ -55,7 +54,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     /* Phase one: transform productions such that each user-defined production has sort subsorted to KItem and each
      * not-terminal has sort subsorted to K */
     @Override
-    public Syntax visit(Syntax node, Void _) throws TransformerException {
+    public Syntax visit(Syntax node, Void _)  {
         if (state != TransformationState.TRANSFORM_PRODUCTIONS) {
             return node;
         }
@@ -118,7 +117,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
     /* Phase two: transform terms such that each term respects the transform productions */
     @Override
-    public Rule visit(Rule node, Void _) throws TransformerException {
+    public Rule visit(Rule node, Void _)  {
         // TODO(AndreiS): remove this check when include files do not contain the old List, Map, and Set
         if (node.containsAttribute("nojava")) {
             return node;
@@ -150,7 +149,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
-    public ASTNode visit(TermCons node, Void _) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _)  {
         // TODO(AndreiS): find out why the assertion is failing
         // assert state == TransformationState.TRANSFORM_TERMS;
         if (state != TransformationState.TRANSFORM_TERMS) {

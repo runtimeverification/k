@@ -16,12 +16,10 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collections;
-
 
 /**
  * Transformer class compiling collection (bag, list, map and set) terms into K internal
@@ -49,7 +47,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
 
         location = node.getLocation();
         filename = node.getFilename();
@@ -89,13 +87,13 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rewrite node, Void _) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _)  {
         assert false: "CompileDataStructures pass should be applied after ResolveRewrite pass";
         return node;
     }
 
     @Override
-    public ASTNode visit(KApp node, Void _) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         if (!(node.getLabel() instanceof KLabelConstant)) {
             /* only consider KLabel constants */
             return super.visit(node, _);

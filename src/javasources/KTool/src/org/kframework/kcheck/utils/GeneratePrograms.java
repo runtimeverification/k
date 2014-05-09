@@ -11,10 +11,9 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
-public class GeneratePrograms extends BasicTransformer {
+public class GeneratePrograms extends CopyOnWriteTransformer {
 
     private List<ASTNode> reachabilityRules;
     private List<Term> programs;
@@ -26,7 +25,7 @@ public class GeneratePrograms extends BasicTransformer {
     }
     
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) {
         
         if(node.getAttribute(AddCircularityRules.RRULE_ATTR)!= null && (node.getBody() instanceof Rewrite)) {
             

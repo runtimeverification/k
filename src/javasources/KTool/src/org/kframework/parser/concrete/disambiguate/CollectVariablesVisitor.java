@@ -19,7 +19,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 public class CollectVariablesVisitor extends BasicVisitor {
     public CollectVariablesVisitor(Context context) {
@@ -42,7 +42,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
             if (context.cellSorts.containsKey(c.getLabel())) {
                 try {
                     c.setContents((Term) new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel())).visitNode(c.getContents()));
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
             }
@@ -59,7 +59,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
                 Term t = node.getContents().get(j);
                 try {
                     new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()).visitNode(t);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
                 this.visitNode(t);
@@ -71,7 +71,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
                 try {
                     new CollectVariablesVisitor2(context, ul.getSort()).visitNode(t1);
                     new CollectVariablesVisitor2(context, node.getProduction().getSort()).visitNode(t2);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
                 this.visitNode(t1);
@@ -115,7 +115,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         }
 
         @Override
-        public ASTNode visit(Variable node, Void _) throws TransformerException {
+        public ASTNode visit(Variable node, Void _) throws ParseFailedException {
             if (node.isUserTyped()) {
                 node.setExpectedSort(node.getSort());
                 return node;
@@ -134,22 +134,22 @@ public class CollectVariablesVisitor extends BasicVisitor {
         }
 
         @Override
-        public ASTNode visit(Rewrite node, Void _) throws TransformerException {
+        public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
             Rewrite result = new Rewrite(node);
             result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
             return visit((Term) result, _);
         }
 
         @Override
-        public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
-            TransformerException exception = null;
+        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+            ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
                     result = this.visitNode(t);
                     terms.add((Term) result);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     exception = e;
                 }
             }
@@ -163,7 +163,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         }
 
         @Override
-        public ASTNode visit(Bracket node, Void _) throws TransformerException {
+        public ASTNode visit(Bracket node, Void _) throws ParseFailedException {
             node.setContent((Term) this.visitNode(node.getContent()));
             return visit((Term) node, _);
         }

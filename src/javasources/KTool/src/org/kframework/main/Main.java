@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.fusesource.jansi.AnsiConsole;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 import org.kframework.utils.file.KPaths;
@@ -34,10 +33,9 @@ public class Main {
     /**
      * @param args
      *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
-     * @throws TransformerException when loadDefinition fails
      * @throws IOException when loadDefinition fails 
      */
-    public static void main(String[] args) throws IOException, TransformerException {
+    public static void main(String[] args) throws IOException {
         Stopwatch.instance();
         setJavaLibraryPath();
         AnsiConsole.systemInstall();

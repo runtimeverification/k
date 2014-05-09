@@ -3,6 +3,7 @@ package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 /**
  * A {@link AbstractTransformer} which doesn't visit its children. See also 
@@ -10,7 +11,7 @@ import org.kframework.kil.loader.Context;
  * @author dwightguth
  *
  */
-public class LocalTransformer extends AbstractTransformer {
+public class LocalTransformer extends AbstractTransformer<ParseFailedException> {
 
     public LocalTransformer(String name, Context context) {
         super(name, context);

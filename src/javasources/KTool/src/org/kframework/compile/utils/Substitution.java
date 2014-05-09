@@ -5,10 +5,8 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Map;
-
 
 public class Substitution extends CopyOnWriteTransformer {
     Map<Term, Term> substitution;
@@ -18,7 +16,7 @@ public class Substitution extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode visit(Term node, Void _) throws TransformerException {
+    public ASTNode visit(Term node, Void _)  {
         Term substitute = substitution.get(node);
         if (!(null ==substitute)) 
             node = substitute;

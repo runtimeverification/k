@@ -6,7 +6,6 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class SetCellContent extends CopyOnWriteTransformer {
 
@@ -20,7 +19,7 @@ public class SetCellContent extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Cell node, Void _) throws TransformerException {
+    public ASTNode visit(Cell node, Void _)  {
         if (node.getLabel().equals(cell)){
             Cell newCell = node.shallowCopy();
             newCell.setContents(term);

@@ -6,7 +6,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.*;
 import java.util.List;
@@ -25,14 +24,14 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Definition node, Void _) throws TransformerException {
+    public ASTNode visit(Definition node, Void _)  {
         node = (Definition) new FlattenTerms(context).visitNode(node);
         //TODO:  Remove the above once we figure out how to split the two phases
         return super.visit(node, _);
     }
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         listSeparators.clear();
         node = (Module) super.visit(node, _);
         if (listSeparators.isEmpty())
@@ -45,7 +44,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Syntax node, Void _) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _)  {
         if (!MetaK.isComputationSort(node.getSort().getName())) {
             isComputation = false;
             return super.visit(node, _);
@@ -57,7 +56,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Production node, Void _) throws TransformerException {
+    public ASTNode visit(Production node, Void _)  {
         if (node.containsAttribute("KLabelWrapper"))
             return node;
         if (!isComputation)
@@ -81,7 +80,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Sort node, Void _) throws TransformerException {
+    public ASTNode visit(Sort node, Void _)  {
         if (!MetaK.isComputationSort(node.getName()))
             return node;
         return new Sort("K");

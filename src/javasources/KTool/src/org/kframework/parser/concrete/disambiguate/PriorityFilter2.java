@@ -10,7 +10,7 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -30,7 +30,7 @@ public class PriorityFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons tc, Void _) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         String parentLabel = parent.getProduction().getKLabel();
         String localLabel = tc.getProduction().getKLabel();
         if (context.isPriorityWrong(parentLabel, localLabel)) {
@@ -43,15 +43,15 @@ public class PriorityFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
-        TransformerException exception = null;
+    public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+        ParseFailedException exception = null;
         ArrayList<Term> terms = new ArrayList<Term>();
         for (Term t : node.getContents()) {
             ASTNode result = null;
             try {
                 result = this.visitNode(t);
                 terms.add((Term) result);
-            } catch (TransformerException e) {
+            } catch (ParseFailedException e) {
                 exception = e;
             }
         }
@@ -65,7 +65,7 @@ public class PriorityFilter2 extends LocalTransformer {
     }
 
     @Override
-    public ASTNode visit(Term node, Void _) throws TransformerException {
+    public ASTNode visit(Term node, Void _) throws ParseFailedException {
         return node;
     }
 }

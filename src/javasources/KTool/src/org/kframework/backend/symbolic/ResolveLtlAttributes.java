@@ -14,7 +14,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -54,7 +53,7 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule rule, Void _) throws TransformerException {
+    public ASTNode visit(Rule rule, Void _)  {
         if (rule.getAttributes().containsKey(LTL)) {
             Term body = rule.getBody();
             if (body instanceof Rewrite) {

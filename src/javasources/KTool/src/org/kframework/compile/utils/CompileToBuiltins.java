@@ -25,7 +25,6 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -63,13 +62,13 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Configuration node, Void _) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         ASTNode result = super.visit(node, _);
         return result;
     }
 
     @Override
-    public ASTNode visit(KApp node, Void _) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
 
         // TODO(YilongL): how can the K label of node be an instance of TermCons?
         if (node.getLabel() instanceof TermCons) {
@@ -104,7 +103,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(List node, Void _) throws TransformerException {
+    public ASTNode visit(List node, Void _)  {
 
         if (node.getContents().isEmpty()) {
             return new KApp(KLabelConstant.of("'.MyList"), KList.EMPTY);
@@ -116,7 +115,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Set node, Void _) throws TransformerException {
+    public ASTNode visit(Set node, Void _)  {
 
         if (node.getContents().isEmpty()) {
             return new KApp(KLabelConstant.of("'.MySet"), KList.EMPTY);
@@ -129,7 +128,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
 
 
     @Override
-    public ASTNode visit(Rule node, Void _) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         // TODO(YilongL): why not transform the rule from /include directory? is
         // it because this will be filtered out by TagUserRules anyway? However,
         // this stage is used also by the Java backend which also uses io.k
@@ -142,7 +141,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Map node, Void _) throws TransformerException {
+    public ASTNode visit(Map node, Void _)  {
 //        System.out.println("TR: " + node);
 
         if (node.getContents().isEmpty()) {
@@ -156,7 +155,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(TermCons node, Void _) throws TransformerException {
+    public ASTNode visit(TermCons node, Void _)  {
         String label = getLabelOf(node);
         
         // do not transform this TermCons unless it represents a Collection/CollectionItem node
@@ -193,7 +192,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
         return context.conses.get(node.getCons()).getLabel();
     }
 
-    private java.util.List<Term> transformTerms(java.util.List<Term> terms) throws TransformerException {
+    private java.util.List<Term> transformTerms(java.util.List<Term> terms)  {
         java.util.List<Term> contents = new ArrayList<>();
         for(Term t : terms) {
             Term tnew = (Term) this.visitNode(t);
@@ -204,7 +203,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
         return contents;
     }
 
-    private ASTNode transformBuiltinOp(TermCons node) throws TransformerException {
+    private ASTNode transformBuiltinOp(TermCons node)  {
         String label = getLabelOf(node);
         String newLabel = null;
         // pre-defined K label, e.g., @see builtinCollectionOps
@@ -223,7 +222,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(MapItem node, Void _) throws TransformerException {
+    public ASTNode visit(MapItem node, Void _)  {
 
 //        System.out.println(node);
 
@@ -238,14 +237,14 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(ListItem node, Void _) throws TransformerException {
+    public ASTNode visit(ListItem node, Void _)  {
         java.util.List<Term> contents = new ArrayList<>();
         contents.add((Term) this.visitNode(node.getItem()));
         return new KApp(KLabelConstant.of("'MyListItem"), new KList(contents));
     }
 
     @Override
-    public ASTNode visit(SetItem node, Void _) throws TransformerException {
+    public ASTNode visit(SetItem node, Void _)  {
         java.util.List<Term> contents = new ArrayList<>();
         contents.add((Term) this.visitNode(node.getItem()));
         return new KApp(KLabelConstant.of("'MySetItem"), new KList(contents));
@@ -267,7 +266,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable node, Void _) throws TransformerException {
+    public ASTNode visit(Variable node, Void _)  {
 
         if (isCollectionItem(node.getSort())) {
             // TODO:find a clever way to deal with anonymous variables for (List)Item
@@ -297,7 +296,7 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Module node, Void _) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
 
         Module result = (Module) super.visit(node, _);
         for (String label : undeclaredLabels) {

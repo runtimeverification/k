@@ -11,7 +11,6 @@ import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class MakeFreshVariables extends CopyOnWriteTransformer {
 
@@ -23,7 +22,7 @@ public class MakeFreshVariables extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Variable node, Void _) throws TransformerException {
+    public ASTNode visit(Variable node, Void _)  {
 //        System.out.println("Var: " + node + " sort: " + node.getSort()
 //                + " is fresh " + node.isFresh());
         for (Variable v : variables) {

@@ -6,7 +6,7 @@ import java.nio.charset.CharacterCodingException;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.K;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
@@ -105,7 +105,7 @@ public class BuiltinIOOperations {
             Term term = Term.of(kast, definition(context));
             term = term.evaluate(context);
             return term;
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             return processIOException("noparse", context);
         }
     }

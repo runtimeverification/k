@@ -5,7 +5,7 @@ import org.kframework.backend.BasicBackend;
 import org.kframework.compile.transformers.DeleteFunctionRules;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -41,12 +41,8 @@ public class KompileBackend extends BasicBackend {
             .append(builtinsFilter.getResult()).append("endm\n");
         FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
         sw.printIntermediate("Generating equations for hooks");
-        try {
-            javaDef = (Definition) new DeleteFunctionRules(maudeHooks.stringPropertyNames(), context)
-                .visitNode(javaDef);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
+        javaDef = (Definition) new DeleteFunctionRules(maudeHooks.stringPropertyNames(), context)
+            .visitNode(javaDef);
         return super.firstStep(javaDef);
     }
 

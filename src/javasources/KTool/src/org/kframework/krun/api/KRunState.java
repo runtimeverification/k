@@ -10,7 +10,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.K;
@@ -93,8 +93,8 @@ public class KRunState implements Serializable{
                 }
             }
             result = (Term) new TokenVariableToSymbolic(context).visitNode(result);
-        } catch (TransformerException e) {
-            assert false : "Concretization threw a TransformerException";
+        } catch (ParseFailedException e) {
+            e.report();
         }
         if (result.getClass() == Cell.class) {
             Cell generatedTop = (Cell) result;

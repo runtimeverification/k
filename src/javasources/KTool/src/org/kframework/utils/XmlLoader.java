@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -39,7 +39,7 @@ public class XmlLoader {
         return null;
     }
 
-    public static void reportErrors(Document doc) throws TransformerException {
+    public static void reportErrors(Document doc) throws ParseFailedException {
         // report any error that xml parser returns
         NodeList nl = doc.getElementsByTagName("error");
 
@@ -54,14 +54,14 @@ public class XmlLoader {
                         String msg = node.getAttribute("message");
                         String file = node.getAttribute("filename");
                         String location = node.getAttribute("loc");
-                        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
                     }
                 }
             }
         }
     }
 
-    public static void reportErrors(Document doc, String fromWhere) throws TransformerException {
+    public static void reportErrors(Document doc, String fromWhere) throws ParseFailedException {
         // report any error that xml parser returns
         NodeList nl = doc.getElementsByTagName("error");
 
@@ -78,7 +78,7 @@ public class XmlLoader {
                             msg = "Unexpected end of " + fromWhere;
                         String file = node.getAttribute("filename");
                         String location = node.getAttribute("loc");
-                        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
                     }
                 }
             }

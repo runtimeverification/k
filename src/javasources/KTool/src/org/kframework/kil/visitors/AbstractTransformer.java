@@ -4,18 +4,17 @@ package org.kframework.kil.visitors;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * A helper class designed to encapsulate functionality shared between 
- * {@link LocalTransformer}, {@link BasicTransformer}, and {@link CopyOnWriteTransformer}.
+ * {@link LocalTransformer}, {@link ParseForestTransformer}, and {@link CopyOnWriteTransformer}.
  * 
  * This class serves to replace the Transformable interface that existed before, and implements
  * functionality specific to visitors which transform terms.
  * @author dwightguth
  *
  */
-public abstract class AbstractTransformer extends AbstractVisitor<Void, ASTNode, TransformerException> {
+public abstract class AbstractTransformer<E extends Throwable> extends AbstractVisitor<Void, ASTNode, E> {
 
     public AbstractTransformer(String name, Context context) {
         super(name, context);

@@ -10,16 +10,16 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
-public class PreferAvoidFilter extends BasicTransformer {
+public class PreferAvoidFilter extends ParseForestTransformer {
     public PreferAvoidFilter(Context context) {
         super("Ambiguity filter", context);
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         java.util.List<Term> prefer = new ArrayList<Term>();
         java.util.List<Term> avoid = new ArrayList<Term>();
 

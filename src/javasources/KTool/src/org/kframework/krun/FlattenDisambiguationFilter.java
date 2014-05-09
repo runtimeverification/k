@@ -16,7 +16,6 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
     public FlattenDisambiguationFilter(Context context) {
@@ -24,7 +23,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Ambiguity amb, Void _) throws TransformerException {
+    public ASTNode visit(Ambiguity amb, Void _)  {
         
         if (amb.getContents().get(0) instanceof TermCons) {
             TermCons t1 = (TermCons)amb.getContents().get(0);
