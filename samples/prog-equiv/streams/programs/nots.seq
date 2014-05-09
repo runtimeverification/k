@@ -5,8 +5,8 @@ not(xs) :~ 1 <| hd(xs) = 0 |> 0 : L.not(tl(xs));
 
 ~
 
-<k> L.$S:BSExp </k>
+<k> L.id($S:BSExp) </k>
 <sspecs>
-a := a;
+id(xs) :~ hd(xs) : L.id(xs);
 </sspecs> ;
 
