@@ -5,6 +5,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.parser.ParserType;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KException;

@@ -91,14 +91,10 @@ public class KastFrontEnd {
             context = new Context(kompileOptions);
             context.kompiled = compiledFile;
             
-            try {
-                javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
-                javaDef = new FlattenModules(context).compile(javaDef, null);
-                javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
-                        context).visitNode(javaDef);
-            } catch (TransformerException e) {
-                throw new AssertionError("should not have thrown TransformerException", e);
-            }
+            javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
+            javaDef = new FlattenModules(context).compile(javaDef, null);
+            javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
+                    context).visitNode(javaDef);
             javaDef.preprocess(context);
 
             String sort = options.sort(context);
@@ -132,15 +128,11 @@ public class KastFrontEnd {
     
                 Stopwatch.instance().printIntermediate("Maudify Program");
                 Stopwatch.instance().printTotal("Total");
-            } catch (TransformerException e) {
+                return true;
+            } catch (ParseFailedException e) {
                 e.report();
+                return false;
             }
-
-            Stopwatch.instance().printIntermediate("Maudify Program");
-            Stopwatch.instance().printTotal("Total");
-        } catch (ParseFailedException e) {
-            e.report();
-            return true;
         } catch (ParameterException ex) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
             return false;
