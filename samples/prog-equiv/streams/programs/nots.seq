@@ -1,0 +1,12 @@
+<k> L.not(L.not(L.$S:BSExp)) </k>
+<sspecs>
+not(xs) :~ 1 <| hd(xs) = 0 |> 0 : L.not(tl(xs));
+</sspecs> 
+
+~
+
+<k> L.$S:BSExp </k>
+<sspecs>
+a := a;
+</sspecs> ;
+
