@@ -90,7 +90,7 @@ public class ProgramLoader {
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         if (!context.definedSorts.contains(startSymbol)) {
-            throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
                     "The start symbol must be declared in the definition. Found: " + startSymbol));
         }
 
