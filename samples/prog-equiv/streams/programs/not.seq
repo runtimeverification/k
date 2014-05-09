@@ -8,6 +8,6 @@ not(xs) :~ 1 <| hd(xs) = 0 |> 0 : L.not(tl(xs));
 
 <k> L.one </k>
 <sspecs>
-one :~ 1 : L.L.one;
+one :~ 1 : L.one;
 </sspecs> ;
 
