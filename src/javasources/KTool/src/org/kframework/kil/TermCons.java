@@ -7,13 +7,8 @@ import java.util.List;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
-import aterm.ATerm;
-import aterm.ATermAppl;
-import aterm.ATermList;
 
 /**
  * Applications that are not in sort K, or have not yet been flattened.
@@ -35,35 +30,6 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
             contents.add((Term) JavaClassesFactory.getTerm(e));
-    }
-
-    public TermCons(ATermAppl atm, Context context) {
-        super(atm);
-        this.cons = atm.getName();
-        this.sort = StringUtil.getSortNameFromCons(cons);
-        this.production = context.conses.get(cons);
-        assert this.production != null;
-
-        contents = new ArrayList<Term>();
-        if (atm.getArity() == 0) {
-            contents = new ArrayList<Term>();
-        } else if (atm.getArgument(0) instanceof ATermList) {
-            ATermList list = (ATermList) atm.getArgument(0);
-            for (; !list.isEmpty(); list = list.getNext()) {
-                if (isColon(list.getFirst())) continue;
-                contents.add((Term) JavaClassesFactory.getTerm(list.getFirst()));
-            }
-            contents.add(new ListTerminator(sort, null));
-        } else {
-            for (int i = 0; i < atm.getArity(); i++) {
-                if (isColon(atm.getArgument(i))) continue;
-                contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
-            }
-        }
-    }
-
-    private boolean isColon(ATerm atm) {
-        return atm.getType() == ATerm.APPL && (((ATermAppl)atm).getName().equals("Colon") || ((ATermAppl)atm).getName().equals("QuestionMark"));
     }
 
     public TermCons(String sort, String cons, org.kframework.kil.loader.Context context) {

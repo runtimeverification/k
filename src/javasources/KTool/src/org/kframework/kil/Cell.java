@@ -19,9 +19,6 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
-import aterm.ATermAppl;
-import aterm.ATermList;
-
 /**
  * Class for representing a K cell term.  The textual representation of a K cell is the following:
  * <table>
@@ -103,45 +100,6 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
                 cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteString("\"" + its.item(i).getNodeValue() + "\""));
             }
         }
-    }
-
-    public Cell(ATermAppl atm) {
-        super(atm);
-
-        this.sort = "BagItem";
-        label = ((ATermAppl) atm.getArgument(0)).getName();
-        boolean left = false, right = false;
-        ATermAppl next = (ATermAppl) atm.getArgument(2);
-
-        if (next.getName().equals("LeftCell")) {
-            left = true;
-            next = (ATermAppl) next.getArgument(0);
-        }
-        if (next.getName().equals("RightCell")) {
-            right = true;
-            next = (ATermAppl) next.getArgument(0);
-        }
-        cellAttributes = new HashMap<String, String>();
-        if (left && right)
-            setEllipses(Ellipses.BOTH);
-        else if (left)
-            setEllipses(Ellipses.LEFT);
-        else if (right)
-            setEllipses(Ellipses.RIGHT);
-        else
-            setEllipses(Ellipses.NONE);
-
-        // extract cell attributes
-        ATermList list = (ATermList) atm.getArgument(1);
-        while (!list.isEmpty()) {
-            String key = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(0)).getName();
-            String value = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(1)).getName();
-            cellAttributes.put(key, StringUtil.unquoteString(value));
-            list = list.getNext();
-        }
-
-        contents = (Term) JavaClassesFactory.getTerm(next);
-        endLabel = ((ATermAppl) atm.getArgument(3)).getName();
     }
 
     public Cell(Cell node) {

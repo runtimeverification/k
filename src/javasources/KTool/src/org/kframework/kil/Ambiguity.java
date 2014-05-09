@@ -4,8 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 import java.util.ArrayList;
 
 /**
@@ -15,10 +13,6 @@ public class Ambiguity extends Collection {
 
     public Ambiguity(Element element) {
         super(element);
-    }
-
-    public Ambiguity(ATermAppl atm) {
-        super(atm);
     }
 
     public Ambiguity(Ambiguity node) {

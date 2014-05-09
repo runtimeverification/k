@@ -27,8 +27,6 @@ import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.Parser;
 import org.kframework.parser.concrete2.Parser.ParseError;
 import org.kframework.parser.concrete2.TreeCleanerVisitor;
-import org.kframework.parser.utils.ReportErrorsVisitor;
-import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -36,7 +34,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -92,7 +89,10 @@ public class ProgramLoader {
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
-        assert context.definedSorts.contains(startSymbol) : "The start symbol must be declared in the definition. Found: " + startSymbol;
+        if (!context.definedSorts.contains(startSymbol)) {
+            throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                    "The start symbol must be declared in the definition. Found: " + startSymbol));
+        }
 
         try {
             ASTNode out;

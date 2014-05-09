@@ -9,9 +9,6 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
-
 /**
  * Class representing a builtin integer token.
  */
@@ -129,11 +126,6 @@ public class IntBuiltin extends Token {
     protected IntBuiltin(Element element) {
         super(element);
         value = new BigInteger(element.getAttribute(Constants.VALUE_value_ATTR));
-    }
-
-    protected IntBuiltin(ATermAppl atm) {
-        super(atm);
-        value = new BigInteger(((ATermAppl) atm.getArgument(0)).getName());
     }
 
     /**

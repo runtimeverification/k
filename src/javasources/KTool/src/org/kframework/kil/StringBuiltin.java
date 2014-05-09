@@ -13,8 +13,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * Class representing a builtin string token.
  *
@@ -98,17 +96,6 @@ public class StringBuiltin extends Token {
     protected StringBuiltin(Element element) {
         super(element);
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
-        try {
-            value = StringUtil.unquoteString(s);
-        } catch (IllegalArgumentException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, encodingErrorMsg, this.getLocation(), this.getFilename()));
-            throw e; //unreachable
-        }
-    }
-
-    protected StringBuiltin(ATermAppl atm) {
-        super(atm);
-        String s = ((ATermAppl) atm.getArgument(0)).getName();
         try {
             value = StringUtil.unquoteString(s);
         } catch (IllegalArgumentException e) {

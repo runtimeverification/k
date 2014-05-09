@@ -6,8 +6,6 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /**
  * Variables, used both in rules/contexts and for variables like {@code $PGM} in configurations.
  */
@@ -37,20 +35,6 @@ public class Variable extends Term {
         this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
         this.name = element.getAttribute(Constants.NAME_name_ATTR);
         this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
-        if (this.name.startsWith("?")) {
-            this.setFresh(true);
-            this.name = this.name.substring(1);
-        }
-    }
-
-    public Variable(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-
-        name = ((ATermAppl) atm.getArgument(0)).getName();
-
-        if (atm.getName().endsWith("2Var"))
-            this.userTyped = true;
         if (this.name.startsWith("?")) {
             this.setFresh(true);
             this.name = this.name.substring(1);

@@ -8,8 +8,6 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Base class for collection sorts */
 public abstract class Collection extends Term implements Interfaces.MutableList<Term, Enum<?>> {
 
@@ -37,14 +35,6 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
             contents.add((Term) JavaClassesFactory.getTerm(e));
-    }
-
-    public Collection(ATermAppl atm) {
-        super(atm);
-        contents = new ArrayList<Term>();
-        for (int i = 0; i < atm.getArity(); i++) {
-            contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
-        }
     }
 
     public Collection(String sort, List<Term> col) {

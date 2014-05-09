@@ -7,8 +7,6 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** MapItem is a map item with key {@link #key} and value the inherited {@link #value} */
 public class MapItem extends CollectionItem {
     private Term key;
@@ -22,12 +20,6 @@ public class MapItem extends CollectionItem {
         elm = XML.getChildrenElementsByTagName(element, Constants.VALUE).get(0);
         elmBody = XML.getChildrenElements(elm).get(0);
         this.value = (Term) JavaClassesFactory.getTerm(elmBody);
-    }
-
-    public MapItem(ATermAppl atm) {
-        super(atm);
-        key = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-        value = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
     }
 
     public MapItem(String location, String filename) {
