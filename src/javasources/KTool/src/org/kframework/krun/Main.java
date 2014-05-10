@@ -208,7 +208,7 @@ public class Main {
         return plug(output, context);
     }
 
-    private static KRun obtainKRun(Context context) {
+    public static KRun obtainKRun(Context context) {
         if (K.backend.equals("maude") || K.backend.equals("symbolic")) {
             return new MaudeKRun(context, sw);
         } else if (K.backend.equals("java")) {
@@ -844,7 +844,7 @@ public class Main {
         try {
             KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
-            RunKRunCommand cmd = new RunKRunCommand(kast, lang, context);
+            RunKRunCommand cmd = new RunKRunCommand(kast, lang,krun, context);
             MainWindow window = new MainWindow(cmd);
             synchronized(window.lock) {
                 while (true) {
