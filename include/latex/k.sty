@@ -629,8 +629,11 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\constant}[2][none]{%
   \k@withTooltip{\text{\sffamily #2}}{syntax #1 ::= "#2"}%
 }
+
+\newcommand{\typedTo}[1]{{\it :}#1}
+
 \newcommand{\variable}[3][none]{%
-\k@withTooltip{\text{\ensuremath{\it #2\ifthenelse{\equal{#3}{user}}{\!\!:\!\!#1}{}}}\/}{Variable #2:#1}%
+\k@withTooltip{\text{\ensuremath{\it #2\ifthenelse{\equal{#3}{user}}{\typedTo{#1}}{}}}\/}{Variable #2:#1}%
 }
 
 \newcommand{\displayGreek}[1]{%
@@ -653,7 +656,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\msuffix}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}}}
 \newcommand{\mmiddle}[3]{\mcell{#1}{#2}{{\color{#1!50!black}\ellipses}\ {#3}\ {\color{#1!50!black}\ellipses}}}
 \newcommand{\mdot}{\cdot}
-\newcommand{\mAnyVar}[2]{\_\ifthenelse{\equal{#2}{user}}{\!\!:\!\!#1}{}}
+\newcommand{\mAnyVar}[2]{\_\ifthenelse{\equal{#2}{user}}{\typedTo{#1}}{}}
 
 %%% Bubble notation.
 
@@ -672,7 +675,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
 \newcommand{\bmiddle}[3]{\kcell{#1}{#2}{#3}{none}{none}}
 \newcommand{\bdot}{{\scriptscriptstyle\bullet}}
 \newcommand{\bAnyVar}[2]{%
-  \k@withTooltip{\mbox{---}\ifthenelse{\equal{#2}{user}}{\!\!:\!\!#1}{}}{Variable \_:#1}%
+  \k@withTooltip{\mbox{---}\ifthenelse{\equal{#2}{user}}{\typedTo{#1}}{}}{Variable \_:#1}%
 }
 
 \tikzset{
