@@ -1,7 +1,7 @@
 /*
  This is an example of STREAM program.
  If the expression to be evaluated is a stream one, e.g.  blink or blink2,
- then the program must be esectued in debugger mode because the evaluation
+ then the program must be exectued in debugger mode because the evaluation
  process is infinite.
 */
 
