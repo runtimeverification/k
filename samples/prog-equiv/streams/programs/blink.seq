@@ -16,6 +16,7 @@ zero :~ 0 : zero;
 zip(xs, ys) :~ hd(xs) : L.zip(ys, tl(xs));
 </sspecs> ;
 
+/*
 <k> L.one </k>
 <sspecs>
 one :~ 1 : L.one;
@@ -28,3 +29,5 @@ one :~ 1 : L.one;
 one :~ 1 : L.one;
 zip(xs, ys) :~ hd(xs) : L.zip(ys, tl(xs));
 </sspecs> ;
+*/
+

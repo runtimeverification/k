@@ -1,3 +1,5 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+
 /*!
 \setlength{\parindent}{1em}
 \title{CinK -- an experiment on how to think in \K}
