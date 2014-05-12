@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 require "builtins/set.k"
 require "builtins/map.k"
 

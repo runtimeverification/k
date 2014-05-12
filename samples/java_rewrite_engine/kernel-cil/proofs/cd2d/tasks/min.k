@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /*@ ensures \result == dmin(a,b); */
 /*
 double mmin(double a, double b){

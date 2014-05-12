@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 module MY-PATTERN-MATCHING
 
 // adapted from k-prelude.k

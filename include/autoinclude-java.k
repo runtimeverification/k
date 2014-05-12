@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 require "k-prelude.k"
 require "builtins/map.k"
 require "builtins/set.k"

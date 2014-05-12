@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 // This is a heavily commented K definition, part of the K tutorial.
 
 /*!

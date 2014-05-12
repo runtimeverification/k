@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "lambda.k"
 
 module MU-SYNTAX imports LAMBDA-SYNTAX
