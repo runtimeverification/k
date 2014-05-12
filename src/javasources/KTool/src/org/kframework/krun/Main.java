@@ -208,7 +208,7 @@ public class Main {
         return plug(output, context);
     }
 
-    public static KRun obtainKRun(Context context) {
+    private static KRun obtainKRun(Context context) {
         if (K.backend.equals("maude") || K.backend.equals("symbolic")) {
             return new MaudeKRun(context, sw);
         } else if (K.backend.equals("java")) {

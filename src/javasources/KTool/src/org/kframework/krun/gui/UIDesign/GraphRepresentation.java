@@ -721,7 +721,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                 KRunState conf = loadConf(file);
                 // addConfToTabbed(conf);
                 MainWindow.addDebugTab(new GraphRepresentation(new RunKRunCommand(conf,
-                        commandProcessor.getLang(), definitionHelper)),
+                        commandProcessor.getLang(),commandProcessor.getKrun() ,definitionHelper)),
                         "Tab resulted from loading :" + file.getName());
             } catch (IOException | ClassCastException e) {
                 showMessage("Unable to load configuration from file");

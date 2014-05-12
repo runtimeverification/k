@@ -38,13 +38,13 @@ public class RunKRunCommand {
         debugger = krun.debug(cfg);
     }
 
-    public RunKRunCommand(KRunState state, String lang, Context context) {
+    public RunKRunCommand(KRunState state, String lang, KRun krun, Context context) {
         super();
         this.context = context;
         this.KAST = state.getRawResult();
         this.lang = lang;
         rp = new RunProcess();
-        this.krun = Main.obtainKRun(context);
+        this.krun = krun;
         DirectedGraph<KRunState, Transition> dg = new DirectedSparseGraph<KRunState, Transition>();
         dg.addVertex(state);
         debugger = krun.debug(dg);
