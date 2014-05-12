@@ -78,6 +78,9 @@ module MAP
 //  rule values(_ |-> K:K M:Map) => BagItem(K) values(M)
 //  rule values(.Map) => .Bag
 
+  /*@ Test map inclusion */
+  syntax Bool ::= Map "<=Map" Map    [function, hook(Map:inclusion)]
+
   /*@ Get Map size (TODO: number of key/value pairs? Total combined number of keys and values?):*/
   syntax Int ::= size(Map)   [function]
 //  rule size(_ |-> _ M:Map) => 1 +Int size(M)

@@ -41,7 +41,10 @@ module SET
   syntax Set ::= intersectSet(Set, Set)   [function]
 //  rule intersectSet(S1:Set, S2:Set) => S1 -Set (S1 -Set S2)
 
-  /*@ Test element membership in a set ( a $\epsilon$ A ) :*/
+  /*@ Test set inclusion ($S_1 \subseteq S_2 $): */
+  syntax Bool ::= Set "<=Set" Set   [function, hook(Set:inclusion)]
+
+  /*@ Test element membership in a set ($a \in A$): */
   syntax Bool ::= K "in" Set    [function, hook(Set:in)]
 //  rule K1:K in SetItem(K2:K) S:Set => K1 =K K2 orBool K1 in S
 //  rule _ in .Set => false

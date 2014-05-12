@@ -54,6 +54,13 @@ module MAP-IMPL
   rule values(_ |-> K:K M:Map) => ListItem(K) values(M)
   rule values(.Map) => .List
 
+  /* map inclusion */
+//  syntax Bool ::= Map "<=Map" Map    [function, hook(Map:inclusion)]
+  rule (K1 |-> K2 Map1:Map) <=Map (K1 |-> K2 Map2:Map)
+        =>
+       (Map1 <=Map Map2)
+  rule .Map <=Map _:Map => true
+
   /* map size */
 //  syntax Int ::= size(Map)   [function]
   rule size(_ |-> _ M:Map) => 1 +Int size(M)

@@ -66,10 +66,10 @@ module MINT
    * overflowMInt(saddMInt(...))  returns true if overflow is detected during
    *                              the execution of the operation
    */
-  syntax MInt ::= miMInt(MyList)          [function]
-  rule miMInt(MyListItem(MI:MInt), MyListItem(_:Bool)) => MI
-  syntax Bool ::= overflowMInt(MyList)    [function]
-  rule overflowMInt(MyListItem(_:MInt), MyListItem(B:Bool)) => B
+  syntax MInt ::= miMInt(List)          [function]
+  rule miMInt(ListItem(MI:MInt) ListItem(_:Bool)) => MI
+  syntax Bool ::= overflowMInt(List)    [function]
+  rule overflowMInt(ListItem(_:MInt) ListItem(B:Bool)) => B
 
   /* 
    * Arithmetic and comparison operations
@@ -94,7 +94,7 @@ module MINT
    * udiv/urem  operation interprets operands as unsigned; undefined if the
    *            second argument is 0 
    */
-  syntax MyList ::= sdivMInt(MInt, MInt)    [function, hook(#MINT:sdiv)]
+  syntax List ::= sdivMInt(MInt, MInt)    [function, hook(#MINT:sdiv)]
                   | sremMInt(MInt, MInt)    [function, hook(#MINT:srem)]
   syntax MInt ::= udivMInt(MInt, MInt)    [function, hook(#MINT:udiv)]
                 | uremMInt(MInt, MInt)    [function, hook(#MINT:urem)]
@@ -104,7 +104,7 @@ module MINT
    * operation returns a pair of result and overflow flag represented as a list
    * of 2 elements
    */
-  syntax MyList ::= saddMInt(MInt, MInt)    [function, hook(#MINT:sadd)]
+  syntax List ::= saddMInt(MInt, MInt)    [function, hook(#MINT:sadd)]
                   | uaddMInt(MInt, MInt)    [function, hook(#MINT:uadd)]
                   | ssubMInt(MInt, MInt)    [function, hook(#MINT:ssub)]
                   | usubMInt(MInt, MInt)    [function, hook(#MINT:usub)]
@@ -142,7 +142,7 @@ module MINT
    * be an integer greater than 1. Useful for serializing a integer to a
    * sequence of bytes.
    */
-  syntax MyList ::= digitsOfMInt(MInt, Int)   [function, hook(#MINT:toDigits)]
+  syntax List ::= digitsOfMInt(MInt, Int)   [function, hook(#MINT:toDigits)]
 
   /*
    * Returns a machine integer representing the given list of digits in the
@@ -150,7 +150,7 @@ module MINT
    * be an integer greater than 1. Useful for deserializing an integer from a
    * sequence of bytes.
    */
-  syntax MInt ::= mIntOfDigits(MyList, Int)   [function, hook(#MINT:fromDigits)]
+  syntax MInt ::= mIntOfDigits(List, Int)   [function, hook(#MINT:fromDigits)]
 
 
   /* Implementation with K rules */
@@ -174,14 +174,14 @@ module MINT
   rule
     sdivMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2)))),
-    MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
+    ListItem(mi(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
+    ListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
   when notBool zeroMInt(mi(N, I2))
   rule
     sremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, svalueMInt(mi(N, I1)) %Int svalueMInt(mi(N, I2)))),
-    MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
+    ListItem(mi(N, svalueMInt(mi(N, I1)) %Int svalueMInt(mi(N, I2))))
+    ListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
   when notBool zeroMInt(mi(N, I2))
 
 
@@ -202,35 +202,35 @@ module MINT
   rule
     saddMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, I1 +Int I2)),
-    MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) +Int svalueMInt(mi(N, I2))))
+    ListItem(mi(N, I1 +Int I2))
+    ListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) +Int svalueMInt(mi(N, I2))))
   rule
     uaddMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, I1 +Int I2)),
-    MyListItem(uoverflowMInt(N, uvalueMInt(mi(N, I1)) +Int uvalueMInt(mi(N, I2))))
+    ListItem(mi(N, I1 +Int I2))
+    ListItem(uoverflowMInt(N, uvalueMInt(mi(N, I1)) +Int uvalueMInt(mi(N, I2))))
 
   rule
     ssubMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, I1 -Int I2)),
-    MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) -Int svalueMInt(mi(N, I2))))
+    ListItem(mi(N, I1 -Int I2))
+    ListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) -Int svalueMInt(mi(N, I2))))
   rule
     usubMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, I1 -Int I2)),
-    MyListItem(uoverflowMInt(N, uvalueMInt(mi(N, I1)) -Int uvalueMInt(mi(N, I2))))
+    ListItem(mi(N, I1 -Int I2))
+    ListItem(uoverflowMInt(N, uvalueMInt(mi(N, I1)) -Int uvalueMInt(mi(N, I2))))
 
   rule
     smulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, I1 *Int I2)),
-    MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) *Int svalueMInt(mi(N, I2))))
+    ListItem(mi(N, I1 *Int I2))
+    ListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) *Int svalueMInt(mi(N, I2))))
   rule
     umulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    MyListItem(mi(N, I1 *Int I2)),
-    MyListItem(uoverflowMInt(N, uvalueMInt(mi(N, I1)) *Int uvalueMInt(mi(N, I2))))
+    ListItem(mi(N, I1 *Int I2))
+    ListItem(uoverflowMInt(N, uvalueMInt(mi(N, I1)) *Int uvalueMInt(mi(N, I2))))
 
   /*
    * Bitwise operations
@@ -301,25 +301,25 @@ module MINT
     digitsOfMInt(MI:MInt, N:Int)
   =>
     digitsOfMIntHelper(uvalueMInt(MI), N, bitwidthMInt(MI))
-  syntax MyList ::= digitsOfMIntHelper(Int, Int, Int)   [function]
+  syntax List ::= digitsOfMIntHelper(Int, Int, Int)   [function]
   rule
     digitsOfMIntHelper(I:Int, N:Int, M:Int)
   =>
-    digitsOfMIntHelper(I >>Int N, N, M -Int N),
-    MyListItem(mi(N, I %Int (1 <<Int N)))
+    digitsOfMIntHelper(I >>Int N, N, M -Int N)
+    ListItem(mi(N, I %Int (1 <<Int N)))
   when M >Int 0
-  rule digitsOfMIntHelper(0, _:Int, 0) => .MyList
+  rule digitsOfMIntHelper(0, _:Int, 0) => .List
 
   rule
-    mIntOfDigits(L:MyList, N:Int)
+    mIntOfDigits(L:List, N:Int)
   =>
     mi(N *Int size(L), mIntOfDigitsHelper(L, N))
-  syntax Int ::= mIntOfDigitsHelper(MyList, Int)    [function]
+  syntax Int ::= mIntOfDigitsHelper(List, Int)    [function]
   rule
-    mIntOfDigitsHelper((L:MyList, MyListItem(MI:MInt)), N:Int)
+    mIntOfDigitsHelper((L:List ListItem(MI:MInt)), N:Int)
   =>
     (mIntOfDigitsHelper(L, N) <<Int N) +Int uvalueMInt(MI)
   when bitwidthMInt(MI) ==Int N
-  rule mIntOfDigitsHelper(.MyList, _:Int) => 0
+  rule mIntOfDigitsHelper(.List, _:Int) => 0
 endmodule
 

@@ -194,7 +194,7 @@
       <krun-option name="--parser" value="kast --parser ground" />
     </all-programs>
   </test>
-<!--
+
   <test
       definition="tests/regression/java-rewrite-engine/list/test1/list-test1.k"
       programs="tests/regression/java-rewrite-engine/list/test1/programs"
@@ -245,7 +245,7 @@
       <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
--->
+
   <test
       definition="tests/regression/issue#1/issue.k"
       programs="tests/regression/issue#1"
@@ -283,19 +283,20 @@
       <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
-<!--
+
   <test
       definition="tests/regression/issue#12/test.k"
       programs="tests/regression/issue#12/programs"
       results="tests/regression/issue#12/tests"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-smt" value="none" />
-      <krun-option name="-output" value="pretty" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
 
+<!--
   <test
       definition="samples/java_rewrite_engine/imp_with_floats/imp.k"
       extension="imp"
@@ -411,18 +412,6 @@
       definition="tests/regression/java-rewrite-engine/data_structure_iteration/test2/test.k"
       programs="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
       results="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
-      extension="test"
-      >
-    <kompile-option name="--backend" value="java" />
-    <all-programs>
-      <krun-option name="--smt" value="none" />
-    </all-programs>
-  </test>
-
-  <test
-      definition="tests/regression/java-rewrite-engine/machine_integers/test.k"
-      programs="tests/regression/java-rewrite-engine/machine_integers"
-      results="tests/regression/java-rewrite-engine/machine_integers"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />

@@ -1,0 +1,70 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+
+<tests>
+  <!-- Java Backend Regression Tests -->
+  <test
+      definition="issue#1/issue.k"
+      programs="issue#1"
+      results="issue#1"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue#2/issue.k"
+      programs="issue#2"
+      results="issue#2"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue#8/test.k"
+      programs="issue#8/programs"
+      results="issue#8/tests"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue#12/test.k"
+      programs="issue#12/programs"
+      results="issue#12/tests"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tokenconstants/issue.k"
+      programs="tokenconstants"
+      results="tokenconstants"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--directory" value="tokenconstants-java_kompiled" />
+    <program name="test.issue">
+      <krun-option  name="--directory" value="tokenconstants-java_kompiled" />
+    </program>
+  </test>
+
+  <include file="java-rewrite-engine/config.xml" directory="java-rewrite-engine" />
+</tests>
+

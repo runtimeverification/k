@@ -1,3 +1,5 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.compile.sharing;
 
 import org.kframework.kil.Attribute;
@@ -36,6 +38,10 @@ public class DataStructureSortCollector extends BasicVisitor {
         for (Map.Entry<String, String> entry : types.entrySet()) {
             String sort = entry.getKey();
 
+            if (!types.containsKey(sort)) {
+                /* TODO: print error message */
+                continue;
+            }
             if (!constructorLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 continue;
@@ -85,13 +91,7 @@ public class DataStructureSortCollector extends BasicVisitor {
             return;
         }
 
-        if (types.containsKey(sort)) {
-            if (!types.get(sort).equals(type)) {
-                /* TODO: print error message */
-                return;
-            }
-        } else {
-            types.put(sort, type);
+        if (!operatorLabels.containsKey(sort)) {
             operatorLabels.put(sort, new HashMap<String, String>());
         }
 
@@ -123,6 +123,20 @@ public class DataStructureSortCollector extends BasicVisitor {
             operatorLabels.get(sort).put(operator, node.getKLabel());
         }
 
+        /*
+         * The type (list, map, set) of a data structure is determined by its constructor, element,
+         * and unit
+         */
+        if (!operatorLabels.get(sort).containsKey(operator)) {
+            if (types.containsKey(sort)) {
+                if (!types.get(sort).equals(type)) {
+                    /* TODO: print error message */
+                    return;
+                }
+            } else {
+                types.put(sort, type);
+            }
+        }
     }
 
 }
