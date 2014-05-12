@@ -197,14 +197,12 @@ public class LatexFilter extends BackendFilter {
             return null;
         }
         if (hasBR) {
-            if (parens) result.append("\\left(");
             result.append("\\begin{array}{@{}c@{}}");
         }
         List<Term> contents = col.getContents();
         printList(contents, "\\mathrel{}");
         if (hasBR) {
             result.append("\\end{array}");
-            if (parens) result.append("\\right)");
         }
         return null;
     }
