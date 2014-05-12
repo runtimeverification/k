@@ -250,6 +250,11 @@ public class LatexFilter extends BackendFilter {
         if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
             result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
         }
+        result.append("{");
+        if (var.isUserTyped()) {
+            result.append("user");
+        }
+        result.append("}");
         return null;
     }
 
