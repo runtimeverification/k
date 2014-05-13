@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 require "io/uris.k"
 require "builtins/list.k"
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 require "../../kernel-cil.k"
 require "cd2d-spec.k"
 module CD2D

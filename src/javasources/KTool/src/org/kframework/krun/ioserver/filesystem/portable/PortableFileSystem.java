@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.ioserver.filesystem.portable;
 
 import org.apache.commons.collections15.BidiMap;

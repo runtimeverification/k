@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 require "../../extended-float.k"
 
 module CD2D-SPEC

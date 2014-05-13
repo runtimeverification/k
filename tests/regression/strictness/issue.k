@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 module ISSUE
 
 syntax Foo ::= bar(Foo, Foo, Foo) [strict(1,  2)]

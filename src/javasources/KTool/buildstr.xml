@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 <project basedir="." default="all.stratego2java" name="K3Java Build requriements">
 	<!-- This is an automatic way of compiling K3.
 	To be able to call this script, you will first have to install the appropriate version of
