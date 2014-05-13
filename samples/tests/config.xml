@@ -1,4 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+
 <tests>
-  <include file="../java_rewrite_engine/tests/config.xml"
-           directory="java_rewrite_engine" />
+  <!-- QUINE -->
+  <test
+      definition="quine/explicit/quine-explicit.k"
+      programs="../../tests/examples/quine-explicit"
+      results="../../tests/examples/quine-explicit"
+      extension="quine" >
+    <all-programs>
+      <krun-option name="--output" value="none" />
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+  <test
+      definition="quine/short/quine-short.k"
+      programs="../../tests/examples/quine-short"
+      results="../../tests/examples/quine-short"
+      extension="quine" >
+    <all-programs>
+      <krun-option name="--output" value="none" />
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+
+  <include file="../java_rewrite_engine/tests/config.xml" directory="java_rewrite_engine" />
 </tests>
+

@@ -1,10 +1,26 @@
-<tests>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
 
+<tests>
   <test
-    definition="imp.k"
-    programs="."
-    extension="imp"
-    results="." >
+      definition="imp.k"
+      programs="."
+      results="."
+      extension="imp"
+      >
   </test>
 
+  <test
+      definition="imp.k"
+      programs="."
+      results="."
+      extension="imp"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--directory" value="imp-java_kompiled" />
+    <all-programs>
+      <krun-option  name="--directory" value="imp-java_kompiled" />
+    </all-programs>
+  </test>
 </tests>
+

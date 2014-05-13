@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 require "set.k"
 
 
@@ -20,6 +21,13 @@ module SET-IMPL
   /* set intersection */
 //  syntax Set ::= intersectSet(Set, Set)   [function]
   rule intersectSet(S1:Set, S2:Set) => S1 -Set (S1 -Set S2)
+
+  /* set inclusion */
+//  syntax Bool ::= Set "<=Set" Set    [function, hook(Set:inclusion)]
+  rule SetItem(K:K) Set1:Set <=Set SetItem(K) Set2:Set => Set1 <=Set Set2
+  rule .Set <=Set _:Set => true
+  rule SetItem(K:K) _:Set <=Set Set2:Set => false
+  when notBool (K in Set2:Set)
 
   /* element membership */
 //  syntax Bool ::= K "in" Set    [function, hook(Set:in)]

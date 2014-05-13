@@ -1,14 +1,17 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "bool.k"
-require "k-prelude.k"
 require "list.k"
+require "map.k"
+require "set.k"
+require "k-prelude.k"
+
 
 module K-EQUAL-HOOKS
   imports #K-EQUAL-INTERFACE
   imports BOOL-HOOKS
-  //imports K-SET-EXTRAS
-  //imports K-MAP-EXTRAS
   imports LIST
   imports MAP
+  imports SET
 
 
   syntax Bool ::= left:
@@ -26,12 +29,6 @@ module K-EQUAL-HOOKS
   rule #if true #then K:K #else _:K #fi => K
   rule #if false #then _:K #else K:K #fi => K
 
-  // inclusion between sets
-  syntax Bool ::= Set "<=Set" Set    [function]
-  rule SetItem(K:K) Set1:Set <=Set SetItem(K) Set2:Set => Set1 <=Set Set2
-  rule .Set <=Set _:Set => true
-  rule SetItem(K:K) _:Set <=Set Set2:Set => false
-                            when notBool (K in Set2:Set)
   // equality over sets
   syntax Bool ::= Set "==Set" Set    [function]
   rule Set1:Set ==Set Set2:Set => (Set1 <=Set Set2) andBool (Set2 <=Set Set1)
@@ -39,17 +36,6 @@ module K-EQUAL-HOOKS
   // disequality over sets
   syntax Bool ::= Set "=/=Set" Set   [function]
   rule Set1:Set =/=Set Set2:Set => notBool(Set1 ==Set Set2)
-
-  // inclusion between maps
-  syntax Bool ::= Map "<=Map" Map    [function]
-
-  rule (K1 |-> K2 Map1:Map) <=Map (K1 |-> K2 Map2:Map)
-        =>
-       (Map1 <=Map Map2)
-
-
-  rule .Map <=Map _:Map => true [function, anywhere]
-
 
   // equality over maps
   syntax Bool ::= Map "==Map" Map    [function]

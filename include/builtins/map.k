@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 require "builtins/bag.k"
 require "builtins/set.k"
 
@@ -77,6 +78,9 @@ module MAP
 	syntax List ::= values(Map)    [function]
 //  rule values(_ |-> K:K M:Map) => BagItem(K) values(M)
 //  rule values(.Map) => .Bag
+
+  /*@ Test map inclusion */
+  syntax Bool ::= Map "<=Map" Map    [function, hook(Map:inclusion)]
 
   /*@ Get Map size (TODO: number of key/value pairs? Total combined number of keys and values?):*/
   syntax Int ::= size(Map)   [function]
