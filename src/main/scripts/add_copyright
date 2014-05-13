@@ -8,7 +8,7 @@
 
 EXTENSION="${1##*.}"
 YEAR=
-BLAME="`git blame "$1" -e | awk '{print $4}'`"
+BLAME="`git blame "$1" -e -f | awk '{print $4}'`"
 if [ -n "`echo $BLAME | grep 2013`" ]
 then
   YEAR=2013-
