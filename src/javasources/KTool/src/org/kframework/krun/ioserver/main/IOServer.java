@@ -7,13 +7,12 @@ import org.kframework.krun.ioserver.commands.*;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.ServerSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.ServerSocketChannel;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -27,7 +26,7 @@ import java.util.logging.Logger;
 
 public class IOServer {
     int port;
-    ServerSocket serverSocket;
+    ServerSocketChannel serverSocket;
     ThreadPoolExecutor pool;
     private int POOL_THREADS_SIZE = 10;
     private Logger _logger;
@@ -45,26 +44,31 @@ public class IOServer {
 
     public void createServer() {
         try {
-            serverSocket = new ServerSocket(port);
-            this.port = serverSocket.getLocalPort();
+            serverSocket = ServerSocketChannel.open();
+            serverSocket.socket().bind(new InetSocketAddress(port));
+            this.port = serverSocket.socket().getLocalPort();
         } catch (IOException e) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "IO Server could not listen on port " + port));
         }
     }
 
     public void acceptConnections() throws IOException {
-        _logger.info("Server started at " + serverSocket.getInetAddress() + ": " + port);
-        
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            _logger.info(clientSocket.toString());
-            String msg = getMessage(clientSocket);
-            Command command = parseCommand(msg, clientSocket);
-
-            // execute command == append it to pool
-            if (command != null) {
-                pool.execute(command);
+        _logger.info("Server started at " + serverSocket.socket().getInetAddress() + ": " + port);
+        try {
+            while (true) {
+                Socket clientSocket = serverSocket.socket().accept();
+                _logger.info(clientSocket.toString());
+                String msg = getMessage(clientSocket);
+                Command command = parseCommand(msg, clientSocket);
+    
+                // execute command == append it to pool
+                if (command != null) {
+                    pool.execute(command);
+                }
             }
+        } catch (ClosedByInterruptException e) {
+            //runner has exited, so this thread needs to terminate
+            pool.shutdown();
         }
     }
     
