@@ -92,7 +92,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
             String l = tc.getLocation();
             String f = tc.getFilename();
-            Production ppp = context.conses.get(tc.getCons());
+            Production ppp = tc.getProduction();
             KList lok = new KList(l, f);
             for (Term t : tc.getContents()) {
                 lok.getContents().add((Term) this.visitNode(t));

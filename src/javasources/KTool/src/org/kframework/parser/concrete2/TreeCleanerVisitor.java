@@ -1,16 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
-import java.util.ArrayList;
-
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KList;
-import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 /**
  * Remove parsing artifacts such as single element ambiguities.
@@ -22,7 +16,14 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(KApp node, Void _) throws ParseFailedException {
+    public ASTNode visit(TermCons tc, Void _) {
+        if (!tc.getProduction().containsAttribute("klabel"))
+            return tc.getContents().get(0);
+        return tc;
+    }
+/*
+    @Override
+    public ASTNode visit(KApp node, Void _) throws TransformerException {
         ASTNode rez = this.visitNode(node.getChild());
         assert rez != null;
         if (rez instanceof KList)
@@ -51,4 +52,5 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
         else
             return node;
     }
+*/
 }

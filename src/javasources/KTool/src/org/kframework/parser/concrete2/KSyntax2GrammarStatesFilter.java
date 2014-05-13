@@ -92,8 +92,9 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             // IdsTerminator
             NonTerminal IdsTerminatorNt = new NonTerminal(prd.getSort() + "-Terminator");
             {
+                // TODO: (Radu) think of a way to make this a list terminator of some sort
                 RuleState terminatorLabelRule = new RuleState("AddLabelRS", IdsTerminatorNt,
-                    new WrapLabelRule(new KLabelConstant(ul.getTerminatorKLabel()), prd.getSort()));
+                    new WrapLabelRule(prd, prd.getSort()));
                 RuleState locRule = new RuleState(prd.getSort() + "-R", IdsTerminatorNt,
                     new AddLocationRule());
 
@@ -114,7 +115,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 NonTerminalState NeIdsState = new NonTerminalState(ntName + "-S", NeIdsNt,
                     NeIdsNt, false);
                 RuleState labelState = new RuleState(ntName + "-L", NeIdsNt,
-                    new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
+                    new WrapLabelRule(prd, prd.getSort()));
                 RuleState locRule = new RuleState(prd.getSort() + "-R", NeIdsNt,
                     new AddLocationRule());
 
@@ -149,19 +150,6 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 previous = NeIdsState;
             }
             // ************************************** end of list creation **********************
-        } else if (prd.isSubsort()) {
-            Sort srt = prd.getSubsort();
-            NonTerminalState nts = new NonTerminalState(
-                    prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
-            previous.next.add(nts);
-            previous = nts;
-            // if the subsort has a klabel attached to it, then we must attach a label to it
-            if (prd.containsAttribute("klabel")) {
-                RuleState labelRule = new RuleState("AddLabelRS",
-                    nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
-                previous.next.add(labelRule);
-                previous = labelRule;
-            }
         } else if (prd.isLexical()) {
             // T ::= Token{regex}
             // these kind of productions create KApps which contain token elements
@@ -215,7 +203,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 }
             }
             RuleState labelRule = new RuleState("AddLabelRS",
-                    nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
+                    nt, new WrapLabelRule(prd, prd.getSort()));
             previous.next.add(labelRule);
             previous = labelRule;
         }

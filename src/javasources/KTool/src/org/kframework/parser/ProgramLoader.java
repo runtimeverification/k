@@ -149,6 +149,7 @@ public class ProgramLoader {
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
                 out = new AmbFilter(context).visitNode(out);
+                out = new FlattenTerms(context).visitNode(out);
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = new ResolveVariableAttribute(context).visitNode(out);

@@ -51,6 +51,13 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         production = context.conses.get(cons);
     }
 
+    public TermCons(String psort, List<Term> contents, Production production) {
+        super(psort);
+        cons = "";
+        this.contents = contents;
+        this.production = production;
+    }
+
     public Production getProduction() {
         return production;
     }
