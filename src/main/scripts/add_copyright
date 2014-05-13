@@ -1,4 +1,11 @@
 #!/bin/bash
+# Copyright (c) 2014 K Team. All Rights Reserved.
+# Usage: ./copyright <file>
+# TODO(dwightguth): currently this script will add a duplicate xml declaration
+# to files containing an xml declaration but no copyright, and will not
+# add an xml declaration to files with a copyright but no xml declaration.
+# you will have to correct for these two cases manually.
+
 EXTENSION="${1##*.}"
 YEAR=
 BLAME="`git blame "$1" -e | awk '{print $4}'`"
