@@ -1,15 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.Controller;
 
-import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
-import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.ConcretizeSyntax;
-import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.Main;
@@ -18,10 +13,6 @@ import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
-import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
-import org.kframework.utils.Stopwatch;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
@@ -35,25 +26,25 @@ public class RunKRunCommand {
     protected KRunDebugger debugger;
     protected RunProcess rp;
 
-    public RunKRunCommand(Term kast, String lang, Context context) throws KRunExecutionException {
+    public RunKRunCommand(Term kast, String lang, KRun krun, Context context) throws KRunExecutionException {
         super();
         this.context = context;
         this.KAST = kast;
         this.lang = lang;
         rp = new RunProcess();
-        this.krun = createKrun(context);
+        this.krun = krun;
         Term cfg;
         cfg = Main.makeConfiguration(KAST, null, rp, K.term, context);
         debugger = krun.debug(cfg);
     }
 
-    public RunKRunCommand(KRunState state, String lang, Context context) {
+    public RunKRunCommand(KRunState state, String lang, KRun krun, Context context) {
         super();
         this.context = context;
         this.KAST = state.getRawResult();
         this.lang = lang;
         rp = new RunProcess();
-        this.krun = createKrun(context);
+        this.krun = krun;
         DirectedGraph<KRunState, Transition> dg = new DirectedSparseGraph<KRunState, Transition>();
         dg.addVertex(state);
         debugger = krun.debug(dg);
@@ -93,26 +84,6 @@ public class RunKRunCommand {
 
     public Context getContext() {
         return context;
-    }
-
-    private static KRun createKrun(Context context) {
-        KRun krun;
-        if (K.backend.equals("maude")) {
-            krun = new MaudeKRun(context, Stopwatch.instance());
-        } else if (K.backend.equals("java")) {
-            try {
-                krun = new JavaSymbolicKRun(context);
-            } catch (KRunExecutionException e) {
-                org.kframework.utils.Error.report(e.getMessage());
-                return null;
-            }
-        } else {
-            org.kframework.utils.Error
-                    .report("Currently supported backends are 'maude' and 'java'");
-            return null;
-        }
-        krun.setBackendOption("io", false);
-        return krun;
     }
 
     public static String transformTerm(Term term, Context context) {
