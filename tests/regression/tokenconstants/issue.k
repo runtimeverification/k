@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 module ISSUE
   // When parsed in rules, the token "Main" should become a #token of sort Id
   // because it was declared as a single token under Id which is a Lexer sort.\

@@ -4,14 +4,12 @@ package org.kframework.main;
 import java.util.EnumSet;
 import java.util.Set;
 
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.options.BaseEnumConverter;
 
-import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
 
 public final class GlobalOptions {
@@ -42,11 +40,11 @@ public final class GlobalOptions {
         }
     }
 
-    public static class WarningsConverter extends BaseEnumConverter<Warnings> implements IStringConverter<Warnings> {
+    public static class WarningsConverter extends BaseEnumConverter<Warnings> {
 
         @Override
-        public Warnings convert(String arg0) {
-            return convert(Warnings.class, arg0);
+        public Class<Warnings> enumClass() {
+            return Warnings.class;
         }
     }
     
@@ -59,9 +57,18 @@ public final class GlobalOptions {
         Stopwatch.instance().init(this);
         GlobalSettings.kem = new KExceptionManager(this);
     }
+    
+    @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
+    public boolean help = false;  
+    
+    @Parameter(names="--version", description="Print version information")
+    public boolean version = false;
 
     @Parameter(names={"--verbose", "-v"}, description="Print verbose output messages")
     public boolean verbose = false;
+    
+    @Parameter(names="--debug", description="Print debugging output messages")
+    public boolean debug = false;
     
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
     public Warnings warnings = Warnings.NORMAL;

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -16,16 +17,17 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
-public class TypeInferenceSupremumFilter extends BasicTransformer {
+public class TypeInferenceSupremumFilter extends ParseForestTransformer {
 
     public TypeInferenceSupremumFilter(Context context) {
         super("Type inference supremum", context);
     }
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    @Override
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         // find the groups of terms alike
 
         Set<Term> processed = new HashSet<Term>();
@@ -75,11 +77,11 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
         }
 
         if (maxterms.size() == 1) {
-            return maxterms.iterator().next().accept(this);
+            return this.visitNode(maxterms.iterator().next());
         } else if (maxterms.size() > 1)
             amb.setContents(new ArrayList<Term>(maxterms));
 
-        return super.transform(amb);
+        return super.visit(amb, _);
     }
 
     private boolean isSubsorted(Production big, Production small) {

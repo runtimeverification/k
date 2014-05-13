@@ -1,6 +1,7 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.OS;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -51,7 +52,7 @@ public class KPaths {
             javaLibraryPath = KPaths.getKBase(false) + "/lib/native";
 
             String arch = System.getProperty("os.arch");
-            switch (GlobalSettings.os()) {
+            switch (OS.current()) {
                 case WIN:
                     if (arch.toLowerCase().contains("64"))
                         javaLibraryPath += "/cygwin/x64";

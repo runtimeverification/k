@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.Term;
@@ -108,7 +109,7 @@ public final class StringToken extends Token {
      */
     @Override
     public String value() {
-        return StringUtil.escapeK(value);
+        return StringUtil.enquoteString(value);
     }
 
     @Override

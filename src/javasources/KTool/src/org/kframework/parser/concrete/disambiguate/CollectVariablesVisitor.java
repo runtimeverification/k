@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -16,9 +17,9 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicHookWorker;
+import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 public class CollectVariablesVisitor extends BasicVisitor {
     public CollectVariablesVisitor(Context context) {
@@ -35,56 +36,57 @@ public class CollectVariablesVisitor extends BasicVisitor {
         this.vars = vars;
     }
 
-    public void visit(Cell c) {
+    @Override
+    public Void visit(Cell c, Void _) {
         if (c.getEllipses() == Ellipses.NONE)
             if (context.cellSorts.containsKey(c.getLabel())) {
                 try {
-                    c.setContents((Term) c.getContents().accept(new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel()))));
-                } catch (TransformerException e) {
+                    c.setContents((Term) new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel())).visitNode(c.getContents()));
+                } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
             }
-        super.visit(c);
+        return super.visit(c, _);
     }
 
     @Override
-    public void visit(TermCons node) {
-        if (isVisited(node))
-            return;
+    public Void visit(TermCons node, Void _) {
+        if (cache.containsKey(node))
+            return null;
 
         for (int i = 0, j = 0; i < node.getProduction().getItems().size(); i++) {
             if (node.getProduction().getItems().get(i) instanceof Sort) {
                 Term t = node.getContents().get(j);
                 try {
-                    t.accept(new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()));
-                } catch (TransformerException e) {
+                    new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()).visitNode(t);
+                } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
-                t.accept(this);
+                this.visitNode(t);
                 j++;
             } else if (node.getProduction().getItems().get(i) instanceof UserList) {
                 UserList ul = (UserList) node.getProduction().getItems().get(i);
                 Term t1 = node.getContents().get(0);
                 Term t2 = node.getContents().get(1);
                 try {
-                    t1.accept(new CollectVariablesVisitor2(context, ul.getSort()));
-                    t2.accept(new CollectVariablesVisitor2(context, node.getProduction().getSort()));
-                } catch (TransformerException e) {
+                    new CollectVariablesVisitor2(context, ul.getSort()).visitNode(t1);
+                    new CollectVariablesVisitor2(context, node.getProduction().getSort()).visitNode(t2);
+                } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
-                t1.accept(this);
-                t2.accept(this);
+                this.visitNode(t1);
+                this.visitNode(t2);
             }
         }
 
-        super.visit(node);
+        return super.visit(node, _);
     }
 
     @Override
-    public void visit(Variable var) {
+    public Void visit(Variable var, Void _) {
         if (var.getExpectedSort() == null)
             var.setExpectedSort(var.getSort());
-        if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && var.isUserTyped())
+        if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && var.isUserTyped()) {
             if (vars.containsKey(var.getName()))
                 vars.get(var.getName()).add(var);
             else {
@@ -92,6 +94,8 @@ public class CollectVariablesVisitor extends BasicVisitor {
                 varss.add(var);
                 vars.put(var.getName(), varss);
             }
+        }
+        return null;
     }
 
     /**
@@ -102,7 +106,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
      * @author Radu
      * 
      */
-    public class CollectVariablesVisitor2 extends BasicHookWorker {
+    public class CollectVariablesVisitor2 extends LocalTransformer {
         String expectedSort = null;
 
         public CollectVariablesVisitor2(Context context, String expectedSort) {
@@ -111,7 +115,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         }
 
         @Override
-        public ASTNode transform(Variable node) throws TransformerException {
+        public ASTNode visit(Variable node, Void _) throws ParseFailedException {
             if (node.isUserTyped()) {
                 node.setExpectedSort(node.getSort());
                 return node;
@@ -130,22 +134,22 @@ public class CollectVariablesVisitor extends BasicVisitor {
         }
 
         @Override
-        public ASTNode transform(Rewrite node) throws TransformerException {
+        public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
             Rewrite result = new Rewrite(node);
-            result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
-            return transform((Term) result);
+            result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
+            return visit((Term) result, _);
         }
 
         @Override
-        public ASTNode transform(Ambiguity node) throws TransformerException {
-            TransformerException exception = null;
+        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+            ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
-                    result = t.accept(this);
+                    result = this.visitNode(t);
                     terms.add((Term) result);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     exception = e;
                 }
             }
@@ -155,13 +159,13 @@ public class CollectVariablesVisitor extends BasicVisitor {
                 return terms.get(0);
             }
             node.setContents(terms);
-            return transform((Term) node);
+            return visit((Term) node, _);
         }
 
         @Override
-        public ASTNode transform(Bracket node) throws TransformerException {
-            node.setContent((Term) node.getContent().accept(this));
-            return transform((Term) node);
+        public ASTNode visit(Bracket node, Void _) throws ParseFailedException {
+            node.setContent((Term) this.visitNode(node.getContent()));
+            return visit((Term) node, _);
         }
     }
 }

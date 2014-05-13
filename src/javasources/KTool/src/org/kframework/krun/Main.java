@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2010-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import static org.apache.commons.io.FileUtils.deleteDirectory;
@@ -56,7 +56,7 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ResolveVariableAttribute;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
@@ -73,7 +73,6 @@ import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.ColorUtil;
@@ -118,15 +117,10 @@ public class Main {
     }
     private static Stopwatch sw = Stopwatch.instance();
 
-    public static Term plug(Map<String, Term> args, Context context) throws TransformerException {
+    public static Term plug(Map<String, Term> args, Context context) {
         Configuration cfg = K.kompiled_cfg;
         ASTNode cfgCleanedNode = null;
-        try {
-            cfgCleanedNode = new ConfigurationCleaner(context).transform(cfg);
-        } catch (TransformerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        cfgCleanedNode = new ConfigurationCleaner(context).visitNode(cfg);
         Term cfgCleaned;
         if (cfgCleanedNode == null) {
             cfgCleaned = Bag.EMPTY;
@@ -142,13 +136,13 @@ public class Main {
 
         sw.printIntermediate("Plug configuration variables");
 
-        Term configuration = (Term) cfgCleaned.accept(new SubstitutionFilter(args, context));
-        configuration = (Term) configuration .accept(new Cell2DataStructure(context));
+        Term configuration = (Term) new SubstitutionFilter(args, context).visitNode(cfgCleaned);
+        configuration = (Term) new Cell2DataStructure(context).visitNode(configuration);
         return configuration;
     }
 
     public static Term makeConfiguration(Term kast, String stdin,
-                                         RunProcess rp, boolean hasTerm, Context context) throws TransformerException, IOException {
+                                         RunProcess rp, boolean hasTerm, Context context) {
 
         if (hasTerm) {
             return kast;
@@ -170,7 +164,7 @@ public class Main {
                     parser = "kast --parser ground -e";
                 }
                 parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
-                parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
+                parsed = (Term) new ResolveVariableAttribute(context).visitNode(parsed);
                 output.put("$" + name, parsed);
                 hasPGM = hasPGM || name.equals("$PGM");
             }
@@ -231,8 +225,17 @@ public class Main {
     }
 
     // execute krun in normal mode (i.e. not in debug mode)
+    /**
+     * 
+     * @param KAST
+     * @param lang
+     * @param rp
+     * @param cmd_options
+     * @param context
+     * @return true if the application completed normally; false otherwise
+     */
     @SuppressWarnings("unchecked")
-    public static void normalExecution(Term KAST, String lang, RunProcess rp,
+    public static boolean normalExecution(Term KAST, String lang, RunProcess rp,
                                        CommandlineOptions cmd_options, Context context) {
         try {
             CommandLine cmd = cmd_options.getCommandLine();
@@ -253,7 +256,7 @@ public class Main {
                             KSorts.BAG,
                             context);
                     CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-                    pattern.accept(vars);
+                    vars.visitNode(pattern);
                     //varNames = vars.getVars().keySet();
 
                     try {
@@ -388,8 +391,8 @@ public class Main {
 
             } catch (KRunExecutionException e) {
                 rp.printError(e.getMessage(), lang, context);
-                System.exit(1);
-            } catch (TransformerException e) {
+                return false;
+            } catch (ParseFailedException e) {
                 e.report();
             } catch (UnsupportedBackendOptionException e) {
                 org.kframework.utils.Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
@@ -405,7 +408,7 @@ public class Main {
                 if(result.getResult() instanceof KRunState){
                     
                     UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
-                    ((KRunState)(result.getResult())).getResult().accept(printer);
+                    printer.visitNode(((KRunState)(result.getResult())).getResult());
                     output = printer.getResult();
                 } else if (result.getResult() instanceof SearchResults) {
                     
@@ -414,7 +417,7 @@ public class Main {
                         Map<String, Term> substitution = solution.getSubstitution();
                         if (((SearchResults)result.getResult()).isDefaultPattern()) {
                             UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
-                            substitution.get("B:Bag").accept(unparser);
+                            unparser.visitNode(substitution.get("B:Bag"));
                             solutionStrings.add("\n" + unparser.getResult());
                         } else {
                             boolean empty = true;
@@ -422,7 +425,7 @@ public class Main {
                             StringBuilder varStringBuilder = new StringBuilder();
                             for (String variable : substitution.keySet()) {
                                 UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
-                                substitution.get(variable).accept(unparser);
+                                unparser.visitNode(substitution.get(variable));
                                 varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
                                 empty = false;
                             }
@@ -458,7 +461,7 @@ public class Main {
                         
                         UnparserFilterNew t = new UnparserFilterNew(true, K.color, K.parens, context);
                         Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
-                        concretePgm.accept(t);
+                        t.visitNode(concretePgm);
                         // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
                         sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
                         sb.append("\nResult:");
@@ -466,7 +469,7 @@ public class Main {
 
                         if (((TestGenResults)result.getResult()).isDefaultPattern()) {
                             UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
-                            substitution.get("B:Bag").accept(unparser);
+                            unparser.visitNode(substitution.get("B:Bag"));
                             sb.append("\n" + unparser.getResult());
                         } else {
                             boolean empty = true;
@@ -474,7 +477,7 @@ public class Main {
                             for (String variable : substitution.keySet()) {
                                 UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
                                 sb.append("\n" + variable + " -->");
-                                substitution.get(variable).accept(unparser);
+                                unparser.visitNode(substitution.get(variable));
                                 sb.append("\n" + unparser.getResult());
                                 empty = false;
                             }
@@ -534,7 +537,7 @@ public class Main {
                         }
                         if (input.equals("y")) {
                             K.debug = true;
-                            debugExecution(KAST, lang, searchResult, context);
+                            debugExecution(KAST, searchResult, context);
                         } else if (input.equals("n")) {
                             K.debug = false;
                             K.guidebug = false;
@@ -576,20 +579,39 @@ public class Main {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
+            return false;
         }
+        return true;
     }
 
-    // execute krun in debug mode (i.e. step by step execution)
-    // isSwitch variable is true if we enter in debug execution from normal
-    // execution (we use the search command with --graph option)
+    /**
+     *  execute krun in debug mode (i.e. step by step execution)
+     * isSwitch variable is true if we enter in debug execution from normal
+     * execution (we use the search command with --graph option)
+     * @param kast The term parsed from the program or term passed on the command line as the
+     * primary argument to krun.
+     * @param state An optional set of search results to initialize with the initial state of the debugger.
+     * @param context The definition context loaded from the compiled definition.
+     * @return true if the application completed normally; false otherwise
+     */
     @SuppressWarnings("unchecked")
-    public static void debugExecution(Term kast, String lang,
+    public static boolean debugExecution(Term kast,
                                       KRunResult<SearchResults> state, org.kframework.kil.loader.Context context) {
+
+        ConsoleReader reader;
+        try {
+            reader = new ConsoleReader();
+        } catch (IOException e) {
+            if (context.globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    "IO error detected interacting with console"));
+            return false;
+        }
         try {
             // adding autocompletion and history feature to the stepper internal
             // commandline by using the JLine library
-            ConsoleReader reader = new ConsoleReader();
             reader.setBellEnabled(false);
 
             List<Completor> argCompletor = new LinkedList<Completor>();
@@ -601,8 +623,6 @@ public class Main {
             completors.add(new ArgumentCompletor(argCompletor));
             reader.addCompletor(new MultiCompletor(completors));
 
-            new File(K.compiled_def + K.fileSeparator + "main.maude")
-                    .getCanonicalPath();
             RunProcess rp = new RunProcess();
             KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
@@ -623,11 +643,21 @@ public class Main {
             }
             while (true) {
                 System.out.println();
-                String input = reader.readLine("Command > ");
+                String input;
+                try {
+                    input = reader.readLine("Command > ");
+                } catch (IOException e) {
+                    if (context.globalOptions.debug) {
+                        e.printStackTrace();
+                    }
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                            "IO error detected interacting with console"));
+                    return false;
+                }
                 if (input == null) {
                     // probably pressed ^D
                     System.out.println();
-                    System.exit(0);
+                    return true;
                 }
 
                 // construct the right command line input when we specify the
@@ -668,7 +698,7 @@ public class Main {
                         printDebugUsage(cmd_options);
                     }
                     if (cmd.hasOption("abort")) {
-                        System.exit(0);
+                        return true;
                     }
                     if (cmd.hasOption("resume")) {
                         try {
@@ -777,7 +807,7 @@ public class Main {
 
                     DirectedGraph<KRunState, Transition> savedGraph = null;
                     if(cmd.hasOption("save")) {
-                        BinaryLoader.save(new File(cmd.getOptionValue("save")).getCanonicalPath(), debugger.getGraph()
+                        BinaryLoader.save(new File(cmd.getOptionValue("save")).getAbsolutePath(), debugger.getGraph()
                         );
                         System.out.println("File successfully saved.");
                     }
@@ -799,20 +829,36 @@ public class Main {
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
+        } catch (KRunExecutionException e) {
+            if (context.globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+                    KExceptionGroup.CRITICAL, e.getMessage()));
+            return false;
         }
     }
-
-    public static void guiDebugExecution(Term kast, String lang, KRunResult<SearchResults> state,
+    
+    public static boolean guiDebugExecution(Term kast, String lang, KRunResult<SearchResults> state,
             Context context) {
         try {
             KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
-            new MainWindow(new RunKRunCommand(kast, lang, context));
-        } catch (Exception e) {
+            RunKRunCommand cmd = new RunKRunCommand(kast, lang,krun, context);
+            MainWindow window = new MainWindow(cmd);
+            synchronized(window.lock) {
+                while (true) {
+                    try {
+                        window.lock.wait();
+                        return true;
+                    } catch (InterruptedException e) {
+                        //keep waiting
+                    }
+                }
+            }
+        } catch (KRunExecutionException e) {
             org.kframework.utils.Error.report("Unable to start gui due to : " + e.getMessage());
+            return false;
         }
     }
     
@@ -822,7 +868,7 @@ public class Main {
      * it will be used for simulation tool
      */
     public static org.kframework.kil.Term preDefineSimulation(CommandlineOptions cmd_options,
-            CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException, TransformerException{
+            CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException {
         
         K.directory=new File(directory).getCanonicalPath();
         K.pgm = pgm;
@@ -888,12 +934,7 @@ public class Main {
             // This is essential for generating maude
             javaDef = new FlattenModules(context).compile(javaDef, null);
 
-            try {
-                javaDef = (Definition) javaDef
-                        .accept(new AddTopCellConfig(context));
-            } catch (TransformerException e) {
-                e.report();
-            }
+            javaDef = (Definition) new AddTopCellConfig(context).visitNode(javaDef);
 
             javaDef.preprocess(context);
 
@@ -932,26 +973,30 @@ public class Main {
     }
 
     /**
-     * @param cmds
-     *            represents the arguments/options given to krun command..
+     * @param cmds represents the arguments/options given to krun command..
+     * @return true if the application completed normally; false otherwise
      */
-    public static void execute_Krun(String cmds[]) {
+    public static boolean execute_Krun(String cmds[]) {
         GlobalOptions globalOptions = new GlobalOptions();
-        ExperimentalParserOptions parserOptions = new ExperimentalParserOptions();
 
         CommandlineOptions cmd_options = new CommandlineOptions();
         CommandLine cmd = cmd_options.parse(cmds);
         if (cmd == null) {
             printKRunUsageS(cmd_options);
-         /* printKRunUsageE(cmd_options); */ /* TODO: Switch to this when the user has tried to use an experimental option. */
-            System.exit(1);
+            return false;
+        }
+        
+        if (cmd.hasOption("debug-gui")) {
+            System.setProperty("java.awt.headless", "false");
         }
 
         if (!cmd.hasOption("debug-info")) {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     try {
-                        deleteDirectory(new File(K.krunTempDir));
+                        if (K.krunTempDir != null) {
+                            deleteDirectory(new File(K.krunTempDir));
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -964,12 +1009,11 @@ public class Main {
             globalOptions.verbose = true;
         }
         
-        globalOptions.initialize();
-
-        // set fast-kast
-        if (cmd.hasOption("fast-kast")) {
-            parserOptions.fastKast = true;
+        if (cmd.hasOption("debug")) {
+            globalOptions.debug = true;
         }
+        
+        globalOptions.initialize();
 
         sw.printIntermediate("Deleting temporary krun directory");
 
@@ -1062,7 +1106,7 @@ public class Main {
                 String v = cmd.getOptionValue("terminal-color");
                 Color terminalColor = ColorUtil.getColorByName(v);
                 if (terminalColor != null) {
-                    K.terminalColor = terminalColor;
+                    K.setTerminalColor(terminalColor);
                 } else {
                     org.kframework.utils.Error.report("Invalid terminal color: " + v);
                 }
@@ -1186,16 +1230,16 @@ public class Main {
             // printing the output according to the given options
             if (K.help) {
                 printKRunUsageS(cmd_options);
-                System.exit(0);
+                return true;
             }
             if (K.helpExperimental) {
                 printKRunUsageE(cmd_options);
-                System.exit(0);
+                return true;
             }
             if (K.version) {
                 String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.println(msg);
-                System.exit(0);
+                return true;
             }
             
             if(cmd.hasOption("simulation")) {
@@ -1206,8 +1250,8 @@ public class Main {
                 K.simulationProgLeft=temp[2];
                 K.simulationProgRight=temp[3];
                 
-                Context contextLeft = new Context(globalOptions, parserOptions);
-                Context contextRight = new Context(globalOptions, parserOptions);
+                Context contextLeft = new Context(globalOptions);
+                Context contextRight = new Context(globalOptions);
                 Term leftInitTerm = null;
                 Term rightInitTerm = null;
                 Waitor runSimulation = null;
@@ -1218,9 +1262,6 @@ public class Main {
                     rightInitTerm = Main.preDefineSimulation(cmd_options, cmd,
                             contextRight, K.simulationDefinitionRight, K.simulationProgRight);
                 } catch (KRunExecutionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (TransformerException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
@@ -1234,7 +1275,12 @@ public class Main {
                 
                 runSimulation.start();
                 
-                return;
+                try {
+                    runSimulation.join();
+                } catch (InterruptedException e) {
+                    return false;
+                }
+                return true;
             }
             
             String[] remainingArguments = null;
@@ -1302,7 +1348,6 @@ public class Main {
             KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
             //merge krun options into kompile options object
             kompileOptions.global = globalOptions;
-            kompileOptions.experimental.parser = parserOptions;
             //merge kompile options into K static object
             //TODO(dwightguth): fix this when org.kframework.krun.K is deleted
             if (!cmd.hasOption("backend")) {
@@ -1355,13 +1400,7 @@ public class Main {
 
                 sw.printIntermediate("Flattening modules");
 
-                try {
-                    javaDef = (Definition) javaDef
-                            .accept(new AddTopCellConfig(context));
-                } catch (TransformerException e) {
-                    e.report();
-                }
-
+                javaDef = (Definition) new AddTopCellConfig(context).visitNode(javaDef);
                 sw.printIntermediate("Adding top cell to configuration");
 
                 javaDef.preprocess(context);
@@ -1405,8 +1444,6 @@ public class Main {
                 }
             }
 
-            GlobalSettings.kem.print();
-
             if (!K.debug && !K.guidebug) {
                 normalExecution(KAST, lang, rp, cmd_options, context);
             } else {
@@ -1414,17 +1451,14 @@ public class Main {
                     org.kframework.utils.Error.report("Cannot specify --search with --debug. In order to search\nnside the debugger, use the step-all command.");
                 }
                 if (K.guidebug)
-                    guiDebugExecution(KAST, lang, null, context);
+                    return guiDebugExecution(KAST, lang, null, context);
                 else
-                    debugExecution(KAST, lang, null, context);
+                    debugExecution(KAST, null, context);
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
+            return false;
         }
-    }
-
-    public static void main(String[] args) {
-        execute_Krun(args);
+        return true;
     }
 }

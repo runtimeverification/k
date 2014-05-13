@@ -59,6 +59,7 @@ public class CommandlineOptions {
         addOptionS(OptionBuilder.withLongOpt("help").withDescription("Print this help message.").create("h"));
         addOptionS(OptionBuilder.withLongOpt("version").withDescription("Print version information.").create());
         addOptionS(OptionBuilder.withLongOpt("verbose").withDescription("Verbose output.").create("v"));
+        addOptionS(OptionBuilder.withLongOpt("debug").withDescription("Debug messages").create());
 
         // Common K options
         addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the kompiled K definition resides. The default is the current directory.").create("d"));
@@ -89,7 +90,6 @@ public class CommandlineOptions {
         addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
         
         // Experimental options
-        addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());
         addOptionE(OptionBuilder.withLongOpt("statistics").hasArg().withArgName("[on|off]").withDescription("Print Maude's rewrite statistics. (Default: ...).").create());
         addOptionE(OptionBuilder.withLongOpt("term").withDescription("Input argument will be parsed with the specified parser and used as the sole input to krun.").create());
         addOptionE(OptionBuilder.withLongOpt("maude-cmd").hasArg().withArgName("string").withDescription("Maude command used to execute the definition.").create());

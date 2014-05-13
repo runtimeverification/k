@@ -35,7 +35,7 @@ public class MaudeFilter extends BackendFilter {
     }
 
     @Override
-    public void visit(Definition definition) {
+    public Void visit(Definition definition, Void _) {
         unusedTransitions.addAll(options.transition);
         if (unusedTransitions.contains(KompileOptions.DEFAULT_TRANSITION)) {
             unusedTransitions.remove(KompileOptions.DEFAULT_TRANSITION);
@@ -43,7 +43,7 @@ public class MaudeFilter extends BackendFilter {
         // TODO: remove hack for token membership predicates
 
         for (DefinitionItem di : definition.getItems()) {
-            di.accept(this);
+            this.visitNode(di);
             result.append(" \n");
         }
         if (!(unusedTransitions.isEmpty())) {
@@ -52,10 +52,11 @@ public class MaudeFilter extends BackendFilter {
                             "These specified transition tags were not used (mispelled?):\n\t\t" + unusedTransitions,
                             "command line arguments", "--transition"));
         }
+        return null;
     }
 
     @Override
-    public void visit(Import imp) {
+    public Void visit(Import imp, Void _) {
         result.append("including ");
         String name = imp.getName();
         final String iface = "-INTERFACE";
@@ -64,10 +65,11 @@ public class MaudeFilter extends BackendFilter {
         }
         result.append(name);
         result.append(" .");
+        return null;
     }
 
     @Override
-    public void visit(Module mod) {
+    public Void visit(Module mod, Void _) {
           result.append("mod ");
           result.append(mod.getName());
           result.append(" is\n");
@@ -76,7 +78,7 @@ public class MaudeFilter extends BackendFilter {
           result.append("op #token : #String #String -> KLabel .\n");
 
           for (ModuleItem mi : mod.getItems()) {
-            mi.accept(this);
+            this.visitNode(mi);
             result.append("\n");
           }
 
@@ -102,14 +104,16 @@ public class MaudeFilter extends BackendFilter {
           }
 
           result.append("\nendm");
+          return null;
     }
 
     @Override
-    public void visit(PriorityExtended syn) {
+    public Void visit(PriorityExtended syn, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Syntax syn) {
+    public Void visit(Syntax syn, Void _) {
         for (PriorityBlock pb : syn.getPriorityBlocks()) {
             for (Production p : pb.getProductions()) {
                 if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {
@@ -145,7 +149,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append(syn.getSort());
                         if (!isEmptyAttributes(p.getAttributes())) {
                             result.append(" [metadata \"");
-                            p.getAttributes().accept(this);
+                            this.visitNode(p.getAttributes());
                             result.append("\"]");
                         }
                         result.append(" .\n");
@@ -158,7 +162,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append("op _");
                         result.append(StringUtil.escapeMaude(list.getSeparator()));
                         result.append("_ : K K -> K [prec 120 metadata \"");
-                        p.getAttributes().accept(this);
+                        this.visitNode(p.getAttributes());
                         result.append(" hybrid=()");
                         result.append("\"] .\n");
                         result.append("op .List`{\"");
@@ -178,12 +182,12 @@ public class MaudeFilter extends BackendFilter {
                         result.append("op ");
                         result.append(StringUtil.escapeMaude(maudelabel));
                         result.append(" : ");
-                        p.accept(this);
+                        this.visitNode(p);
                         result.append(" -> ");
                         result.append(syn.getSort());
                         // if (!isEmptyAttributes(p.getCellAttributes())) {
                         result.append(" [metadata \"");
-                        p.getAttributes().accept(this);
+                        this.visitNode(p.getAttributes());
                         result.append("\"]");
                         // }
                         result.append(" .\n");
@@ -191,19 +195,22 @@ public class MaudeFilter extends BackendFilter {
                 }
             }
         }
+        return null;
     }
 
     @Override
-    public void visit(PriorityExtendedAssoc priorityBlock) {
+    public Void visit(PriorityExtendedAssoc priorityBlock, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(PriorityBlock priorityBlock) {
+    public Void visit(PriorityBlock priorityBlock, Void _) {
         result.append("production");
+        return null;
     }
 
     @Override
-    public void visit(Production prod) {
+    public Void visit(Production prod, Void _) {
         boolean first = true;
         for (ProductionItem pi : prod.getItems()) {
             if (!first) {
@@ -212,45 +219,52 @@ public class MaudeFilter extends BackendFilter {
                 first = false;
             }
             if (pi instanceof Sort) {
-                pi.accept(this);
+                this.visitNode(pi);
             }
         }
+        return null;
     }
 
     @Override
-    public void visit(Sort sort) {
+    public Void visit(Sort sort, Void _) {
         result.append(sort.getName());
+        return null;
     }
 
     @Override
-    public void visit(Terminal terminal) {
+    public Void visit(Terminal terminal, Void _) {
         // do nothing
+        return null;
     }
 
     @Override
-    public void visit(StringSentence stringSentence) {
+    public Void visit(StringSentence stringSentence, Void _) {
         result.append("StringSentence should not be maudifiable");
+        return null;
     }
 
     @Override
-    public void visit(UserList userList) {
+    public Void visit(UserList userList, Void _) {
         // do nothing
+        return null;
     }
 
     @Override
-    public void visit(KList listOfK) {
-        this.visit((Collection) listOfK);
+    public Void visit(KList listOfK, Void _) {
+        this.visit((Collection) listOfK, _);
         // throw new RuntimeException("don't know how to maudify KList");
+        return null;
     }
 
     @Override
-    public void visit(Attributes attributes) {
+    public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
         for (Attribute entry : attributes.getContents()) {
             if (!entry.getKey().equals("klabel")) {
-                entry.accept(this);
+                this.visitNode(entry);
             }
         }
+        return null;
     }
 
     private boolean isEmptyAttributes(Attributes attributes) {
@@ -278,7 +292,7 @@ public class MaudeFilter extends BackendFilter {
     }
 
     @Override
-    public void visit(Attribute attribute) {
+    public Void visit(Attribute attribute, Void _) {
         java.util.List<String> reject = new LinkedList<String>();
         reject.add("cons");
         reject.add("kgeneratedlabel");
@@ -296,6 +310,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(attribute.getValue().replaceAll("[()]", ""));
             result.append(")");
         }
+        return null;
     }
 
     /**
@@ -307,8 +322,8 @@ public class MaudeFilter extends BackendFilter {
      * @param configuration
      */
     @Override
-    public void visit(Configuration configuration) {
-        if (cfgStr == null) return;
+    public Void visit(Configuration configuration, Void _) {
+        if (cfgStr == null) return null;
         for (ConfigurationStructure cellStr : cfgStr.values()) {
             String id = cellStr.id;
             if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
@@ -367,6 +382,7 @@ public class MaudeFilter extends BackendFilter {
             declareCell(id+"-fragment",placeHolders,fragSorts, cellFragment, format);
         }
 
+        return null;
         // result.append("mb configuration ");
         // this.visit((Sentence)configuration);
     }
@@ -394,20 +410,21 @@ public class MaudeFilter extends BackendFilter {
      * @param cell
      */
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
         String id = cell.getId();
         result.append("<_>_</_>(" + id + ", ");
         if (cell.getContents() != null) {
-            cell.getContents().accept(this);
+            this.visitNode(cell.getContents());
         } else {
             result.append("null");
         }
         result.append(", " + id + ")");
+        return null;
     }
 
     @Override
-    public void visit(Variable variable) {
-        if (MetaK.isBuiltinSort(variable.getSort())
+    public Void visit(Variable variable, Void _) {
+         if (MetaK.isBuiltinSort(variable.getSort())
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
             if (context.getDataStructureSorts().containsKey(variable.getSort())) {
@@ -438,10 +455,11 @@ public class MaudeFilter extends BackendFilter {
             result.append(".KList");
             result.append(") ");
         }
+        return null;
     }
 
     @Override
-    public void visit(ListTerminator empty) {
+    public Void visit(ListTerminator empty, Void _) {
         String sort = empty.getSort();
         if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellFragment(sort)) {
             result.append(".");
@@ -453,10 +471,11 @@ public class MaudeFilter extends BackendFilter {
             result.append(ul.getSeparator());
             result.append("\"`}");
         }
+        return null;
     }
 
     @Override
-    public void visit(Rule rule) {
+    public Void visit(Rule rule, Void _) {
         boolean isTransition = false;
         for (Attribute a : rule.getAttributes().getContents()) {
             if (options.transition.contains(a.getKey())) {
@@ -483,17 +502,17 @@ public class MaudeFilter extends BackendFilter {
         } else {
             result.append("eq ");
         }
-        body.getLeft().accept(this);
+        this.visitNode(body.getLeft());
         if (isTransition) {
             result.append(" => ");
         } else {
             result.append(" = ");
         }
-        body.getRight().accept(this);
+        this.visitNode(body.getRight());
 
         if (null != condition) {
             result.append(" if ");
-            condition.accept(this);
+            this.visitNode(condition);
             result.append(" = _`(_`)(# true, .KList)");
         }
         if (null != rule.getAttributes()) {
@@ -506,28 +525,31 @@ public class MaudeFilter extends BackendFilter {
                 result.append("metadata");
             }
             result.append(" \"");
-            rule.getAttributes().accept(this);
+            this.visitNode(rule.getAttributes());
             result.append("\"] .\n");
         }
+        return null;
     }
 
     @Override
-    public void visit(KApp kapp) {
+    public Void visit(KApp kapp, Void _) {
         result.append("_`(_`)(");
-        kapp.getLabel().accept(this);
+        this.visitNode(kapp.getLabel());
         result.append(", ");
-        kapp.getChild().accept(this);
+        this.visitNode(kapp.getChild());
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(KSequence ksequence) {
-        this.visit((Collection) ksequence);
+    public Void visit(KSequence ksequence, Void _) {
+        this.visit((Collection) ksequence, _);
+        return null;
         // throw new RuntimeException("don't know how to maudify KSequence");
     }
 
     @Override
-    public void visit(TermCons termCons) {
+    public Void visit(TermCons termCons, Void _) {
         Production pr = context.conses.get(termCons.getCons());
         String cons = StringUtil.escapeMaude(pr.getLabel());
 
@@ -547,7 +569,7 @@ public class MaudeFilter extends BackendFilter {
                 first = false;
             }
             if (term != null) {
-                term.accept(this);
+                this.visitNode(term);
             } else {
                 result.append("null");
             }
@@ -555,15 +577,16 @@ public class MaudeFilter extends BackendFilter {
         if (termCons.getContents().size() > 0) {
             result.append(")");
         }
+        return null;
     }
 
     @Override
-    public void visit(Sentence sentence) {
-        sentence.getBody().accept(this);
+    public Void visit(Sentence sentence, Void _) {
+        this.visitNode(sentence.getBody());
         result.append(" ");
         if (sentence.getRequires() != null) {
             result.append("when ");
-            sentence.getRequires().accept(this);
+            this.visitNode(sentence.getRequires());
         }
         assert sentence.getEnsures() == null : "Maude does not support conditions on the right hand side";
 
@@ -579,61 +602,67 @@ public class MaudeFilter extends BackendFilter {
             result.append("metadata");
         }
         result.append(" \"");
-        sentence.getAttributes().accept(this);
+        this.visitNode(sentence.getAttributes());
         result.append("\"] .");
+        return null;
     }
 
     @Override
-    public void visit(Rewrite rewrite) {
+    public Void visit(Rewrite rewrite, Void _) {
         result.append("_=>_(");
         if (rewrite.getLeft() == null) {
             result.append("null");
         } else {
-            rewrite.getLeft().accept(this);
+            this.visitNode(rewrite.getLeft());
         }
         result.append(",");
         if (rewrite.getRight() == null) {
             result.append("null");
         } else {
-            rewrite.getRight().accept(this);
+            this.visitNode(rewrite.getRight());
         }
         result.append(")");
 
+        return null;
     }
 
     @Override
-    public void visit(KLabelConstant kLabelConstant) {
+    public Void visit(KLabelConstant kLabelConstant, Void _) {
         result.append(StringUtil.escapeMaude(kLabelConstant.getLabel()));
+        return null;
     }
 
     private java.util.Set<String> maudeBuiltinTokenSorts =
         ImmutableSet.of("#Float", "#LtlFormula");
 
     @Override
-    public void visit(GenericToken token) {
+    public Void visit(GenericToken token, Void _) {
         if (maudeBuiltinTokenSorts.contains(token.tokenSort())) {
             result.append("#_(" + token.value() + ")");
         } else {
             result.append(token);
         }
+        return null;
     }
 
     @Override
-    public void visit(StringBuiltin token) {
+    public Void visit(StringBuiltin token, Void _) {
         result.append("#_(\"" + StringUtil.escape(token.stringValue()) + "\")");
+        return null;
     }
 
     @Override
-    public void visit(Token token) {
+    public Void visit(Token token, Void _) {
         result.append("#_(" + token.value() + ")");
+        return null;
     }
 
     @Override
-    public void visit(Collection collection) {
+    public Void visit(Collection collection, Void _) {
         if (collection.getContents().size() == 0) {
-            new ListTerminator(collection.getSort(), null).accept(this);
+            this.visitNode(new ListTerminator(collection.getSort(), null));
         } else if (collection.getContents().size() == 1) {
-            collection.getContents().get(0).accept(this);
+            this.visitNode(collection.getContents().get(0));
         } else {
             String constructor = getMaudeConstructor(collection.getSort());
             result.append(constructor);
@@ -650,50 +679,55 @@ public class MaudeFilter extends BackendFilter {
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
                             + ".", collection.getFilename(), collection.getLocation()));
                 }
-                term.accept(this);
+                this.visitNode(term);
             }
 
             result.append(")");
         }
+        return null;
     }
 
     @Override
-    public void visit(CollectionItem collectionItem) {
+    public Void visit(CollectionItem collectionItem, Void _) {
         throw new RuntimeException("don't know how to maudify CollectionItem");
     }
 
     @Override
-    public void visit(BagItem bagItem) {
+    public Void visit(BagItem bagItem, Void _) {
         result.append("BagItem(");
-        bagItem.getItem().accept(this);
+        this.visitNode(bagItem.getItem());
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(ListItem listItem) {
+    public Void visit(ListItem listItem, Void _) {
         result.append("ListItem(");
-        listItem.getItem().accept(this);
+        this.visitNode(listItem.getItem());
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(SetItem setItem) {
+    public Void visit(SetItem setItem, Void _) {
         result.append("SetItem(");
-        setItem.getItem().accept(this);
+        this.visitNode(setItem.getItem());
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(MapItem mapItem) {
+    public Void visit(MapItem mapItem, Void _) {
         result.append("_|->_(");
-        mapItem.getKey().accept(this);
+        this.visitNode(mapItem.getKey());
         result.append(",");
-        mapItem.getValue().accept(this);
+        this.visitNode(mapItem.getValue());
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(DataStructureBuiltin dataStructure) {
+    public Void visit(DataStructureBuiltin dataStructure, Void _) {
         result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
 
         if (!dataStructure.isEmpty()) {
@@ -724,6 +758,7 @@ public class MaudeFilter extends BackendFilter {
         }
 
         result.append("), .KList)");
+        return null;
     }
 
     private void visitDataStructureVariable(String varName, String varType) {
@@ -738,19 +773,19 @@ public class MaudeFilter extends BackendFilter {
             result.append(DataStructureSort.LABELS.get(collection.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            term.accept(this);
+            this.visitNode(term);
             result.append(")");
         }
     }
 
-    public void visitListBuiltinElements(ListBuiltin listBuiltin) {
+    public Void visitListBuiltinElements(ListBuiltin listBuiltin) {
         // append lhs elements
         for (Term term : listBuiltin.elementsLeft()) {
             result.append(", ");
             result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            term.accept(this);
+            this.visitNode(term);
             result.append(")");
         }
 
@@ -762,9 +797,10 @@ public class MaudeFilter extends BackendFilter {
             result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            term.accept(this);
+            this.visitNode(term);
             result.append(")");
         }
+        return null;
     }
 
     private void visitDataStructureBaseTerms(DataStructureBuiltin listBuiltin) {
@@ -778,7 +814,7 @@ public class MaudeFilter extends BackendFilter {
             } else {
                 result.append("K2" + listBuiltin.sort().type());
                 result.append("(");
-                    term.accept(this);
+                    this.visitNode(term);
                     result.append(")");
             }
         }
@@ -790,36 +826,52 @@ public class MaudeFilter extends BackendFilter {
             result.append(DataStructureSort.LABELS.get(map.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
-            entry.getKey().accept(this);
+            this.visitNode(entry.getKey());
             result.append(", ");
-            entry.getValue().accept(this);
+            this.visitNode(entry.getValue());
             result.append(")");
         }
     }
 
     @Override
-    public void visit(CollectionBuiltin collection) {
-        visit((DataStructureBuiltin) collection);
+    public Void visit(CollectionBuiltin collection, Void _) {
+        visit((DataStructureBuiltin) collection, _);
+        return null;
     }
 
     @Override
-    public void visit(MapBuiltin map) {
-        visit((DataStructureBuiltin) map);
+    public Void visit(MapBuiltin map, Void _) {
+        visit((DataStructureBuiltin) map, _);
+        return null;
+    }
+    
+    @Override
+    public Void visit(SetBuiltin set, Void _) throws RuntimeException {
+        visit((DataStructureBuiltin) set, _);
+        return null;
+    }
+    
+    @Override
+    public Void visit(ListBuiltin set, Void _) throws RuntimeException {
+        visit((DataStructureBuiltin) set, _);
+        return null;
     }
 
 
     @Override
-    public void visit(Hole hole) {
+    public Void visit(Hole hole, Void _) {
         result.append("HOLE");
+        return null;
     }
 
     @Override
-    public void visit(FreezerHole hole) {
+    public Void visit(FreezerHole hole, Void _) {
         result.append("HOLE");
+        return null;
     }
 
     @Override
-    public void visit(KInjectedLabel kInjectedLabel) {
+    public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
         String sort = term.getSort().equals("K") ? "KList" : term.getSort();
         if (MetaK.isKSort(sort)) {
@@ -832,42 +884,48 @@ public class MaudeFilter extends BackendFilter {
         } else {
             result.append("#_(");
         }
-        term.accept(this);
+        this.visitNode(term);
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(FreezerLabel freezerLabel) {
+    public Void visit(FreezerLabel freezerLabel, Void _) {
         Term term = freezerLabel.getTerm();
         result.append("#freezer_(");
-        term.accept(this);
+        this.visitNode(term);
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(Freezer freezer) {
-        freezer.getTerm().accept(this);
+    public Void visit(Freezer freezer, Void _) {
+        this.visitNode(freezer.getTerm());
+        return null;
     }
 
     @Override
-    public void visit(KLabel kLabel) {
+    public Void visit(KLabel kLabel, Void _) {
         throw new RuntimeException("don't know how to maudify KLabel of type" + kLabel.getClass());
     }
 
     @Override
-    public void visit(TermComment termComment) {
+    public Void visit(TermComment termComment, Void _) {
         result.append(" .Bag ");
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.List list) {
-        this.visit((Collection) list);
+    public Void visit(org.kframework.kil.List list, Void _) {
+        this.visit((Collection) list, _);
+        return null;
         // throw new RuntimeException("don't know how to maudify List");
     }
 
     @Override
-    public void visit(org.kframework.kil.Map map) {
-        this.visit((Collection) map);
+    public Void visit(org.kframework.kil.Map map, Void _) {
+        this.visit((Collection) map, _);
+        return null;
         // throw new RuntimeException("don't know how to maudify Map");
     }
 
@@ -879,30 +937,32 @@ public class MaudeFilter extends BackendFilter {
      * @param bag
      */
     @Override
-    public void visit(Bag bag) {
+    public Void visit(Bag bag, Void _) {
         if (bag.getContents().isEmpty()) {
-            new ListTerminator(KSorts.BAG, null).accept(this);
-            return;
+            this.visitNode(new ListTerminator(KSorts.BAG, null));
+            return null;
         }
         for (Term item: bag.getContents()) {
             if (item instanceof TermComment) continue;
             result.append("(");
-            item.accept(this);
+            this.visitNode(item);
             result.append(")");
             result.append(" ");
         }
+        return null;
 //        this.visit((Collection) bag);
         // throw new RuntimeException("don't know how to maudify Bag");
     }
 
     @Override
-    public void visit(org.kframework.kil.Set set) {
-        this.visit((Collection) set);
+    public Void visit(org.kframework.kil.Set set, Void _) {
+        this.visit((Collection) set, _);
+        return null;
         // throw new RuntimeException("don't know how to maudify Set");
     }
 
     @Override
-    public void visit(org.kframework.kil.Ambiguity ambiguity) {
+    public Void visit(org.kframework.kil.Ambiguity ambiguity, Void _) {
         result.append("amb(");
         boolean first = true;
         for (Term term : ambiguity.getContents()) {
@@ -912,74 +972,82 @@ public class MaudeFilter extends BackendFilter {
                 first = false;
             }
             if (term != null) {
-                term.accept(this);
+                this.visitNode(term);
             } else {
                 result.append("null");
             }
         }
         result.append(")");
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context context) {
+    public Void visit(org.kframework.kil.Context context, Void _) {
         result.append("mb context ");
-        this.visit((Sentence) context);
+        this.visit((Sentence) context, _);
         result.append("\n");
+        return null;
     }
 
     @Override
-    public void visit(LiterateDefinitionComment literateDefinitionComment) {
+    public Void visit(LiterateDefinitionComment literateDefinitionComment, Void _) {
+        return null;
         // do nothing
     }
 
     @Override
-    public void visit(LiterateModuleComment literateModuleComment) {
+    public Void visit(LiterateModuleComment literateModuleComment, Void _) {
+        return null;
         // do nothing
     }
 
     @Override
-    public void visit(org.kframework.kil.Require require) {
+    public Void visit(org.kframework.kil.Require require, Void _) {
+        return null;
         // do nothing
     }
 
     @Override
-    public void visit(BackendTerm term) {
+    public Void visit(BackendTerm term, Void _) {
         result.append(term.getValue());
+        return null;
     }
 
     @Override
-    public void visit(Bracket term) {
-        term.getContent().accept(this);
+    public Void visit(Bracket term, Void _) {
+        this.visitNode(term.getContent());
+        return null;
     }
 
     @Override
-    public void visit(Cast term) {
+    public Void visit(Cast term, Void _) {
         throw new RuntimeException("don't know how to maudify Cast at "+term.getFilename()+" "+term.getLocation());
     }
 
     @Override
-    public void visit(MapUpdate term) {
+    public Void visit(MapUpdate term, Void _) {
         result.append("_`(_`)(Map2KLabel(");
         result.append("update(");
         result.append("remove(");
         result.append(term.map().getName() + ":Map , (.Map ");
         for (java.util.Map.Entry<Term, Term> t : term.removeEntries().entrySet()) {
-            t.getKey().accept(this);
+            this.visitNode(t.getKey());
             result.append(" |-> ");
-            t.getValue().accept(this);
+            this.visitNode(t.getValue());
             result.append(" ");
         }
         result.append(")), ");
 
         result.append("(.Map ");
         for (java.util.Map.Entry<Term, Term> t : term.updateEntries().entrySet()) {
-            t.getKey().accept(this);
+            this.visitNode(t.getKey());
             result.append(" |-> ");
-            t.getValue().accept(this);
+            this.visitNode(t.getValue());
             result.append(" ");
         }
         result.append("))");
         result.append(") , .KList)");
+        return null;
     }
 
     private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();

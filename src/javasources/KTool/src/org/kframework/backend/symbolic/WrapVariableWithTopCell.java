@@ -10,7 +10,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 
@@ -34,12 +33,13 @@ public class WrapVariableWithTopCell extends CopyOnWriteTransformer {
         this.ltlVarStateName = ltlVarStateName;
     }
 
-    public ASTNode transform(Variable node) throws TransformerException {
+    @Override
+    public ASTNode visit(Variable node, Void _)  {
         if (node.getName().equals(ltlVarStateName)) {
             return wrapPCAndVarWithGeneratedTop(pathCondition, node);
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     /**

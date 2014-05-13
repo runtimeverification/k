@@ -1,22 +1,24 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 import java.util.ArrayList;
 
 
-public class FlattenListsFilter extends BasicTransformer {
+public class FlattenListsFilter extends ParseForestTransformer {
 
     public FlattenListsFilter(Context context) {
         super("Flatten lists", context);
     }
 
-    public ASTNode transform(Collection c) throws TransformerException {
+    @Override
+    public ASTNode visit(Collection c, Void _) throws ParseFailedException {
         boolean found;
         do {
             found = false;
@@ -32,6 +34,6 @@ public class FlattenListsFilter extends BasicTransformer {
             c.setContents(contents);
         } while (found);
 
-        return super.transform(c);
+        return super.visit(c, _);
     }
 }

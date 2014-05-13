@@ -1,10 +1,11 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 
 import java.util.ArrayList;
@@ -19,14 +20,14 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp kapp) throws TransformerException {
+    public ASTNode visit(KApp kapp, Void _)  {
         ASTNode t = internalTransform(kapp);
         try {
-            t = t.accept(new TypeSystemFilter(context));
-        } catch (TransformerException e) {
+            t = new TypeSystemFilter(context).visitNode(t);
+        } catch (ParseFailedException e) {
             //type error, so don't disambiguate
         }
-        t = t.accept(new RemoveEmptyLists(context));
+        t = new RemoveEmptyLists(context).visitNode(t);
         return t;
     }
 
@@ -36,7 +37,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(TermCons tcParent) throws TransformerException {
+        public ASTNode visit(TermCons tcParent, Void _)  {
             for (int i = 0; i < tcParent.getContents().size(); i++) {
                 Term child = tcParent.getContents().get(i);
                 internalTransform(tcParent, i, child);
@@ -63,7 +64,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
 
-    public ASTNode internalTransform(KApp kapp) throws TransformerException {
+    public ASTNode internalTransform(KApp kapp)  {
         Term label = kapp.getLabel();
         Term child = kapp.getChild();
         child = child.shallowCopy();
@@ -71,11 +72,11 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         if (label instanceof KInjectedLabel && child.equals(KList.EMPTY)) {
             if (label instanceof FreezerLabel) {
                 FreezerLabel l = (FreezerLabel) label;
-                return new Freezer((Term)l.getTerm().accept(this));
+                return new Freezer((Term) this.visitNode(l.getTerm()));
             }
             Term injected = ((KInjectedLabel)label).getTerm();
 //            if (injected instanceof Token) {
-                return (Term)injected.accept(this);
+                return (Term) this.visitNode(injected);
 //            }
         } else if (label instanceof KLabelConstant) {
             String klabel = ((KLabelConstant) label).getLabel();
@@ -87,7 +88,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             }
             if (conses != null) {    
                 for (int i = 0; i < contents.size(); i++) {
-                    contents.set(i, (Term)contents.get(i).accept(this));
+                    contents.set(i, (Term) this.visitNode(contents.get(i)));
                 }
                 for (String cons : conses) {
                     Production p = context.conses.get(cons);
@@ -109,7 +110,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                     possibleTerms.add(new TermCons(p.getSort(), cons, newContents, context));
                 }
                 if (possibleTerms.size() == 0) {
-                    return super.transform(kapp);
+                    return super.visit(kapp, null);
                 }
                 if (possibleTerms.size() == 1) {
                     return possibleTerms.get(0);
@@ -125,7 +126,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                             possibleTerms.add(new ListTerminator(sort, null));
                     }
                     if (possibleTerms.size() == 0) {
-                        return super.transform(kapp);
+                        return super.visit(kapp, null);
                     }
                     if (possibleTerms.size() == 1) {
                         return possibleTerms.get(0);
@@ -140,22 +141,22 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             assert ((KList)child).getContents().size() == 0;
             return kapp;
             }
-        return super.transform(kapp);
+        return super.visit(kapp, null);
     }
 
     @Override
-    public ASTNode transform(Cell cell) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _)  {
         if (cell.getLabel().matches(".*-fragment")) {
-            return cell.getContents().accept(this);
+            return this.visitNode(cell.getContents());
         }
-        return super.transform(cell);
+        return super.visit(cell, _);
     }
 
     @Override
-    public ASTNode transform(Bag bag) throws TransformerException {
+    public ASTNode visit(Bag bag, Void _)  {
         List<Term> contents = new ArrayList<Term>();
         for (Term child : bag.getContents()) {
-            Term accept = (Term) child.accept(this);
+            Term accept = (Term) this.visitNode(child);
             if (accept instanceof ListTerminator) {
                 ListTerminator empty = (ListTerminator) accept;
                 if (!empty.getSort().equals("Bag")) {

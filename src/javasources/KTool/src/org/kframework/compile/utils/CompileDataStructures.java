@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
@@ -15,12 +16,10 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collections;
-
 
 /**
  * Transformer class compiling collection (bag, list, map and set) terms into K internal
@@ -48,7 +47,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
 
         location = node.getLocation();
         filename = node.getFilename();
@@ -59,13 +58,13 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
         Rewrite rewrite = (Rewrite) node.getBody();
         status = Status.LHS;
-        Term lhs = (Term) rewrite.getLeft().accept(this);
+        Term lhs = (Term) this.visitNode(rewrite.getLeft());
         status = Status.RHS;
-        Term rhs = (Term) rewrite.getRight().accept(this);
+        Term rhs = (Term) this.visitNode(rewrite.getRight());
         Term requires;
         if (node.getRequires() != null) {
             status = Status.CONDITION;
-            requires = (Term) node.getRequires().accept(this);
+            requires = (Term) this.visitNode(node.getRequires());
         } else {
             requires = null;
         }
@@ -88,22 +87,22 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _)  {
         assert false: "CompileDataStructures pass should be applied after ResolveRewrite pass";
         return node;
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         if (!(node.getLabel() instanceof KLabelConstant)) {
             /* only consider KLabel constants */
-            return super.transform(node);
+            return super.visit(node, _);
         }
         KLabelConstant kLabelConstant = (KLabelConstant) node.getLabel();
 
         if (!(node.getChild() instanceof KList)) {
             /* only consider KList constants */
-            return super.transform(node);
+            return super.visit(node, _);
         }
         KList kList = (KList) node.getChild();
 
@@ -116,18 +115,18 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
         if (context.productionsOf(kLabelConstant.getLabel()).size() != 1) {
             /* ignore KLabels associated with multiple productions */
-            return super.transform(node);
+            return super.visit(node, _);
         }
         Production production = context.productionsOf(kLabelConstant.getLabel()).iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
-            return super.transform(node);
+            return super.visit(node, _);
         }
 
         Term[] arguments = new Term[kList.getContents().size()];
         for (int i = 0; i < kList.getContents().size(); ++i) {
-            arguments[i] = (Term) kList.getContents().get(i).accept(this);
+            arguments[i] = (Term) this.visitNode(kList.getContents().get(i));
         }
 
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
@@ -159,24 +158,23 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         getName(),
                         filename,
                         location));
-                return super.transform(node);
+                return super.visit(node, _);
             }
         } else if (sort.type().equals(KSorts.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
-            try {
-                if (sort.operatorLabels().get("update").equals(kLabelConstant.getLabel())) {
-                    return new MapUpdate(
-                            (Variable) kList.getContents().get(0),
-                            Collections.<Term, Term>emptyMap(),
-                            Collections.singletonMap(
-                                    kList.getContents().get(1),
-                                    kList.getContents().get(2)));
-                }
-            } catch (Exception e) { }
-            return super.transform(node);
+            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update")) 
+                    && kList.getContents().size() >= 3 && kList.getContents().get(0) instanceof Variable) {
+                return new MapUpdate(
+                        (Variable) kList.getContents().get(0),
+                        Collections.<Term, Term>emptyMap(),
+                        Collections.singletonMap(
+                                kList.getContents().get(1),
+                                kList.getContents().get(2)));
+            }
+            return super.visit(node, _);
         } else {
             /* custom function */
-            return super.transform(node);
+            return super.visit(node, _);
         }
     }
 

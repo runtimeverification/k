@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.*;
@@ -21,11 +22,11 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
     public Set<VarHashMap> vars = new HashSet<VarHashMap>();
 
     @Override
-    public void visit(Ambiguity node) {
+    public Void visit(Ambiguity node, Void _) {
         Set<VarHashMap> newVars = new HashSet<VarHashMap>();
         for (Term t : node.getContents()) {
             CollectExpectedVariablesVisitor viz = new CollectExpectedVariablesVisitor(context);
-            t.accept(viz);
+            viz.visitNode(t);
             // create the split
             for (VarHashMap elem : vars) { // for every local type restrictions
                 for (VarHashMap elem2 : viz.vars) { // create a combination with every ambiguity detected
@@ -37,11 +38,11 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
         }
         if (!newVars.isEmpty())
             vars = newVars;
-        visit((Term) node);
+        return visit((Term) node, _);
     }
 
     @Override
-    public void visit(Variable var) {
+    public Void visit(Variable var, Void _) {
         if (!var.isUserTyped() && !var.getName().equals(MetaK.Constants.anyVarSymbol)) {
             if (vars.isEmpty())
                 vars.add(new VarHashMap());
@@ -54,6 +55,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
                     vars2.put(var.getName(), varss);
                 }
         }
+        return null;
     }
 
     private VarHashMap duplicate(VarHashMap in) {

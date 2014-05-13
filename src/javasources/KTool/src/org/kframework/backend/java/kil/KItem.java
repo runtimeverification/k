@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,6 +25,8 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
 import com.google.common.collect.Sets;
 
 
@@ -271,10 +274,24 @@ public final class KItem extends Term {
                     return result;
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
-            } catch (RuntimeException e) {
-                if (context.definition().context().globalOptions.verbose) {
-                    System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
-                    e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                // TODO(YilongL): is reflection/exception really the best way to
+                // deal with builtin functions? builtin functions are supposed to be
+                // super-fast...
+                Throwable t = e.getTargetException();
+                if (t instanceof Error) {
+                    throw (Error)t;
+                }
+                if (t instanceof KExceptionManager.KEMException) {
+                    throw (RuntimeException)t;
+                }
+                if (t instanceof RuntimeException) {
+                    if (context.definition().context().globalOptions.verbose) {
+                        System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
+                        e.printStackTrace();
+                    }
+                } else {
+                    throw new AssertionError("Builtin functions should not throw checked exceptions", e);
                 }
             }
         }

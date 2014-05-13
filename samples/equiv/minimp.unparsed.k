@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 require "bool.k"
 require "k-prelude.k"
 require "k-equal.k"

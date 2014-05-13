@@ -28,19 +28,24 @@ public class KCheckFrontEnd {
     public static String output;
     public static CommandLine cmd;
 
-    public static void kcheck(String[] args) {
+    /**
+     * 
+     * @param args
+     * @return true if the application completed normally; false otherwise
+     */
+    public static boolean kcheck(String[] args) {
         KCheckOptionsParser op = new KCheckOptionsParser();
 
         cmd = op.parse(args);
 
         // options: help
-        if (cmd.hasOption("help"))
-            org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
+        //if (cmd.hasOption("help"))
+            //org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
 
         if (cmd.hasOption("version")) {
             String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
             System.out.println(msg);
-            System.exit(0);
+            return true;
         }
 
         // main settings
@@ -70,7 +75,7 @@ public class KCheckFrontEnd {
             if (!cmd.hasOption("prove")) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
             } else {
-                GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
+                //GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
             }
 
 
@@ -114,6 +119,8 @@ public class KCheckFrontEnd {
 
             verbose(cmd, context);
         }
+        
+        return true;
     }
 
     public static void verbose(CommandLine cmd, Context context) {
@@ -121,7 +128,6 @@ public class KCheckFrontEnd {
         //if (GlobalSettings.verbose) {
             context.printStatistics();
         //}
-        GlobalSettings.kem.print();
     }
 
 
@@ -131,29 +137,31 @@ public class KCheckFrontEnd {
             String step,
             Context context) {
         org.kframework.kil.Definition javaDef;
+        Stopwatch.instance().start();
+        javaDef = null;//DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
+        new CountNodesVisitor(context).visitNode(javaDef);
+
+        CompilerSteps<Definition> steps = backend.getCompilationSteps();
+
+        if (step == null) {
+            step = backend.getDefaultStep();
+        }
         try {
-            Stopwatch.instance().start();
-            javaDef = null;//DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
-            javaDef.accept(new CountNodesVisitor(context));
+            javaDef = steps.compile(javaDef, step);
+        } catch (CompilerStepDone e) {
+            javaDef = (Definition) e.getResult();
+        }
 
-            CompilerSteps<Definition> steps = backend.getCompilationSteps();
-
-            if (step == null) {
-                step = backend.getDefaultStep();
-            }
-            try {
-                javaDef = steps.compile(javaDef, step);
-            } catch (CompilerStepDone e) {
-                javaDef = (Definition) e.getResult();
-            }
-
-            BinaryLoader.save(
-                    context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context)
-            );
-
+        BinaryLoader.save(
+                context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context));
+        try {                
             backend.run(javaDef);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            if (context.globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    "IO error executing backend"));
         }
     }
 }

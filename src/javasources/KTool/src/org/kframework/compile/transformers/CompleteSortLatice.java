@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
@@ -12,14 +13,12 @@ import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 
 /**
  * Completes the sort lattice as follows:
@@ -53,7 +52,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         Module transformedNode = node.shallowCopy();
         transformedNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
@@ -152,9 +151,9 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             }
         }
         /* add conses to new syntactic lists */
-        transformedNode.accept(new AddConsesVisitor(context));
+        new AddConsesVisitor(context).visitNode(transformedNode);
         /* update syntactic lists conses information in the context */
-        transformedNode.accept(new CollectConsesVisitor(context));
+        new CollectConsesVisitor(context).visitNode(transformedNode);
 
         /*
          * Subsort one syntactic list to another syntactic list with the same separator if the

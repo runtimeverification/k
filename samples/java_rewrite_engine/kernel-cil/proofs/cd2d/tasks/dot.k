@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /*@
   requires DISTANCE(u_x) && DISTANCE(u_y);
   requires VELOCITY(v_x) && VELOCITY(v_y);

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module IMP-SYNTAX
   syntax AExp ::= Int | Id
 //                 | AExp "*" AExp [left, seqstrict]

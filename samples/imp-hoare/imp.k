@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /*@
 This is the symbolic semantics of IMP enriched with arrays and Hoare logic.
 The semantics, gets as input an IMP program, annotated with pre and post 

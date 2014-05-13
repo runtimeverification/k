@@ -1,8 +1,10 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.visitors.AbstractTransformer;
+import org.kframework.utils.Stopwatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,7 @@ public class CompilerSteps<T extends ASTNode> extends BasicCompilerStep<T> {
         steps.add(t);
     }
 
-    public void add(Transformer t) {
+    public void add(AbstractTransformer<RuntimeException> t) {
         steps.add(new CompilerTransformerStep<T>(t, context));
     }
 

@@ -24,7 +24,6 @@ import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
@@ -49,7 +48,7 @@ public class JavaSymbolicBackend extends BasicBackend {
             super("Serialize Compiled Definition to XML", context);
         }
         @Override
-        public ASTNode transform(Definition node) throws TransformerException {
+        public ASTNode visit(Definition node, Void _)  {
             BinaryLoader.save(new File(context.dotk, "defx-java.bin").toString(), node);
 
             return node;

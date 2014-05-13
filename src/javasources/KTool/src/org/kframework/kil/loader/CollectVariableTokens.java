@@ -1,8 +1,8 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import org.kframework.kil.Production;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 
 /**
@@ -18,8 +18,9 @@ public class CollectVariableTokens extends BasicVisitor {
     }
 
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
         if  (node.containsAttribute("variable"))
             context.variableTokenSorts.add(node.getSort());
+        return null;
     }
 }

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.Definition;
@@ -8,6 +9,8 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.krun.K;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
@@ -41,7 +44,7 @@ public class BuiltinFunction {
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateDefinition(org.kframework.backend.java.kil.Definition)
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateRule(org.kframework.backend.java.kil.Rule, org.kframework.backend.java.kil.Definition)
      */
-    private static final ImmutableSet hookMetaModules = ImmutableSet.of(
+    private static final ImmutableSet<String> hookMetaModules = ImmutableSet.of(
             "#META-K",
             "MetaK",
             "Visitor",
@@ -55,12 +58,19 @@ public class BuiltinFunction {
 
     public static void init(Definition definition) {
         /* initialize {@code table} */
-        try {
             String separator = System.getProperty("file.separator");
             String path = KPaths.getKBase(false) + separator + "include" + separator + "java";
             Properties properties = new Properties();
 
-            FileUtil.loadProperties(properties, path + separator + hookPropertiesFileName);
+            String propertyFile = path + separator + hookPropertiesFileName;
+            try {
+                FileUtil.loadProperties(properties, propertyFile);
+            } catch (IOException e) {
+                if (definition.context().globalOptions.debug) {
+                    e.printStackTrace();
+                }
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Could not read from " + propertyFile));
+            }
 
             for (String label : definition.context().labels.keySet()) {
                 for (Production production : definition.context().productionsOf(label)) {
@@ -100,7 +110,10 @@ public class BuiltinFunction {
                                     break;
                                 }
                             }
-                        } catch (Exception e) {
+                        } catch (ClassNotFoundException | SecurityException e) {
+                            if (definition.context().globalOptions.debug) {
+                                e.printStackTrace();
+                            }
                             GlobalSettings.kem.register(new KException(
                                     KException.ExceptionType.WARNING,
                                     KException.KExceptionGroup.CRITICAL,
@@ -112,9 +125,6 @@ public class BuiltinFunction {
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -131,27 +141,15 @@ public class BuiltinFunction {
      * @throws IllegalArgumentException
      */
     public static Term invoke(TermContext context, KLabelConstant label, Term ... arguments)
-            throws IllegalAccessException, IllegalArgumentException {
+            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Object[] args =  Arrays.copyOf(arguments, arguments.length + 1, Object[].class);
         args[arguments.length] =  context;
-        try {
-            // TODO(YilongL): is reflection/exception really the best way to
-            // deal with builtin functions? builtin functions are supposed to be
-            // super-fast...
-            Method method = table.get(label);
-            Term t = (Term) method.invoke(null, args);
-            return t;
-        } catch (InvocationTargetException e) {
-            Throwable t = e.getTargetException();
-            if (t instanceof Error) {
-                throw (Error)t;
-            }
-            if (t instanceof RuntimeException) {
-                throw (RuntimeException)t;
-            }
-            assert false : "Builtin functions should not throw checked exceptions";
-            return null; //unreachable
-        }
+        // TODO(YilongL): is reflection/exception really the best way to
+        // deal with builtin functions? builtin functions are supposed to be
+        // super-fast...
+        Method method = table.get(label);
+        Term t = (Term) method.invoke(null, args);
+        return t; 
     }
 
     /**

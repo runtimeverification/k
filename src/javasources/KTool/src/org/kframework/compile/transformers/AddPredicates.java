@@ -1,5 +1,5 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
-
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -22,13 +22,11 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 public class AddPredicates extends CopyOnWriteTransformer {
 
@@ -44,9 +42,9 @@ public class AddPredicates extends CopyOnWriteTransformer {
         private Set<String> lists = new HashSet<String>();
 
         @Override
-        public void visit(Module node) {
+        public Void visit(Module node, Void _) {
             lists.clear();
-            super.visit(node);
+            super.visit(node, _);
             if (!lists.isEmpty()) {
                 for (String listSort : lists) {
                     Rule rule = new Rule(
@@ -61,36 +59,36 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     result.add(rule);
                 }
             }
+            return null;
         }
 
         @Override
-        public void visit(Syntax node) {
+        public Void visit(Syntax node, Void _) {
             String sort = node.getSort().getName();
 
             if (context.isListSort(sort))
                 lists.add(sort);
 
             if (MetaK.isKSort(sort))
-                return;
+                return null;
             else
-                super.visit(node);
+                return super.visit(node, _);
         }
 
         @Override
-        public void visit(Production node) {
+        public Void visit(Production node, Void _) {
             if (node.containsAttribute("bracket"))
-                return;
+                return null;
             if (node.containsAttribute("predicate"))
-                return;
-
+                return null;
             if (node.isLexical()) {
                 /* predicate definition for token sorts is deferred to each backend */
-                return;
+                return null;
             }
 
             if (context.getDataStructureSorts().containsKey(node.getSort())) {
                 /* predicate definition for builtin collection sorts is deferred to each backend */
-                return;
+                return null;
             }
 
             String sort = node.getSort();
@@ -114,18 +112,22 @@ public class AddPredicates extends CopyOnWriteTransformer {
                 rule.addAttribute(Attribute.FUNCTION);
                 result.add(rule);
             }
+            return null;
         }
 
         @Override
-        public void visit(Rule node) {
+        public Void visit(Rule node, Void _) {
+            return null;
         }
 
         @Override
-        public void visit(org.kframework.kil.Context node) {
+        public Void visit(org.kframework.kil.Context node, Void _) {
+            return null;
         }
 
         @Override
-        public void visit(Configuration node) {
+        public Void visit(Configuration node, Void _) {
+            return null;
         }
 
         public List<ModuleItem> getResult() {
@@ -164,7 +166,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
@@ -244,7 +246,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", context);
-        node.accept(mv);
+        mv.visitNode(node);
         retNode.getItems().addAll(mv.getResult());
 
         if (retNode.getItems().size() != node.getItems().size())

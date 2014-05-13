@@ -1,10 +1,9 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
-
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Set;
 
@@ -18,17 +17,17 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
     
     
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
     
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
     
     @Override
-    public ASTNode transform(Sentence node) throws TransformerException {
+    public ASTNode visit(Sentence node, Void _)  {
         boolean change = false;
         Set<Variable> vars = node.getBody().variables();
         KList ands = new KList();

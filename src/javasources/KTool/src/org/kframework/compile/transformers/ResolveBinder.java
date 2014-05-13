@@ -20,15 +20,16 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.kompile.KompileOptions.Backend;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class ResolveBinder extends CopyOnWriteTransformer {
 
@@ -47,7 +48,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         Set<Production> prods = SyntaxByTag.get(node, "binder", context);
         if (prods.isEmpty())
             return node;
@@ -66,18 +67,15 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 
             while (m.regionStart() < m.regionEnd()) {
                 if (!m.lookingAt()) {
-                    System.err.println("[error:] could not parse binder attribute \"" + bindInfo.substring(m.regionStart(), m.regionEnd()) + "\"");
-                    System.exit(1);
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "could not parse binder attribute \"" + bindInfo.substring(m.regionStart(), m.regionEnd()) + "\""));
                 }
                 if (m.end() < m.regionEnd()) {
                     if (!m.group(4).equals(",")) {
-                        System.err.println("[error:] expecting ',' at the end \"" + m.group() + "\"");
-                        System.exit(1);
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "expecting ',' at the end \"" + m.group() + "\""));
                     }
                 } else {
                     if (!m.group(4).equals("")) {
-                        System.err.println("[error:] unexpected ',' at the end \"" + m.group() + "\"");
-                        System.exit(1);
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "unexpected ',' at the end \"" + m.group() + "\""));
                     }
                 }
 
@@ -131,17 +129,6 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                     items.add(rule);
                 }
             }
-/*
-if (bndIdx == 0 || bndIdx > prod.getArity())  {
-          System.err.println("[error:] argument index out of bounds: " + bndIdx);
-          System.exit(1);
-        }
-
-if (bndMap.containsKey(bndIndex)) {
-            System.err.println("[error:] " + bndIdx );
-            System.exit(1);
-          }
-*/
         }
 
         return node;

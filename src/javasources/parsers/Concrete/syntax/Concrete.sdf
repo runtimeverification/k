@@ -1,3 +1,4 @@
+%% Copyright (c) 2014 K Team. All Rights Reserved.
 %% Grammar for the K language
 module Concrete
 imports Common %% For Comments and whitespace
@@ -43,7 +44,7 @@ context-free syntax
 	K		-> CellContents %%{cons("K")}
 	Bag		-> CellContents %%{cons("Bag")}
 
-	DzDzID "=" DzDzSTRING -> CellProperty {cons("CellProperty")}
+	DzDzID "=" DzStringDz -> CellProperty {cons("CellProperty")}
 	CellLabel "=>" CellLabel	-> CellLabel {non-assoc, cons("CellLabelRewrite")}
 
 	TagDz					-> TagListDz
@@ -52,7 +53,7 @@ context-free syntax
 
 	KEYDz							-> TagDz {cons("Tag")}
 	KEYDz "(" TAGCONTENTDz ")"		-> TagDz {cons("TagParam")}
-	KEYDz "(" DzDzSTRING ")"		-> TagDz {cons("TagString")}
+	KEYDz "(" DzStringDz ")"		-> TagDz {cons("TagString")}
 lexical syntax
 	[a-z] [A-Za-z\-0-9]*	-> KEYDz
 	TCDz*					-> TAGCONTENTDz

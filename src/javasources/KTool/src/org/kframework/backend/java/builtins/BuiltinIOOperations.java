@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import java.io.IOException;
@@ -5,7 +6,7 @@ import java.nio.charset.CharacterCodingException;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.K;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
@@ -48,8 +49,6 @@ public class BuiltinIOOperations {
             return IntToken.of(fs(context).get(term.longValue()).getc() & 0xff);
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
-        } catch (RuntimeException e) {
-            throw e;
         }
     }
 
@@ -106,7 +105,7 @@ public class BuiltinIOOperations {
             Term term = Term.of(kast, definition(context));
             term = term.evaluate(context);
             return term;
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             return processIOException("noparse", context);
         }
     }

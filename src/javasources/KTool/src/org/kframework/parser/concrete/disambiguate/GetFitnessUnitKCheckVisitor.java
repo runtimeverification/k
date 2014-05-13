@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
@@ -16,8 +17,8 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
     }
 
     @Override
-    public void visit(TermCons tc) {
-        super.visit(tc);
+    public Void visit(TermCons tc, Void _) {
+        super.visit(tc, _);
 
         if (tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
@@ -35,6 +36,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
                 }
             }
         }
+        return null;
     }
 
     /**

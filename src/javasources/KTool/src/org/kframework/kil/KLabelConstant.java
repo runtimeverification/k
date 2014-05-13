@@ -9,16 +9,11 @@ import java.util.List;
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
-
-import aterm.ATermAppl;
 
 /**
  * AST representation of a KLabel constant.
@@ -131,13 +126,6 @@ public class KLabelConstant extends KLabel {
         productions = (List<Production>) Collections.EMPTY_LIST;
     }
 
-    @SuppressWarnings("unchecked")
-    public KLabelConstant(ATermAppl atm) {
-        super(atm);
-        label = StringUtil.unescapeMaude(((ATermAppl) atm.getArgument(0)).getName());
-        productions = (List<Production>) Collections.EMPTY_LIST;
-    }
-
     /**
      * @return unmodifiable list of productions generating this KLabel
      */
@@ -175,21 +163,6 @@ public class KLabelConstant extends KLabel {
         return getLabel();
     }
 
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
     /**
      * A KLabel is considered functional if either it syntactically qualifies as a predicate,
      * or if the attributes associated to its production contain
@@ -220,5 +193,10 @@ public class KLabelConstant extends KLabel {
             }
         }
         return false;
+    }
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 }

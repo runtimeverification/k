@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import java.util.HashSet;
@@ -13,7 +14,7 @@ public class CollectConsesVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
         if (node.containsAttribute(Constants.CONS_cons_ATTR)) {
             String cons = node.getAttribute(Constants.CONS_cons_ATTR);
             context.conses.put(cons, node);
@@ -35,5 +36,6 @@ public class CollectConsesVisitor extends BasicVisitor {
                 context.productions.put(key, sset);
             }
         }
+        return null;
     }
 }

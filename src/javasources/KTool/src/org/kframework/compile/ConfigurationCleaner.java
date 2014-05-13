@@ -1,8 +1,8 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
@@ -19,14 +19,14 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Cell node) throws TransformerException {
+    public ASTNode visit(Cell node, Void _)  {
         if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
             if (node.variables().isEmpty()) {
                 return new Bag();
             }
         }
 
-        ASTNode result = super.transform(node);
+        ASTNode result = super.visit(node, _);
         if (result == null) return null;
 
         if (result == node) {

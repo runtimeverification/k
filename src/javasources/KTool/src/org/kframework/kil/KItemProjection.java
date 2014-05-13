@@ -1,16 +1,13 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-
 
 /**
  * @author AndreiS
  */
-public class KItemProjection extends Term {
+public class KItemProjection extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
 
     private Term term;
 
@@ -69,18 +66,17 @@ public class KItemProjection extends Term {
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public Term getChild(Enum<?> type) {
+        return term;
     }
 
     @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
+    public void setChild(Term child, Enum<?> type) {
+        this.term = child;
     }
-
 }

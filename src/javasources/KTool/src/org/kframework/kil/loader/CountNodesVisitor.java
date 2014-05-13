@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import org.kframework.kil.loader.Context;
@@ -19,39 +20,42 @@ public class CountNodesVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Module module) {
+    public Void visit(Module module, Void _) {
         if (!module.isPredefined()) {
             context.numModules++;
-            super.visit(module);
+            super.visit(module, _);
         }
+        return null;
     }
 
     @Override
-    public void visit(Sentence rule) {
+    public Void visit(Sentence rule, Void _) {
         context.numSentences++;
-        super.visit(rule);
+        return super.visit(rule, _);
     }
 
     @Override
-    public void visit(Production production) {
+    public Void visit(Production production, Void _) {
         context.numProductions++;
-        super.visit(production);
+        return super.visit(production, _);
     }
 
     boolean inConfig = false;
     @Override
-    public void visit(Configuration config) {
+    public Void visit(Configuration config, Void _) {
         inConfig = true;
-        super.visit(config);
+        super.visit(config, _);
         inConfig = false;
         context.numSentences++;
+        return null;
     }
 
     @Override
-    public void visit(Cell cell) {
+    public Void visit(Cell cell, Void _) {
         if (inConfig) {
             context.numCells++;
-            super.visit(cell);
+            super.visit(cell, _);
         }
+        return null;
     }
 }

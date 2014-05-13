@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import org.kframework.kil.Production;
@@ -11,12 +12,14 @@ public class CollectLocationsVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
         context.locations.put(node.getFilename() + ":" + node.getLocation(), node);
+        return null;
     }
 
     @Override
-    public void visit(Sentence node) {
+    public Void visit(Sentence node, Void _) {
         context.locations.put(node.getFilename() + ":" + node.getLocation(), node);
+        return null;
     }
 }

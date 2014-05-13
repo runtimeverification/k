@@ -1,10 +1,9 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.backend.java.kil.Token;
-import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
@@ -21,7 +20,6 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddCircularityRules extends CopyOnWriteTransformer {
 
@@ -35,7 +33,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
 
         ArrayList<ModuleItem> items = new ArrayList<ModuleItem>(node.getItems());
         Module module = node.shallowCopy();
@@ -49,7 +47,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
                 // "parse" the reachability rules
                 ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(
                         context);
-                r.accept(parser);
+                parser.visitNode(r);
 
                 Term newPi = parser.getPi().shallowCopy();
                 Variable K = Variable.getFreshVar("K");
@@ -57,13 +55,13 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
                 // extract the content of the K cell (PGM) from LHS of  
                 // the reachability rule and replace it by PGM ~> K
                 ExtractCellContent extract = new ExtractCellContent(context, "k");
-                newPi.accept(extract);
+                extract.visitNode(newPi);
                 Term pgm = extract.getContent().shallowCopy();
                 
                 // push the new program without the first label
                 Term pgmprime = pgm.shallowCopy();
                 RemoveLabel pl = new RemoveLabel(context);
-                pgmprime = (Term) pgmprime.accept(pl);
+                pgmprime = (Term) pl.visitNode(pgmprime);
                 
                 List<Term> cnt = new ArrayList<Term>();
                 cnt.add(pgm);
@@ -72,22 +70,22 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
                 KSequence newContent = new KSequence(cnt);
 
                 SetCellContent app = new SetCellContent(context, newContent, "k");
-                newPi = (Term) newPi.accept(app);
+                newPi = (Term) app.visitNode(newPi);
 
                 // in RHS, replace .K with K
                 Term newPiPrime = parser.getPi_prime().shallowCopy();
                 SetCellContent appPrime = new SetCellContent(context, K, "k");
-                newPiPrime = (Term) newPiPrime.accept(appPrime);
+                newPiPrime = (Term) appPrime.visitNode(newPiPrime);
                 
                 // fresh variables
                 VariablesVisitor vvleft = new VariablesVisitor(context);
-                parser.getPi().accept(vvleft);
+                vvleft.visitNode(parser.getPi());
                 
 //                System.out.println("CFG VARS: " + vvleft.getVariables());
 //                System.out.println("FROM: " + parser.getPi());
 //                
                 VariablesVisitor vvright = new VariablesVisitor(context);
-                parser.getPi_prime().accept(vvright);
+                vvright.visitNode(parser.getPi_prime());
                 
 //                System.out.println("CFG' VARS: " + vvright.getVariables());
 //                System.out.println("FROM: " + parser.getPi_prime());

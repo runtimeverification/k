@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.VariableCollector;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.visitors.Visitor;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -108,14 +109,9 @@ public abstract class JavaSymbolicObject extends ASTNode
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
-            throws org.kframework.kil.visitors.exceptions.TransformerException {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
-    public void accept(org.kframework.kil.visitors.Visitor visitor) {
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         throw new UnsupportedOperationException();
     }
 

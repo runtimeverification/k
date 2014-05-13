@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kagreg;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /*
  * Add to each sort a labeled production for that sort.
@@ -41,15 +41,15 @@ public class AddSortLabels extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Module module) throws TransformerException {
+    public ASTNode visit(Module module, Void _)  {
         if (module.isPredefined()) {
             return module;
         }
-        return super.transform(module);
+        return super.visit(module, _);
     }
     
     @Override
-    public ASTNode transform(Syntax syntax) throws TransformerException {
+    public ASTNode visit(Syntax syntax, Void _)  {
         if (labeledSorts.contains(syntax.getSort().getName())) {
             return syntax;
         }
@@ -63,7 +63,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 
 //        System.out.println("Before: " + context.conses);
         AddConsesVisitor acv = new AddConsesVisitor(context);
-        production.accept(acv);
+        acv.visitNode(production);
 //        System.out.println("After: " + context.conses);
 //        acv.visit(production);
         List<PriorityBlock> priorityBlocks = syntax.getPriorityBlocks();

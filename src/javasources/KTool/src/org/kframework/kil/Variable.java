@@ -1,14 +1,10 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
-
-import aterm.ATermAppl;
 
 /**
  * Variables, used both in rules/contexts and for variables like {@code $PGM} in configurations.
@@ -39,20 +35,6 @@ public class Variable extends Term {
         this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
         this.name = element.getAttribute(Constants.NAME_name_ATTR);
         this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
-        if (this.name.startsWith("?")) {
-            this.setFresh(true);
-            this.name = this.name.substring(1);
-        }
-    }
-
-    public Variable(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-
-        name = ((ATermAppl) atm.getArgument(0)).getName();
-
-        if (atm.getName().endsWith("2Var"))
-            this.userTyped = true;
         if (this.name.startsWith("?")) {
             this.setFresh(true);
             this.name = this.name.substring(1);
@@ -90,18 +72,8 @@ public class Variable extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override

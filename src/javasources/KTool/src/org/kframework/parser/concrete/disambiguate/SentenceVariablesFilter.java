@@ -1,8 +1,9 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -14,35 +15,40 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
  * @author radu
  * 
  */
-public class SentenceVariablesFilter extends BasicTransformer {
+public class SentenceVariablesFilter extends ParseForestTransformer {
     private boolean config = false;
 
     public SentenceVariablesFilter(org.kframework.kil.loader.Context context) {
         super("Sentence Variable Filter", context);
     }
 
-    public ASTNode transform(Configuration cfg) throws TransformerException {
+    @Override
+    public ASTNode visit(Configuration cfg, Void _) throws ParseFailedException {
         config = true;
-        return super.transform(cfg);
+        return super.visit(cfg, _);
     }
 
-    public ASTNode transform(org.kframework.kil.Context cfg) throws TransformerException {
+    @Override
+    public ASTNode visit(org.kframework.kil.Context cfg, Void _) throws ParseFailedException {
         config = false;
-        return super.transform(cfg);
+        return super.visit(cfg, _);
     }
 
-    public ASTNode transform(Rule cfg) throws TransformerException {
+    @Override
+    public ASTNode visit(Rule cfg, Void _) throws ParseFailedException {
         config = false;
-        return super.transform(cfg);
+        return super.visit(cfg, _);
     }
 
-    public ASTNode transform(Syntax cfg) throws TransformerException {
+    @Override
+    public ASTNode visit(Syntax cfg, Void _) throws ParseFailedException {
         config = false;
         return cfg;
     }
 
-    public ASTNode transform(TermCons tc) throws TransformerException {
-        super.transform(tc);
+    @Override
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+        super.visit(tc, _);
         if (tc.getProduction().isSubsort()) {
             if (tc.getContents().get(0) instanceof Variable) {
                 return tc.getContents().get(0);
@@ -51,7 +57,8 @@ public class SentenceVariablesFilter extends BasicTransformer {
         return tc;
     }
 
-    public ASTNode transform(Variable var) throws TransformerException {
+    @Override
+    public ASTNode visit(Variable var, Void _) throws ParseFailedException {
         if (config) {
             if (!var.getName().startsWith("$")) {
                 String msg = "In the configuration you can only have external variables, not: '" + var.getName() + "' (starts with '$').";
