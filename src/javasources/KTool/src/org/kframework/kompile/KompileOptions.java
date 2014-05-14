@@ -52,8 +52,8 @@ public final class KompileOptions implements Serializable {
     private List<String> parameters;
     
     public File mainDefinitionFile() {
-        if (parameters == null || parameters.size() != 1) {
-            throw new ParameterException("You have to provide a file in order to compile.");
+        if (parameters == null || parameters.size() == 0) {
+            throw new ParameterException("You have to provide exactly one main file in order to compile.");
         }
         return new File(parameters.get(0));
     }
@@ -120,6 +120,7 @@ public final class KompileOptions implements Serializable {
         return syntaxModule;
     }
     
+    //TODO(dwightguth): replace this with variable arity when we have a more elegant ktest
     public static class TagListConverter implements IStringConverter<Set<String>> {
         
         @Override
