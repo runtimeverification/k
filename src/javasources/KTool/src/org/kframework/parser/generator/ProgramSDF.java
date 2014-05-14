@@ -38,8 +38,11 @@ public class ProgramSDF {
         KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
-            psdfv.visitNode(m);
             ctv.visitNode(m);
+        }
+        for (String modName : csmv.synModNames) {
+            Module m = def.getModulesMap().get(modName);
+            psdfv.visitNode(m);
             ks2gsf.visitNode(m);
         }
 

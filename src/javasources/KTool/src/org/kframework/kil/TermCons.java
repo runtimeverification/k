@@ -7,6 +7,7 @@ import java.util.List;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -68,7 +69,10 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         if (production.items.size() > 0) {
             if (production.items.get(0) instanceof UserList) {
                 String separator = ((UserList) production.items.get(0)).separator;
-                str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
+                if (contents.size() == 2)
+                    str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
+                else
+                    str = ".List{\"" + StringUtil.escape(separator) + "\"}";
             } else
                 for (int i = 0, j = 0; i < production.items.size(); i++) {
                     ProductionItem pi = production.items.get(i);
