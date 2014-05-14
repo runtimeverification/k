@@ -1,15 +1,10 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
-
-import aterm.ATermAppl;
 
 /**
  * Abstract class representing a {@link KLabel} of the form #token("SORT", "VALUE").
@@ -50,7 +45,7 @@ public abstract class Token extends KLabel {
         } else if (sort.equals(IntBuiltin.SORT_NAME)) {
             return IntBuiltin.kAppOf(value);
         } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            return StringBuiltin.kAppOf(value);
+            return StringBuiltin.kAppOf(StringUtil.unquoteString(value));
         } else {
             return GenericToken.kAppOf(sort, value);
         }
@@ -75,27 +70,10 @@ public abstract class Token extends KLabel {
         }
     }
 
-    public static KApp kAppOf(ATermAppl atm) {
-        String sort = StringUtil.getSortNameFromCons(atm.getName());
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
-            return KApp.of(new BoolBuiltin(atm));
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
-            return KApp.of(new IntBuiltin(atm));
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            return KApp.of(new StringBuiltin(atm));
-        } else {
-            return KApp.of(new GenericToken(atm));
-        }
-    }
-
     protected Token() {
     }
 
     protected Token(Element element) {
-        super(element);
-    }
-
-    protected Token(ATermAppl element) {
         super(element);
     }
 
@@ -144,22 +122,7 @@ public abstract class Token extends KLabel {
     @Override
     public String toString() {
         // TODO (BUG): has extra quotations when #Sort string
-        return "#token(\"" + tokenSort() + "\", " + StringUtil.escapeK(value()) + ")";
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+        return "#token(\"" + tokenSort() + "\", " + StringUtil.enquoteString(value()) + ")";
     }
 
 }

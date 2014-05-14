@@ -15,7 +15,7 @@ public class DocumentationFilter extends LatexFilter {
     }
 
     @Override
-    public void visit(Module mod) {
+    public Void visit(Module mod, Void _) {
         result.append("\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl);
         //insert section and label tags for link
         result.append("\\section{" + mod.getName() + "}" + endl);
@@ -24,17 +24,18 @@ public class DocumentationFilter extends LatexFilter {
         //as we should have visited a Definition before visiting a Module
         result.insert(result.indexOf("\\maketitle") + ".maketitle".length(), "\\hyperref[sec:" + mod.getName() + "]{" + mod.getName() + "}\\\\" + endl);
 
-        if (isVisited(mod))
-            return;
+        if (cache.containsKey(mod))
+            return null;
         for (ModuleItem mi : mod.getItems()) {
-            mi.accept(this);
+            this.visitNode(mi);
         }
-        visit((DefinitionItem) mod);
+        visit((DefinitionItem) mod, _);
         result.append("\\end{module}" + endl);
+        return null;
     }
 
     @Override
-    public void visit(Rule rule) {
+    public Void visit(Rule rule, Void _) {
         // termComment = false;
         Attributes atts = rule.getAttributes(); 
         boolean process = false;
@@ -44,6 +45,7 @@ public class DocumentationFilter extends LatexFilter {
                 break;
             }
         }
-        if(process) super.visit(rule);
+        if(process) super.visit(rule, _);
+        return null;
     }
 }

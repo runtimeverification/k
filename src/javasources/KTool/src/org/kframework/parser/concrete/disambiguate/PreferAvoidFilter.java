@@ -1,21 +1,25 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KApp;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
-public class PreferAvoidFilter extends BasicTransformer {
+public class PreferAvoidFilter extends ParseForestTransformer {
     public PreferAvoidFilter(Context context) {
         super("Ambiguity filter", context);
     }
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    @Override
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         java.util.List<Term> prefer = new ArrayList<Term>();
         java.util.List<Term> avoid = new ArrayList<Term>();
 
@@ -26,6 +30,13 @@ public class PreferAvoidFilter extends BasicTransformer {
                     prefer.add(tc);
                 if (tc.getProduction().getAttributes().containsKey("avoid"))
                     avoid.add(tc);
+            } else if (variant instanceof KApp) {
+                // Adding int tokens to the prefer container in order to disambiguate between
+                // negative numbers and unary minus.
+                KApp kapp = (KApp) variant;
+                if (kapp.getLabel() instanceof IntBuiltin) {
+                    prefer.add(kapp);
+                }
             }
         }
 
@@ -46,8 +57,8 @@ public class PreferAvoidFilter extends BasicTransformer {
         }
 
         if (result == amb)
-            return super.transform(result);
+            return super.visit(result, _);
         else
-            return result.accept(this);
+            return this.visitNode(result);
     }
 }

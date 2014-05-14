@@ -472,6 +472,44 @@ Note that when they are not specified, the default roots are:
   R0 = C1
 
 
+KTEST: AUTOMATIC OUTPUT GENERATION
+----------------------------------
+
+ktest has a feature of automatic generation of output (*.out) files. This
+feature consists of two options: —-update-out and --generate-out.
+
+ktest --update-out
+
+When this option is enabled, ktest updates every output files by newly
+generated output of krun. This option creates a new set of reference output
+files, discarding the previous one. This option is useful when you want to
+change the format of output files due to the version update of krun.
+
+Use this option at your own risk. With this option, ktest does not check the
+correctness of krun's output.
+
+ktest —-generate-out
+
+When this option is enabled, ktest generates a new output file at a new place
+whenever krun's output is different from the existing output file. The new
+output file is created in the last directory of the given 'results' attributes.
+
+This option is useful when you create a new K definition and want to construct
+a new set of test programs and outputs for the K definition.
+
+NOTE:
+- A new output file is also created when no previous output file exists.
+- A previous output file could be updated if the last directory of the
+  'results' attributes is the same with the directory that the previous output
+  file resides.
+
+NOTE:
+These two options make ktest run in sequential mode, ignoring the '—-threads'
+option of ktest. Since multiple tests can share a single output file,
+generating/updating output files should be done sequentially. Otherwise,
+parallel updates may cause a race condition for the shared output files.
+
+
 FILE READ/WRITE:
 ----------------
 

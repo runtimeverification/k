@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import org.kframework.kil.ASTNode;
@@ -10,7 +11,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
 
@@ -25,7 +25,7 @@ public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if (!node.containsAttribute(RL_ATR)) {
             return node;
         }

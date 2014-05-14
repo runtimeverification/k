@@ -1,12 +1,12 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.kframework.utils.OS;
 import org.kframework.utils.ThreadedStreamCapturer;
-import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
 
 public class Sdf2Table {
 
@@ -14,7 +14,7 @@ public class Sdf2Table {
         ThreadedStreamCapturer errorStreamHandler;
 
         try {
-            File f = GlobalSettings.getNativeExecutable("sdf2table");
+            File f = OS.current().getNativeExecutable("sdf2table");
 
             // create process
             ProcessBuilder pb = new ProcessBuilder(f.getAbsolutePath(), "-c", "-m", mainFile, "-o", mainFile + ".tbl");
@@ -33,10 +33,7 @@ public class Sdf2Table {
             String s = errorStreamHandler.getContent().toString();
             // if some errors occurred (if something was written on the stderr stream)
             if (!s.equals("")) {
-                System.out.println("Some errors occurred..");
-                System.out.println(s);
-                // abort the compilation
-                System.exit(1);
+                assert false : "SDF2Table returned errors: " + s;
             }
         } catch (IOException e) {
             e.printStackTrace();

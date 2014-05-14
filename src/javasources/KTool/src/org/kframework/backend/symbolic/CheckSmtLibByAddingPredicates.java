@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import org.kframework.compile.transformers.AddPredicates;
@@ -26,13 +27,13 @@ public class CheckSmtLibByAddingPredicates extends BasicVisitor{
     }
 
     @Override
-    public void visit(KApp node) {
+    public Void visit(KApp node, Void _) {
         Term klabel = node.getLabel();
 
         if (klabel instanceof KLabelConstant) {
             if (klabel.equals(KLabelConstant.KEQ)) {
                 smtValid = true;
-                return;
+                return null;
             }
 
             Set<Production> prods = context.productions.get(((KLabelConstant) klabel).getLabel());
@@ -64,7 +65,8 @@ public class CheckSmtLibByAddingPredicates extends BasicVisitor{
                 }
             }
         }
-        // super.visit(node);
+        // super.visit(node, _);
+        return null;
     }
 
     public boolean smtValid() {

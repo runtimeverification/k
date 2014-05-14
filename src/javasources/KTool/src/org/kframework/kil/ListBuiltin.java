@@ -1,13 +1,11 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
-
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
+
+import org.kframework.kil.visitors.Visitor;
 
 /**
  * A builtin list
@@ -30,10 +28,16 @@ public class ListBuiltin extends CollectionBuiltin {
     public Collection<Term> elementsRight() {
         return Collections.unmodifiableCollection(elementsRight);
     }
-
+    
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    public DataStructureBuiltin shallowCopy(Collection<Term> terms) {
+        return ListBuiltin.of(sort(), elementsLeft(), elementsRight(), terms);
+    }
+    
+    @Override
+    public CollectionBuiltin shallowCopy(Collection<Term> terms,
+            Collection<Term> elements) {
+        return ListBuiltin.of(sort(), elements, elementsRight(), terms);
     }
 
     // TODO(YilongL): shouldn't elementsLeft and elementsRight have type java.util.List?
@@ -85,6 +89,22 @@ public class ListBuiltin extends CollectionBuiltin {
     @Override
     public String toString() {
         return elements().toString() + baseTerms().toString() + elementsRight.toString();
+    }
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+    
+
+    @Override
+    public Collection<Term> getChildren(DataStructureBuiltin.ListChildren type) {
+        switch (type) {
+            case ELEMENTS_RIGHT:
+                return elementsRight;
+            default:
+                return super.getChildren(type);
+        }
     }
 
 }

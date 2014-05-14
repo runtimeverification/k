@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -14,15 +15,15 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicHookWorker;
-import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.LocalTransformer;
+import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CorrectRewritePriorityFilter extends BasicTransformer {
+public class CorrectRewritePriorityFilter extends ParseForestTransformer {
     private CorrectRewriteFilter2 secondFilter;
 
     public CorrectRewritePriorityFilter(Context context) {
@@ -30,7 +31,8 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
         secondFilter = new CorrectRewriteFilter2(context);
     }
 
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    @Override
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
         List<Term> children = new ArrayList<Term>();
         boolean klist = false;
         Term krw = null;
@@ -47,63 +49,63 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
             children.remove(krw);
 
         if (children.size() == 0 || children.size() == amb.getContents().size())
-            return super.transform(amb);
+            return super.visit(amb, _);
         if (children.size() == 1)
-            return children.get(0).accept(this);
+            return this.visitNode(children.get(0));
         amb.setContents(children);
-        return super.transform(amb);
+        return super.visit(amb, _);
     }
 
     @Override
-    public ASTNode transform(KSequence ks) throws TransformerException {
+    public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
         if (ks.getContents().size() == 2) {
-            ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
-            ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
+            ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
+            ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
         }
         assert ks.getContents().size() <= 2;
 
-        return super.transform(ks);
+        return super.visit(ks, _);
     }
 
     @Override
-    public ASTNode transform(KList ks) throws TransformerException {
+    public ASTNode visit(KList ks, Void _) throws ParseFailedException {
         if (ks.getContents().size() == 2) {
-            ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
-            ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
+            ks.getContents().set(0, (Term) secondFilter.visitNode(ks.getContents().get(0)));
+            ks.getContents().set(1, (Term) secondFilter.visitNode(ks.getContents().get(1)));
         }
         assert ks.getContents().size() <= 2;
 
-        return super.transform(ks);
+        return super.visit(ks, _);
     }
 
     @Override
-    public ASTNode transform(MapItem mi) throws TransformerException {
-        mi.setKey((Term) mi.getKey().accept(secondFilter));
-        mi.setValue((Term) mi.getValue().accept(secondFilter));
+    public ASTNode visit(MapItem mi, Void _) throws ParseFailedException {
+        mi.setKey((Term) secondFilter.visitNode(mi.getKey()));
+        mi.setValue((Term) secondFilter.visitNode(mi.getValue()));
 
-        return super.transform(mi);
+        return super.visit(mi, _);
     }
 
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         if (tc.getProduction() == null)
             System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
         if (tc.getProduction().isListDecl()) {
-            tc.getContents().set(0, (Term) tc.getContents().get(0).accept(secondFilter));
-            tc.getContents().set(1, (Term) tc.getContents().get(1).accept(secondFilter));
+            tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
+            tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof Sort) {
                     // look for the outermost element
                     if (i == 0 || i == tc.getProduction().getItems().size() - 1) {
-                        tc.getContents().set(j, (Term) tc.getContents().get(j).accept(secondFilter));
+                        tc.getContents().set(j, (Term) secondFilter.visitNode(tc.getContents().get(j)));
                     }
                     j++;
                 }
             }
         }
 
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 
     /**
@@ -114,27 +116,28 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
      * @author Radu
      * 
      */
-    public class CorrectRewriteFilter2 extends BasicHookWorker {
+    public class CorrectRewriteFilter2 extends LocalTransformer {
         public CorrectRewriteFilter2(Context context) {
             super("org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter2", context);
         }
 
-        public ASTNode transform(Rewrite ks) throws TransformerException {
+        @Override
+        public ASTNode visit(Rewrite ks, Void _) throws ParseFailedException {
             String msg = "Due to typing errors, => is not greedy. Use parentheses to set proper scope.";
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
         @Override
-        public ASTNode transform(Ambiguity node) throws TransformerException {
-            TransformerException exception = null;
+        public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
+            ParseFailedException exception = null;
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term t : node.getContents()) {
                 ASTNode result = null;
                 try {
-                    result = t.accept(this);
+                    result = this.visitNode(t);
                     terms.add((Term) result);
-                } catch (TransformerException e) {
+                } catch (ParseFailedException e) {
                     exception = e;
                 }
             }

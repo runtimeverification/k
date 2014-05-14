@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 module K-PRINTER
   imports STRING-HOOKS
   imports K-EQUAL-HOOKS

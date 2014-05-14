@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /**
 Test for issue 627.
 Tagging a subsort should not automatically create a klabel for it.

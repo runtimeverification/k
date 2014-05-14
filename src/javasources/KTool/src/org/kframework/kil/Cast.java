@@ -1,21 +1,15 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
-
-import java.util.ArrayList;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
-public class Cast extends Term {
+public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     public enum CastType {
         /**
          * Casting of the form _:Sort. Sort restrictions are imposed for both the inner term, as well as the outer term.
@@ -61,22 +55,6 @@ public class Cast extends Term {
         this.content = t;
     }
 
-    public Cast(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-        String atmtype = ((ATermAppl) atm.getArgument(1)).getName();
-        if (atmtype.equals("Semantic"))
-            this.type = CastType.SEMANTIC;
-        else if (atmtype.equals("Syntactic"))
-            this.type = CastType.SYNTACTIC;
-        else if (atmtype.equals("Inner"))
-            this.type = CastType.INNER;
-        else if (atmtype.equals("Outer"))
-            this.type = CastType.OUTER;
-
-        content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-    }
-
     public Cast(String location, String filename, String sort) {
         super(location, filename, sort);
     }
@@ -113,21 +91,6 @@ public class Cast extends Term {
         if (type == CastType.OUTER)
             return KSorts.K;
         return sort;
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
     }
 
     @Override
@@ -181,4 +144,18 @@ public class Cast extends Term {
         return type != CastType.SEMANTIC;
     }
 
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return content;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.content = child;
+    }
 }

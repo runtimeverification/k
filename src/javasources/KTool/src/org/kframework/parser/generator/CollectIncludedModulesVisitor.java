@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import org.kframework.compile.utils.MetaK;
@@ -26,7 +27,7 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
         this.startModuleName = startModuleName;
     }
 
-    public void visit(Definition def) {
+    public Void visit(Definition def, Void _) {
         List<String> synQue = new LinkedList<String>();
         synQue.add(startModuleName);
 
@@ -54,5 +55,6 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
                 }
             }
         }
+        return null;
     }
 }

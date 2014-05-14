@@ -1,14 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.Controller;
 
-import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
-import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.Main;
@@ -17,10 +13,6 @@ import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
-import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
-import org.kframework.utils.Stopwatch;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
@@ -34,39 +26,35 @@ public class RunKRunCommand {
     protected KRunDebugger debugger;
     protected RunProcess rp;
 
-    public RunKRunCommand(Term kast, String lang, Context context) throws Exception {
+    public RunKRunCommand(Term kast, String lang, KRun krun, Context context) throws KRunExecutionException {
         super();
         this.context = context;
         this.KAST = kast;
         this.lang = lang;
         rp = new RunProcess();
-        this.krun = createKrun(context);
+        this.krun = krun;
         Term cfg;
         cfg = Main.makeConfiguration(KAST, null, rp, K.term, context);
         debugger = krun.debug(cfg);
     }
 
-    public RunKRunCommand(KRunState state, String lang, Context context) throws Exception {
+    public RunKRunCommand(KRunState state, String lang, KRun krun, Context context) {
         super();
         this.context = context;
         this.KAST = state.getRawResult();
         this.lang = lang;
         rp = new RunProcess();
-        this.krun = createKrun(context);
+        this.krun = krun;
         DirectedGraph<KRunState, Transition> dg = new DirectedSparseGraph<KRunState, Transition>();
         dg.addVertex(state);
         debugger = krun.debug(dg);
     }
 
-    public DirectedGraph<KRunState, Transition> firstStep() throws Exception {
+    public DirectedGraph<KRunState, Transition> firstStep() {
         return debugger.getGraph();
     }
 
-    public void abort() {
-        System.exit(0);
-    }
-
-    public DirectedGraph<KRunState, Transition> step(KRunState v, int steps) throws Exception {
+    public DirectedGraph<KRunState, Transition> step(KRunState v, int steps) throws KRunExecutionException {
         if (steps > 0) {
             debugger.setCurrentState(v.getStateId());
             debugger.step(steps);
@@ -74,7 +62,7 @@ public class RunKRunCommand {
         return debugger.getGraph();
     }
 
-    public DirectedGraph<KRunState, Transition> step_all(int steps, KRunState v) throws Exception {
+    public DirectedGraph<KRunState, Transition> step_all(int steps, KRunState v) throws KRunExecutionException {
         if (steps < 1)
             steps = 1;
         debugger.setCurrentState(v.getStateId());
@@ -98,38 +86,8 @@ public class RunKRunCommand {
         return context;
     }
 
-    private static KRun createKrun(Context context) {
-        KRun krun;
-        if (K.backend.equals("maude")) {
-            krun = new MaudeKRun(context, Stopwatch.instance());
-        } else if (K.backend.equals("java")) {
-            try {
-                krun = new JavaSymbolicKRun(context);
-            } catch (KRunExecutionException e) {
-                org.kframework.utils.Error.report(e.getMessage());
-                return null;
-            }
-        } else {
-            org.kframework.utils.Error
-                    .report("Currently supported backends are 'maude' and 'java'");
-            return null;
-        }
-        krun.setBackendOption("io", false);
-        return krun;
-    }
-
     public static String transformTerm(Term term, Context context) {
-        try {
-            term = (Term) term.accept(new ConcretizeSyntax(context));
-            term = (Term) term.accept(new TypeInferenceSupremumFilter(context));
-            term = (Term) term.accept(new BestFitFilter(
-                    new GetFitnessUnitTypeCheckVisitor(context), context));
-            // as a last resort, undo concretization
-            term = (Term) term
-                    .accept(new org.kframework.krun.FlattenDisambiguationFilter(context));
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
+        term = KRunState.concretize(term, context);
         if (term.getClass() == Cell.class) {
             Cell generatedTop = (Cell) term;
             if (generatedTop.getLabel().equals("generatedTop")) {
@@ -138,7 +96,7 @@ public class RunKRunCommand {
         }
 
         UnparserFilter unparser = new UnparserFilter(true, false, context);
-        term.accept(unparser);
+        unparser.visitNode(term);
         return unparser.getResult();
     }
 

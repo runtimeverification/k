@@ -499,11 +499,21 @@ public class Grammar implements Serializable {
     public static class RegExState extends PrimitiveState {
         /** The java regular expression pattern. */
         public final Pattern pattern;
+        /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
+        public final Set<String> rejects;
 
         public RegExState(String name, NonTerminal nt, Pattern pattern, String sort) {
             super(name, nt, sort);
             assert pattern != null;
             this.pattern = pattern;
+            this.rejects = new HashSet<>();
+        }
+
+        public RegExState(String name, NonTerminal nt, Pattern pattern, String sort, Set<String> rejects) {
+            super(name, nt, sort);
+            assert pattern != null;
+            this.pattern = pattern;
+            this.rejects = rejects;
         }
 
         // Position is an 'int' offset into the text because CharSequence uses 'int'
@@ -514,7 +524,9 @@ public class Grammar implements Serializable {
             matcher.useTransparentBounds(true);
             Set<MatchResult> results = new HashSet<>();
             if (matcher.lookingAt()) {
-                results.add(new MatchResult(matcher.end()));
+                // reject keywords
+                if (!rejects.contains(matcher.group()))
+                    results.add(new MatchResult(matcher.end()));
             }
             return results;
         }

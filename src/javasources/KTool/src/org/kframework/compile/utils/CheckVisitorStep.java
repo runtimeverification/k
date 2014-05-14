@@ -1,28 +1,24 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Visitor;
 
 public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> implements CheckStep<T> {
 
-    Visitor t;
+    AbstractVisitor<Void, ?, RuntimeException> t;
 
-    public CheckVisitorStep(Visitor t, Context context) {
+    public CheckVisitorStep(AbstractVisitor<Void, ?, RuntimeException> t, Context context) {
         super(context);
         this.t = t;
     }
 
     @Override
     public boolean check(T def) {
-        try {
-            def.accept(t);
-            if (sw != null) {
-                sw.printIntermediate(getName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        t.visitNode(def);
+        if (sw != null) {
+            sw.printIntermediate(getName());
         }
         return true;
     }

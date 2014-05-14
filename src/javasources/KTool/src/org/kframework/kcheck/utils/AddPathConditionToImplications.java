@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.ArrayList;
@@ -18,7 +19,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 
@@ -31,19 +31,19 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
             
             // get the corresponding reachability rule
             int rIndex = Integer.parseInt(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR));
             ASTNode rrule = reachabilityRules.get(rIndex);
             ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(context);
-            rrule.accept(parser);
+            parser.visitNode(rrule);
 
             VariablesVisitor vvpi = new VariablesVisitor(context);
-            parser.getPi().accept(vvpi);
+            vvpi.visitNode(parser.getPi());
             VariablesVisitor vvpiprime = new VariablesVisitor(context);
-            parser.getPi_prime().accept(vvpiprime);
+            vvpiprime.visitNode(parser.getPi_prime());
             List<Variable> fresh = new ArrayList<Variable>();
             for(Variable v : vvpi.getVariables()) {
                 if (!AddCircularityRules.varInList(v, vvpiprime.getVariables())) {
@@ -56,7 +56,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             // extract phi and phi'
             Term cnd = node.getRequires();
             ExtractPatternless ep = new ExtractPatternless(context, true);
-            cnd = (Term) cnd.accept(ep);
+            cnd = (Term) ep.visitNode(cnd);
             
             // separate left and right
             Rewrite ruleBody = (Rewrite) node.getBody();
@@ -93,11 +93,11 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             }
             newRule.setRequires(cc);
             newRule.setAttributes(node.getAttributes().shallowCopy());
-            newRule = (Rule) newRule.accept(new MakeFreshVariables(context, fresh));
+            newRule = (Rule) new MakeFreshVariables(context, fresh).visitNode(newRule);
             
             return newRule;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }

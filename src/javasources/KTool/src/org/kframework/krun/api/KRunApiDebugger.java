@@ -1,9 +1,10 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
-
 
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
@@ -16,7 +17,7 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
@@ -27,6 +28,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
+import java.io.File;
 import java.util.Map.Entry;
 
 public class KRunApiDebugger implements KRunDebugger {
@@ -43,20 +45,22 @@ public class KRunApiDebugger implements KRunDebugger {
     public KRunApiDebugger(KRun krun, Term cfg, Context context) throws KRunExecutionException {
         this.context = context;
         try { 
-            org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
+            org.kframework.parser.concrete.KParser.ImportTblRule(new File(K.compiled_def));
             ASTNode pattern = DefinitionLoader.parsePattern(
                     K.pattern,
                     "Command line pattern",
                     KSorts.BAG,
                     context);
             CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-            pattern.accept(vars);
+            vars.visitNode(pattern);
             defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
             defaultPattern = (Rule) pattern;
-        } catch (Exception e) {
+        } catch (CompilerStepDone e) {
             e.printStackTrace();
+        } catch (ParseFailedException e) {
+            e.report();
         }
 
         this.krun = krun;
@@ -123,7 +127,7 @@ public class KRunApiDebugger implements KRunDebugger {
         return state;
     }
 
-    private void steppingLoop(Integer steps) throws Exception {
+    private void steppingLoop(Integer steps) throws KRunExecutionException {
         if (currentState == null) {
             throw new IllegalStateException("Cannot step without a current state to step from.");
         }
@@ -152,15 +156,15 @@ public class KRunApiDebugger implements KRunDebugger {
         }
     }
 
-    public void step(int steps) throws Exception {
+    public void step(int steps) throws KRunExecutionException {
         steppingLoop(steps);
     }
 
-    public void resume() throws Exception {
+    public void resume() throws KRunExecutionException {
         steppingLoop(null);
     }
 
-    public SearchResults stepAll(int steps) throws Exception {
+    public SearchResults stepAll(int steps) throws KRunExecutionException {
         if (currentState == null) {
             throw new IllegalStateException("Cannot step without a current state to step from.");
         }
@@ -221,7 +225,7 @@ public class KRunApiDebugger implements KRunDebugger {
     public String printState(int stateNum) {
         KRunState state = getState(stateNum);
         UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-        state.getResult().accept(unparser);
+        unparser.visitNode(state.getResult());
         return state.toString() + ":\n" + unparser.getResult();
     }
 
@@ -238,7 +242,7 @@ public class KRunApiDebugger implements KRunDebugger {
         String rule;
         if (edge.getType() == TransitionType.RULE) {
             UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-            edge.getRule().accept(unparser);
+            unparser.visitNode(edge.getRule());
             rule = unparser.getResult();
         } else if (edge.getType() == TransitionType.LABEL) {
             rule = "rule [" + edge.getLabel() + "]: ...";
@@ -258,12 +262,7 @@ public class KRunApiDebugger implements KRunDebugger {
         Term configuration = getState(currentState).getRawResult();
         AppendToStdin transformer = new AppendToStdin(s, context);
         Term result;
-        try {
-            result = (Term)configuration.accept(transformer);
-        } catch (TransformerException e) {
-            assert false;
-            result = null; //for static purposes
-        }
+        result = (Term) transformer.visitNode(configuration);
         if (!transformer.getSucceeded()) {
             throw new IllegalStateException("Cannot perform command: Configuration does not " + 
                 "have an stdin buffer");
@@ -305,35 +304,35 @@ public class KRunApiDebugger implements KRunDebugger {
         }
 
         @Override
-        public ASTNode transform(Cell cell) throws TransformerException {
+        public ASTNode visit(Cell cell, Void _)  {
             if ("stdin".equals(context.cells.get(cell.getLabel())
                 .getCellAttributes().get("stream"))) {
                 inStdin = true;
-                ASTNode result = super.transform(cell);
+                ASTNode result = super.visit(cell, _);
                 inStdin = false;
                 return result;
             }
-            return super.transform(cell);
+            return super.visit(cell, _);
         }
 
         @Override
-        public ASTNode transform(KApp kapp) throws TransformerException {
+        public ASTNode visit(KApp kapp, Void _)  {
             if (kapp.getLabel().equals(KLabelConstant.of("#buffer", context))) {
                 inBuffer = true;
-                ASTNode result = super.transform(kapp);
+                ASTNode result = super.visit(kapp, _);
                 inBuffer = false;
                 return result;
             }
-            return super.transform(kapp);
+            return super.visit(kapp, _);
         }
 
         @Override
-        public ASTNode transform(StringBuiltin s) throws TransformerException {
+        public ASTNode visit(StringBuiltin s, Void _)  {
             if (inStdin && inBuffer) {
                 succeeded = true;
                 return StringBuiltin.of(s.stringValue() + str);
             }
-            return super.transform(s);
+            return super.visit(s, _);
         }
     }
 }

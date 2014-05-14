@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import java.util.HashSet;
@@ -31,8 +32,8 @@ public class Definition2SDF {
 
         DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(true, context);
         CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(context);
-        def.accept(psdfv);
-        def.accept(terminals);
+        psdfv.visitNode(def);
+        terminals.visitNode(def);
 
         for (Production p1 : psdfv.listProds)
             for (Production p2 : psdfv.listProds)
@@ -183,10 +184,10 @@ public class Definition2SDF {
         }
 
         sdf.append("\n");
-        sdf.append("    DzDzINT        -> DzDzInt\n");
+        //sdf.append("    DzDzINT        -> DzDzInt\n");
         //sdf.append("    DzDzID        -> DzDzId\n");
-        sdf.append("    DzDzSTRING    -> DzDzString\n");
-        sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
+        //sdf.append("    DzDzSTRING    -> DzDzString\n");
+        //sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
 
         sdf.append("\n");
 
@@ -223,7 +224,7 @@ public class Definition2SDF {
 
         sdf.append("lexical restrictions\n");
         sdf.append("%% some restrictions to ensure greedy matching for user defined constants\n");
-        sdf.append("    DzDzInt -/- [0-9]\n");
+        //sdf.append("    DzDzInt -/- [0-9]\n");
         sdf.append("    \"is\" -/- [\\#A-Z]\n");
         sdf.append("\n");
 

@@ -1,10 +1,7 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.util.List;
-
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  *
@@ -38,16 +35,6 @@ public class Restrictions extends ModuleItem {
     @Override
     public String toString() {
         return "  syntax " + (sort != null ? sort : terminal) + " -/- " + pattern + "\n";
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
     }
 
     @Override
@@ -93,5 +80,10 @@ public class Restrictions extends ModuleItem {
 
     public void setPattern(String pattern) {
         this.pattern = pattern;
+    }
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 }

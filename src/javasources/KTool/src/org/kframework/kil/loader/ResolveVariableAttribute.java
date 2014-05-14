@@ -1,14 +1,11 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import org.kframework.backend.Backend;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.Variable;
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
 
 /**
@@ -24,7 +21,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
     }
 
     @java.lang.Override
-    public org.kframework.kil.ASTNode transform(KApp kapp) throws TransformerException {
+    public ASTNode visit(KApp kapp, Void _)  {
         if (kapp.getLabel() instanceof Token) {
             Token node = (Token) kapp.getLabel();
 
@@ -53,6 +50,6 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             if (context.variableTokenSorts.contains(node.tokenSort()))
                 return new org.kframework.kil.Variable(node.value(), node.tokenSort());
         }
-        return super.transform(kapp);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.visit(kapp, _);    //To change body of overridden methods use File | Settings | File Templates.
     }
 }

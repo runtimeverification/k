@@ -1,12 +1,11 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
-import java.util.*;
 import java.util.List;
 
 /**
@@ -23,7 +22,7 @@ public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         if (node.getLabel().toString().startsWith(AddSymbolicK.getSymbolicConstructorPrefix())) {
             String sort = node.getLabel().toString().substring(AddSymbolicK.getSymbolicConstructorPrefix().length());
             List<Term> contents = ((KList) node.getChild()).getContents();
@@ -42,7 +41,7 @@ public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
             }
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 }
 

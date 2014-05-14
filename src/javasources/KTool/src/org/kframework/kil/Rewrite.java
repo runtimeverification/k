@@ -1,19 +1,13 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
-
-import java.util.ArrayList;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
-import aterm.ATermAppl;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -24,7 +18,7 @@ public class Rewrite extends Term {
     private Term left;
     private Term right;
 
-    public Rewrite(Element element) {
+    public Rewrite(Element element, Context context) {
         super(element);
 
         Element temp = XML.getChildrenElementsByTagName(element, Constants.LEFT).get(0);
@@ -33,14 +27,7 @@ public class Rewrite extends Term {
         temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
         temp = XML.getChildrenElements(temp).get(0);
         right = (Term) JavaClassesFactory.getTerm(temp);
-    }
-
-    public Rewrite(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-
-        left = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-        right = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
+        recomputeSort(context);
     }
 
     public Rewrite(Rewrite node) {
@@ -63,7 +50,7 @@ public class Rewrite extends Term {
         if (left instanceof Ambiguity || right instanceof Ambiguity)
             super.getSort();
         else
-            sort = context.getLUBSort(ImmutableSet.of(left.getSort(), right.getSort()));
+            sort = context.getLUBSort(left.getSort(), right.getSort());
     }
 
     public Term getLeft() {
@@ -96,20 +83,10 @@ public class Rewrite extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
-    }
-
+    
     @Override
     public Rewrite shallowCopy() {
         return new Rewrite(this);

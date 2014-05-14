@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
@@ -13,8 +14,7 @@ import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -26,14 +26,14 @@ import java.util.List;
 /**
  * Transformer class adding the implicit terminator (.List{"SEP"}) to user defined lists.
  */
-public class AddEmptyLists extends BasicTransformer {
+public class AddEmptyLists extends CopyOnWriteTransformer {
 
     public AddEmptyLists(Context context) {
         super("Add empty lists", context);
     }
 
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) {
         // traverse
         Production p = tc.getProduction();
 
@@ -79,7 +79,7 @@ public class AddEmptyLists extends BasicTransformer {
             }
         }
 
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 
     private boolean isUserListElement(String listSort, Term element, Context context) {

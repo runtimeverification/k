@@ -7,7 +7,6 @@ import org.kframework.backend.BasicBackend;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
@@ -37,19 +36,14 @@ public class UnflattenBackend extends BasicBackend {
     public void run(Definition definition) throws IOException {
         /* first unflatten the syntax */
         ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
-        try {
-            definition = (Definition)definition.accept(concretizeSyntax);
-        } catch (TransformerException e) {
-            System.err.println("Error unflattening syntax:");
-            e.printStackTrace();
-        }
+        definition = (Definition) concretizeSyntax.visitNode(definition);
 
         /* then unparse it */
         // TODO(YilongL): there should be an option to specify whether we want
         // to unparse it since two differently kompiled definition may look the
         // same after unparsing (e.g., empty list)
         UnparserFilter unparserFilter = new UnparserFilter(context);
-        definition.accept(unparserFilter);
+        unparserFilter.visitNode(definition);
 
         String unparsedText = unparserFilter.getResult();
 

@@ -1,6 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.kframework.kil.Configuration;
@@ -32,8 +35,9 @@ import org.kframework.parser.concrete2.Rule.WrapLabelRule;
  * will be referenced each time a NonTerminalState is created.
  */
 public class KSyntax2GrammarStatesFilter extends BasicVisitor {
-    public KSyntax2GrammarStatesFilter(Context context) {
+    public KSyntax2GrammarStatesFilter(Context context, Set<String> terminals) {
         super(KSyntax2GrammarStatesFilter.class.getName(), context);
+        this.terminals = terminals;
 
         // create a NonTerminal for every declared sort
         for (String sort : context.definedSorts) {
@@ -42,12 +46,18 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     }
 
     private Grammar grammar = new Grammar();
+    private Set<String> terminals;
 
     @Override
-    public void visit(Production prd) {
+    public Void visit(Production prd, Void _) {
+        if (prd.containsAttribute("notInPrograms"))
+            return null;
         NonTerminal nt = grammar.get(prd.getSort());
         assert nt != null : "Could not find in the grammar the required sort: " + prd.getSort();
         NextableState previous = nt.entryState;
+        // all types of production follow pretty much the same pattern
+        // previous = entryState
+        // loop: add a new State to the 'previous' state; update 'previous' state
         if (prd.isListDecl()) {
             // ************************************** start of list creation **********************
             UserList ul = prd.getListDecl();
@@ -139,92 +149,100 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 previous = NeIdsState;
             }
             // ************************************** end of list creation **********************
-        } else {
-            // the other types of production follow pretty much the same pattern
-            // previous = entryState
-            // loop: add a new State to the 'previous' state; update 'previous' state
-            if (prd.isSubsort()) {
-                Sort srt = prd.getSubsort();
-                NonTerminalState nts = new NonTerminalState(
-                        prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
-                previous.next.add(nts);
-                previous = nts;
-                // if the subsort has a klabel attached to it, then we must attach a label to it
-                if (prd.containsAttribute("klabel")) {
-                    RuleState labelRule = new RuleState("AddLabelRS",
-                        nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
-                    previous.next.add(labelRule);
-                    previous = labelRule;
-                }
-            } else if (prd.isLexical()) {
-                // T ::= Token{regex}
-                // these kind of productions create KApps which contain token elements
-                Lexical lx = prd.getLexical();
-                String pattern = prd.containsAttribute(Constants.REGEX) ?
-                                    prd.getAttribute(Constants.REGEX) :
-                                    lx.getLexicalRule();
-                PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
-                    nt, Pattern.compile(pattern), prd.getSort());
-                previous.next.add(pstate);
-                previous = pstate;
-            } else if (prd.isConstant()) {
-                // T ::= "value"
-                // just like the above case, but match an exact string instead of a regex
-                Terminal terminal = prd.getConstant();
-                PrimitiveState pstate = new RegExState(
-                    prd.getSort() + "-T", nt,
-                    Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort());
-                previous.next.add(pstate);
-                previous = pstate;
-            } else {
-                // just a normal production with Terminals and Sort alternations
-                // this will create a labeled KApp with the same arity as the production
-                for (ProductionItem prdItem : prd.getItems()) {
-                    if (prdItem instanceof Terminal) {
-                        Terminal terminal = (Terminal) prdItem;
-                        PrimitiveState pstate = new RegExState(
-                                prd.getSort() + "-T", nt,
-                                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.KITEM);
-                        previous.next.add(pstate);
-                        RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
-                        pstate.next.add(del);
-                        previous = del;
-                    } else if (prdItem instanceof Sort) {
-                        Sort srt = (Sort) prdItem;
-                        NonTerminalState nts = new NonTerminalState(
-                                prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
-                        previous.next.add(nts);
-                        previous = nts;
-                    } else {
-                        assert false : "Didn't expect this ProductionItem type: " + prdItem.getClass().getName();
-                    }
-                }
+        } else if (prd.isSubsort()) {
+            Sort srt = prd.getSubsort();
+            NonTerminalState nts = new NonTerminalState(
+                    prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
+            previous.next.add(nts);
+            previous = nts;
+            // if the subsort has a klabel attached to it, then we must attach a label to it
+            if (prd.containsAttribute("klabel")) {
                 RuleState labelRule = new RuleState("AddLabelRS",
-                        nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
+                    nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
                 previous.next.add(labelRule);
                 previous = labelRule;
             }
-            RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
-            previous.next.add(locRule);
-            previous = locRule;
-
-            previous.next.add(nt.exitState);
+        } else if (prd.isLexical()) {
+            // T ::= Token{regex}
+            // these kind of productions create KApps which contain token elements
+            Lexical lx = prd.getLexical();
+            String pattern = prd.containsAttribute(Constants.REGEX) ?
+                                prd.getAttribute(Constants.REGEX) :
+                                lx.getLexicalRule();
+            // check to see which terminals match the current regular expression and send it to
+            // the PrimitiveState for rejection
+            Set<String> rejects = new HashSet<>();
+            Pattern p = Pattern.compile(pattern);
+            for (String keyword : terminals) {
+                Matcher m = p.matcher(keyword);
+                if (m.matches())
+                    rejects.add(keyword);
+            }
+            PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
+                nt, Pattern.compile(pattern), prd.getSort(), rejects);
+            previous.next.add(pstate);
+            previous = pstate;
+        } else if (prd.isConstant(context)) { // TODO(Radu): properly determine if a production is a constant or not
+            // T ::= "value"
+            // just like the above case, but match an exact string instead of a regex
+            Terminal terminal = prd.getConstant();
+            PrimitiveState pstate = new RegExState(
+                prd.getSort() + "-T", nt,
+                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort());
+            previous.next.add(pstate);
+            previous = pstate;
+        } else {
+            // just a normal production with Terminals and Sort alternations
+            // this will create a labeled KApp with the same arity as the production
+            for (ProductionItem prdItem : prd.getItems()) {
+                if (prdItem instanceof Terminal) {
+                    Terminal terminal = (Terminal) prdItem;
+                    PrimitiveState pstate = new RegExState(
+                            prd.getSort() + "-T", nt,
+                            Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.KITEM);
+                    previous.next.add(pstate);
+                    RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
+                    pstate.next.add(del);
+                    previous = del;
+                } else if (prdItem instanceof Sort) {
+                    Sort srt = (Sort) prdItem;
+                    NonTerminalState nts = new NonTerminalState(
+                            prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
+                    previous.next.add(nts);
+                    previous = nts;
+                } else {
+                    assert false : "Didn't expect this ProductionItem type: " + prdItem.getClass().getName();
+                }
+            }
+            RuleState labelRule = new RuleState("AddLabelRS",
+                    nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
+            previous.next.add(labelRule);
+            previous = labelRule;
         }
+        RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
+        previous.next.add(locRule);
+        previous = locRule;
+
+        previous.next.add(nt.exitState);
+        return null;
     }
 
     @Override
-    public void visit(Rule s) {
+    public Void visit(Rule s, Void _) {
         // skip visiting rules, contexts and configurations
+        return null;
     }
 
     @Override
-    public void visit(Configuration s) {
+    public Void visit(Configuration s, Void _) {
         // skip visiting rules, contexts and configurations
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context s) {
+    public Void visit(org.kframework.kil.Context s, Void _) {
         // skip visiting rules, contexts and configurations
+        return null;
     }
 
     public Grammar getGrammar() {

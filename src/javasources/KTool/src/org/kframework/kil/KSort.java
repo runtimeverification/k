@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 public enum KSort {
@@ -5,8 +6,8 @@ public enum KSort {
 
     public static KSort getKSort(String sort) {
         try {
-            return valueOf(sort);
-        } catch (Exception e) {
+            return KSort.valueOf(sort);
+        } catch (IllegalArgumentException e) {
             return K;
         }
     }

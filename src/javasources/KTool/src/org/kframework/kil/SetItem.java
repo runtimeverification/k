@@ -1,25 +1,16 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
-import aterm.ATermAppl;
 
 public class SetItem extends CollectionItem {
 
     public SetItem(Element element) {
         super(element);
         this.value = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
-    }
-
-    public SetItem(ATermAppl atm) {
-        super(atm);
-        value = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
     }
 
     public SetItem(SetItem node) {
@@ -36,18 +27,8 @@ public class SetItem extends CollectionItem {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override

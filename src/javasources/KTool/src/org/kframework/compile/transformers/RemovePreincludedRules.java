@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import java.io.File;
@@ -6,9 +7,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.file.KPaths;
-
 
 /**
  * 
@@ -21,7 +20,7 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if ((!node.getFilename().startsWith(KPaths.getKBase(false) + File.separator + "include") 
                 && !node.getFilename().startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME))
                 || (node.getFilename().equals(KPaths.getKBase(false)

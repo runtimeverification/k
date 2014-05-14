@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.*;
@@ -24,17 +25,18 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Configuration node) {
+    public Void visit(Configuration node, Void _) {
         Term t = node.getBody();
         Cell top = new Cell();
         top.setLabel(MetaK.Constants.generatedCfgAbsTopCellLabel);
         top.setId(MetaK.Constants.generatedCfgAbsTopCellLabel);
         top.setContents(t);
-        top.accept(this);
+        this.visitNode(top);
+        return null;
     }
     
     @Override
-    public void visit(Cell node) {
+    public Void visit(Cell node, Void _) {
         ConfigurationStructure cfg = new ConfigurationStructure();
         cfg.multiplicity = node.getMultiplicity();
         cfg.id = node.getId();
@@ -47,21 +49,25 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
             parent.sons.put(cfg.id, cfg);
         }
         ancestors.push(cfg);
-        super.visit(node);
+        super.visit(node, _);
         ancestors.pop();
         config.put(cfg.id, cfg);
+        return null;
     }
     
     @Override
-    public void visit(org.kframework.kil.Context node) {
+    public Void visit(org.kframework.kil.Context node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Syntax node) {
+    public Void visit(Syntax node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Rule node) {
+    public Void visit(Rule node, Void _) {
+        return null;
     }
 
     public int getMaxLevel() {

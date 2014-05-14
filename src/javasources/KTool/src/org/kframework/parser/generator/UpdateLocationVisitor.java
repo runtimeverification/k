@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
@@ -13,8 +14,8 @@ public class UpdateLocationVisitor extends BasicVisitor {
         this.startCol = startCollumn;
     }
 
-    public void visit(ASTNode a) {
-        super.visit(a);
+    public Void visit(ASTNode a, Void _) {
+        super.visit(a, _);
         if (a.getLocation().startsWith("(")) {
             String[] str = a.getLocation().split("[\\(,\\)]");
             int loc0 = Integer.parseInt(str[0 + 1]);
@@ -38,5 +39,6 @@ public class UpdateLocationVisitor extends BasicVisitor {
             String newLoc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
             a.setLocation(newLoc);
         }
+        return null;
     }
 }

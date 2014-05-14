@@ -1,17 +1,11 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.*;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +13,7 @@ import java.util.List;
 /**
  * AST representation a term of sort K explicitly constructed as an application of a KLabel to a KList.
  */
-public class KApp extends Term {
+public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Children> {
     /**
      * A KLabel represented as a non-null instance of {@link KLabel}, {@link Variable} of sort KLabel, or {@link Ambiguity}.
      */
@@ -28,6 +22,10 @@ public class KApp extends Term {
      * A KList represented as a non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     private Term child;
+    
+    public static enum Children {
+        LABEL, CHILD;
+    }
 
     /**
      * Constructs the application of the given KLabel to a KList with the given elements.
@@ -82,14 +80,6 @@ public class KApp extends Term {
         }
     }
 
-    public KApp(ATermAppl atm) {
-        super(atm);
-        this.sort = KSorts.KITEM;
-
-        label = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-        child = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
-    }
-
     private KApp(KApp node) {
         super(node);
         setLabel(node.label);
@@ -140,21 +130,6 @@ public class KApp extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
-    }
-
-    @Override
     public KApp shallowCopy() {
         return new KApp(this);
     }
@@ -184,4 +159,34 @@ public class KApp extends Term {
         return label.hashCode() * 23 + child.hashCode();
     }
 
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Children type) {
+        switch (type) {
+            case LABEL:
+                return label;
+            case CHILD:
+                return child;
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
+    @Override
+    public void setChild(Term child, Children type) {
+        switch (type) {
+            case LABEL:
+                this.label = child;
+                break;
+            case CHILD:
+                this.child = child;
+                break;
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
 }

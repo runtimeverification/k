@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck;
 
 import java.io.IOException;
@@ -8,8 +9,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.DefinitionLoader;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
@@ -23,26 +23,26 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
         super("Parse RL input file", context);
 
         // resolve reachability rules
-        String rlFileContent = FileUtil.getFileContent(GlobalSettings.CHECK);
+        String rlFileContent = null;//FileUtil.getFileContent(GlobalSettings.CHECK);
         context.kompiled = context.dotk.getAbsoluteFile();
-        ASTNode rlModule = DefinitionLoader.parseString(rlFileContent,
-                GlobalSettings.CHECK, context);
+        ASTNode rlModule = null;//DefinitionLoader.parseString(rlFileContent,
+                //GlobalSettings.CHECK, context);
         RetrieveRRVisitor rrrv = new RetrieveRRVisitor(context);
-        rlModule.accept(rrrv);
+        rrrv.visitNode(rlModule);
         reachabilityRules = rrrv.getRules();
 
         // resolve pgm if any
         if (RLBackend.PGM != null) {
             String pgmContent = FileUtil.getFileContent(pgmFilePath);
-            try {
+            //try {
                 context.kompiled = context.dotk.getAbsoluteFile();
-                program = (Term) ProgramLoader.loadPgmAst(pgmContent,
-                        GlobalSettings.CHECK, "K", context);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            } catch (TransformerException e1) {
-                e1.printStackTrace();
-            }
+                //program = (Term) ProgramLoader.loadPgmAst(pgmContent,
+                //        GlobalSettings.CHECK, "K", context);
+            //} catch (IOException e1) {
+            //    e1.printStackTrace();
+            //} catch (TransformerException e1) {
+            //    e1.printStackTrace();
+            //}
         }
     }
 

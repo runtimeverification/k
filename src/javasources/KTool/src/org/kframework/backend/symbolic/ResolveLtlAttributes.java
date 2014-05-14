@@ -14,7 +14,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -54,13 +53,13 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule rule) throws TransformerException {
+    public ASTNode visit(Rule rule, Void _)  {
         if (rule.getAttributes().containsKey(LTL)) {
             Term body = rule.getBody();
             if (body instanceof Rewrite) {
                 // search the LTL state
                 SearchLTLState searchLTLState = new SearchLTLState(context);
-                rule.accept(searchLTLState);
+                searchLTLState.visitNode(rule);
 
                 // The LTL state should ALWAYS be a variable.
                 // Otherwise, an error message is thrown.
@@ -96,14 +95,14 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                     // <generatedTop> cell
                     String ltlVarStateName = ((Variable) expectedVariable).getName();
                     WrapVariableWithTopCell wrapper = new WrapVariableWithTopCell(context, phi, ltlVarStateName);
-                    rule = (Rule) rule.accept(wrapper);
+                    rule = (Rule) wrapper.visitNode(rule);
 
                     // check if the path condition implies the rule condition
                     // step 1: filter the rule condition by extracting the terms
                     //         which can be translated into SMTLIB
                     Term requires = rule.getRequires();
                     ConditionTransformer ct = new ConditionTransformer(context);
-                    Term smtlibInvalidCondition = (Term) requires.accept(ct);
+                    Term smtlibInvalidCondition = (Term) ct.visitNode(requires);
                     List<Term> filtered = ct.getFilteredTerms();
                     filtered.add(BoolBuiltin.TRUE);
                     Term smtlibValidCondition = AddPathCondition.andBool(filtered);
@@ -124,7 +123,7 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
             }
         }
 
-        return super.transform(rule);
+        return super.visit(rule, _);
     }
 
     /**

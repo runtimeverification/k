@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module TEST
   syntax MyMap ::= getModel(Bool) [function, hook(#BOOL:checksat_)]
   syntax Bool ::= "[E]K" K "." Bool

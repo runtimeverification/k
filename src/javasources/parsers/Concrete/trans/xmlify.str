@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 module xmlify
 
 imports
@@ -66,7 +67,7 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml1:
-		CellProperty(a, b) -> $[[<id>""] [a]=[<xmlStringEscapeFromString>b]]
+		"CellProperty"#([a, b]) -> $[[<id>""] [a]=[<xmlStringEscapeFromString>b]]
 
 //----------------------------------------------------------------------
 	to-xml1:
@@ -149,7 +150,7 @@ rules
 		]
 		where loc := <getLocAsString>
 	to-xml1:
-		TagString(x, y) -> $[<tag key="[x]" value="[<xml-string-escape-from-string> y]" loc="[loc]" />
+		"TagString"#([x, y]) -> $[<tag key="[x]" value="[<xml-string-escape-from-string> y]" loc="[loc]" />
 		]
 		where loc := <getLocAsString>
 

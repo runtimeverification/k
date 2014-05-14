@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.ArrayList;
@@ -7,10 +8,8 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Base class for collection sorts */
-public abstract class Collection extends Term {
+public abstract class Collection extends Term implements Interfaces.MutableList<Term, Enum<?>> {
 
     protected java.util.List<Term> contents;
 
@@ -36,14 +35,6 @@ public abstract class Collection extends Term {
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
             contents.add((Term) JavaClassesFactory.getTerm(e));
-    }
-
-    public Collection(ATermAppl atm) {
-        super(atm);
-        contents = new ArrayList<Term>();
-        for (int i = 0; i < atm.getArity(); i++) {
-            contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
-        }
     }
 
     public Collection(String sort, List<Term> col) {
@@ -107,5 +98,15 @@ public abstract class Collection extends Term {
     @Override
     public int hashCode() {
         return sort.hashCode() * 13 + contents.hashCode();
+    }
+    
+    @Override
+    public List<Term> getChildren(Enum<?> _) {
+        return contents;
+    }
+    
+    @Override
+    public void setChildren(List<Term> children, Enum<?> _) {
+        this.contents = children;
     }
 }

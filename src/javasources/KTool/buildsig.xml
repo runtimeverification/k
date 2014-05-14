@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 <project basedir="." default="all.signature" name="K3 build signature files">
 
 	<!-- set the native directory depending on the os -->

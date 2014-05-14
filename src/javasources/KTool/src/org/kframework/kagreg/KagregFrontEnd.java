@@ -14,12 +14,10 @@ import org.kframework.kil.ConfigurationNotUnique;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
 import org.kframework.utils.Error;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -33,7 +31,7 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class KagregFrontEnd {
 
-    public static void kagreg(String[] args) throws IOException, TransformerException {
+    public static void kagreg(String[] args) throws IOException {
         if (args.length != 2) {
             Error.report("There must be exactly two K definitions as arguments to kagreg.");
         }
@@ -77,11 +75,11 @@ public class KagregFrontEnd {
         context1.dotk.mkdirs();
         Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true,
                 context1);
-        firstDef = (Definition)firstDef.accept(new AddKCell(context1));
-        firstDef = (Definition)firstDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("1"), context1));
-        firstDef = (Definition)firstDef.accept(new RenameVariablesTransformer(new AppendRenameStrategy("1"), context1));
+        firstDef = (Definition) new AddKCell(context1).visitNode(firstDef);
+        firstDef = (Definition) new RenameCellsTransformer(new AppendRenameStrategy("1"), context1).visitNode(firstDef);
+        firstDef = (Definition) new RenameVariablesTransformer(new AppendRenameStrategy("1"), context1).visitNode(firstDef);
         CollectImportsVisitor collectImportsVisitor1 = new CollectImportsVisitor(context1, false);
-        collectImportsVisitor1.visit(firstDef);
+        collectImportsVisitor1.visitNode(firstDef);
         List<Import> imports1 = collectImportsVisitor1.getImports();
         
 //        GlobalSettings.symbolicEquality = false;
@@ -96,11 +94,11 @@ public class KagregFrontEnd {
         context2.dotk.mkdirs();
         Definition secondDef = DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true,
                 context2);
-        secondDef = (Definition)secondDef.accept(new AddKCell(context2));
-        secondDef = (Definition)secondDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("2"), context2));
-        secondDef = (Definition)secondDef.accept(new RenameVariablesTransformer(new AppendRenameStrategy("2"), context2));
+        secondDef = (Definition) new AddKCell(context2).visitNode(secondDef);
+        secondDef = (Definition) new RenameCellsTransformer(new AppendRenameStrategy("2"), context2).visitNode(secondDef);
+        secondDef = (Definition) new RenameVariablesTransformer(new AppendRenameStrategy("2"), context2).visitNode(secondDef);
         CollectImportsVisitor collectImportsVisitor2 = new CollectImportsVisitor(context2, false);
-        collectImportsVisitor2.visit(secondDef);
+        collectImportsVisitor2.visitNode(secondDef);
         List<Import> imports2 = collectImportsVisitor2.getImports();
 
         Configuration firstConf = null;
@@ -145,20 +143,20 @@ public class KagregFrontEnd {
         List<String> labeledSorts = new ArrayList<String>();
         labeledSorts.add("KResult"); // temporary bug fix for https://code.google.com/p/k-framework/issues/detail?id=541
         AddSortLabels addSortLabels1 = new AddSortLabels(context1, labeledSorts);
-        firstDef = (Definition)addSortLabels1.transform(firstDef);
+        firstDef = (Definition) addSortLabels1.visitNode(firstDef);
 
         AddSortLabels addSortLabels2 = new AddSortLabels(context2, labeledSorts);
-        secondDef = (Definition)addSortLabels2.transform(secondDef);
+        secondDef = (Definition) addSortLabels2.visitNode(secondDef);
 
         UnparserFilter unparserFirst = new UnparserFilter(context1);
         unparserFirst.setIndenter(indenter);
         unparserFirst.setForEquivalence();
-        unparserFirst.visit(firstDef);
+        unparserFirst.visitNode(firstDef);
         
         UnparserFilter unparserSecond = new UnparserFilter(context2);
         unparserSecond.setIndenter(indenter);
         unparserSecond.setForEquivalence();
-        unparserSecond.visit(secondDef);
+        unparserSecond.visitNode(secondDef);
         
         indenter.write("configuration");
         indenter.endLine();
@@ -175,7 +173,7 @@ public class KagregFrontEnd {
         UnparserFilter unparserFirstConfiguration = new UnparserFilter(context1);
         unparserFirstConfiguration.setIndenter(indenter);
         unparserFirstConfiguration.setInConfiguration(true);
-        firstConf.getBody().accept(unparserFirstConfiguration);
+        unparserFirstConfiguration.visitNode(firstConf.getBody());
         indenter.endLine();
         indenter.unindent();
         indenter.write("</first>");
@@ -188,7 +186,7 @@ public class KagregFrontEnd {
         UnparserFilter unparserSecondConfiguration = new UnparserFilter(context2);
         unparserSecondConfiguration.setIndenter(indenter);
         unparserSecondConfiguration.setInConfiguration(true);
-        secondConf.getBody().accept(unparserSecondConfiguration);
+        unparserSecondConfiguration.visitNode(secondConf.getBody());
         indenter.endLine();
         indenter.unindent();
         indenter.write("</second>");

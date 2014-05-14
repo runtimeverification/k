@@ -1,9 +1,10 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "bool.k"
 require "int.k"
 module FLOAT-SYNTAX-HOOKS
   imports #FLOAT-INTERFACE
-  syntax #Float
+  syntax #Float ::= Token{[\+\-]?[0-9]+"."[0-9]+([eE][\+\-]?[0-9]+)?[fFdD]?}
+                 [regex("([\\+-]?\\d(\\.\\d*)?|\\.\\d+)([eE][\\+-]?(\\d(\\.\\d*)?|\\.\\d+))?[fFdD]?")]
   syntax Float ::= #Float
 endmodule
 
@@ -13,7 +14,7 @@ module FLOAT-HOOKS
   imports INT-HOOKS
   imports K
 
-  syntax Float ::= "--Float" Float              [function, hook(#FLOAT:-Float_)]
+  syntax Float ::= "--Float" Float          [function, hook(#FLOAT:-Float_)]
 				 > Float "^Float" Float		[function, left, latex({#1}^{#2}), hook(#FLOAT:_^Float_)]
                  > left:
 				   Float "*Float" Float		[function, left, latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:_*Float_)]
@@ -31,7 +32,7 @@ module FLOAT-HOOKS
 				| Float "==Float" Float		[function, left, latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:_==Float_)]
 				| Float "=/=Float" Float	[function, left, latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 				> Float "<=Float" Float "<=Float" Float
-	[function, latex({#2}\in[{#1},{#3}]), hook(#FLOAT:_<=Float_<=Float_)]
+	                                        [function, latex({#2}\in[{#1},{#3}]), hook(#FLOAT:_<=Float_<=Float_)]
 
 
   rule F1:Float =/=Float F2:Float => notBool(F1 ==Float F2)

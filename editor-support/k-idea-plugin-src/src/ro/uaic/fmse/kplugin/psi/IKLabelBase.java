@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package ro.uaic.fmse.kplugin.psi;
 
 import com.intellij.psi.PsiElement;

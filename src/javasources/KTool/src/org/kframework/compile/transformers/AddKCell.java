@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import java.util.*;
@@ -9,7 +10,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddKCell extends CopyOnWriteTransformer {
     /*
@@ -34,9 +34,9 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module module) throws TransformerException {
+    public ASTNode visit(Module module, Void _)  {
         newRules = new ArrayList<ModuleItem>();
-        Module newModule = (Module)super.transform(module);
+        Module newModule = (Module)super.visit(module, _);
         Module returnModule;
         if (newRules.isEmpty()) {
             returnModule = newModule;
@@ -48,7 +48,7 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) {
+    public ASTNode visit(Rule node, Void _) {
         if (MetaK.isAnywhere(node)) {
             return node;
         }
@@ -78,7 +78,7 @@ public class AddKCell extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration cfg) throws TransformerException {
+    public ASTNode visit(Configuration cfg, Void _)  {
         if (!intersects(MetaK.getAllCellLabels(cfg.getBody(), context), komputationCells)) {
             cfg = cfg.shallowCopy();
             Bag bag;

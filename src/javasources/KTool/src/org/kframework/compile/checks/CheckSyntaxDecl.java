@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import java.util.HashMap;
@@ -31,7 +31,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
     java.util.Map<Production, Production> prods = new HashMap<Production, Production>();
 
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
 
         if (prods.containsKey(node)) {
             Production oldProd = prods.get(node);
@@ -100,11 +100,13 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
+        return null;
     }
 
     @Override
-    public void visit(Sentence node) {
+    public Void visit(Sentence node, Void _) {
         // optimization to not visit the entire tree
+        return null;
     }
     
     private boolean isBinaryInfixProd(Production node) {

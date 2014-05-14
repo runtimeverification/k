@@ -6,8 +6,6 @@ import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.parser.basic.Basic;
 import org.kframework.parser.basic.ParseException;
 import org.kframework.utils.errorsystem.KException;
@@ -38,7 +36,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         //collect the productions which have the attributes strict and seqstrict
         Set<Production> prods = SyntaxByTag.get(node, "strict", true, context);
         prods.addAll(SyntaxByTag.get(node, "seqstrict", true, context));

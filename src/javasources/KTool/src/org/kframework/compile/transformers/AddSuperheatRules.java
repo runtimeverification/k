@@ -5,7 +5,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -24,9 +23,9 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         superHeats.clear();
-        node = (Module) super.transform(node);
+        node = (Module) super.visit(node, _);
         if (!superHeats.isEmpty()) {
             node = node.shallowCopy();
             node.setItems(new ArrayList<ModuleItem>(node.getItems()));
@@ -36,17 +35,17 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         if (!node.containsAttribute(MetaK.Constants.heatingTag)) {
             return node;
         }
@@ -139,7 +138,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Syntax node) throws TransformerException {
+    public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
 }

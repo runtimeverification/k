@@ -1,14 +1,12 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.Interfaces.MutableParent;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
-import aterm.ATermAppl;
 
 /**
  * A rule, configuration declaration, or context.
@@ -16,12 +14,16 @@ import aterm.ATermAppl;
  * {@link #body} and {@link #requires}, which have different
  * interpretations in the subclasses.
  */
-public class Sentence extends ModuleItem {
+public class Sentence extends ModuleItem implements MutableParent<Term, Sentence.Children> {
     /** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
     String label = "";
     Term body;
     Term requires = null;
     Term ensures = null;
+    
+    public static enum Children {
+        BODY, REQUIRES, ENSURES;
+    }
 
     public Sentence(Sentence s) {
         super(s);
@@ -34,21 +36,6 @@ public class Sentence extends ModuleItem {
     public Sentence() {
         super();
         attributes = new Attributes();
-    }
-
-    public Sentence(ATermAppl atm) {
-        setLocation(atm);
-
-        if (atm.getName().equals("Ensures")) {
-            ensures = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
-        }
-        atm = (ATermAppl) atm.getArgument(0);
-
-        body = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-
-        if (atm.getName().equals("RequiresSentence")) {
-            requires = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
-        }
     }
 
     public Sentence(Element element) {
@@ -95,16 +82,6 @@ public class Sentence extends ModuleItem {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
     public Sentence shallowCopy() {
         return new Sentence(this);
     }
@@ -140,5 +117,41 @@ public class Sentence extends ModuleItem {
 
     public void setEnsures(Term ensures) {
         this.ensures = ensures;
+    }
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Children type) {
+        switch(type) {
+            case BODY:
+                return getBody();
+            case ENSURES:
+                return getEnsures();
+            case REQUIRES:
+                return getRequires();
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
+    @Override
+    public void setChild(Term child, Children type) {
+        switch(type) {
+            case BODY:
+                setBody(child);
+                break;
+            case ENSURES:
+                setEnsures(child);
+                break;
+            case REQUIRES:
+                setRequires(child);
+                break;
+            default:
+                throw new AssertionError("unreachable");
+        }
     }
 }

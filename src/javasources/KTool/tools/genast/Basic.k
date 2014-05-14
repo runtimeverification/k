@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 // TODO: inner LiterateDefinitionComment.Type
 
 // Is there any reason to separate imports from module definitions?

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.ArrayList;
@@ -8,10 +9,7 @@ import java.util.Map.Entry;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -20,9 +18,6 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-
-import aterm.ATermAppl;
-import aterm.ATermList;
 
 /**
  * Class for representing a K cell term.  The textual representation of a K cell is the following:
@@ -45,7 +40,7 @@ import aterm.ATermList;
  * <p>
  * Cell attributes are in {@link #cellAttributes}, not {@link #attributes}.
  */
-public class Cell extends Term {
+public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     /** Possible values for the multiplicity attribute */
     public enum Multiplicity {
         ONE, MAYBE, ANY, SOME,
@@ -102,48 +97,9 @@ public class Cell extends Term {
                                                                                     // !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.ENDLABEL_label_ATTR)) {
-                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unescapeK("\"" + its.item(i).getNodeValue() + "\""));
+                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteString("\"" + its.item(i).getNodeValue() + "\""));
             }
         }
-    }
-
-    public Cell(ATermAppl atm) {
-        super(atm);
-
-        this.sort = "BagItem";
-        label = ((ATermAppl) atm.getArgument(0)).getName();
-        boolean left = false, right = false;
-        ATermAppl next = (ATermAppl) atm.getArgument(2);
-
-        if (next.getName().equals("LeftCell")) {
-            left = true;
-            next = (ATermAppl) next.getArgument(0);
-        }
-        if (next.getName().equals("RightCell")) {
-            right = true;
-            next = (ATermAppl) next.getArgument(0);
-        }
-        cellAttributes = new HashMap<String, String>();
-        if (left && right)
-            setEllipses(Ellipses.BOTH);
-        else if (left)
-            setEllipses(Ellipses.LEFT);
-        else if (right)
-            setEllipses(Ellipses.RIGHT);
-        else
-            setEllipses(Ellipses.NONE);
-
-        // extract cell attributes
-        ATermList list = (ATermList) atm.getArgument(1);
-        while (!list.isEmpty()) {
-            String key = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(0)).getName();
-            String value = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(1)).getName();
-            cellAttributes.put(key, StringUtil.unescapeK(value));
-            list = list.getNext();
-        }
-
-        contents = (Term) JavaClassesFactory.getTerm(next);
-        endLabel = ((ATermAppl) atm.getArgument(3)).getName();
     }
 
     public Cell(Cell node) {
@@ -264,21 +220,6 @@ public class Cell extends Term {
         this.label = label;
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
-    }
-
     public void setDefaultAttributes() {
         cellAttributes = new HashMap<String, String>();
     }
@@ -340,5 +281,19 @@ public class Cell extends Term {
         }
         return cells;
     }
-    
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return contents;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.contents = child;
+    }
 }

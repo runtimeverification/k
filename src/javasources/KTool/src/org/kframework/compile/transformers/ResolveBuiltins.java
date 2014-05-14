@@ -1,10 +1,10 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,9 +25,9 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         builtinSorts.clear();
-        super.transform(node);
+        super.visit(node, _);
         if (builtinSorts.isEmpty()) return node;
         node = node.shallowCopy();
         List<ModuleItem> items = new ArrayList<ModuleItem>(node.getItems());
@@ -65,24 +65,24 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Sort node) throws TransformerException {
+    public ASTNode visit(Sort node, Void _)  {
         if (MetaK.isBuiltinSort(node.getName()))
                 builtinSorts.add(node.getName());
         return node;
     }
     
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         return node;
     }
 

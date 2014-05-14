@@ -1,19 +1,23 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class XmlLoader {
@@ -28,15 +32,14 @@ public class XmlLoader {
             Document doc = db.parse(is);
 
             return doc;
-
-        } catch (Exception e) {
+        } catch (IOException | ParserConfigurationException | SAXException e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    public static void reportErrors(Document doc) throws TransformerException {
+    public static void reportErrors(Document doc) throws ParseFailedException {
         // report any error that xml parser returns
         NodeList nl = doc.getElementsByTagName("error");
 
@@ -51,14 +54,14 @@ public class XmlLoader {
                         String msg = node.getAttribute("message");
                         String file = node.getAttribute("filename");
                         String location = node.getAttribute("loc");
-                        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
                     }
                 }
             }
         }
     }
 
-    public static void reportErrors(Document doc, String fromWhere) throws TransformerException {
+    public static void reportErrors(Document doc, String fromWhere) throws ParseFailedException {
         // report any error that xml parser returns
         NodeList nl = doc.getElementsByTagName("error");
 
@@ -75,7 +78,7 @@ public class XmlLoader {
                             msg = "Unexpected end of " + fromWhere;
                         String file = node.getAttribute("filename");
                         String location = node.getAttribute("loc");
-                        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
                     }
                 }
             }

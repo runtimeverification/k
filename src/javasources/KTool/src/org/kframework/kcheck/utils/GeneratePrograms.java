@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.ArrayList;
@@ -10,10 +11,9 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
-public class GeneratePrograms extends BasicTransformer {
+public class GeneratePrograms extends CopyOnWriteTransformer {
 
     private List<ASTNode> reachabilityRules;
     private List<Term> programs;
@@ -25,7 +25,7 @@ public class GeneratePrograms extends BasicTransformer {
     }
     
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _) {
         
         if(node.getAttribute(AddCircularityRules.RRULE_ATTR)!= null && (node.getBody() instanceof Rewrite)) {
             
@@ -35,21 +35,21 @@ public class GeneratePrograms extends BasicTransformer {
             // get the corresponding reachability rule
             ASTNode rrule = reachabilityRules.get(rIndex);
             ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(context);
-            rrule.accept(parser);
+            parser.visitNode(rrule);
             
             //TODO: how about ensures?
             
             // remove the condition wrapper
             Term cnd = node.getRequires().shallowCopy();
             ExtractPatternless ep = new ExtractPatternless(context, true);
-            cnd = (Term) cnd.accept(ep);
+            cnd = (Term) ep.visitNode(cnd);
             
             // create the new rule
             Term left = rewrite.getLeft();
             Term right = rewrite.getRight();
             
             ExtractCellContent ecc = new ExtractCellContent(context, "k");
-            left.accept(ecc);
+            ecc.visitNode(left);
             KSequence kseq = (KSequence) ecc.getContent();
             List<Term> contents = kseq.getContents();
             
@@ -60,7 +60,7 @@ public class GeneratePrograms extends BasicTransformer {
             KSequence newSeq = new KSequence(newContents);
             
             Term newLeft = left.shallowCopy();
-            newLeft = (Term) newLeft.accept(new SetCellContent(context, newSeq, "k"));
+            newLeft = (Term) new SetCellContent(context, newSeq, "k").visitNode(newLeft);
             Term newRight = right.shallowCopy();
             Rule newRule = new Rule(newLeft, newRight, context);
             newRule.setRequires(cnd);
@@ -79,22 +79,22 @@ public class GeneratePrograms extends BasicTransformer {
             KSequence newContent = new KSequence(cnt);
             
             SetCellContent scc = new SetCellContent(context, newContent, "k");
-            newPgm = (Term) newPgm.accept(scc);
+            newPgm = (Term) scc.visitNode(newPgm);
 
             SetCellContent setpc = new SetCellContent(context, ep.getPhi(), MetaK.Constants.pathCondition);
-            newPgm = (Term) newPgm.accept(setpc);
+            newPgm = (Term) setpc.visitNode(newPgm);
             
             // generate fresh symbolic variables
             VariablesVisitor vvleft = new VariablesVisitor(context);
-            parser.getPi().accept(vvleft);
+            vvleft.visitNode(parser.getPi());
 
 //            System.out.println("VARIABLES: " + vvleft.getVariables());
             
 //            System.out.println("PI: " + newPi);
             MakeFreshVariables mfv = new MakeFreshVariables(context, vvleft.getVariables());
-            newPgm = (Term) newPgm.accept(mfv);
+            newPgm = (Term) mfv.visitNode(newPgm);
             
-//            newPi = (Term) newPi.accept(new FlattenSyntax(context));
+//            newPi = (Term) new FlattenSyntax(context).visitNode(newPi);
 //            System.out.println("PGM: " + newPi);
             
             programs.add(newPgm);
@@ -102,7 +102,7 @@ public class GeneratePrograms extends BasicTransformer {
             return newRule;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     public List<Term> getPrograms() {

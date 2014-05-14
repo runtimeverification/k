@@ -1,5 +1,7 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.ioserver.client;
 
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -24,7 +26,7 @@ public class Client {
                     osw.flush();
                     osw.close();
                     break;
-                } catch (Exception e) {
+                } catch (IOException e) {
                 }
             }
 

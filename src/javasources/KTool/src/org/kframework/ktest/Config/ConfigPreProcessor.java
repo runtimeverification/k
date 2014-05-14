@@ -1,3 +1,4 @@
+// Copyright (c) 2011-2014 K Team. All Rights Reserved.
 package org.kframework.ktest.Config;
 
 import org.kframework.utils.errorsystem.KException;

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.compile.transformers.*;
@@ -28,7 +29,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
         this.add(new ResolveListOfK(context));
         this.add(new FlattenTerms(context));
         ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor(context);
-        def.accept(cfgStrVisitor);
+        cfgStrVisitor.visitNode(def);
         context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
         final ResolveContextAbstraction resolveContextAbstraction =
                 new ResolveContextAbstraction(context);
@@ -39,7 +40,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
     @Override
     public Rule compile(Rule def, String stepName) throws CompilerStepDone {
         CollectVariablesVisitor collectVars = new CollectVariablesVisitor(context);
-        def.accept(collectVars);
+        collectVars.visitNode(def);
         vars = new HashSet<Variable>();
         for (List<Variable> collectedVars : collectVars.getVars().values()) {
             vars.add(collectedVars.get(0));

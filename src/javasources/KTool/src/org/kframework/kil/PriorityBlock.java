@@ -1,16 +1,16 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A block of productions at the same priority within a syntax declaration.
  * @see Syntax
  */
-public class PriorityBlock extends ASTNode {
+public class PriorityBlock extends ASTNode implements Interfaces.MutableList<Production, Enum<?>> {
 
     java.util.List<Production> productions = new ArrayList<Production>();
     /** "left", "right", or "non-assoc" if this group of productions had
@@ -65,13 +65,8 @@ public class PriorityBlock extends ASTNode {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
@@ -111,4 +106,15 @@ public class PriorityBlock extends ASTNode {
     public PriorityBlock shallowCopy() {
         return new PriorityBlock(this);
     }
+
+    @Override
+    public List<Production> getChildren(Enum<?> _) {
+        return productions;
+    }
+    
+    @Override
+    public void setChildren(List<Production> children, Enum<?> _) {
+        this.productions = children;
+    }
+
 }

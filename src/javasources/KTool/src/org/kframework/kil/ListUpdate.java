@@ -1,21 +1,18 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Collection;
 import java.util.Collections;
-
 
 /**
  * Builtin List update operation.
  *
  * @author TraianSF (refactoring from {@link SetUpdate})
  */
-public class ListUpdate extends Term {
+public class ListUpdate extends Term implements Interfaces.Collection<Term, ListUpdate.ListChildren> {
 
     /** {@link Variable} name of the set */
     private final Variable base;
@@ -23,6 +20,11 @@ public class ListUpdate extends Term {
     /** {@code List} of entries to be removed from the list */
     private final Collection<Term> removeLeft;
     private final Collection<Term> removeRight;
+    
+    public static enum ListChildren {
+        REMOVE_LEFT,
+        REMOVE_RIGHT
+    }
 
     public ListUpdate(Variable base, Collection<Term> removeLeft, Collection<Term> removeRight) {
         super(base.getSort());
@@ -73,18 +75,19 @@ public class ListUpdate extends Term {
     }
 
     @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    public Collection<Term> getChildren(ListChildren type) {
+        switch (type) {
+            case REMOVE_LEFT:
+                return removeLeft;
+            case REMOVE_RIGHT:
+                return removeRight;
+            default:
+                throw new AssertionError("unreachable");
+        }
     }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
 }

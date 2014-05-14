@@ -1,8 +1,7 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /** An import directive */
 public class Import extends ModuleItem {
@@ -24,16 +23,6 @@ public class Import extends ModuleItem {
         return "  imports " + name;
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
     public String getName() {
         return name;
     }
@@ -45,5 +34,10 @@ public class Import extends ModuleItem {
     @Override
     public Import shallowCopy() {
         return new Import(this);
+    }
+
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 }

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import org.kframework.kil.Terminal;
@@ -21,11 +22,13 @@ public class CollectTerminalsVisitor extends BasicVisitor {
         terminals.add(terminal);
     }
 
-    public void visit(Terminal t) {
+    public Void visit(Terminal t, Void _) {
         addTerminal(t.getTerminal());
+        return null;
     }
 
-    public void visit(UserList ul) {
+    public Void visit(UserList ul, Void _) {
         addTerminal(ul.getSeparator());
+        return null;
     }
 }

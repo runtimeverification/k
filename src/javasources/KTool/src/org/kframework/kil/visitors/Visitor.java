@@ -1,107 +1,140 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
-import org.kframework.kil.KItemProjection;
 
-
-public interface Visitor {
-    public void visit(ASTNode node);
-    public void visit(ParseError node);
-    public void visit(Definition node);
-    public void visit(DefinitionItem node);
+public interface Visitor<P, R, E extends Throwable> {
+    public R visit(ASTNode node, P p) throws E;
+    public R visit(ParseError node, P p) throws E;
+    public R visit(Definition node, P p) throws E;
+    public R visit(DefinitionItem node, P p) throws E;
     // <DefinitionItems>
-    public void visit(LiterateDefinitionComment node);
-    public void visit(Module node);
-    public void visit(Require require);
+    public R visit(LiterateDefinitionComment node, P p) throws E;
+    public R visit(Module node, P p) throws E;
+    public R visit(Require require, P p) throws E;
     // </DefinitionItems>
-    public void visit(ModuleItem node);
+    public R visit(ModuleItem node, P p) throws E;
     // <ModuleItems>
-    public void visit(Import node);
-    public void visit(LiterateModuleComment node);
-    public void visit(Sentence node);
+    public R visit(Import node, P p) throws E;
+    public R visit(LiterateModuleComment node, P p) throws E;
+    public R visit(Sentence node, P p) throws E;
     // <Sentences>
-    public void visit(StringSentence node);
-    public void visit(Restrictions node);
-    public void visit(Configuration node);
-    public void visit(Context node);
-    public void visit(Rule node);
+    public R visit(StringSentence node, P p) throws E;
+    public R visit(Restrictions node, P p) throws E;
+    public R visit(Configuration node, P p) throws E;
+    public R visit(Context node, P p) throws E;
+    public R visit(Rule node, P p) throws E;
     // </Sentences>
-    public void visit(Syntax node);
-    public void visit(PriorityExtended node);
-    public void visit(PriorityExtendedAssoc node);
+    public R visit(Syntax node, P p) throws E;
+    public R visit(PriorityExtended node, P p) throws E;
+    public R visit(PriorityExtendedAssoc node, P p) throws E;
     // <ModuleItems>
-    public void visit(PriorityBlock node);
-    public void visit(PriorityBlockExtended node);
-    public void visit(Production node);
-    public void visit(ProductionItem node);
+    public R visit(PriorityBlock node, P p) throws E;
+    public R visit(PriorityBlockExtended node, P p) throws E;
+    public R visit(Production node, P p) throws E;
+    public R visit(ProductionItem node, P p) throws E;
     // <ProductionItems>
-    public void visit(Sort node);
-    public void visit(Lexical node);
-    public void visit(Terminal node);
-    public void visit(UserList node);
+    public R visit(Sort node, P p) throws E;
+    public R visit(Lexical node, P p) throws E;
+    public R visit(Terminal node, P p) throws E;
+    public R visit(UserList node, P p) throws E;
     // </ProductionItems>
-    public void visit(Term node);
+    public R visit(Term node, P p) throws E;
     // <Terms>
-    public void visit(Cell node);
-    public void visit(Collection node);
+    public R visit(Cell node, P p) throws E;
+    public R visit(org.kframework.kil.Collection node, P p) throws E;
     // <Collections>
-    public void visit(Ambiguity node);
-    public void visit(Bag node);
-    public void visit(KSequence node);
-    public void visit(List node);
-    public void visit(KList node);
-    public void visit(Map node);
-    public void visit(Set node);
+    public R visit(Ambiguity node, P p) throws E;
+    public R visit(Bag node, P p) throws E;
+    public R visit(KSequence node, P p) throws E;
+    public R visit(List node, P p) throws E;
+    public R visit(KList node, P p) throws E;
+    public R visit(org.kframework.kil.Map node, P p) throws E;
+    public R visit(Set node, P p) throws E;
     // </Collections>
-    public void visit(CollectionItem node);
+    public R visit(CollectionItem node, P p) throws E;
     // <CollectionItems>
-    public void visit(BagItem node);
-    public void visit(ListItem node);
-    public void visit(MapItem node);
-    public void visit(SetItem node);
+    public R visit(BagItem node, P p) throws E;
+    public R visit(ListItem node, P p) throws E;
+    public R visit(MapItem node, P p) throws E;
+    public R visit(SetItem node, P p) throws E;
     // </CollectionItems>
     // <BuiltinDataStructure>
-    public void visit(DataStructureBuiltin node);
-    public void visit(CollectionBuiltin node);
-    public void visit(ListBuiltin node);
-    public void visit(ListLookup node);
-    public void visit(ListUpdate node);
-    public void visit(SetBuiltin node);
-    public void visit(SetLookup node);
-    public void visit(SetUpdate node);
-    public void visit(MapBuiltin node);
-    public void visit(MapLookup node);
-    public void visit(MapUpdate node);
+    public R visit(BuiltinLookup node, P p) throws E;
+    public R visit(DataStructureBuiltin node, P p) throws E;
+    public R visit(CollectionBuiltin node, P p) throws E;
+    public R visit(ListBuiltin node, P p) throws E;
+    public R visit(ListLookup node, P p) throws E;
+    public R visit(ListUpdate node, P p) throws E;
+    public R visit(SetBuiltin node, P p) throws E;
+    public R visit(SetLookup node, P p) throws E;
+    public R visit(SetUpdate node, P p) throws E;
+    public R visit(MapBuiltin node, P p) throws E;
+    public R visit(MapLookup node, P p) throws E;
+    public R visit(MapUpdate node, P p) throws E;
     // </BuiltinDataStructure>
     // <Token>
-    public void visit(Token node);
-    public void visit(BoolBuiltin node);
-    public void visit(IntBuiltin node);
-    public void visit(StringBuiltin node);
-    public void visit(GenericToken node);
+    public R visit(Token node, P p) throws E;
+    public R visit(BoolBuiltin node, P p) throws E;
+    public R visit(IntBuiltin node, P p) throws E;
+    public R visit(StringBuiltin node, P p) throws E;
+    public R visit(GenericToken node, P p) throws E;
     // </Token>
-    public void visit(ListTerminator node);
-    public void visit(Hole node);
-    public void visit(FreezerHole node);
-    public void visit(KApp node);
-    public void visit(KItemProjection node);
-    public void visit(KLabel node);
-    public void visit(KLabelConstant node);
-    public void visit(KLabelInjection node);
-    public void visit(Rewrite node);
-    public void visit(TermCons node);
-    public void visit(Bracket node);
-    public void visit(Cast node);
-    public void visit(Variable node);
+    public R visit(ListTerminator node, P p) throws E;
+    public R visit(Hole node, P p) throws E;
+    public R visit(FreezerHole node, P p) throws E;
+    public R visit(KApp node, P p) throws E;
+    public R visit(KItemProjection node, P p) throws E;
+    public R visit(KLabel node, P p) throws E;
+    public R visit(KLabelConstant node, P p) throws E;
+    public R visit(KLabelInjection node, P p) throws E;
+    public R visit(Rewrite node, P p) throws E;
+    public R visit(TermCons node, P p) throws E;
+    public R visit(Bracket node, P p) throws E;
+    public R visit(Cast node, P p) throws E;
+    public R visit(Variable node, P p) throws E;
     // </Terms>
-    public void visit(Attributes attributes);
-    public void visit(Attribute attribute);
-    public void visit(TermComment node);
+    public R visit(TermComment node, P p) throws E;
     // Others
-    public void visit(KInjectedLabel kInjectedLabel);
-    public void visit(FreezerLabel freezerLabel);
-    public void visit(Freezer f);
-    public void visit(BackendTerm term);
+    public R visit(Attributes node, P p) throws E;
+    public R visit(Attribute node, P p) throws E;
+    public R visit(KInjectedLabel kInjectedLabel, P p) throws E;
+    public R visit(FreezerLabel freezerLabel, P p) throws E;
+    public R visit(Freezer f, P p) throws E;
+    public R visit(BackendTerm term, P p) throws E;
+    
+    /**
+     * Visit an AST tree. This is the main entry point whenever you want to apply a visitor to an ASTNode.
+     * 
+     * @param node The node to visit.
+     * @param p The optional parameter to pass to the visit methods.
+     * @return The value returned from visiting the entire ASTNode tree.
+     * @throws E if the visitor implementation raises an exception.
+     */
+    public R visitNode(ASTNode node, P p) throws E;
+    
+    /**
+     * Visit an AST tree with {@code p} equal to null. Useful if {@code <P>} is {@link Void}. 
+     * 
+     * This method should be implemented by calling {@code visitNode(node, null)}.
+     * 
+     * @param node The node to visit.
+     * @return The value returned from visiting the entire ASTNode tree.
+     * @throws E if the visitor implementation raises an exception.
+     */
+    public R visitNode(ASTNode node) throws E;
 
-    public String getName();
+    /**
+     * This method must be called by {@link ASTNode#accept(Visitor, Object)} with the ASTNode
+     * and the result of transforming the ASTNode. Its purpose is to factor out functionality
+     * which must be performed by the visitor for correctness regardless of whether the visit
+     * methods are overridden. For example, a visitor may override a method in such a way that 
+     * children are not accepted, or so that the parent class's visit method is not called.
+     * This method serves to guarantee that certain functionality will occur regardless of whether
+     * this is the case.
+     * @param node Should be the {@code this} of the ASTNode.
+     * @param Should be the result of visiting the ASTNode.
+     * @return Implementations should return {@code r}.
+     */
+    public R complete(ASTNode node, R r);
 }

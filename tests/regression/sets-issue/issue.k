@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 module ISSUE
   configuration <k> a </k> <out stream="stdout"> .List </out>
   syntax K ::= "a"

@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import java.util.ArrayList;
@@ -53,13 +54,14 @@ public class ProgramSDFVisitor extends BasicVisitor {
         constantSorts.add("#Float");
     }
 
-    public void visit(Syntax syn) {
+    public Void visit(Syntax syn, Void _) {
         userSort.add(syn.getSort().getName());
         List<PriorityBlock> priblocks = syn.getPriorityBlocks();
         processPriorities(priblocks);
+        return null;
     }
 
-    public void visit(PriorityExtended node) {
+    public Void visit(PriorityExtended node, Void _) {
         // reconstruct a syntax declaration from the syntax priorities
         List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
         for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
@@ -78,9 +80,10 @@ public class ProgramSDFVisitor extends BasicVisitor {
         }
 
         processPriorities(priblocks);
+        return null;
     }
 
-    public void visit(PriorityExtendedAssoc node) {
+    public Void visit(PriorityExtendedAssoc node, Void _) {
         // reconstruct a syntax declaration from the syntax priorities
         List<PriorityBlock> priblocks = new ArrayList<PriorityBlock>();
         PriorityBlock pb1 = new PriorityBlock();
@@ -97,6 +100,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
         priblocks.add(pb1);
 
         processPriorities(priblocks);
+        return null;
     }
 
     private void processPriorities(List<PriorityBlock> priblocks) {
@@ -180,7 +184,8 @@ public class ProgramSDFVisitor extends BasicVisitor {
         }
     }
 
-    public void visit(Restrictions node) {
+    public Void visit(Restrictions node, Void _) {
         restrictions.add(node);
+        return null;
     }
 }

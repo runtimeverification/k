@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
 import org.kframework.kil.Rule;
@@ -5,11 +6,9 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * Class implementing a transformation which normalizes the fresh variable indices in rules
@@ -27,25 +26,21 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public Rule transform(Rule rule) {
+    public Rule visit(Rule rule, Void _) {
         counter = 0;
         substitution.clear();
-        rule.accept(visitor);
+        visitor.visitNode(rule);
         if (substitution.isEmpty()) {
             // no fresh variables in this rule
             return rule;
         }
 
-        try {
-            return (Rule) super.transform(rule);
-        } catch (TransformerException e) {
-            return rule;
-        }
+        return (Rule) super.visit(rule, _);
     }
 
     @Override
-    public Variable transform(Variable variable) {
-        Variable substituteVariable = substitution.get(variable);
+    public Variable visit(Variable variable, Void _) {
+         Variable substituteVariable = substitution.get(variable);
         if (substituteVariable != null) {
             return substituteVariable;
         } else {
@@ -64,9 +59,9 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
         }
 
         @Override
-        public void visit(Variable variable) {
+        public Void visit(Variable variable, Void _) {
             if (substitution.containsKey(variable)) {
-                return;
+                return null;
             }
 
             if (variable.getName().startsWith("GeneratedFreshVar")) {
@@ -75,8 +70,10 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                     substitution.put(
                             variable,
                             new Variable("GeneratedFreshVar" + counter++, variable.getSort()));
-                } catch (Exception e) { }
+                } catch (NumberFormatException e) { }
             }
+
+            return null;
         }
 
     }

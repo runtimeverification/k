@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -19,7 +20,7 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Variable var) {
+    public ASTNode visit(Variable var, Void _) {
         Term t = args.get(var.getName());
         if (t == null) {
             t = args.get(var.getName() + ":" + var.getSort());

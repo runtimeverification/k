@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /*!
 \setlength{\parindent}{1em}
 \title{\K Reference Manual}

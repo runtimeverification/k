@@ -1,11 +1,8 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-
 
 /**
  * Builtin map lookup operation. The operation has the form {@code value := map[key]} with
@@ -60,18 +57,20 @@ public class MapLookup extends BuiltinLookup {
     }
 
     @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
-
+    
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
+    public Term getChild(Children type) {
+        if (type == Children.VALUE) {
+            return value;
+        }
+        return super.getChild(type);
     }
-
+    
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public BuiltinLookup shallowCopy(Variable base, Term key) {
+        return new MapLookup(base, key, value, kind(), choice());
     }
-
 }

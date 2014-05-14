@@ -14,5 +14,8 @@
     <program name="2.test">
       <krun-option name="--parser" value="kast --sort K" />
     </program>
+    <program name="3.test">
+      <krun-option name="--parser" value="kast --parser ground" />
+    </program>
   </test>
 </tests>

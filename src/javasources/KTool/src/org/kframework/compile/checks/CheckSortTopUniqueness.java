@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import org.kframework.kil.KSorts;
@@ -20,7 +21,7 @@ public class CheckSortTopUniqueness extends BasicVisitor {
     }
 
     @Override
-    public void visit(Syntax node) {
+    public Void visit(Syntax node, Void _) {
         String msg = "Multiple top sorts found for " + node.getSort() + ": ";
         int count = 0;
         if (context.isSubsorted(KSorts.KLIST, node.getSort().getName())) {
@@ -47,10 +48,12 @@ public class CheckSortTopUniqueness extends BasicVisitor {
             msg = msg.substring(0, msg.length() - 2);
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }
+        return null;
     }
 
     @Override
-    public void visit(Sentence node) {
+    public Void visit(Sentence node, Void _) {
         // optimization to not visit the entire tree
+        return null;
     }
 }

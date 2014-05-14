@@ -37,7 +37,7 @@ public class LatexBackend extends BasicBackend {
         LatexFilter lf;
         if(makeDocument) lf = new DocumentationFilter(context);
         else lf = new LatexFilter(context);
-        javaDef.accept(lf);
+        lf.visitNode(javaDef);
 
         String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
         latexStyleFile = new File(context.dotk.getAbsolutePath() + fileSep + "k.sty");

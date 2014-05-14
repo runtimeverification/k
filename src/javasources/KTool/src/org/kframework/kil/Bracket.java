@@ -1,21 +1,15 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
-
-import java.util.ArrayList;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
-public class Bracket extends Term {
+public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
 
     private Term content;
 
@@ -57,30 +51,8 @@ public class Bracket extends Term {
         this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
-    public Bracket(ATermAppl atm) {
-        super(atm);
-        this.sort = StringUtil.getSortNameFromCons(atm.getName());
-
-        content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-    }
-
     public Bracket(String sort) {
         super(sort);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
     }
 
     @Override
@@ -122,4 +94,18 @@ public class Bracket extends Term {
         return content.contains(b.content);
     }
 
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return content;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.content = child;
+    }
 }

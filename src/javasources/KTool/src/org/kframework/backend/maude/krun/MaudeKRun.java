@@ -6,7 +6,6 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
@@ -28,6 +27,7 @@ import org.w3c.dom.NodeList;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.io.GraphIOException;
 import edu.uci.ics.jung.io.graphml.EdgeMetadata;
 import edu.uci.ics.jung.io.graphml.GraphMetadata;
 import edu.uci.ics.jung.io.graphml.GraphMLReader2;
@@ -81,24 +81,27 @@ public class MaudeKRun implements KRun {
                 returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() },
                         context);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Runner threw exception", e);
-        }
-        if (errFile.exists()) {
-            String content = FileUtil.getFileContent(K.maude_err);
-            if (content.length() > 0) {
-                throw new KRunExecutionException(content);
+            if (errFile.exists()) {
+                String content = FileUtil.getFileContent(K.maude_err);
+                if (content.length() > 0) {
+                    throw new KRunExecutionException(content);
+                }
             }
+            if (returnValue != 0) {
+                org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
+            }
+        } catch (IOException e) {
+            if (context.globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    "IO error detected when calling maude"));
         }
-        if (returnValue != 0) {
-            org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
-        }
-
     }
 
     public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
         MaudeFilter maudeFilter = new MaudeFilter(context);
-        cfg.accept(maudeFilter);
+        maudeFilter.visitNode(cfg);
         StringBuilder cmd = new StringBuilder();
 
         if(K.trace) {
@@ -210,10 +213,12 @@ public class MaudeKRun implements KRun {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + K.maude_output.replaceAll("/krun[0-9]*/", "/krun/")));
         }
     }
+    
+    private static class InvalidMaudeXMLException extends Exception {}
 
-    private static void assertXMLTerm(boolean assertion) throws Exception {
+    private static void assertXMLTerm(boolean assertion) throws InvalidMaudeXMLException {
         if (!assertion) {
-            throw new Exception();
+            throw new InvalidMaudeXMLException();
         }
     }
 
@@ -380,7 +385,7 @@ public class MaudeKRun implements KRun {
                     return new Ambiguity(sort, possibleTerms);
                 }
             }
-        } catch (Exception e) {
+        } catch (InvalidMaudeXMLException e) {
             return new BackendTerm(sort, flattenXML(xml));
         }
     }
@@ -431,15 +436,15 @@ public class MaudeKRun implements KRun {
             cmd.append("[,").append(depth).append("] ");
         }
         MaudeFilter maudeFilter = new MaudeFilter(context);
-        cfg.accept(maudeFilter);
+        maudeFilter.visitNode(cfg);
         cmd.append(maudeFilter.getResult()).append(" ");
         MaudeFilter patternBody = new MaudeFilter(context);
-        pattern.getBody().accept(patternBody);
+        patternBody.visitNode(pattern.getBody());
         String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
         //TODO: consider replacing Requires with Ensures here.
         if (pattern.getRequires() != null) {
             MaudeFilter patternCondition = new MaudeFilter(context);
-            pattern.getRequires().accept(patternCondition);
+            patternCondition.visitNode(pattern.getRequires());
             patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
         }
         cmd.append(patternString).append(" .");
@@ -461,12 +466,17 @@ public class MaudeKRun implements KRun {
             KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
       result.setRawOutput(FileUtil.getFileContent(K.maude_out));
             return result;
-        } catch (Exception e) {
-            throw new RuntimeException("Pretty-printer threw exception", e);
+        } catch (IOException e) {
+            if (context.globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    "IO error detected reading maude output"));
+            throw new AssertionError("unreachable");
         }
     }
 
-    private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
+    private DirectedGraph<KRunState, Transition> parseSearchGraph() throws IOException {
         try (
             Scanner scanner = new Scanner(new File(K.maude_output));
             Writer writer = new OutputStreamWriter(new BufferedOutputStream(
@@ -549,7 +559,11 @@ public class MaudeKRun implements KRun {
             GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
                 = new GraphMLReader2<>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
                 edgeTransformer, hyperEdgeTransformer);
-            return graphmlParser.readGraph();
+            try {
+                return graphmlParser.readGraph();
+            } catch (GraphIOException e) {
+                throw new IOException(e);
+            }
         }
     }
 
@@ -579,17 +593,13 @@ public class MaudeKRun implements KRun {
                 rawSubstitution.put(child.get(0).getAttribute("op"), result);
             }
 
-            try {
-                Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution,
-                        context));
-                KRunState state = new KRunState(rawResult, context);
-                state.setStateId(stateNum + K.stateCounter);
-                SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo,
-                        context);
-                results.add(result);
-            } catch (TransformerException e) {
-                e.report(); //this should never happen, so I want it to blow up
-            }
+            Term rawResult = (Term) new SubstitutionFilter(rawSubstitution, context)
+                    .visitNode(pattern.getBody());
+            KRunState state = new KRunState(rawResult, context);
+            state.setStateId(stateNum + K.stateCounter);
+            SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo,
+                    context);
+            results.add(result);
         }
         list = doc.getElementsByTagName("result");
         nod = list.item(1);
@@ -599,9 +609,9 @@ public class MaudeKRun implements KRun {
 
     public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
         MaudeFilter formulaFilter = new MaudeFilter(context);
-        formula.accept(formulaFilter);
+        formulaFilter.visitNode(formula);
         MaudeFilter cfgFilter = new MaudeFilter(context);
-        cfg.accept(cfgFilter);
+        cfgFilter.visitNode(cfg);
 
         StringBuilder cmd = new StringBuilder()
             .append("mod MCK is").append(K.lineSeparator)
