@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.kframework.compile.transformers.AddEmptyLists;
@@ -33,7 +32,6 @@ import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -42,25 +40,20 @@ public class ProgramLoader {
     /**
      * Load program file to ASTNode.
      * 
-     * Write pgm.xml cache in given dotk folder.
-     * 
      * @param kappize
      *            If true, then apply KAppModifier to AST.
      */
     public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, Context context) throws IOException,
             ParseFailedException {
-        File tbl = new File(context.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
-
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
-        org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
+        org.kframework.parser.concrete.KParser.ImportTblPgm(context.kompiled);
         String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         XmlLoader.addFilename(doc.getFirstChild(), filename);
         XmlLoader.reportErrors(doc);
-        FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
         JavaClassesFactory.startConstruction(context);
         out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
         JavaClassesFactory.endConstruction();
@@ -97,14 +90,14 @@ public class ProgramLoader {
         try {
             ASTNode out;
             if (whatParser == ParserType.GROUND) {
-                org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
+                org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled);
                 out = DefinitionLoader.parseCmdString(content, filename, startSymbol, context);
                 out = new RemoveBrackets(context).visitNode(out);
                 out = new AddEmptyLists(context).visitNode(out);
                 out = new RemoveSyntacticCasts(context).visitNode(out);
                 out = new FlattenTerms(context).visitNode(out);
             } else if (whatParser == ParserType.RULES) {
-                org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+                org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
                 out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
                 out = new RemoveBrackets(context).visitNode(out);
                 out = new AddEmptyLists(context).visitNode(out);

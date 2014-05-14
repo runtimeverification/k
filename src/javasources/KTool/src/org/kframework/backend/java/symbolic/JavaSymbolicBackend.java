@@ -49,7 +49,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         }
         @Override
         public ASTNode visit(Definition node, Void _)  {
-            BinaryLoader.save(new File(context.dotk, "defx-java.bin").toString(), node);
+            BinaryLoader.save(new File(context.kompiled, "defx-java.bin").toString(), node);
 
             return node;
         }
@@ -73,7 +73,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         assert definition.getIndex() != null;
 
-        BinaryLoader.save(new File(context.dotk,
+        BinaryLoader.save(new File(context.kompiled,
                 JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
                 definition);
 

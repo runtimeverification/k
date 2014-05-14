@@ -108,28 +108,35 @@ public class KRunner {
     }
 
     public int run() {
-        if (!_noServer) {
-            startServer();
-        }
-        _maudeFileName = KPaths.windowfyPath(_maudeFileName);
-        _maudeCommandFileName = KPaths.windowfyPath(_maudeCommandFileName);
-        String commandTemplate = "load {0}" + K.lineSeparator + "mod KRUNNER is including {1} ." + K.lineSeparator + "eq #TCPPORT = {2,number,#} ." + K.lineSeparator + "endm" + K.lineSeparator + "load {3}" + K.lineSeparator;
-        /*_maudeFileName = _maudeFileName.replaceAll("(\\s)", "\\\1");
-        _maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");*/
-        
-        String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
-        MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName);
-
-        maude.start();
-        _logger.info("Maude started");
-        _logger.info("Maude command:" + K.lineSeparator + command);
-
+        Thread ioServer = null;
         try {
-            maude.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            if (!_noServer) {
+                ioServer = startServer();
+            }
+            _maudeFileName = KPaths.windowfyPath(_maudeFileName);
+            _maudeCommandFileName = KPaths.windowfyPath(_maudeCommandFileName);
+            String commandTemplate = "load {0}" + K.lineSeparator + "mod KRUNNER is including {1} ." + K.lineSeparator + "eq #TCPPORT = {2,number,#} ." + K.lineSeparator + "endm" + K.lineSeparator + "load {3}" + K.lineSeparator;
+            /*_maudeFileName = _maudeFileName.replaceAll("(\\s)", "\\\1");
+            _maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");*/
+            
+            String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
+            MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName);
+    
+            maude.start();
+            _logger.info("Maude started");
+            _logger.info("Maude command:" + K.lineSeparator + command);
+    
+            try {
+                maude.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return maude.returnValue;
+        } finally {
+            if (ioServer != null) {
+                ioServer.interrupt();
+            }
         }
-        return maude.returnValue;
     }
 
     public static int main(String[] args, Context context) throws IOException {

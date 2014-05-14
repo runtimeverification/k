@@ -249,7 +249,7 @@ public class Main {
             try {
                 if (cmd.hasOption("pattern") || "search".equals(K.maude_cmd)) {
                     org.kframework.parser.concrete.KParser
-                            .ImportTbl(K.compiled_def + "/def/Concrete.tbl");
+                            .ImportTblRule(new File(K.compiled_def));
                     ASTNode pattern = DefinitionLoader.parsePattern(
                             K.pattern,
                             "Command line pattern",
