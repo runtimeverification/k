@@ -16,12 +16,11 @@ public class DesugarStreams extends CopyOnWriteTransformer {
     ArrayList<String> channels = new ArrayList<String>();
     boolean newList;
 
-    public DesugarStreams(org.kframework.kil.loader.Context context, boolean newList) {
+    public DesugarStreams(org.kframework.kil.loader.Context context) {
         super("Desugar streams", context);
         
         channels.add("stdin");
         channels.add("stdout");
-        this.newList = newList;
     }
     
     @Override
