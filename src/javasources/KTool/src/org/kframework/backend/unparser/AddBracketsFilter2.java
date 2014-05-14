@@ -18,7 +18,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
 
     public AddBracketsFilter2(Context context) throws IOException {
         super("Add more brackets", context);
-        org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+        org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
     }
 
     private Term reparsed = null;

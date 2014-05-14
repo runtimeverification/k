@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete;
 
+import java.io.File;
 import java.util.HashSet;
 
 import org.kframework.parser.concrete.lib.ConcreteMain;
@@ -37,6 +38,10 @@ public class KParser {
                 context = ConcreteMain.init();
             }
         }
+    }
+    
+    public static String ImportTblRule(File kompiled) {
+        return ImportTbl(kompiled.getAbsolutePath() + "/Rule.tbl");
     }
 
     public static String ImportTbl(String filePath) {
@@ -79,8 +84,8 @@ public class KParser {
         return null;
     }
 
-    public static String ImportTblPgm(String filePath) {
-
+    public static String ImportTblPgm(File kompiled) {
+        String filePath = kompiled.getAbsolutePath() + "/Program.tbl";
         if (!tables.contains(filePath)) {
             tables.add(filePath);
 
@@ -119,7 +124,8 @@ public class KParser {
         return null;
     }
 
-    public static String ImportTblGround(String filePath) {
+    public static String ImportTblGround(File kompiled) {
+        String filePath = kompiled.getAbsolutePath() + "/Ground.tbl";
 
         if (!tables.contains(filePath)) {
             tables.add(filePath);
