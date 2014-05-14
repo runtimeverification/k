@@ -65,7 +65,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
             .append(mainModule).append("-BUILTINS is\n")
             .append(" including ").append(mainModule).append("-BASE .\n")
             .append(builtinsFilter.getResult()).append("endm\n");
-        FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
+        FileUtil.save(context.kompiled.getAbsolutePath() + "/builtins.maude", builtins);
         sw.printIntermediate("Generating equations for hooks");
         return super.firstStep(javaDef);
     }
@@ -90,7 +90,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
             .append("mod ").append(mainModule).append(" is \n")
             .append("  including ").append(mainModule).append("-BASE .\n")
             .append("  including ").append(mainModule).append("-BUILTINS .\n").append("endm\n");
-        FileUtil.save(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
+        FileUtil.save(context.kompiled.getAbsolutePath() + "/" + "main.maude", main);
 
          UnparserFilter unparserFilter = new UnparserFilter(this.context);
          unparserFilter.visitNode(javaDef);

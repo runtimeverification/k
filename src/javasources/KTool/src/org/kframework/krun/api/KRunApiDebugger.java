@@ -28,6 +28,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
+import java.io.File;
 import java.util.Map.Entry;
 
 public class KRunApiDebugger implements KRunDebugger {
@@ -44,7 +45,7 @@ public class KRunApiDebugger implements KRunDebugger {
     public KRunApiDebugger(KRun krun, Term cfg, Context context) throws KRunExecutionException {
         this.context = context;
         try { 
-            org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
+            org.kframework.parser.concrete.KParser.ImportTblRule(new File(K.compiled_def));
             ASTNode pattern = DefinitionLoader.parsePattern(
                     K.pattern,
                     "Command line pattern",

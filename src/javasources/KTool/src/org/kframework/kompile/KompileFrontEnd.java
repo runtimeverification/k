@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.html.HtmlBackend;
@@ -78,10 +79,25 @@ public class KompileFrontEnd {
         K.do_kompilation = true;
         org.kframework.utils.Error.checkIfOutputDirectory(options.directory);
 
-        Context context = new Context(options);
+        final Context context = new Context(options);
         
-        context.dotk = new File(options.directory, ".k");
+        context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
         context.dotk.mkdirs();
+        
+        // default for documentation backends is to store intermediate outputs in temp directory
+        context.kompiled = context.dotk;
+        
+        if (!options.global.debug) {
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    try {
+                        FileUtils.deleteDirectory(context.dotk);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
 
         Backend backend = null;
         switch (options.backend) {
@@ -104,15 +120,15 @@ public class KompileFrontEnd {
                 return;
             case MAUDE:
                 backend = new KompileBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.dotk);
-                context.dotk.mkdirs();
+                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
+                checkAnotherKompiled(context.kompiled);
+                context.kompiled.mkdirs();
                 break;
             case JAVA:
                 backend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.dotk);
-                context.dotk.mkdirs();
+                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
+                checkAnotherKompiled(context.kompiled);
+                context.kompiled.mkdirs();
                 break;
             case UNPARSE:
                 backend = new UnparserBackend(Stopwatch.instance(), context);
@@ -124,16 +140,16 @@ public class KompileFrontEnd {
                 // TODO(YilongL): make it general to all backends; add info about
                 // this backend in KompileOptionsParser
                 Backend innerBackend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.dotk);
-                context.dotk.mkdirs();
+                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
+                checkAnotherKompiled(context.kompiled);
+                context.kompiled.mkdirs();
                 backend = new UnflattenBackend(Stopwatch.instance(), context, innerBackend);
                 break;
             case SYMBOLIC:
                 backend = new SymbolicBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.dotk);
-                context.dotk.mkdirs();
+                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
+                checkAnotherKompiled(context.kompiled);
+                context.kompiled.mkdirs();
                 break;
             default:
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
@@ -145,7 +161,7 @@ public class KompileFrontEnd {
             genericCompile(options, backend, options.experimental.step, context);
         }
         
-        BinaryLoader.save(new File(context.dotk, "kompile-options.bin").getAbsolutePath(), options);
+        BinaryLoader.save(new File(context.kompiled, "kompile-options.bin").getAbsolutePath(), options);
 
         verbose(context);
     }
@@ -178,7 +194,7 @@ public class KompileFrontEnd {
             javaDef = (Definition) e.getResult();
         }
 
-        BinaryLoader.save(context.dotk.getAbsolutePath() + "/configuration.bin",
+        BinaryLoader.save(context.kompiled.getAbsolutePath() + "/configuration.bin",
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
