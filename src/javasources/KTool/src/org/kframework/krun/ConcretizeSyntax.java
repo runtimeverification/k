@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
@@ -9,6 +10,8 @@ import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -173,5 +176,61 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             return contents.get(0);
         }
         return new Bag(contents);
+    }
+    
+    Comparator<Term> unparserLexicalComparator = new Comparator<Term>() {
+
+        @Override
+        public int compare(Term o1, Term o2) {
+            UnparserFilterNew unparser = new UnparserFilterNew(context);
+            unparser.visitNode(o1);
+            String s1 = unparser.getResult();
+            unparser = new UnparserFilterNew(context);
+            unparser.visitNode(o2);
+            String s2 = unparser.getResult();
+            return s1.compareTo(s2);
+        }
+        
+    };
+    
+    @Override
+    public ASTNode visit(MapBuiltin map, Void _) {
+        Map result = new Map();
+        for (java.util.Map.Entry<Term, Term> entry : map.elements().entrySet()) {
+            result.add(new MapItem((Term)this.visitNode(entry.getKey()), (Term)this.visitNode(entry.getValue())));
+        }
+        Collections.sort(result.getContents(), unparserLexicalComparator);
+        if (map.hasViewBase()) {
+            result.add((Term)this.visitNode(map.viewBase()));
+        }
+        return result;
+    }
+    
+    @Override
+    public ASTNode visit(ListBuiltin list, Void _) {
+        org.kframework.kil.List result = new org.kframework.kil.List();
+        for (Term element : list.elementsLeft()) {
+            result.add(new ListItem((Term)this.visitNode(element)));
+        }
+        if (list.hasViewBase()) {
+            result.add((Term)this.visitNode(list.viewBase()));
+        }
+        for (Term element : list.elementsRight()) {
+            result.add((Term)this.visitNode(new ListItem(element)));
+        }
+        return result;
+    }
+    
+    @Override
+    public ASTNode visit(SetBuiltin set, Void _) {
+        org.kframework.kil.Set result = new org.kframework.kil.Set();
+        for (Term element : set.elements()) {
+            result.add(new ListItem((Term)this.visitNode(element)));
+        }
+        Collections.sort(result.getContents(), unparserLexicalComparator);
+        if (set.hasViewBase()) {
+            result.add((Term)this.visitNode(set.viewBase()));
+        }
+        return result;
     }
 }

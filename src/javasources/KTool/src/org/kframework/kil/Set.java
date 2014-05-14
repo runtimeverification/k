@@ -28,6 +28,10 @@ public class Set extends Collection {
         super("Set", col);
     }
 
+    public Set() {
+        super("Set");
+    }
+
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));

@@ -230,6 +230,10 @@ public class MaudeKRun implements KRun {
         sort = sort.replaceAll("`([{}\\[\\](),])", "$1");
         List<Element> list = XmlUtil.getChildElements(xml);
         
+        DataStructureSort listSort = context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT);
+        DataStructureSort mapSort = context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT);
+        DataStructureSort setSort = context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT);
+        
         try {
             if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("<_>_</_>")) {
                 Cell cell = new Cell();
@@ -243,13 +247,13 @@ public class MaudeKRun implements KRun {
                 return new BagItem(parseXML(list.get(0), context));
             } else if ((sort.equals("MapItem") || sort.equals("[Map]")) && op.equals("_|->_")) {
                 assertXMLTerm(list.size() == 2);
-                return new MapItem(parseXML(list.get(0), context), parseXML(list.get(1), context));
+                return MapBuiltin.element(mapSort, parseXML(list.get(0), context), parseXML(list.get(1), context));
             } else if ((sort.equals("SetItem") || sort.equals("[Set]")) && op.equals("SetItem")) {
                 assertXMLTerm(list.size() == 1);
-                return new SetItem(parseXML(list.get(0), context));
+                return SetBuiltin.element(setSort, parseXML(list.get(0), context));
             } else if ((sort.equals("ListItem") || sort.equals("[List]")) && op.equals("ListItem")) {
                 assertXMLTerm(list.size() == 1);
-                return new ListItem(parseXML(list.get(0), context));
+                return ListBuiltin.element(listSort, parseXML(list.get(0), context));
             } else if (op.equals("_`,`,_") && sort.equals("NeKList")) {
                 assertXMLTerm(list.size() >= 2);
                 List<Term> l = new ArrayList<Term>();
@@ -270,7 +274,7 @@ public class MaudeKRun implements KRun {
                 for (Element elem : list) {
                     l.add(parseXML(elem, context));
                 }
-                return new org.kframework.kil.List(l);
+                return DataStructureBuiltin.of(listSort, l.toArray(new Term[l.size()]));
             } else if (op.equals("__") && (sort.equals("NeBag") || sort.equals("Bag") || sort.equals("[Bag]"))) {
                 assertXMLTerm(list.size() >= 2);
                 List<Term> l = new ArrayList<Term>();
@@ -284,15 +288,15 @@ public class MaudeKRun implements KRun {
                 for (Element elem : list) {
                     l.add(parseXML(elem, context));
                 }
-                return new org.kframework.kil.Set(l);
+                return DataStructureBuiltin.of(setSort, l.toArray(new Term[l.size()]));
             } else if (op.equals("__") && (sort.equals("NeMap") || sort.equals("Map") || sort.equals("[Map]"))) {
                 assertXMLTerm(list.size() >= 2);
                 List<Term> l = new ArrayList<Term>();
                 for (Element elem : list) {
                     l.add(parseXML(elem, context));
                 }
-                return new org.kframework.kil.Map(l);
-            } else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && (sort.equals(KSorts.KLABEL) || sort.equals("[KLabel]"))) {
+                return DataStructureBuiltin.of(mapSort, l.toArray(new Term[l.size()]));
+            } else if ((op.equals("#_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && (sort.equals(KSorts.KLABEL) || sort.equals("[KLabel]"))) {
                 assertXMLTerm(list.size() == 1);
                 Term term = parseXML(list.get(0), context);
                 if (op.equals("#_") && term instanceof Token) {
@@ -300,6 +304,9 @@ public class MaudeKRun implements KRun {
                 } else {
                     return new KInjectedLabel(term);
                 }
+            } else if (op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_")) {
+                assertXMLTerm(list.size() == 1);
+                return parseXML(list.get(0), context);
             } else if (sort.equals("#NzInt") && op.equals("--Int_")) {
                 assertXMLTerm(list.size() == 1);
                 return IntBuiltin.of("-" + ((IntBuiltin) parseXML(list.get(0), context)).value());
@@ -330,11 +337,11 @@ public class MaudeKRun implements KRun {
                 if (sort.equals("Bag")) {
                     return Bag.EMPTY;
                 } else if (sort.equals("List")) {
-                    return org.kframework.kil.List.EMPTY;
+                    return DataStructureBuiltin.empty(listSort);
                 } else if (sort.equals("Map")) {
-                    return org.kframework.kil.Map.EMPTY;
+                    return DataStructureBuiltin.empty(mapSort);
                 } else if (sort.equals("Set")) {
-                    return org.kframework.kil.Set.EMPTY;
+                    return DataStructureBuiltin.empty(setSort);
                 } else {
                     // sort.equals("K")
                     return KSequence.EMPTY;
@@ -350,7 +357,11 @@ public class MaudeKRun implements KRun {
                     terms.add(child);
                     child = new KList(terms);
                 }
-                return new KApp(parseXML(list.get(0), context),child);
+                Term label = parseXML(list.get(0), context);
+                if (label instanceof MapBuiltin || label instanceof SetBuiltin || label instanceof ListBuiltin) {
+                    return label;
+                }
+                return new KApp(label,child);
             } else if (sort.equals(KSorts.KLABEL) && list.size() == 0) {
                 return KLabelConstant.of(StringUtil.unescapeMaude(op), context);
             } else if (sort.equals(KSorts.KLABEL) && op.equals("#freezer_")) {
