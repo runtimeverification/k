@@ -18,7 +18,7 @@ module REF
 
   context * HOLE := _
   rule <k> ref V:Val => N ...</k> 
-       <mem>... . => N |-> V ...</mem>  when fresh(N:Int)
+       <mem>... .Map => N |-> V ...</mem>  when fresh(N:Int)
   rule <k> * N => V ...</k> <mem>... N |-> V ...</mem> [transition]
   rule <k> * N := V => skip ...</k> <mem>... N |-> (_ => V) ...</mem> [transition]
 endmodule

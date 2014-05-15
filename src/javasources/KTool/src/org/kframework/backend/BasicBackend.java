@@ -68,7 +68,7 @@ public abstract class BasicBackend implements Backend {
         steps.add(new AddSupercoolDefinition(context));
         steps.add(new AddHeatingConditions(context));
         steps.add(new AddSuperheatRules(context));
-        steps.add(new DesugarStreams(context, true));
+        steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new AddKCell(context));
         steps.add(new AddStreamCells(context));
@@ -89,7 +89,7 @@ public abstract class BasicBackend implements Backend {
         steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
         steps.add(new FlattenSyntax(context));
-        steps.add(new ResolveBlockingInput(context, true));
+        steps.add(new ResolveBlockingInput(context));
         steps.add(new InitializeConfigurationStructure(context));
         steps.add(new AddKStringConversion(context));
         steps.add(new AddKLabelConstant(context));

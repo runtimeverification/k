@@ -30,9 +30,9 @@ module THREADS
 
   rule [free-acquire] : 
        <k>acquire V:Val 
-          => skip ...</k> <holds>... . 
+          => skip ...</k> <holds>... .Map
                                      => V|->0 ...</holds> 
-       <busy>Busy (.
+       <busy>Busy (.Set
                    => SetItem(V))</busy>
     when notBool(V in Busy:Set) [transition]
   rule [reentrant-acquire] : 
@@ -49,9 +49,9 @@ module THREADS
   rule [release] : 
        <k>release V:Val 
           => skip ...</k> <holds>... (V|->0 
-                                      => .) ...</holds> 
+                                      => .Map) ...</holds> 
        <busy>... (SetItem(V)
-            => .) ...</busy>
+            => .Set) ...</busy>
 
   rule [rendezvous] : 
        <k>rendezvous V:Val 

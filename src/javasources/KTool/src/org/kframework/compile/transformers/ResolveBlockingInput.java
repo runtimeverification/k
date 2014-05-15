@@ -37,7 +37,6 @@ public class ResolveBlockingInput extends GetLhsPattern {
     Map<String, String> inputCells = new HashMap<String, String>();
     java.util.List<Rule> generated = new ArrayList<Rule>();
     boolean hasInputCell;
-    boolean newList;
     /**
      * The original requires condition of the rule.  the predicate  corresponding to the variable being
      * read from the stream will be removed from this condition before setting this condition as the
@@ -53,9 +52,8 @@ public class ResolveBlockingInput extends GetLhsPattern {
      */
     Term resultCondition;
 
-    public ResolveBlockingInput(Context context, boolean newList) {
+    public ResolveBlockingInput(Context context) {
         super("Resolve Blocking Input", context);
-        this.newList = newList;
     }
     
     @Override
@@ -150,10 +148,10 @@ public class ResolveBlockingInput extends GetLhsPattern {
             return node;
         }
         Rewrite rewrite = (Rewrite) contents;
-        if ((!newList && !(rewrite.getLeft() instanceof ListItem)) ||
-            (newList && !(rewrite.getLeft() instanceof KApp &&
+        if ((
+            (!(rewrite.getLeft() instanceof KApp &&
             ((KApp)rewrite.getLeft()).getLabel().equals(
-                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, context))))) {
+                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, context)))))) {
             GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
                     KExceptionGroup.COMPILER, 
                     "Expecting a list item but got " + rewrite.getLeft().getClass() + "." +
@@ -163,20 +161,17 @@ public class ResolveBlockingInput extends GetLhsPattern {
         }
         Term item = rewrite.getLeft();
         Term variable;
-        if (newList) {
-            KApp kappItem = (KApp)item;
-            Term child = kappItem.getChild();
-            if (!(child instanceof KList) || ((KList)child).getContents().size() != 1) {
-                GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
-                    KExceptionGroup.COMPILER, 
-                    "Expecting an input type variable but got a KList instead. Won't transform.", 
-                            getName(), ((KApp)item).getChild().getFilename(), ((KApp)item).getChild().getLocation()));
-                return node;
-            }
-            variable = ((KList)child).getContents().get(0);
-        } else {
-            variable = ((ListItem)item).getItem();
+        KApp kappItem = (KApp)item;
+        Term child = kappItem.getChild();
+        if (!(child instanceof KList) || ((KList)child).getContents().size() != 1) {
+            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
+                KExceptionGroup.COMPILER, 
+                "Expecting an input type variable but got a KList instead. Won't transform.", 
+                        getName(), ((KApp)item).getChild().getFilename(), ((KApp)item).getChild().getLocation()));
+            return node;
         }
+        variable = ((KList)child).getContents().get(0);
+ 
         if (!(variable instanceof Variable))//&&    MetaK.isBuiltinSort(item.getItem().getSort())
                  {
             GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
@@ -186,9 +181,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
                             getName(), variable.getFilename(), variable.getLocation()));
             return node;
         }            
-        if ((!newList && !(rewrite.getRight() instanceof List && 
-            ((List) rewrite.getRight()).isEmpty())) ||
-            (newList && !(rewrite.getRight() instanceof KApp &&
+        if ((!(rewrite.getRight() instanceof KApp &&
             ((KApp)rewrite.getRight()).getLabel().equals(
                 KLabelConstant.of(DataStructureSort.DEFAULT_LIST_UNIT_LABEL, context))))) {
             GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
@@ -213,20 +206,15 @@ public class ResolveBlockingInput extends GetLhsPattern {
         
 //        ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]
         Term list;
-        if (newList) {
-            DataStructureSort myList = context.dataStructureListSortOf(
-                DataStructureSort.DEFAULT_LIST_SORT);
-            Term term1 = new Rewrite(
-                KApp.of(KLabelConstant.of(myList.unitLabel(), context)),
-                KApp.of(KLabelConstant.of(myList.elementLabel(), context), parseTerm),
-                context);
-            Term term2 = KApp.of(KLabelConstant.of(myList.elementLabel(), context), ioBuffer);
-            list = KApp.of(KLabelConstant.of(myList.constructorLabel(), context), term1, term2);
-        } else {
-            list = new List();
-            ((List)list).getContents().add(new Rewrite(List.EMPTY, new ListItem(parseTerm), context));
-            ((List)list).getContents().add(new ListItem(ioBuffer));
-        }
+        DataStructureSort myList = context.dataStructureListSortOf(
+            DataStructureSort.DEFAULT_LIST_SORT);
+        Term term1 = new Rewrite(
+            KApp.of(KLabelConstant.of(myList.unitLabel(), context)),
+            KApp.of(KLabelConstant.of(myList.elementLabel(), context), parseTerm),
+            context);
+        Term term2 = KApp.of(KLabelConstant.of(myList.elementLabel(), context), ioBuffer);
+        list = KApp.of(KLabelConstant.of(myList.constructorLabel(), context), term1, term2);
+       
         
         node = node.shallowCopy();
         node.setContents(list);
