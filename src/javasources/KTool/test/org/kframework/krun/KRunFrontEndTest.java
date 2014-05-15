@@ -8,6 +8,6 @@ public class KRunFrontEndTest {
 
     @Test(expected=KExceptionManager.KEMException.class)
     public void testInvalidArguments() {
-        org.kframework.krun.Main.execute_Krun(new String[] {"--backend", "foobarbaz"});
+        org.kframework.krun.KRunFrontEnd.execute_Krun(new String[] {"--backend", "foobarbaz"});
     }
 }

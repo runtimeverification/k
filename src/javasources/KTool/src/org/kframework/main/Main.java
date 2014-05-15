@@ -68,7 +68,7 @@ public class Main {
                         break;
                     case "-krun":
                         K.setTool(K.Tool.KRUN);
-                        succeeded = org.kframework.krun.Main.execute_Krun(args2);
+                        succeeded = org.kframework.krun.KRunFrontEnd.execute_Krun(args2);
                         break;
                     case "-kpp":
                         K.setTool(K.Tool.OTHER);

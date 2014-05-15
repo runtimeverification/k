@@ -63,7 +63,7 @@ import com.beust.jcommander.ParameterException;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
-public class Main {
+public class KRunFrontEnd {
 
     private static Stopwatch sw = Stopwatch.instance();
 
