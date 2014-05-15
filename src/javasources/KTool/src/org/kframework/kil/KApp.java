@@ -37,6 +37,17 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
     public static KApp of(Term label, Term... elements) {
         return new KApp(label, new KList(Arrays.asList(elements)));
     }
+    
+    /**
+     * Constructs the application of the given KLabel to a KList with the given elements.
+     *
+     * @param label the string of a KLabelConstant which is applied to a KList with the given elements.
+     * @param elements the elements of the KList.
+     * @return a {@link KApp} which represents the application of the given KLabel to a KList with the given elements.
+     */
+    public static KApp of(String label, Term... elements) {
+        return KApp.of(KLabelConstant.of(label), elements);
+    }
 
     /**
      * Constructs a {@link KApp} object representing the application of the specified KLabel to the specified KList.

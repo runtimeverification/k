@@ -22,7 +22,7 @@ rule <k> I:Int + I2:Int => I +Int I2 ...</k>
 
 rule <k> print => . ...</k>
      <sum> I:Int </sum>
-     <out>... . => ListItem(I) </out>
+     <out>... .List => ListItem(I) </out>
 
 rule F:Foo F2:Foo => F ~> F2
 
