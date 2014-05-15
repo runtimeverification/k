@@ -1,11 +1,13 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
@@ -44,6 +46,17 @@ public class ProgramSDF {
             Module m = def.getModulesMap().get(modName);
             psdfv.visitNode(m);
             ks2gsf.visitNode(m);
+        }
+
+        // automatically add a production of the type K ::= <start-sort>
+        // if the start symbol is K, then all other sorts are considered
+        for (String sort : psdfv.startSorts) {
+            if (!Sort.isBasesort(sort) && !context.isListSort(sort)) {
+                List<ProductionItem> pi = new ArrayList<>();
+                pi.add(new Sort(sort));
+                Production prod = new Production(new Sort(KSorts.K), pi);
+                ks2gsf.visitNode(prod);
+            }
         }
 
         // save the new parser info

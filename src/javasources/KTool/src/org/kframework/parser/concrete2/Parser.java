@@ -654,6 +654,7 @@ public class Parser {
      * @return the result of parsing, as a Term
      */
     public Term parse(NonTerminal nt, int position) {
+        assert nt != null : "Start symbol cannot be null.";
         activateStateCall(s.stateCalls.get(new StateCall.Key(s.ntCalls.get(
             new NonTerminalCall.Key(nt, position)), position, nt.entryState)),
             Function.IDENTITY);
