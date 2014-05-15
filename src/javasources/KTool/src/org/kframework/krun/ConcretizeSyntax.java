@@ -200,8 +200,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             result.add(new MapItem((Term)this.visitNode(entry.getKey()), (Term)this.visitNode(entry.getValue())));
         }
         Collections.sort(result.getContents(), unparserLexicalComparator);
-        if (map.hasViewBase()) {
-            result.add((Term)this.visitNode(map.viewBase()));
+        for (Term base : map.baseTerms()) {
+            result.add((Term)this.visitNode(base));
         }
         return result;
     }
@@ -212,8 +212,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         for (Term element : list.elementsLeft()) {
             result.add(new ListItem((Term)this.visitNode(element)));
         }
-        if (list.hasViewBase()) {
-            result.add((Term)this.visitNode(list.viewBase()));
+        for (Term base : list.baseTerms()) {
+            result.add((Term)this.visitNode(base));
         }
         for (Term element : list.elementsRight()) {
             result.add((Term)this.visitNode(new ListItem(element)));
@@ -228,8 +228,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             result.add(new ListItem((Term)this.visitNode(element)));
         }
         Collections.sort(result.getContents(), unparserLexicalComparator);
-        if (set.hasViewBase()) {
-            result.add((Term)this.visitNode(set.viewBase()));
+        for (Term base : set.baseTerms()) {
+            result.add((Term)this.visitNode(base));
         }
         return result;
     }
