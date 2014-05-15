@@ -31,7 +31,7 @@ public class MaudeBackend extends BasicBackend {
         StringBuilder maudified = maudeFilter.getResult();
         StringBuilderUtil.replaceFirst(maudified, mainModule, mainModule + "-BASE");
 
-        FileUtil.save(context.dotk.getAbsolutePath() + "/base.maude", maudified);
+        FileUtil.save(context.kompiled.getAbsolutePath() + "/base.maude", maudified);
         sw.printIntermediate("Generating Maude file");
 
         StringBuilder consTable = getLabelTable(definition);

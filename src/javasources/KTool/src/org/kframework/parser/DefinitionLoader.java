@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
@@ -35,7 +36,6 @@ import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -80,7 +80,7 @@ public class DefinitionLoader {
         } else {
             javaDef = parseDefinition(mainFile, lang, autoinclude, context);
 
-            BinaryLoader.save(context.dotk.getAbsolutePath() + "/defx-" + context.kompileOptions.backend.name().toLowerCase() + ".bin", javaDef);
+            BinaryLoader.save(context.kompiled.getAbsolutePath() + "/defx-" + context.kompileOptions.backend.name().toLowerCase() + ".bin", javaDef);
         }
         return javaDef;
     }
@@ -131,7 +131,7 @@ public class DefinitionLoader {
             //This following line was commented out to make the latex backend 
             //parse files importing from other files
             def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
-
+            
             // HERE: add labels to sorts
 
             def.preprocess(context);
@@ -146,23 +146,23 @@ public class DefinitionLoader {
 
             // ------------------------------------- generate files
             try {
-                ResourceExtractor.ExtractDefSDF(new File(context.dotk + "/def"));
-                ResourceExtractor.ExtractGroundSDF(new File(context.dotk + "/ground"));
+                ResourceExtractor.ExtractDefSDF(new File(context.dotk, "def"));
+                ResourceExtractor.ExtractGroundSDF(new File(context.dotk, "ground"));
     
-                ResourceExtractor.ExtractProgramSDF(new File(context.dotk + "/pgm"));
+                ResourceExtractor.ExtractProgramSDF(new File(context.dotk, "pgm"));
             } catch (IOException e) {
                 if (context.globalOptions.debug) {
                     e.printStackTrace();
                 }
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
-                        "IO error detected writing to " + context.dotk.getAbsolutePath()));
+                        "IO error detected writing to " + context.kompiled.getAbsolutePath()));
             }
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
             if (!context.kompileOptions.backend.documentation()) {
                 String oldSdfPgm = "";
-                if (new File(context.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-                    oldSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+                if (new File(context.kompiled, "Program.sdf").exists())
+                    oldSdfPgm = FileUtil.getFileContent(context.kompiled.getAbsolutePath() + "/Program.sdf");
 
                 StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
 
@@ -171,8 +171,20 @@ public class DefinitionLoader {
 
                 Stopwatch.instance().printIntermediate("File Gen Pgm");
 
-                if (!oldSdfPgm.equals(newSdfPgm) || !new File(context.dotk.getAbsoluteFile() + "/pgm/Program.tbl").exists()) {
+                if (!oldSdfPgm.equals(newSdfPgm) || !new File(context.kompiled, "Program.tbl").exists()) {
                     Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/pgm"), "Program");
+                    try {
+                        FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.sdf"), context.kompiled);
+                        FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.tbl"), context.kompiled);
+                        } catch (IOException e) {
+                        if (context.globalOptions.debug) {
+                            e.printStackTrace();
+                        }
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                                "IO error detected writing program parser to file"));
+                        return null; //unreachable
+                    }
+                    
                     Stopwatch.instance().printIntermediate("Generate TBLPgm");
                 }
             }
@@ -184,32 +196,56 @@ public class DefinitionLoader {
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
             String oldSdf = "";
-            if (new File(context.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
-                oldSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
+            if (new File(context.kompiled, "Integration.sdf").exists())
+                oldSdf = FileUtil.getFileContent(context.kompiled.getAbsolutePath() + "/Integration.sdf");
             FileUtil.save(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, context));
             FileUtil.save(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
             String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
             Stopwatch.instance().printIntermediate("File Gen Def");
 
-            if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
-                    || !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
+            if (!oldSdf.equals(newSdf) || !new File(context.kompiled, "Rule.tbl").exists()
+                    || !new File(context.kompiled, "Ground.tbl").exists()) {
                 try {
                     // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     if (!context.kompileOptions.backend.documentation()) {
                         Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
                         t2.join();
+                        try {
+                            FileUtils.copyFile(new File(context.dotk, "ground/Concrete.tbl"), new File(context.kompiled, "Ground.tbl"));
+                        } catch (IOException e) {
+                            if (context.globalOptions.debug) {
+                                e.printStackTrace();
+                            }
+                            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                                    "IO error detected writing ground parser to file"));
+                            return null; //unreachable
+                        }
                     }
                     t1.join();
+                    try {
+                        FileUtils.copyFileToDirectory(new File(context.dotk, "def/Integration.sdf"), context.kompiled);
+                        FileUtils.copyFile(new File(context.dotk, "def/Concrete.tbl"), new File(context.kompiled, "Rule.tbl"));
+                    } catch (IOException e) {
+                        if (context.globalOptions.debug) {
+                            e.printStackTrace();
+                        }
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                                "IO error detected writing rule parser to file"));
+                        return null; //unreachable
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
                             "Thread was interrupted trying to run SDF2Table"));
                 }
+                
+                
                 Stopwatch.instance().printIntermediate("Generate TBLDef");
             }
-            org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
+            
+            org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
 
             Stopwatch.instance().printIntermediate("Importing Files");
             // ------------------------------------- parse configs
@@ -256,7 +292,7 @@ public class DefinitionLoader {
         def.setItems(di);
 
         // ------------------------------------- import files in Stratego
-        org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getAbsolutePath() + "/def/Concrete.tbl");
+        org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
 
         // ------------------------------------- parse configs
         JavaClassesFactory.startConstruction(context);
@@ -281,7 +317,6 @@ public class DefinitionLoader {
         Document doc = XmlLoader.getXMLDoc(parsed);
         XmlLoader.addFilename(doc.getFirstChild(), filename);
         XmlLoader.reportErrors(doc);
-        FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 
         JavaClassesFactory.startConstruction(context);
         org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
@@ -331,8 +366,6 @@ public class DefinitionLoader {
 
         XmlLoader.addFilename(doc.getFirstChild(), filename);
         XmlLoader.reportErrors(doc);
-        FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-        XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
         JavaClassesFactory.startConstruction(context);
         ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
@@ -382,8 +415,6 @@ public class DefinitionLoader {
 
         // XmlLoader.addFilename(doc.getFirstChild(), filename);
         XmlLoader.reportErrors(doc);
-        FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-        XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
         JavaClassesFactory.startConstruction(context);
         ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
