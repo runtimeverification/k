@@ -1,3 +1,5 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Matcher;
@@ -7,12 +9,20 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
+
 /**
  * An injection KLabel.
  *
  * @author AndreiS
  */
 public class KLabelInjection extends KLabel {
+
+    /**
+     * Returns an injection of the term into a {@link org.kframework.backend.java.kil.KItem}.
+     */
+    public static KItem injectionOf(Term term, TermContext context) {
+        return new KItem(new KLabelInjection(term), new KList(), context);
+    }
 
     private final Term term;
 
