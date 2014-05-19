@@ -7,6 +7,8 @@ import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
+import org.kframework.utils.OS;
+import org.kframework.utils.StringUtil;
 
 import java.io.File;
 import java.util.*;
@@ -163,7 +165,7 @@ public class TestCase {
      * @return String representation of kompile command to be used in logging.
      */
     public String toKompileLogString() {
-        return StringUtils.join(getKompileCmd(), " ");
+        return StringUtil.escapeShell(getKompileCmd(), OS.current());
     }
 
     /**
@@ -192,7 +194,7 @@ public class TestCase {
      * @return String representation of posixInitScript command to be used in logging.
      */
     public String toPosixOnlyLogString() {
-        return StringUtils.join(getPosixOnlyCmd(), " ");
+        return StringUtil.escapeShell(getPosixOnlyCmd(), OS.current());
     }
 
     /**
@@ -207,7 +209,7 @@ public class TestCase {
      * @return String representation of PDF command to be used in logging.
      */
     public String toPdfLogString() {
-        return StringUtils.join(getPdfCmd(), " ");
+        return StringUtil.escapeShell(getPdfCmd(), OS.current());
     }
 
     public void setKompileOpts(List<PgmArg> kompileOpts) {
