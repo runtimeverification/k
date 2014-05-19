@@ -212,7 +212,7 @@
     </target>
 
     <target name="checkstyle-copyright">
-        <exec executable="git" outputproperty="git.diff.out">
+        <exec executable="git" outputproperty="git.diff.out" failifexecutionfails="false">
           <arg value="diff" />
           <arg value="${base}" />
           <arg value="--name-only" />
