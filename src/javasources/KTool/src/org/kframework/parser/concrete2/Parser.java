@@ -111,9 +111,11 @@ public class Parser {
             final State state;
 
     //***************************** Start Boilerplate *****************************
+            final int hash;
             public Key(NonTerminalCall ntCall, int stateBegin, State state) {
                 assert ntCall != null; assert state != null;
                 this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
+                hash = (ntCall.key.hashCode() * 31 + stateBegin) * 31 + state.hashCode();
             }
 
             public StateCall create() { return new StateCall(this); }
@@ -134,10 +136,7 @@ public class Parser {
 
             @Override
             public int hashCode() {
-                int result = ntCall.key.hashCode();
-                result = 31 * result + stateBegin;
-                result = 31 * result + state.hashCode();
-                return result;
+                return hash;
             }
         }
         final Key key;
@@ -190,6 +189,7 @@ public class Parser {
             public final StateCall stateCall;
             /** The end position of the parse */
             public final int stateEnd;
+            private final int hash;
             public Key(StateCall stateCall, int stateEnd) {
                 assert stateCall != null;
                 // if we are a lookahead, then force the the state end to be equal to the state begin
@@ -199,6 +199,7 @@ public class Parser {
                 }
     //***************************** Start Boilerplate *****************************
                 this.stateCall = stateCall; this.stateEnd = stateEnd;
+                hash = stateCall.key.hashCode() * 31 + stateEnd;
             }
 
             public StateReturn create() { return new StateReturn(this); }
@@ -218,9 +219,7 @@ public class Parser {
 
             @Override
             public int hashCode() {
-                int result = stateCall.key.hashCode();
-                result = 31 * result + stateEnd;
-                return result;
+                return hash;
             }
         }
 
@@ -289,10 +288,12 @@ public class Parser {
             /** The start position for parsing the {@link NonTerminal} */
             public final int ntBegin;
     //***************************** Start Boilerplate *****************************
+            private final int hash;
             public Key(NonTerminal nt, int ntBegin) {
                 assert nt != null;
                 // assert ntBegin == c.stateBegin for c in callers
                 this.nt = nt; this.ntBegin = ntBegin;
+                hash = nt.hashCode() * 31 + ntBegin;
             }
 
             public NonTerminalCall create() { return new NonTerminalCall(this); }
@@ -312,9 +313,7 @@ public class Parser {
 
             @Override
             public int hashCode() {
-                int result = nt.hashCode();
-                result = 31 * result + ntBegin;
-                return result;
+                return hash;
             }
         }
         final Key key;

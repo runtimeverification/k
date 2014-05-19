@@ -266,6 +266,7 @@ public class Grammar implements Serializable {
      */
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
         public final String name;
+        private final int hashCode;
         /**
          * The first state of the state machine for the non-terminal.
          */
@@ -292,6 +293,7 @@ public class Grammar implements Serializable {
         public NonTerminal(String name) {
             assert name != null && !name.equals("") : "NonTerminal name cannot be null or empty.";
             this.name = name;
+            hashCode = name.hashCode();
             this.entryState = new EntryState(name + "-entry", this);
             this.exitState = new ExitState(name + "-exit", this);
         }
@@ -328,7 +330,7 @@ public class Grammar implements Serializable {
 
         @Override
         public int hashCode() {
-            return name.hashCode();
+            return hashCode;
         }
     }
 

@@ -20,6 +20,9 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     protected java.util.List<Term> contents;
     protected Production production;
 
+    private int cachedHashCode = 0;
+    private boolean upToDateHash = false;
+
     public TermCons(Element element, Context context) {
         super(element);
         this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
@@ -100,11 +103,13 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     }
 
     public java.util.List<Term> getContents() {
+        upToDateHash = false;
         return contents;
     }
 
     public void setContents(java.util.List<Term> contents) {
         this.contents = contents;
+        upToDateHash = false;
     }
 
     public Term getSubterm(int idx) {
@@ -182,11 +187,14 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
 
     @Override
     public int hashCode() {
-        int hash = sort.hashCode() + cons.hashCode();
+        if (upToDateHash) {
+            cachedHashCode = sort.hashCode() + cons.hashCode();
 
-        for (Term t : contents)
-            hash += t.hashCode();
-        return hash;
+            for (Term t : contents)
+                cachedHashCode += t.hashCode();
+            upToDateHash = true;
+        }
+        return cachedHashCode;
     }
 
     @Override
@@ -203,5 +211,4 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     public void setChildren(List<Term> children, Enum<?> cls) {
         this.contents = children;
     }
-
 }

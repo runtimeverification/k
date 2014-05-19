@@ -15,21 +15,31 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Remove parsing artifacts such as single element ambiguities.
  */
 // TODO: simplify by removing left over "null" checks and recheck this code
 public class TreeCleanerVisitor extends ParseForestTransformer {
+
     public TreeCleanerVisitor(Context context) {
         super(TreeCleanerVisitor.class.getName(), context);
     }
 
     @Override
+    public boolean cache() {
+        return true;
+    }
+
+    @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+        ASTNode vis;
         if (!tc.getProduction().containsAttribute("klabel"))
-            return super.visitNode(tc.getContents().get(0), _);
-        return super.visit(tc, _);
+            vis = super.visitNode(tc.getContents().get(0), _);
+        else
+            vis = super.visit(tc, _);
+        return vis;
     }
 /*
     @Override
