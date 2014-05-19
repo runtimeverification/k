@@ -2,7 +2,6 @@
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.kframework.backend.SMTSolver;
@@ -23,7 +22,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Add path condition cell to rules. Since this step is right after
@@ -49,7 +47,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
      * expressions and we add as side condition of the rule
      * checkSat(SC-P) =/= unsat.
      */
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
 
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
             return node;
@@ -63,10 +61,10 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         Term condition = node.getRequires();
 //        Term originalCondition = condition.shallowCopy();
         CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(context);
-        condition = (Term) node.getRequires().accept(cnft);
+        condition = (Term) cnft.visitNode(node.getRequires());
 
         ConditionTransformer ct = new ConditionTransformer(context);
-        condition = (Term) condition.accept(ct);
+        condition = (Term) ct.visitNode(condition);
         
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
@@ -9,10 +10,10 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
-public class MergeAmbFilter extends BasicTransformer {
+public class MergeAmbFilter extends ParseForestTransformer {
     public MergeAmbFilter(Context context) {
         super("Remove ambiguity duplicates", context);
     }
@@ -24,7 +25,8 @@ public class MergeAmbFilter extends BasicTransformer {
      * 
      * if the children of every A are located in the same places (see isSimilar(...)).
      */
-    public ASTNode transform(Ambiguity amb) throws TransformerException {
+    @Override
+    public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
 
         java.util.List<Term> children = new ArrayList<Term>();
         //IStrategoTerm currentList = amb.getSubterm(0);
@@ -77,9 +79,9 @@ public class MergeAmbFilter extends BasicTransformer {
             Ambiguity amb2 = new Ambiguity(KSorts.K, newchildren);
             amb2.setLocation(amb.getLocation());
             amb2.setFilename(amb.getFilename());
-            return super.transform(amb2);
+            return super.visit(amb2, _);
         } else
-            return newchildren.get(0).accept(this);
+            return this.visitNode(newchildren.get(0));
     }
 
     /**

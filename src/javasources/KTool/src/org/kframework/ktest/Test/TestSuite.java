@@ -7,7 +7,7 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.utils.ColorUtil;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.OS;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -99,7 +99,7 @@ public class TestSuite {
 
         List<TestCase> successfulTests;
 
-        if (GlobalSettings.isPosix()) {
+        if (OS.current().isPosix) {
             successfulTests = runPosixOnlySteps(tests);
         } else {
             successfulTests = tests;
@@ -177,7 +177,7 @@ public class TestSuite {
      * @throws InterruptedException
      */
     private List<TestCase> runPosixOnlySteps(List<TestCase> tests) throws InterruptedException {
-        assert GlobalSettings.isPosix();
+        assert OS.current().isPosix;
         int len = tests.size();
         List<TestCase> successfulTests = new ArrayList<>(len);
         List<Proc<TestCase>> ps = new ArrayList<>(len);
@@ -474,7 +474,7 @@ public class TestSuite {
         return absolutePath.replaceFirst(pathRegex, "");
     }
 
-    private void makeReport(Proc p, String definition, String testName) {
+    private void makeReport(Proc<?> p, String definition, String testName) {
         if (reportGen == null)
             return;
         if (p.isSuccess())

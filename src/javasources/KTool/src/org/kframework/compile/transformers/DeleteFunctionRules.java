@@ -1,9 +1,9 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Set;
 import java.util.List;
@@ -25,7 +25,7 @@ public class DeleteFunctionRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         Term body = node.getBody();
         if (body instanceof Rewrite) {
             body = ((Rewrite) body).getLeft();

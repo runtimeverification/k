@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /*@
 This is the symbolic semantics of IMP enriched with arrays and Hoare logic.
 The semantics, gets as input an IMP program, annotated with pre and post 
@@ -17,7 +18,7 @@ module IMP-SYNTAX
                  > left:
 		   AExp "+" AExp              [left, strict]
                  | AExp "-" AExp              [left, strict]
-                 | "(" AExp ")"               [bracket]
+                 > "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
                  | AExp "==" AExp             [strict]
@@ -115,20 +116,20 @@ module IMP
   rule <k> lvalue(array(L:Int, Size:Int)[I:Int]) => loc(L +Int I) ...</k> 
        <store>... L |-> _:Int ...</store>
 
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
   rule <k> int (X:Id,Xs:AExps => Xs); _:Pre _:Post _:Stmt </k> 
-       <env> Rho:Map (. => X |-> L) </env>
-       <store>... . => (L |-> 0) </store>
+       <env> Rho:Map (.Map => X |-> L) </env>
+       <store>... .Map => (L |-> 0) </store>
        when notBool (X in keys(Rho)) andBool fresh(L:Int)
 
   // symbolic arrays
   rule <k> int (X:Id [S:#Int] ,Xs:Ids => Xs); _:Pre _:Post St:Stmt </k>
-       <env> Rho:Map (. => X |-> L) </env>
-       <store>... (. => L |-> array(AL, S) AL |-> #symArray(X) ) </store>
+       <env> Rho:Map (.Map => X |-> L) </env>
+       <store>... (.Map => L |-> array(AL, S) AL |-> #symArray(X) ) </store>
        when notBool (X in keys(Rho)) andBool fresh(L:Int) andBool fresh(AL:Int)
 
   rule int .AExps ; P:Pre P':Post S:Stmt => P ~> P' ~> S [structural]
@@ -243,12 +244,12 @@ module IMP
 
 //@ Utils              
   syntax Bool ::= "mapLeftEq" "(" Map "," Map ")" [function]
-  rule mapLeftEq(X:Int |-> V1:Int Rest:Map, Left:Map X |-> V2 Right:Map) => V1 ==Int V2 andBool mapLeftEq(Rest, Left Right)
-  rule mapLeftEq(X:Int |-> array(AL:Int, Sz:Int) Rest:Map, Left:Map X |-> array(AL, Sz) Right:Map) => mapLeftEq(Rest, Left Right)
-  rule mapLeftEq(X:Int |-> A:Array Rest:Map, Left:Map X |-> A Right:Map) => mapLeftEq(Rest, Left Right)
+  rule mapLeftEq(X:Int |-> V1:Int Rest:Map, X |-> V2 Rest2:Map) => V1 ==Int V2 andBool mapLeftEq(Rest, Rest2)
+  rule mapLeftEq(X:Int |-> array(AL:Int, Sz:Int) Rest:Map, X |-> array(AL, Sz) Rest2:Map) => mapLeftEq(Rest, Rest2)
+  rule mapLeftEq(X:Int |-> A:Array Rest:Map, X |-> A Rest2:Map) => mapLeftEq(Rest, Rest2)
   rule mapLeftEq(. , _) => true
   rule mapLeftEq(X:Int |-> _:Int _:Map, Right:Map) => false when notBool(X in keys(Right))
-  rule mapLeftEq(M:Map, .) => false when notBool(isEmptySet(keys(M)))
+  rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==Set .Set)
 
 //@ Compiler issues
   // subsort issue? 

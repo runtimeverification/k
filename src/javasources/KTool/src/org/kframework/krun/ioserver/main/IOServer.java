@@ -1,13 +1,18 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.ioserver.main;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.commands.*;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.ServerSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.ServerSocketChannel;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -21,7 +26,7 @@ import java.util.logging.Logger;
 
 public class IOServer {
     int port;
-    ServerSocket serverSocket;
+    ServerSocketChannel serverSocket;
     ThreadPoolExecutor pool;
     private int POOL_THREADS_SIZE = 10;
     private Logger _logger;
@@ -39,28 +44,31 @@ public class IOServer {
 
     public void createServer() {
         try {
-            serverSocket = new ServerSocket(port);
-            this.port = serverSocket.getLocalPort();
+            serverSocket = ServerSocketChannel.open();
+            serverSocket.socket().bind(new InetSocketAddress(port));
+            this.port = serverSocket.socket().getLocalPort();
         } catch (IOException e) {
-            _logger.severe("Could not listen on port: " + port);
-            _logger.severe("This program will exit with error code: 1");
-            System.exit(1);
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "IO Server could not listen on port " + port));
         }
     }
 
     public void acceptConnections() throws IOException {
-        _logger.info("Server started at " + serverSocket.getInetAddress() + ": " + port);
-        
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            _logger.info(clientSocket.toString());
-            String msg = getMessage(clientSocket);
-            Command command = parseCommand(msg, clientSocket);
-
-            // execute command == append it to pool
-            if (command != null) {
-                pool.execute(command);
+        _logger.info("Server started at " + serverSocket.socket().getInetAddress() + ": " + port);
+        try {
+            while (true) {
+                Socket clientSocket = serverSocket.socket().accept();
+                _logger.info(clientSocket.toString());
+                String msg = getMessage(clientSocket);
+                Command command = parseCommand(msg, clientSocket);
+    
+                // execute command == append it to pool
+                if (command != null) {
+                    pool.execute(command);
+                }
             }
+        } catch (ClosedByInterruptException e) {
+            //runner has exited, so this thread needs to terminate
+            pool.shutdown();
         }
     }
     
@@ -156,32 +164,11 @@ public class IOServer {
         if (command.equals("writebytes")) {
             return new CommandWritebytes(args, socket, logger, fs); //, maudeId);
         }
-        if (command.equals("stat") || command.equals("opendir")) {
-            String cls;
-            if (command.equals("stat")) {
-                cls = "org.kframework.krun.ioserver.commands.CommandStat";
-            } else {
-                cls = "org.kframework.krun.ioserver.commands.CommandOpendir";
-            }
-            try {
-                Class commandStat = Class.forName(cls);
-                Class[] argTypes = {String[].class, Socket.class, Logger.class, FileSystem.class};
-                @SuppressWarnings("unchecked")
-                Constructor cons = commandStat.getDeclaredConstructor(argTypes);
-                Object[] arguments = {args, socket, logger, fs};
-                return (Command) cons.newInstance(arguments);
-            //wow, this is ridiculous. I think I see what Pat means
-            } catch (ClassNotFoundException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (NoSuchMethodException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (InstantiationException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (IllegalAccessException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            } catch (InvocationTargetException e) {
-                return new CommandUnknown(args, socket, logger, fs);
-            }
+        if (command.equals("stat")) {
+            return new CommandStat(args, socket, logger, fs);
+        }
+        if (command.equals("opendir")) {
+            return new CommandOpendir(args, socket, logger, fs);
         }
         if (command.equals("end")) {
             CommandEnd c = new CommandEnd(args, socket, logger, fs);
@@ -216,7 +203,7 @@ public class IOServer {
             // close everything
             output.close();
             socket.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

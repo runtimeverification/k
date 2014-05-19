@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package Concrete;
 
 import org.strategoxt.imp.runtime.dynamicloading.Descriptor;

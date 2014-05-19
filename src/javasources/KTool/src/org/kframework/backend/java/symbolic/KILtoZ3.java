@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import com.microsoft.z3.ArithExpr;
@@ -36,7 +37,7 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
         try {
             return new Z3Term(context.MkBool(boolToken.booleanValue()));
         } catch (Z3Exception e) {
-            throw new RuntimeException(e.getMessage(), e.getCause());
+            throw new UnsupportedOperationException(e.getMessage(), e.getCause());
         }
     }
 
@@ -45,24 +46,24 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
         try {
             return new Z3Term(context.MkInt(intToken.bigIntegerValue().longValue()));
         } catch (Z3Exception e) {
-            throw new RuntimeException(e.getMessage(), e.getCause());
+            throw new UnsupportedOperationException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
     public ASTNode transform(KItem kItem) {
         if (!(kItem.kLabel() instanceof KLabelConstant)) {
-            throw new RuntimeException();
+            throw new UnsupportedOperationException();
         }
         KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
 
         if (!(kItem.kList() instanceof KList)) {
-            throw new RuntimeException();
+            throw new UnsupportedOperationException();
         }
         KList kList = (KList) kItem.kList();
         
         if (kList.hasFrame()) {
-            throw new RuntimeException();
+            throw new UnsupportedOperationException();
         }
 
         // TODO(AndreiS): implement a more general mechanic
@@ -179,12 +180,12 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
             }
             
             else {
-                throw new RuntimeException("cannot translate term to Z3 format " + kItem);
+                throw new UnsupportedOperationException("cannot translate term to Z3 format " + kItem);
             }
         } catch (ClassCastException e) {
-            throw new RuntimeException(e.getMessage(), e.getCause());
+            throw new UnsupportedOperationException(e.getMessage(), e.getCause());
         } catch (Z3Exception e) {
-            throw new RuntimeException(e.getMessage(), e.getCause());
+            throw new UnsupportedOperationException(e.getMessage(), e.getCause());
         }
     }
 
@@ -201,10 +202,10 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
             } else /*if (variable.sort().equals(IntToken.SORT_NAME))*/ {
                 return new Z3Term(context.MkIntConst(variable.name()));
             } /*else {
-                throw new RuntimeException();
+                throw new UnsupportedOperationException();
             }*/
         } catch (Z3Exception e) {
-            throw new RuntimeException(e.getMessage(), e.getCause());
+            throw new UnsupportedOperationException(e.getMessage(), e.getCause());
         }
     }
 

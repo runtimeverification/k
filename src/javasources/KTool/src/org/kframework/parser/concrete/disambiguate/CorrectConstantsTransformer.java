@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
@@ -8,12 +9,12 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 import java.util.ArrayList;
 
-public class CorrectConstantsTransformer extends BasicTransformer {
+public class CorrectConstantsTransformer extends ParseForestTransformer {
     public CorrectConstantsTransformer(Context context) {
         super(CorrectConstantsTransformer.class.getName(), context);
     }
@@ -26,7 +27,7 @@ public class CorrectConstantsTransformer extends BasicTransformer {
      * the filter will be applied in every parser call.
      */
     @Override
-    public ASTNode transform(TermCons tc) throws TransformerException {
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         if (context.getTokenSorts().contains(tc.getSort())) {
             Production p = (Production) tc.getProduction();
             if (p.getItems().size() == 1 && p.getItems().get(0) instanceof Terminal) {
@@ -37,6 +38,6 @@ public class CorrectConstantsTransformer extends BasicTransformer {
                 return trm;
             }
         }
-        return super.transform(tc);
+        return super.visit(tc, _);
     }
 }

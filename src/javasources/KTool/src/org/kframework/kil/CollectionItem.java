@@ -1,13 +1,16 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import org.w3c.dom.Element;
 
-import aterm.ATermAppl;
-
 /** Subclasses wrap a term as an item in the corresponding collection */
-public abstract class CollectionItem extends Term {
+public abstract class CollectionItem extends Term implements Interfaces.MutableParent<Term, CollectionItem.Children> {
 
     protected Term value;
+    
+    public static enum Children {
+        KEY, VALUE
+    }
 
     public CollectionItem(CollectionItem i) {
         super(i);
@@ -20,10 +23,6 @@ public abstract class CollectionItem extends Term {
 
     public CollectionItem(Element element) {
         super(element);
-    }
-
-    public CollectionItem(ATermAppl atm) {
-        super(atm);
     }
 
     public CollectionItem(String sort) {
@@ -64,5 +63,22 @@ public abstract class CollectionItem extends Term {
     @Override
     public int hashCode() {
         return sort.hashCode() * 19 + value.hashCode();
+    }
+    
+    @Override
+    public Term getChild(Children type) {
+        if (type == Children.VALUE) {
+            return value;
+        }
+        throw new IllegalArgumentException("unexpected child type " + type.name());
+    }
+    
+    @Override
+    public void setChild(Term child, Children type) {
+        if (type == Children.VALUE) {
+            this.value = child;
+        } else {
+            throw new IllegalArgumentException("unexpected child type " + type.name());
+        }
     }
 }

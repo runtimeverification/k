@@ -1,9 +1,11 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.ioserver.commands;
 
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.main.IOServer;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.logging.Logger;
@@ -45,7 +47,7 @@ public abstract class Command implements Runnable {
             output.write(success);
             output.flush();
             output.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             _logger.info("failed to respond to client " + maudeId);
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -56,9 +58,11 @@ public abstract class Command implements Runnable {
 //            if (output != null) {output.close();}
             Thread.sleep(100);   // There should exist a better solution for this problem
             socket.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             _logger.info("failed to close socket for " + maudeId);
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

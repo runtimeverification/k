@@ -1,9 +1,10 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ColorSetting;
 
 
@@ -32,13 +33,9 @@ public class KilTransformer {
     
     public String kilToKore(ASTNode node){
 
-        try {
-            node.accept(builtinTrans).accept(kappTrans).accept(koreTrans);
-            //node.accept(kappTrans).accept(koreTrans);
-        } catch (TransformerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        node = builtinTrans.visitNode(node);
+        node = kappTrans.visitNode(node);
+        koreTrans.visitNode(node);
         return koreTrans.getResult();
     }
 }

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.UIDesign;
 
 import java.awt.Component;
@@ -24,6 +25,17 @@ public class MainWindow extends JFrame {
     JTabbedPane tabbedPanel;
     JMenuBar menuBar;
     JMenu menu;
+    
+    public final Object lock = new Object();
+    private boolean error;
+    
+    public static MainWindow instance() {
+        return window;
+    }
+    
+    public boolean error() {
+        return error;
+    }
 
     public MainWindow(RunKRunCommand command) {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -31,15 +43,11 @@ public class MainWindow extends JFrame {
         this.setExtendedState(MAXIMIZED_BOTH);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         tabbedPanel = new JTabbedPane();
-        try {
-            tabbedPanel.add("Debug", new GraphRepresentation(command));
-            // do not allow to close the default tab
-            // tabbedPanel.setTabComponentAt(0,
-            // new ButtonTabComponent(tabbedPanel));
-            this.getContentPane().add(tabbedPanel);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        tabbedPanel.add("Debug", new GraphRepresentation(command));
+        // do not allow to close the default tab
+        // tabbedPanel.setTabComponentAt(0,
+        // new ButtonTabComponent(tabbedPanel));
+        this.getContentPane().add(tabbedPanel);
         addMenu();
         this.pack();
         this.setVisible(true);
@@ -113,13 +121,12 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public static void showAndExit(Exception e) {
-        showAndExit("Exception", "Debug will close due to :\n" + e.getMessage());
-    }
-
     public static void showAndExit(String title, String message) {
         JOptionPane.showMessageDialog(window, message, title, JOptionPane.ERROR_MESSAGE);
         window.dispose();
-        System.exit(1);
+        window.error = true;
+        synchronized(MainWindow.instance().lock) {
+            MainWindow.instance().lock.notify();
+        }
     }
 }

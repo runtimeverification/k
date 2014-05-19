@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude;
 
 import org.kframework.backend.BackendFilter;
@@ -30,34 +31,34 @@ public class MaudeBuiltinsFilter extends BackendFilter {
     }
 
     @Override
-    public void visit(Configuration node) {
-        return;
+    public Void visit(Configuration node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context node) {
-        return;
+    public Void visit(org.kframework.kil.Context node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Rule node) {
-        return;
+    public Void visit(Rule node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Production node) {
+    public Void visit(Production node, Void _) {
         if (!node.containsAttribute(Attribute.HOOK_KEY)) {
-            return;
+            return null;
         }
         final String hook = node.getAttribute(Attribute.HOOK_KEY);
         if (!maudeHooksMap.containsKey(hook)) {
-            return;
+            return null;
         }
 
         if (specialMaudeHooks.containsKey(hook)) {
             result.append(specialMaudeHooks.getProperty(hook));
             result.append("\n");
-            return;
+            return null;
         }
 
         result.append(" eq ");
@@ -67,7 +68,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         if (node.getArity() > 0) {
             right += "(";
             first = true;
-            super.visit(node);
+            super.visit(node, _);
             right += ")";
         } else {
             left += ".KList";
@@ -83,11 +84,12 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         result.append(right);
         result.append("), .KList)");
         result.append(" .\n");
+        return null;
     }
 
 
     @Override
-    public void visit(Sort node) {
+    public Void visit(Sort node, Void _) {
         if (!first) {
             left += ",, ";
             right += ", ";
@@ -105,13 +107,14 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         }
 
         MaudeFilter filter = new MaudeFilter(context);
-        filter.visit(var);
+        filter.visit(var, null);
         left += filter.getResult();
 
         if (context.getDataStructureSorts().containsKey(node.getName())) {
             var.setSort(context.dataStructureSortOf(node.getName()).type());
         }
         right += var.toString();
+        return null;
     }
 
     private String getHookLabel(String hook) {

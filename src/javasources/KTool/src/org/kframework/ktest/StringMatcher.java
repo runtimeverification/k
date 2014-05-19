@@ -17,7 +17,7 @@ public interface StringMatcher {
      */
     void matches(String pattern, String actual) throws MatchFailure;
     
-    public class MatchFailure extends Exception {
+    public static class MatchFailure extends Exception {
         public MatchFailure(String message) { super(message); }
     }
 }

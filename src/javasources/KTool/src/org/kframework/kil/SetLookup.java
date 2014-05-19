@@ -1,13 +1,8 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.util.ArrayList;
-
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-
 
 /**
  * Builtin set lookup operation. The operation has the form {@code truth := set[key]} with
@@ -56,17 +51,12 @@ public class SetLookup extends BuiltinLookup {
     }
 
     @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
-
+    
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public BuiltinLookup shallowCopy(Variable base, Term key) {
+        return new SetLookup(base, key, choice());
     }
 }

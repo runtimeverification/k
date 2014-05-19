@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 require "../../../../samples/java_rewrite_engine/tutorial/2_languages/3_fun/1_untyped/1_environment/my-pattern-matching.k"
 
-
 module TEST
   imports MY-PATTERN-MATCHING
 

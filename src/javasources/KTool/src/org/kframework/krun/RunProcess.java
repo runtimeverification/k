@@ -1,16 +1,17 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.parser.ParserType;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings.ParserType;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,10 +92,10 @@ public class RunProcess {
 
     }
 
-    public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) throws IOException {
+    public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) {
         try {
             return runParser(parser, pgm, isPgm, startSymbol, context);
-        } catch (TransformerException e) {
+        } catch (ParseFailedException e) {
             e.report();
             return null;
         }
@@ -103,7 +104,7 @@ public class RunProcess {
     /*
      * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
      */
-    public Term runParser(String parser, String value, boolean isNotFile, String startSymbol, Context context) throws TransformerException {
+    public Term runParser(String parser, String value, boolean isNotFile, String startSymbol, Context context) throws ParseFailedException {
         Term term;
 
         if (startSymbol == null) {
@@ -149,7 +150,7 @@ public class RunProcess {
                 this.execute(environment, tokens.toArray(new String[tokens.size()]));
 
                 if (this.getExitCode() != 0) {
-                    throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
                 }
 
                 String kast = this.getStdout() != null ? this.getStdout() : "";

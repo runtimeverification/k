@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import org.kframework.kil.ASTNode;
@@ -7,7 +8,6 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class EliminateRRWrapper extends CopyOnWriteTransformer {
 
@@ -18,7 +18,7 @@ public class EliminateRRWrapper extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         if (node.getLabel().toString().equals(ReachabilityRuleToKRule.RR_COND)) {
                 KList contents = (KList) node.getChild();
                 lphi = contents.getContents().get(0);
@@ -26,7 +26,7 @@ public class EliminateRRWrapper extends CopyOnWriteTransformer {
                 return BoolBuiltin.TRUE;
         }
         
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     public Term getLphi() {

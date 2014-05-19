@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.compile.utils.BasicCompilerStep;
@@ -23,7 +24,7 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
     @Override
     public Definition compile(Definition def, String stepName) {
         FlattenModulesVisitor fm = new FlattenModulesVisitor(context);
-        def.accept(fm);
+        fm.visitNode(def);
         return fm.getResult();
     }
 
@@ -36,11 +37,11 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
         private Definition result;
 
         @Override
-        public void visit(Definition d) {
+        public Void visit(Definition d, Void _) {
             result = new Definition(d);
             Set<String> included = new HashSet<String>();
             Configuration cfg = null;
-            super.visit(d);
+            super.visit(d, _);
             result.setFilename(d.getFilename());
             result.setLocation(d.getLocation());
             result.setMainFile(d.getMainFile());
@@ -85,11 +86,13 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
             }
             if (null != cfg)
                 rmod.getItems().add(cfg);
+            return null;
         }
 
         @Override
-        public void visit(Module m) {
+        public Void visit(Module m, Void _) {
             modules.put(m.getName(), m);
+            return null;
         }
 
         public Definition getResult() {

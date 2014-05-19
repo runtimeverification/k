@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /**
 Test for issue 627.
 Tagging a subsort should not automatically create a klabel for it.
@@ -18,5 +19,5 @@ configuration <k> $PGM:K </k>
 syntax Id ::= "x"
 rule 5 => isExp(x)
 rule <k> true => . </k>
-     <out>... . => ListItem("Correct") </out>
+     <out>... .List => ListItem("Correct") </out>
 endmodule

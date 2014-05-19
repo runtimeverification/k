@@ -5,7 +5,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
@@ -30,15 +29,10 @@ public class UnparserBackend extends BasicBackend {
     public void run(Definition definition) throws IOException {
         if (unflattenFirst) {
             ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
-            try {
-                definition = (Definition)definition.accept(concretizeSyntax);
-            } catch (TransformerException e) {
-                System.err.println("Error unflattening syntax:");
-                e.printStackTrace();
-            }
+            definition = (Definition) concretizeSyntax.visitNode(definition);
         }
         UnparserFilter unparserFilter = new UnparserFilter(context);
-        definition.accept(unparserFilter);
+        unparserFilter.visitNode(definition);
 
         String unparsedText = unparserFilter.getResult();
 

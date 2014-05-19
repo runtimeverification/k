@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module TEST
   syntax B ::= Int | B "*" B
    syntax A ::= B [klabel('a), strict]
@@ -12,5 +13,5 @@ module TEST
   rule I1:Int + I2:Int => I1 +Int I2
   rule 'a(I:Int) => I
 
-  rule <k> print(I:Int) => . ...</k> <out>... . => ListItem(I) </out>
+  rule <k> print(I:Int) => . ...</k> <out>... .List => ListItem(I) </out>
 endmodule

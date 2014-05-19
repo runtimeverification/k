@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Replace data constants with symbolic values and
@@ -27,7 +27,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         
         if (node.getLabel() instanceof Token) {
 //            Token token = ((Token) node.getLabel());
@@ -36,7 +36,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
             return newVar;
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
     
     public Map<Variable, KApp> getGeneratedSV() {

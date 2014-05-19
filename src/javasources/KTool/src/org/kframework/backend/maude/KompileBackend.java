@@ -1,11 +1,11 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.compile.transformers.DeleteFunctionRules;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -33,20 +33,16 @@ public class KompileBackend extends BasicBackend {
             e.printStackTrace();
         }
         MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(maudeHooks, specialMaudeHooks, context);
-        javaDef.accept(builtinsFilter);
+        builtinsFilter.visitNode(javaDef);
         final String mainModule = javaDef.getMainModule();
         StringBuilder builtins = new StringBuilder()
             .append("mod ").append(mainModule).append("-BUILTINS is\n").append(" including ")
             .append(mainModule).append("-BASE .\n")
             .append(builtinsFilter.getResult()).append("endm\n");
-        FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
+        FileUtil.save(context.kompiled.getAbsolutePath() + "/builtins.maude", builtins);
         sw.printIntermediate("Generating equations for hooks");
-        try {
-            javaDef = (Definition) javaDef.accept(new DeleteFunctionRules(maudeHooks
-                    .stringPropertyNames(), context));
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
+        javaDef = (Definition) new DeleteFunctionRules(maudeHooks.stringPropertyNames(), context)
+            .visitNode(javaDef);
         return super.firstStep(javaDef);
     }
 
@@ -69,7 +65,7 @@ public class KompileBackend extends BasicBackend {
             .append("  including ").append(mainModule).append("-BASE .\n")
             .append("  including ").append(mainModule).append("-BUILTINS .\n")
             .append("eq mainModule = '").append(mainModule).append(" .\nendm\n");
-        FileUtil.save(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
+        FileUtil.save(context.kompiled.getAbsolutePath() + "/" + "main.maude", main);
     }
 
     @Override

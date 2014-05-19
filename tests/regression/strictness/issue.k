@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 module ISSUE
 
 syntax Foo ::= bar(Foo, Foo, Foo) [strict(1,  2)]
@@ -21,7 +22,7 @@ rule <k> I:Int + I2:Int => I +Int I2 ...</k>
 
 rule <k> print => . ...</k>
      <sum> I:Int </sum>
-     <out>... . => ListItem(I) </out>
+     <out>... .List => ListItem(I) </out>
 
 rule F:Foo F2:Foo => F ~> F2
 

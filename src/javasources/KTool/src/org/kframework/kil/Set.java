@@ -1,15 +1,11 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
-import aterm.ATermAppl;
 
 /** Set contents have sort Set or SetItem */
 public class Set extends Collection {
@@ -18,10 +14,6 @@ public class Set extends Collection {
 
     public Set(Element element) {
         super(element);
-    }
-
-    public Set(ATermAppl atm) {
-        super(atm);
     }
 
     public Set(Set node) {
@@ -36,19 +28,13 @@ public class Set extends Collection {
         super("Set", col);
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public Set() {
+        super("Set");
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        matcher.match(this, toMatch);
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override

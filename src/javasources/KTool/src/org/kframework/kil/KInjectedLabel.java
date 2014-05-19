@@ -1,15 +1,13 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /** Represents a term of sort KLabel made by injecting something else.
  * Corresponds to operators Foo2KLabel and #_ in source.
  * Usually only occurs as the label of a {@link KApp} an {@link Empty} as arguments.
  */
-public class KInjectedLabel extends Term {
+public class KInjectedLabel extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     protected Term term;
 
     public KInjectedLabel(String location, String filename) {
@@ -51,22 +49,6 @@ public class KInjectedLabel extends Term {
     }
 
     @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
-
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
-
-
-    @Override
     public KInjectedLabel shallowCopy() {
         return new KInjectedLabel(this);
     }
@@ -89,10 +71,23 @@ public class KInjectedLabel extends Term {
         return term.contains(k.term);
     }
 
-
     @Override
     public int hashCode() {
         return term.hashCode();
     }
 
+    @Override
+    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
+        return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term getChild(Enum<?> type) {
+        return term;
+    }
+
+    @Override
+    public void setChild(Term child, Enum<?> type) {
+        this.term = child;
+    }
 }

@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
 import org.kframework.compile.utils.BasicCompilerStep;
@@ -25,7 +26,7 @@ public class DeclareCellLabels extends BasicCompilerStep<Definition> {
         Module module = def.getSingletonModule();        
 
         CellLabelCollector labels = new CellLabelCollector(context);
-        module.accept(labels);
+        labels.visitNode(module);
         
         for (String cellLabel : labels.cellLabels) {
             module.addProduction("CellLabel", new Terminal(cellLabel));

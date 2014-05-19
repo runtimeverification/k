@@ -1,10 +1,10 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class GetLhsPattern extends CopyOnWriteTransformer {
     public GetLhsPattern(String s, Context context) {
@@ -12,7 +12,7 @@ public class GetLhsPattern extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Rewrite node) throws TransformerException {
+    public ASTNode visit(Rewrite node, Void _)  {
         return node.getLeft();
     }
 

@@ -24,7 +24,6 @@ import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
@@ -49,8 +48,8 @@ public class JavaSymbolicBackend extends BasicBackend {
             super("Serialize Compiled Definition to XML", context);
         }
         @Override
-        public ASTNode transform(Definition node) throws TransformerException {
-            BinaryLoader.save(new File(context.dotk, "defx-java.bin").toString(), node);
+        public ASTNode visit(Definition node, Void _)  {
+            BinaryLoader.save(new File(context.kompiled, "defx-java.bin").toString(), node);
 
             return node;
         }
@@ -74,7 +73,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         assert definition.getIndex() != null;
 
-        BinaryLoader.save(new File(context.dotk,
+        BinaryLoader.save(new File(context.kompiled,
                 JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
                 definition);
 
@@ -117,7 +116,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         //steps.add(new AddSupercoolDefinition(context));
         steps.add(new AddHeatingConditions(context));
         //steps.add(new AddSuperheatRules(context));
-        steps.add(new DesugarStreams(context, true));
+        steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new AddKCell(context));
         steps.add(new AddStreamCells(context));
@@ -140,7 +139,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new AddInjections(context));
 
         steps.add(new FlattenSyntax(context));
-        steps.add(new ResolveBlockingInput(context, true));
+        steps.add(new ResolveBlockingInput(context));
         steps.add(new InitializeConfigurationStructure(context));
         //steps.add(new AddKStringConversion(context));
         //steps.add(new AddKLabelConstant(context));

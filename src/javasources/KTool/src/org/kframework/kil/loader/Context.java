@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import java.io.File;
@@ -16,6 +16,8 @@ import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Sets;
+
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -31,7 +33,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -160,20 +161,14 @@ public class Context implements Serializable {
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
-    public transient ExperimentalParserOptions experimentalParserOptions;
     
     public Context(GlobalOptions globalOptions) {
         this.globalOptions = globalOptions;
         initSubsorts();
     }
     
-    public Context(GlobalOptions globalOptions, ExperimentalParserOptions experimentalParserOptions) {
-        this(globalOptions);
-        this.experimentalParserOptions = experimentalParserOptions;
-    }
-    
     public Context(KompileOptions kompileOptions) {
-        this(kompileOptions.global, kompileOptions.experimental.parser);
+        this(kompileOptions.global);
         this.kompileOptions = kompileOptions;
     }
 
@@ -263,6 +258,10 @@ public class Context implements Serializable {
      */
     public String getLUBSort(Set<String> sorts) {
         return subsorts.getLUB(sorts);
+    }
+    
+    public String getLUBSort(String... sorts) {
+        return subsorts.getLUB(Sets.newHashSet(sorts));
     }
 
     /**

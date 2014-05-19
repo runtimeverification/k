@@ -1,13 +1,17 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -19,14 +23,14 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp kapp) throws TransformerException {
+    public ASTNode visit(KApp kapp, Void _)  {
         ASTNode t = internalTransform(kapp);
         try {
-            t = t.accept(new TypeSystemFilter(context));
-        } catch (TransformerException e) {
+            t = new TypeSystemFilter(context).visitNode(t);
+        } catch (ParseFailedException e) {
             //type error, so don't disambiguate
         }
-        t = t.accept(new RemoveEmptyLists(context));
+        t = new RemoveEmptyLists(context).visitNode(t);
         return t;
     }
 
@@ -36,7 +40,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(TermCons tcParent) throws TransformerException {
+        public ASTNode visit(TermCons tcParent, Void _)  {
             for (int i = 0; i < tcParent.getContents().size(); i++) {
                 Term child = tcParent.getContents().get(i);
                 internalTransform(tcParent, i, child);
@@ -63,7 +67,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     }
 
 
-    public ASTNode internalTransform(KApp kapp) throws TransformerException {
+    public ASTNode internalTransform(KApp kapp)  {
         Term label = kapp.getLabel();
         Term child = kapp.getChild();
         child = child.shallowCopy();
@@ -71,11 +75,11 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         if (label instanceof KInjectedLabel && child.equals(KList.EMPTY)) {
             if (label instanceof FreezerLabel) {
                 FreezerLabel l = (FreezerLabel) label;
-                return new Freezer((Term)l.getTerm().accept(this));
+                return new Freezer((Term) this.visitNode(l.getTerm()));
             }
             Term injected = ((KInjectedLabel)label).getTerm();
 //            if (injected instanceof Token) {
-                return (Term)injected.accept(this);
+                return (Term) this.visitNode(injected);
 //            }
         } else if (label instanceof KLabelConstant) {
             String klabel = ((KLabelConstant) label).getLabel();
@@ -87,7 +91,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             }
             if (conses != null) {    
                 for (int i = 0; i < contents.size(); i++) {
-                    contents.set(i, (Term)contents.get(i).accept(this));
+                    contents.set(i, (Term) this.visitNode(contents.get(i)));
                 }
                 for (String cons : conses) {
                     Production p = context.conses.get(cons);
@@ -109,7 +113,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                     possibleTerms.add(new TermCons(p.getSort(), cons, newContents, context));
                 }
                 if (possibleTerms.size() == 0) {
-                    return super.transform(kapp);
+                    return super.visit(kapp, null);
                 }
                 if (possibleTerms.size() == 1) {
                     return possibleTerms.get(0);
@@ -125,7 +129,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                             possibleTerms.add(new ListTerminator(sort, null));
                     }
                     if (possibleTerms.size() == 0) {
-                        return super.transform(kapp);
+                        return super.visit(kapp, null);
                     }
                     if (possibleTerms.size() == 1) {
                         return possibleTerms.get(0);
@@ -140,22 +144,22 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             assert ((KList)child).getContents().size() == 0;
             return kapp;
             }
-        return super.transform(kapp);
+        return super.visit(kapp, null);
     }
 
     @Override
-    public ASTNode transform(Cell cell) throws TransformerException {
+    public ASTNode visit(Cell cell, Void _)  {
         if (cell.getLabel().matches(".*-fragment")) {
-            return cell.getContents().accept(this);
+            return this.visitNode(cell.getContents());
         }
-        return super.transform(cell);
+        return super.visit(cell, _);
     }
 
     @Override
-    public ASTNode transform(Bag bag) throws TransformerException {
+    public ASTNode visit(Bag bag, Void _)  {
         List<Term> contents = new ArrayList<Term>();
         for (Term child : bag.getContents()) {
-            Term accept = (Term) child.accept(this);
+            Term accept = (Term) this.visitNode(child);
             if (accept instanceof ListTerminator) {
                 ListTerminator empty = (ListTerminator) accept;
                 if (!empty.getSort().equals("Bag")) {
@@ -172,5 +176,61 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             return contents.get(0);
         }
         return new Bag(contents);
+    }
+    
+    Comparator<Term> unparserLexicalComparator = new Comparator<Term>() {
+
+        @Override
+        public int compare(Term o1, Term o2) {
+            UnparserFilterNew unparser = new UnparserFilterNew(context);
+            unparser.visitNode(o1);
+            String s1 = unparser.getResult();
+            unparser = new UnparserFilterNew(context);
+            unparser.visitNode(o2);
+            String s2 = unparser.getResult();
+            return s1.compareTo(s2);
+        }
+        
+    };
+    
+    @Override
+    public ASTNode visit(MapBuiltin map, Void _) {
+        Map result = new Map();
+        for (java.util.Map.Entry<Term, Term> entry : map.elements().entrySet()) {
+            result.add(new MapItem((Term)this.visitNode(entry.getKey()), (Term)this.visitNode(entry.getValue())));
+        }
+        Collections.sort(result.getContents(), unparserLexicalComparator);
+        for (Term base : map.baseTerms()) {
+            result.add((Term)this.visitNode(base));
+        }
+        return result;
+    }
+    
+    @Override
+    public ASTNode visit(ListBuiltin list, Void _) {
+        org.kframework.kil.List result = new org.kframework.kil.List();
+        for (Term element : list.elementsLeft()) {
+            result.add(new ListItem((Term)this.visitNode(element)));
+        }
+        for (Term base : list.baseTerms()) {
+            result.add((Term)this.visitNode(base));
+        }
+        for (Term element : list.elementsRight()) {
+            result.add((Term)this.visitNode(new ListItem(element)));
+        }
+        return result;
+    }
+    
+    @Override
+    public ASTNode visit(SetBuiltin set, Void _) {
+        org.kframework.kil.Set result = new org.kframework.kil.Set();
+        for (Term element : set.elements()) {
+            result.add(new ListItem((Term)this.visitNode(element)));
+        }
+        Collections.sort(result.getContents(), unparserLexicalComparator);
+        for (Term base : set.baseTerms()) {
+            result.add((Term)this.visitNode(base));
+        }
+        return result;
     }
 }

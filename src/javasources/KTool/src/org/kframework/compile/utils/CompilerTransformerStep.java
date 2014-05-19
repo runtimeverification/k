@@ -1,18 +1,19 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.AbstractTransformer;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 
 public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerStep<T> {
     
-    Transformer t;
+    AbstractTransformer<RuntimeException> t;
 
-    public CompilerTransformerStep(Transformer t, Context context) {
+    public CompilerTransformerStep(AbstractTransformer<RuntimeException> t, Context context) {
         super(context);
         this.t = t;
     }
@@ -20,11 +21,7 @@ public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerSte
     @Override
     public T compile(T def, String stepName) {
         ASTNode result = null;
-        try {
-            result = def.accept(t);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
+        result = t.visitNode(def);
         if (!def.getClass().isInstance(result)) {
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                     KException.KExceptionGroup.INTERNAL,

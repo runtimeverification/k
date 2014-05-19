@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +78,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.Main;
@@ -94,10 +93,6 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
-
-import static org.apache.commons.io.FileUtils.deleteDirectory;
-import static org.apache.commons.io.FileUtils.moveDirectory;
 
 public class RLBackend extends BasicBackend implements Backend {
 
@@ -145,7 +140,7 @@ public class RLBackend extends BasicBackend implements Backend {
         }
         MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(
                 maudeHooks, specialMaudeHooks, context);
-        javaDef.accept(builtinsFilter);
+        builtinsFilter.visitNode(javaDef);
         final String mainModule = javaDef.getMainModule();
         StringBuilder builtins = new StringBuilder().append("mod ")
             .append(mainModule).append("-BUILTINS is\n")
@@ -190,7 +185,7 @@ public class RLBackend extends BasicBackend implements Backend {
          ****************/
 
         UnparserFilter unparserFilter = new UnparserFilter(context);
-        javaDef.accept(unparserFilter);
+        unparserFilter.visitNode(javaDef);
 
         String unparsedText = unparserFilter.getResult();
 
@@ -227,8 +222,8 @@ public class RLBackend extends BasicBackend implements Backend {
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern),
                     null);
             defaultPattern = (Rule) pattern;
-        } catch (TransformerException e1) {
-            e1.printStackTrace();
+        } catch (ParseFailedException e1) {
+            e1.report();
         } catch (CompilerStepDone e) {
             e.printStackTrace();
         }
@@ -254,8 +249,6 @@ public class RLBackend extends BasicBackend implements Backend {
                 icontext = res.getResult().getRawResult();//.getResult();
             } catch (KRunExecutionException e1) {
                 e1.printStackTrace();
-            } catch (TransformerException e) {
-                e.printStackTrace();
             }
         }
         /****************
@@ -268,16 +261,11 @@ public class RLBackend extends BasicBackend implements Backend {
         if (icontext != null) {
             for (Term lpgm : lpgms) {
                 Term merged;
-                try {
-                    merged = mergeLeftIntoRight(lpgm, icontext);
+                merged = mergeLeftIntoRight(lpgm, icontext);
 //                    System.out.println("Left: " + lpgm);
 //                    System.out.println("Right:" + icontext);
 //                    System.out.println("Merged: " + merged);
-                    programs.add(merged);
-                } catch (TransformerException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                programs.add(merged);
 //                programs.add(merged);
             }
         } else {
@@ -307,11 +295,11 @@ public class RLBackend extends BasicBackend implements Backend {
         }
     }
 
-    private Term mergeLeftIntoRight(Term lpgm, Term icontext) throws TransformerException {
+    private Term mergeLeftIntoRight(Term lpgm, Term icontext) {
         
         Term context = icontext.shallowCopy();
         MergeToTransformer mtt = new MergeToTransformer(this.context, lpgm);
-        context = (Term) context.accept(mtt);
+        context = (Term) mtt.visitNode(context);
         
         return context;
     }
@@ -343,7 +331,7 @@ public class RLBackend extends BasicBackend implements Backend {
         steps.add(new AddHeatingConditions(context));
         steps.add(new AddSuperheatRules(context));
         // steps.add(new ResolveSymbolicInputStream(context)); // symbolic step
-        steps.add(new DesugarStreams(context, false));
+        steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new TagUserRules(context)); // symbolic step
         steps.add(new AddKCell(context));
@@ -366,7 +354,7 @@ public class RLBackend extends BasicBackend implements Backend {
         steps.add(new AddTopCellRules(context));
         steps.add(new ResolveBinder(context));
         steps.add(new ResolveAnonymousVariables(context));
-        steps.add(new ResolveBlockingInput(context, false));
+        steps.add(new ResolveBlockingInput(context));
         steps.add(new AddK2SMTLib(context));
         steps.add(new AddPredicates(context));
         steps.add(new ResolveSyntaxPredicates(context));

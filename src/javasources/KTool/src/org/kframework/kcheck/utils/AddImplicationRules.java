@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.utils;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddImplicationRules extends CopyOnWriteTransformer {
 
@@ -28,7 +28,7 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
     
         List<ModuleItem> items = node.getItems();
         node = node.shallowCopy();
@@ -41,18 +41,18 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
                 
                 ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(
                         context);
-                r.accept(parser);
+                parser.visitNode(r);
 
                 
                 Term newPi = parser.getPi_prime().shallowCopy();
                 Term implies = AddCheckConstants.getFreshImplicationForRule(reachabilityRules.indexOf(rr), context);
                 SetCellContent app = new SetCellContent(context, implies, "k");
-                newPi = (Term) newPi.accept(app);
+                newPi = (Term) app.visitNode(newPi);
 
                 
                 Term newPiPrime = parser.getPi_prime().shallowCopy();
                 SetCellContent appPrime = new SetCellContent(context, KSequence.EMPTY, "k");
-                newPiPrime = (Term) newPiPrime.accept(appPrime);
+                newPiPrime = (Term) appPrime.visitNode(newPiPrime);
                 
                 // insert patternless formulas into condition
                 Term phi = parser.getPhi().shallowCopy();

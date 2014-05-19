@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class TestGenResults {
             
             UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
             Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
-            concretePgm.accept(t);
+            t.visitNode(concretePgm);
             // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
             sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
             sb.append("\nResult:");
@@ -47,7 +48,7 @@ public class TestGenResults {
 
             if (isDefaultPattern) {
                 UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-                substitution.get("B:Bag").accept(unparser);
+                unparser.visitNode(substitution.get("B:Bag"));
                 sb.append("\n" + unparser.getResult());
             } else {
                 boolean empty = true;
@@ -55,7 +56,7 @@ public class TestGenResults {
                 for (String variable : substitution.keySet()) {
                     UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
                     sb.append("\n" + variable + " -->");
-                    substitution.get(variable).accept(unparser);
+                    unparser.visitNode(substitution.get(variable));
                     sb.append("\n" + unparser.getResult());
                     empty = false;
                 }

@@ -1,4 +1,7 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
+
+import org.kframework.krun.KRunExecutionException;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
@@ -53,7 +56,7 @@ public interface KRunDebugger {
     @param steps The maximum number of transitions to follow through (0 to stop before first
     transition)
     */
-    public void step(int steps) throws Exception;
+    public void step(int steps) throws KRunExecutionException;
 
     /**
     Explore the complete search graph from the currently selected state forward a specified number
@@ -62,12 +65,12 @@ public interface KRunDebugger {
     @return A set of all new states discovered by the stepper after searching the specified number
     of steps.
     */
-    public SearchResults stepAll(int steps) throws Exception;
+    public SearchResults stepAll(int steps) throws KRunExecutionException;
 
     /**
     Explore the search graph one step at a time until rewriting terminates.
     */
-    public void resume() throws Exception;
+    public void resume() throws KRunExecutionException;
     /**
     Display a textual representation of the specified state.
     @param stateNum The integral state number of the state to print

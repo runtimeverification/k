@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Filter the rule side condition such that it contains only
@@ -29,7 +29,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         Term label = node.getLabel();
         if (label instanceof KLabelConstant) {
             Term content = node.getChild();
@@ -39,7 +39,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                     List<Term> remainingTerms = new ArrayList<Term>();
                     for (Term t : terms) {
                         CheckSmtLibByAddingPredicates csv = new CheckSmtLibByAddingPredicates(context);
-                        t.accept(csv);
+                        csv.visitNode(t);
                         if (csv.smtValid()) {
                             filteredTerms.add(t.shallowCopy());
                             generatedPredicates.addAll(csv.getContents());
@@ -50,7 +50,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                 }
             } else {
                 CheckSmtLibByAddingPredicates csv = new CheckSmtLibByAddingPredicates(context);
-                content.accept(csv);
+                csv.visitNode(content);
                 if (csv.smtValid()) {
                     filteredTerms.add(content.shallowCopy());
                     generatedPredicates.addAll(csv.getContents());
@@ -63,7 +63,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
             return node;
         }
 
-        return super.transform(node);
+        return super.visit(node, _);
     }
 
     public List<Term> getFilteredTerms() {

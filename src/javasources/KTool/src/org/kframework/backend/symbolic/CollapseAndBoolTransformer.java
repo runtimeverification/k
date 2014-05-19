@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
  * Collapse nested conjunctions like _andBool_(_andBool_(t1, t2), t3)
@@ -25,7 +25,7 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(KApp node) throws TransformerException {
+    public ASTNode visit(KApp node, Void _)  {
         return recursiveCollapseAndBool(node);
     }
     

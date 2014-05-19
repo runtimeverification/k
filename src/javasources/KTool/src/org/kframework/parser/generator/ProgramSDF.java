@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 
@@ -22,9 +23,6 @@ import org.kframework.utils.StringUtil;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
- *
- * @author RaduFmse
- *
  */
 public class ProgramSDF {
 
@@ -32,21 +30,22 @@ public class ProgramSDF {
 
         // collect all the syntax modules
         CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context);
-        def.accept(csmv);
+        csmv.visitNode(def);
 
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
         CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context);
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
-            m.accept(psdfv);
-            m.accept(ctv);
-            m.accept(ks2gsf);
+            psdfv.visitNode(m);
+            ctv.visitNode(m);
+            ks2gsf.visitNode(m);
         }
 
         // save the new parser info
-        BinaryLoader.save(context.dotk.getPath()+ "/pgm/newParser.bin", ks2gsf.getGrammar());
+        new File(context.kompiled, "pgm").mkdirs();
+        BinaryLoader.save(context.kompiled.getPath()+ "/pgm/newParser.bin", ks2gsf.getGrammar());
 
         StringBuilder sdf = new StringBuilder();
         sdf.append("module Program\n\n");
@@ -109,10 +108,10 @@ public class ProgramSDF {
         }
 
         sdf.append("\n");
-        sdf.append("    DzDzINT        -> DzDzInt\n");
-        sdf.append("    DzDzID        -> DzDzId\n");
-        sdf.append("    DzDzSTRING    -> DzDzString\n");
-        sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
+        //sdf.append("    DzDzINT        -> DzDzInt\n");
+        //sdf.append("    DzDzID        -> DzDzId\n");
+        //sdf.append("    DzDzSTRING    -> DzDzString\n");
+        //sdf.append("    DzDzFLOAT    -> DzDzFloat\n");
         sdf.append("\n");
 
         sdf.append("\n%% start symbols subsorts\n");
@@ -147,7 +146,7 @@ public class ProgramSDF {
 
         for (String t : ctv.terminals) {
             if (t.matches("[a-zA-Z\\_][a-zA-Z0-9\\_]*")) {
-                sdf.append("    \"" + StringUtil.escape(t) + "\" -> DzDzID {reject}\n");
+                sdf.append("    \"" + StringUtil.escape(t) + "\" -> IdDz {reject}\n");
             }
         }
 

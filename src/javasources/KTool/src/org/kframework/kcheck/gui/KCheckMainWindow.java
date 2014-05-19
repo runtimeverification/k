@@ -1,20 +1,8 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kcheck.gui;
 
-import org.apache.commons.io.FilenameUtils;
-import org.kframework.backend.Backend;
-import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kcheck.KCheckFrontEnd;
-import org.kframework.kcheck.RLBackend;
-import org.kframework.kil.loader.Context;
 import org.kframework.krun.RunProcess;
 import org.kframework.ktest.ExecNames;
-import org.kframework.ktest.Proc;
-import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.Stopwatch;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,9 +11,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.List;
 
 /**
  * Created by andrei on 2/11/14.
@@ -353,7 +338,7 @@ public class KCheckMainWindow extends JFrame implements KeyListener, ActionListe
         switch (cmd) {
             case BROWSE_FILE:
                 selectFile(file);
-                GlobalSettings.CHECK = file.getText();
+                //GlobalSettings.CHECK = file.getText();
                 break;
             case BROWSE_PGM:
                 selectFile(pgm);

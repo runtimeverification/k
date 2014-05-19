@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module FUNCONS-SYNTAX
   syntax K ::= deref(K)                       [strict]
              | boundValue(Id)

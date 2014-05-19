@@ -94,38 +94,41 @@ public class HTMLFilter extends BackendFilter {
     }
     
     @Override
-    public void visit(Definition def) {
-        def.accept(patternsVisitor);
+    public Void visit(Definition def, Void _) {
+        patternsVisitor.visitNode(def);
         title = def.getMainModule();
-        super.visit(def);
+        return super.visit(def, _);
 
     }
 
     @Override
-    public void visit(Module mod) {
+    public Void visit(Module mod, Void _) {
         if (mod.isPredefined())
-            return;
+            return _;
         result.append("<div>" + "MODULE <span class=\"large\">" + mod.getName() + "</span> <br /> <br />" + endl);
-        super.visit(mod);
+        super.visit(mod, _);
         result.append("END MODULE </div>" + endl + "<br />" + endl);
+        return _;
     }
 
     @Override
-    public void visit(Syntax syn) {
+    public Void visit(Syntax syn, Void _) {
         // These are rendered using a table to position each symbol nicely.
         result.append("<table> <tr> <td> SYNTAX ");
         firstProduction = true;
-        super.visit(syn);
+        super.visit(syn, _);
         result.append("</table>" + endl + "<br />" + endl);
+        return _;
     }
 
     @Override
-    public void visit(Sort sort) {
+    public Void visit(Sort sort, Void _) {
         result.append("<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>");
+        return _;
     }
 
     @Override
-    public void visit(Production p) {
+    public Void visit(Production p, Void _) {
         if (firstProduction) {
             result.append("</td><td> ::= </td> <td>");
             firstProduction = false;
@@ -148,7 +151,7 @@ public class HTMLFilter extends BackendFilter {
             for (ProductionItem pi : p.getItems()) {
                 if (!(pi instanceof Terminal)) {
                     termFilter.setResult("");
-                    pi.accept(termFilter);
+                    termFilter.visitNode(pi);
                     pattern = pattern.replace("{#" + n++ + "}", isLatex ? "\\)" + termFilter.getResult() + "\\(" : termFilter.getResult());
                 }
             }
@@ -156,31 +159,35 @@ public class HTMLFilter extends BackendFilter {
              * treated by MathJax. */
             result.append(isLatex ? "\\(" + pattern + "\\)" : pattern);
         } else {
-            super.visit(p);
+            super.visit(p, _);
         }
-        p.getAttributes().accept(this);
+        this.visitNode(p.getAttributes());
         result.append("</td> </tr>" + endl);
+        return _;
     }
 
     @Override
-    public void visit(Terminal pi) {
+    public Void visit(Terminal pi, Void _) {
         result.append(makeGreek(htmlify(pi.getTerminal())) +" ");
+        return _;
     }
 
     @Override
-    public void visit(UserList ul) {
+    public Void visit(UserList ul, Void _) {
         result.append("<span class =\"italic\">" + "List</span>{#<span class =\"italic\">" + ul.getSort() + "</span>,\"" + ul.getSeparator() + "\"} </span>"  + endl);
+        return _;
     }
 
     @Override
-    public void visit(Configuration conf) {
+    public Void visit(Configuration conf, Void _) {
         result.append("<div> CONFIGURATION : <br />");
-        super.visit(conf);
+        super.visit(conf, _);
         result.append("</div> <br />");
+        return _;
     }
 
     @Override
-    public void visit(Cell c) {
+    public Void visit(Cell c, Void _) {
         String blockClasses = "block";
         String tabClasses = "tab";
         
@@ -225,17 +232,19 @@ public class HTMLFilter extends BackendFilter {
         }
             
         result.append("> <div class=\"center\">");
-        super.visit(c);
+        super.visit(c, _);
         result.append("</div> </div> </div>" + endl);
+        return _;
     }
 
-    public void visit(Collection col) {
+    public Void visit(Collection col, Void _) {
         if (col.isEmpty()) {
             printEmpty(col.getSort());
-            return;
+            return _;
         }
         List<Term> contents = col.getContents();
         printList(contents, "");
+        return _;
     }
 
     private void printEmpty(String sort) {
@@ -250,94 +259,101 @@ public class HTMLFilter extends BackendFilter {
             } else {
                 result.append(str);
             }
-            trm.accept(this);
+            this.visitNode(trm);
         }
     }
     
-    public void visit(TermComment tc) {
+    public Void visit(TermComment tc, Void _) {
         result.append("<br />");
-        super.visit(tc);
+        return super.visit(tc, _);
     }
 
     @Override
-    public void visit(Variable var) {
+    public Void visit(Variable var, Void _) {
         result.append("<span ");
         if (var.getSort() != null) {
             result.append("title =\"" + var.getSort() + "\"");
         }
         result.append(">" + makeGreek(var.getName()));
         result.append(" </span> ");
+        return _;
     }
 
     @Override
-    public void visit(ListTerminator e) {
+    public Void visit(ListTerminator e, Void _) {
         result.append(" <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ");
+        return _;
     }
 
     @Override
-    public void visit(Rule rule) {
+    public Void visit(Rule rule, Void _) {
         result.append("<div> <span ");
         if (!"".equals(rule.getLabel())) {
             result.append("title =\"Rule Label: " + rule.getLabel() + "\"");
         }
         result.append("> RULE </span>");
         result.append("<div class=\"cell\"> ");
-        rule.getBody().accept(this);
+        this.visitNode(rule.getBody());
         result.append("</div> ");
         if (rule.getRequires() != null) {
             result.append(" when ");
-            rule.getRequires().accept(this);
+            this.visitNode(rule.getRequires());
         }
         if (rule.getEnsures() != null) {
             result.append(" ensures ");
-            rule.getEnsures().accept(this);
+            this.visitNode(rule.getEnsures());
         }
-        rule.getAttributes().accept(this);
+        this.visitNode(rule.getAttributes());
         result.append("</div> <br />" + endl);
+        return _;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context cxt) {
+    public Void visit(org.kframework.kil.Context cxt, Void _) {
         result.append("<div> CONTEXT ");
-        cxt.getBody().accept(this);
+        this.visitNode(cxt.getBody());
         if (cxt.getRequires() != null) {
             result.append(" when ");
-            cxt.getRequires().accept(this);
+            this.visitNode(cxt.getRequires());
         }
         if (cxt.getEnsures() != null) {
             result.append(" ensures ");
-            cxt.getEnsures().accept(this);
+            this.visitNode(cxt.getEnsures());
         }
-        cxt.getAttributes().accept(this);
+        this.visitNode(cxt.getAttributes());
         result.append("</div> <br />" + endl);
+        return _;
     }
 
     @Override
-    public void visit(Hole hole) {
+    public Void visit(Hole hole, Void _) {
         result.append("&#9633;");
+        return _;
     }
 
     @Override
-    public void visit(Rewrite rew) {
+    public Void visit(Rewrite rew, Void _) {
         
         result.append("<table class=\"rewrite\"> <tr class='rewriteLeft'> <td> <em>");
-        rew.getLeft().accept(this);
+        this.visitNode(rew.getLeft());
         result.append("</em></td></tr> <tr class='rewriteRight'> <td><em>");
-        rew.getRight().accept(this);
+        this.visitNode(rew.getRight());
         result.append("</em> </td> </tr> </table>");
+        return _;
     }
 
     @Override
-    public void visit(Bracket trm) {
+    public Void visit(Bracket trm, Void _) {
         if (trm.getContent() instanceof Rewrite)
-            super.visit(trm);
+            super.visit(trm, _);
         else {
             String pattern = getBracketPattern(trm);
             HTMLFilter termFilter = new HTMLFilter(includePath, context);
-            trm.getContent().accept(termFilter);
+            termFilter.visitNode(trm.getContent());
             pattern = pattern.replace("{#1}", "<span>" + termFilter.getResult() + "</span>");
             result.append(pattern);
         }
+        return _;
     }
 
     private String getBracketPattern(Bracket trm) {
@@ -346,12 +362,12 @@ public class HTMLFilter extends BackendFilter {
 
 
     @Override
-    public void visit(TermCons trm) {
+    public Void visit(TermCons trm, Void _) {
         HTMLPatternType type = patternsVisitor.getPatternType(trm.getCons());
         if(type == null)
         {
             Production pr = context.conses.get(trm.getCons());
-            pr.accept(patternsVisitor);
+            patternsVisitor.visitNode(pr);
             type = patternsVisitor.getPatternType(trm.getCons());
         }
         /* This condition pretty much is : "Does this term have a Latex or HTML attribute?" */
@@ -364,7 +380,7 @@ public class HTMLFilter extends BackendFilter {
             HTMLFilter termFilter = new HTMLFilter(includePath, context);
             for (Term t : trm.getContents()) {
                 termFilter.setResult("");
-                t.accept(termFilter);
+                termFilter.visitNode(t);
                 if(type == HTMLPatternType.LATEX)
                     pattern = pattern.replace("{#" + n++ + "}", "\\) " + termFilter.getResult() + "\\(");
                 else
@@ -387,20 +403,20 @@ public class HTMLFilter extends BackendFilter {
             if (pr.getItems().size() > 0) {
                 if (pr.getItems().get(0) instanceof UserList) {
                     String separator = ((UserList) pr.getItems().get(0)).getSeparator();
-                    trm.getContents().get(0).accept(this);
+                    this.visitNode(trm.getContents().get(0));
                     result.append(" " + separator + " ");
-                    trm.getContents().get(1).accept(this);
+                    this.visitNode(trm.getContents().get(1));
                     result.append(" ");
                     empty = false;
                 } else
                     for (int i = 0, j = 0; i < pr.getItems().size(); i++) {
                         ProductionItem pi = pr.getItems().get(i);
                         if (pi instanceof Terminal) {
-                            pi.accept(this);
+                            this.visitNode(pi);
                             empty = false;
                         } else if (pi instanceof Sort) {
                             Term t = trm.getContents().get(j++);
-                            t.accept(this);    
+                            this.visitNode(t);    
                             empty = false;
                         }
                     }
@@ -408,43 +424,47 @@ public class HTMLFilter extends BackendFilter {
             if(empty)
                 result.append("&nbsp; &nbsp; &middot; &nbsp; &nbsp;");
         }
+        return _;
     }
 
     @Override
-    public void visit(MapItem mi) {
-        mi.getKey().accept(this);
+    public Void visit(MapItem mi, Void _) {
+        this.visitNode(mi.getKey());
         result.append("<span text-size=\"large\"> &#x21a6; </span>");
-        mi.getItem().accept(this);
+        return this.visitNode(mi.getItem());
     }
 
     @Override
-    public void visit(KSequence k) {
+    public Void visit(KSequence k, Void _) {
         if (k.isEmpty()) {
             printEmpty("K");
-            return;
+            return _;
         }
         printList(k.getContents(), "&#x219d; ");
+        return _;
     }
 
     @Override
-    public void visit(KApp app) {
+    public Void visit(KApp app, Void _) {
         if (app.getLabel() instanceof Token) {
             result.append("<span title =\"" + ((Token)app.getLabel()).tokenSort() + "\"> " + makeGreek(((Token)app.getLabel()).value()) + " </span> ");
         } else {
-            app.getLabel().accept(this);
+            this.visitNode(app.getLabel());
             result.append("(");
-            app.getChild().accept(this);
+            this.visitNode(app.getChild());
             result.append(")");
         }
+        return _;
     }
 
     @Override
-    public void visit(KList list) {
+    public Void visit(KList list, Void _) {
         printList(list.getContents(), "<span class=\"bold\">, </span>");
+        return _;
     }
 
     @Override
-    public void visit(LiterateDefinitionComment comment) {
+    public Void visit(LiterateDefinitionComment comment, Void _) {
         /*MathJax does not render these comments correctly. 
          * It's told explicitly to ignore them with the tex2jax_ignore class. */
         if (comment.getType() == LiterateCommentType.LATEX) {
@@ -454,10 +474,11 @@ public class HTMLFilter extends BackendFilter {
         } else if (comment.getType() == LiterateCommentType.PREAMBLE) {
             preamble += comment.getValue();
         }
+        return _;
     }
 
     @Override
-    public void visit(LiterateModuleComment comment) {
+    public Void visit(LiterateModuleComment comment, Void _) {
         /*MathJax does not render these comments correctly. 
          * It's told explicitly to ignore them with the tex2jax_ignore class. */
         if (comment.getType() == LiterateCommentType.LATEX) {
@@ -467,32 +488,34 @@ public class HTMLFilter extends BackendFilter {
         } else if (comment.getType() == LiterateCommentType.PREAMBLE) {
             preamble += comment.getValue();
         }
+        return _;
     }
     
     @Override
-    public void visit(Attributes attributes) {
+    public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
         for (Attribute entry : attributes.getContents()) {
-            entry.accept(this);
+            this.visitNode(entry);
         }
         if(!firstAttribute)
             result.append("</span> ]");
+        return null;
     }
 
     @Override
-    public void visit(Attribute entry) {
+    public Void visit(Attribute entry, Void _) {
         if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
-            return;
+            return null;
         if (context.isTagGenerated(entry.getKey()))
-            return;
+            return null;
         if (context.isParsingTag(entry.getKey()))
-            return;
+            return null;
         
         // The latex and/or html attributes are processed in the HTMLPatternVisitor, not here.
         if (entry.getKey().equals("latex"))
-            return;
+            return null;
         if (entry.getKey().equals("html")) {
-            return;
+            return null;
         }
             
         
@@ -507,6 +530,7 @@ public class HTMLFilter extends BackendFilter {
         
         if (!value.isEmpty())
             result.append("(" + value + ")");
+        return null;
     }
     
     private String makeGreek(String name) {

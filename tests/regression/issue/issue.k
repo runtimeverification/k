@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 
 module ISSUE-SYNTAX
   syntax Stmt ::= "read" String
@@ -20,17 +21,17 @@ module ISSUE
 				</T>
 				
   rule <k> read S:String => getInput ...</k>
-	   <out>... . => ListItem(S) </out>
+	   <out>... .List => ListItem(S) </out>
 	   
 	   
   rule <k> getInput => . ...</k>
-	   <in> ListItem(D:String) => . ...</in>
-       <data>... . => ListItem(D) </data> [structural]
+	   <in> ListItem(D:String) => .List ...</in>
+       <data>... .List => ListItem(D) </data> [structural]
 
 	   
   rule <k> flush ...</k>
-       <data> ListItem(D:String) => . ...</data>
-	   <out>... . => ListItem(D) </out> [structural]
+       <data> ListItem(D:String) => .List ...</data>
+	   <out>... .List => ListItem(D) </out> [structural]
 
   rule <k> flush => . ...</k>
        <data> .List </data> [structural]

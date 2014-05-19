@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import org.kframework.backend.java.util.KSorts;
@@ -35,23 +36,27 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
     }
 
     @Override
-    public void visit(Rule node) {
+    public Void visit(Rule node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(org.kframework.kil.Context node) {
+    public Void visit(org.kframework.kil.Context node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Syntax node) {
+    public Void visit(Syntax node, Void _) {
+        return null;
     }
 
     @Override
-    public void visit(Variable node) {
+    public Void visit(Variable node, Void _) {
         if (node.getName().equals("$PGM")) {
             context.startSymbolPgm = node.getSort();
         }
         assert node.getName().startsWith("$") : "Configuration variables must start with $ symbol.";
         context.configVarSorts.put(node.getName().substring(1), node.getSort());
+        return null;
     }
 }

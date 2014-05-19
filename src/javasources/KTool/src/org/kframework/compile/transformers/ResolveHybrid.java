@@ -1,9 +1,9 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +18,9 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
     
     
     @Override
-    public ASTNode transform(Module node) throws TransformerException {
+    public ASTNode visit(Module node, Void _)  {
         hybrids.clear();
-        super.transform(node);
+        super.visit(node, _);
         if (hybrids.isEmpty()) return node;
         node = node.shallowCopy();
         hybrids.addAll(node.getItems());
@@ -29,7 +29,7 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Production node) throws TransformerException {
+    public ASTNode visit(Production node, Void _)  {
         if (!node.containsAttribute("hybrid")) return node;
         Rule rule = new Rule();
         rule.setBody(new Rewrite(
@@ -48,19 +48,19 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(Configuration node) throws TransformerException {
+    public ASTNode visit(Configuration node, Void _)  {
         
         return node;
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         
         return node;
     }
     
     @Override
-    public ASTNode transform(Rule node) throws TransformerException {
+    public ASTNode visit(Rule node, Void _)  {
         
         return node;
     }

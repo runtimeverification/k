@@ -97,9 +97,14 @@ public class KTest {
         System.out.println(FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE));
     }
 
-    public static void main(String[] args) {
+    /**
+     * 
+     * @param args
+     * @return true if the application terminated normally; false otherwise
+     */
+    public static boolean main(String[] args) {
         try {
-            System.exit(new KTest(args).run());
+            return new KTest(args).run() == 0;
         } catch (ParseException | InvalidArgumentException | SAXException |
                 ParserConfigurationException | IOException | InterruptedException |
                 TransformerException e) {
@@ -115,6 +120,6 @@ public class KTest {
                             KException.KExceptionGroup.CRITICAL,
                             e.getMessage(), location.getSystemId(), location.getPosStr()));
         }
-        System.exit(1);
+        return false;
     }
 }

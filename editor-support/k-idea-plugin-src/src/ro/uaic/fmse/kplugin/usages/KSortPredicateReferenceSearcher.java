@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package ro.uaic.fmse.kplugin.usages;
 
 import com.intellij.openapi.application.QueryExecutorBase;

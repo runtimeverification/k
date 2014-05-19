@@ -20,20 +20,23 @@ public class KExceptionManager {
     public void register(KException exception) {
         exceptions.add(exception);
         if (exception.type == ExceptionType.ERROR)
-            print();
+            throw new KEMException();
     }
 
     public void print() {
-        boolean errors = false;
         for (KException e : exceptions) {
             if (!options.warnings.includesExceptionType(e.type))
                 continue;
 
-            if (e.type == ExceptionType.ERROR)
-                errors = true;
             System.err.println(StringUtil.splitLines(e.toString()));
         }
-        if (errors)
-            System.exit(1);
+    }
+    
+    /**
+     * Thrown to indicate that the K Exception manager has terminated the application due to an error.
+     * @author dwightguth
+     */
+    public static class KEMException extends RuntimeException {
+        private KEMException() {}
     }
 }

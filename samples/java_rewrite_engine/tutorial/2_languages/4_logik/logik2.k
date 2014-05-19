@@ -1,3 +1,4 @@
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module META
   syntax KItem ::= renameVariables(K)   [function, hook(MetaK:renameVariables)]
   syntax KItem ::= variables(K)         [function, hook(MetaK:variables)]

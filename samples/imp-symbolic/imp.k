@@ -1,3 +1,4 @@
+// Copyright (c) 2012-2014 K Team. All Rights Reserved.
 /*@
 This is the symbolic semantics of IMP. It contains the normal semantics if IMP
 and the rules for symbolic execution, as described in the technical report 
@@ -69,7 +70,7 @@ module IMP
   rule {S} => S  [structural]
 // Stmt
   rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 //  rule if (true)  S else _ => S
 //  rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]

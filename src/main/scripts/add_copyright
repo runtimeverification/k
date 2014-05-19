@@ -1,0 +1,41 @@
+#!/bin/bash
+# Copyright (c) 2014 K Team. All Rights Reserved.
+# Usage: ./copyright <file>
+# TODO(dwightguth): currently this script will add a duplicate xml declaration
+# to files containing an xml declaration but no copyright, and will not
+# add an xml declaration to files with a copyright but no xml declaration.
+# you will have to correct for these two cases manually.
+
+EXTENSION="${1##*.}"
+YEAR=
+BLAME="`git blame "$1" -e -f | awk '{print $4}'`"
+if [ -n "`echo $BLAME | grep 2013`" ]
+then
+  YEAR=2013-
+fi
+if [ -n "`echo $BLAME | grep 2012`" ]
+then
+  YEAR=2012-
+fi
+if [ -n "`echo $BLAME | grep 2011`" ]
+then
+  YEAR=2011-
+fi
+if [ -n "`echo $BLAME | grep 2010`" ]
+then
+  YEAR=2010-
+fi
+if [ -n "`cat "$1" | head -2 | grep "Copyright (c)"`" ]
+then
+  # copyright already present, just fix year
+  sed -i '1,2s/Copyright (c) .* K Team/Copyright (c) '$YEAR'2014 K Team/' "$1"
+  exit
+fi
+if [ $EXTENSION = "xml" -o $EXTENSION = "xsd" ]
+then
+  sed -i '1s/^/<?xml version="1.0" encoding="UTF-8"?>\n<!-- Copyright (c) '$YEAR'2014 K Team. All Rights Reserved. -->\n/' "$1"
+fi
+if [ $EXTENSION = "k" -o $EXTENSION = "java" -o $EXTENSION = "jj" ]
+then
+  sed -i '1s/^/\/\/ Copyright (c) '$YEAR'2014 K Team. All Rights Reserved.\n/' "$1"
+fi
