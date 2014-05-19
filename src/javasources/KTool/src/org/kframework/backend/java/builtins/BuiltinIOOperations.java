@@ -1,15 +1,23 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
-import java.io.IOException;
-import java.nio.charset.CharacterCodingException;
-
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.K;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
+
+import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
+
 
 /**
  * Table of {@code public static} methods for builtin IO operations.
@@ -63,38 +71,46 @@ public class BuiltinIOOperations {
     public static Term close(IntToken term, TermContext context) {
         try {
             fs(context).close(term.longValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
+            return KLabelInjection.injectionOf(new KSequence(), context);
         } catch (IOException e) {
-            return processIOException(e.getMessage(), context);
+            return KLabelInjection.injectionOf(
+                    processIOException(e.getMessage(), context),
+                    context);
         }
     }
 
     public static Term seek(IntToken term1, IntToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).seek(term2.longValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
+            return KLabelInjection.injectionOf(new KSequence(), context);
         } catch (IOException e) {
-            return processIOException(e.getMessage(), context);
+            return KLabelInjection.injectionOf(
+                    processIOException(e.getMessage(), context),
+                    context);
         }
     }
 
     public static Term putc(IntToken term1, IntToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).putc(term2.unsignedByteValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
+            return KLabelInjection.injectionOf(new KSequence(), context);
         } catch (IOException e) {
-            return processIOException(e.getMessage(), context);
+            return KLabelInjection.injectionOf(
+                    processIOException(e.getMessage(), context),
+                    context);
         }
     }
 
     public static Term write(IntToken term1, StringToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).write(term2.byteArrayValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
+            return KLabelInjection.injectionOf(new KSequence(), context);
         } catch (CharacterCodingException e) {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {
-            return processIOException(e.getMessage(), context);
+            return KLabelInjection.injectionOf(
+                    processIOException(e.getMessage(), context),
+                    context);
         }
     }
 
