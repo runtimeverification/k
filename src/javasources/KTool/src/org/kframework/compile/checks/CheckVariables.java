@@ -6,7 +6,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -62,7 +61,7 @@ public class CheckVariables extends BasicVisitor {
 
     @Override
     public Void visit(Variable node, Void _) {
-        if (node.isFresh()) {
+        if (node.isFreshVariable() || node.isFreshConstant()) {
              if (current == right  && !inCondition) {
                  Integer i = fresh.get(node);
                  if (i == null) i = new Integer(1);
@@ -73,8 +72,7 @@ public class CheckVariables extends BasicVisitor {
              //nodes are ok to be found in rhs
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                     KException.KExceptionGroup.COMPILER,
-                    "Fresh variable \"" + node + "\" is bound in the " +
-                            "rule pattern.",
+                    "Fresh variable \"" + node + "\" is bound in the " + "rule pattern.",
                     getName(), node.getFilename(), node.getLocation()
             ));
         }
@@ -148,7 +146,7 @@ public class CheckVariables extends BasicVisitor {
         }
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {
-            if (MetaK.isAnonVar(v) && !v.isFresh()) {
+            if (MetaK.isAnonVar(v) && !(v.isFreshVariable() || v.isFreshConstant())) {
                 GlobalSettings.kem.register(new KException(KException
                         .ExceptionType.ERROR,
                         KException.KExceptionGroup.COMPILER,
@@ -183,7 +181,7 @@ public class CheckVariables extends BasicVisitor {
                         getName(), key.getFilename(), key.getLocation()));
             }
             if (MetaK.isAnonVar(key)) continue;
-            if (e.getValue().intValue()>1) continue;
+            if (e.getValue().intValue() > 1) continue;
             if (!right.containsKey(key)) {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.HIDDENWARNING,
                         KException.KExceptionGroup.COMPILER,

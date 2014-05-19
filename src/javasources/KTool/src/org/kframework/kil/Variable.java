@@ -3,7 +3,6 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
 /**
@@ -16,7 +15,8 @@ public class Variable extends Term {
     private String name;
     /** True if the variable was written with an explicit type annotation */
     private boolean userTyped = false;
-    private boolean fresh = false;
+    private boolean freshVariable = false;
+    private boolean freshConstant = false;
     private boolean syntactic = false;
     /** Used by the type inferencer  */
     private String expectedSort = null;
@@ -36,7 +36,11 @@ public class Variable extends Term {
         this.name = element.getAttribute(Constants.NAME_name_ATTR);
         this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
         if (this.name.startsWith("?")) {
-            this.setFresh(true);
+            this.freshVariable = true;
+            this.name = this.name.substring(1);
+        }
+        if (this.name.startsWith("!")) {
+            this.freshConstant = true;
             this.name = this.name.substring(1);
         }
     }
@@ -49,7 +53,7 @@ public class Variable extends Term {
     public Variable(Variable variable) {
         super(variable);
         name = variable.name;
-        fresh = variable.fresh;
+        freshVariable = variable.freshVariable;
         userTyped = variable.userTyped;
         syntactic = variable.syntactic;
         expectedSort = variable.expectedSort;
@@ -107,12 +111,12 @@ public class Variable extends Term {
         return new Variable(this);
     }
 
-    public void setFresh(boolean fresh) {
-        this.fresh = fresh;
+    public void setFreshVariable(boolean fresh) {
+        this.freshVariable = fresh;
     }
 
-    public boolean isFresh() {
-        return fresh;
+    public boolean isFreshVariable() {
+        return freshVariable;
     }
 
     public boolean isGenerated(){
@@ -127,4 +131,11 @@ public class Variable extends Term {
         this.syntactic = syntactic;
     }
 
+    public boolean isFreshConstant() {
+        return freshConstant;
+    }
+
+    public void setFreshConstant(boolean freshConstant) {
+        this.freshConstant = freshConstant;
+    }
 }

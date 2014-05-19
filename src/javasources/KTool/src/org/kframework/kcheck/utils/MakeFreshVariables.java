@@ -24,11 +24,11 @@ public class MakeFreshVariables extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Variable node, Void _)  {
 //        System.out.println("Var: " + node + " sort: " + node.getSort()
-//                + " is fresh " + node.isFresh());
+//                + " is fresh " + node.isFreshVariable());
         for (Variable v : variables) {
-            if (v.getName().equals(node.getName()) && !node.isFresh()) {
+            if (v.getName().equals(node.getName()) && !node.isFreshVariable()) {
 //                System.out.println("Transformed: " + node + "(" + v.getSort()
-//                        + ", " + node.isFresh() + ")");
+//                        + ", " + node.isFreshVariable() + ")");
                 //return new AddSymbolicK(context).freshSymSortN(v.getSort(),
                 //        RLBackend.idx);
                 return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), Token.kAppOf("#Id", v.getName()));
