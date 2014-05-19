@@ -3,41 +3,13 @@
 
 <tests>
   <!-- QUINE -->
-  <test
-      definition="quine/explicit/quine-explicit.k"
-      programs="../../tests/examples/quine-explicit"
-      results="../../tests/examples/quine-explicit"
-      extension="quine" >
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-  </test>
-  <test
-      definition="quine/short/quine-short.k"
-      programs="../../tests/examples/quine-short"
-      results="../../tests/examples/quine-short"
-      extension="quine" >
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-  </test>
+  <include file="../quine/tests/config.xml" directory="quine" />
 
   <include file="../java_rewrite_engine/tests/config.xml" directory="java_rewrite_engine" />
 
   <!-- BF -->
-  <test
-      definition="bf/bf.k"
-      programs="../bf/programs"
-      results="../../tests/examples/bf"
-      extension="bf"
-      >
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-  </test>
+  <include file="../bf/tests/config.xml" directory="bf" />
+  
 
   <!-- IMP-SYMBOLIC -->
   <test
