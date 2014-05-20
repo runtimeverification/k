@@ -28,7 +28,7 @@
           extension="test"
           results="03-arithmetic-expressions-amb/">
         <all-programs>
-            <krun-option name="-parser" value="kast -parser newprogram" />
+            <krun-option name="-parser" value="kast --parser newprogram" />
         </all-programs>
     </test>
 
@@ -38,7 +38,7 @@
           extension="test"
           results="04-ambiguous-constructor/">
         <all-programs>
-            <krun-option name="-parser" value="kast -parser newprogram" />
+            <krun-option name="-parser" value="kast --parser newprogram" />
         </all-programs>
     </test>
 
@@ -47,6 +47,16 @@
 		  programs="05-reject-keywords/"
 		  extension="test"
 		  results="05-reject-keywords/">
+		<all-programs>
+			<krun-option name="--parser" value="kast --parser newprogram" />
+		</all-programs>
+	</test>
+
+	<test
+		  definition="07-conslist/test.k"
+		  programs="07-conslist/"
+		  extension="test"
+		  results="07-conslist/">
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
