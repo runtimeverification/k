@@ -134,7 +134,7 @@ module WCET
   //@ The values of the language are integers once an immediate or register index is evaluated.
 
   syntax KItem ::= load(K)
-             | jumpTo(Id)
+                 | jumpTo(Id)
   /*@ Here we define additional auxiliary operators. load takes a program and puts it in the
   \texttt{pgm} cell for use by jump instructions later on. jumpTo takes an identifier and jumps
   immediately to  it. We define this instruction because we want to use it in places where using
