@@ -321,10 +321,23 @@ public final class KItem extends Term {
 
                 Map<Variable, Term> solution = solutions.iterator().next();
                 if (K.do_kompilation || K.do_concrete_exec) {
-                    assert solutions.size() <= 1 : "function definition is not deterministic";
+                    assert solutions.size() <= 1 :
+                         "[non-deterministic function definition]: more than one way to apply the rule\n"
+                            + rule + "\nagainst the function\n" + this;
                 }
 
-                Term rightHandSide = rule.rightHandSide().substituteAndEvaluate(solution, context);
+                Term rightHandSide = rule.rightHandSide();
+                if (rule.hasUnboundVariables()) {
+                    // this opt. only makes sense when using pattern matching
+                    // because after unification variables can end up in the
+                    // constraint rather than in the form of substitution
+
+                    /* rename unbound variables */
+                    Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.unboundVariables());
+                    /* rename rule variables in the rule RHS */
+                    rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
+                }
+                rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
 
                 /* update the constraint */
                 if (K.do_kompilation || K.do_concrete_exec) {
@@ -342,22 +355,19 @@ public final class KItem extends Term {
 
                 if (rule.containsAttribute("owise")) {
                     /*
-                     * YilongL: consider applying rules with attribute [owise]
-                     * only after no other rules can be applied for sure; in
-                     * other words, we cannot apply [owise] rule if some argument
-                     * is symbolic
+                     * YilongL: consider applying ``owise'' rule only when the
+                     * function is ground. This is fine because 1) it's OK not
+                     * to fully evaluate non-ground function during kompilation;
+                     * and 2) it's better to get stuck rather than to apply the
+                     * wrong ``owise'' rule during execution.
                      */
-                    boolean mayUseOwiseRule = true;
-                    for (Term term : solution.values()) {
-                        mayUseOwiseRule = mayUseOwiseRule && !term.isSymbolic();
-                    }
-                    if (mayUseOwiseRule) {
+                    if (this.isGround()) {
                         owiseResults.add(rightHandSide);
                     }
                 } else {
                     if (K.do_concrete_exec) {
                         assert result == null || result.equals(rightHandSide):
-                                "function definition is not deterministic";
+                                "[non-deterministic function definition]: more than one rule can apply to the function\n" + this;
                     }
                     result = rightHandSide;
                 }
@@ -374,7 +384,9 @@ public final class KItem extends Term {
             if (result != null) {
                 return result;
             } else if (!owiseResults.isEmpty()) {
-                assert owiseResults.size() == 1 : "function definition is not deterministic";
+                assert owiseResults.size() == 1 :
+                    "[non-deterministic function definition]: more than one ``owise'' rule for the function\n"
+                        + this;
                 return owiseResults.iterator().next();
             }
         }
