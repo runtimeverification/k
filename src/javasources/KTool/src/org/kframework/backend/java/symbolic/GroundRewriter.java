@@ -1,5 +1,4 @@
 // Copyright (C) 2013-2014 K Team. All Rights Reserved.
-
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
@@ -30,8 +29,7 @@ import com.google.common.base.Stopwatch;
 public class GroundRewriter {
     
     private final TermContext termContext;
-    private final TransitionCompositeStrategy strategy
-            = new TransitionCompositeStrategy(GlobalSettings.transition);
+    private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final List<Term> results = new ArrayList<>();
@@ -41,6 +39,7 @@ public class GroundRewriter {
     public GroundRewriter(Definition definition, TermContext termContext) {
         ruleIndex = definition.getIndex();
         this.termContext = termContext;
+        this.strategy = new TransitionCompositeStrategy(definition.context().kompileOptions.transition);
     }
 
     public Term rewrite(Term subject, int bound) {
