@@ -126,10 +126,15 @@ module WCET
 
   syntax KResult ::= Int
   syntax Exp ::= Int
+
+  syntax Map ::= Map "<-" Map [function]
+  rule M1 <- (K1:K |-> K2:K M2:Map) => M1[K1 <- K2] <- M2
+  rule M1 <- .Map => M1
+
   //@ The values of the language are integers once an immediate or register index is evaluated.
 
-  syntax K ::= load(K)
-             | jumpTo(Id)
+  syntax KItem ::= load(K)
+                 | jumpTo(Id)
   /*@ Here we define additional auxiliary operators. load takes a program and puts it in the
   \texttt{pgm} cell for use by jump instructions later on. jumpTo takes an identifier and jumps
   immediately to  it. We define this instruction because we want to use it in places where using
@@ -199,7 +204,7 @@ module WCET
   rule <k> blt X:Id , I:Int , I2:Int => time(blt) ~> branch(I <Int I2, X) ...</k>
   rule <k> ble X:Id , I:Int , I2:Int => time(ble) ~> branch(I <=Int I2, X) ...</k>
 
-  syntax K ::= branch(Bool, Id)
+  syntax KItem ::= branch(Bool, Id)
   rule branch(true, X:Id) => jumpTo(X)
   rule branch(false, _) => .
   /*@ Conditional jump evaluates a boolean condition. If the condition is true, we jump to the 
@@ -227,7 +232,7 @@ module WCET
        <reg> Reg:Map => Reg[I2 <- I] </reg>
   //@ \texttt{rw} simply combines these two instructions together.
 
-  syntax K ::= (Id, Int, Int)
+  syntax KItem ::= (Id, Int, Int)
   rule <k> int X:Id , I:Int , I2:Int => time(int) ...</k>
        <timers>... .List => ListItem((X, I +Int Time, I2)) </timers>
        <wcet> Time:Int </wcet>
@@ -235,7 +240,7 @@ module WCET
   $I2$ cycles thereafter. The \texttt{timers} cell stores the currently activated interrupts in a
   list of tuples.*/
 
-  syntax K ::= (K, Int)
+  syntax KItem ::= (K, Int)
   rule <k> rfi ~> _ => time(rfi) ~> K </k>
        <stack> ListItem((K:K, Priority:Int)) => .List ...</stack>
        <priority> _ => Priority </priority>
@@ -245,13 +250,13 @@ module WCET
   and can interrupt only code running at a lower priority. Recall the program begins executing at
   priority 0.*/
 
-  syntax K ::= time(OpCode)
+  syntax KItem ::= time(OpCode)
   rule <k> time(O:OpCode) => waitFor(Timing[O]) ...</k>
        <timing> Timing:Map </timing>
   /*@ For modularity, we allow the time each instruction executes for to be specified dynamically
   in the \texttt{timing} cell.*/
 
-  syntax K ::= waitFor(Int)
+  syntax KItem ::= waitFor(Int)
   rule <k> waitFor(I:Int) => updateStatus(I2) ~> updateTimers(L) ~> interrupt(L, size(L)) ...</k>
        <br/>
        <wcet> I2:Int => I2 +Int I </wcet>
@@ -261,12 +266,12 @@ module WCET
   I/O line, provided in advance in the \texttt{input} cell. The second is the firing of a timer 
   interrupt.*/
 
-  syntax K ::= updateStatus(Int)
-  syntax K ::= (Int, Map)
+  syntax KItem ::= updateStatus(Int)
+  syntax KItem ::= (Int, Map) [klabel('status)]
   rule <k> updateStatus(Start:Int) ...</k>
        <input> ListItem((I2:Int, M:Map)) => .List ...</input>
        <wcet> I:Int </wcet>
-       <status> Status:Map => Status[M] </status> when I >=Int I2 andBool I2 >=Int Start
+       <status> Status:Map => Status <- M </status> when I >=Int I2 andBool I2 >=Int Start
   rule <k> updateStatus(Start:Int) => . ...</k>
        <input> ListItem((I2:Int, _:Map)) ...</input>
        <wcet> I:Int </wcet> when notBool(I >=Int I2 andBool I >=Int Start)
@@ -276,7 +281,7 @@ module WCET
   Each event contains a map of associated I/O writes, which is merged with the status cell. Events
   ocurring before or after the time window of the instruction are ignored.*/
 
-  syntax K ::= updateTimers(List)
+  syntax KItem ::= updateTimers(List)
   rule <k> updateTimers((ListItem((X:Id, Expires:Int, Interval:Int)) => .List) _) ...</k>
        <br/>
        <wcet> I:Int </wcet>
@@ -290,7 +295,7 @@ module WCET
   have been triggered by the previous instruction. When an interrupt is triggered, the tuple
   containing info on the interrupt is updated with a new expiration time.*/
 
-  syntax K ::= interrupt(List, Int)
+  syntax KItem ::= interrupt(List, Int)
   rule <k> interrupt((ListItem((X:Id, _, _)) => .List) _, (N:Int => N -Int 1)) ...</k>
        <br/>
        <interrupts> S:Set </interrupts>
