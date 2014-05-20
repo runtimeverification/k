@@ -109,7 +109,7 @@ public class Rule extends JavaSymbolicObject {
             unboundVars = null;
         }
         
-        isSortPredicate = super.containsAttribute(Attribute.FUNCTION_KEY)
+        isSortPredicate = isFunction()
                 && functionKLabel().toString().startsWith("is");
         if (isSortPredicate) {
             predSort = functionKLabel().toString().substring(2);
@@ -192,9 +192,13 @@ public class Rule extends JavaSymbolicObject {
 
         return sortPredArg;
     }
+    
+    public boolean isFunction() {
+        return super.containsAttribute(Attribute.FUNCTION_KEY);
+    }
 
     public KLabelConstant functionKLabel() {
-        assert super.containsAttribute(Attribute.FUNCTION_KEY);
+        assert isFunction();
 
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }
