@@ -58,6 +58,20 @@ public final class IntToken extends Token {
         return of(BigInteger.valueOf(value));
     }
 
+    public static IntToken of(String value) {
+        try {
+            return IntToken.of(new BigInteger(value));
+        } catch (NumberFormatException e) {
+            if (value.codePointCount(0, value.length()) == 1) {
+                int numericValue = Character.getNumericValue(value.codePointAt(0));
+                if (numericValue >= 0) {
+                    return IntToken.of(numericValue);
+                }
+            }
+            throw e;
+        }
+    }
+
     /**
      * Returns a {@link BigInteger} representation of the (interpreted) value of this IntToken.
      */

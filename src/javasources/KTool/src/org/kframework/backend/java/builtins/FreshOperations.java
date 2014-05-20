@@ -19,7 +19,7 @@ public class FreshOperations {
     private FreshOperations() { }
 
     public static Term fresh(StringToken term, TermContext context) {
-        String name = context.definition().context().freshFunctionNames.get(term.value());
+        String name = context.definition().context().freshFunctionNames.get(term.stringValue());
         if (name == null) {
             throw new UnsupportedOperationException();
         }

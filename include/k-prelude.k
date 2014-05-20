@@ -84,7 +84,7 @@ endmodule
 
 module K-FRESH
   imports K-TECHNIQUE
-  syntax Bool ::= "fresh" "(" K ")"  [cons(Bool1FreshSyn)]
+  //syntax Bool ::= "fresh" "(" K ")"  [cons(Bool1FreshSyn)]
 endmodule
 
 module K-FREZERS
