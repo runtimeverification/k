@@ -54,6 +54,7 @@ public class Variable extends Term {
         super(variable);
         name = variable.name;
         freshVariable = variable.freshVariable;
+        freshConstant = variable.freshConstant;
         userTyped = variable.userTyped;
         syntactic = variable.syntactic;
         expectedSort = variable.expectedSort;
@@ -90,7 +91,9 @@ public class Variable extends Term {
             return false;
         Variable var = (Variable) obj;
 
-        return this.sort.equals(var.getSort()) && this.name.equals(var.getName());
+        return this.sort.equals(var.getSort()) && this.name.equals(var.getName())
+                && this.freshVariable == var.freshVariable
+                && this.freshConstant == var.freshConstant;
     }
 
     @Override
@@ -119,6 +122,10 @@ public class Variable extends Term {
         return freshVariable;
     }
 
+    public boolean isFreshConstant() {
+        return freshConstant;
+    }
+
     public boolean isGenerated(){
         return name.startsWith(GENERATED_FRESH_VAR);
     }
@@ -131,11 +138,4 @@ public class Variable extends Term {
         this.syntactic = syntactic;
     }
 
-    public boolean isFreshConstant() {
-        return freshConstant;
-    }
-
-    public void setFreshConstant(boolean freshConstant) {
-        this.freshConstant = freshConstant;
-    }
 }

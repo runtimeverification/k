@@ -14,4 +14,8 @@ module ID-HOOKS
   syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id)]
   rule Id2String(X:Id) => #tokenToString(X)
   rule String2Id(S:String) => #parseToken("Id", S)
+
+  syntax Id ::= freshId(Int)    [freshGenerator, function]
+  rule freshId(I) => String2Id("_" +String Int2String(I))
 endmodule
+

@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ public class TermContext extends JavaSymbolicObject {
     private static Map<Definition, TermContext> cache1 = new HashMap<Definition, TermContext>();
     private static Table<Definition, FileSystem, TermContext> cache2 = HashBasedTable.create();
 
+    private BigInteger counter = BigInteger.ZERO;
     private final Definition def;
     private final FileSystem fs;
     
@@ -49,6 +51,20 @@ public class TermContext extends JavaSymbolicObject {
             cache2.put(def, fs, termContext);
         }
         return termContext;
+    }
+
+    public BigInteger getCounter() {
+        return counter;
+    }
+
+    public void setCounter(BigInteger counter) {
+        this.counter = counter;
+    }
+
+    public BigInteger incrementCounter() {
+        BigInteger counter = this.counter;
+        this.counter = this.counter.add(BigInteger.ONE);
+        return counter;
     }
 
     public Definition definition() {

@@ -160,7 +160,7 @@ public class Variable extends Term {
      * Renames serialized anonymous variables to avoid name clashes with existing anonymous
      * variables.
      */
-    private Object readResolve() {
+    Object readResolve() {
         if (anonymous) {
             int id = Integer.parseInt(name.substring(VARIABLE_PREFIX.length()));
             if (id < counter) {

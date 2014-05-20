@@ -98,40 +98,6 @@ public class CheckVariables extends BasicVisitor {
     }
 
     @Override
-    public Void visit(TermCons node, Void _) {
-        if (!node.getCons().equals(MetaK.Constants.freshCons)) {
-            super.visit(node, _);
-            return null;
-        }
-        if (!inCondition) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
-                    "Fresh can only be used in conditions.",
-                    getName(), node.getFilename(), node.getLocation()));
-        }
-        final Term term = node.getContents().get(0);
-        if (!(term instanceof  Variable)) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
-                    "Fresh can only be applied to variables, but was applied to\n\t\t" + term,
-                    getName(), term.getFilename(), term.getLocation()));
-        }
-        Variable v = (Variable) term;
-        if (left.containsKey(v)) {
-            for (Variable v1 : left.keySet()) {
-                if (v1.equals(v)) {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.COMPILER,
-                            "Fresh variable \"" + v1 + "\" is bound in the rule pattern.",
-                            getName(), v1.getFilename(), v1.getLocation()));
-                }
-            }
-        }
-        left.put(v, new Integer(1));
-        return null;
-    }
-
-    @Override
     public Void visit(Sentence node, Void _) {
         inCondition = false;
         left.clear();

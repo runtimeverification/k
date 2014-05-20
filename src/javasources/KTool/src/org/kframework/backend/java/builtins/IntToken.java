@@ -26,9 +26,6 @@ public final class IntToken extends Token {
     /* IntToken cache */
     private static final Map<BigInteger, IntToken> cache = new HashMap<BigInteger, IntToken>();
 
-    /* counter for generating fresh IntToken values */
-    private static BigInteger freshValue = BigInteger.valueOf(0);
-
     /* BigInteger value wrapped by this IntToken */
     private final BigInteger value;
 
@@ -36,9 +33,9 @@ public final class IntToken extends Token {
         this.value = value;
     }
 
+    @Deprecated
     public static IntToken fresh() {
-        freshValue = freshValue.add(BigInteger.valueOf(1));
-        return of(freshValue);
+        return null;
     }
 
     /**

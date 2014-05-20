@@ -20,17 +20,7 @@ import com.google.common.collect.Sets;
 
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Cell;
-import org.kframework.kil.CellDataStructure;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.kil.UserList;
+import org.kframework.kil.*;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
@@ -103,6 +93,7 @@ public class Context implements Serializable {
     protected java.util.List<String> komputationCells = null;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<String> variableTokenSorts = new HashSet<>();
+    public HashMap<String, String> freshFunctionNames = new HashMap<>();
 
     public int numModules, numSentences, numProductions, numCells;
 
@@ -499,6 +490,30 @@ public class Context implements Serializable {
         assert !initialized;
 
         this.tokenSorts = new HashSet<String>(tokenSorts);
+    }
+
+    public void makeFreshFunctionNamesMap(Set<Production> freshProductions) {
+        for (Production production : freshProductions) {
+            if (!production.containsAttribute(Attribute.FUNCTION_KEY)) {
+                GlobalSettings.kem.register(new KException(
+                        ExceptionType.ERROR,
+                        KExceptionGroup.COMPILER,
+                        "missing [function] attribute for fresh function " + production,
+                        production.getFilename(),
+                        production.getLocation()));
+            }
+
+            if (freshFunctionNames.containsKey(production.getSort())) {
+                GlobalSettings.kem.register(new KException(
+                        ExceptionType.ERROR,
+                        KExceptionGroup.COMPILER,
+                        "multiple fresh functions for sort " + production.getSort(),
+                        production.getFilename(),
+                        production.getLocation()));
+            }
+
+            freshFunctionNames.put(production.getSort(), production.getKLabel());
+        }
     }
 
 }
