@@ -2,9 +2,10 @@
 <!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 <project basedir="." default="build" name="KTool Build file">
 
-	<property location="src/javasources" name="javasources" />
-	<property name="version" value="nightly" />
-	<property name="config" value="./tests/config.xml" />
+    <property location="src/javasources" name="javasources" />
+    <property name="version" value="nightly" />
+    <property name="config" value="./tests/config.xml" />
+    <property name="base" value="master" />
 
 	<target name="java">
 		<ant antfile="${javasources}/KTool/buildjava.xml" dir="${javasources}/KTool" />
@@ -211,9 +212,21 @@
     </target>
 
     <target name="checkstyle-copyright">
+        <exec executable="git" outputproperty="git.diff.out" failifexecutionfails="false">
+            <arg value="diff" />
+            <arg value="${base}" />
+            <arg value="--name-only" />
+        </exec>
+        <condition property="git.diff.out" value="">
+            <isset property="git.diff.out" />
+        </condition>
+        <filelist id="git.diff.filelist" dir="." files="${git.diff.out}" />
+        <pathconvert property="checkstyle.files" pathsep="," refid="git.diff.filelist" dirsep="/">
+            <map from="/" to="" />
+        </pathconvert>
         <checkstyle config="${javasources}/KTool/checkstyle-copyright.xml">
-            <fileset dir="." includesfile=".checkstyle-files">
-              <!-- TODO: exclude files here which should not be given copyright notices -->
+            <fileset dir="/" includes="${checkstyle.files}">
+                <!-- TODO: exclude files here which should not be given copyright notices -->
             </fileset>
         </checkstyle>
     </target>

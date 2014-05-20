@@ -2,9 +2,10 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.ExecNames;
 import org.kframework.ktest.PgmArg;
+import org.kframework.utils.OS;
+import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,6 @@ public class KRunProgram {
      * @return String to be used in logging.
      */
     public String toLogString() {
-        return StringUtils.join(getKrunCmd(), " ");
+        return StringUtil.escapeShell(getKrunCmd(), OS.current());
     }
 }
