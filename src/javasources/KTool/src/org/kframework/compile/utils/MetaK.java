@@ -207,18 +207,6 @@ public class MetaK {
         return cell;
     }
 
-
-
-    public static Variable freshVar(Set<Variable> vars, String sort) {
-        String prefix = "?";
-        int i = 0;
-        Variable v = new Variable(prefix + i, sort);
-        while (vars.contains(v)) {
-            v.setName(prefix + (++i));
-        }
-        return v;
-    }
-
     public static int countRewrites(Term t, org.kframework.kil.loader.Context context) {
         final List<Integer> count = new ArrayList<Integer>();
         count.add(0);
