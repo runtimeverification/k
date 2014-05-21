@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
@@ -21,7 +21,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.krun.api.SearchType;
-import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.base.Stopwatch;
 
