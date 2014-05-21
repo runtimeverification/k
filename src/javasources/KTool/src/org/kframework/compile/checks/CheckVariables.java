@@ -127,12 +127,12 @@ public class CheckVariables extends BasicVisitor {
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.COMPILER,
                             "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
+                            getName(), node.getFilename(), node.getLocation()));
                 } else {
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
                             KException.KExceptionGroup.COMPILER,
                             "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
+                            getName(), node.getFilename(), node.getLocation()));
                 }
             }
         }
