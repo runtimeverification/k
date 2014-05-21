@@ -19,6 +19,7 @@ public class TermContext extends JavaSymbolicObject {
 
     private static Map<Definition, TermContext> cache1 = new HashMap<Definition, TermContext>();
     private static Table<Definition, FileSystem, TermContext> cache2 = HashBasedTable.create();
+    private static int golbalCounter = 0;
 
     private final Definition def;
     private final FileSystem fs;

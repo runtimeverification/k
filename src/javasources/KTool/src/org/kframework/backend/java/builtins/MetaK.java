@@ -172,4 +172,8 @@ public class MetaK {
         // TODO(AndreiS): handle KLabel variables
         return new KItem(new KLabelInjection(kItem.kLabel()), new KList(), context);
     }
+
+    public static Term fresh(StringToken sort, TermContext context) {
+
+    }
 }
