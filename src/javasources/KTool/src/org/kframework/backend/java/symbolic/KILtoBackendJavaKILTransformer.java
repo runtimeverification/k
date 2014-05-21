@@ -64,6 +64,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 
 
 /**
@@ -560,41 +561,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
         Term rightHandSide = (Term) this.visitNode(rewrite.getRight());
 
-        Collection<Term> requires = new ArrayList<Term>();
-        Collection<Term> ensures = new ArrayList<Term>();
-        Collection<Variable> freshVariables = new ArrayList<Variable>();
-        //TODO: Deal with Ensures
+        Collection<Term> requires = new ArrayList<>();
         if (node.getRequires() != null) {
-            Term term = (Term) this.visitNode(node.getRequires());
-            if (term instanceof KItem &&
-                   (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) || 
-                    ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
-                for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
-                    if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
-                        freshVariables.add((Variable) ((KList) ((KItem) item).kList()).get(0));
-                    } else {
-                        requires.add(item);
-                    }
-                }
-            } else {
-                if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'fresh(_)")) {
-                    freshVariables.add((Variable) ((KList) ((KItem) term).kList()).get(0));
-                } else {
-                    requires.add(term);
-                }
-            }
+            transformConjunction(requires, (Term) this.visitNode(node.getRequires()));
         }
 
+        Collection<Term> ensures = new ArrayList<>();
         if (node.getEnsures() != null) {
-            Term term = (Term) this.visitNode(node.getEnsures());
-            // TODO(YilongL): "'_andBool_" or "#andBool"?
-            if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
-                for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
-                    ensures.add(item);
-                }
-            } else {
-                ensures.add(term);
-            }
+            transformConjunction(requires, (Term) this.visitNode(node.getEnsures()));
         }
 
         UninterpretedConstraint lookups = new UninterpretedConstraint();
@@ -646,6 +620,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         }
 
+        Collection<Variable> freshVariables = new ArrayList<>();
+        // TODO(AndreiS): check !Variable only appears in the RHS
+        for (org.kframework.kil.Variable variable : node.getBody().variables()) {
+            if (variable.isFreshConstant()) {
+                freshVariables.add((Variable) this.visitNode(variable));
+            }
+        }
+
         assert leftHandSide.kind() == rightHandSide.kind()
                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST)
                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
@@ -667,6 +649,18 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             return rule.getFreshRule(TermContext.of(definition));
         }
         return rule;
+    }
+
+    private void transformConjunction(Collection<Term> requires, Term term) {
+        if (term instanceof KItem &&
+               (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) ||
+                ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
+            for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
+                requires.add(item);
+            }
+        } else {
+            requires.add(term);
+        }
     }
 
     @Override
