@@ -3,6 +3,7 @@ package org.kframework.backend.java.builtins;
 
 import java.math.BigInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.utils.StringUtil;
 
@@ -152,5 +153,29 @@ public class BuiltinStringOperations {
 
     public static StringToken token2string(UninterpretedToken token, TermContext context) {
         return StringToken.of(token.value());
+    }
+    
+    public static StringToken replaceAll(StringToken source, StringToken regex,
+            StringToken replacement, TermContext context) {
+        return StringToken.of(source.stringValue().replaceAll(
+                regex.stringValue(), replacement.stringValue()));
+    }
+    
+    public static StringToken replace(StringToken source, StringToken regex,
+            StringToken replacement, TermContext context) {
+        return StringToken.of(source.stringValue().replace(regex.stringValue(),
+                replacement.stringValue()));
+    }
+
+    public static StringToken replaceFirst(StringToken source,
+            StringToken regex, StringToken replacement, TermContext context) {
+        return StringToken.of(source.stringValue().replaceFirst(
+                regex.stringValue(), replacement.stringValue()));
+    }
+    
+    public static IntToken countOccurences(StringToken source,
+            StringToken toCount, TermContext context) {
+        return IntToken.of(StringUtils.countMatches(source.stringValue(),
+                toCount.stringValue()));
     }
 }
