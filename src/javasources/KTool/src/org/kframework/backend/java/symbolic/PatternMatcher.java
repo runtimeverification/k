@@ -104,7 +104,24 @@ public class PatternMatcher extends AbstractMatcher {
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(context);
-        if (!matcher.patternMatch(subject, rule.leftHandSide())) {
+        
+        boolean failed = true;
+        if (rule.isFunction()) {
+            /* match function rule */
+            if (subject instanceof KItem) {
+                KItem kItem = (KItem) subject;
+                Term kLabel = kItem.kLabel();
+                Term kList = kItem.kList();
+                if (kLabel.equals(rule.functionKLabel())) {
+                    failed = !matcher.patternMatch(kList, ((KItem) rule.leftHandSide()).kList());
+                }
+            }
+        } else {
+            /* match normal rewrite rule */
+            failed = !matcher.patternMatch(subject, rule.leftHandSide());
+        }
+        
+        if (failed) {
             return Collections.emptyList();
         }
 
@@ -297,25 +314,11 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public void match(Term subject, Term pattern) {
         /*
-         * During concrete execution:
-         *   - the subject must be ground;
-         *   - the top symbol of the subject can be a function klabel because
-         *     we are also using pattern matching to search for function rules
-         *     to evaluate user-defined functions;
-         *   - the top symbol of the pattern can be a function klabel; besides
-         *     that all symbolic terms in the pattern must be variables;
-         *
-         * During kompilation:
-         *   - the subject can be non-ground due to macro expansion and partial evaluation;
-         *   - the subject can be symbolic for the same reason above; there could be variables,
-         *     function klabels, KItem projections, and data structure lookup/update operations
-         *     inside;
-         *   - the pattern is pretty much the same case as the subject
+         * We make no assumption about whether the subject will be ground in the
+         * matching algorithm. As for the pattern, all symbolic terms inside it
+         * must be variables (no function KLabels, KItem projections, or
+         * data-structure lookup/update).
          */
-
-        if (K.do_concrete_exec) {
-//            assert subject.isGround() : "expected the subject to be ground in concrete execution mode; but found: " + subject;
-        }
 
         if (subject.kind().isComputational()) {
             assert pattern.kind().isComputational();
@@ -348,8 +351,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* add substitution */
             addSubstitution(variable, subject);
-        } else if (subject.isSymbolic() && !(subject instanceof KItem)) {
-            assert K.do_kompilation : "KItem projection and data structure lookup/update can appear in the subject only during kompilation; but found: " + subject;
+        } else if (subject.isSymbolic()) {
             fail(subject, pattern);
         } else {
             /* match */
@@ -902,10 +904,6 @@ public class PatternMatcher extends AbstractMatcher {
     private void matchKCollection(KCollection kCollection, KCollection pattern) {
         assert kCollection.getClass().equals(pattern.getClass());
 
-        if (K.do_concrete_exec) {
-            assert !kCollection.hasFrame() : "the subject term should be ground";
-        }
-
         int length = pattern.size();
         if (kCollection.size() >= length) {
             if (pattern.hasFrame()) {
@@ -935,10 +933,6 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public void match(Variable variable, Term pattern) {
         assert !(pattern instanceof Variable);
-
-        if (K.do_concrete_exec) {
-            assert false : "the subject term should be ground; but found variable " + variable;
-        }
 
         fail(variable, pattern);
     }
