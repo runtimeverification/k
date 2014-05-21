@@ -39,4 +39,8 @@ public class KExceptionManager {
     public static class KEMException extends RuntimeException {
         private KEMException() {}
     }
+
+    public List<KException> getExceptions() {
+        return exceptions;
+    }
 }
