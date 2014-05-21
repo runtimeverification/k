@@ -163,6 +163,10 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     // for each variable name do checks or type inference
                     for (Entry<String, java.util.List<Variable>> varEntry : vars3.vars.entrySet()) {
                         java.util.List<Variable> varList = varEntry.getValue();
+                        // It means that this variable has already been defined somewhere
+                        // no need to do type inference for it
+                        if (vars3.typedVars.contains(varEntry.getKey()))
+                            continue;
 
                         // divide into locations
                         Map<String, java.util.Set<Variable>> varLoc = new HashMap<String, java.util.Set<Variable>>();
@@ -290,17 +294,21 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
         }
 
         public java.util.Map<String, java.util.List<Variable>> vars = new HashMap<String, java.util.List<Variable>>();
+        public Set<String> typedVars = new HashSet<>();
 
         @Override
         public Void visit(Variable var, Void _) {
-            if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && !var.isUserTyped()) {
-                if (vars.containsKey(var.getName()))
-                    vars.get(var.getName()).add(var);
-                else {
-                    java.util.List<Variable> varss = new ArrayList<Variable>();
-                    varss.add(var);
-                    vars.put(var.getName(), varss);
-                }
+            if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
+                if (!var.isUserTyped()) {
+                    if (vars.containsKey(var.getName()))
+                        vars.get(var.getName()).add(var);
+                    else {
+                        java.util.List<Variable> varss = new ArrayList<Variable>();
+                        varss.add(var);
+                        vars.put(var.getName(), varss);
+                    }
+                } else
+                    typedVars.add(var.getName());
             }
             return null;
         }
