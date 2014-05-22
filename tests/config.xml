@@ -394,9 +394,12 @@
       programs="tests/regression/issue663/programs"
       results="tests/regression/issue663/out"
       extension="issue">
-      <all-programs>
+      <program name="a.issue">
         <krun-option name="--ltlmc" value="TrueLtl" />
-      </all-programs>
+      </program>
+      <program name="b.issue">
+        <krun-option name="--ltlmc" value="FalseLtl" />
+      </program>
   </test>
   <test
       definition="tests/regression/issue674/issue.k"
