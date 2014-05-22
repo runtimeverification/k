@@ -62,13 +62,9 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                 varDeclMap.put(var.getName(), var);
         }
         // after finding all of the variable declarations traverse the tree to disambiguate
-        try {
-            r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
-            r = (Sentence) new TypeSystemFilter(context).visitNode(r);
-            r = (Sentence) new TypeInferenceSupremumFilter(context).visitNode(r);
-        } catch (ParseFailedException e) {
-            e.report();
-        }
+        r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
+        r = (Sentence) new TypeSystemFilter(context).visitNode(r);
+        r = (Sentence) new TypeInferenceSupremumFilter(context).visitNode(r);
 
         boolean varTypeInference = true;
         if (varTypeInference) {
