@@ -166,7 +166,7 @@ public class Variable extends Term {
             if (id < counter) {
                 Variable variable = deserializationAnonymousVariableMap.get(id);
                 if (variable == null) {
-                    variable = getFreshVariable(sort);
+                    variable = getFreshCopy();
                     deserializationAnonymousVariableMap.put(id, variable);
                 }
                 return variable;
