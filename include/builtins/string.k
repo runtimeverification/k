@@ -47,15 +47,15 @@ module STRING-HOOKS
   syntax String ::= "KLabel2String" "(" KLabel ")"  [function, klabel(KLabel2String)]
   syntax KLabel ::= "String2KLabel" "(" String ")" [function, cons(KLabel1String2KLabelSyn)]
 
-  syntax String ::= "replaceAll" "(" String "," String "," String ")" [function]
-  syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function]
-  syntax String ::= "replaceFirst" "(" String "," String "," String ")" [function]
-  syntax Int ::= "countAllOccurences" "(" String "," String ")" [function]
-  
+  syntax String ::= "replaceAll" "(" String "," String "," String ")" [function, hook(#STRING:replaceAll)]
+  syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(#STRING:replace)]
+  syntax String ::= "replaceFirst" "(" String "," String "," String ")" [function, hook(#STRING:replaceFirst)]
+  syntax Int ::= "countAllOccurences" "(" String "," String ")" [function, hook(#STRING:countAllOccurences)]
+
   syntax String ::=  "trim" "(" String ")" [function]
   syntax String ::= "ltrim" "(" String ")" [function]
   syntax String ::= "rtrim" "(" String ")" [function]
-  
+
   syntax Bool ::= String "=/=String" String      [function, left, hook(#STRING:_=/=String_)]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2)
 
@@ -84,27 +84,27 @@ module STRING-HOOKS
 
   syntax Bool ::= "#isWhiteSpace" "(" String ")"   [function, klabel(#isWhiteSpace)]
   rule #isWhiteSpace(C:String)
-      => (ordChar(C) >=Int 9 andBool ordChar(C) <=Int 13)  
+      => (ordChar(C) >=Int 9 andBool ordChar(C) <=Int 13)
            orBool (C ==String " ") when isChar(C)
 
   syntax Bool ::= "#isDigit" "(" String ")"        [function, klabel(#isDigit)]
-  rule #isDigit(C:String) 
-      => (ordChar(C) >=Int ordChar("0")) 
+  rule #isDigit(C:String)
+      => (ordChar(C) >=Int ordChar("0"))
            andBool (ordChar(C) <=Int ordChar("9")) when isChar(C)
 
-  rule countAllOccurences(Source:String, ToCount:String) => 0 
+  rule countAllOccurences(Source:String, ToCount:String) => 0
 			when findString(Source, ToCount, 0) <Int 0
-  rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount) 
+  rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
 			when findString(Source, ToCount, 0) >=Int 0
-			
+
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
-				+String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)) 
+				+String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source))
 				when findString(Source, ToReplace, 0) >=Int 0
-  rule replaceFirst(Source:String, ToReplace:String, _:String) => Source 
+  rule replaceFirst(Source:String, ToReplace:String, _:String) => Source
 		when findString(Source, ToReplace, 0) <Int 0
-  
-  
-  rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) => 
+
+
+  rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) =>
        substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
 		when Count >Int 0
@@ -118,16 +118,16 @@ module STRING-HOOKS
   rule rtrim(S:String) => rtrim(substrString(S,0, lengthString(S) -Int 1)) when substrString(S, lengthString(S) -Int 1, lengthString(S)) ==String " "
   rule rtrim(S:String) => S when substrString(S, lengthString(S) -Int 1, lengthString(S)) =/=String " "
   rule rtrim("") => ""
-  
+
   rule trim(S:K) => ltrim(rtrim(S))
 
   syntax K ::= "#parseToken" "(" String "," String ")"  [function, klabel(#parseToken)]
   rule #parseToken("#Int",S:String) => String2Int(S)
-  rule #parseToken("#Float",S:String) => (String2Float(S)) 
-  rule #parseToken("#String",S:String) => (S) 
+  rule #parseToken("#Float",S:String) => (String2Float(S))
+  rule #parseToken("#String",S:String) => (S)
   rule #parseToken("Int",S:String) => String2Int(S)
-  rule #parseToken("Float",S:String) => (String2Float(S)) 
-  rule #parseToken("String",S:String) => (S) 
+  rule #parseToken("Float",S:String) => (String2Float(S))
+  rule #parseToken("String",S:String) => (S)
   rule #parseToken("Char",S:String) => (String2Char(S))
 
   syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString), hook(#CONVERSION:token2string)]
