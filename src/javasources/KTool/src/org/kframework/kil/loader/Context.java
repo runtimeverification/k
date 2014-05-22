@@ -1,6 +1,28 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
+import org.kframework.compile.utils.ConfigurationStructureMap;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Cell;
+import org.kframework.kil.CellDataStructure;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Term;
+import org.kframework.kil.UserList;
+import org.kframework.kompile.KompileOptions;
+import org.kframework.main.GlobalOptions;
+import org.kframework.utils.Poset;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -16,20 +38,8 @@ import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Sets;
-
-import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
-import org.kframework.kompile.KompileOptions;
-import org.kframework.main.GlobalOptions;
-import org.kframework.utils.Poset;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 
 public class Context implements Serializable {
