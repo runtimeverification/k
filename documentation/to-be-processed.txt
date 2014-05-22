@@ -633,3 +633,20 @@ KOMPILE - isSort predicates
 Currently the compilation process assumes that all KLabels having 'is' as a prefix are of the form 'isSort' where Sort is the name of a syntactic category.
 Therefore users defining their own labels should be aware of this and understand that defining and using an isXXX label which is not related to a sort XXX will 
 result in undefined behavior.
+
+KOMPILE - automatic keyword rejection
+---------------------------
+
+To make defining languages easier and small for simple definitions, the terminals in productions are automatically rejected from being any lexical production.
+This is a simple way to ensure that keywords don't produce ambiguities.
+Example:
+
+    Stmt ::= "return" ";"
+           | Exp ";"
+    Exp  ::= Id ...
+    Id   ::= Token{[a-zA-Z][a-zA-Z0-9]*}
+
+Because "return" can match the regular expression of Id, it may produce ambiguities. The solution is to say that "return" is not allowed to parse as an Id.
+There might be cases when the default behaviour is not wanted. It can be simply be overridden by declaring another time the desired production:
+    Id ::= "return"
+
