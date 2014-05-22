@@ -341,7 +341,7 @@ public class SymbolicRewriter {
         for (Variable variable : rule.freshVariables()) {
             leftHandSideConstraint.add(
                     variable,
-                    FreshOperations.fresh(StringToken.of(variable.sort()), termContext));
+                    FreshOperations.fresh(variable.sort(), termContext));
         }
 
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
@@ -466,9 +466,7 @@ public class SymbolicRewriter {
         SymbolicConstraint termConstraint = new SymbolicConstraint(term.termContext());
         termConstraint.addAll(pattern.requires());
         for (Variable var : pattern.freshVariables()) {
-            termConstraint.add(
-                    var,
-                    FreshOperations.fresh(StringToken.of(var.sort()), term.termContext()));
+            termConstraint.add(var, FreshOperations.fresh(var.sort(), term.termContext()));
         }
 
         // Create a constrained term from the left hand side of the pattern.

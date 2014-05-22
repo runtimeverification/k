@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.MetaK;
-import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
@@ -323,7 +320,9 @@ public final class KItem extends Term {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
                 leftHandSideConstraint.addAll(rule.requires());
                 for (Variable variable : rule.freshVariables()) {
-                    leftHandSideConstraint.add(variable, IntToken.fresh());
+                    leftHandSideConstraint.add(
+                            variable,
+                            FreshOperations.fresh(variable.sort(), context));
                 }
 
                 ConstrainedTerm leftHandSide = new ConstrainedTerm(

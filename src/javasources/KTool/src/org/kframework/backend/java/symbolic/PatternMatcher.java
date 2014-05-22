@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
@@ -94,7 +95,7 @@ public class PatternMatcher extends AbstractMatcher {
         for (Map<Variable, Term> subst : getMultiSubstitutions(matcher)) {
             /* add bindings for fresh variables used in the rule */
             for (Variable variable : rule.freshVariables()) {
-                subst.put(variable, IntToken.fresh());
+                subst.put(variable, FreshOperations.fresh(variable.sort(), context));
             }
             
             /* evaluate data structure lookups and add bindings for them */

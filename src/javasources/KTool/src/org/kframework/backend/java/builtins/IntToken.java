@@ -33,11 +33,6 @@ public final class IntToken extends Token {
         this.value = value;
     }
 
-    @Deprecated
-    public static IntToken fresh() {
-        return null;
-    }
-
     /**
      * Returns a {@code IntToken} representation of the given {@link BigInteger} value. The
      * {@code IntToken} instances are cached to ensure uniqueness (subsequent invocations of this
