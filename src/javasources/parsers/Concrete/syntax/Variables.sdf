@@ -22,7 +22,8 @@ context-free syntax
 	"HOLE"			-> K {cons("K1Hole")}
 
 	":" -> ColonDz {cons("Colon")}
-	"?" -> QuestionMarkDz {cons("QuestionMark")} 
+	"?" -> QuestionMarkDz {cons("QuestionMark")}
+	"!" -> QuestionMarkDz {cons("ExclamationMarkDz")}
 	VARID -> VARIDz %% in order to put the follow restriction
 
 	KVarDz			-> K
@@ -43,6 +44,7 @@ lexical syntax
 context-free restrictions
 	ColonDz -/- [A-Z] 
 	QuestionMarkDz -/- [A-Z]
+	ExclamationMarkDz -/- [A-Z]
 	VARIDz -/- [\:].[\#A-Z]
 
 	KVarDz			-/- [a-zA-Z0-9\{]

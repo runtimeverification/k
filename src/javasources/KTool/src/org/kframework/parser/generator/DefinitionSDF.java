@@ -142,6 +142,8 @@ public class DefinitionSDF {
                             sdf.append("ColonDz ");
                         else if (t.getTerminal().equals("?"))
                             sdf.append("QuestionMarkDz ");
+                        else if (t.getTerminal().equals("!"))
+                            sdf.append("ExclamationMarkDz ");
                         else
                             sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
                     } else if (itm instanceof Sort) {
