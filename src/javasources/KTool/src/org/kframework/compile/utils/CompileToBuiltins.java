@@ -33,7 +33,6 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
  * Time: 9:06 AM
  * To change this template use File | Settings | File Templates.
  */
-@Deprecated
 public class CompileToBuiltins extends CopyOnWriteTransformer {
 
     private static java.util.Map<String,String> builtinCollectionOps;
