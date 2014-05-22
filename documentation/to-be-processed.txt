@@ -650,3 +650,7 @@ Because "return" can match the regular expression of Id, it may produce ambiguit
 There might be cases when the default behaviour is not wanted. It can be simply be overridden by declaring another time the desired production:
     Id ::= "return"
 
+An additional way to reject unwanted parses, is to write:
+    Float ::= Token{[0-9]* "." [0-9]*}
+    Float ::= "." [reject]
+But just like in the other cases, the "." value will be rejected from all other lexical productions.
