@@ -4,15 +4,6 @@ package org.kframework.backend.java.symbolic;
 import static org.kframework.kil.KLabelConstant.ANDBOOL_KLABEL;
 import static org.kframework.kil.KLabelConstant.BOOL_ANDBOOL_KLABEL;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
@@ -60,11 +51,19 @@ import org.kframework.kil.TermComment;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 
 
 /**

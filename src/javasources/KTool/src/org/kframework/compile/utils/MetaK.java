@@ -87,6 +87,7 @@ public class MetaK {
         public static final String heatingTag = "heat";
         public static final String coolingTag = "cool";
         public static final String hole = "[]";
+        @Deprecated
         public static final String freshCons = "Bool1FreshSyn";
         public static final String plusIntCons = "Int1PlusSyn";
         public static final String generatedTopCellLabel = "generatedTop";

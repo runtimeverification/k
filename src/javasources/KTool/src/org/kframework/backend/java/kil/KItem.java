@@ -1,16 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.kframework.backend.java.builtins.*;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FreshOperations;
+import org.kframework.backend.java.builtins.MetaK;
+import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
@@ -23,6 +17,15 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.utils.errorsystem.KExceptionManager;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Sets;
 
