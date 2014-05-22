@@ -1188,6 +1188,7 @@ public class Main {
             }
             if (cmd.hasOption("ltlmc")) {
                 K.model_checking = cmd.getOptionValue("ltlmc");
+                K.io = false;
             }
             if (cmd.hasOption("prove")) {
                 K.prove = cmd.getOptionValue("prove");
