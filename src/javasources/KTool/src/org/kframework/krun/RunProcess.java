@@ -132,7 +132,7 @@ public class RunProcess {
             case "kast --parser ground -e":
                 term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.GROUND);
                 break;
-            case "kast --parser rule":
+            case "kast --parser rules":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
                 }
