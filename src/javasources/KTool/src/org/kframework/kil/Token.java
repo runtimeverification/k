@@ -65,6 +65,8 @@ public abstract class Token extends KLabel {
             return KApp.of(new IntBuiltin(element));
         } else if (sort.equals(StringBuiltin.SORT_NAME)) {
             return KApp.of(new StringBuiltin(element));
+        } else if (sort.equals(FloatBuiltin.SORT_NAME)) {
+            return KApp.of(new FloatBuiltin(element));
         } else {
             return KApp.of(new GenericToken(element));
         }

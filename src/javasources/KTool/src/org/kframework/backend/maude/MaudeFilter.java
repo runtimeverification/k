@@ -633,7 +633,7 @@ public class MaudeFilter extends BackendFilter {
     }
 
     private java.util.Set<String> maudeBuiltinTokenSorts =
-        ImmutableSet.of("#Float", "#LtlFormula");
+        ImmutableSet.of("#LtlFormula");
 
     @Override
     public Void visit(GenericToken token, Void _) {
@@ -644,7 +644,29 @@ public class MaudeFilter extends BackendFilter {
         }
         return null;
     }
-
+    
+    boolean floatWarning = false;
+    @Override
+    public Void visit(FloatBuiltin token, Void _) {
+        result.append("#_(");
+        if (token.bigFloatValue().isNegativeZero() || token.bigFloatValue().isNaN()) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                    "Attempting to compile a definition containing -0.0 or NaN with the Maude backend. "
+                            + "Maude does not support these features, and floating point arithmetic is "
+                            + "unsupported in the Maude backend. Please recompile with --backend java."));
+        }
+        result.append(FloatBuiltin.printKFloat(token.bigFloatValue()));
+        result.append(")");
+        if (!floatWarning) {
+            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL, 
+                    "The Maude backend does not officially support floating point numbers. The results of "
+                    + "this semantics may be undefined or, in some cases, "
+                    + "incorrect."));
+            floatWarning = true;
+        }
+        return null;
+    }
+    
     @Override
     public Void visit(StringBuiltin token, Void _) {
         result.append("#_(\"" + StringUtil.escape(token.stringValue()) + "\")");
