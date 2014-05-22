@@ -12,6 +12,8 @@ import com.google.common.collect.ImmutableList;
 
 
 /**
+ * Implements generation of fresh constants.
+ *
  * @author AndreiS
  */
 public class FreshOperations {
