@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2012-2014 K Team. All Rights Reserved
 /*!
 \title{SIMPLE --- Untyped}
 \author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
@@ -833,15 +833,14 @@ and initialized automatically as described in the definition of SIMPLE's
 configuration.  This is part of \K's configuration abstraction mechanism. */
 
   rule <thread>...
-         <k> spawn S => T ...</k>
+         <k> spawn S => !T:Int ...</k>
          <env> Env </env>
        ...</thread>
        (. => <thread>...
                <k> S </k>
                <env> Env </env>
-               <id> T </id>
+               <id> !T </id>
              ...</thread>)
-    when fresh(T:Int)
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the

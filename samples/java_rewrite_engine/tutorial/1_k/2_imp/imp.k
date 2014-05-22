@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 K Team. All Rights Reserved.
+// Copyright (c) 2013-2014 K Team. All Rights Reserved
 
 module IMP-SYNTAX
   syntax AExp  ::= Int | Id
@@ -71,3 +71,4 @@ module IMP
     //when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule
+

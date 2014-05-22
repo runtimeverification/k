@@ -63,8 +63,7 @@ module IMP
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 
   rule <k> int (X,Xs => Xs); ...</k>
-       <env> Rho => Rho[X <- N] </env>
-       <store>... .Map => N |-> 0 ...</store>
-    when fresh(N:Nat)
+       <env> Rho => Rho[X <- !N:Int] </env>
+       <store>... .Map => !N |-> 0 ...</store>
   rule int .Ids; => .  [structural]
 endmodule

@@ -672,14 +672,14 @@ above. */
 
   rule bindTo(.Map) => .  [structural]
   rule <k> bindTo((X:Name |-> V:Val => .Map) _:Map) ...</k>  // <= TODO(YilongL): need to implement iteration of builtin map in DataStructureToLookupUpdate
-       <env> Rho => Rho[X <- L] </env>
-       <store>... .Map => L |-> V ...</store> // YilongL: gotta use .Map
-    when fresh(L:Int)  [structural]
+       <env> Rho => Rho[X <- !L:Int] </env>
+       <store>... .Map => !L |-> V ...</store>
+  [structural]
 
   rule bind(.Names) => .                  [structural]
   rule <k> bind(X:Name,Xs => Xs) ...</k>
-       <env> Rho => Rho[X <- L] </env>
-    when fresh(L:Int)                   [structural]
+       <env> Rho => Rho[X <- !L:Int] </env>
+  [structural]
 
   syntax KItem ::= assignTo(Names,Exps)  [strict(2)]
 

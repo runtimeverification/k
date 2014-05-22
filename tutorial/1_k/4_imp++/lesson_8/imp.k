@@ -443,9 +443,8 @@ thread cell will add a new thread cell next to it, which is consistent
 with the declared configuration cell multiplicity.  The unique identifier
 of the new thread is generated using the ``fresh'' side condition. */
 
-  rule <k> spawn S => T ...</k> <env> Rho </env>
-       (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
-    when fresh(T:Int)
+  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
+       (. => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
 
 /*@ \subsubsection{Join thread}
 A thread who wants to join another thread \texttt{T} has to wait until
@@ -486,9 +485,8 @@ We allocate a fresh location for each newly declared variable and
 initialize it with 0. */
 
   rule <k> int (X,Xs => Xs); ...</k>
-       <env> Rho => Rho[X <- N] </env>
-       <store>... .Map => N |-> 0 ...</store>
-    when fresh(N:Nat)
+       <env> Rho => Rho[X <- !N:Int] </env>
+       <store>... .Map => !N |-> 0 ...</store>
   rule int .Ids; => .  [structural]
 
 /*@ \subsubsection{Auxiliary operations}
