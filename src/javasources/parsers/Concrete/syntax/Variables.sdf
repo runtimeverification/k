@@ -23,7 +23,7 @@ context-free syntax
 
 	":" -> ColonDz {cons("Colon")}
 	"?" -> QuestionMarkDz {cons("QuestionMark")}
-	"!" -> QuestionMarkDz {cons("ExclamationMarkDz")}
+	"!" -> ExclamationMarkDz {cons("ExclamationMarkDz")}
 	VARID -> VARIDz %% in order to put the follow restriction
 
 	KVarDz			-> K

@@ -167,6 +167,8 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                                         sdf.append("ColonDz ");
                                     else if (t.getTerminal().equals("?"))
                                         sdf.append("QuestionMarkDz ");
+                                    else if (t.getTerminal().equals("!"))
+                                        sdf.append("ExclamationMarkDz ");
                                     else
                                         sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
                                 } else
