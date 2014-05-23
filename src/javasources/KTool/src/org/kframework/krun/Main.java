@@ -1190,6 +1190,7 @@ public class Main {
             }
             if (cmd.hasOption("ltlmc")) {
                 K.model_checking = cmd.getOptionValue("ltlmc");
+                K.io = false;
             }
             if (cmd.hasOption("prove")) {
                 K.prove = cmd.getOptionValue("prove");
@@ -1439,7 +1440,7 @@ public class Main {
             if (K.term) {
                 if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                     if (K.backend.equals("java")) {
-                        K.parser = "kast --parser rule";
+                        K.parser = "kast --parser rules";
                     } else {
                         K.parser = "kast --parser ground";
                     }

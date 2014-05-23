@@ -30,8 +30,6 @@ public class MaudeTask extends Thread {
         try {
             runMaude();
             runCommand();
-            writeOutput();
-            writeError();
             returnValue = _maudeProcess.waitFor();
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,7 +52,9 @@ public class MaudeTask extends Thread {
         commands.add("-no-wrap");
         commands.add("-no-banner");
         commands.add("-xml-log=" + K.maude_output);
-        maude.command(commands); 
+        maude.command(commands);
+        maude.redirectOutput(new File(_outputFile));
+        maude.redirectError(new File(_errorFile));
 
         Process maudeProcess = maude.start();
         _maudeProcess = maudeProcess;
@@ -64,32 +64,5 @@ public class MaudeTask extends Thread {
         BufferedWriter maudeInput = new BufferedWriter(new OutputStreamWriter(_maudeProcess.getOutputStream()));
         maudeInput.write(_command + K.lineSeparator);
         maudeInput.close();
-    }
-
-    private void writeOutput() throws IOException {
-        // redirect out in log file
-        BufferedReader maudeOutput = new BufferedReader(new InputStreamReader(_maudeProcess.getInputStream()));
-        BufferedWriter outputFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_outputFile)));
-
-        String line;
-        while ((line = maudeOutput.readLine()) != null) {
-            outputFile.write(line + K.lineSeparator);
-        }
-        maudeOutput.close();
-        outputFile.close();
-    }
-
-    private void writeError() throws IOException {
-        try (
-            BufferedReader maudeError
-                = new BufferedReader(new InputStreamReader(_maudeProcess.getErrorStream()));
-            BufferedWriter errorFile
-                = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_errorFile)))) {
-
-            String line;
-            while ((line = maudeError.readLine()) != null) {
-                errorFile.write(line + K.lineSeparator);
-            }
-        }
     }
 }
