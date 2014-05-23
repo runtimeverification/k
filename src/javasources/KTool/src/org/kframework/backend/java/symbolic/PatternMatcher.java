@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +15,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -31,25 +31,41 @@ public class PatternMatcher extends AbstractMatcher {
      * Represents the substitution after the pattern matching.
      */
     private Map<Variable, Term> fSubstitution = new HashMap<Variable, Term>();
-    
+
     /**
      * Represents a conjunction of multiple collections of substitutions; each
      * collection is a disjunction of substitutions created by some AC-matching
-     * between two cell collections.
+     * between two cell collections. For example:
+     * <pre>
+     *   Matching pattern {@code <thread> T </thread> <class> C </class> <store> S </store>} against
+     *   subject
+     *   {@code
+     *     <threads>
+     *       <thread> t1 </thread>
+     *       <thread> t2 </thread>
+     *     </threads>
+     *     <classes>
+     *       <class> c1 </class>
+     *       <class> c2 </class>
+     *     </classes>
+     *     <store> s <store>}
+     *   will result in this field being ``(T = t1 \/ T = t2) /\ (C = c1 \/ C = c2)''.
+     *   And ``S = s'' is stored in {@link PatternMatcher#fSubstitution}.
+     * </pre>
      */
     private final Collection<Collection<Map<Variable, Term>>> multiSubstitutions;
-    
+
     /**
      * Records whether the pattern matcher is currently traversing under a
      * starred cell.
      */
     private boolean isStarNested;
-    
+
     private final TermContext termContext;
-    
+
     /**
      * Checks if the subject term matches the pattern.
-     * 
+     *
      * @param subject
      *            the subject term
      * @param pattern
@@ -68,10 +84,14 @@ public class PatternMatcher extends AbstractMatcher {
         }
         return true;
     }
-    
+
     /**
-     * Matches a subject term against a rule.
-     * 
+     * Matches a subject term against a rule. Returns possible instantiations
+     * when the rule can be applied for sure (all side-conditions are cleared).
+     * Note that, however, an empty list doesn't mean that this rule cannot
+     * apply definitely; it is possible that side-conditions are blocked by
+     * symbolic argument(s).
+     *
      * @param subject
      *            the subject term
      * @param rule
@@ -84,87 +104,117 @@ public class PatternMatcher extends AbstractMatcher {
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(context);
-        if (!matcher.patternMatch(subject, rule.leftHandSide())) {
+        
+        boolean failed = true;
+        if (rule.isFunction()) {
+            /* match function rule */
+            if (subject instanceof KItem) {
+                KItem kItem = (KItem) subject;
+                Term kLabel = kItem.kLabel();
+                Term kList = kItem.kList();
+                if (kLabel.equals(rule.functionKLabel())) {
+                    failed = !matcher.patternMatch(kList, ((KItem) rule.leftHandSide()).kList());
+                }
+            }
+        } else {
+            /* match normal rewrite rule */
+            failed = !matcher.patternMatch(subject, rule.leftHandSide());
+        }
+        
+        if (failed) {
             return Collections.emptyList();
         }
 
         /* handle fresh variables, data structure lookups, and side conditions */
-        List<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>();
-        label: 
+        List<Map<Variable, Term>> results = new ArrayList<Map<Variable, Term>>();
         for (Map<Variable, Term> subst : getMultiSubstitutions(matcher)) {
             /* add bindings for fresh variables used in the rule */
             for (Variable variable : rule.freshVariables()) {
                 subst.put(variable, IntToken.fresh());
             }
-            
-            /* evaluate data structure lookups and add bindings for them */
-            List<Map<Variable, Term>> multiSubsts = new ArrayList<>(Collections.singletonList(subst));
+
+            /* evaluate data structure lookups/choices and add bindings for them */
+
+            // evaluate data structure lookups/choices may cause @{code subst}
+            // to split up into multiple substitutions which will be stored in
+            // @{code substitutions}
+            List<Map<Variable, Term>> substitutions = new ArrayList<>(Collections.singletonList(subst));
             for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-                Term lookup = equality.leftHandSide() instanceof DataStructureLookup ? 
+                // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
+                Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
                         equality.leftHandSide() : equality.rightHandSide();
-                Term nonLookup = equality.leftHandSide() == lookup ? 
+                Term nonLookupOrChoice = equality.leftHandSide() == lookupOrChoice ?
                         equality.rightHandSide() : equality.leftHandSide();
-                assert lookup instanceof DataStructureLookup : 
-                    "one side of the equality should be an instance of DataStructureLookup";
-                
-                Term evaluatedLookup = lookup.substituteAndEvaluate(subst, context);
-                if (nonLookup instanceof Variable) {
-                    Variable variable = (Variable) nonLookup;
-                    if (checkOrderedSortedCondition(variable, evaluatedLookup, context)) {
-                        for (Map<Variable, Term> subst2 : multiSubsts) {
-                            subst2.put(variable, evaluatedLookup);
+                assert lookupOrChoice instanceof DataStructureLookupOrChoice :
+                    "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
+
+                List<Map<Variable, Term>> updatedSubsts = new ArrayList<>();
+                for (Map<Variable, Term> crntSubst : substitutions) {
+                    Term evalLookupOrChoice = lookupOrChoice.substituteAndEvaluate(crntSubst, context);
+                    if (evalLookupOrChoice instanceof Bottom) {
+                        /* the data-structure lookup or choice operation is undefined */
+                        continue;
+                    }
+
+                    if (evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
+                        /* the data-structure lookup or choice operation is pending due to symbolic argument(s) */
+
+                        // in other words, this is not really a valid match.
+                        // for example, matching ``<env>... X |-> V ...</env>''
+                        // against ``<env> Rho </env>'' will result in a pending
+                        // choice operation due to the unknown ``Rho''.
+                        continue;
+                    }
+
+                    if (nonLookupOrChoice instanceof Variable) {
+                        Variable variable = (Variable) nonLookupOrChoice;
+                        if (checkOrderedSortedCondition(variable, evalLookupOrChoice, context)) {
+                            Map<Variable, Term> newSubst = new HashMap<Variable, Term>(crntSubst);
+                            newSubst.put(variable, evalLookupOrChoice);
+                            updatedSubsts.add(newSubst);
                         }
                     } else {
-                        continue label;
-                    }
-                } else {
-                    // the non-lookup term is not a variable and thus requires further pattern matching
-                    PatternMatcher lookupMatcher = new PatternMatcher(context);
-                    if (lookupMatcher.patternMatch(evaluatedLookup, nonLookup)) {
-                        List<Map<Variable, Term>> product = new ArrayList<Map<Variable, Term>>();
-                        // it's possible that multiple substitutions are possible from the pattern matching above
-                        for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
-                            for (Map<Variable, Term> subst2 : multiSubsts) {
-                                Map<Variable, Term> composedSubst = composeSubstitution(subst1, subst2);
+                        // the non-lookup term is not a variable and thus requires further pattern matching
+                        // for example: TODO(YilongL)
+                        PatternMatcher lookupMatcher = new PatternMatcher(context);
+                        if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
+                            // it's possible that multiple substitutions are viable from the pattern matching above
+                            for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
+                                Map<Variable, Term> composedSubst = composeSubstitution(subst1, crntSubst);
                                 if (composedSubst != null) {
-                                    product.add(composedSubst);
+                                    updatedSubsts.add(composedSubst);
                                 }
                             }
                         }
-                        if (product.isEmpty()) {
-                            continue label;
-                        } else {
-                            multiSubsts = product;
-                        }
-                    } else {
-                        continue label;
                     }
                 }
+                substitutions = updatedSubsts;
             }
-            
+
             /* evaluate side conditions */
-            Iterator<Map<Variable, Term>> iter = multiSubsts.iterator();
+            Iterator<Map<Variable, Term>> iter = substitutions.iterator();
             while (iter.hasNext()) {
                 Map<Variable, Term> nextSubst = iter.next();
                 for (Term require : rule.requires()) {
-                    if (!require.substituteAndEvaluate(nextSubst, context).equals(BoolToken.TRUE)) {
+                    Term evaluatedReq = require.substituteAndEvaluate(nextSubst, context);
+                    if (!evaluatedReq.equals(BoolToken.TRUE)) {
                         iter.remove();
                         break;
                     }
                 }
             }
-            
-            substitutions.addAll(multiSubsts);
+
+            results.addAll(substitutions);
         }
-        
-        return substitutions;
+
+        return results;
     }
-    
+
     /**
      * Private helper method which constructs all possible variable bindings of
      * the pattern term to match the subject term, given the pattern matcher
      * object that is used to perform the matching.
-     * 
+     *
      * @param matcher
      *            the pattern matcher
      * @return all possible substitutions of the pattern term to match the
@@ -173,7 +223,7 @@ public class PatternMatcher extends AbstractMatcher {
     private static List<Map<Variable, Term>> getMultiSubstitutions(PatternMatcher matcher) {
         if (!matcher.multiSubstitutions.isEmpty()) {
             assert matcher.multiSubstitutions.size() <= 2;
-            
+
             List<Map<Variable, Term>> result = new ArrayList<Map<Variable, Term>>();
             Iterator<Collection<Map<Variable, Term>>> iterator = matcher.multiSubstitutions.iterator();
             if (matcher.multiSubstitutions.size() == 1) {
@@ -203,10 +253,10 @@ public class PatternMatcher extends AbstractMatcher {
             return Collections.singletonList(matcher.fSubstitution);
         }
     }
-    
+
     /**
      * Composes two specified substitutions.
-     * 
+     *
      * @param subst1
      *            the first substitution
      * @param subst2
@@ -235,7 +285,7 @@ public class PatternMatcher extends AbstractMatcher {
 
     /**
      * Matches the subject term against the pattern.
-     * 
+     *
      * @param subject
      *            the subject term
      * @param pattern
@@ -262,6 +312,13 @@ public class PatternMatcher extends AbstractMatcher {
      */
     @Override
     public void match(Term subject, Term pattern) {
+        /*
+         * We make no assumption about whether the subject will be ground in the
+         * matching algorithm. As for the pattern, all symbolic terms inside it
+         * must be variables (no function KLabels, KItem projections, or
+         * data-structure lookup/update).
+         */
+
         if (subject.kind().isComputational()) {
             assert pattern.kind().isComputational();
 
@@ -274,7 +331,7 @@ public class PatternMatcher extends AbstractMatcher {
             subject = CellCollection.upKind(subject, pattern.kind(), context);
             pattern = CellCollection.upKind(pattern, subject.kind(), context);
         }
-        
+
         // TODO(YilongL): may need to replace the following assertion to the
         // method fail() in the future because it crashes the Java rewrite
         // engine instead of just failing the pattern matching process
@@ -282,8 +339,7 @@ public class PatternMatcher extends AbstractMatcher {
                "kind mismatch between " + subject + " (" + subject.kind() + ")"
                + " and " + pattern + " (" + pattern.kind() + ")";
 
-        if (pattern.isSymbolic()) {
-            assert pattern instanceof Variable;
+        if (pattern instanceof Variable) {
             Variable variable = (Variable) pattern;
 
             /* special case for concrete collections  */
@@ -294,24 +350,26 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* add substitution */
             addSubstitution(variable, subject);
+        } else if (subject.isSymbolic()) {
+            fail(subject, pattern);
         } else {
             /* match */
-            if (!subject.equals(pattern)) {
+            if (subject.hashCode() != pattern.hashCode() || !subject.equals(pattern)) {
                 subject.accept(this, pattern);
             }
         }
     }
-    
+
     /**
      * Private helper method that checks if a specified variable binding
      * satisfies the ordered-sorted pattern matching condition; namely, the sort
      * of the term must be subsorted to the sort of the variable.
-     * 
+     *
      * @param variable
      *            the variable to be bound
      * @param term
      *            the term to be bound to
-     * @param termContext 
+     * @param termContext
      * @return {@code true} if the variable can be bound to the term
      *         successfully; otherwise, {@code false}
      */
@@ -322,17 +380,25 @@ public class PatternMatcher extends AbstractMatcher {
     /**
      * Binds a variable in the pattern to a subterm of the subject; calls
      * {@link PatternMatcher#fail(Term, Term)} when the binding fails.
-     * 
+     *
      * @param variable
      *            the variable
      * @param term
      *            the term
      */
     private void addSubstitution(Variable variable, Term term) {
+        /* retrieve the exact element when the term is some singleton collection */
+        if (term.kind() == Kind.K || term.kind() == Kind.KLIST) {
+            term = KCollection.downKind(term);
+        }
+        if (term.kind() == Kind.CELL_COLLECTION) {
+            term = CellCollection.downKind(term);
+        }
+
         if (!checkOrderedSortedCondition(variable, term, termContext)) {
             fail(variable, term);
         }
-        
+
         Term subst = fSubstitution.get(variable);
         if (subst == null) {
             fSubstitution.put(variable, term);
@@ -340,12 +406,12 @@ public class PatternMatcher extends AbstractMatcher {
             fail(subst, term);
         }
     }
-    
+
     /**
      * Binds multiple variables in the pattern to an equal number of subterms of
      * the subject respectively; calls {@link PatternMatcher#fail(Term, Term)}
      * when the binding fails.
-     * 
+     *
      * @param variable
      *            the variable
      * @param term
@@ -360,11 +426,11 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public void match(BuiltinList builtinList, Term pattern) {
         assert !(pattern instanceof Variable);
-        
+
         if (!(pattern instanceof BuiltinList)) {
             this.fail(builtinList, pattern);
         }
-        
+
         throw new UnsupportedOperationException(
                 "list matching is only supported when one of the lists is a variable.");
     }
@@ -396,7 +462,7 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public void match(BuiltinMgu builtinMgu, Term pattern) {
         assert !(pattern instanceof Variable);
-        
+
         if (!(pattern instanceof BuiltinMgu)) {
             this.fail(builtinMgu, pattern);
         }
@@ -423,7 +489,7 @@ public class PatternMatcher extends AbstractMatcher {
              * AndreiS: commented out the check below as matching might fail due
              * to KItem < K < KList subsorting:
              * !cell.contentKind().equals(otherCell.contentKind())
-             */            
+             */
             fail(cell, otherCell);
         }
 
@@ -431,24 +497,29 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     /**
-     * 
+     *
      */
     @Override
     public void match(CellCollection cellCollection, Term pattern) {
         assert !(pattern instanceof Variable);
-        
+
         if (!(pattern instanceof CellCollection)) {
             fail(cellCollection, pattern);
         }
         CellCollection otherCellCollection = (CellCollection) pattern;
-        
-        assert !cellCollection.hasFrame() : "the subject term should be ground";
+
+        if (cellCollection.hasFrame()) {
+            assert !K.do_concrete_exec : "the subject term should be ground in concrete execution";
+            if (!otherCellCollection.hasFrame()) {
+                fail(cellCollection, otherCellCollection);
+            }
+        }
 
         Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
         unifiableCellLabels.retainAll(otherCellCollection.labelSet());
 
         Context context = termContext.definition().context();
-        
+
         /*
          * Case 1: at least one of the cell collections has no explicitly
          * specified starred-cell; therefore, no need to worry about AC-matching
@@ -466,25 +537,20 @@ public class PatternMatcher extends AbstractMatcher {
             Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
                     cellMap, otherCellCollection, otherCellMap);
-            
-            if (!cellCollection.hasStar()
-                    && !addCellCollectionConstraint(
-                            cellMap, null,
-                            otherCellMap, otherCellCollection.hasFrame() ? otherCellCollection.frame() : null)) {
-                fail(cellCollection, otherCellCollection);
-            } else if (!otherCellCollection.hasStar()
-                    && !addCellCollectionConstraint(
-                            otherCellMap, otherCellCollection.hasFrame() ? otherCellCollection.frame() : null, 
-                            cellMap, null)) {
+
+            if (!addCellCollectionConstraint(
+                    cellMap,
+                    cellCollection.hasFrame() ? cellCollection.frame() : null,
+                    otherCellMap,
+                    otherCellCollection.hasFrame() ? otherCellCollection.frame() : null)) {
                 fail(cellCollection, otherCellCollection);
             }
-        } 
+        }
         /* Case 2: both cell collections have explicitly specified starred-cells */
         else {
             assert !isStarNested : "nested cells with multiplicity='*' not supported";
             // TODO(AndreiS): fix this assertions
-        
-            // note that cellCollection is free of frame
+
             Multimap<String, Cell> cellMap = ArrayListMultimap.create();
             Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
@@ -503,23 +569,32 @@ public class PatternMatcher extends AbstractMatcher {
                     iter.remove();
                 }
             }
-            
-            // YilongL: the assertion here must hold
+
             if (unifiableCellLabels.isEmpty()) {
+                // now we have different starred-cells in subject and pattern
                 fail(cellCollection, otherCellCollection);
             } else {
                 assert unifiableCellLabels.size() == 1;
             }
+            String starredCellLabel = unifiableCellLabels.iterator().next();
 
-            if (cellCollection.size() < otherCellCollection.size()
-                    || cellCollection.size() > otherCellCollection.size()
-                    && !otherCellCollection.hasFrame()) {
-                fail(cellCollection, otherCellCollection);
+            if (otherCellCollection.hasFrame()) {
+                if (cellCollection.get(starredCellLabel).size() < otherCellCollection.get(starredCellLabel).size()) {
+                    fail(cellCollection, otherCellCollection);
+                }
+            } else {
+                // now we know otherCellMap.isEmpty() && otherCellCollection is free of frame
+                if (cellCollection.hasFrame()
+                        || cellMap.isEmpty()
+                        || cellCollection.get(starredCellLabel).size() != otherCellCollection
+                                .get(starredCellLabel).size()) {
+                    fail(cellCollection, otherCellCollection);
+                }
             }
 
-            String label = unifiableCellLabels.iterator().next();
-            Cell<?>[] cells = cellCollection.get(label).toArray(new Cell[1]);
-            Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
+            Cell<?>[] cells = cellCollection.get(starredCellLabel).toArray(new Cell[1]);
+            Cell<?>[] otherCells = otherCellCollection.get(starredCellLabel).toArray(new Cell[1]);
+            Variable frame = cellCollection.hasFrame() ? cellCollection.frame() : null;
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
@@ -530,8 +605,8 @@ public class PatternMatcher extends AbstractMatcher {
 
             // {@code substitutions} represents all possible substitutions by
             // matching these two cell collections
-            Collection<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>(); 
-            
+            Collection<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>();
+
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             // start searching for all possible unifiers
             do {
@@ -542,7 +617,7 @@ public class PatternMatcher extends AbstractMatcher {
                     for (int i = 0; i < otherCells.length; ++i) {
                         match(cells[generator.selection.get(i)], otherCells[i]);
                     }
-                } catch (UnificationFailure e) {
+                } catch (PatternMatchingFailure e) {
                     continue;
                 }
 
@@ -555,11 +630,12 @@ public class PatternMatcher extends AbstractMatcher {
                 cm.putAll(cellMap);
 
                 if (otherFrame != null) {
-                    addSubstitution(otherFrame, new CellCollection(cm, context));
+                    addSubstitution(otherFrame, new CellCollection(cm, frame, context));
                 } else {
-                    if (!cm.isEmpty()) {
-                        fail(cellCollection, otherCellCollection);
-                    }
+                    // we should've guaranteed that
+                    //   cellMap.isEmpty() && cells.length == otherCells.length
+                    // when otherFrame == null
+                    assert cm.isEmpty();
                 }
                 substitutions.add(fSubstitution);
             } while (generator.generate());
@@ -660,12 +736,10 @@ public class PatternMatcher extends AbstractMatcher {
 
     /**
      * Private helper method to compute and add constraint(s) between two
-     * specialized cell collections. Three preconditions for the arguments: 1)
+     * specialized cell collections. One precondition for the arguments:
      * The two specified cell collections shall have no common cell label in
-     * their explicit contents; 2) the first cell collection contains no
-     * starred-cell in its explicit content; 3) at least one of the cell
-     * collections has no frame.
-     * 
+     * their explicit contents.
+     *
      * @return true if the constraint addition does not make the matching to
      *         fail
      */
@@ -676,25 +750,23 @@ public class PatternMatcher extends AbstractMatcher {
             Variable otherFrame) {
         for (String cellLabel : cellMap.keySet()) {
             assert !otherCellMap.containsKey(cellLabel);
-            assert cellMap.get(cellLabel).size() == 1;
         }
-        assert frame == null || otherFrame == null;
-        
-        Context context = termContext.definition().context();
-        
-        if (frame != null) {
-            // otherFrame == null
-            if (!cellMap.isEmpty()) {
-                return false;
-            }
 
-            addSubstitution(frame, new CellCollection(otherCellMap, context));
-        } else {
-            // frame == null
+        Context context = termContext.definition().context();
+
+        if (frame != null) {
+            if (!otherCellMap.isEmpty()) {
+                return false;
+            } else if (otherFrame == null) {
+                return false;
+            } else {
+                // otherFrame != null && otherCellMap.isEmpty() == true
+                addSubstitution(otherFrame, new CellCollection(cellMap, frame, context));
+            }
+        } else { // frame == null
             if (!otherCellMap.isEmpty()) {
                 return false;
             }
-
             if (otherFrame == null) {
                 if (!cellMap.isEmpty()) {
                     return false;
@@ -710,7 +782,7 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public void match(KLabelConstant kLabelConstant, Term pattern) {
         assert !(pattern instanceof Variable);
-        
+
         if (!kLabelConstant.equals(pattern)) {
             fail(kLabelConstant, pattern);
         }
@@ -830,17 +902,16 @@ public class PatternMatcher extends AbstractMatcher {
 
     private void matchKCollection(KCollection kCollection, KCollection pattern) {
         assert kCollection.getClass().equals(pattern.getClass());
-        
-        assert !kCollection.hasFrame() : "the subject term should be ground";
 
         int length = pattern.size();
         if (kCollection.size() >= length) {
             if (pattern.hasFrame()) {
                 addSubstitution(pattern.frame(), kCollection.fragment(length));
-            } else if (kCollection.size() > length) {
+            } else if (kCollection.hasFrame() || kCollection.size() > length) {
                 fail(kCollection, pattern);
             }
-            
+
+            // kCollection.size() == length
             for (int index = 0; index < length; ++index) {
                 match(kCollection.get(index), pattern.get(index));
             }
@@ -848,7 +919,7 @@ public class PatternMatcher extends AbstractMatcher {
             fail(kCollection, pattern);
         }
     }
-    
+
     @Override
     public void match(MetaVariable metaVariable, Term pattern) {
         assert !(pattern instanceof Variable);
@@ -860,9 +931,11 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(Variable variable, Term pattern) {
-        assert false : "the subject term should be ground; but found variable " + variable;
+        assert !(pattern instanceof Variable);
+
+        fail(variable, pattern);
     }
-    
+
     @Override
     public String getName() {
         return this.getClass().toString();

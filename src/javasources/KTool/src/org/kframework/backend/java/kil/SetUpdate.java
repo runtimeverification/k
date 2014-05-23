@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
  *
  * @author TraianSF
  */
-public class SetUpdate extends Term {
+public class SetUpdate extends Term implements DataStructureUpdate {
 
     /** {@link org.kframework.backend.java.kil.Term} representation of the map */
     private final Term set;

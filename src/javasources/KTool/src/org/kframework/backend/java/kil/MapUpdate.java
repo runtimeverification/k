@@ -22,7 +22,7 @@ import com.google.common.collect.Sets;
  *
  * @author AndreiS
  */
-public class MapUpdate extends Term {
+public class MapUpdate extends Term implements DataStructureUpdate {
 
     /** {@link Term} representation of the map */
     private final Term map;

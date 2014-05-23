@@ -17,7 +17,7 @@ public class VariableTypeFilter extends ParseForestTransformer {
 
     private Map<String, Variable> variableTypes = null;
     // if expected is true, then do disambiguation on the expected sort.
-    // the expected sort is inferred by the type inferencer
+    // the expected sort is inferred by the type inference
     private boolean expected = false;
 
     public VariableTypeFilter(Map<String, Variable> types, boolean expected, Context context) {
@@ -42,7 +42,7 @@ public class VariableTypeFilter extends ParseForestTransformer {
             return newV;
         }
         String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getExpectedSort();
-        msg += " but it has been declared (or infered) of sort " + correctVar.getExpectedSort() + ".";
+        msg += " but it has been declared (or inferred) of sort " + correctVar.getExpectedSort() + ".";
         KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation());
         throw new VariableTypeClashException(kex);
     }
