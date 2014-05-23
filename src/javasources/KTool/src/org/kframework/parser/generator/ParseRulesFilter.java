@@ -1,8 +1,8 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Formatter;
 
 import org.kframework.kil.ASTNode;
@@ -36,28 +36,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseRulesFilter extends ParseForestTransformer {
-    Formatter f;
     boolean checkInclusion = true;
 
     public ParseRulesFilter(Context context, boolean checkInclusion) {
-        super("Parse Configurations", context);
+        super("Parse Rules", context);
         this.checkInclusion = checkInclusion;
-        if (globalOptions.verbose)
-            try {
-                f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
     }
 
     public ParseRulesFilter(Context context) {
-        super("Parse Configurations", context);
-        if (globalOptions.verbose)
-            try {
-                f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+        super("Parse Rules", context);
     }
 
     String localModule = null;
@@ -104,7 +91,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
                 st.setLabel(ss.getLabel());
                 //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
                 st.setAttributes(ss.getAttributes());
-                    
+
                 // disambiguate rules
                 if (config.getFilename().endsWith("test.k")) {
                     // this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
@@ -134,9 +121,12 @@ public class ParseRulesFilter extends ParseForestTransformer {
                 // last resort disambiguation
                 config = new AmbFilter(context).visitNode(config);
 
-                if (globalOptions.verbose) {
-                    f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getFilename(), ss.getLocation());
-                    f.flush();
+                if (globalOptions.debug) {
+                    try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
+                        f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getFilename(), ss.getLocation());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return config;
             } catch (ParseFailedException te) {
