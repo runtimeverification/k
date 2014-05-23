@@ -313,7 +313,7 @@ public final class KItem extends Term {
 
             LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
             for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-
+                /* function rules should be applied by pattern match rather than unification */
                 Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
                 if (solutions.isEmpty()) {
                     continue;
