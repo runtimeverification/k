@@ -31,6 +31,7 @@ public class MaudeHelper {
         basicSorts.add(BoolBuiltin.SORT_NAME);
         basicSorts.add(IntBuiltin.SORT_NAME);
         basicSorts.add(StringBuiltin.SORT_NAME);
+        basicSorts.add(FloatBuiltin.SORT_NAME);
 
         basicSorts.add(KSorts.BAG);
         basicSorts.add(KSorts.BAG_ITEM);
@@ -43,7 +44,6 @@ public class MaudeHelper {
 
         basicSorts.add("#Id");
         basicSorts.add("#Rat");
-        basicSorts.add("#Float");
         basicSorts.add("#ModelCheckerState");
         basicSorts.add("#ModelCheckResult");
         basicSorts.add("#LTLFormula");
