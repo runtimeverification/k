@@ -269,9 +269,12 @@
       results="issue663/out"
       extension="issue"
       >
-    <all-programs>
-      <krun-option name="--ltlmc" value="TrueLtl" />
-    </all-programs>
+      <program name="a.issue">
+        <krun-option name="--ltlmc" value="TrueLtl" />
+      </program>
+      <program name="b.issue">
+        <krun-option name="--ltlmc" value="FalseLtl" />
+      </program>
   </test>
   <test
       definition="issue674/issue.k"
@@ -343,6 +346,16 @@
     </all-programs>
   </test>
 
+<test
+      definition="issue#428/test.k"
+      programs="issue#428"
+      results="issue#428"
+      extension="test"
+      >
+    <all-programs>
+	  <krun-option name="--parser" value="kast --parser rules" />
+    </all-programs>
+  </test>
 
   <test
       definition="issue677/test.k"
