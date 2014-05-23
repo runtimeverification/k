@@ -40,4 +40,14 @@
 		</all-programs>
 	</test>
 
+	<test
+		  definition="08-manual-reject/test.k"
+		  programs="08-manual-reject/"
+		  extension="test"
+		  results="08-manual-reject/">
+		<all-programs>
+			<krun-option name="--parser" value="kast --parser newprogram" />
+		</all-programs>
+	</test>
+
 </tests>
