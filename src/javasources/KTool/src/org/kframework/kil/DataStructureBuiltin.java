@@ -164,6 +164,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
             if (leftIndex == rightIndex && argument[rightIndex] instanceof ListBuiltin) {
                 ListBuiltin listBuiltin = (ListBuiltin) argument[leftIndex];
                 elementsLeft.addAll(listBuiltin.elementsLeft());
+                terms.addAll(listBuiltin.baseTerms());
                 for (Term element : listBuiltin.elementsRight()) {
                     elementsRight.add(0, element);
                 }
