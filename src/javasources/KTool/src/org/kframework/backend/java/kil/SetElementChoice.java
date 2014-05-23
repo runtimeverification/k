@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -15,7 +14,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class SetElementChoice extends Term {
+public class SetElementChoice extends Term implements DataStructureChoice {
 
     /**
      * Set from which the element is chosen.

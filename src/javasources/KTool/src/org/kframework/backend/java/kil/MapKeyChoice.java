@@ -15,7 +15,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class MapKeyChoice extends Term {
+public class MapKeyChoice extends Term implements DataStructureChoice {
 
     /**
      * Map from which the key is chosen.

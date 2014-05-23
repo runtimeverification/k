@@ -762,6 +762,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         TermContext termContext = TermContext.of(definition);
         // TODO(AndreiS): some evaluation is required in the LHS as well
         //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
+
+        Rule origRule = rule;
+        if (rule.isFunction()) {
+            /*
+             * rename variables in the function rule to avoid variable confusion
+             * when trying to apply this rule on its RHS
+             */
+            rule = rule.getFreshRule(termContext);
+        }
         Term rightHandSide = rule.rightHandSide().evaluate(termContext);
         List<Term> requires = new ArrayList<>();
         for (Term term : rule.requires()) {
@@ -778,7 +787,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     equality.rightHandSide().evaluate(termContext));
         }
         
-        return new Rule(
+        Rule newRule = new Rule(
                 rule.label(),
                 rule.leftHandSide(),
                 rightHandSide,
@@ -788,6 +797,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 lookups,
                 rule.getAttributes(),
                 definition);
+        return newRule.equals(rule) ? origRule : newRule;                
     }
 
     private static void flattenKSequence(
