@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 <!--
   Use these tags for comments.  To test only one language,
   just comment out the other tests and then type "ant test".
@@ -58,6 +60,25 @@
     </all-programs>
   </test>
 
+  <!-- testing pattern-matching -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
+      programs="tutorial/2_languages/1_simple/2_typed/programs/"
+      extension="simple"
+      exclude="dekker.simple exceptions_07.simple threads_05.simple"
+      results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests/"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
+    <all-programs>
+      <krun-option name="--backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
+      <krun-option name="--pattern-matching" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="none" />
+    </all-programs>
+  </test>
+
   <test
       definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
       programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/tests/"
@@ -88,6 +109,25 @@
     </all-programs>
   </test>
 
+  <!-- testing pattern-matching -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
+      programs="tutorial/2_languages/2_kool/2_typed/programs/"
+      extension="kool"
+      exclude="cycle.kool"
+      results="tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
+    <all-programs>
+      <krun-option name="--backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
+      <krun-option name="--pattern-matching" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="none" />
+    </all-programs>
+  </test>
+
   <!-- YilongL: the output of cycle.kool depends on the implementation of the rewrite engine -->
   <test
       definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
@@ -96,11 +136,67 @@
       exclude="cycle.kool"
       results="tutorial/2_languages/2_kool/2_typed/2_static/tests/"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
+      <kompile-option name="--rule-index" value="path" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="none" />
+    </all-programs>
+  </test>
+
+  <!-- testing pattern-matching -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
+      programs="tutorial/2_languages/2_kool/2_typed/programs/"
+      extension="kool"
+      exclude="cycle.kool"
+      results="tutorial/2_languages/2_kool/2_typed/2_static/tests/"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
+    <all-programs>
+      <krun-option name="--backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
+      <krun-option name="--pattern-matching" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="none" />
+    </all-programs>
+  </test>
+
+  <!-- YilongL: the pretty printer stucks at the result of constructor-bst-sorting -->
+  <!-- YilongL: the outputs of stuck-letrec & polymorphism-6 are different from the maude backend -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
+      programs="tutorial/2_languages/3_fun/programs"
+      extension="fun"
+      exclude="constructor-bst-sorting stuck-letrec polymorphism-6"
+      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--rule-index" value="path" />
     <all-programs>
       <krun-option name="-backend" value="java" />
       <krun-option name="-smt" value="none" />
       <krun-option name="-output" value="none" />
+    </all-programs>
+  </test>
+
+  <!-- testing pattern-matching -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
+      programs="tutorial/2_languages/3_fun/programs"
+      extension="fun"
+      exclude="constructor-bst-sorting stuck-letrec polymorphism-6"
+      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
+    <all-programs>
+      <krun-option name="--backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
+      <krun-option name="--pattern-matching" />
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
     </all-programs>
   </test>
 
