@@ -149,12 +149,11 @@ public class PatternMatcher extends AbstractMatcher {
                     "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
                 List<Map<Variable, Term>> updatedSubsts = new ArrayList<>();
-                label:
                 for (Map<Variable, Term> crntSubst : substitutions) {
                     Term evalLookupOrChoice = lookupOrChoice.substituteAndEvaluate(crntSubst, context);
                     if (evalLookupOrChoice instanceof Bottom) {
                         /* the data-structure lookup or choice operation is undefined */
-                        continue label;
+                        continue;
                     }
 
                     if (evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
@@ -164,7 +163,7 @@ public class PatternMatcher extends AbstractMatcher {
                         // for example, matching ``<env>... X |-> V ...</env>''
                         // against ``<env> Rho </env>'' will result in a pending
                         // choice operation due to the unknown ``Rho''.
-                        continue label;
+                        continue;
                     }
 
                     if (nonLookupOrChoice instanceof Variable) {
