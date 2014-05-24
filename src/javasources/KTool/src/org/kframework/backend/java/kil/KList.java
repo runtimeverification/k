@@ -31,6 +31,7 @@ public class KList extends KCollection {
 
     private static final String SEPARATOR_NAME = ",, ";
     private static final String IDENTITY_NAME = "." + Kind.KLIST;
+    public static final KList EMPTY = new KList();
     
     private String sort;
 
@@ -58,7 +59,7 @@ public class KList extends KCollection {
     }
     */
 
-    public KList() {
+    private KList() {
         super(null, Kind.KLIST);
     }
 

@@ -170,6 +170,6 @@ public class MetaK {
      */
     public static KItem getKLabel(KItem kItem, TermContext context) {
         // TODO(AndreiS): handle KLabel variables
-        return new KItem(new KLabelInjection(kItem.kLabel()), new KList(), context);
+        return new KItem(new KLabelInjection(kItem.kLabel()), KList.EMPTY, context);
     }
 }
