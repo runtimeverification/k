@@ -8,7 +8,7 @@ syntax KItem ::= assertEqual(K, K)
 
 syntax KResult ::= Int | String | TCPError
 
-syntax KIetm ::= K "-" K [strict]
+syntax KItem ::= K "-" K [strict]
 
 rule I1:Int - I2:Int => I1 -Int I2
 

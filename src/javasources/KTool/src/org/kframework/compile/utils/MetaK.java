@@ -42,7 +42,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -54,6 +53,12 @@ public class MetaK {
     public static final String cellSort = "CellSort";
     public static final String cellFragment = "CellFragment";
 
+    /**
+     * TODO(YilongL)
+     * @param condition
+     * @param kresultCnd
+     * @return
+     */
     public static Term incrementCondition(Term condition, Term kresultCnd) {
         if (condition == null) {
             return kresultCnd;
