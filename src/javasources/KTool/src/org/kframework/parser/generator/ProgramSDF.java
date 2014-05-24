@@ -37,19 +37,24 @@ public class ProgramSDF {
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
         CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
+        // visit all modules to collect all Terminals first
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
             ctv.visitNode(m);
         }
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
+        // generate SDF and states for the new parser, using the terminals collected from the
+        // previous step
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
             psdfv.visitNode(m);
             ks2gsf.visitNode(m);
         }
 
+        // for each start sort in the grammar
         // automatically add a production of the type K ::= <start-sort>
-        // if the start symbol is K, then all other sorts are considered
+        // this will allow the parser to accept any sort as input if the definition doesn't contain
+        // a configuration, or the $PGM variable has sort K
         for (String sort : psdfv.startSorts) {
             if (!Sort.isBasesort(sort) && !context.isListSort(sort)) {
                 List<ProductionItem> pi = new ArrayList<>();

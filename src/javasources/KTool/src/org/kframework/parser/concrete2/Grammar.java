@@ -160,7 +160,7 @@ public class Grammar implements Serializable {
     }
 
     /**
-     * Calculates Nullability and OrderinInfo for all the states in the grammar.
+     * Calculates Nullability and OrderingInfo for all the states in the grammar.
      * Must be called before being handed over to the parser, but after
      * the grammar is finished being built.
      */
@@ -187,7 +187,7 @@ public class Grammar implements Serializable {
             predecessors[i] = new ArrayList<>();
         }
 
-        // A state "A" must preceed another state "B" if it is possible to get from a StateReturn
+        // A state "A" must precede another state "B" if it is possible to get from a StateReturn
         // of A to a StateReturn of B without consuming input.
         // There are three ways for this to happen:
         // (1) A.next contains B and B is nullable

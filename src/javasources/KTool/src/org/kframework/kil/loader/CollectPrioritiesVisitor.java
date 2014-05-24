@@ -96,6 +96,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
         for (Production p1 : prods) {
             if (p1.containsAttribute("klabel")) {
                 for (Production p2 : prods) {
+                    // collect the associativity for the entire block (production1 to production2)
                     if (p1 != p2) {
                         if (assoc.equals(Constants.LEFT) || assoc.equals(Constants.NON_ASSOC))
                             context.addLeftAssoc(p1.getKLabel(), p2.getKLabel());
@@ -103,6 +104,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                             context.addRightAssoc(p1.getKLabel(), p2.getKLabel());
                     }
                 }
+                // collect the associativity for the production with itself
                 if (p1.containsAttribute(Constants.LEFT) || p1.containsAttribute(Constants.NON_ASSOC))
                     context.addLeftAssoc(p1.getKLabel(), p1.getKLabel());
                 if (p1.containsAttribute(Constants.RIGHT) || p1.containsAttribute(Constants.NON_ASSOC))
@@ -111,4 +113,3 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
         }
     }
 }
-

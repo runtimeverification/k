@@ -130,6 +130,9 @@ public class ProgramLoader {
                     out = new PreferAvoidFilter(context).visitNode(out);
                     if (context.globalOptions.debug)
                         System.out.println("Filtered: " + out + "\n");
+                    out = new AmbFilter(context).visitNode(out);
+                    out = new RemoveBrackets(context).visitNode(out);
+                    out = new FlattenTerms(context).visitNode(out);
                 } catch (ParseFailedException te) {
                     ParseError perror = parser.getErrors();
 
@@ -141,9 +144,6 @@ public class ProgramLoader {
                     throw new ParseFailedException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
-                out = new AmbFilter(context).visitNode(out);
-                out = new RemoveBrackets(context).visitNode(out);
-                out = new FlattenTerms(context).visitNode(out);
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = new ResolveVariableAttribute(context).visitNode(out);

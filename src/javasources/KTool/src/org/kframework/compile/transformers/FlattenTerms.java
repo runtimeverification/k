@@ -99,8 +99,8 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 lok.getContents().add((Term) this.visitNode(t));
             }
             String label;
-            if (ppp.isListDecl() && tc.getContents().size() == 0)
-                label = "'.List{\"" + StringUtil.escape(ppp.getListDecl().getSeparator()) + "\"}";
+            if (tc.isListTerminator())
+                label = tc.getProduction().getListDecl().getTerminatorKLabel();
             else
                 label = ppp.getKLabel();
             return new KApp(l, f, KLabelConstant.of(label, context), lok);
