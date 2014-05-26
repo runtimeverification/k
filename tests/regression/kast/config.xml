@@ -17,5 +17,8 @@
     <program name="3.test">
       <krun-option name="--parser" value="kast --parser ground" />
     </program>
+    <program name="4.test">
+      <krun-option name="--parser" value="kast --parser ground --sort KItem" />
+    </program>
   </test>
 </tests>

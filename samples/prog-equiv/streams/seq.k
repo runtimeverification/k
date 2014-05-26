@@ -1,4 +1,5 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
+
 require "builtins/symbolic-k.k"
 
 
@@ -33,29 +34,30 @@ module STREAM-SYNTAX
   //@ Integer Expressions
   syntax IExp ::=  Int | Id
                 | "hd" "(" SExp ")" [strict]
-                | "(" IExp ")" [brackets]
+                | "(" IExp ")" [bracket]
                 > Id "(" IExps ")" [strict(2)]
-                > Id "." IExp [strict(2)]
                 > IExp "<|" BExp "|>" IExp [strict(2)]
                 | IExp "+" IExp [strict]
-
+ 
   syntax IExps ::= List{IExp,","} [strict]
   //@ Stream Expressions
 
 
   syntax SExp ::= Id 
                 | "tl" "(" SExp ")" [strict, prefer]
-//                | "(" SExp ")" [brackets]
+                | "(" SExp ")" [bracket]
                 > Id "(" SExps ")" [strict(2)]
-                > Id "." SExp [lsexp]
+                > Id "." SExp [strict(2), lsexp]
                 > IExp ":" SExp [strict(1), right, constr]
                 | "[]"
+
   syntax SExps ::= List{SExp,","} [strict]
 
 
   //@ Expressions
   syntax Exp ::= IExp | SExp
   syntax Exps ::= List{Exp,","} [strict]
+
 
   //@ Stream Specifications
   syntax SSpec ::= Id ":~" Exp ";"
@@ -70,6 +72,7 @@ module STREAM-SYNTAX
   the evaluation is a infinite process and therefore the debugger should
   be used for such cases.
 */
+
   syntax SPgm ::= SSpecs Exp 
 
 
@@ -85,18 +88,29 @@ module STREAM-SYNTAX
                     "<k>" SExp "</k>"
                     "<sspecs>" SSpecs "</sspecs>" ";"
 
-  syntax Start ::= EqvPgm  
+  syntax EqvPgms ::= EqvPgm | EqvPgms EqvPgms [left] 
+
+  syntax Start ::= EqvPgms
 
 
   /*@
     Extending with symbolic values:
    */
 
+/*
   syntax IExp ::= "#symIExp" "(" Id ")"  [onlyLabel, klabel(#symIExp)]
 
   syntax SExp ::= "#symSExp" "(" Id ")"  [onlyLabel, klabel(#symSExp)]
 
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
+*/
+  //@ Variables
+
+  syntax VariableSExp ::= Token{[\$][A-Z][a-zA-Z0-9]*[\:][S][E][x][p]} [onlyLabel]
+  syntax VariableBSExp ::= Token{[\$][A-Z][a-zA-Z0-9]*[\:][B][S][E][x][p]} [onlyLabel]
+
+  syntax SExp ::= VariableSExp
+  syntax VariableSExp ::= VariableBSExp
 
 endmodule
 
@@ -152,13 +166,14 @@ substitution always exists).
        andBool (K2' =/=K .K)
 
 
-  rule getSubst(X:Id, SE:SExp) => (X replBy SE)
-
-  rule getSubst(X:Id, IE:IExp) => (X replBy IE)
   
   rule getSubst(#symSExp(X:K), SE:SExp) => (#symSExp(X) replBy SE)
 
   rule getSubst(#symInt(X:K), IE:IExp) => (#symInt(X) replBy IE)
+
+  rule getSubst(V:VariableSExp, SE:SExp) => (V replBy SE)
+
+  rule getSubst(V:VariableBSExp, SE:SExp) => (V replBy SE)
 
   rule getSubst(hd(SE:SExp), hd(SE':SExp)) => getSubst(SE, SE') 
 
@@ -166,13 +181,15 @@ substitution always exists).
 
   rule getSubst(F:Id(SEs:SExps), F(SEs':SExps)) => getSubst(SEs, SEs')
 
-  rule getSubst((IE:IExp : SE:SExp), (IE':IExp : SE':SExp))
+  rule getSubst(IE:IExp : SE:SExp, IE':IExp : SE':SExp)
        => getSubst(IE, IE') ;; getSubst(SE, SE')
 
   rule getSubst((SE:SExp, SEs:SExps), (SE':SExp, SEs':SExps))
        => getSubst(SE, SE') ;; getSubst(SEs, SEs')
 
   rule getSubst(.SExps, .SExps) => emptySubst
+
+  rule getSubst(E, E) => emptySubst
 
   // to be completed
 
@@ -189,6 +206,7 @@ substitution always exists).
 
   rule isSubst(M:K ;; (I:K replBy A:K)) => isSubst(M)
 
+  // to be refactored
 
  //@ Two auxiliary rules
 
@@ -208,8 +226,8 @@ substitution always exists).
 /*
   syntax Bool ::= "eqObs" "(" OutCellSort "," OutCellSort ")" [function]
 
-  rule eqObs(<out> OUT1:SExp </out>,
-             <out> OUT2 </out>)
+  rule eqObs(<out> OUT:SExp </out>,
+             <out> OUT </out>)
        =>
        true
 */
@@ -236,7 +254,7 @@ substitution always exists).
   syntax SExp ::= append(Int, SExp) [function]
 
   rule append(I:Int, []) => I : []
-  rule append(I:Int, (J:Int : SE:SExp)) => J : append(I, SE)
+  rule append(I:Int, J:Int : SE:SExp) => J : append(I, SE)
 
 
   //@ Replace X:K by V:K in E:K
@@ -272,6 +290,31 @@ substitution always exists).
        isInstanceOfSExp(SE, SE')
 
 
+  //@ removing the labels from an stream expression
+
+  syntax SExp ::= removeLabels(SExp) [function]
+
+/*
+  syntax SExp ::= Id 
+                | "tl" "(" SExp ")" [strict, prefer]
+                | "(" SExp ")" [bracket]
+                > Id "(" SExps ")" [strict(2)]
+                > Id "." SExp [strict(2), lsexp]
+                > IExp ":" SExp [strict(1), right, constr]
+                | "[]"
+*/
+  rule removeLabels(X:Id) => X
+  rule removeLabels(V:VariableSExp) => V
+  rule removeLabels(tl(SE:SExp)) => tl(removeLabels(SE))
+  rule removeLabels(X:Id(SEs:SExps)) => X(removeLabels(SEs))
+  rule removeLabels(_:Id . SE:SExp) => removeLabels(SE)
+  rule removeLabels(_:IExp : SE:SExp) => removeLabels(SE)
+
+  syntax SExp ::= removeLabels(SExps) [function]
+
+  rule removeLabels(SE:SExp, SEs:SExps) => removeLabels(SE), removeLabels(SEs)
+  rule removeLabels(.SExps) => .SExps
+
 endmodule
 
 //@ \section{Semantics}
@@ -295,10 +338,11 @@ module SEQ
                   <goals> 
                     <goal multiplicity="*">
                       <config multiplicity="*">
-                        <k color="green"> $PGM:EqvPgm  </k>
+                        <k color="green"> $PGM:EqvPgms  </k>
                         <sspecs color="red"> .Map </sspecs>
                         <out> [] </out> 
                       </config>
+                      <kb> .Map </kb>
                     </goal>
                   </goals>
                   <hypos>
@@ -325,10 +369,18 @@ module SEQ
 
 
   rule isKResult(_:Int : _:SExp) => true
-
+  rule isKResult('_._(_:Id ,, _:Int : _:SExp)) => true
 
 
   //@ Preprocessing
+
+  rule <goal>
+         <config> <k> EP:EqvPgm EPs:EqvPgms </k> Cfg:Bag </config>
+         Cfg':Bag
+       </goal>
+       => 
+       <goal> <config> <k> EP </k> Cfg </config> Cfg' </goal>
+       <goal> <config> <k> EPs </k> Cfg </config> Cfg' </goal>
 
   rule SS:SSpec SSs:SSpecs E:Exp => SS ~> SSs E
 
@@ -336,6 +388,7 @@ module SEQ
 
   rule <k> F:Id :~ SE:SExp; => . ...</k>
        <sspecs>... . => F |-> lambda(.Ids) SE </sspecs>
+
 
   rule <k> F:Id(Ys:Ids) :~ SE:SExp; => . ...</k>
        <sspecs>... . => F |-> lambda(Ys) SE </sspecs>
@@ -348,7 +401,7 @@ module SEQ
 
  // cotext
 
-  context L:Id . HOLE : _
+  context '_._(_:Id ,, HOLE : _:SExp)
 
  //@ Computations:
 
@@ -364,14 +417,31 @@ module SEQ
 
   rule _:IExp <| false |> IE:IExp => IE
 
+  // only for bit streams
+
+  rule <k> V:VariableBSExp => 0 : V ...</k>
+       <kb> KB:Map => (KB V |-> (0 : V)) </kb>
+       requires notBool V in keys(KB)
+       [transition]
+
+  rule <k> V:VariableBSExp => 1 : V ...</k>
+       <kb> KB:Map => (KB V |-> (1 : V)) </kb>
+       requires notBool V in keys(KB)
+       [transition]
+
+  rule <k> V:VariableBSExp => SE ...</k>
+       <kb>... V |-> SE:SExp  ...</kb>
+
 
  //@ The evaluation of the head:
 
   rule hd(I:Int : _) => I [anywhere]
+  rule hd('_._(_:Id ,, I:Int : _)) => I [anywhere]
 
   //@ The evaluation of tail:
 
   rule tl(_:Int : SE:SExp) => SE [anywhere]
+  rule tl('_._(_:Id ,, _:Int : SE:SExp)) => SE [anywhere]
   
   //@ When the head is completely evaluated is moved in the cell out:
   rule <k> I:Int => . </k>
@@ -384,6 +454,10 @@ module SEQ
 
   rule <k> F:Id => SE ...</k>
        <sspecs>... F |-> lambda(.Ids) SE ...</sspecs>
+       [transition]
+
+  rule <k> V:VariableSExp => SE ...</k>
+       <sspecs>... V |-> lambda(.Ids) SE ...</sspecs>
        [transition]
 
  //@ Stream specification with parameters:
@@ -403,25 +477,8 @@ module SEQ
        <k>
           ( L:Id . SE:SExp
             =>
-            lbldStmt(L, SE ~> K) ~> SE
-          ) ~> K:K 
-       </k>
-
-
-  rule [labelled-sexp] :
-       <k>
-          ( L:Id . IE:Int : SE:SExp
-            =>
-            lbldStmt(L, (IE : SE)) ~> (IE : SE)
-          )
-       </k>
-
-  rule [labelled-sexp] :
-       <k>
-          ( L:Id . IE:IExp
-            =>
-            lbldStmt(L, IE) ~> IE
-          )
+            lbldStmt(L, SE) ~> SE // ~> K) ~> SE
+          ) // ~> K:K 
        </k>
 
 
@@ -446,7 +503,7 @@ module SEQ
            <sspecs> _:Map </sspecs>
            <out> OUT' </out>
          </config>
-       </goal>
+       ...</goal>
        =>
        .)
        when OUT ==K OUT'
@@ -499,7 +556,7 @@ module SEQ
            <sspecs> SSp2:Map </sspecs>
            <out> OUT2:SExp </out>
          </config>
-       </goal>
+       ...</goal>
        <hypos>
          Hypos:Bag
        </hypos>
@@ -578,10 +635,11 @@ module SEQ
          ...</config>
        ...</goal>
        =>
+// <goal> <config> <k> getSubst(SE1', SE1) ~> getSubst(SE2', SE2) </k> </config> <sspecs> .Map </sspecs> <out> [] </out> </goal> ) // for debugging
        .)
        when (OUT1 ==K OUT2)
-       andBool (isSubst(getSubst(SE1', SE1)) ==K true)
-       andBool (isSubst(getSubst(SE2', SE2)) ==K true)
+       andBool (isSubst(getSubst(SE1', removeLabels(SE1))) ==K true)
+       andBool (isSubst(getSubst(SE2', removeLabels(SE2))) ==K true)
        andBool isInstanceOfSExp(OUT1, OUT1') ==K true
        andBool isInstanceOfSExp(OUT2, OUT2') ==K true
        [transition]
@@ -624,10 +682,11 @@ module SEQ
          ...</config>
        ...</goal>
        =>
-       .)
+// <goal> <config> <k> getSubst(SE2', SE1) ~> getSubst(SE1', SE2) </k> </config> <sspecs> .Map </sspecs> <out> [] </out> </goal>) // for debugging
+      .)
        when (OUT1 ==K OUT2)
-       andBool (isSubst(getSubst(SE2', SE1)) ==K true)
-       andBool (isSubst(getSubst(SE1', SE2)) ==K true)
+       andBool (isSubst(getSubst(SE2', removeLabels(SE1))) ==K true)
+       andBool (isSubst(getSubst(SE1', removeLabels(SE2))) ==K true)
        andBool isInstanceOfSExp(OUT1, OUT2') ==K true
        andBool isInstanceOfSExp(OUT2, OUT1') ==K true
        [transition]
@@ -666,8 +725,8 @@ module SEQ
            <out> OUT2 </out>
          ...</config>
        ...</goal>
-       when (isSubst(getSubst(SE1', SE1)) =/=K true)
-       orBool (isSubst(getSubst(SE2', SE2)) =/=K true)
+       when (isSubst(getSubst(SE1', removeLabels(SE1))) =/=K true)
+       orBool (isSubst(getSubst(SE2', removeLabels(SE2))) =/=K true)
        orBool isInstanceOfSExp(OUT1, OUT1') =/=K true
        orBool isInstanceOfSExp(OUT2, OUT2') =/=K true
        [transition]
@@ -702,11 +761,11 @@ module SEQ
          Hypos
          <hypo>
            <patt1> 
-             <hk1> K1 </hk1>
+             <hk1> removeLabels(K1) </hk1>
              <hout1> OUT1 </hout1>
            </patt1> 
            <patt2> 
-             <hk2> K2 </hk2>
+             <hk2> removeLabels(K2) </hk2>
              <hout2> OUT2 </hout2>
            </patt2>
          </hypo>

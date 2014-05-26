@@ -66,8 +66,10 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
             Queue<Module> mods = new LinkedList<Module>();
             for (String name : initialModules) {
                 Module mainModule = d.getModulesMap().get(name);
-                mods.add(mainModule);
-                included.put(name, mainModule);
+                if (mainModule != null) {
+                    mods.add(mainModule);
+                    included.put(name, mainModule);
+                }
             }
             //        System.out.println("push " + d.getMainModule());
             while (!mods.isEmpty()) {

@@ -42,10 +42,11 @@ public class PdfBackend extends BasicBackend {
             // this information is old and apparently not all of them needed with Java 7.
             IOUtils.toString(process.getInputStream());
             process.waitFor();
-            if (process.exitValue() != 0)
+            if (process.exitValue() != 0) {
                 GlobalSettings.kem.register(
-                        new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "pdflatex returned a non-zero exit code.  The pdf might be generated, but with bugs. please inspect the latex logs in the .k directory.", "", ""));
-
+                        new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "pdflatex returned a non-zero exit code.  The pdf might be generated, but with bugs. please inspect the latex logs."));
+                copyFile(new File(context.dotk, FilenameUtils.removeExtension(latexFile.getName()) + ".log"), new File(FilenameUtils.removeExtension(latexFile.getName()) + ".log"));
+            }
             sw.printIntermediate("Latex2PDF");
 
             return new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf");
@@ -62,7 +63,9 @@ public class PdfBackend extends BasicBackend {
         latexBackend.compile(definition);
         File latexFile = latexBackend.getLatexFile();
         File pdfFile = generatePdf(latexFile);
-        copyFile(pdfFile, new File(options.directory, FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
+        if (pdfFile.exists()) {
+            copyFile(pdfFile, new File(options.directory, FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
+        }
     }
 
     @Override

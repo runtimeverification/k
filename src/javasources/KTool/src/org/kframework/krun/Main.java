@@ -37,6 +37,7 @@ import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.Cell2DataStructure;
+import org.kframework.compile.utils.CompileDataStructures;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -138,6 +139,7 @@ public class Main {
 
         Term configuration = (Term) new SubstitutionFilter(args, context).visitNode(cfgCleaned);
         configuration = (Term) new Cell2DataStructure(context).visitNode(configuration);
+        configuration = (Term) new CompileDataStructures(context).visitNode(configuration);
         return configuration;
     }
 
