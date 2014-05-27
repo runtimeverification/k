@@ -66,17 +66,16 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
         return super.visit(node, _);
     }
 
-    private Substitution freshSubstitution(
-            Set<Variable> vars) {
+    private Substitution freshSubstitution(Set<Variable> vars) {
         Map<Term, Term> symMap = new HashMap<Term, Term>();
         for (Variable var : vars) {
             Variable freshVar = var.shallowCopy();
-            freshVar.setFresh(true);
+            // TODO: this class should become dead code
+            //freshVar.setFreshVariable(true);
             symMap.put(var, freshVar);
         }
 
         return new Substitution(symMap, context);
     }
-
 }
 

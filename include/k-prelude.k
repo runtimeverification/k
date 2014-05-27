@@ -81,12 +81,6 @@ module K-BUILTINS
   syntax KLabel ::=  "#" K [builtinWrapper]
 endmodule
 
-
-module K-FRESH
-  imports K-TECHNIQUE
-  syntax Bool ::= "fresh" "(" K ")"  [cons(Bool1FreshSyn)]
-endmodule
-
 module K-FREZERS
   imports K-TECHNIQUE
   syntax KLabel ::= "#freezer" K
@@ -132,7 +126,6 @@ module K
   imports K-DESTRUCTORS           // defines getKLabel and getKList for K
   //imports K-EXTRAS                // defines a KLabel substitution
   imports K-FREZERS
-  imports K-FRESH
   imports K-LISTK-EXTRAS
   imports K-TOKENS
   //imports K-LATEX

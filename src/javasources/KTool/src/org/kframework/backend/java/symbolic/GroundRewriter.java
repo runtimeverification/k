@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.Cell;
@@ -154,7 +155,7 @@ public class GroundRewriter {
         SymbolicConstraint termConstraint = new SymbolicConstraint(termContext);
         termConstraint.addAll(pattern.requires());
         for (Variable var : pattern.freshVariables()) {
-            termConstraint.add(var, IntToken.fresh());
+            termConstraint.add(var, FreshOperations.fresh(var.sort(), termContext));
         }
 
         // Create a constrained term from the left hand side of the pattern.

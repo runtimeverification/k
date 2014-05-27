@@ -838,15 +838,14 @@ and initialized automatically as described in the definition of SIMPLE's
 configuration.  This is part of \K's configuration abstraction mechanism. */
 
   rule <thread>...
-         <k> spawn S => T ...</k>
+         <k> spawn S => !T:Int ...</k>
          <env> Env </env>
        ...</thread>
        (. => <thread>...
                <k> S </k>
                <env> Env </env>
-               <id> T </id>
+               <id> !T </id>
              ...</thread>)
-    when fresh(T:Int)
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the
@@ -1037,3 +1036,4 @@ program behaviors then you need to kompile with the transition option
 including rule tags such as lookup, increment, acquire, etc.  See the
 IMP++ tutorial for what the transition option means how to use it. */
 endmodule 
+

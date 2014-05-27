@@ -41,7 +41,6 @@ module IMP
                   <threads color="orange">
                     <thread multiplicity="*" color="blue">
                       <k color="green"> $PGM:Stmts </k>
-                      //<k color="green"> $PGM:K </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <id color="black"> 0 </id>
                     </thread>
@@ -83,9 +82,9 @@ module IMP
   rule while (B) S => if (B) { S while(B) S } else { .Stmts }   [structural]
 
   rule <k> int (X:Id, Xs => Xs); ...</k>
-       <env> Rho:Map => Rho[X <- L] </env>
-       <store>... .Map => L |-> 0 ...</store>
-    when fresh(L:Int)   [structural]
+       <env> Rho:Map => Rho[X <- !L:Int] </env>
+       <store>... .Map => !L |-> 0 ...</store>
+  [structural]
   rule int .Ids; => .   [structural]
 
   syntax AExp ::= Printable
@@ -96,9 +95,8 @@ module IMP
 
   rule <k> halt; ~> _ => . </k>
 
-  rule <k> spawn S => T ...</k> <env> Rho:Map </env>
-       (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
-    when fresh(T:Int)
+  rule <k> spawn S => !T:Int ...</k> <env> Rho:Map </env>
+       (. => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
   rule <k> join(T:Int); => . ...</k>
        <thread>... <k> . </k> <id> T </id> ...</thread>
 
@@ -107,3 +105,4 @@ module IMP
   // the following has sort annotation to avoid ambiguity with Map, Set, etc
   rule S:Stmt Ss:Stmts => S ~> Ss   [structural]
 endmodule
+

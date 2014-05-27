@@ -306,8 +306,10 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Variable variable, Void _) {
         prepare(variable);
-        if (variable.isFresh())
+        if (variable.isFreshVariable())
             indenter.write("?");
+        else if (variable.isFreshConstant())
+            indenter.write("!");
         indenter.write(variable.getName());
         if (!variableList.contains(variable.getName())) {
             indenter.write(":" + variable.getSort());

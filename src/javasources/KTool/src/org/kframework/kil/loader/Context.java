@@ -1,26 +1,10 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Sets;
-
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
 import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.DataStructureSort;
@@ -39,7 +23,23 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 
 public class Context implements Serializable {
@@ -103,6 +103,7 @@ public class Context implements Serializable {
     protected java.util.List<String> komputationCells = null;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<String> variableTokenSorts = new HashSet<>();
+    public HashMap<String, String> freshFunctionNames = new HashMap<>();
 
     public int numModules, numSentences, numProductions, numCells;
 
@@ -499,6 +500,30 @@ public class Context implements Serializable {
         assert !initialized;
 
         this.tokenSorts = new HashSet<String>(tokenSorts);
+    }
+
+    public void makeFreshFunctionNamesMap(Set<Production> freshProductions) {
+        for (Production production : freshProductions) {
+            if (!production.containsAttribute(Attribute.FUNCTION_KEY)) {
+                GlobalSettings.kem.register(new KException(
+                        ExceptionType.ERROR,
+                        KExceptionGroup.COMPILER,
+                        "missing [function] attribute for fresh function " + production,
+                        production.getFilename(),
+                        production.getLocation()));
+            }
+
+            if (freshFunctionNames.containsKey(production.getSort())) {
+                GlobalSettings.kem.register(new KException(
+                        ExceptionType.ERROR,
+                        KExceptionGroup.COMPILER,
+                        "multiple fresh functions for sort " + production.getSort(),
+                        production.getFilename(),
+                        production.getLocation()));
+            }
+
+            freshFunctionNames.put(production.getSort(), production.getKLabel());
+        }
     }
 
 }

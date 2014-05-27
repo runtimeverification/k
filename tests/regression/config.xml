@@ -66,23 +66,33 @@
     </program>
   </test>
 
+  <test
+      definition="freshMOS/test.k"
+      programs="freshMOS/programs"
+      results="freshMOS/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--directory" value="freshMOS-java_kompiled" />
+    <all-programs>
+      <krun-option  name="--directory" value="freshMOS-java_kompiled" />
+    </all-programs>
+  </test>
+
   <include file="java-rewrite-engine/config.xml" directory="java-rewrite-engine" />
 
   <!-- Regression Tests -->
   <test definition="issue552/issue.k" />
   <test definition="issue529/issue.k" />
   <test definition="defaultTerms1/issue.k" />
+<!-- TODO(Traian) uncomment this test once !X works in Maude
   <test
-      definition="freshMOS/issue.k"
+      definition="freshMOS/test.k"
       programs="freshMOS/programs"
       results="freshMOS/tests"
-      extension="issue"
-      >
-      <all-programs>
-        <krun-option name="--output" value="none" />
-        <krun-option name="--color" value="off" />
-      </all-programs>
-  </test>
+      extension="test"
+      />
+-->
   <test
       definition="openCells1/issue.k"
       programs="openCells1/programs"

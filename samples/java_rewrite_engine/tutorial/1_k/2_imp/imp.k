@@ -71,3 +71,4 @@ module IMP
     //when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule
+

@@ -27,7 +27,7 @@ module FUNCONS
   syntax K ::= env(Map)
 
   rule <k> alloc(I:Int) => L ...</k>
-       <store>... . => L |-> I ...</store>  when fresh(L:Int)
+       <store>... . => !L:Int |-> I ...</store>
   rule <k> bind(X,L:Int) => skip ...</k>  <env> Rho => Rho[L/X] </env>
   rule <k> boundValue(X) => L ...</k>  <env>... X |-> L </env>
   rule <k> scope(B,S) => seq(B,S) ~> env(Rho) ...</k> <env> Rho </env>

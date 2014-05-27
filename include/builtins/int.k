@@ -72,4 +72,8 @@ module INT-HOOKS
 
   rule 0 +Int I:Int => I [anywhere]
   rule 0 *Int I:Int => 0 [anywhere]
+
+  syntax Int ::= freshInt(Int)    [freshGenerator, function]
+  rule freshInt(I) => I
 endmodule
+

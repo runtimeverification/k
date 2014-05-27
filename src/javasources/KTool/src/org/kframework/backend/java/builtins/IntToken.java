@@ -26,19 +26,11 @@ public final class IntToken extends Token {
     /* IntToken cache */
     private static final Map<BigInteger, IntToken> cache = new HashMap<BigInteger, IntToken>();
 
-    /* counter for generating fresh IntToken values */
-    private static BigInteger freshValue = BigInteger.valueOf(0);
-
     /* BigInteger value wrapped by this IntToken */
     private final BigInteger value;
 
     private IntToken(BigInteger value) {
         this.value = value;
-    }
-
-    public static IntToken fresh() {
-        freshValue = freshValue.add(BigInteger.valueOf(1));
-        return of(freshValue);
     }
 
     /**
@@ -59,6 +51,20 @@ public final class IntToken extends Token {
 
     public static IntToken of(long value) {
         return of(BigInteger.valueOf(value));
+    }
+
+    public static IntToken of(String value) {
+        try {
+            return IntToken.of(new BigInteger(value));
+        } catch (NumberFormatException e) {
+            if (value.codePointCount(0, value.length()) == 1) {
+                int numericValue = Character.getNumericValue(value.codePointAt(0));
+                if (numericValue >= 0) {
+                    return IntToken.of(numericValue);
+                }
+            }
+            throw e;
+        }
     }
 
     /**

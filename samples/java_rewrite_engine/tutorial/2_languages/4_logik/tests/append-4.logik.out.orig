@@ -1,0 +1,59 @@
+Search results:
+
+Solution 1:
+Solution:K -->
+<<<<<<< HEAD
+L1:Term |-> cons ( _110:Term, cons ( _115:Term, cons ( _120:Term, cons ( _125
+  :Term, nil ) ) ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _110, cons ( _115, cons ( _120, cons ( _125, cons ( a, L2 )
+   ) ) ) )
+
+Solution 2:
+Solution:K -->
+L1:Term |-> cons ( _110:Term, cons ( _115:Term, cons ( _120:Term, nil ) ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _110, cons ( _115, cons ( _120, cons ( a, L2 ) ) ) )
+
+Solution 3:
+Solution:K -->
+L1:Term |-> cons ( _110:Term, cons ( _115:Term, nil ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _110, cons ( _115, cons ( a, L2 ) ) )
+
+Solution 4:
+Solution:K -->
+L1:Term |-> cons ( _110:Term, nil )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _110, cons ( a, L2 ) )
+=======
+L1:Term |-> cons ( _99:Term, cons ( _133:Term, cons ( _170:Term, cons ( _210
+  :Term, nil ) ) ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _99, cons ( _133, cons ( _170, cons ( _210, cons ( a, L2 ) 
+  ) ) ) )
+
+Solution 2:
+Solution:K -->
+L1:Term |-> cons ( _99:Term, cons ( _133:Term, cons ( _170:Term, nil ) ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _99, cons ( _133, cons ( _170, cons ( a, L2 ) ) ) )
+
+Solution 3:
+Solution:K -->
+L1:Term |-> cons ( _99:Term, cons ( _133:Term, nil ) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _99, cons ( _133, cons ( a, L2 ) ) )
+
+Solution 4:
+Solution:K -->
+L1:Term |-> cons ( _99:Term, nil )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( _99, cons ( a, L2 ) )
+>>>>>>> unified-builtins2
+
+Solution 5:
+Solution:K -->
+L1:Term |-> nil
+L2:Term |-> L2:Term
+L3:Term |-> cons ( a, L2 )
