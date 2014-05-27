@@ -70,7 +70,8 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
         Map<Term, Term> symMap = new HashMap<Term, Term>();
         for (Variable var : vars) {
             Variable freshVar = var.shallowCopy();
-            freshVar.setFreshVariable(true);
+            // TODO: this class should become dead code
+            //freshVar.setFreshVariable(true);
             symMap.put(var, freshVar);
         }
 

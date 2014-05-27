@@ -15,8 +15,8 @@ public class Variable extends Term {
     private String name;
     /** True if the variable was written with an explicit type annotation */
     private boolean userTyped = false;
-    private boolean freshVariable = false;
-    private boolean freshConstant = false;
+    private final boolean freshVariable;
+    private final boolean freshConstant;
     private boolean syntactic = false;
     /** Used by the type inferencer  */
     private String expectedSort = null;
@@ -37,17 +37,27 @@ public class Variable extends Term {
         this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
         if (this.name.startsWith("?")) {
             this.freshVariable = true;
+            this.freshConstant = false;
             this.name = this.name.substring(1);
-        }
-        if (this.name.startsWith("!")) {
+        } else if (this.name.startsWith("!")) {
             this.freshConstant = true;
+            this.freshVariable = false;
             this.name = this.name.substring(1);
+        } else {
+            this.freshVariable = false;
+            this.freshConstant = false;
         }
     }
 
-    public Variable(String name, String sort) {
+    public Variable(String name, String sort, boolean freshVariable, boolean freshConstant) {
         super(sort);
         this.name = name;
+        this.freshVariable = freshVariable;
+        this.freshConstant = freshConstant;
+    }
+
+    public Variable(String name, String sort) {
+        this(sort, name, false, false);
     }
 
     public Variable(Variable variable) {
@@ -112,10 +122,6 @@ public class Variable extends Term {
     @Override
     public Variable shallowCopy() {
         return new Variable(this);
-    }
-
-    public void setFreshVariable(boolean fresh) {
-        this.freshVariable = fresh;
     }
 
     public boolean isFreshVariable() {
