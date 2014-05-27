@@ -432,6 +432,7 @@ public class DefinitionLoader {
         // config = new VariableTypeInferenceFilter().visitNode(config);
         config = new AmbDuplicateFilter(context).visitNode(config);
         config = new TypeSystemFilter(context).visitNode(config);
+        config = new VariableTypeInferenceFilter(context).visitNode(config);
         // config = new PriorityFilter().visitNode(config);
         config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
         config = new TypeInferenceSupremumFilter(context).visitNode(config);

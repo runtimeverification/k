@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class CheckVariables extends BasicVisitor {
 
-    public static final String UNBOUNDED_VARS = "hasUnboundedVars";
+    public static final String UNBOUND_VARS = "hasUnboundVars";
 
     KompileOptions options;
     
@@ -120,7 +120,7 @@ public class CheckVariables extends BasicVisitor {
                         getName(), v.getFilename(), v.getLocation()));
             }
             if (!left.containsKey(v)) {
-                node.addAttribute(UNBOUNDED_VARS, "");
+                node.addAttribute(UNBOUND_VARS, "");
                 
                 /* matching logic relaxes this restriction */
                 if (!options.backend.java()) {
