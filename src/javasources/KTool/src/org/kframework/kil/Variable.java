@@ -57,7 +57,7 @@ public class Variable extends Term {
     }
 
     public Variable(String name, String sort) {
-        this(sort, name, false, false);
+        this(name, sort, false, false);
     }
 
     public Variable(Variable variable) {
