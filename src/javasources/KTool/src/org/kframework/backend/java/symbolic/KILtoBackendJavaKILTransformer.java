@@ -206,7 +206,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         List<org.kframework.kil.Term> list = new ArrayList<>();
         KILtoBackendJavaKILTransformer.flattenList(list, node.getContents());
         if (list.isEmpty()){
-            return new KList();
+            return KList.EMPTY;
         }
         //TODO(OwolabiL): What should happen when the list is not empty?
         return super.visit(node, _);

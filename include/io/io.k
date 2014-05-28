@@ -22,11 +22,15 @@ module IO
        ListItem(#buffer(Buffer:String => Buffer +String S))
        (ListItem(S:String) => .List)
        _:List [stdout, stderr]
+
   rule ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
        (ListItem(F:Float) => .List)
        _:List [stdout, stderr]
   rule ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
        (ListItem(I:Int) => .List)
+       _:List [stdout, stderr]
+  rule ListItem(#buffer(Buffer:String => Buffer +String Char2String(C)))
+       (ListItem(C:Char) => .List)
        _:List [stdout, stderr]
   rule ListItem(#buffer(Buffer:String => Buffer +String S))
        (ListItem(S:String) => .List)
@@ -48,7 +52,7 @@ module IO
   // when we reach whitespace, if it parses create a ListItem
   rule (ListItem(#parseInput("String", Delimiters:String)) => ListItem(S))
        ListItem(#buffer(S:String => ""))
-       _:List 
+       _:List
     when findChar(S, Delimiters, 0) =/=Int -1 [stdin]
 
   // a hack: handle the case when we read integers without the help of the IO server
@@ -58,21 +62,20 @@ module IO
        => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort)))
        ListItem(#buffer(S:String => ""))
        ListItem(#istream(_))
-    when findChar(S, Delimiters, 0) =/=Int -1 
-       andBool Sort =/=String "String" 
+    when findChar(S, Delimiters, 0) =/=Int -1
+       andBool Sort =/=String "String"
        andBool lengthString(S) >Int 1 [stdin]
 
   rule ListItem(#parseInput(Sort:String, Delimiters:String))
        ListItem(#buffer(S:String => substrString(S, 1, lengthString(S))))
-       _:List 
-    when findChar(S, Delimiters, 0) =/=Int -1 
-       andBool Sort =/=String "String" 
+       _:List
+    when findChar(S, Delimiters, 0) =/=Int -1
+       andBool Sort =/=String "String"
        andBool lengthString(S) <=Int 1 [stdin]
-  
+
   rule ListItem(#buffer(_))
        (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
 
   rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List)
        ListItem(#buffer(_)) [stdout, stderr]
 endmodule
-
