@@ -5,6 +5,7 @@
   <test
     definition="lambda.k"
     programs="."
+    skip="pdf"
     extension="lambda"
     results="." >
     <all-programs>
