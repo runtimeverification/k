@@ -3,6 +3,8 @@ package org.kframework.parser.generator;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.transformers.AddSymbolicK;
@@ -262,10 +264,23 @@ public class DefinitionSDF {
             if (l.getFollow() != null && !l.getFollow().equals("")) {
                 psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
             }
+
+            // reject all terminals that match the regular expression of the lexical production
+            if (p.containsAttribute("regex")) {
+                Pattern pat = Pattern.compile(p.getAttribute("regex"));
+                for (String t : terminals.terminals) {
+                    Matcher m = pat.matcher(t);
+                    if (m.matches())
+                        sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                }
+            } else {
+                // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
+                // add rejects for all possible combinations
+                for (String t : terminals.terminals) {
+                    sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                }
+            }
         }
-        for (String s : lexerSorts)
-            for (String t : terminals.terminals)
-                sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(s) + "Dz {reject}\n");
 
         // adding cons over lexical rules
         sdf.append("context-free syntax\n");
