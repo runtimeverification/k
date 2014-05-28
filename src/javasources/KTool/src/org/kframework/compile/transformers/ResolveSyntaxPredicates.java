@@ -37,6 +37,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
         }
         for (Variable var : vars) {
 //            if (!var.isUserTyped()) continue;
+            if (var.isFreshConstant()) continue;
             if (var.isSyntactic()) continue;
             if (MetaK.isKSort(var.getSort())) continue;
             change = true;

@@ -62,8 +62,7 @@ public class TermContext extends JavaSymbolicObject {
     }
 
     public BigInteger incrementCounter() {
-        BigInteger counter = this.counter;
-        this.counter = this.counter.add(BigInteger.ONE);
+        counter = this.counter.add(BigInteger.ONE);
         return counter;
     }
 

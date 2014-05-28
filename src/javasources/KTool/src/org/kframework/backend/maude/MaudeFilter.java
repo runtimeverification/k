@@ -74,6 +74,13 @@ public class MaudeFilter extends BackendFilter {
           result.append(mod.getName());
           result.append(" is\n");
 
+        result.append(" op fresh : #String -> KItem . \n");
+        for (Map.Entry<String, String> entry : context.freshFunctionNames.entrySet()) {
+            result.append(" eq fresh(\"").append(entry.getKey()).append("\") = ");
+            result.append(StringUtil.escapeMaude(entry.getValue()));
+            result.append("('#counter(.KList)) .\n");
+        }
+
           // TODO(AndreiS): move declaration of #token in a .maude file
           result.append("op #token : #String #String -> KLabel .\n");
 
@@ -424,6 +431,10 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(Variable variable, Void _) {
+        if (variable.isFreshConstant()) {
+            variable = variable.shallowCopy();
+            variable.setSort(KSorts.KITEM);
+        }
          if (MetaK.isBuiltinSort(variable.getSort())
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
@@ -494,7 +505,16 @@ public class MaudeFilter extends BackendFilter {
         Rewrite body = (Rewrite) rule.getBody();
         assert rule.getEnsures() == null : "Maude does not support conditions on the right hand side";
         final Term condition = rule.getRequires();
-        if (null != condition) {
+
+        boolean conditional = (null != condition);
+        Set<Variable> variables = body.variables();
+        for (Variable variable : variables) {
+            if (variable.isFreshConstant()) {
+                conditional = true;
+                break;
+            }
+        }
+        if (conditional) {
             result.append("c");
         }
         if (isTransition) {
@@ -510,10 +530,26 @@ public class MaudeFilter extends BackendFilter {
         }
         this.visitNode(body.getRight());
 
-        if (null != condition) {
+        boolean addAnd = false;
+        if (conditional) {
             result.append(" if ");
-            this.visitNode(condition);
-            result.append(" = _`(_`)(# true, .KList)");
+            if (null != condition) {
+                this.visitNode(condition);
+                result.append(" = _`(_`)(# true, .KList)");
+                addAnd = true;
+            }
+            for (Variable variable : variables) {
+                if (variable.isFreshConstant()) {
+                    if (addAnd) {
+                        result.append(" /\\ ");
+                    }
+                    addAnd = true;
+                    Variable kVariable = variable.shallowCopy();
+                    kVariable.setSort(KSorts.KITEM);
+                    this.visitNode(kVariable);
+                    result.append(" := fresh(\"").append(variable.getSort()).append("\")");
+                }
+            }
         }
         if (null != rule.getAttributes()) {
             result.append(" [");
