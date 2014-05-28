@@ -85,14 +85,12 @@
   <test definition="issue552/issue.k" />
   <test definition="issue529/issue.k" />
   <test definition="defaultTerms1/issue.k" />
-<!-- TODO(Traian) uncomment this test once !X works in Maude
   <test
       definition="freshMOS/test.k"
       programs="freshMOS/programs"
       results="freshMOS/tests"
       extension="test"
       />
--->
   <test
       definition="openCells1/issue.k"
       programs="openCells1/programs"
