@@ -1,25 +1,25 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 require "builtins/builtins.k"
 
-module URIS
+module URIS 
   imports BUILTIN-HOOKS
   imports #K-PARSER-INTERFACE
   imports #K-PRINTER-INTERFACE
-
+ 
 // B, N, and P are really supposed to be Nat
   syntax KItem ::= "#open" "(" String ")" [function]
                  | "#open" "(" String "," String ")" [function, hook(#IO:#open)]
-                 | "#tell" "(" Int ")" [function, hook(#IO:#tell)]
+                 | "#tell" "(" Int ")" [function, hook(#IO:#tell)] 
                  | "#getc" "(" Int ")"             [function, hook(#IO:#getc)]
                  | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read)]
-
+ 
   syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close)]
              | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek)]
              | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc)]
              | "#write" "(" Int "," String ")" [function, hook(#IO:#write)]
 
   syntax K ::= "#ioError" "(" String ")"
-
+ 
   syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat)]
                  | "#lstat" "(" String ")" [function, hook(#IO:#lstat)]
                  | "#opendir" "(" String ")" [function, hook(#IO:#opendir)]
@@ -28,13 +28,13 @@ module URIS
   rule #open(S:String) => #open(S:String, "rw")
   rule #open(S:String, Mode:String) => #string2Int((#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01"))::K) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
 
-  rule #close(N:Int)
+  rule #close(N:Int) 
       => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))::K)
 
   syntax K ::= String2DotK(TCPAnswer)  [function]
   rule String2DotK(S:String) => #ioError(#retrieveTCPError(S)) when #isTCPError(S)
   rule String2DotK(S:String) => .K when notBool(#isTCPError(S))
-  rule String2DotK(E:TCPError) => E
+  rule String2DotK(E:TCPError) => E 
 
   syntax Bool ::= String2Bool(TCPAnswer) [function]
   rule String2Bool("0") => false
@@ -44,19 +44,19 @@ module URIS
 
   rule #tell(N:Int) => #string2Int((#tcpRequest("position\x01" +String Int2String(N) +String "\x01"))::K)
 
-  rule #seek(N:Int,P:Int)
+  rule #seek(N:Int,P:Int) 
       => String2DotK((#tcpRequest("seek\x01" +String Int2String(N) +String "\x01"
                               +String Int2String(P) +String "\x01"))::K)
 
 
-  syntax Int ::= "#stdin"  [function]
-               | "#stdout" [function]
-               | "#stderr" [function]
+  syntax Int ::= "#stdin"   [function] 
+                | "#stdout" [function]
+                | "#stderr" [function] 
   rule #stdin => 0
   rule #stdout => 1
   rule #stderr => 2
 
-  rule #getc(N:Int)
+  rule #getc(N:Int) 
       => #string2Int(#tcpRequest("readbyte\x01" +String Int2String(N) +String "\x01")) when N =/=Int 1 andBool N =/=Int 2
 
   rule #read(N:Int, NumBytes:Int)
@@ -95,7 +95,7 @@ module URIS
   syntax Stream ::= "#parseInput" "(" String "," String ")"   [cons(Stream1ParseSyn), klabel(#parseInput)]
   syntax Stream ::= "#buffer" "(" K ")"           [cons(Stream1IOBufferSyn), klabel(#buffer)]
   syntax Stream ::= "#istream" "(" Int ")"        [cons(Stream1InputStreamSyn)]
-                  | "#ostream" "(" Int ")"        [cons(Stream1OutputStreamSyn)]
+                    | "#ostream" "(" Int ")"        [cons(Stream1OutputStreamSyn)]
   syntax Stream ::= "#noIO"
 
   rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String Float2String(F))) (ListItem(F:Float) => .List) _:List [stdout, stderr]
@@ -118,7 +118,7 @@ module URIS
   rule (ListItem(#parseInput("Int", Delimiters:String)) => ListItem(String2Int(substrString(S, 0, findChar(S, Delimiters, 0))))) ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S)))) when findChar(S, Delimiters, 0) =/=Int -1 andBool lengthString(S) >Int 1 [stdin]
   rule (ListItem(#parseInput(Sort:String, Delimiters:String)) => ListItem(#parse(substrString(S, 0, findChar(S, Delimiters, 0)), Sort))) ListItem(#buffer(S:String =>  substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S)))) _:List when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) >Int 1 [stdin]
   rule ListItem(#parseInput(Sort:String, Delimiters:String)) ListItem(#buffer(S:String => substrString(S, 1, lengthString(S)))) _:List when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1 [stdin]
-
+  
   rule ListItem(#buffer(_)) (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
   rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List) ListItem(#buffer(_)) [stdout, stderr]
 
