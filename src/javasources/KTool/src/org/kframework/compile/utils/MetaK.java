@@ -15,6 +15,7 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.Hole;
 import org.kframework.kil.IntBuiltin;
@@ -42,7 +43,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -337,7 +337,7 @@ public class MetaK {
         return sort.equals(BoolBuiltin.SORT_NAME)
                || sort.equals(IntBuiltin.SORT_NAME)
                || sort.equals(StringBuiltin.SORT_NAME)
-               || sort.equals("#Float")
+               || sort.equals(FloatBuiltin.SORT_NAME)
                /* LTL builtin sorts */
 //               || sort.equals("#LtlFormula")
                || sort.equals("#Prop")

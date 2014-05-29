@@ -5,6 +5,7 @@ import static org.kframework.kil.KLabelConstant.ANDBOOL_KLABEL;
 import static org.kframework.kil.KLabelConstant.BOOL_ANDBOOL_KLABEL;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
@@ -42,6 +43,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Module;
@@ -142,6 +144,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return IntToken.of(((IntBuiltin) node.getLabel()).bigIntegerValue());
             } else if (node.getLabel() instanceof StringBuiltin) {
                 return StringToken.of(((StringBuiltin) node.getLabel()).stringValue());
+            } else if (node.getLabel() instanceof FloatBuiltin) {
+                return FloatToken.of(
+                        ((FloatBuiltin) node.getLabel()).bigFloatValue(),
+                        ((FloatBuiltin) node.getLabel()).exponent());
             } else if (node.getLabel() instanceof GenericToken) {
                 return UninterpretedToken.of(
                         ((GenericToken) node.getLabel()).tokenSort(),

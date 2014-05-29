@@ -78,6 +78,7 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(BoolBuiltin node, P p) throws E;
     public R visit(IntBuiltin node, P p) throws E;
     public R visit(StringBuiltin node, P p) throws E;
+    public R visit(FloatBuiltin node, P p) throws E;
     public R visit(GenericToken node, P p) throws E;
     // </Token>
     public R visit(ListTerminator node, P p) throws E;

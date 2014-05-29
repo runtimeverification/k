@@ -21,6 +21,8 @@
 	<classpathentry kind="lib" path="../../../lib/java/jung-visualization-2.0.1.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/strategoxt.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/jcommander-1.36.jar"/>
+	<classpathentry kind="lib" path="../../../lib/java/mpfr_java-1.0.jar"/>
+	<classpathentry kind="lib" path="../../../lib/java/mpfr_java-1.0-linux64.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/mockito-all.jar"/>
 	<classpathentry kind="output" path="bin"/>

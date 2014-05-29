@@ -331,7 +331,7 @@ public class MaudeKRun implements KRun {
                 return GenericToken.of(sortString.stringValue(), valueString.stringValue());
             } else if (sort.equals("#FiniteFloat")) {
                 assertXMLTerm(list.size() == 0);
-                return GenericToken.of("#Float", op);
+                return FloatBuiltin.of(Double.parseDouble(op));
             } else if (emptyPattern.matcher(op).matches() && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
                 assertXMLTerm(list.size() == 0);
                 if (sort.equals("Bag")) {
