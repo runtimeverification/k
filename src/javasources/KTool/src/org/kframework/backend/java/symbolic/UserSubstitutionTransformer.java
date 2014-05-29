@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
+import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.*;
@@ -12,9 +13,9 @@ import java.util.Set;
 
 
 /**
- * Substitutes variables with terms according to a given substitution map.
+ * Substitutes user-level variables with terms according to a given substitution map.
  * 
- * @author AndreiS
+ * @author TraianSF
  */
 public class UserSubstitutionTransformer extends PrePostTransformer {
 
@@ -96,7 +97,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                         // only rename vars if they are already a builtin structure.
                         Term bindingExp = kList.get(1);
                         Term variable = boundVar;
-                        Term freshBoundVars = MetaK.fresh(StringToken.of(variable.sort()), context);
+                        Term freshBoundVars = FreshOperations.fresh(variable.sort(), context);
                         Term current = substitution.get(boundVar);
                         substitution.put(boundVar, freshBoundVars);
                         Term resultBindingExp = (Term) bindingExp.accept(this);
