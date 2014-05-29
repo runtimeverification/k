@@ -102,7 +102,6 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     public BuiltinList srem(BitVector<BigInteger> bitVector) {
         if (!bitVector.signedValue().equals(BigInteger.ZERO)) {
             /* the overflow flag for srem is set if the associated sdiv overflows */
-            BigInteger result = signedValue().remainder(bitVector.signedValue());
             return getBuiltinList(
                     signedValue().remainder(bitVector.signedValue()),
                     checkSignedOverflow(signedValue().divide(bitVector.signedValue())));

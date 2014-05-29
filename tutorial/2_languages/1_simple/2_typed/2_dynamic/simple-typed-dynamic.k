@@ -408,15 +408,14 @@ values, in which case our semantics below works fine: */
 //@ {Thread creation}
 
    rule <thread>...
-          <k> spawn S => T ...</k>
+          <k> spawn S => !T:Int ...</k>
           <env> Env </env>
         ...</thread>
         (. => <thread>...
                 <k> S </k>
                 <env> Env </env>
-                <id> T </id>
+                <id> !T </id>
               ...</thread>)
-     when fresh(T:Int)
 
 //@ {Thread termination}
 

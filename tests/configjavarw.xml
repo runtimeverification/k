@@ -247,35 +247,35 @@
     </program>
   </test>
 
-<!--
-
   <test
       definition="tests/regression/java-rewrite-engine/io/test1/test.k"
-      extensions="test"
+      extension="test"
       programs="tests/regression/java-rewrite-engine/io/test1/programs"
       results="tests/regression/java-rewrite-engine/io/test1/tests"
-      unixOnly="tests/regression/java-rewrite-engine/io/test1/prepare.sh"
+      posixInitScript="tests/regression/java-rewrite-engine/io/test1/prepare.sh"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-backend" value="java" />
-      <krun-option name="-smt" value="none" />
-      <krun-option name="-parser" value="kast -groundParser" />
+      <krun-option name="--backend" value="java" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--parser" value="kast --parser ground" />
     </all-programs>
   </test>
+
   <test
       definition="tests/regression/java-rewrite-engine/io/test2/test.k"
-      extensions="test"
+      extension="test"
       programs="tests/regression/java-rewrite-engine/io/test2/programs"
       results="tests/regression/java-rewrite-engine/io/test2/tests"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-smt" value="none" />
+      <krun-option name="--backend" value="java" />
+      <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
 
+<!--
   <test
       definition="tests/regression/java-rewrite-engine/strings/test.k"
       programs="tests/regression/java-rewrite-engine/strings/programs"
@@ -289,6 +289,7 @@
       <krun-option name="-parser" value="kast -groundParser" />
     </all-programs>
   </test>
+-->
 
   <test
       definition="tests/regression/java-rewrite-engine/list/test1/list-test1.k"
@@ -296,11 +297,10 @@
       results="tests/regression/java-rewrite-engine/list/test1/tests"
       extensions="issue"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-smt" value="none" />
-      <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output" value="pretty" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
   <test
@@ -309,14 +309,27 @@
       results="tests/regression/java-rewrite-engine/list/test2/tests"
       extensions="issue"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-smt" value="none" />
-      <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output" value="pretty" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
 
+  <test
+      definition="tests/regression/java-rewrite-engine/list/issue146/test.k"
+      programs="tests/regression/java-rewrite-engine/list/issue146/programs"
+      results="tests/regression/java-rewrite-engine/list/issue146/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+<!--
   <test
       definition="tests/regression/java-rewrite-engine/set/test1/test1.k"
       programs="tests/regression/java-rewrite-engine/set/test1/programs"

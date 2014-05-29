@@ -25,6 +25,12 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
                 && !node.getFilename().startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME))
                 || (node.getFilename().equals(KPaths.getKBase(false)
                         + File.separator + "include" + File.separator + "builtins"
+                        + File.separator + "id.k"))
+                || (node.getFilename().equals(KPaths.getKBase(false)
+                        + File.separator + "include" + File.separator + "builtins"
+                        + File.separator + "int.k"))
+                || (node.getFilename().equals(KPaths.getKBase(false)
+                        + File.separator + "include" + File.separator + "builtins"
                         + File.separator + "mint.k"))
                 || (node.getFilename().equals(KPaths.getKBase(false)
                         + File.separator + "include" + File.separator + "io"

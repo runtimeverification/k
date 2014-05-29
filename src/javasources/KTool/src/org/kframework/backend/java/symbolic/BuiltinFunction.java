@@ -48,7 +48,8 @@ public class BuiltinFunction {
             "#META-K",
             "MetaK",
             "Visitor",
-            "#IO");
+            "#IO",
+            "#FRESH");
 
     /**
      * Map of {@link KLabelConstant} representation of builtin (hooked) operations to

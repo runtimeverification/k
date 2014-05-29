@@ -670,14 +670,14 @@ above. */
 
   rule bindTo(.Map) => .  [structural]
   rule <k> bindTo((X:Name |-> V:Val => .) _) ...</k>
-       <env> Rho => Rho[L/X] </env>
-       <store>... . => L |-> V ...</store>
-    when fresh(L:Int)  [structural]
+       <env> Rho => Rho[!L:Int/X] </env>
+       <store>... . => !L |-> V ...</store>
+  [structural]
 
   rule bind(.Names) => .                  [structural]
   rule <k> bind(X:Name,Xs => Xs) ...</k>
-       <env> Rho => Rho[L/X] </env>
-    when fresh(L:Int)                   [structural]
+       <env> Rho => Rho[!L:Int/X] </env>
+  [structural]
 
   syntax K ::= assignTo(Names,Exps)  [strict(2)]
 

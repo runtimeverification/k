@@ -20,7 +20,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.indexing.Index;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.RuleIndex;
@@ -337,7 +339,9 @@ public class SymbolicRewriter {
                 termContext);
         leftHandSideConstraint.addAll(rule.requires());
         for (Variable variable : rule.freshVariables()) {
-            leftHandSideConstraint.add(variable, IntToken.fresh());
+            leftHandSideConstraint.add(
+                    variable,
+                    FreshOperations.fresh(variable.sort(), termContext));
         }
 
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
@@ -458,7 +462,7 @@ public class SymbolicRewriter {
         SymbolicConstraint termConstraint = new SymbolicConstraint(term.termContext());
         termConstraint.addAll(pattern.requires());
         for (Variable var : pattern.freshVariables()) {
-            termConstraint.add(var, IntToken.fresh());
+            termConstraint.add(var, FreshOperations.fresh(var.sort(), term.termContext()));
         }
 
         // Create a constrained term from the left hand side of the pattern.

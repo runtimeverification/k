@@ -6,7 +6,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -62,7 +61,7 @@ public class CheckVariables extends BasicVisitor {
 
     @Override
     public Void visit(Variable node, Void _) {
-        if (node.isFresh()) {
+        if (node.isFreshVariable() || node.isFreshConstant()) {
              if (current == right  && !inCondition) {
                  Integer i = fresh.get(node);
                  if (i == null) i = new Integer(1);
@@ -73,8 +72,7 @@ public class CheckVariables extends BasicVisitor {
              //nodes are ok to be found in rhs
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                     KException.KExceptionGroup.COMPILER,
-                    "Fresh variable \"" + node + "\" is bound in the " +
-                            "rule pattern.",
+                    "Fresh variable \"" + node + "\" is bound in the " + "rule pattern.",
                     getName(), node.getFilename(), node.getLocation()
             ));
         }
@@ -100,40 +98,6 @@ public class CheckVariables extends BasicVisitor {
     }
 
     @Override
-    public Void visit(TermCons node, Void _) {
-        if (!node.getCons().equals(MetaK.Constants.freshCons)) {
-            super.visit(node, _);
-            return null;
-        }
-        if (!inCondition) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
-                    "Fresh can only be used in conditions.",
-                    getName(), node.getFilename(), node.getLocation()));
-        }
-        final Term term = node.getContents().get(0);
-        if (!(term instanceof  Variable)) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
-                    "Fresh can only be applied to variables, but was applied to\n\t\t" + term,
-                    getName(), term.getFilename(), term.getLocation()));
-        }
-        Variable v = (Variable) term;
-        if (left.containsKey(v)) {
-            for (Variable v1 : left.keySet()) {
-                if (v1.equals(v)) {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.COMPILER,
-                            "Fresh variable \"" + v1 + "\" is bound in the rule pattern.",
-                            getName(), v1.getFilename(), v1.getLocation()));
-                }
-            }
-        }
-        left.put(v, new Integer(1));
-        return null;
-    }
-
-    @Override
     public Void visit(Sentence node, Void _) {
         inCondition = false;
         left.clear();
@@ -148,7 +112,7 @@ public class CheckVariables extends BasicVisitor {
         }
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {
-            if (MetaK.isAnonVar(v) && !v.isFresh()) {
+            if (MetaK.isAnonVar(v) && !(v.isFreshVariable() || v.isFreshConstant())) {
                 GlobalSettings.kem.register(new KException(KException
                         .ExceptionType.ERROR,
                         KException.KExceptionGroup.COMPILER,
@@ -183,7 +147,7 @@ public class CheckVariables extends BasicVisitor {
                         getName(), key.getFilename(), key.getLocation()));
             }
             if (MetaK.isAnonVar(key)) continue;
-            if (e.getValue().intValue()>1) continue;
+            if (e.getValue().intValue() > 1) continue;
             if (!right.containsKey(key)) {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.HIDDENWARNING,
                         KException.KExceptionGroup.COMPILER,

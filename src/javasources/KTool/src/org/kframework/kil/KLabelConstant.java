@@ -43,6 +43,7 @@ public class KLabelConstant extends KLabel {
     public static final KLabelConstant KRESULT_PREDICATE = of(AddPredicates.predicate(KSorts.KRESULT));
     public static final KLabelConstant STREAM_PREDICATE = of(AddPredicates.predicate("Stream"));
     public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
+    public static final KLabelConstant FRESH_KLABEL = of("fresh");
 
     /**
      * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant objects; subsequent calls with the same label return

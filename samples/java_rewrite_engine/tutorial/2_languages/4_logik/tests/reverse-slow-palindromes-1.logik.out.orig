@@ -1,0 +1,30 @@
+Search results:
+
+Solution 1:
+Solution:K -->
+L:Term |-> cons ( _113:Term, cons ( _113, nil ) )
+
+Solution 2:
+Solution:K -->
+<<<<<<< HEAD
+L:Term |-> cons ( _113:Term, cons ( _117:Term, cons ( _113, nil ) ) )
+
+Solution 3:
+Solution:K -->
+L:Term |-> cons ( _113:Term, cons ( _117:Term, cons ( _117, cons ( _113, nil )
+=======
+L:Term |-> cons ( _113:Term, cons ( _146:Term, cons ( _113, nil ) ) )
+
+Solution 3:
+Solution:K -->
+L:Term |-> cons ( _113:Term, cons ( _146:Term, cons ( _146, cons ( _113, nil )
+>>>>>>> unified-builtins2
+   ) ) )
+
+Solution 4:
+Solution:K -->
+L:Term |-> cons ( _113:Term, nil )
+
+Solution 5:
+Solution:K -->
+L:Term |-> nil

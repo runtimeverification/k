@@ -231,7 +231,14 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     // The above loop looks for variables that can have multiple sorts, collected from multiple solutions.
                     // In rare cases (couldn't think of one right now) it may be that the
                     // solution may be different because of different variable names
-                    assert false : "An error message should have been thrown here in the above loop.";
+
+                    // Ok, I found one example now. In C with unified-builtins, the follow restriction for ==Set doesn't work
+                    // and it creates multiple parses with different amounts of variables
+                    // This makes it that I can't disambiguate properly
+                    // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
+                    String msg = "Unsolvable ambiguities. Please write the rule in labeled form.\n (Generally because of __ productions mixing with variables).";
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                    //assert false : "An error message should have been thrown here in the above loop.";
                 }
             }
         }

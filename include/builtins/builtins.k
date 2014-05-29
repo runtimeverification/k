@@ -12,6 +12,7 @@ require "counter.k"
 require "map.k"
 require "list.k"
 require "set.k"
+require "fresh.k"
 //require "model-checker.k"
 
 module BUILTIN-SYNTAX-HOOKS
@@ -37,6 +38,7 @@ module BUILTIN-HOOKS
   imports RANDOM-HOOKS
   imports COUNTER-HOOKS
   imports ID-HOOKS
+  imports FRESH-HOOKS
   //imports LTL-HOOKS
   //imports MODEL-CHECKER-HOOKS
 endmodule

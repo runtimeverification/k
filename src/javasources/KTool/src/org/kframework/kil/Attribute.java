@@ -19,6 +19,7 @@ public class Attribute extends ASTNode {
     public static final String HOOK_KEY = "hook";
     public static final String MACRO_KEY = "macro";
     public static final String SIMPLIFICATION_KEY = "simplification";
+    public static final String FRESH_GENERATOR = "freshGenerator";
 
 
     public static final Attribute BRACKET = new Attribute("bracket", "");

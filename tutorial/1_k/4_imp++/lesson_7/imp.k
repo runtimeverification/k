@@ -77,9 +77,8 @@ module IMP
   rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
 
   rule <k> int (X,Xs => Xs); ...</k>
-       <env> Rho => Rho[X <- N] </env>
-       <store>... .Map => N |-> 0 ...</store>
-    when fresh(N:Int)
+       <env> Rho => Rho[X <- !N:Int] </env>
+       <store>... .Map => !N |-> 0 ...</store>
   rule int .Ids; => .  [structural]
 
   syntax AExp ::= Printable
@@ -90,9 +89,8 @@ module IMP
   
   rule <k> halt; ~> _ => . </k>
 
-  rule <k> spawn S => T ...</k> <env> Rho </env>
-       (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
-    when fresh(T:Int)
+  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
+       (. => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
   rule <k> join(T:Int); => . ...</k>
        <thread>... <k> . </k> <id> T </id> ...</thread>
 

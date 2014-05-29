@@ -37,7 +37,7 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
     
     @Override
     public ASTNode visit(Variable node, Void _)  {
-        if (node.isFresh()) {
+        if (node.isFreshVariable()) {
             this.vars.add(node);
             return node;
         }

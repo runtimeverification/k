@@ -39,10 +39,9 @@ module AGENTS
       
 
 // Agents
-  rule [agent-creation] : <agent>...  <k>newAgent S:K => N2 ...</k> <me>N1:Int</me> 
-        ...</agent> <world>... .Set => SetItem(N2) ...</world> // <br/>
-       (. => <agent>... <me>N2</me><parent>N1</parent><k>S</k> ...</agent>) 
-       when fresh(N2:Int)
+  rule [agent-creation] : <agent>...  <k>newAgent S:K => !N2:Int ...</k> <me>N1:Int</me> 
+        ...</agent> <world>... .Set => SetItem(!N2) ...</world> // <br/>
+       (. => <agent>... <me>!N2</me><parent>N1</parent><k>S</k> ...</agent>) 
   rule [agent-completion] : (<agent>... <control>.Bag</control> <me>N:Int</me>  ...</agent>=> .) 
        <world>... (SetItem(N) => .Set) ...</world>
   rule [halt-agent] : <control>...  <k>haltAgent ...</k>  ...</control> => <control> .Bag </control> 

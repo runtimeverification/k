@@ -325,8 +325,10 @@ public class XmlUnparseFilter extends BasicVisitor {
     public Void visit(Variable variable, Void _) {
 
         prepare(variable);
-        if (variable.isFresh())
+        if (variable.isFreshVariable())
             buffer.append("?");
+        else if (variable.isFreshConstant())
+            buffer.append("!");
         buffer.append(StringEscapeUtils.escapeXml(variable.getName()));
         if (!variableList.contains(variable.getName())) {
             buffer.append(":" + StringEscapeUtils.escapeXml(variable.getSort()));
