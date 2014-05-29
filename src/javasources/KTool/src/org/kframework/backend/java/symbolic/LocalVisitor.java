@@ -76,7 +76,7 @@ public class LocalVisitor implements Visitor {
 
     @Override
     public void visit(ConstrainedTerm node) {
-        visit((Term) node);
+        visit((JavaSymbolicObject) node);
     }
 
     @Override
