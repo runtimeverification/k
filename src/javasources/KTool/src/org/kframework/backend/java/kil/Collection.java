@@ -78,7 +78,7 @@ public abstract class Collection extends Term {
     public abstract int size();
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return false;
     }
     

@@ -3,7 +3,9 @@
 package org.kframework.backend.java.kil;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
@@ -38,7 +40,16 @@ public class Rule extends JavaSymbolicObject {
     private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
-    private final boolean hasUnboundedVars;
+    private final boolean hasUnboundVars;
+    
+    /**
+     * Unbound variables in the rule before kompilation; that is, all variables
+     * on the rhs which do not appear in either lhs or fresh condition(s).
+     * Therefore, variables that could be bound by side-condition(s) are also
+     * counted. This definition of unbound variable is consistent with the
+     * checking algorithm used in the {@link CheckVariables} pass.
+     */
+    private final ImmutableSet<Variable> unboundVars;
     private final boolean isSortPredicate;
     private final String predSort;
     private final KItem sortPredArg;
@@ -85,9 +96,20 @@ public class Rule extends JavaSymbolicObject {
         });
         containsKCell = tempContainsKCell;
                
-        hasUnboundedVars = super.containsAttribute(CheckVariables.UNBOUNDED_VARS);
+        hasUnboundVars = super.containsAttribute(CheckVariables.UNBOUND_VARS);
+        if (hasUnboundVars) {
+            // TODO(YilongL): maybe compute unbound variables in the generic KIL instead
+            Set<Variable> ubVars = new HashSet<>(rightHandSide.variableSet());
+            ubVars.removeAll(leftHandSide.variableSet());
+            for (UninterpretedConstraint.Equality eq : lookups.equalities()) {
+                ubVars.remove(eq.leftHandSide());
+            }
+            unboundVars = ImmutableSet.copyOf(ubVars);
+        } else {
+            unboundVars = null;
+        }
         
-        isSortPredicate = super.containsAttribute(Attribute.FUNCTION_KEY)
+        isSortPredicate = isFunction()
                 && functionKLabel().toString().startsWith("is");
         if (isSortPredicate) {
             predSort = functionKLabel().toString().substring(2);
@@ -137,8 +159,12 @@ public class Rule extends JavaSymbolicObject {
         return freshVariables;
     }
     
-    public boolean hasUnboundedVariables() {
-        return hasUnboundedVars;
+    public boolean hasUnboundVariables() {
+        return hasUnboundVars;
+    }
+    
+    public ImmutableSet<Variable> unboundVariables() {
+        return unboundVars == null ? ImmutableSet.<Variable>of() : unboundVars;
     }
     
     /**
@@ -166,9 +192,13 @@ public class Rule extends JavaSymbolicObject {
 
         return sortPredArg;
     }
+    
+    public boolean isFunction() {
+        return super.containsAttribute(Attribute.FUNCTION_KEY);
+    }
 
     public KLabelConstant functionKLabel() {
-        assert super.containsAttribute(Attribute.FUNCTION_KEY);
+        assert isFunction();
 
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }

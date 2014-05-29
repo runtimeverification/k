@@ -67,6 +67,16 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
         }
+        if (node.containsAttribute("reject")) {
+            if (node.getItems().size() != 1) {
+                String msg = "Only single Terminals can be rejected.";
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            }
+            if (node.getItems().size() == 1 && !(node.getItems().get(0) instanceof Terminal)) {
+                String msg = "Only Terminals can be rejected.";
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            }
+        }
 
         for (ProductionItem pi : node.getItems()) {
             if (pi instanceof Sort) {

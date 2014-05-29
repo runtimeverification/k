@@ -1,8 +1,8 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
-import java.util.ArrayList;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class ProgramSDF {
             Module m = def.getModulesMap().get(modName);
             ctv.visitNode(m);
         }
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv);
         // generate SDF and states for the new parser, using the terminals collected from the
         // previous step
         for (String modName : csmv.synModNames) {

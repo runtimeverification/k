@@ -373,14 +373,10 @@ public class SymbolicRewriter {
 
         Term result = rule.rightHandSide();
 
-        /* the RHS of the rule has introduced new variables */
-        if (rule.hasUnboundedVariables()) {
-            /* rename rule variables in the constraints */
-            Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
-            /* rename rule variables in the rule RHS */
-            result = result.substituteWithBinders(freshSubstitution, constraint.termContext());
-        }
-        
+        /* rename rule variables in the constraints */
+        Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+        /* rename rule variables in the rule RHS */
+        result = result.substituteWithBinders(freshSubstitution, constraint.termContext());
         /* apply the constraints substitution on the rule RHS */
         result = result.substituteAndEvaluate(
                 constraint.substitution(),

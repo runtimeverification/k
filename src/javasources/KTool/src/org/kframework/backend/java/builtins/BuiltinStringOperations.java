@@ -3,6 +3,7 @@ package org.kframework.backend.java.builtins;
 
 import java.math.BigInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.utils.StringUtil;
 
@@ -152,5 +153,86 @@ public class BuiltinStringOperations {
 
     public static StringToken token2string(UninterpretedToken token, TermContext context) {
         return StringToken.of(token.value());
+    }
+    
+    /**
+     * Replaces all occurrences of a string within another string.
+     * 
+     * @param text
+     *            the string to search and replace in
+     * @param search
+     *            the string to search for
+     * @param replacement
+     *            the string to replace it with
+     * @param context
+     *            the term context
+     * @return the text with any replacements processed
+     */
+    public static StringToken replaceAll(StringToken text,
+            StringToken searchString, StringToken replacement,
+            TermContext context) {
+        return StringToken.of(StringUtils.replace(text.stringValue(),
+                searchString.stringValue(), replacement.stringValue()));
+    }
+    
+    /**
+     * Replaces all occurrences of a string within another string, for the first
+     * max values of the search string.
+     * 
+     * @param text
+     *            the string to search and replace in
+     * @param search
+     *            the string to search for
+     * @param replacement
+     *            the string to replace it with
+     * @param max
+     *            the maximum number of occurrences to be replaced
+     * @param context
+     *            the term context
+     * @return the text with any replacements processed
+     */
+    public static StringToken replace(StringToken text,
+            StringToken searchString, StringToken replacement, IntToken max,
+            TermContext context) {
+        return StringToken.of(StringUtils.replace(text.stringValue(),
+                searchString.stringValue(), replacement.stringValue(),
+                max.intValue()));
+    }
+    
+    /**
+     * Replaces the first occurrence of a string within another string.
+     * 
+     * @param text
+     *            the string to search and replace in
+     * @param search
+     *            the string to search for
+     * @param replacement
+     *            the string to replace it with
+     * @param context
+     *            the term context
+     * @return the text with any replacements processed
+     */
+    public static StringToken replaceFirst(StringToken text,
+            StringToken searchString, StringToken replacement,
+            TermContext context) {
+        return StringToken.of(StringUtils.replaceOnce(text.stringValue(),
+                searchString.stringValue(), replacement.stringValue()));
+    }
+    
+    /**
+     * Counts how many times the substring appears in another string.
+     * 
+     * @param text
+     *            the string to search in
+     * @param substr
+     *            the substring to search for
+     * @param context
+     *            the term context
+     * @return the number of occurrences
+     */
+    public static IntToken countOccurences(StringToken text,
+            StringToken substr, TermContext context) {
+        return IntToken.of(StringUtils.countMatches(text.stringValue(),
+                substr.stringValue()));
     }
 }

@@ -28,6 +28,7 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Rule.AddLocationRule;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.parser.concrete2.Rule.WrapLabelRule;
+import org.kframework.parser.generator.CollectTerminalsVisitor;
 
 /**
  * A simple visitor that goes through every accessible production and creates the NFA states for the
@@ -35,9 +36,9 @@ import org.kframework.parser.concrete2.Rule.WrapLabelRule;
  * will be referenced each time a NonTerminalState is created.
  */
 public class KSyntax2GrammarStatesFilter extends BasicVisitor {
-    public KSyntax2GrammarStatesFilter(Context context, Set<String> terminals) {
+    public KSyntax2GrammarStatesFilter(Context context, CollectTerminalsVisitor ctv) {
         super(KSyntax2GrammarStatesFilter.class.getName(), context);
-        this.terminals = terminals;
+        this.ctv = ctv;
 
         // create a NonTerminal for every declared sort
         for (String sort : context.definedSorts) {
@@ -46,11 +47,11 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     }
 
     private Grammar grammar = new Grammar();
-    private Set<String> terminals;
+    private CollectTerminalsVisitor ctv;
 
     @Override
     public Void visit(Production prd, Void _) {
-        if (prd.containsAttribute("notInPrograms"))
+        if (prd.containsAttribute("notInPrograms") || prd.containsAttribute("reject"))
             return null;
         NonTerminal nt = grammar.get(prd.getSort());
         assert nt != null : "Could not find in the grammar the required sort: " + prd.getSort();
@@ -99,10 +100,15 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             // the PrimitiveState for rejection
             Set<String> rejects = new HashSet<>();
             Pattern p = Pattern.compile(pattern);
-            for (String keyword : terminals) {
+            for (String keyword : ctv.terminals) {
                 Matcher m = p.matcher(keyword);
                 if (m.matches())
                     rejects.add(keyword);
+            }
+            for (Production preject : ctv.rejects) {
+                if (preject.getSort().equals(prd.getSort())) {
+                    rejects.add(((Terminal) preject.getItems().get(0)).getTerminal());
+                }
             }
             PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
                 nt, Pattern.compile(pattern), prd.getSort(), rejects);
