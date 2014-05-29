@@ -52,7 +52,7 @@ public class Bottom extends Term {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHash() {
         return kind.hashCode();
     }
 

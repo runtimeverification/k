@@ -502,6 +502,7 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public int hashCode() {
+        // TODO(YilongL): why does ContrainedTerm have a cached hashCode?
         if (hashCode == 0) {
             hashCode = 1;
             hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
