@@ -500,15 +500,7 @@
     </all-programs>
   </test>
 
-   <test
-    definition="tests/regression/java-rewrite-engine/user_substitution/lambda.k"
-    programs="tests/regression/java-rewrite-engine/user_substitution/tests"
-    results="tests/regression/java-rewrite-engine/user_substitution/tests" 
-    extension="lambda"
-    >
-    <kompile-option name="--backend" value="java" />
-  </test>
-
+  <include file="regression/java-rewrite-engine/user_substitution/tests/config.xml" directory="tests/regression/java-rewrite-engine/user_substitution" />
 
 <!-- end Java Rewrite Engine tests -->
 </tests>
