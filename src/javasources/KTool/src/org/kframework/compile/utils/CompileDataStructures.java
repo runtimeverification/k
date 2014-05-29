@@ -20,6 +20,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Transformer class compiling collection (bag, list, map and set) terms into K internal
@@ -106,22 +107,28 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
         KList kList = (KList) node.getChild();
 
-        // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
-        //if (kLabelConstant.productions().size() != 1) {
-        //    /* ignore KLabels associated with multiple productions */
-        //    return super.transform(node);
-        //}
-        //Production production = kLabelConstant.productions().iterator().next();
-
-        if (context.productionsOf(kLabelConstant.getLabel()).size() != 1) {
-            /* ignore KLabels associated with multiple productions */
+        List<Production> productions = context.productionsOf(kLabelConstant.getLabel());
+        if (productions.isEmpty()) {
             return super.visit(node, _);
         }
-        Production production = context.productionsOf(kLabelConstant.getLabel()).iterator().next();
+        Production production = productions.iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
             return super.visit(node, _);
+        }
+        
+        // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
+        if (productions.size() > 1) {
+            GlobalSettings.kem.register(new KException(
+                    KException.ExceptionType.WARNING,
+                    KException.KExceptionGroup.COMPILER,
+                    "unable to transform the KApp: " + node
+                    + "\nbecause of multiple productions associated:\n"
+                    + productions,
+                    getName(),
+                    filename,
+                    location));
         }
 
         Term[] arguments = new Term[kList.getContents().size()];
