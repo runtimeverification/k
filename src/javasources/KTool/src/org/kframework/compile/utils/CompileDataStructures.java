@@ -106,15 +106,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
         KList kList = (KList) node.getChild();
 
-        // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
-        //if (kLabelConstant.productions().size() != 1) {
-        //    /* ignore KLabels associated with multiple productions */
-        //    return super.transform(node);
-        //}
-        //Production production = kLabelConstant.productions().iterator().next();
-
-        if (context.productionsOf(kLabelConstant.getLabel()).size() != 1) {
-            /* ignore KLabels associated with multiple productions */
+        if (context.productionsOf(kLabelConstant.getLabel()).isEmpty()) {
             return super.visit(node, _);
         }
         Production production = context.productionsOf(kLabelConstant.getLabel()).iterator().next();
@@ -122,6 +114,19 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
             return super.visit(node, _);
+        }
+        
+        // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
+        if (context.productionsOf(kLabelConstant.getLabel()).size() > 1) {
+            GlobalSettings.kem.register(new KException(
+                    KException.ExceptionType.WARNING,
+                    KException.KExceptionGroup.COMPILER,
+                    "unable to transform the KApp: " + node
+                    + "\nbecause of multiple productions associated:\n"
+                    + context.productionsOf(kLabelConstant.getLabel()),
+                    getName(),
+                    filename,
+                    location));
         }
 
         Term[] arguments = new Term[kList.getContents().size()];
