@@ -31,6 +31,7 @@ public class KSequence extends KCollection {
 
     private static final String SEPARATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = "." + Kind.K;
+    public static final KSequence EMPTY = new KSequence();
     
     private String sort;
     
@@ -58,7 +59,7 @@ public class KSequence extends KCollection {
     }
     */
 
-    public KSequence() {
+    private KSequence() {
         super(null, Kind.K);
     }
 

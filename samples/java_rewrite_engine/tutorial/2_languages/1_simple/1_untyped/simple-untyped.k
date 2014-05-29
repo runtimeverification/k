@@ -375,8 +375,8 @@ structure. */
   syntax KItem ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
@@ -399,8 +399,8 @@ declarations. */
   context var _:Id[HOLE];
 
   rule <k> var X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(L +Int 1, N)
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> array(L +Int 1, N)
                        (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
@@ -460,8 +460,8 @@ SIMPLE, also defined in \K (see \texttt{examples/simple/typed/static}),
 discards programs which do not respect this requirement. */
 
   rule <k> function F(Xs) S => . ...</k>
-       <env> Env => Env[L/F] </env>
-       <store>... . => L |-> lambda(Xs, S) ...</store>
+       <env> Env => Env[F <- L] </env>
+       <store>... .Map => L |-> lambda(Xs, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ When we are done with the first pass (pre-processing), the computation
@@ -485,7 +485,7 @@ that the functions ``see'' each other, allowing for mutual recursion, etc. */
   syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> . => Env </genv>  [structural]
+       <genv> .Map => Env </genv>  [structural]
 
 /*@ \section{Expressions}
 We next define the \K semantics of all the expression constructs. */
@@ -617,7 +617,7 @@ nulary \texttt{return;} statements. */
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => mkDecls(Xs,Vs) S return; </k>
        <control>
-         <fstack> . => ListItem((Env,K,C)) ...</fstack>
+         <fstack> .List => ListItem((Env,K,C)) ...</fstack>
          C
        </control>
        <env> Env => GEnv </env>
@@ -625,7 +625,7 @@ nulary \texttt{return;} statements. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
-         <fstack> ListItem((Env,K,C)) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => .List ...</fstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -655,7 +655,7 @@ The \texttt{read()} expression construct simply evaluates to the next
 input value, at the same time discarding the input value from the
 \textsf{in} cell. */
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -725,7 +725,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
@@ -763,7 +763,7 @@ evaluated (recall that \texttt{print} is variadic).  We append each of
 its evaluated arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
   rule print(.Vals); => .  [structural]
 
@@ -799,17 +799,17 @@ exception stack.  The three rules below modularly do precisely the above. */
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
+         <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
   rule <k> popx => . ...</k>
-       <xstack> _:ListItem => . ...</xstack>
+       <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
+         <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -838,15 +838,14 @@ and initialized automatically as described in the definition of SIMPLE's
 configuration.  This is part of \K's configuration abstraction mechanism. */
 
   rule <thread>...
-         <k> spawn S => T ...</k>
+         <k> spawn S => !T:Int ...</k>
          <env> Env </env>
        ...</thread>
        (. => <thread>...
                <k> S </k>
                <env> Env </env>
-               <id> T </id>
+               <id> !T </id>
              ...</thread>)
-    when fresh(T:Int)
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the
@@ -865,7 +864,7 @@ threads have terminated. */
 
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
        <busy> Busy => Busy -Set keys(H) </busy>
-       <terminated>... . => SetItem(T) ...</terminated>
+       <terminated>... .Set => SetItem(T) ...</terminated>
 
 /*@ \subsubsection{Thread joining}
 Thread joining is now straightforward: all we need to do is to check whether
@@ -887,8 +886,8 @@ counter for the lock (the locks are re-entrant).  These two cases are captured
 by the two rules below: */
 
   rule <k> acquire V:Val; => . ...</k>
-       <holds>... . => V |-> 0 ...</holds>
-       <busy> Busy (. => SetItem(V)) </busy>
+       <holds>... .Map => V |-> 0 ...</holds>
+       <busy> Busy (.Set => SetItem(V)) </busy>
     when (notBool(V in Busy))  [acquire]
 
   rule <k> acquire V; => . ...</k>
@@ -907,8 +906,8 @@ so other threads can acquire it if they need to. */
        <holds>... V |-> (N => N -Int 1) ...</holds>
     when N >Int 0
 
-  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-       <busy>... SetItem(V) => . ...</busy>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+       <busy>... SetItem(V) => .Set ...</busy>
 
 /*@ \subsubsection{Rendezvous synchronization}
 In addition to synchronization through acquire and release of locks, SIMPLE
@@ -1037,3 +1036,4 @@ program behaviors then you need to kompile with the transition option
 including rule tags such as lookup, increment, acquire, etc.  See the
 IMP++ tutorial for what the transition option means how to use it. */
 endmodule 
+

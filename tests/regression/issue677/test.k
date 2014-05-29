@@ -13,5 +13,5 @@ module TEST
   rule I1:Int + I2:Int => I1 +Int I2
   rule 'a(I:Int) => I
 
-  rule <k> print(I:Int) => . ...</k> <out>... . => ListItem(I) </out>
+  rule <k> print(I:Int) => . ...</k> <out>... .List => ListItem(I) </out>
 endmodule

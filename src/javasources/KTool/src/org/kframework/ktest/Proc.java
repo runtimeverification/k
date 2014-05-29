@@ -2,8 +2,8 @@
 package org.kframework.ktest;
 
 import org.apache.commons.io.IOUtils;
-import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.StringMatcher.MatchFailure;
+import org.kframework.krun.ColorSetting;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;

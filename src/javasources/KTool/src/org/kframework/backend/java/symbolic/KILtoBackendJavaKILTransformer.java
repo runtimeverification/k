@@ -4,15 +4,6 @@ package org.kframework.backend.java.symbolic;
 import static org.kframework.kil.KLabelConstant.ANDBOOL_KLABEL;
 import static org.kframework.kil.KLabelConstant.BOOL_ANDBOOL_KLABEL;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
@@ -59,6 +50,15 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -206,7 +206,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         List<org.kframework.kil.Term> list = new ArrayList<>();
         KILtoBackendJavaKILTransformer.flattenList(list, node.getContents());
         if (list.isEmpty()){
-            return new KList();
+            return KList.EMPTY;
         }
         //TODO(OwolabiL): What should happen when the list is not empty?
         return super.visit(node, _);
@@ -560,41 +560,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
         Term rightHandSide = (Term) this.visitNode(rewrite.getRight());
 
-        Collection<Term> requires = new ArrayList<Term>();
-        Collection<Term> ensures = new ArrayList<Term>();
-        Collection<Variable> freshVariables = new ArrayList<Variable>();
-        //TODO: Deal with Ensures
+        Collection<Term> requires = new ArrayList<>();
         if (node.getRequires() != null) {
-            Term term = (Term) this.visitNode(node.getRequires());
-            if (term instanceof KItem &&
-                   (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) || 
-                    ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
-                for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
-                    if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
-                        freshVariables.add((Variable) ((KList) ((KItem) item).kList()).get(0));
-                    } else {
-                        requires.add(item);
-                    }
-                }
-            } else {
-                if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'fresh(_)")) {
-                    freshVariables.add((Variable) ((KList) ((KItem) term).kList()).get(0));
-                } else {
-                    requires.add(term);
-                }
-            }
+            transformConjunction(requires, (Term) this.visitNode(node.getRequires()));
         }
 
+        Collection<Term> ensures = new ArrayList<>();
         if (node.getEnsures() != null) {
-            Term term = (Term) this.visitNode(node.getEnsures());
-            // TODO(YilongL): "'_andBool_" or "#andBool"?
-            if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
-                for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
-                    ensures.add(item);
-                }
-            } else {
-                ensures.add(term);
-            }
+            transformConjunction(requires, (Term) this.visitNode(node.getEnsures()));
         }
 
         UninterpretedConstraint lookups = new UninterpretedConstraint();
@@ -646,6 +619,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         }
 
+        Collection<Variable> freshVariables = new ArrayList<>();
+        // TODO(AndreiS): check !Variable only appears in the RHS
+        for (org.kframework.kil.Variable variable : node.getBody().variables()) {
+            if (variable.isFreshConstant()) {
+                freshVariables.add((Variable) this.visitNode(variable));
+            }
+        }
+
         assert leftHandSide.kind() == rightHandSide.kind()
                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST)
                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
@@ -667,6 +648,18 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             return rule.getFreshRule(TermContext.of(definition));
         }
         return rule;
+    }
+
+    private void transformConjunction(Collection<Term> requires, Term term) {
+        if (term instanceof KItem &&
+               (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) ||
+                ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
+            for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
+                requires.add(item);
+            }
+        } else {
+            requires.add(term);
+        }
     }
 
     @Override
@@ -762,6 +755,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         TermContext termContext = TermContext.of(definition);
         // TODO(AndreiS): some evaluation is required in the LHS as well
         //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
+
+        Rule origRule = rule;
+        if (rule.isFunction()) {
+            /*
+             * rename variables in the function rule to avoid variable confusion
+             * when trying to apply this rule on its RHS
+             */
+            rule = rule.getFreshRule(termContext);
+        }
         Term rightHandSide = rule.rightHandSide().evaluate(termContext);
         List<Term> requires = new ArrayList<>();
         for (Term term : rule.requires()) {
@@ -778,7 +780,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     equality.rightHandSide().evaluate(termContext));
         }
         
-        return new Rule(
+        Rule newRule = new Rule(
                 rule.label(),
                 rule.leftHandSide(),
                 rightHandSide,
@@ -788,6 +790,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 lookups,
                 rule.getAttributes(),
                 definition);
+        return newRule.equals(rule) ? origRule : newRule;                
     }
 
     private static void flattenKSequence(

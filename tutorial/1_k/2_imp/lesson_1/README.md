@@ -1,6 +1,6 @@
-### Defining a More Complex Syntax
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [9'15"]](http://youtu.be/F39Ta1stiCM)
+### Defining a More Complex Syntax
 
 Here we learn how to define a more complex language syntax than LAMBDA's,
 namely the C-like syntax of IMP.  Also, we will learn how to define languages
@@ -24,12 +24,12 @@ contents of the imported module in the one which imports it (making sure
 that everything is only kept once, even if you import it multiple times).
 In other words, there is currently nothing fancy in K tool's module system.
 
-IMP has six syntactic categories, as shown in imp.k: AExp for arithmetic
-expressions, BExp for Boolean expressions, Block for blocks, Stmt for
-statements, Pgm for programs and Ids for comma-separated lists of identifiers.
-Blocks are special statements, whose role is to syntactically constrain the
-conditional statement and the while loop statement to only take blocks as
-branches and body, respectively.
+IMP has six syntactic categories, as shown in `imp.k`: `AExp` for arithmetic
+expressions, `BExp` for Boolean expressions, `Block` for blocks, `Stmt` for
+statements, `Pgm` for programs and Ids for comma-separated lists of
+identifiers.  Blocks are special statements, whose role is to syntactically
+constrain the conditional statement and the while loop statement to only
+take blocks as branches and body, respectively.
 
 There is nothing special about arithmetic and Boolean expressions.  
 They are given the expected strictness attributes, except for `<=` and `&&`,
@@ -79,9 +79,9 @@ lists.  In general,
 
     syntax B ::= List{A,T}
 
-declares a new non-terminal, B, corresponding to T-separated sequences of
-elements of A, where A is a non-terminal and T is a terminal.  These lists
-can also be empty, that is, IMP programs declaring no variable are also
+declares a new non-terminal, `B`, corresponding to `T`-separated sequences of
+elements of `A`, where `A` is a non-terminal and `T` is a terminal.  These
+lists can also be empty, that is, IMP programs declaring no variable are also
 allowed (e.g., `int; {}` is a valid IMP program).  To instantiate and use
 the K builtin lists, you should alias each instance with a (typically fresh)
 non-terminal in your syntax, like we do with the `Ids` nonterminal.
@@ -93,12 +93,12 @@ Recall from Tutorial 1 (LAMBDA) that in order for strictness to work well
 we also need to tell K which computations are meant to be results.  We do
 this as well now, in the module IMP: integers and Booleans are K results.
 
-Compile imp.k and test the generated parser by running some programs.
+Kompile `imp.k` and test the generated parser by running some programs.
 Since IMP is a fragment of C, you may want to select the C mode in your
 editor when writing these programs.  This will also give your the feel that
-you are writing programs in a real programming language :)
+you are writing programs in a real programming language.
 
-For example, here is sum.imp, which sums in sum all numbers up to n:
+For example, here is `sum.imp`, which sums in sum all numbers up to n:
 
     int n, sum;
     n = 100;
@@ -110,7 +110,7 @@ For example, here is sum.imp, which sums in sum all numbers up to n:
 
 Now krun it and see how it looks parsed in the default `k` cell.
 
-The program collatz.imp tests the Collatz conjecture for all numbers up to
+The program `collatz.imp` tests the Collatz conjecture for all numbers up to
 m and accumulates the total number of steps in s:
 
     int m, n, q, r, s;
@@ -154,14 +154,14 @@ Finally, program `primes.imp` counts in `s` all the prime numbers up to `m`:
     }
 
 All the programs above will run once we define the semantics of IMP.  If you
-want to execute them now, wrap them in a `main(){...}` function and compile them
-and run them with your favorite C compiler.
+want to execute them now, wrap them in a `main(){...}` function and compile
+them and run them with your favorite C compiler.
 
 Before we move to the K semantics of IMP, we would like to make some
-clarifications regarding the K builtin parser, kast.  Although it is quite
-powerful, thanks to the SDF system upon which it builds, you should not expect
-magic from it!  While the K parser can parse many non-trivial languages (see,
-for example, the KOOL language in k/examples in the K distribution), it was
+clarifications regarding the K builtin parser, `kast`.  Although it is quite
+powerful, you should not expect magic from it!  While the K parser can parse
+many non-trivial languages (see, for example, the KOOL language in
+[tutorial/2_languages](/tutorial/2_languages)) in the K distribution), it was
 never meant to be a substitute for real parsers.  We often call the syntax
 defined in K *the syntax of the semantics*, to highlight the fact that its
 role is to serve as a convenient notation when writing the semantics, not
@@ -170,14 +170,11 @@ programming languages.  See the KERNELC language in [samples](/samples/)
 for an example on how to connect an external parser for concrete syntax to
 the K tool.
 
-The above being said, I personally strongly encourage you to strive to make
-the builtin parser work with your desired language syntax!  Do not give up
+The above being said, we strongly encourage you to strive to make the
+builtin parser work with your desired language syntax!  Do not give up
 simply because you don't want to deal with syntactic problems.  On the
 contrary, fight for your syntax!  If you really cannot define your desired
 syntax because of tool limitations, we would like to know.  Please tell us.
-Note that the SDF community has managed to define grammars for many real
-languages, like C and Java, and the K parser builds upon SDF, so everything
-is there for you to parse complex languages.
 
 Until now we have only seen default configurations.  In the next lesson we
 will learn how to define a K custom configuration.

@@ -9,7 +9,7 @@ module ISSUE
   rule K1 ; K2 => K1 ~> K2 [macro]
 
   rule <k> test1 => . ...</k>
-       <out>... . => ListItem(1) </out>
+       <out>... .List => ListItem(1) </out>
 
   rule test2 => . 
 endmodule

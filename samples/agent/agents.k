@@ -39,12 +39,11 @@ module AGENTS
       
 
 // Agents
-  rule [agent-creation] : <agent>...  <k>newAgent S:K => N2 ...</k> <me>N1:Int</me> 
-        ...</agent> <world>... . => SetItem(N2) ...</world> // <br/>
-       (. => <agent>... <me>N2</me><parent>N1</parent><k>S</k> ...</agent>) 
-       when fresh(N2:Int)
+  rule [agent-creation] : <agent>...  <k>newAgent S:K => !N2:Int ...</k> <me>N1:Int</me> 
+        ...</agent> <world>... .Set => SetItem(!N2) ...</world> // <br/>
+       (. => <agent>... <me>!N2</me><parent>N1</parent><k>S</k> ...</agent>) 
   rule [agent-completion] : (<agent>... <control>.Bag</control> <me>N:Int</me>  ...</agent>=> .) 
-       <world>... (SetItem(N) => .) ...</world>
+       <world>... (SetItem(N) => .Set) ...</world>
   rule [halt-agent] : <control>...  <k>haltAgent ...</k>  ...</control> => <control> .Bag </control> 
     [transition]
   rule <k>me => N ...</k> <me>N</me>
@@ -69,12 +68,12 @@ module AGENTS
        <agent>... <me>N2</me> <k>receive => V ...</k>  ...</agent>
     [transition]
   rule [start-waiting-at-barrier] : <me>N</me> <k>barrier ...</k>
-       <barrier>true</barrier> <waiting>W (. => SetItem(N))</waiting> 
+       <barrier>true</barrier> <waiting>W (.Set => SetItem(N))</waiting> 
     when notBool(SetItem(N) in W)
   rule [lifting-barrier] : <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> 
-    when W =/=Set .
+    when W =/=Set .Set
     [transition]
   rule [leave-barrier] : <me>N</me> <k>barrier => skip ...</k> <barrier>false</barrier>
-       <waiting>... (SetItem(N) => .) ...</waiting>
+       <waiting>... (SetItem(N) => .Set) ...</waiting>
   rule [lowering-barrier] : <barrier>false => true</barrier> <waiting>.Set</waiting>
 endmodule

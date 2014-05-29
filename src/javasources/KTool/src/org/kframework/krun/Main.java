@@ -37,6 +37,7 @@ import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.Cell2DataStructure;
+import org.kframework.compile.utils.CompileDataStructures;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -138,6 +139,7 @@ public class Main {
 
         Term configuration = (Term) new SubstitutionFilter(args, context).visitNode(cfgCleaned);
         configuration = (Term) new Cell2DataStructure(context).visitNode(configuration);
+        configuration = (Term) new CompileDataStructures(context).visitNode(configuration);
         return configuration;
     }
 
@@ -177,24 +179,24 @@ public class Main {
         }
         if (stdin != null) {
             KApp noIO = KApp.of(KLabelConstant.of("'#noIO", context));
-            if (K.backend.equals("java")) {
+//            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
                     output.put("$noIO", DataStructureBuiltin.element(myList, noIO));
                 }
-            } else {
-                output.put("$noIO", new ListItem(noIO));
-            }
+//            } else {
+//                output.put("$noIO", new ListItem(noIO));
+//            }
             output.put("$stdin", StringBuiltin.kAppOf(stdin + "\n"));
         } else {
-            if (K.backend.equals("java")) {
+//            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
                     output.put("$noIO", DataStructureBuiltin.empty(myList));
                 }
-            } else {
-                output.put("$noIO", org.kframework.kil.List.EMPTY);
-            }
+//            } else {
+//                output.put("$noIO", org.kframework.kil.List.EMPTY);
+//            }
             output.put("$stdin", StringBuiltin.EMPTY);
         }
 
@@ -226,7 +228,7 @@ public class Main {
 
     // execute krun in normal mode (i.e. not in debug mode)
     /**
-     * 
+     *
      * @param KAST
      * @param lang
      * @param rp
@@ -338,7 +340,7 @@ public class Main {
                         KAST1 = rp.runParserOrDie("kast", K.model_checking, false,
                                 "LtlFormula", context);
                     }
-                    
+
                     result = krun
                             .modelCheck(
                                     KAST1,
@@ -399,19 +401,19 @@ public class Main {
             }
 
             if (K.PRETTY.equals(K.output_mode) || K.KORE.equals(K.output_mode) || K.COMPATIBLE.equals(K.output_mode)) {
-                
+
                 String output = null;
-                        
+
                 //Liyi Li: I think this code is temporal, since the new pretty printer
                 //relies on k definition. I think eventually we need to add
                 // the KStatue, KSearchResults, and KTestGenerates a definition field.
                 if(result.getResult() instanceof KRunState){
-                    
+
                     UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
                     printer.visitNode(((KRunState)(result.getResult())).getResult());
                     output = printer.getResult();
                 } else if (result.getResult() instanceof SearchResults) {
-                    
+
                     TreeSet<String> solutionStrings = new TreeSet<String>();
                     for (SearchResult solution : ((SearchResults)result.getResult()).getSolutions()) {
                         Map<String, Term> substitution = solution.getSubstitution();
@@ -421,7 +423,7 @@ public class Main {
                             solutionStrings.add("\n" + unparser.getResult());
                         } else {
                             boolean empty = true;
-                            
+
                             StringBuilder varStringBuilder = new StringBuilder();
                             for (String variable : substitution.keySet()) {
                                 UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
@@ -447,18 +449,18 @@ public class Main {
                             i++;
                         }
                     }
-                    
+
                     output = sb.toString();
                 } else if (result.getResult() instanceof TestGenResults) {
-                    
+
                     int n = 1;
                     StringBuilder sb = new StringBuilder();
                     sb.append("Test generation results:");
-                    
+
                     for (TestGenResult testGenResult : ((TestGenResults)result.getResult()).getTestGenResults()) {
                         // TODO(YilongL): how to set state id?
                         sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
-                        
+
                         UnparserFilterNew t = new UnparserFilterNew(true, K.color, K.parens, context);
                         Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
                         t.visitNode(concretePgm);
@@ -496,20 +498,20 @@ public class Main {
                         strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
                         strCnstr = strCnstr.replace("/\\ ", "/\\\n");
                         sb.append(strCnstr);
-                        
+
                         n++;
                     }
-                    
+
                     if (n == 1) {
                         sb.append("\nNo test generation results");
                     }
-                    
+
                     output = sb.toString();
-                    
+
                 } else {
                     output = result.toString();
                 }
-                
+
                 if (!cmd.hasOption("output-file")) {
                     System.out.println(output);
                 } else {
@@ -605,7 +607,7 @@ public class Main {
             if (context.globalOptions.debug) {
                 e.printStackTrace();
             }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                     "IO error detected interacting with console"));
             return false;
         }
@@ -650,7 +652,7 @@ public class Main {
                     if (context.globalOptions.debug) {
                         e.printStackTrace();
                     }
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                             "IO error detected interacting with console"));
                     return false;
                 }
@@ -833,12 +835,12 @@ public class Main {
             if (context.globalOptions.debug) {
                 e.printStackTrace();
             }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                     KExceptionGroup.CRITICAL, e.getMessage()));
             return false;
         }
     }
-    
+
     public static boolean guiDebugExecution(Term kast, String lang, KRunResult<SearchResults> state,
             Context context) {
         try {
@@ -861,15 +863,15 @@ public class Main {
             return false;
         }
     }
-    
-    
+
+
     /*
      * author: Liyi Li
      * it will be used for simulation tool
      */
     public static org.kframework.kil.Term preDefineSimulation(CommandlineOptions cmd_options,
             CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException {
-        
+
         K.directory=new File(directory).getCanonicalPath();
         K.pgm = pgm;
 
@@ -879,7 +881,7 @@ public class Main {
                 return new File(current, name).isDirectory();
             }
         });
-        
+
         K.compiled_def = null;
         for (int i = 0; i < dirs.length; i++) {
             if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
@@ -896,7 +898,7 @@ public class Main {
             String msg = "Could not find a compiled definition.";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
         }
-        
+
 
         File compiledFile = new File(K.compiled_def);
         if (!compiledFile.exists()) {
@@ -914,7 +916,7 @@ public class Main {
         context.kompiled = new File(K.compiled_def);
         K.kdir = context.dotk.getCanonicalPath();
         K.setKDir();
-        
+
         org.kframework.kil.Term KAST = null;
         RunProcess rp = new RunProcess();
 
@@ -966,7 +968,7 @@ public class Main {
                 }
             }
         }
-        
+
         org.kframework.kil.Term term = makeConfiguration(KAST, null, rp,
                 K.term, context);
         return term;
@@ -985,7 +987,7 @@ public class Main {
             printKRunUsageS(cmd_options);
             return false;
         }
-        
+
         if (cmd.hasOption("debug-gui")) {
             System.setProperty("java.awt.headless", "false");
         }
@@ -1008,11 +1010,11 @@ public class Main {
         if (cmd.hasOption("verbose")) {
             globalOptions.verbose = true;
         }
-        
+
         if (cmd.hasOption("debug")) {
             globalOptions.debug = true;
         }
-        
+
         globalOptions.initialize();
 
         sw.printIntermediate("Deleting temporary krun directory");
@@ -1152,9 +1154,9 @@ public class Main {
             }
             if (cmd.hasOption("output")) {
                 K.output_mode = cmd.getOptionValue("output");
-                
+
                 if (K.output_mode.equals("smart")){
-                    
+
                     K.output_mode=K.PRETTY;
                     K.parens=false;
                 } else if (K.output_mode.equals("no-wrap")) {
@@ -1188,6 +1190,7 @@ public class Main {
             }
             if (cmd.hasOption("ltlmc")) {
                 K.model_checking = cmd.getOptionValue("ltlmc");
+                K.io = false;
             }
             if (cmd.hasOption("prove")) {
                 K.prove = cmd.getOptionValue("prove");
@@ -1227,6 +1230,9 @@ public class Main {
             if (cmd.hasOption("deterministic-functions")) {
                 K.deterministic_functions = true;
             }
+            if (cmd.hasOption("pattern-matching")) {
+                K.pattern_matching  = true;
+            }
             // printing the output according to the given options
             if (K.help) {
                 printKRunUsageS(cmd_options);
@@ -1241,21 +1247,21 @@ public class Main {
                 System.out.println(msg);
                 return true;
             }
-            
+
             if(cmd.hasOption("simulation")) {
-                
+
                 String[] temp = cmd.getOptionValue("simulation").split("\\s+");
                 K.simulationDefinitionLeft=temp[0];
                 K.simulationDefinitionRight=temp[1];
                 K.simulationProgLeft=temp[2];
                 K.simulationProgRight=temp[3];
-                
+
                 Context contextLeft = new Context(globalOptions);
                 Context contextRight = new Context(globalOptions);
                 Term leftInitTerm = null;
                 Term rightInitTerm = null;
                 Waitor runSimulation = null;
-                
+
                 try {
                     leftInitTerm = Main.preDefineSimulation(cmd_options, cmd,
                             contextLeft, K.simulationDefinitionLeft, K.simulationProgLeft);
@@ -1265,16 +1271,16 @@ public class Main {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                
+
                 try {
                     runSimulation = new Waitor(contextLeft, contextRight, leftInitTerm, rightInitTerm);
                 } catch (KRunExecutionException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                
+
                 runSimulation.start();
-                
+
                 try {
                     runSimulation.join();
                 } catch (InterruptedException e) {
@@ -1282,7 +1288,7 @@ public class Main {
                 }
                 return true;
             }
-            
+
             String[] remainingArguments = null;
             if (cmd_options.getCommandLine().getOptions().length > 0) {
                 remainingArguments = cmd.getArgs();
@@ -1344,7 +1350,7 @@ public class Main {
                         + K.compiled_def
                         + "\nPlease compile the definition by using `kompile'.");
             }
-            
+
             KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
             //merge krun options into kompile options object
             kompileOptions.global = globalOptions;
@@ -1353,7 +1359,7 @@ public class Main {
             if (!cmd.hasOption("backend")) {
                 K.backend = kompileOptions.backend.name().toLowerCase();
             }
-            
+
             Context context = new Context(kompileOptions);
             K.init(context);
 
@@ -1437,7 +1443,7 @@ public class Main {
             if (K.term) {
                 if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                     if (K.backend.equals("java")) {
-                        K.parser = "kast --parser rule";
+                        K.parser = "kast --parser rules";
                     } else {
                         K.parser = "kast --parser ground";
                     }

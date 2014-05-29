@@ -2,6 +2,7 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.KilProperty;
+import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;

@@ -31,6 +31,10 @@ public class SetLookup extends Term implements DataStructureLookup {
 
         if (((BuiltinSet) base).contains(key)) {
             return BoolToken.TRUE;
+        } else if (base.isGround() && key.isGround()) {
+            return BoolToken.FALSE;
+        } else if (((BuiltinSet) base).isEmpty()) {
+            return BoolToken.FALSE;
         }
         return  this;
     }

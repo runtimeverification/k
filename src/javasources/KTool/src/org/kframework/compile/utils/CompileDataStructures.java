@@ -163,7 +163,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         } else if (sort.type().equals(KSorts.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
             if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update")) 
-                    && kList.getContents().size() >= 3) {
+                    && kList.getContents().size() >= 3 && kList.getContents().get(0) instanceof Variable) {
                 return new MapUpdate(
                         (Variable) kList.getContents().get(0),
                         Collections.<Term, Term>emptyMap(),

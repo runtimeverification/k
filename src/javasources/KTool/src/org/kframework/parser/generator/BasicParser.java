@@ -32,7 +32,6 @@ public class BasicParser {
     private String mainModule;
     private boolean autoinclude;
     private static final String missingFileMsg = "Could not find 'required' file: ";
-    private String autoincludeFileName;
     
     private KompileOptions kompileOptions;
     private GlobalOptions globalOptions;
@@ -41,11 +40,6 @@ public class BasicParser {
         this.autoinclude = autoinclude;
         this.kompileOptions = kompileOptions;
         this.globalOptions = kompileOptions.global;
-        if (this.kompileOptions.backend.java())
-            autoincludeFileName = "autoinclude-java.k";
-        else
-            autoincludeFileName ="autoinclude.k";
-
     }
 
     /**
@@ -69,7 +63,10 @@ public class BasicParser {
                 List<DefinitionItem> tempmi = moduleItems;
                 moduleItems = new ArrayList<DefinitionItem>();
 
-                file = buildCanonicalPath(autoincludeFileName, new File(fileName));
+                if (context.kompileOptions.backend.java())
+                    file = buildCanonicalPath("autoinclude-java.k", new File(fileName));
+                else
+                    file = buildCanonicalPath("autoinclude.k", new File(fileName));
                 if (file == null)
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                             missingFileMsg + fileName + " autoimported for every definition ", fileName, ""));
@@ -123,7 +120,7 @@ public class BasicParser {
 
             boolean predefined = file.getCanonicalPath().startsWith(KPaths.getKBase(false) + File.separator + "include");
             if (!predefined)
-                context.addFileRequirement(buildCanonicalPath(autoincludeFileName, file).getCanonicalPath(), file.getCanonicalPath());
+                context.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
 
             // add the modules to the modules list and to the map for easy access
             for (DefinitionItem di : defItemList) {

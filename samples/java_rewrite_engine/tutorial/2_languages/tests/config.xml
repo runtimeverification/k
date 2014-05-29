@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+
 <tests>
-  <test />
+  <include file="../1_simple/tests/config.xml" directory="1_simple" />
+  <include file="../2_kool/tests/config.xml" directory="2_kool" />
+  <include file="../3_fun/tests/config.xml" directory="3_fun" />
+  <include file="../4_logik/tests/config.xml" directory="4_logik" />
 </tests>
+

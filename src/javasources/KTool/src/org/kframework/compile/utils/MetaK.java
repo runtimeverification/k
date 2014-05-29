@@ -87,6 +87,7 @@ public class MetaK {
         public static final String heatingTag = "heat";
         public static final String coolingTag = "cool";
         public static final String hole = "[]";
+        @Deprecated
         public static final String freshCons = "Bool1FreshSyn";
         public static final String plusIntCons = "Int1PlusSyn";
         public static final String generatedTopCellLabel = "generatedTop";
@@ -205,18 +206,6 @@ public class MetaK {
         cell.setEllipses(ellipses);
         cell.setContents(t);
         return cell;
-    }
-
-
-
-    public static Variable freshVar(Set<Variable> vars, String sort) {
-        String prefix = "?";
-        int i = 0;
-        Variable v = new Variable(prefix + i, sort);
-        while (vars.contains(v)) {
-            v.setName(prefix + (++i));
-        }
-        return v;
     }
 
     public static int countRewrites(Term t, org.kframework.kil.loader.Context context) {
@@ -409,12 +398,6 @@ public class MetaK {
         switch (sort) {
             case Bag:
                 return new Bag(col);
-            case List:
-                return new org.kframework.kil.List(col);
-            case Set:
-                return new org.kframework.kil.Set(col);
-            case Map:
-                return new Map(col);
             case K:
                 return new KSequence(col);
             default:

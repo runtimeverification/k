@@ -110,25 +110,23 @@ module SYMBOLIC-K
 //  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
 
   // declare isSymbolicSort for List, Set, Bag and Map
-  syntax K ::= "isSymbolicList" "(" List ")" [prefixlabel(isSymbolicList), predicate]
-  syntax K ::= "isSymbolicSet" "(" Set ")" [prefixlabel(isSymbolicSet), predicate]
   syntax K ::= "isSymbolicBag" "(" Bag ")" [prefixlabel(isSymbolicBag), predicate]
-  syntax K ::= "isSymbolicMap" "(" Map ")" [prefixlabel(isSymbolicMap), predicate]
 
+  syntax K ::= isSymbolicK(List)
 
   // define isSymbolicK
-  rule
-    isSymbolicK(List2KLabel(L:List)(.KList)) => isSymbolicList(L)
-  [predicate]
-  rule
-    isSymbolicK(Set2KLabel(S:Set)(.KList)) => isSymbolicSet(S)
-  [predicate]
-  rule
-    isSymbolicK(Bag2KLabel(B:Bag)(.KList)) => isSymbolicBag(B)
-  [predicate]
-  rule
-    isSymbolicK(Map2KLabel(M:Map)(.KList)) => isSymbolicMap(M)
-  [predicate]
+  //rule
+    //isSymbolicK(L:List) => isSymbolicList(L)
+  //[predicate]
+  //rule
+    //isSymbolicK(S:Set) => isSymbolicSet(S)
+  //[predicate]
+  //rule
+    //isSymbolicK(B:Bag) => isSymbolicBag(B)
+  //[predicate]
+  //rule
+    //isSymbolicK(M:Map) => isSymbolicMap(M)
+  //[predicate]
   rule isSymbolicK(KL:KLabel(LK:KList)) => false
   when isBuiltin(KL(LK))
   rule isSymbolicK(KL:KLabel(LK:KList)) => false

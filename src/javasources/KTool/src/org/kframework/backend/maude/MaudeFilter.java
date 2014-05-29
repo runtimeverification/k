@@ -747,12 +747,8 @@ public class MaudeFilter extends BackendFilter {
                 visitMapElements((MapBuiltin) dataStructure);
             }
 
-            if (dataStructure.isLHSView() && dataStructure.hasViewBase() && !(dataStructure instanceof ListBuiltin)) {
-                result.append(", ");
-                Variable variable = new Variable(
-                        dataStructure.viewBase().getName(),
-                        dataStructure.sort().type());
-                this.visitNode(variable);
+            if (!(dataStructure instanceof ListBuiltin)) {
+                visitDataStructureBaseTerms(dataStructure);
             }
 
             result.append(")");
@@ -763,6 +759,12 @@ public class MaudeFilter extends BackendFilter {
 
         result.append("), .KList)");
         return null;
+    }
+
+    private void visitDataStructureVariable(String varName, String varType) {
+        result.append(varName);
+        result.append(":");
+        result.append(varType);
     }
 
     private void visitCollectionElements(CollectionBuiltin collection) {
@@ -787,22 +789,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(")");
         }
 
-        // append base elements
-        for (Term term : listBuiltin.baseTerms()) {
-            result.append(", ");
-            if (term instanceof  Variable) {
-                Variable variable = new Variable(
-                        listBuiltin.viewBase().getName(),
-                        listBuiltin.sort().type());
-                this.visitNode(variable);
-            } else {
-                result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
-                        DataStructureSort.Label.ELEMENT));
-                result.append("(");
-                    this.visitNode(term);
-                    result.append(")");
-            }
-        }
+        visitDataStructureBaseTerms(listBuiltin);
 
         // append rhs elements
         for (Term term : listBuiltin.elementsRight()) {
@@ -814,6 +801,23 @@ public class MaudeFilter extends BackendFilter {
             result.append(")");
         }
         return null;
+    }
+
+    private void visitDataStructureBaseTerms(DataStructureBuiltin listBuiltin) {
+        // append base elements
+        for (Term term : listBuiltin.baseTerms()) {
+            result.append(", ");
+            if (term instanceof Variable) {
+                visitDataStructureVariable(
+                        ((Variable)term).getName(),
+                        listBuiltin.sort().type());
+            } else {
+                result.append("K2" + listBuiltin.sort().type());
+                result.append("(");
+                    this.visitNode(term);
+                    result.append(")");
+            }
+        }
     }
 
     private void visitMapElements(MapBuiltin map) {
@@ -1049,9 +1053,6 @@ public class MaudeFilter extends BackendFilter {
     private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
     static {
         maudeCollectionConstructors.put(KSort.Bag, "__");
-        maudeCollectionConstructors.put(KSort.Map, "__");
-        maudeCollectionConstructors.put(KSort.Set, "__");
-        maudeCollectionConstructors.put(KSort.List, "__");
         maudeCollectionConstructors.put(KSort.K, "_~>_");
         maudeCollectionConstructors.put(KSort.KList, "_`,`,_");
     }

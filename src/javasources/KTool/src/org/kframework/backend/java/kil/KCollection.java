@@ -102,7 +102,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    public boolean isExactSort() {
+    public final boolean isExactSort() {
         if (contents.size() == 1) {
             return !hasFrame() && contents.get(0).isExactSort();
         } else {

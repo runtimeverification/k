@@ -1,6 +1,6 @@
-### Configuration Abstraction, Part 1; Types of Rules
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [9'16"]](http://youtu.be/fR2VEfGHtho)
+### Configuration Abstraction, Part 1; Types of Rules
 
 Here we will complete the K definition of IMP and, while doing so, we will
 learn the very first step of what we call *configuration abstraction*, and
@@ -12,16 +12,20 @@ Let us add the remaining rules, in the order in which the language constructs
 were defined in IMP-SYNTAX.
 
 The rules for the arithmetic and Boolean constructs are self-explanatory.
-Note, however, that in all rules except those for && we inserted dynamic
-checks for the variable sorts.  Indeed, we do not want to apply the rule for
-addition, for example, when the two arguments are not integers.  In the rules
-for &&, we prefer not to add the dynamic check B:BExp, for two reasons.
-First, it can be shown that whenever any of these rules apply, B will indeed
-be a BExp; that's because there is no rule that can touch such a B (this will
-become clearer shortly, when we discuss the first step of configuration
-abstraction).  Second, since we know that B will be a BExp anyway, we can
+Note, however, that K will infer the correct sorts of all the variables in
+these rules, because of they appear as arguments of the builtin operations
+(`_+Int_`, etc.).  Moreover, the inferred sorts will be enforced dynamically.
+Indeed, we do not want to apply the rule for addition, for example, when the
+two arguments are not integers.  In the rules for `&&`, although we prefer to
+not do it here for simplicity, we could have eliminated the dynamic check by
+replacing `B` (and similarly for `_`) with `B:K`, for two reasons.  First, it
+can be shown that whenever any of these rules apply, `B` will be a `BExp`
+anyway; that's because there is no rule that can touch such a `B` (this
+will become clearer shortly, when we discuss the first step of configuration
+abstraction).  Second, since we know that `B` will be a `BExp` anyway, we can
 save the time it takes to check its sort; such times may look minor, but they
-accumulate, so in general we try to avoid run-time checks as much as possible.
+accumulate, so some designers may prefer to avoid run-time checks whenever
+possible.
 
 The block rules are trivial.  However, the rule for non-empty blocks works
 only because we do not have local variable declarations in IMP.  We will have
@@ -30,15 +34,15 @@ to change this rule in IMP++.
 The assignment rule has two `=>`: one in the k cell dissolving the assignment
 statement, and the other in the state updating the value of the assigned
 variable.  Note that the one in the state is surrounded by parentheses:
-(_ => I).  That is because => is greedy: it matches as much as it can to the
-left and to the right, until it reaches the cell boundaries (closed or open).
-If you want to limit its scope, or for clarity, you can use parentheses like
-here.
+`(_ => I)`.  That is because `=>` is greedy: it matches as much as it can to
+the left and to the right, until it reaches the cell boundaries (closed or
+open).  If you want to limit its scope, or for clarity, you can use
+parentheses like here.
 
-The rule for sequential composition simply desugars S1 S2 into S1 ~> S2.
+The rule for sequential composition simply desugars `S1 S2` into `S1 ~> S2`.
 Indeed, the two have exactly the same semantics.  Note that statements
-*evaluate* to nothing (`.`), so once S1 is processed in S1 ~> S2, then the
-next task is automatically S2, without wasting any step for the transition.
+*evaluate* to nothing (`.`), so once S1 is processed in `S1 ~> S2`, then the
+next task is automatically `S2`, without wasting any step for the transition.
 
 The rules for the conditional and while statements are clear.  One thing to
 keep in mind now is that the while unrolling rule will not apply
@@ -47,11 +51,11 @@ of K's configuration abstraction, which will be discussed shortly.
 
 An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
-to 0.  The rules for programs initialize the declared variables one by one,
+to `0`.  The rules for programs initialize the declared variables one by one,
 checking also that there are no duplicates.  We check for duplicates only for
 demonstration purposes, to illustrate the `keys` predefined operation that
 returns the set of keys of a map, and the set membership operation `in`.
-In real life, we typically define a static type checker for our language,
+In practice, we typically define a static type checker for our language,
 which we execute before the semantics and reject inappropriate programs.
 
 The use of the `.Ids` in the second rule is not necessary.  We could have
@@ -60,11 +64,11 @@ kompile the definition correctly, because it uses the same parser used for
 parsing programs also to parse the semantics.  However, we typically prefer to
 explicitly write the *nothing* values in the semantics, for clarity;
 the parser has been extended to accept these.  Note that the first rule
-matches the entire k cell, because `int_;_` is the top-level program construct
-in IMP, so there is nothing following it in the computation cell.  The
-anonymous variable stands for the second argument of this top-level program
+matches the entire `k` cell, because `int_;_` is the top-level program
+construct in IMP, so there is nothing following it in the computation cell.
+The anonymous variable stands for the second argument of this top-level program
 construct, not for the rest of the computation.  The second rule could have
-also been put in a complete k cell, but we preferred not to, for simplicity.
+also been put in a complete `k` cell, but we preferred not to, for simplicity.
 
 Our IMP semantics is now complete, but there are a few more things that we
 need to understand and do.
@@ -79,7 +83,7 @@ However, many rules do not involve any cells, being rules between syntactic
 terms (of sort K); for example, we had only three rules involving cells in our
 IMP semantics.  In this case, the k cell will be added automatically and the
 actual rewrite will happen on top of the enclosed computation.  For example,
-the rule for the while loop is automatically translated into the following:
+the rule for the `while` loop is automatically translated into the following:
 
     rule <k> while (B) S => if (B) {S while (B) S} else {} ...</k>
 
@@ -131,10 +135,10 @@ safely be structural.
 
 Kompile and then krun the programs that you only parsed in Lesson 1.  They
 should all execute as expected.  The state cell shows the final state
-of the program.  The k cell shows the final code contents, which should be
+of the program.  The `k` cell shows the final code contents, which should be
 empty whenever the IMP program executes correctly.
 
-Kompile also with the --pdf option and take a look at the generated
+Kompile also with the documentation option and take a look at the generated
 documentation.  The assignment rule should particularly be of interest,
 because it contains two local rewrites.
 

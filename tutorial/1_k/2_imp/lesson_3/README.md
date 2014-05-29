@@ -1,6 +1,6 @@
-### Computations, Results, Strictness; Rules Involving Cells
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [10'30"]](http://youtu.be/gYPkhiT2SxA)
+### Computations, Results, Strictness; Rules Involving Cells
 
 In this lesson we will learn about the syntactic category K of computations,
 about how strictness attributes are in fact syntactic sugar for rewrite rules
@@ -29,13 +29,13 @@ rules can then modify it into task sequences, as seen shortly.
 The strictness attributes, used as annotations to language constructs,
 actually correspond to rules over computations.  For example, the
 `strict(2)` attribute of the assignment statement corresponds to the
-following two opposite rules (X ranges over Id and A over AExp):
+following two opposite rules (`X` ranges over `Id` and `A` over `AExp`):
 
     X=A; => A ~> X=[];
     A ~> X=[]; => X=A;
 
-The first rule pulls A from the syntactic context X=A; and schedules it
-for processing.  The second rule plugs A back into its context.
+The first rule pulls `A` from the syntactic context X=A; and schedules it
+for processing.  The second rule plugs `A` back into its context.
 Inspired from the chemical abstract machine, we call rules of the first
 type above *heating* rules and rules of the second type *cooling* rules.
 Similar rules are generated for other arguments in which operations are
@@ -70,14 +70,14 @@ it matters in the case of `seqstrict`: they are to be evaluated in the
 specified order; if no arguments are given, then they are assumed by default
 to be evaluated from left-to-right.  For example, the default heating/cooling
 rules associated to the sequentially strict `<=` construct above are
-(A1,A2 range over AExp and I1 over Int):
+(`A1`, `A2` range over `AExp` and `I1` over `Int`):
 
     A1<=A2 => A1 ~> []<=A2
     A1 ~> []<=A2 => A1<=A2
     I1<=A2 => A2 ~> I1<=[]
     A2 ~> I1<=[] => I1<=A2
 
-In other words, A2 is only heated/cooled after A1 is already evaluated.
+In other words, `A2` is only heated/cooled after `A1` is already evaluated.
 
 While the heating/cooling rules give us a nice and uniform means to define
 all the various allowable ways in which a program can evaluate, all based
@@ -96,7 +96,7 @@ The K tool provides a predicate `isKResult`, which is automatically defined
 as we add syntactic constructs to KResult (in fact the K tool defines such
 predicates for all syntactic categories, which are used, for example, as
 rule side conditions to check user-declared variable memberships, such as
-V:Val stating that V belongs to Val).
+`V:Val` stating that `V` belongs to `Val`).
 
 The kompile tool, depending upon what it is requested to do, changes the
 reversible heating/cooling rules corresponding to evaluation strategy
@@ -152,7 +152,7 @@ Here is our first K rule explicitly involving cells:
 
     rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
 
-Recall that the k cell holds computations, which are sequences of tasks
+Recall that the `k` cell holds computations, which are sequences of tasks
 separated by `~>`.  Also, the state cell holds a map, which is a set of
 bindings, each binding being a pair of computations (currently, the
 K builtin data-structures, like maps, are untyped; or, said differently,
@@ -166,9 +166,10 @@ The rewrite relation `=>` is allowed in K to appear anywhere in a term, its
 meaning being that the corresponding subterm is rewritten as indicated in the
 shown context.  We say that K's rewriting is *local*.
 
-The rule above says that if the identifier X is the first task in the k cell,
-and if X is bound to I somewhere in the state, then X rewrites to I locally in
-the k cell.  Therefore, variables need to be already declared when looked up.
+The rule above says that if the identifier `X` is the first task in the `k`
+cell, and if `X` is bound to `I` somewhere in the state, then `X` rewrites
+to `I` locally in the `k` cell.  Therefore, variables need to be already
+declared when looked up.
 
 Of course, the K rule above can be translated into an ordinary rewrite rule
 of the form
@@ -186,11 +187,11 @@ on read-only parts, while they cannot if regarded as ordinary rewrite logic
 rules.  Note: our current implementation of the K tool is not concurrent,
 so K rules are in fact desugared as normal rewrite rules in the K tool.
 
-Compile imp.k using a documentation option, say --pdf, and check out how the
-K rule looks in the generated document.  Nice, isn't it? :)  The `...` frames
-are displayed as cell tears, metaphorically implying that those parts of the
-cells that we do not care about are *torn away*.  The rewrite relation is
-replaced by a horizontal line: specifically, the subterm which rewrites, X, is
+Kompile `imp.k` using a documentation option and check out how the K rule
+looks in the generated document.  The `...` frames are displayed as cell
+tears, metaphorically implying that those parts of the cells that we
+do not care about are *torn away*.  The rewrite relation is replaced by a
+horizontal line: specifically, the subterm which rewrites, `X`, is
 underlined, and its replacement is written underneath the line.
 
 In the next lesson we define the complete K semantics of IMP and

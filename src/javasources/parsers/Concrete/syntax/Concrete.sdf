@@ -29,10 +29,7 @@ context-free syntax
 	CondSentence1 		 		-> CondSentence {cons("NoEnsures")}
 
 	KList		-> RuleContentDz
-	Map			-> RuleContentDz
 	Bag			-> RuleContentDz
-	Set			-> RuleContentDz
-	List		-> RuleContentDz
 	KLabel		-> RuleContentDz
 
 	"<" CellLabel CellProperty* ">" ADz "</" CellLabel ">"	-> BagItem {cons("Bag1ClosedCell")}
@@ -45,10 +42,7 @@ context-free syntax
 
 
 	K		-> CellContents %%{cons("K")}
-	Map		-> CellContents %%{cons("Map")}
 	Bag		-> CellContents %%{cons("Bag")}
-	Set		-> CellContents %%{cons("Set")}
-	List	-> CellContents %%{cons("List")}
 
 	DzDzID "=" DzStringDz -> CellProperty {cons("CellProperty")}
 	CellLabel "=>" CellLabel	-> CellLabel {non-assoc, cons("CellLabelRewrite")}

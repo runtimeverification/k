@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+
 <tests>
-  <include file="../java_rewrite_engine/tests/config.xml"
-           directory="java_rewrite_engine" />
+  <!-- QUINE -->
+  <include file="../quine/tests/config.xml" directory="quine" />
+
+  <include file="../java_rewrite_engine/tests/config.xml" directory="java_rewrite_engine" />
+
+  <!-- BF -->
+  <include file="../bf/tests/config.xml" directory="bf" />
+  
+
+  <!-- IMP-SYMBOLIC -->
+  <test
+      definition="imp-symbolic/imp.k"
+      programs="../imp-symbolic/programs"
+      results="../imp-symbolic/programs"
+      extension="imp"
+      >
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--parser" value="kast --parser ground"/>
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+
+  <include file="../wcet/tests/config.xml" directory="wcet" />
+
 </tests>
+

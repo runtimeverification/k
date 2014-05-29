@@ -1,6 +1,6 @@
-### Defining a Configuration
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [4'21"]](http://youtu.be/jkwLyGdt70U)
+### Defining a Configuration
 
 Here we learn how to define a configuration in K.  We also learn how to
 initialize and how to display it.

@@ -30,6 +30,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Formatter;
+
 public class ParseConfigsFilter extends ParseForestTransformer {
     public ParseConfigsFilter(Context context) {
         super("Parse Configurations", context);
@@ -53,6 +57,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
 
     public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {
         if (ss.getType().equals(Constants.CONFIG)) {
+            long startTime2 = System.currentTimeMillis();
             try {
                 ASTNode config = null;
                 String parsed = null;
@@ -101,6 +106,13 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 // last resort disambiguation
                 config = new AmbFilter(context).visitNode(config);
 
+                if (globalOptions.debug) {
+                    try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
+                        f.format("Parsing config: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime2), ss.getFilename(), ss.getLocation());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 return config;
             } catch (ParseFailedException te) {
                 te.printStackTrace();

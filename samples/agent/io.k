@@ -16,7 +16,7 @@ module IO
   configuration <k> $PGM:Exp </k>  
                 <in stream="stdin"> .List </in> <out stream="stdout"> .List </out>
    rule <k> read => I:Int ...</k> 
-        <in> ListItem(I) => . ...</in>
+        <in> ListItem(I) => .List ...</in>
    rule <k> print V:Val => skip ...</k> 
-        <out>... . => ListItem(V) </out>
+        <out>... .List => ListItem(V) </out>
 endmodule
