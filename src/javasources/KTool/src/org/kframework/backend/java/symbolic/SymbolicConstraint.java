@@ -1035,6 +1035,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                  */
                 if (!equalitiesToRemove.contains(j)) {
                     Equality previousEquality = equalities.get(j).substituteAndEvaluate(tempSubst);
+                    equalities.set(j, previousEquality);
+
                     if (previousEquality.isTrue()) {
                         equalitiesToRemove.add(j);
                     } else if (previousEquality.isFalse()) {
