@@ -59,97 +59,35 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         // previous = entryState
         // loop: add a new State to the 'previous' state; update 'previous' state
         if (prd.isListDecl()) {
-            // ************************************** start of list creation **********************
             UserList ul = prd.getListDecl();
-            /**
-             * An empty list such as Ids ::= List{Id,","} is treated as if it would be written
-             * as the following:
-             *
-             * Ids ::= IdsTerminator
-             *       | NeIds
-             * NeIds ::= Id IdsTerminator [klabel('_,_)]
-             *         | Id "," NeIds     [klabel('_,_)]
-             * IdsTerminator ::= ""       [klabel('.Ids)]
-             *
-             * However, it's implemented by directly generating the grammar because all the labels
-             * must maintain the sort of the original production, therefore we create the
-             * following graph:
-             *
-             * IdsTerminator:
-             * (|-----<'.Ids>---<loc>---|)
-             *
-             * NeIds:
-             * (|-----[Id]--+--(",")---<Del>---[NeIds]--+--<'_,_>---<loc>-|)
-             *              |                           |
-             *              +-----[IdsTerminator]-------+
-             *
-             * Ids:
-             * (|--+-/-[IdsTerminator]-/-+--|) // used only if the list type is *
-             *     |                     |
-             *     +-------[NeIds]-------+
-             */
-
-            // IdsTerminator
-            NonTerminal IdsTerminatorNt = new NonTerminal(prd.getSort() + "-Terminator");
-            {
-                // TODO: (Radu) think of a way to make this a list terminator of some sort
-                RuleState terminatorLabelRule = new RuleState("AddLabelRS", IdsTerminatorNt,
-                    new WrapLabelRule(prd, prd.getSort()));
-                RuleState locRule = new RuleState(prd.getSort() + "-R", IdsTerminatorNt,
-                    new AddLocationRule());
-
-                IdsTerminatorNt.entryState.next.add(terminatorLabelRule);
-                terminatorLabelRule.next.add(locRule);
-                locRule.next.add(IdsTerminatorNt.exitState);
-            }
-            // NeIds
             String ntName = prd.getSort();
-            NonTerminal NeIdsNt = new NonTerminal("Ne-" + ntName);
-            {
-                NonTerminalState IdState = new NonTerminalState(ntName + "-S", NeIdsNt,
-                    grammar.get(ul.getSort()), false);
-                PrimitiveState separatorState = new RegExState(ntName + "-T", NeIdsNt,
-                    Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.KITEM);
-                RuleState deleteToken = new RuleState(ntName + "-D", NeIdsNt,
-                    new DeleteRule(1, true));
-                NonTerminalState NeIdsState = new NonTerminalState(ntName + "-S", NeIdsNt,
-                    NeIdsNt, false);
-                RuleState labelState = new RuleState(ntName + "-L", NeIdsNt,
-                    new WrapLabelRule(prd, prd.getSort()));
-                RuleState locRule = new RuleState(prd.getSort() + "-R", NeIdsNt,
-                    new AddLocationRule());
+            /**
+             * It may be more efficient to make it this way.
+             *
+             * (|---+--------------+--<'_,_>--<loc>--|)
+             *      |              |
+             *      |     +--------+
+             *      +---[E]---(",")--<Del>--+
+             *           ^------------------+
+             */
+            RuleState labelState = new RuleState(ntName + "-L", nt, new WrapLabelRule(prd, prd.getSort()));
+            NonTerminalState IdState = new NonTerminalState(ntName + "-S", nt, grammar.get(ul.getSort()), false);
+            PrimitiveState separatorState = new RegExState(ntName + "-T", nt, Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.KITEM);
+            RuleState deleteToken = new RuleState(ntName + "-D", nt, new DeleteRule(1, true));
 
-                NeIdsNt.entryState.next.add(IdState);
-                IdState.next.add(separatorState);
-                separatorState.next.add(deleteToken);
-                deleteToken.next.add(NeIdsState);
-                NeIdsState.next.add(labelState);
-                labelState.next.add(locRule);
-                locRule.next.add(NeIdsNt.exitState);
-
-                NonTerminalState IdsTerminatorState = new NonTerminalState(
-                    prd.getSort() + "-S", NeIdsNt, IdsTerminatorNt, false);
-
-                IdState.next.add(IdsTerminatorState);
-                IdsTerminatorState.next.add(labelState);
+            if (ul.getListType().equals(UserList.ZERO_OR_MORE)) {
+                // create the branch which allows for empty lists
+                nt.entryState.next.add(labelState);
             }
-            // Ids
-            NonTerminal IdsNt = nt;
-            {
-                if (ul.getListType().equals(UserList.ZERO_OR_MORE)) {
-                    // create the branch which allows for empty lists
-                    NonTerminalState special = new NonTerminalState(ntName + "-S", IdsNt,
-                        IdsTerminatorNt, false);
-                    previous.next.add(special);
-                    special.next.add(IdsNt.exitState);
-                }
-                NonTerminalState NeIdsState = new NonTerminalState(ntName + "-S", IdsNt,
-                    NeIdsNt, false);
-                IdsNt.entryState.next.add(NeIdsState);
-                // NeIdsState.next.add(IdsNt.exitState); // added at the end
-                previous = NeIdsState;
-            }
-            // ************************************** end of list creation **********************
+
+            nt.entryState.next.add(IdState);
+            IdState.next.add(labelState);
+            IdState.next.add(separatorState);
+            separatorState.next.add(deleteToken);
+            deleteToken.next.add(IdState);
+            // NeIdsState.next.add(IdsNt.exitState); // added at the end
+            previous = labelState;
+
         } else if (prd.isLexical()) {
             // T ::= Token{regex}
             // these kind of productions create KApps which contain token elements
