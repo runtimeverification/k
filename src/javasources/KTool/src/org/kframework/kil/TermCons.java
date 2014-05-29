@@ -57,7 +57,7 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
 
     public TermCons(String psort, List<Term> contents, Production production) {
         super(psort);
-        cons = null;
+        cons = "";
         this.contents = contents;
         this.production = production;
     }
@@ -74,8 +74,10 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
                 String separator = ((UserList) production.items.get(0)).separator;
                 if (contents.size() == 0)
                     str = "." + sort;
-                else
-                    str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
+                else {
+                    for (Term t : contents)
+                        str = t + separator + " ";
+                }
             } else
                 for (int i = 0, j = 0; i < production.items.size(); i++) {
                     ProductionItem pi = production.items.get(i);
