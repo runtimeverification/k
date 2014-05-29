@@ -113,7 +113,7 @@ public final class StringToken extends Token {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHash() {
         return value.hashCode();
     }
 

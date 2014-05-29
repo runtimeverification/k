@@ -183,6 +183,10 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return toString().compareTo(o.toString());
     }
     
+    /**
+     * Computes and caches the hashCode if it has not been computed yet.
+     * Otherwise, simply returns the cached value.
+     */
     @Override
     public final int hashCode() {
         if (hashCode == Utils.NO_HASHCODE) {
@@ -191,5 +195,9 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return hashCode;
     }
     
+    /**
+     * (Re-)computes the hashCode of this {@code Term}.
+     * @return the hash code
+     */
     public abstract int computeHash();
 }

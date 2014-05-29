@@ -98,11 +98,9 @@ public class KCollectionFragment extends KCollection {
     }
     
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = super.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + startIndex;
-        }
+    public int computeHash() {
+        int hashCode = super.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + startIndex;
         return hashCode;
     }
     

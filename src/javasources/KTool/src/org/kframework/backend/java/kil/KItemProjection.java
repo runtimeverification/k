@@ -59,11 +59,8 @@ public class KItemProjection extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = term.hashCode();
-        }
-        return hashCode;
+    public int computeHash() {
+        return term.hashCode();
     }
 
     @Override
