@@ -57,17 +57,6 @@
 		</all-programs>
 	</test>
 	
-	<!--<test
-		  definition="06-constant-prefer/test.k"
-		  programs="06-constant-prefer/"
-		  extension="test"
-		  skip="pdf"
-		  results="06-constant-prefer/">
-		<all-programs>
-			<krun-option name="--parser" value="kast --parser newprogram" />
-		</all-programs>
-	</test>-->
-	
 	<test
 		  definition="07-conslist/test.k"
 		  programs="07-conslist/"
