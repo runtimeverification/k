@@ -4,7 +4,6 @@
 
   <test
       definition="imp.k"
-      skip="pdf"
       programs="../../../2_imp/lesson_1/tests
                 ../../../4_imp++/lesson_1/tests
                 ../../../4_imp++/lesson_7/tests"

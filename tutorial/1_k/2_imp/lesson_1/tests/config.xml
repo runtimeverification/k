@@ -5,7 +5,6 @@
   <test
     definition="imp.k"
     programs="."
-    skip="pdf"
     extension="imp"
     results="." >
   </test>

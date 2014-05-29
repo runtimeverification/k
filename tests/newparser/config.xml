@@ -28,9 +28,15 @@
 	<!-- TODO(Radu): once ktest can call kast, add programs for tests. See issue 
 		https://github.com/kframework/k/pull/397
 	-->
-	<test definition="03-arithmetic-expressions-amb/test.k" />
+	<test
+		  definition="03-arithmetic-expressions-amb/test.k"
+		  skip="pdf"
+		/>
 
-	<test definition="04-ambiguous-constructor/test.k" />
+	<test
+		  definition="04-ambiguous-constructor/test.k"
+		  skip="pdf"
+		/>
 
 	<test
 		  definition="05-reject-keywords/test.k"

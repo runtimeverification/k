@@ -6,7 +6,6 @@
     definition="lambda.k"
     programs="."
     extension="lambda"
-    skip="pdf"
     results="." >
     <all-programs>
       <krun-option name="--search" />
