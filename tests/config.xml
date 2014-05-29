@@ -50,6 +50,7 @@
   <test
       definition="samples/quine/short/quine-short.k"
       programs="tests/examples/quine-short"
+	  skip="pdf"
       results="tests/examples/quine-short"
       extension="quine" >
       <all-programs>
@@ -181,18 +182,22 @@
 
   <test
       definition="tests/regression/issue552/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/issue529/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/defaultTerms1/issue.k"
+	  skip="pdf"
   />
    <test
       definition="tests/regression/freshMOS/issue.k"
       programs="tests/regression/freshMOS/programs"
       results="tests/regression/freshMOS/tests"
       extension="issue"
+	  skip="pdf"
       >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -204,6 +209,7 @@
       programs="tests/regression/openCells1/programs"
       results="tests/regression/openCells1/tests"
       extension="issue"
+	  skip="pdf"
       >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -215,6 +221,7 @@
       programs="tests/regression/sets-issue/programs"
       results="tests/regression/sets-issue/tests"
       extension="issue"
+	  skip="pdf"
       >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -223,12 +230,14 @@
   </test>
   <test
       definition="tests/regression/mapitem2klabel/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/issue/issue.k"
       programs="tests/regression/issue/programs"
       results="tests/regression/issue/tests"
       extension="issue"
+	  skip="pdf"
       >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -237,24 +246,30 @@
   </test>
   <test
       definition="tests/regression/issue403/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/issue425/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/issue466/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/issue482/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/issue483/issue.k"
+	  skip="pdf"
   />
   <test
       definition="tests/regression/issue#313/test.k"
       programs="tests/regression/issue#313/programs"
       results="tests/regression/issue#313/tests"
       extension="test"
+	  skip="pdf"
       >
       <all-programs>
         <krun-option name="--output" value="pretty" />
@@ -267,6 +282,7 @@
       programs="tests/regression/strictness/programs"
       results="tests/regression/strictness/tests"
       extension="issue"
+	  skip="pdf"
       >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -278,6 +294,7 @@
       definition="tests/regression/issue580/issue.k"
       programs="tests/regression/issue580/programs"
       results="tests/regression/issue580/tests"
+	  skip="pdf"
       extension="issue" >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -294,6 +311,7 @@
       definition="tests/regression/subsort-klabel/issue.k"
       programs="tests/regression/subsort-klabel/programs"
       results="tests/regression/subsort-klabel/tests"
+	  skip="pdf"
       extension="issue" >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -308,6 +326,7 @@
       definition="tests/regression/issue627/issue.k"
       programs="tests/regression/issue627/programs"
       results="tests/regression/issue627/tests"
+	  skip="pdf"
       extension="issue" >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -319,6 +338,7 @@
       definition="tests/regression/issue631/issue.k"
       programs="tests/regression/issue631"
       results="tests/regression/issue631"
+	  skip="pdf"
       extension="issue" >
       <all-programs>
         <krun-option name="--output" value="none" />
@@ -330,6 +350,7 @@
       definition="tests/regression/negative-test/issue.k"
       programs="tests/regression/negative-test/programs"
       results="tests/regression/negative-test/tests"
+	  skip="pdf"
       extension="issue" >
     <program name="test.issue">
       <krun-option name="--color" value="off" />
@@ -340,6 +361,7 @@
       definition="tests/regression/escapedKLabel/issue.k"
       programs="tests/regression/escapedKLabel/programs"
       results="tests/regression/escapedKLabel/tests"
+	  skip="pdf"
       extension="issue" >
       <program name="test.issue">
         <krun-option name="--output" value="pretty" />
@@ -350,6 +372,7 @@
       definition="tests/regression/tokenconstants/issue.k"
       programs="tests/regression/tokenconstants"
       results="tests/regression/tokenconstants"
+	  skip="pdf"
       extension="issue">
     <program name="test.issue">
       <krun-option name="--color" value="off" />
@@ -360,6 +383,7 @@
       definition="tests/regression/unparsing/issue.k"
       programs="tests/regression/unparsing/programs"
       extension="issue"
+	  skip="pdf"
       results="tests/regression/unparsing/out/">
       <all-programs>
         <krun-option name="--output" value="pretty" />
@@ -370,6 +394,7 @@
       definition="tests/regression/addbrackets/issue.k"
       programs="tests/regression/addbrackets/programs"
       extension="issue"
+	  skip="pdf"
       results="tests/regression/addbrackets/out/">
       <all-programs>
         <krun-option name="--output" value="smart" />
@@ -381,6 +406,7 @@
       definition="tests/regression/issue647/issue.k"
       programs="tests/regression/issue647"
       results="tests/regression/issue647"
+	  skip="pdf"
       extension="issue"
       >
       <all-programs>
@@ -393,6 +419,7 @@
       definition="tests/regression/issue663/issue.k"
       programs="tests/regression/issue663/programs"
       results="tests/regression/issue663/out"
+	  skip="pdf"
       extension="issue">
       <program name="a.issue">
         <krun-option name="--ltlmc" value="TrueLtl" />
@@ -405,6 +432,7 @@
       definition="tests/regression/issue674/issue.k"
       programs="tests/regression/issue674"
       results="tests/regression/issue674"
+	  skip="pdf"
       extension="issue" >
       <all-programs>
         <krun-option name="--output" value="pretty" />
@@ -415,6 +443,7 @@
       definition="tests/regression/basicFloat/issue.k"
       programs="tests/regression/basicFloat"
       results="tests/regression/basicFloat"
+	  skip="pdf"
       extension="issue"
       >
       <all-programs>
@@ -426,6 +455,7 @@
       definition="tests/regression/follow/issue.k"
       programs="tests/regression/follow"
       results="tests/regression/follow"
+	  skip="pdf"
       extension="issue"
       >
       <all-programs>
@@ -438,6 +468,7 @@
       definition="tests/regression/lint/test.k"
       programs="tests/regression/lint"
       extension="test"
+	  skip="pdf"
       results="tests/regression/lint"
       >
     <kompile-option name="-w" value="none" />
@@ -451,6 +482,7 @@
       definition="tests/regression/string2int/test.k"
       programs="tests/regression/string2int"
       results="tests/regression/string2int"
+	  skip="pdf"
       extension="test" >
       <all-programs>
         <krun-option name="--output" value="pretty" />
@@ -461,6 +493,7 @@
       definition="tests/regression/issue#36/issue.k"
       programs="tests/regression/issue#36"
       results="tests/regression/issue#36"
+	  skip="pdf"
 	  extension="issue"
       >
     <all-programs>
@@ -473,6 +506,7 @@
       definition="tests/regression/issue#428/test.k"
       programs="tests/regression/issue#428"
       results="tests/regression/issue#428"
+	  skip="pdf"
 	  extension="test"
       >
     <all-programs>
@@ -484,6 +518,7 @@
       definition="tests/regression/issue677/test.k"
       programs="tests/regression/issue677/programs"
       extension="test"
+	  skip="pdf"
       results="tests/regression/issue677/tests"
       >
       <all-programs>
@@ -496,6 +531,7 @@
       definition="tests/regression/label-and-context/label-and-context.k"
       programs="tests/regression/label-and-context"
       results="tests/regression/label-and-context"
+	  skip="pdf"
       extension="issue">
   <all-programs>
     <krun-option name="--output" value="pretty" />
@@ -510,6 +546,7 @@
       definition="tests/regression/cool-issue/test.k"
       programs="tests/regression/cool-issue/programs"
       results="tests/regression/cool-issue/tests"
+	  skip="pdf"
       extension="test">
     <all-programs>
        <krun-option name="--color" value="off" />
@@ -525,6 +562,7 @@
       definition="tests/regression/profiler/test.k"
       programs="tests/regression/profiler"
       results="tests/regression/profiler"
+	  skip="pdf"
       extension="test">
       <all-programs regex="true">
          <krun-option name="--profile" />

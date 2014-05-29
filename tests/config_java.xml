@@ -262,6 +262,7 @@
       definition="tests/regression/java-rewrite-engine/strings/test.k"
       programs="tests/regression/java-rewrite-engine/strings/programs"
       results="tests/regression/java-rewrite-engine/strings/tests"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -326,6 +327,7 @@
       definition="tests/regression/issue#1/issue.k"
       programs="tests/regression/issue#1"
       results="tests/regression/issue#1"
+	  skip="pdf"
       extension="issue"
       >
     <kompile-option name="--backend" value="java" />
@@ -339,6 +341,7 @@
       definition="tests/regression/issue#2/issue.k"
       programs="tests/regression/issue#2"
       results="tests/regression/issue#2"
+	  skip="pdf"
       extension="issue"
       >
     <kompile-option name="--backend" value="java" />
@@ -351,6 +354,7 @@
   <test
       definition="tests/regression/issue#8/test.k"
       programs="tests/regression/issue#8/programs"
+	  skip="pdf"
       results="tests/regression/issue#8/tests"
       >
     <kompile-option name="--backend" value="java" />
@@ -389,6 +393,7 @@
       definition="tests/regression/tokenconstants/issue.k"
       programs="tests/regression/tokenconstants"
       results="tests/regression/tokenconstants"
+	  skip="pdf"
       extension="issue">
     <kompile-option name="--backend" value="java" />
     <program name="test.issue">
@@ -400,6 +405,7 @@
       definition="tests/regression/java-rewrite-engine/visitor/imp.k"
       programs="tests/regression/java-rewrite-engine/visitor"
       results="tests/regression/java-rewrite-engine/visitor"
+	  skip="pdf"
       extension="imp" >
     <kompile-option name="--backend" value="java" />
     <all-programs>
@@ -411,6 +417,7 @@
       definition="tests/regression/java-rewrite-engine/cell_map/test.k"
       programs="tests/regression/java-rewrite-engine/cell_map"
       results="tests/regression/java-rewrite-engine/cell_map"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -422,6 +429,7 @@
       definition="tests/regression/java-rewrite-engine/cell_list/test.k"
       programs="tests/regression/java-rewrite-engine/cell_list"
       results="tests/regression/java-rewrite-engine/cell_list"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -434,6 +442,7 @@
       definition="tests/regression/java-rewrite-engine/rhs_map_constructor/test.k"
       programs="tests/regression/java-rewrite-engine/rhs_map_constructor"
       results="tests/regression/java-rewrite-engine/rhs_map_constructor"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -445,6 +454,7 @@
       definition="tests/regression/java-rewrite-engine/rhs_list_constructor/test.k"
       programs="tests/regression/java-rewrite-engine/rhs_list_constructor"
       results="tests/regression/java-rewrite-engine/rhs_list_constructor"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -457,6 +467,7 @@
       definition="tests/regression/java-rewrite-engine/pattern_matching/test.k"
       programs="tests/regression/java-rewrite-engine/pattern_matching"
       results="tests/regression/java-rewrite-engine/pattern_matching"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -466,6 +477,7 @@
       definition="tests/regression/java-rewrite-engine/smt_model/test.k"
       programs="tests/regression/java-rewrite-engine/smt_model"
       results="tests/regression/java-rewrite-engine/smt_model"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -476,6 +488,7 @@
       definition="tests/regression/java-rewrite-engine/data_structure_iteration/test1/test.k"
       programs="tests/regression/java-rewrite-engine/data_structure_iteration/test1"
       results="tests/regression/java-rewrite-engine/data_structure_iteration/test1"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -487,6 +500,7 @@
       definition="tests/regression/java-rewrite-engine/data_structure_iteration/test2/test.k"
       programs="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
       results="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
@@ -499,6 +513,7 @@
       definition="tests/regression/java-rewrite-engine/machine_integers/test.k"
       programs="tests/regression/java-rewrite-engine/machine_integers"
       results="tests/regression/java-rewrite-engine/machine_integers"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
