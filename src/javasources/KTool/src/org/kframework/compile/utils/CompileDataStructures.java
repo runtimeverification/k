@@ -20,6 +20,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Transformer class compiling collection (bag, list, map and set) terms into K internal
@@ -106,10 +107,11 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
         KList kList = (KList) node.getChild();
 
-        if (context.productionsOf(kLabelConstant.getLabel()).isEmpty()) {
+        List<Production> productions = context.productionsOf(kLabelConstant.getLabel());
+        if (productions.isEmpty()) {
             return super.visit(node, _);
         }
-        Production production = context.productionsOf(kLabelConstant.getLabel()).iterator().next();
+        Production production = productions.iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
@@ -117,13 +119,13 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
         
         // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
-        if (context.productionsOf(kLabelConstant.getLabel()).size() > 1) {
+        if (productions.size() > 1) {
             GlobalSettings.kem.register(new KException(
                     KException.ExceptionType.WARNING,
                     KException.KExceptionGroup.COMPILER,
                     "unable to transform the KApp: " + node
                     + "\nbecause of multiple productions associated:\n"
-                    + context.productionsOf(kLabelConstant.getLabel()),
+                    + productions,
                     getName(),
                     filename,
                     location));
