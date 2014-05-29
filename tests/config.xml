@@ -41,7 +41,6 @@
       definition="samples/quine/explicit/quine-explicit.k"
       programs="tests/examples/quine-explicit"
       results="tests/examples/quine-explicit"
-	  skip="pdf"
       extension="quine" >
       <all-programs>
         <krun-option name="--output" value="none" />
