@@ -35,6 +35,7 @@
 			<pathelement location="${javalibs}/strategoxt.jar" />
 			<pathelement location="${javalibs}/jcommander-1.36.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0-linux64.jar" />
+			<pathelement location="${javalibs}/mpfr_java-1.0-windows64.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0-linux32.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0.jar" />
             <pathelement location="lib/junit.jar" />
