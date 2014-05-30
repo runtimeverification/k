@@ -111,8 +111,7 @@ public class KTest {
             e.printStackTrace();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
-                            e.getMessage(), "command line", "System file."));
+                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
         } catch (InvalidConfigError e) {
             LocationData location = e.getLocation();
             GlobalSettings.kem.register(
@@ -122,8 +121,7 @@ public class KTest {
         } catch (ParseException | InvalidArgumentException e) {
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
-                            e.getMessage(), "command line", "System file."));
+                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
         }
         return false;
     }
