@@ -23,6 +23,7 @@ import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete2.Grammar;
+import org.kframework.parser.concrete2.MakeConsList;
 import org.kframework.parser.concrete2.Parser;
 import org.kframework.parser.concrete2.Parser.ParseError;
 import org.kframework.parser.concrete2.TreeCleanerVisitor;
@@ -124,6 +125,7 @@ public class ProgramLoader {
                     System.out.println("Raw: " + out + "\n");
                 try {
                     out = new TreeCleanerVisitor(context).visitNode(out);
+                    out = new MakeConsList(context).visitNode(out);
                     if (context.globalOptions.debug)
                         System.out.println("Clean: " + out + "\n");
                     out = new PriorityFilter(context).visitNode(out);

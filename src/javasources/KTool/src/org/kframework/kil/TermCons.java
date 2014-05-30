@@ -73,10 +73,12 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
             if (production.isListDecl()) {
                 String separator = ((UserList) production.items.get(0)).separator;
                 if (contents.size() == 0)
-                    str = "." + sort;
+                    str += "." + sort;
                 else {
+                    str += "'_" + separator + "_(";
                     for (Term t : contents)
-                        str = t + separator + " ";
+                        str += t + ", ";
+                    str = str.substring(0, str.length()-2) + ")";
                 }
             } else
                 for (int i = 0, j = 0; i < production.items.size(); i++) {
