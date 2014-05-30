@@ -103,10 +103,10 @@ public class KTest {
      * @return true if the application terminated normally; false otherwise
      */
     public static boolean main(String[] args) {
+        new GlobalOptions().initialize(); // required for kem
         try {
             return new KTest(args).run() == 0;
-        } catch (ParseException | InvalidArgumentException | SAXException |
-                ParserConfigurationException | IOException | InterruptedException |
+        } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
                 TransformerException e) {
             e.printStackTrace();
             GlobalSettings.kem.register(
@@ -119,6 +119,11 @@ public class KTest {
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL,
                             e.getMessage(), location.getSystemId(), location.getPosStr()));
+        } catch (ParseException | InvalidArgumentException e) {
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.CRITICAL,
+                            e.getMessage(), "command line", "System file."));
         }
         return false;
     }
