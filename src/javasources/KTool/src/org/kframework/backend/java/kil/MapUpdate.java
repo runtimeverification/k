@@ -100,13 +100,11 @@ public class MapUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
-        }
+    public int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
         return hashCode;
     }
 

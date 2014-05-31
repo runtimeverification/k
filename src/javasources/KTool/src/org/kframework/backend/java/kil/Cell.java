@@ -87,12 +87,10 @@ public class Cell<T extends Term> extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
-        }
+    public int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
         return hashCode;
     }
 

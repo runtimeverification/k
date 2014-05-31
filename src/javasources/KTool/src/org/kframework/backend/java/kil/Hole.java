@@ -43,11 +43,8 @@ public final class Hole extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = super.hashCode();
-        }
-        return hashCode;
+    public int computeHash() {
+        return System.identityHashCode(this);
     }
 
     @Override

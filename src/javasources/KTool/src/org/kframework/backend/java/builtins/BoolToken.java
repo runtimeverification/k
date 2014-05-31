@@ -67,7 +67,7 @@ public final class BoolToken extends Token {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHash() {
         return Boolean.valueOf(value).hashCode();
     }
 

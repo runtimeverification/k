@@ -64,4 +64,9 @@ public class Z3Term extends Term {
         visitor.visit(this);
     }
 
+    @Override
+    public int computeHash() {
+        return System.identityHashCode(this);
+    }
+
 }

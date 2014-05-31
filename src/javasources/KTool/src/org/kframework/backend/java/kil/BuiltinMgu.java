@@ -90,12 +90,8 @@ public class BuiltinMgu extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + constraint.hashCode();
-        }
-        return hashCode;
+    public int computeHash() {
+        return Utils.HASH_PRIME + constraint.hashCode();
     }
 
 }

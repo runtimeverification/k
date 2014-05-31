@@ -65,12 +65,10 @@ public class SetLookup extends Term implements DataStructureLookup {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + base.hashCode();
-        }
+    public int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + base.hashCode();
         return hashCode;
     }
 

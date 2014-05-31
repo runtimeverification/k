@@ -68,11 +68,8 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = term.hashCode();
-        }
-        return hashCode;
+    public int computeHash() {
+        return term.hashCode();
     }
 
     @Override

@@ -72,7 +72,7 @@ public class LocalTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ConstrainedTerm constrainedTerm) {
-        return transform((Term) constrainedTerm);
+        return transform((JavaSymbolicObject) constrainedTerm);
     }
 
     @Override

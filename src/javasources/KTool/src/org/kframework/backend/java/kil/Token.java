@@ -69,12 +69,10 @@ public abstract class Token extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + sort().hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + value().hashCode();
-        }
+    public int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + sort().hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + value().hashCode();
         return hashCode;
     }
 

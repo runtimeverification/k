@@ -132,11 +132,8 @@ public class KLabelConstant extends KLabel {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = label.hashCode();
-        }
-        return hashCode;
+    public int computeHash() {
+        return label.hashCode();
     }
 
     @Override
