@@ -4,6 +4,7 @@ package org.kframework.ktest;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.CmdArgs.CmdArgParser;
 import org.kframework.ktest.CmdArgs.Constants;
@@ -112,6 +113,10 @@ public class KTest {
         try {
             ktest = new KTest(args);
         } catch (ParseException e) {
+            // command line argument parsing has failed, but we can still check for --debug argument
+            if (ArrayUtils.contains(args, "--" + Constants.DEBUG)) {
+                e.printStackTrace();
+            }
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL, e.getMessage()));
