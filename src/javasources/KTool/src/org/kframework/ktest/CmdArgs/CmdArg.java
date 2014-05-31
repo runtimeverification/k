@@ -215,17 +215,17 @@ public class CmdArg {
         }
 
         boolean ignoreWS = true;
-        if (cmdOpts.hasOption("ignore-white-spaces")
-                && cmdOpts.getOptionValue("ignore-white-spaces").equals("off"))
+        if (cmdOpts.hasOption(Constants.IGNORE_WS)
+                && cmdOpts.getOptionValue(Constants.IGNORE_WS).equals("off"))
             ignoreWS = false;
 
         boolean ignoreBalancedParens = true;
-        if (cmdOpts.hasOption("ignore-balanced-parentheses")
-                && cmdOpts.getOptionValue("ignore-balanced-parentheses").equals("off"))
+        if (cmdOpts.hasOption(Constants.IGNORE_B_PARENS)
+                && cmdOpts.getOptionValue(Constants.IGNORE_B_PARENS).equals("off"))
             ignoreBalancedParens = false;
 
-        boolean dry = cmdOpts.hasOption("dry");
-        boolean debug = cmdOpts.hasOption("debug");
+        boolean dry = cmdOpts.hasOption(Constants.DRY);
+        boolean debug = cmdOpts.hasOption(Constants.DEBUG);
 
         return new CmdArg(directory, programs, results, extensions, excludes, parseSkips(cmdOpts),
                 parseThreads(cmdOpts), generateReport, targetFile, verbose,
