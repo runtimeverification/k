@@ -78,9 +78,7 @@ public abstract class Collection extends Term {
     }
     
     @Override
-    public int computeHash() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract int computeHash();
 
     @Override
     public boolean equals(Object object) {

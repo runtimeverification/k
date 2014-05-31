@@ -191,6 +191,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public final int hashCode() {
         if (hashCode == Utils.NO_HASHCODE) {
             hashCode = computeHash();
+            hashCode = hashCode == 0 ? 1 : hashCode;
         }
         return hashCode;
     }
