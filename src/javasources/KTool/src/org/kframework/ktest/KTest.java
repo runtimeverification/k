@@ -32,6 +32,10 @@ public class KTest {
 
     private final CmdArgParser argParser;
 
+    public boolean debug() {
+        return argParser.cmdOpts.hasOption(Constants.DEBUG);
+    }
+
     private KTest(String[] args) throws ParseException {
         argParser = new CmdArgParser(args);
     }
@@ -104,24 +108,36 @@ public class KTest {
      */
     public static boolean main(String[] args) {
         new GlobalOptions().initialize(); // required for kem
+        KTest ktest = null;
         try {
-            return new KTest(args).run() == 0;
+            ktest = new KTest(args);
+        } catch (ParseException e) {
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
+        }
+
+        assert(ktest != null);
+
+        try {
+            return ktest.run() == 0;
         } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
-                TransformerException e) {
-            e.printStackTrace();
+                TransformerException | InvalidArgumentException e) {
+            if (ktest.debug()) {
+                e.printStackTrace();
+            }
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL, e.getMessage()));
         } catch (InvalidConfigError e) {
+            if (ktest.debug()) {
+                e.printStackTrace();
+            }
             LocationData location = e.getLocation();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL,
                             e.getMessage(), location.getSystemId(), location.getPosStr()));
-        } catch (ParseException | InvalidArgumentException e) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
         }
         return false;
     }

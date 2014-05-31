@@ -113,11 +113,16 @@ public class CmdArg {
      */
     private final boolean dry;
 
+    /**
+     * Run in debugging mode. (prints stack traces when uncaught exceptions are thrown)
+     */
+    private final boolean debug;
+
     private CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, Set<KTestStep> skips, int threads, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout,
                    boolean updateOut, boolean generateOut,
-                   boolean ignoreWS, boolean ignoreBalancedParens, boolean dry) {
+                   boolean ignoreWS, boolean ignoreBalancedParens, boolean dry, boolean debug) {
         this.directory = directory;
         this.programs = programs;
         this.results = results;
@@ -135,6 +140,7 @@ public class CmdArg {
         this.ignoreWS = ignoreWS;
         this.ignoreBalancedParens = ignoreBalancedParens;
         this.dry = dry;
+        this.debug = debug;
     }
 
     /**
@@ -159,6 +165,7 @@ public class CmdArg {
         this.ignoreWS = obj.ignoreWS;
         this.ignoreBalancedParens = obj.ignoreBalancedParens;
         this.dry = obj.dry;
+        this.debug = obj.debug;
     }
 
     /**
@@ -218,12 +225,13 @@ public class CmdArg {
             ignoreBalancedParens = false;
 
         boolean dry = cmdOpts.hasOption("dry");
+        boolean debug = cmdOpts.hasOption("debug");
 
         return new CmdArg(directory, programs, results, extensions, excludes, parseSkips(cmdOpts),
                 parseThreads(cmdOpts), generateReport, targetFile, verbose,
                 parseColorSetting(cmdOpts), parseTimeout(cmdOpts),
                 updateOut, generateOut,
-                ignoreWS, ignoreBalancedParens, dry);
+                ignoreWS, ignoreBalancedParens, dry, debug);
     }
 
     public String getDirectory() {

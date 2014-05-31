@@ -25,4 +25,5 @@ public class Constants {
     public static final String PDF_STEP = "pdf";
     public static final String KRUN_STEP = "krun";
 
+    public static final String DEBUG = "debug";
 }

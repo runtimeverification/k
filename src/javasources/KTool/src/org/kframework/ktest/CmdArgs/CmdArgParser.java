@@ -77,6 +77,9 @@ public class CmdArgParser {
 
         addOption(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the " +
                 "command to be executed without actual execution.").create());
+        addOption(OptionBuilder.withLongOpt(Constants.DEBUG).withDescription(
+                "Run in debugging mode (prints stack traces when uncaught exceptions are thrown)")
+                .create());
 
         cmdOpts = new PosixParser().parse(options, args);
     }
