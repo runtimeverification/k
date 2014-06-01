@@ -357,7 +357,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet())
                                 templCnstr.add(entry.getKey(), entry.getValue());
 
-                            for (Map.Entry<Term, Term> mapItem : map.getEntries().entrySet()) {
+                            for (Map.Entry<Term, Term> mapItem : map) {
                                 UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
                                 uninterpretedCnstr.add(key, mapItem.getKey());
                                 uninterpretedCnstrs.add(uninterpretedCnstr);
