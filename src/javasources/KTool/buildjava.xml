@@ -34,6 +34,7 @@
 			<pathelement location="${javalibs}/jung-visualization-2.0.1.jar" />
 			<pathelement location="${javalibs}/strategoxt.jar" />
 			<pathelement location="${javalibs}/jcommander-1.36.jar" />
+			<pathelement location="${javalibs}/pcollections-2.1.3.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0-linux64.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0-linux32.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0.jar" />
