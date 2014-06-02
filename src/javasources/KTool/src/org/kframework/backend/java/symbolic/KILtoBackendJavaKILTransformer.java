@@ -431,7 +431,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 node.elements().entrySet()) {
             Term key = (Term) this.visitNode(entry.getKey());
             Term value = (Term) this.visitNode(entry.getValue());
-//            entries.(key, value);
             builder.put(key, value);
         }
 

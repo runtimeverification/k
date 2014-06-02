@@ -168,7 +168,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
         public void putAll(Map<Term, Term> map) {
             Preconditions.checkArgument(!setEntries, "Cannot put in new key-value pair once the entries are set.");
             for (Map.Entry<Term, Term> e : map.entrySet()) {
-                entries.put(e.getKey(), e.getValue());
+                this.put(e.getKey(), e.getValue());
             }
         }
         

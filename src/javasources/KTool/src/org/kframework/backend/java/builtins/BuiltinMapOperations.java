@@ -9,9 +9,7 @@ import org.kframework.backend.java.kil.Variable;
 
 import com.google.common.base.Preconditions;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -30,11 +28,11 @@ public class BuiltinMapOperations {
     }
 
     public static BuiltinMap construct(BuiltinMap term1, BuiltinMap term2, TermContext context) {
+        Preconditions.checkArgument(!term1.hasFrame() || !term2.hasFrame(), 
+                "both map arguments have frames, but the combined map cannot have two frames");
+        
         Variable frame = null;
-        if (term1.hasFrame() && term2.hasFrame()) {
-            throw new IllegalArgumentException(
-                    "both map arguments have frames, but the combined map cannot have two frames");
-        } else if (term1.hasFrame()) {
+        if (term1.hasFrame()) {
             frame = term1.frame();
         } else if (term2.hasFrame()) {
             frame = term2.frame();
@@ -48,14 +46,12 @@ public class BuiltinMapOperations {
     }
 
     public static BuiltinMap update(BuiltinMap term, Term key, Term value, TermContext context) {
-        if (!term.hasFrame()) {
-            BuiltinMap.Builder builder = BuiltinMap.builder();
-            builder.putAll(term.getEntries());
-            builder.put(key, value);
-            return builder.build();
-        } else {
-            throw new IllegalArgumentException("argument " + term + " has frame");
-        }
+        Preconditions.checkArgument(!term.hasFrame(), "argument " + term + " has frame");
+        
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.putAll(term.getEntries());
+        builder.put(key, value);
+        return builder.build();
     }
 
 }
