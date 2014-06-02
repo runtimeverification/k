@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * Remove parsing artifacts such as single element ambiguities.
  */
-// TODO: simplify by removing left over "null" checks and recheck this code
+// TODO: simplify by removing leftover "null" checks and recheck this code
 public class TreeCleanerVisitor extends ParseForestTransformer {
 
     public TreeCleanerVisitor(Context context) {
@@ -41,21 +41,6 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
             vis = super.visit(tc, _);
         return vis;
     }
-/*
-    @Override
-    public ASTNode visit(KApp node, Void _) throws TransformerException {
-        ASTNode rez = this.visitNode(node.getChild());
-        assert rez != null;
-        if (rez instanceof KList)
-            node.setChild((KList) rez);
-        else {
-            KList contents = new KList();
-            contents.getContents().add((Term) rez);
-            node.setChild(contents);
-        }
-        return node;
-    }
-*/
 
     @Override
     public ASTNode visit(KList node, Void _) throws ParseFailedException {
