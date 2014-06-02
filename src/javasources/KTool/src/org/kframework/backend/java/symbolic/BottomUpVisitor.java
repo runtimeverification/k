@@ -132,14 +132,6 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(KCollectionFragment kCollectionFragment) {
-        for (Term term : kCollectionFragment) {
-            term.accept(this);
-        }
-        visit((Collection) kCollectionFragment);
-    }
-
-    @Override
     public void visit(KLabel kLabel) {
         visit((Term) kLabel);
     }

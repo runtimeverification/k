@@ -223,19 +223,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(KCollectionFragment kCollectionFragment) {
-        preVisitor.resetProceed();
-        kCollectionFragment.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        for (Term term : kCollectionFragment) {
-            term.accept(this);
-        }
-        if (kCollectionFragment.hasFrame())
-            kCollectionFragment.frame().accept(this);
-        kCollectionFragment.accept(postVisitor);
-    }
-
-    @Override
     public void visit(KLabel kLabel) {
         preVisitor.resetProceed();
         kLabel.accept(preVisitor);

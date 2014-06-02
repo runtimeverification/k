@@ -1,12 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -31,22 +29,7 @@ public class TermSubstitutionTransformer extends PrePostTransformer {
         public ASTNode transform(Term variable) {
             Term term = substitution.get(variable);
             if (term != null) {
-                if (term instanceof KCollectionFragment) {
-                    KCollectionFragment fragment = (KCollectionFragment) term;
-                    ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
-                    builder.addAll(fragment);
-
-                    KSequence kSequence;
-                    if (fragment.hasFrame()) {
-                        kSequence = new KSequence(builder.build(), fragment.frame());
-                    } else {
-                        kSequence = new KSequence(builder.build());
-                    }
-
-                    return new DoneTransforming(kSequence);
-                } else {
-                    return new DoneTransforming(term);
-                }
+                return new DoneTransforming(term);
             } else {
                 return variable;
             }

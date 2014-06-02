@@ -14,7 +14,6 @@ import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 
@@ -234,13 +233,6 @@ public class CopyOnWriteTransformer implements Transformer {
                     items.addAll(((KList) transformedFrame).getContents());
                     frame = ((KList) transformedFrame).hasFrame() ?
                             ((KList) transformedFrame).frame() : null;
-                } else if (transformedFrame instanceof KCollectionFragment) {
-                    if (items == kList.getContents()) {
-                        items = new ArrayList<>(items);
-                    }
-                    Iterables.addAll(items, (KCollectionFragment) transformedFrame);
-                    frame = ((KCollectionFragment) transformedFrame).hasFrame() ?
-                            ((KCollectionFragment) transformedFrame).frame() : null;
                 } else {
                     frame = (Variable) transformedFrame;
                 }
@@ -282,13 +274,6 @@ public class CopyOnWriteTransformer implements Transformer {
                     items.addAll(((KSequence) transformedFrame).getContents());
                     frame = ((KSequence) transformedFrame).hasFrame() ?
                             ((KSequence) transformedFrame).frame() : null;
-                } else if (transformedFrame instanceof KCollectionFragment) {
-                    if (items == kSequence.getContents()) {
-                        items = new ArrayList<>(items);
-                    }
-                    Iterables.addAll(items, (KCollectionFragment) transformedFrame);
-                    frame = ((KCollectionFragment) transformedFrame).hasFrame() ?
-                            ((KCollectionFragment) transformedFrame).frame() : null;
                 } else {
                     frame = (Variable) transformedFrame;
                 }
