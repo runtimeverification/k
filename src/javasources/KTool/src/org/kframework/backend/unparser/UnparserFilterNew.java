@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
@@ -10,6 +11,8 @@ import org.kframework.utils.ColorUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -256,31 +259,39 @@ public class UnparserFilterNew extends NonCachingVisitor {
         return postpare();
     }
 
-    @Override
-    public Void visit(Cell cell, Void _) {
-        Term contents = cell.getContents();
-        Bag sortedBag = null;
-        if (contents instanceof Bag) {
-            Bag origBag = (Bag) contents;
-            sortedBag = origBag.shallowCopy();
-            sortedBag.setContents(new ArrayList<Term>());
-            for (String cellLabel : context.getConfigurationStructureMap().get(cell.getLabel()).sons.keySet()) {
-                for (Term term : origBag.getContents()) {
-                    if (term instanceof Cell) {
-                        Cell childCell = (Cell) term;
-                        if (childCell.getLabel().equals(cellLabel)) {
-                            sortedBag.add(childCell);
-                        }
-                    }
-                }
+    Comparator<Term> unparserBagItemComparator = new Comparator<Term>() {
+
+        @Override
+        public int compare(Term o1, Term o2) {
+            // case 1: one of o1 and o2 is a cell
+            if ((o1 instanceof Cell) && !(o2 instanceof Cell)
+                    || !(o1 instanceof Cell) && (o2 instanceof Cell)) {
+                return o1 instanceof Cell ? -1 : 1;
             }
-            for (Term term : origBag.getContents()) {
-                if (!(term instanceof Cell)) {
-                    sortedBag.add(term);
-                }
+            
+            // case 2: o1 and o2 are cells with different labels
+            if (o1 instanceof Cell && o2 instanceof Cell
+                    && (!((Cell) o1).getLabel().equals(((Cell) o2).getLabel()))) {
+                Cell crntCell = (Cell) stack.peek();
+                ConfigurationStructureMap sons = context.getConfigurationStructureMap().get(crntCell.getLabel()).sons;
+                return sons.positionOf(((Cell) o1).getLabel()) < sons.positionOf(((Cell) o2).getLabel()) ? -1 : 1;
             }
+            
+            // case 3: neither o1 nor o2 is a cell
+            // case 4: o1 and o2 are cells with the same label
+            UnparserFilterNew unparser = new UnparserFilterNew(context);
+            unparser.visitNode(o1);
+            String s1 = unparser.getResult();
+            unparser = new UnparserFilterNew(context);
+            unparser.visitNode(o2);
+            String s2 = unparser.getResult();
+            return s1.compareTo(s2);
         }
         
+    };
+    
+    @Override
+    public Void visit(Cell cell, Void _) {
         prepare(cell);
         String attributes = "";
         for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
@@ -312,11 +323,19 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
+        
+        /* sort the bag contents before traversing its children */
+        Term contents = cell.getContents();
         if (contents instanceof Bag) {
-            this.visitNode(sortedBag);
+            Bag sortedBag = (Bag) contents.shallowCopy();
+            List<Term> children = sortedBag.getContents();
+            Collections.sort(children, unparserBagItemComparator);
+            sortedBag.setContents(children);
+            this.visitNode(sortedBag);                   
         } else {
             this.visitNode(contents);
         }
+        
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();

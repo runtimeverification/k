@@ -22,10 +22,11 @@ Solution 1:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                3
+                5
             </id>
         </thread>
         <thread>
@@ -34,11 +35,10 @@ Solution 1:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                5
+                3
             </id>
         </thread>
     </threads>
@@ -77,10 +77,11 @@ Solution 2:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                3
+                5
             </id>
         </thread>
         <thread>
@@ -89,11 +90,10 @@ Solution 2:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                5
+                3
             </id>
         </thread>
     </threads>
@@ -132,10 +132,11 @@ Solution 3:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                3
+                5
             </id>
         </thread>
         <thread>
@@ -144,11 +145,10 @@ Solution 3:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                5
+                3
             </id>
         </thread>
     </threads>
@@ -187,10 +187,11 @@ Solution 4:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                3
+                5
             </id>
         </thread>
         <thread>
@@ -199,11 +200,10 @@ Solution 4:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 4
                 x |-> 1
             </env>
             <id>
-                5
+                3
             </id>
         </thread>
     </threads>
@@ -242,10 +242,11 @@ Solution 5:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 6
                 x |-> 1
             </env>
             <id>
-                3
+                7
             </id>
         </thread>
         <thread>
@@ -254,11 +255,10 @@ Solution 5:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 6
                 x |-> 1
             </env>
             <id>
-                7
+                3
             </id>
         </thread>
     </threads>
@@ -297,10 +297,11 @@ Solution 6:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 6
                 x |-> 1
             </env>
             <id>
-                3
+                7
             </id>
         </thread>
         <thread>
@@ -309,11 +310,10 @@ Solution 6:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 6
                 x |-> 1
             </env>
             <id>
-                7
+                3
             </id>
         </thread>
     </threads>
@@ -352,10 +352,11 @@ Solution 7:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 6
                 x |-> 1
             </env>
             <id>
-                3
+                7
             </id>
         </thread>
         <thread>
@@ -364,11 +365,10 @@ Solution 7:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 6
                 x |-> 1
             </env>
             <id>
-                7
+                3
             </id>
         </thread>
     </threads>
@@ -407,10 +407,11 @@ Solution 8:
             </k>
             <env>
                 t1 |-> 2
+                t2 |-> 8
                 x |-> 1
             </env>
             <id>
-                3
+                9
             </id>
         </thread>
         <thread>
@@ -419,11 +420,10 @@ Solution 8:
             </k>
             <env>
                 t1 |-> 2
-                t2 |-> 8
                 x |-> 1
             </env>
             <id>
-                9
+                3
             </id>
         </thread>
     </threads>

@@ -61,6 +61,25 @@ public class ConfigurationStructureMap implements
         }
         return cfgStr;
     }
+    
+    /**
+     * Returns the position of a cell declared under the {@code Cell} of this
+     * {@code ConfigurationStructureMap}.
+     * 
+     * @param cellLabel
+     *            the cell label
+     * @return if found, the position of the cell starting from 0; otherwise, -1
+     */
+    public int positionOf(String cellLabel) {
+        int pos = -1;
+        for (String l : config.keySet()) {
+            pos++;
+            if (l.equals(cellLabel)) {
+                return pos;
+            }
+        }
+        return -1;
+    }
 
     @Override
     public ConfigurationStructure put(String s, ConfigurationStructure configurationStructure) {
