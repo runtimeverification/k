@@ -26,7 +26,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.io.GraphIOException;
 import edu.uci.ics.jung.io.graphml.EdgeMetadata;
 import edu.uci.ics.jung.io.graphml.GraphMetadata;
@@ -731,7 +730,7 @@ public class MaudeKRun implements KRun {
             List<MaudeTransition> loop = new ArrayList<MaudeTransition>();
             parseCounterexample(child.get(0), initialPath, context);
             parseCounterexample(child.get(1), loop, context);
-            DirectedGraph<KRunState, Transition> graph = new DirectedOrderedSparseMultigraph<KRunState, Transition>();
+            DirectedGraph<KRunState, Transition> graph = new KRunGraph();
             Transition edge = null;
             KRunState vertex = null;
             for (MaudeTransition trans : initialPath) {

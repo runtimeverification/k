@@ -20,7 +20,7 @@
 		<antcall target="makeversion" />	
 	</target>
 
-    <target name="test-build">
+    <target name="test-build" depends="build"> 
         <ant antfile="${javasources}/KTool/buildjava.xml" target="test-build" dir="${javasources}/KTool" />
     </target>
 

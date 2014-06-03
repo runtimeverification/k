@@ -4,6 +4,8 @@ package org.kframework.backend.java.builtins;
 import java.math.RoundingMode;
 
 import org.kframework.backend.java.kil.*;
+import org.kframework.mpfr.BigFloat;
+import org.kframework.mpfr.BinaryMathContext;
 
 /**
  * Table of {@code public static} methods on builtin floats.

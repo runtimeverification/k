@@ -13,6 +13,7 @@ import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.util.ArrayList;

@@ -26,6 +26,7 @@ import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.OnOffConverter;
 import org.kframework.utils.options.SMTOptions;
+import org.kframework.utils.options.StringListConverter;
 
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
@@ -296,8 +297,8 @@ public final class KRunOptions {
         @Parameter(names="--log-io", description="Make the IO server create logs.", arity=1, converter=OnOffConverter.class)
         public boolean logIO;
         
-        @Parameter(names="--simulation", description="Simulation property of two programs in two semantics.", 
-                variableArity=true)
+        @Parameter(names="--simulation", description="Simulation property of two programs in two semantics.",
+                listConverter=StringListConverter.class)
         public List<String> simulation;
         
         @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,

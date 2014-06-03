@@ -2,6 +2,8 @@ package org.kframework.krun;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.beust.jcommander.JCommander;
@@ -24,6 +26,13 @@ public class KRunOptionsTest {
         assertFalse(options.experimental.statistics);
         assertFalse(options.experimental.logIO);
         assertFalse(options.io());
+    }
+    
+    @Test
+    public void testSimulation() {
+        KRunOptions options = new KRunOptions();
+        new JCommander(options, "one", "--simulation", "--directory two three\\ four");
+        assertEquals(Arrays.asList("--directory", "two", "three four"), options.experimental.simulation);
     }
     
 }

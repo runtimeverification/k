@@ -18,6 +18,7 @@ import jline.MultiCompletor;
 import jline.SimpleCompletor;
 
 import org.kframework.backend.java.ksimulation.Waitor;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.utils.CompilerStepDone;
@@ -451,7 +452,7 @@ public class KRunFrontEnd {
         try {
             JCommander jc = new JCommander(options, cmds);
             jc.setProgramName("krun");
-            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KRunOptions.Experimental.class, SMTOptions.class));
+            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KRunOptions.Experimental.class, SMTOptions.class, JavaExecutionOptions.class));
             
             if (options.experimental.debuggerGui()) {
                 System.setProperty("java.awt.headless", "false");

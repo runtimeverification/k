@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 
-public class KRunGraph extends DirectedSparseGraph<KRunState, Transition> {
+public class KRunGraph extends DirectedOrderedSparseMultigraph<KRunState, Transition> {
     
     @Override
     public String toString() {
@@ -17,14 +17,14 @@ public class KRunGraph extends DirectedSparseGraph<KRunState, Transition> {
         for (KRunState state : sorted) {
             sb.append(state.toString(true));
         }
-        sb.append("\n\nEdges:\n");
+        sb.append("Edges:\n");
         for (Transition trans : getEdges()) {
             sb.append(trans.toString());
             sb.append(" [Node ");
             sb.append(getSource(trans).getStateId());
             sb.append(", Node ");
             sb.append(getDest(trans).getStateId());
-            sb.append("]");
+            sb.append("]\n");
         }
         return sb.toString();
     }
