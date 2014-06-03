@@ -74,14 +74,13 @@
       results="../../tests/regression/symbolic-backend/test1/tests"
       extension="imp">
     <kompile-option name="--backend" value="symbolic" />
-    <kompile-option name="--directory" value="../../tutorial/1_k/4_imp++/lesson_7/imp-symbolic-kompile" />
+    <kompile-option name="--output" value="../../tutorial/1_k/4_imp++/lesson_7/imp-symbolic-kompile" />
     <all-programs regex="true">
       <krun-option name="--color" value="off" />
       <krun-option name="--search" />
       <krun-option name="--bound" value="2" />
       <krun-option name="-c" key="IN" value="ListItem(#symInt(n))"/>
       <krun-option name="-c" key="PC" value="true" />
-      <krun-option name="--directory" value="../../tutorial/1_k/4_imp++/lesson_7/imp-symbolic-kompile" />
     </all-programs>
   </test>
 

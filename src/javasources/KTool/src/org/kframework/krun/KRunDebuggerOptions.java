@@ -5,7 +5,6 @@ import java.io.File;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 
 public final class KRunDebuggerOptions {
@@ -33,21 +32,21 @@ public final class KRunDebuggerOptions {
     @Parameters(commandNames="step", commandDescription="Execute one or more steps from the current state")
     public static final class CommandStep {
         
-        @Parameter(description="<num steps>")
+        @Parameter(names="-s", description="Number of steps to step")
         public int numSteps = 1;
     }
     
     @Parameters(commandNames={"search", "step-all"}, commandDescription="Search one or more steps from the current state")
     public static final class CommandSearch {
         
-        @Parameter(description="<num steps>")
+        @Parameter(names="-s", description="Number of steps to step")
         public int numSteps = 1;
     }
     
     @Parameters(commandNames="select", commandDescription="Select a particular state as the current state")
     public static final class CommandSelect {
         
-        @Parameter(description="<state id>", required=true)
+        @Parameter(names="-s", description="State ID to select", required=true)
         public int stateId;
     }
     
@@ -57,30 +56,22 @@ public final class KRunDebuggerOptions {
     @Parameters(commandNames={"show-state", "show-node"}, commandDescription="Displays info about the specified state in the search graph")
     public static final class CommandShowState {
         
-        @Parameter(description="<state id>", required=true)
+        @Parameter(names="-s", description="State ID to show", required=true)
         public int stateId;
     }
     
     @Parameters(commandNames={"show-transition", "show-edge"}, commandDescription="Displays info about the specified transition in the search graph")
     public static final class CommandShowTransition {
         
-        @Parameter(description="<state 1> <state 2>", required=true, arity=2)
-        public List<String> states;
+        @Parameter(names="-s", description="<state 1> <state 2>", required=true, arity=2)
+        public List<Integer> states;
         
         public int state1() {
-            try {
-                return Integer.parseInt(states.get(0));
-            } catch (NumberFormatException e) {
-                throw new ParameterException(e.getMessage());
-            }
+            return states.get(0);
         }
         
         public int state2() {
-            try {
-                return Integer.parseInt(states.get(1));
-            } catch (NumberFormatException e) {
-                throw new ParameterException(e.getMessage());
-            }
+            return states.get(1);
         }
     }
     
@@ -93,21 +84,21 @@ public final class KRunDebuggerOptions {
     @Parameters(commandNames="save", commandDescription="Save the debug session to a file")
     public static final class CommandSave {
         
-        @Parameter(description="<file>", required=true)
+        @Parameter(names="-f", description="File to save to", required=true)
         public File file;
     }
     
     @Parameters(commandNames="load", commandDescription="Load the debug session from a file")
     public static final class CommandLoad {
         
-        @Parameter(description="<file>", required=true)
+        @Parameter(names="-f", description="File to load from", required=true)
         public File file;
     }
     
     @Parameters(commandNames="read", commandDescription="Emulate reading a string from stdin")
     public static final class CommandRead {
         
-        @Parameter(description="<string>")
+        @Parameter(names="-s", description="String to read")
         public String string;
     }
 }

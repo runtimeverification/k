@@ -175,8 +175,9 @@ public class ExecutionContext {
     private String getStdinBuffer() {
         String buffer = "";
 
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(System.in))) {
+        try {
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(System.in));
             // detect if the input comes from console or redirected
             // from a pipeline
             Console c = System.console();

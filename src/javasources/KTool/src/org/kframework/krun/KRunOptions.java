@@ -72,14 +72,14 @@ public final class KRunOptions {
         @ParametersDelegate
         public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
 
-        @Parameter(names={"--parser", "-p"}, description="Command used to parse programs. Default is \"kast\"")
+        @Parameter(names={"--parser"}, description="Command used to parse programs. Default is \"kast\"")
         private String parser;
         
         public String parser(Context context) {
             if (parser == null) {
                 if (term()) {
                     if (context.kompileOptions.backend.java()) {
-                        return "kast --parser rule";
+                        return "kast --parser rules";
                     } else {
                         return "kast --parser ground";
                     }
@@ -91,7 +91,7 @@ public final class KRunOptions {
             }
         }
         
-        @DynamicParameter(names={"--config-var-parser", "-cp"}, description="Command used to parse " +
+        @DynamicParameter(names={"--config-parser", "-p"}, description="Command used to parse " +
                 "configuration variables. Default is \"kast --parser ground -e\". See description of " +
                 "--parser. For example, -cpPGM=\"kast\" specifies that the configuration variable $PGM " +
                 "should be parsed with the command \"kast\".")
@@ -143,7 +143,10 @@ public final class KRunOptions {
         if (io != null && io == true && experimental.javaExecution.generateTests) {
             throw new ParameterException("You cannot specify both --io on and --generate-tests");
         }
-        if (search() || experimental.javaExecution.generateTests) {
+        if (io != null && io == true && experimental.ltlmc() != null) {
+            throw new ParameterException("You cannot specify both --io on and --ltlmc");
+        }
+        if (search() || experimental.javaExecution.generateTests || experimental.ltlmc() != null) {
             return false;
         }
         if (io == null) {
@@ -290,14 +293,14 @@ public final class KRunOptions {
     public Experimental experimental = new Experimental();
     
     public final class Experimental {
-        @Parameter(names="log-io", description="Make the IO server create logs.", arity=1, converter=OnOffConverter.class)
+        @Parameter(names="--log-io", description="Make the IO server create logs.", arity=1, converter=OnOffConverter.class)
         public boolean logIO;
         
         @Parameter(names="--simulation", description="Simulation property of two programs in two semantics.", 
                 variableArity=true)
         public List<String> simulation;
         
-        @Parameter(names="--statistics", description="Print rewrite engine statistics.",
+        @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,
                 converter=OnOffConverter.class)
         public boolean statistics = false;
         
@@ -327,9 +330,6 @@ public final class KRunOptions {
         @Parameter(names="--profile", description="Turn on maude profiler.")
         public boolean profile = false;
         
-        @Parameter(names="--pattern-matching", description="Use pattern-matching rather than unification to drive rewriting in the Java backend.")
-        public boolean patternMatching = false;
-
         @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
         private String ltlmc;
         

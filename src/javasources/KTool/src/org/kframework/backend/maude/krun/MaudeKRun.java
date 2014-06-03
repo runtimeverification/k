@@ -27,7 +27,6 @@ import org.w3c.dom.NodeList;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.io.GraphIOException;
 import edu.uci.ics.jung.io.graphml.EdgeMetadata;
 import edu.uci.ics.jung.io.graphml.GraphMetadata;
@@ -561,7 +560,7 @@ public class MaudeKRun implements KRun {
             
         Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() { 
             public DirectedGraph<KRunState, Transition> transform(GraphMetadata g) { 
-                return new DirectedSparseGraph<KRunState, Transition>();
+                return new KRunGraph();
             }
         };
         Transformer<NodeMetadata, KRunState> nodeTransformer = new Transformer<NodeMetadata, KRunState>() {
@@ -809,7 +808,7 @@ public class MaudeKRun implements KRun {
     }
 
     public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph) {
-        return new KRunApiDebugger(this, graph);
+        return new KRunApiDebugger(this, graph, context);
     }
 
     public KRunProofResult<Set<Term>> prove(Module m, Term KAST) {

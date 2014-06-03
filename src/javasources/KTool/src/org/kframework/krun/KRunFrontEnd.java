@@ -198,12 +198,14 @@ public class KRunFrontEnd {
                                 + "Do you want to enter in debug mode? (y/n):");
                         BufferedReader stdin = new BufferedReader(
                                 new InputStreamReader(System.in));
+                        System.out.flush();
                         String input = stdin.readLine();
                         if (input == null || input.equals("n")) {
                             System.out.println();
                             break;
                         } else if (input.equals("y")) {
                             debugExecution(executionContext, searchResult);
+                            break;
                         } else {
                             System.out
                                     .println("You should specify one of the possible answers:y or n");
@@ -244,6 +246,10 @@ public class KRunFrontEnd {
         } else {
             writeStringToFile(options.experimental.outputFile, output);
         }
+    }
+    
+    private static Object command(JCommander jc) {
+        return jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
     }
 
     /**
@@ -354,39 +360,39 @@ public class KRunFrontEnd {
                                 }
                             }
                         }
-                    } else if (jc.getParsedCommand().equals("exit")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandExit) {
                         return true;
-                    } else if (jc.getParsedCommand().equals("resume")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandResume) {
                         debugger.resume();
                         System.out.println(debugger.printState(debugger.getCurrentState()));
-                    } else if (jc.getParsedCommand().equals("step")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandStep) {
                         debugger.step(options.step.numSteps);
                         System.out.println(debugger.printState(debugger.getCurrentState()));
-                    } else if (jc.getParsedCommand().equals("search")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandSearch) {
                         SearchResults states = debugger.stepAll(options.search.numSteps);
                         System.out.println(states);
-                    } else if (jc.getParsedCommand().equals("select")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandSelect) {
                         debugger.setCurrentState(options.select.stateId);
                         System.out.println(debugger.printState(debugger.getCurrentState()));
-                    } else if (jc.getParsedCommand().equals("show-graph")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandShowGraph) {
                         System.out.println("\nThe search graph is:\n");
                         System.out.println(debugger.getGraph());
-                    } else if (jc.getParsedCommand().equals("show-state")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandShowState) {
                         System.out.println(debugger.printState(options.showState.stateId));
-                    } else if (jc.getParsedCommand().equals("show-transition")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandShowTransition) {
                         int state1 = options.showTransition.state1();
                         int state2 = options.showTransition.state2();
                         System.out.println(debugger.printEdge(state1, state2));
-                    } else if (jc.getParsedCommand().equals("save")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandSave) {
                         BinaryLoader.save(options.save.file.getAbsolutePath(), debugger.getGraph(), context);
                         System.out.println("File successfully saved.");
-                    } else if (jc.getParsedCommand().equals("load")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
                         DirectedGraph<KRunState, Transition> savedGraph = 
                                 BinaryLoader.load(DirectedGraph.class, options.load.file.getAbsolutePath(), context);
                         debugger = krun.debug(savedGraph);
                         debugger.setCurrentState(1);
                         System.out.println("File successfully loaded.");
-                    } else if (jc.getParsedCommand().equals("read")) {
+                    } else if (command(jc) instanceof KRunDebuggerOptions.CommandRead) {
                         debugger.readFromStdin(StringBuiltin.valueOf(options.read.string).stringValue());
                         System.out.println(debugger.printState(debugger.getCurrentState()));
                     } else {

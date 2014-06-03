@@ -100,7 +100,7 @@ public class JavaSymbolicKRun implements KRun {
         Term term = Term.of(cfg, definition);
         TermContext termContext = TermContext.of(definition, new PortableFileSystem());
         term = term.evaluate(termContext);
-        if (context.krunOptions.experimental.patternMatching) {
+        if (context.javaExecutionOptions.patternMatching) {
             GroundRewriter groundRewriter = new GroundRewriter(definition, termContext);
             ConstrainedTerm rewriteResult = new ConstrainedTerm(groundRewriter.rewrite(term, bound), termContext);
             return rewriteResult;
@@ -108,11 +108,11 @@ public class JavaSymbolicKRun implements KRun {
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
             SymbolicConstraint constraint = new SymbolicConstraint(termContext);
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
-            if (K.get_indexing_stats){
+            if (context.javaExecutionOptions.indexingStats){
                 IndexingStatistics.preProcessStopWatch.stop();
             }
             ConstrainedTerm rewriteResult;
-            if (K.get_indexing_stats) {
+            if (context.javaExecutionOptions.indexingStats) {
                 IndexingStatistics.totalRewriteStopwatch.start();
                 rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
                 IndexingStatistics.totalRewriteStopwatch.stop();
@@ -247,7 +247,7 @@ public class JavaSymbolicKRun implements KRun {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Map<Variable,Term>> hits;
-        if (K.pattern_matching) {
+        if (context.javaExecutionOptions.patternMatching) {
             Term initialTerm = Term.of(cfg, definition);
             Term targetTerm = null;
             GroundRewriter rewriter = new GroundRewriter(definition, termContext);

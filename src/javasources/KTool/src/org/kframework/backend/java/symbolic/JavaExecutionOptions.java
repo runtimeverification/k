@@ -19,5 +19,8 @@ public final class JavaExecutionOptions {
     
     @Parameter(names="--indexing-stats", description="Measure indexing-related information.")
     public boolean indexingStats = false;
+    
+    @Parameter(names="--pattern-matching", description="Use pattern-matching rather than unification to drive rewriting in the Java backend.")
+    public boolean patternMatching = false;
 }
 

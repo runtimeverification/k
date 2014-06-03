@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class KRunState implements Serializable{
+public class KRunState implements Serializable, Comparable<KRunState> {
 
     /**
     The pretty-printed term associated with this state, as suitable for display
@@ -125,7 +125,7 @@ public class KRunState implements Serializable{
                 context.krunOptions.output, false, context);
         printer.visitNode(getResult());
         if (includeStateId) {
-            return "Node " + stateId + ":\n" + printer.getResult();
+            return "\nNode " + stateId + ":\n" + printer.getResult();
         }
         return printer.getResult();
     }
@@ -162,5 +162,10 @@ public class KRunState implements Serializable{
     @Override
     public int hashCode() {
         return rawResult.hashCode();
+    }
+
+    @Override
+    public int compareTo(KRunState arg0) {
+        return Integer.compare(stateId, arg0.stateId);
     }
 }

@@ -8,11 +8,11 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class RunKRunCommand {
 
@@ -34,7 +34,7 @@ public class RunKRunCommand {
         this.context = context;
         this.initialConfiguration = state.getRawResult();
         this.krun = krun;
-        DirectedGraph<KRunState, Transition> dg = new DirectedSparseGraph<KRunState, Transition>();
+        DirectedGraph<KRunState, Transition> dg = new KRunGraph();
         dg.addVertex(state);
         debugger = krun.debug(dg);
     }

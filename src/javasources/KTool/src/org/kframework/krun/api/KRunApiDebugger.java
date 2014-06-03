@@ -25,7 +25,6 @@ import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
 import java.util.Map.Entry;
@@ -39,7 +38,7 @@ public class KRunApiDebugger implements KRunDebugger {
     private static Rule defaultPattern;
     private static RuleCompilerSteps defaultPatternInfo;
     
-    protected Context context;
+    protected final Context context;
 
     public KRunApiDebugger(KRun krun, Term cfg, Context context) throws KRunExecutionException {
         this.context = context;
@@ -64,7 +63,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
         this.krun = krun;
         KRunState initialState = new KRunState(cfg, context);
-        graph = new DirectedSparseGraph<KRunState, Transition>();
+        graph = new KRunGraph();
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(initialState);
@@ -80,7 +79,8 @@ public class KRunApiDebugger implements KRunDebugger {
         }
     }
 
-    public KRunApiDebugger(KRun krun, DirectedGraph<KRunState, Transition> graph) {
+    public KRunApiDebugger(KRun krun, DirectedGraph<KRunState, Transition> graph, Context context) {
+        this.context = context;
         this.krun = krun;
         this.currentState = null;
         this.graph = graph;
