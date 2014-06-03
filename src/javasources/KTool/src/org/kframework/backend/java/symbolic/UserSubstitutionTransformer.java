@@ -96,15 +96,15 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                     termList.addAll(kList.getContents());
                     Multimap<Integer, Integer> binderMap =  kLabelConstant.getBinderMap();
                     for (Integer key : binderMap.keySet()) {
-                        Term boundVar = termList.get(key);
+                        Term boundVar = termList.get(key - 1);
                         Term current = substitution.get(boundVar);
                         Term freshBoundVar = FreshOperations.fresh(boundVar.sort(), context);
-                        termList.set(key, freshBoundVar);
+                        termList.set(key - 1, freshBoundVar);
                         substitution.put(boundVar, freshBoundVar);
                         for (Integer value : binderMap.get(key)) {
-                            Term bindingExp = kList.get(1);
+                            Term bindingExp = kList.get(value - 1);
                             Term resultBindingExp = (Term) bindingExp.accept(this);
-                            termList.set(value, resultBindingExp);
+                            termList.set(value - 1, resultBindingExp);
                         }
                         if (current != null) {
                             substitution.put(boundVar, current);
