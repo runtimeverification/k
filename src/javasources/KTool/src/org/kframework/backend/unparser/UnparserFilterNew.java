@@ -258,6 +258,29 @@ public class UnparserFilterNew extends NonCachingVisitor {
 
     @Override
     public Void visit(Cell cell, Void _) {
+        Term contents = cell.getContents();
+        Bag sortedBag = null;
+        if (contents instanceof Bag) {
+            Bag origBag = (Bag) contents;
+            sortedBag = origBag.shallowCopy();
+            sortedBag.setContents(new ArrayList<Term>());
+            for (String cellLabel : context.getConfigurationStructureMap().get(cell.getLabel()).sons.keySet()) {
+                for (Term term : origBag.getContents()) {
+                    if (term instanceof Cell) {
+                        Cell childCell = (Cell) term;
+                        if (childCell.getLabel().equals(cellLabel)) {
+                            sortedBag.add(childCell);
+                        }
+                    }
+                }
+            }
+            for (Term term : origBag.getContents()) {
+                if (!(term instanceof Cell)) {
+                    sortedBag.add(term);
+                }
+            }
+        }
+        
         prepare(cell);
         String attributes = "";
         for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
@@ -289,7 +312,11 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        this.visitNode(cell.getContents());
+        if (contents instanceof Bag) {
+            this.visitNode(sortedBag);
+        } else {
+            this.visitNode(contents);
+        }
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();

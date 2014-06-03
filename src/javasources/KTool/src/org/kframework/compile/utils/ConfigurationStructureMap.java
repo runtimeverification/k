@@ -7,7 +7,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,14 +19,10 @@ import java.util.Set;
  */
 public class ConfigurationStructureMap implements
         Map<String, ConfigurationStructure>, Serializable {
-    Map<String, ConfigurationStructure> config;
+    LinkedHashMap<String, ConfigurationStructure> config;
 
     public ConfigurationStructureMap() {
-        this(new HashMap<String, ConfigurationStructure>());
-    }
-
-    public ConfigurationStructureMap(Map<String, ConfigurationStructure> config) {
-        this.config = config;
+        this.config = new LinkedHashMap<String, ConfigurationStructure>();
     }
 
     @Override
