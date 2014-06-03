@@ -148,14 +148,11 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     public static class Builder {
         
         private boolean done = false;
-        private boolean setEntries = false;
-        private boolean setFrame = false;
         
         private Map<Term, Term> entries = new HashMap<>();
         private Variable frame = null;
 
         public void put(Term key, Term value) {
-            Preconditions.checkArgument(!setEntries, "Cannot put in new key-value pair once the entries are set.");
             entries.put(key, value);
         }
         
@@ -166,10 +163,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
          * @param map
          */
         public void putAll(Map<Term, Term> map) {
-            Preconditions.checkArgument(!setEntries, "Cannot put in new key-value pair once the entries are set.");
-            for (Map.Entry<Term, Term> e : map.entrySet()) {
-                this.put(e.getKey(), e.getValue());
-            }
+            entries.putAll(map);
         }
         
         public Term remove(Term key) {
@@ -181,15 +175,14 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
         }
         
         /**
-         * Sets the entries without copying the contents. Once the entries are
-         * set, no more modification is allowed.
+         * Sets the entries as the given {@code BuiltinMap} without copying the
+         * contents. Once the entries are set, no more modification is allowed.
          * 
          * @param map
          */
-        public void setEntries(Map<Term, Term> map) {
-            Preconditions.checkArgument(!setEntries, "Cannot set the entries twice.");
-            setEntries = true;
-            entries = map;
+        public void setEntriesAs(BuiltinMap builtinMap) {
+            // builtinMap.entries must be an UnmodifiableMap
+            entries = builtinMap.entries;
         }
         
         /**
@@ -199,8 +192,6 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
          * @param frame
          */
         public void setFrame(Variable frame) {
-            Preconditions.checkArgument(!setFrame, "Cannot set the frame twice.");
-            setFrame = true;
             this.frame = frame;
         }
         

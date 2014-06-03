@@ -388,7 +388,7 @@ public class CopyOnWriteTransformer implements Transformer {
                 if (!changed) {
                     // the only change is the frame
                     changed = true;
-                    builder.setEntries(builtinMap.getEntries());
+                    builder.setEntriesAs(builtinMap);
                 }
                 builder.concat(transformedFrame);
             } else {
