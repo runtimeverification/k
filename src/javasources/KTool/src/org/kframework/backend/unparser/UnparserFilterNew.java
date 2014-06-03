@@ -9,6 +9,7 @@ import org.kframework.krun.K;
 import org.kframework.utils.ColorUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -397,6 +398,14 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 } else{
                     int i = 0;
                     String [] rawLabelList = rawLabel.split("_");
+                    int lastIdx = termList.size() - 1;
+                    if (termList.get(lastIdx) instanceof ListTerminator) {
+                        termList.remove(lastIdx);
+                        if (termList.size() >= 1 && lastIdx + 1 < rawLabelList.length) {
+                            rawLabelList[lastIdx] = rawLabelList[lastIdx + 1];
+                        }
+                        rawLabelList = Arrays.copyOf(rawLabelList, rawLabelList.length - 1);
+                    }
                     for (i = 0; i < termList.size(); ++i) {
                         indenter.write(rawLabelList[i]);
                         if (i > 0) {
