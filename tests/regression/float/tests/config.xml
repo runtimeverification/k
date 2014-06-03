@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 
 <tests>
-  <test definition="test.k" programs="." results="." extension="test">
+  <test definition="test.k" programs="." results=". ../java" extension="test">
     <kompile-option name="--backend" value="java" />
     <kompile-option name="--directory" value="java_kompiled" />
     <all-programs>
