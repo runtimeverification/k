@@ -2,12 +2,15 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -89,25 +92,26 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
             if (kLabel instanceof KLabelConstant) {
                 KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
                 if (kLabelConstant.isBinder()) {
-                    assert kList.getContents().size()==2 && !kList.hasFrame() :
-                            "Only supporting binders of the form lambda x. e for now";
-                    Term boundVar = kList.get(0);
-//                    if (boundVar instanceof Variable ||
-//                            boundVar instanceof BuiltinList || boundVar instanceof BuiltinSet) {
-                        // only rename vars if they are already a builtin structure.
-                        Term bindingExp = kList.get(1);
-                        Term variable = boundVar;
-                        Term freshBoundVars = FreshOperations.fresh(variable.sort(), context);
+                    List<Term> termList = new ArrayList<>();
+                    termList.addAll(kList.getContents());
+                    Multimap<Integer, Integer> binderMap =  kLabelConstant.getBinderMap();
+                    for (Integer key : binderMap.keySet()) {
+                        Term boundVar = termList.get(key);
                         Term current = substitution.get(boundVar);
-                        substitution.put(boundVar, freshBoundVars);
-                        Term resultBindingExp = (Term) bindingExp.accept(this);
+                        Term freshBoundVar = FreshOperations.fresh(boundVar.sort(), context);
+                        termList.set(key, freshBoundVar);
+                        substitution.put(boundVar, freshBoundVar);
+                        for (Integer value : binderMap.get(key)) {
+                            Term bindingExp = kList.get(1);
+                            Term resultBindingExp = (Term) bindingExp.accept(this);
+                            termList.set(value, resultBindingExp);
+                        }
                         if (current != null) {
                             substitution.put(boundVar, current);
                         }
-                        kList = new KList(ImmutableList.<Term>of(freshBoundVars,resultBindingExp));
-                        return new KItem(kLabel, kList, context);
-
-//                    }
+                    }
+                    kList = new KList(ImmutableList.copyOf(termList));
+                    return new KItem(kLabel, kList, context);
                 }
             }
             return super.transform(kItem);
