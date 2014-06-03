@@ -510,6 +510,43 @@ generating/updating output files should be done sequentially. Otherwise,
 parallel updates may cause a race condition for the shared output files.
 
 
+KTEST: SKIP STEPS
+-----------------
+
+Each test element contains three steps: kompile, pdf, and krun. Each steps can
+be skipped by using either a command line option or an attribute of config.xml
+file.
+
+In order to skip a step for the entire test suite, you can use a command line
+option '--skip <steps>'. For example, the following command runs ktest without
+generating PDFs for all test elements:
+
+  $ ktest --skip pdf config.xml
+
+You can also skip multiple steps by enumerating them. For example, the
+following command runs only the krun steps for all tests:
+
+  $ ktest --skip "kompile pdf" config.xml
+
+In order to skip a step for each test element, you can use an attribute of
+config.xml file 'skip'. For example, the following test element skips the PDF
+generation.
+
+  <test
+    ...
+    skip="pdf"
+    ...
+  />
+
+You can also skip multiple steps by enumerating them as follows:
+
+  <test
+    ...
+    skip="kompile pdf"
+    ...
+  />
+
+
 FILE READ/WRITE:
 ----------------
 
