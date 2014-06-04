@@ -3,7 +3,7 @@ module ISSUE
 
 syntax Exp ::= foo(Bool, KLabel, Id, Exps)
 
-syntax KLabel ::= "'()"
+syntax KLabel ::= "'`(`)"
 
 syntax Exp ::= "foo"
 syntax Exps ::= List{Exp,","}
