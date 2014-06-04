@@ -50,6 +50,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Module node, Void _)  {
         Set<Production> prods = SyntaxByTag.get(node, "binder", context);
+        prods.addAll(SyntaxByTag.get(node, "metabinder", context));
         if (prods.isEmpty())
             return node;
 
@@ -59,8 +60,12 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 
         for (Production prod : prods) {
             String bindInfo = prod.getAttribute("binder");
-            if (bindInfo == null || bindInfo.equals(""))
-                bindInfo = "1->" + prod.getArity();
+            if (bindInfo == null || bindInfo.equals("")) {
+                bindInfo = prod.getAttribute("metabinder");
+                if (bindInfo == null || bindInfo.equals("")) {
+                    bindInfo = "1->" + prod.getArity();
+                }
+            }
             Pattern p = Pattern.compile(REGEX);
             Matcher m = p.matcher(bindInfo);
             Multimap<Integer, Integer> bndMap = HashMultimap.create();
@@ -79,14 +84,14 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                     }
                 }
 
-                int bndIdx = Integer.parseInt(m.group(1));
+                int bndIdx = Integer.parseInt(m.group(1)) - 1; //rebasing  bindings to start at 0
                 if (m.group(3) == null) {
-                    for (int idx = 1; idx <= prod.getArity(); idx++) {
+                    for (int idx = 0; idx < prod.getArity(); idx++) {
                         if (idx != bndIdx)
                             bndMap.put(bndIdx, idx);
                     }
                 } else {
-                    bndMap.put(bndIdx, Integer.parseInt(m.group(3)));
+                    bndMap.put(bndIdx, Integer.parseInt(m.group(3)) - 1);  //rebasing positions to start at 0
                 }
 
                 m.region(m.end(), m.regionEnd());

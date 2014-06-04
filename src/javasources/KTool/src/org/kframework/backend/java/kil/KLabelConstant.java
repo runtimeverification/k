@@ -181,9 +181,17 @@ public class KLabelConstant extends KLabel {
         return termContext;
     }
 
+    public boolean isMetaBinder() {
+        return hasAttribute("metabinder");
+    }
+
     public boolean isBinder() {
+        return hasAttribute("binder");
+    }
+
+    private boolean hasAttribute(String attribute) {
         for (Production production : productions) {
-            if (production.containsAttribute("binder")) {
+            if (production.containsAttribute(attribute)) {
                 return true;
                 //assuming is binder if one production says so.
             }
@@ -191,10 +199,17 @@ public class KLabelConstant extends KLabel {
         return false;
     }
 
+    /**
+     * Searches for and retieves (if found) a binder map for this label
+     * See {@link org.kframework.kil.Production#getBinderMap()}
+     *
+     * @return the binder map for this label (or {@code null} if no binder map was defined.
+     */
     public Multimap<Integer, Integer> getBinderMap() {
         for (Production production : productions) {
-            if (production.containsAttribute("binder")) {
-                return production.getBinderMap();
+            Multimap<Integer, Integer> binderMap = production.getBinderMap();
+            if (binderMap != null) {
+                return binderMap;
                 //assuming is binder if one production says so.
             }
         }

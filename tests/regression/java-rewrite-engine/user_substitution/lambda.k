@@ -4,13 +4,30 @@ module LAMBDA
   syntax K ::= K "[" K "/" K "]" [hook(Substitution:userSubstitution)]
 
   syntax Val ::= Id
-               | "lambda" Id "." Exp  [binder]
+               | Int | Bool
+               | "lambda" Id "." Exp  [binder, lambda]
+
   syntax KResult ::= Val
 
 
   syntax Exp ::= Val
-               | Exp Exp              [left, strict]
+               | Exp Exp              [left, strict(1), app]
+               | "let" Id "=" Exp "in" Exp [binder(1 -> 3), let]
+               | "letrec" Id "=" Exp "in" Exp [binder(1 -> 2, 1 -> 3), letrec]
+               | Exp "<=" Exp [leq, strict]
+               | Exp "+" Exp [plus, strict]
+               | "if" Exp "then" Exp "else" Exp [if, strict(1)]
                | "(" Exp ")"          [bracket]
 
-  rule (lambda X:Id . E:Exp) V:Val => E[V / X]
+  syntax priorities app > plus > leq > if > lambda let letrec
+
+
+  rule (lambda X:Id . E2:Exp) E1:Exp => E2[E1 / X]
+  rule let X:Id = E1:Exp in E2:Exp => E2[E1 / X]
+  rule letrec X:Id = E1:Exp in E2:Exp => E2[letrec X = E1 in E1 / X]
+  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule if true then E1:Exp else _ => E1
+  rule if false then _ else E2:Exp => E2
+
 endmodule

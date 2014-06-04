@@ -43,7 +43,7 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
             KList kList = (KList) kItem.kList();
             if (kLabel instanceof KLabelConstant) {
                 KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-                if (kLabelConstant.isBinder()) {
+                if (kLabelConstant.isMetaBinder()) {
                     assert kList.getContents().size()==2 && !kList.hasFrame() :
                             "Only supporting binders of the form lambda x. e for now";
                     Term boundVars = kList.get(0);

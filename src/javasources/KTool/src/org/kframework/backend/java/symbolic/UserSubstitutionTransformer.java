@@ -1,15 +1,22 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import org.kframework.backend.java.builtins.BuiltinSubstitutionOperations;
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.MetaK;
-import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.*;
-import org.kframework.kil.ASTNode;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.kil.*;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,13 +30,27 @@ import java.util.Set;
 public class UserSubstitutionTransformer extends PrePostTransformer {
 
     private final Map<Term, Term> substitution;
+    private final Set<Term> unboundedTerms;
 
-    public UserSubstitutionTransformer(Map<Term, Term> substitution,
-                                       TermContext context) {
+    public static Term userSubstitution(Map<Term, Term> substitution, Term term, TermContext context) {
+        if (substitution.isEmpty()) return term;
+        UserSubstitutionTransformer transformer = new UserSubstitutionTransformer(substitution, context);
+        return (Term) term.accept(transformer);
+    }
+
+
+    public UserSubstitutionTransformer(Map<Term, Term> substitution, TermContext context) {
         super(context);
         this.substitution = substitution;
+        unboundedTerms = new HashSet<>();
+        for (Map.Entry<Term, Term> substPair : substitution.entrySet()) {
+            Set<Term> unboundedTerms1 = UnboundedTermsCollector.getUnboundedTerms(substPair.getValue());
+            unboundedTerms1.remove(substPair.getKey());
+            unboundedTerms.addAll(unboundedTerms1);
+        }
+
         preTransformer.addTransformer(new BinderSubstitution(context));
-        postTransformer.addTransformer(new LocalSubstitutionTransformer());
+        preTransformer.addTransformer(new LocalSubstitutionTransformer());
     }
     
     /**
@@ -38,11 +59,11 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
     private class LocalSubstitutionTransformer extends LocalTransformer {
 
         @Override
-        public Term transform(Term variable) {
-            Term term = substitution.get(variable);
-            if (term != null) {
-                if (term instanceof KCollectionFragment) {
-                    KCollectionFragment fragment = (KCollectionFragment) term;
+        public ASTNode transform(Term variable) {
+            Term replacement = substitution.get(variable);
+            if (replacement != null) {
+                if (replacement instanceof KCollectionFragment) {
+                    KCollectionFragment fragment = (KCollectionFragment) replacement;
                     ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
                     builder.addAll(fragment);
 
@@ -65,7 +86,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
 
                     return kCollection;
                 } else {
-                    return term;
+                    return new DoneTransforming(replacement);
                 }
             } else {
                 return variable;
@@ -91,31 +112,46 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
             KList kList = (KList) kItem.kList();
             if (kLabel instanceof KLabelConstant) {
                 KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-                if (kLabelConstant.isBinder()) {
-                    List<Term> termList = new ArrayList<>();
-                    termList.addAll(kList.getContents());
+                if (kLabelConstant.isBinder()) {  // if label is a binder rename all bound variables
+                    Map<Integer, Term> freshSubstitution = new HashMap<>();
+                    Multimap<Integer, Integer> backBinding = HashMultimap.create();
                     Multimap<Integer, Integer> binderMap =  kLabelConstant.getBinderMap();
-                    for (Integer key : binderMap.keySet()) {
-                        Term boundVar = termList.get(key - 1);
-                        Term current = substitution.get(boundVar);
+                    for (Integer keyIndex : binderMap.keySet()) {
+                        Term boundVar = kList.get(keyIndex);
+                        if (!unboundedTerms.contains(boundVar) && !substitution.containsKey(boundVar)) continue;
                         Term freshBoundVar = FreshOperations.fresh(boundVar.sort(), context);
-                        termList.set(key - 1, freshBoundVar);
-                        substitution.put(boundVar, freshBoundVar);
-                        for (Integer value : binderMap.get(key)) {
-                            Term bindingExp = kList.get(value - 1);
-                            Term resultBindingExp = (Term) bindingExp.accept(this);
-                            termList.set(value - 1, resultBindingExp);
-                        }
-                        if (current != null) {
-                            substitution.put(boundVar, current);
+                        freshSubstitution.put(keyIndex, freshBoundVar);
+                        backBinding.put(keyIndex, keyIndex);
+                        for (Integer valueIndex : binderMap.get(keyIndex)) {
+                            backBinding.put(valueIndex, keyIndex);
                         }
                     }
+                    List<Term> termList = new ArrayList<>();
+                    termList.addAll(kList.getContents());
+                    for (int idx = 0; idx < termList.size(); idx++) {
+                        Map<Term, Term> newSubstitution = new HashMap<>(substitution);
+                        if (backBinding.containsKey(idx)) {
+                            for (Integer boundPosition : backBinding.get(idx)) {
+                                Term variable = kList.get(boundPosition);
+                                if (unboundedTerms.contains(variable)) {
+                                    newSubstitution.put(variable, freshSubstitution.get(boundPosition));
+                                } else if (substitution.containsKey(variable)) {
+                                    newSubstitution.remove(variable);
+                                }
+                            }
+                        }
+                        Term bindingExp = termList.get(idx);
+                        Term resultBindingExp = userSubstitution(newSubstitution, bindingExp, context);
+                        termList.set(idx, resultBindingExp);
+                    }
+
                     kList = new KList(ImmutableList.copyOf(termList));
-                    return new KItem(kLabel, kList, context);
+                    kItem = new KItem(kLabel, kList, context);
+                    return new DoneTransforming(kItem);
                 }
             }
             return super.transform(kItem);
         }
     }
-   
+
 }
