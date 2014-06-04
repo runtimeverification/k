@@ -4,6 +4,7 @@ package org.kframework.ktest;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.CmdArgs.CmdArgParser;
 import org.kframework.ktest.CmdArgs.Constants;
@@ -31,6 +32,10 @@ import java.util.*;
 public class KTest {
 
     private final CmdArgParser argParser;
+
+    public boolean debug() {
+        return argParser.cmdOpts.hasOption(Constants.DEBUG);
+    }
 
     private KTest(String[] args) throws ParseException {
         argParser = new CmdArgParser(args);
@@ -99,21 +104,40 @@ public class KTest {
 
     /**
      * 
-     * @param args
+     * @param args command line arguments
      * @return true if the application terminated normally; false otherwise
      */
     public static boolean main(String[] args) {
+        new GlobalOptions().initialize(); // required for kem
+        KTest ktest = null;
         try {
-            return new KTest(args).run() == 0;
-        } catch (ParseException | InvalidArgumentException | SAXException |
-                ParserConfigurationException | IOException | InterruptedException |
-                TransformerException e) {
-            e.printStackTrace();
+            ktest = new KTest(args);
+        } catch (ParseException e) {
+            // command line argument parsing has failed, but we can still check for --debug argument
+            if (ArrayUtils.contains(args, "--" + Constants.DEBUG)) {
+                e.printStackTrace();
+            }
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
-                            e.getMessage(), "command line", "System file."));
+                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
+        }
+
+        assert(ktest != null);
+
+        try {
+            return ktest.run() == 0;
+        } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
+                TransformerException | InvalidArgumentException e) {
+            if (ktest.debug()) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
         } catch (InvalidConfigError e) {
+            if (ktest.debug()) {
+                e.printStackTrace();
+            }
             LocationData location = e.getLocation();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
