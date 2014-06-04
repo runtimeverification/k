@@ -9,10 +9,13 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.krun.K;
 import org.kframework.utils.ColorUtil;
 
+import com.davekoelle.AlphanumComparator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -259,7 +262,13 @@ public class UnparserFilterNew extends NonCachingVisitor {
         return postpare();
     }
 
-    Comparator<Term> unparserBagItemComparator = new Comparator<Term>() {
+    private class UnparserBagItemComparator implements Comparator<Term> {
+        
+        private java.util.Map<Term, String> unparsedResults;
+        
+        public UnparserBagItemComparator(java.util.Map<Term, String> unparsedResults) {
+            this.unparsedResults = unparsedResults;
+        }
 
         @Override
         public int compare(Term o1, Term o2) {
@@ -279,12 +288,8 @@ public class UnparserFilterNew extends NonCachingVisitor {
             
             // case 3: neither o1 nor o2 is a cell
             // case 4: o1 and o2 are cells with the same label
-            UnparserFilterNew unparser = new UnparserFilterNew(context);
-            unparser.visitNode(o1);
-            String s1 = unparser.getResult();
-            unparser = new UnparserFilterNew(context);
-            unparser.visitNode(o2);
-            String s2 = unparser.getResult();
+            String s1 = unparsedResults.get(o1);
+            String s2 = unparsedResults.get(o2);
             return s1.compareTo(s2);
         }
         
@@ -324,14 +329,19 @@ public class UnparserFilterNew extends NonCachingVisitor {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
         
-        /* sort the bag contents before traversing its children */
+        /* if the contents of this cell is a bag, sort them properly */
         Term contents = cell.getContents();
         if (contents instanceof Bag) {
-            Bag sortedBag = (Bag) contents.shallowCopy();
-            List<Term> children = sortedBag.getContents();
-            Collections.sort(children, unparserBagItemComparator);
-            sortedBag.setContents(children);
-            this.visitNode(sortedBag);                   
+            Bag sortedBag = ((Bag) contents).shallowCopy();
+            sortedBag.setContents(new ArrayList<>(sortedBag.getContents()));
+            java.util.Map<Term, String> unparsedChildren = new HashMap<>();
+            for (Term child : sortedBag.getContents()) {
+                UnparserFilterNew unparser = new UnparserFilterNew(context);
+                unparser.visitNode(child);
+                unparsedChildren.put(child, unparser.getResult());
+            }  
+            Collections.sort(sortedBag.getContents(), new UnparserBagItemComparator(unparsedChildren));
+            this.visitNode(sortedBag);
         } else {
             this.visitNode(contents);
         }
@@ -437,7 +447,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 rawLabel = ((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "");
             }
             if (child instanceof KList) {
-                java.util.List<Term> termList = ((KList)child).getContents();
+                java.util.List<Term> termList = new ArrayList<>(((KList) child).getContents());
 
                 if(termList.size()==0){
                     indenter.write(rawLabel);
@@ -688,11 +698,40 @@ public class UnparserFilterNew extends NonCachingVisitor {
         super.visit(list, _);
         return postpare();
     }
+    
+    private class UnparserMapItemComparator implements Comparator<Term> {
+        
+        private java.util.Map<Term, String> unparsedResults;
+        private AlphanumComparator comparator = new AlphanumComparator();
+        
+        public UnparserMapItemComparator(java.util.Map<Term, String> unparsedResults) {
+            this.unparsedResults = unparsedResults;
+        }
+
+        @Override
+        public int compare(Term o1, Term o2) {
+            String s1 = unparsedResults.get(o1);
+            String s2 = unparsedResults.get(o2);
+            return comparator.compare(s1, s2);
+        }
+        
+    };
 
     @Override
     public Void visit(org.kframework.kil.Map map, Void _) {
         prepare(map);
-        super.visit(map, _);
+        
+        org.kframework.kil.Map sortedMap = map.shallowCopy();
+        sortedMap.setContents(new ArrayList<>(sortedMap.getContents()));
+        java.util.Map<Term, String> unparsedResults = new HashMap<>();
+        for (Term t : sortedMap.getContents()) {
+            UnparserFilterNew unparser = new UnparserFilterNew(context);
+            unparser.visitNode(t);
+            unparsedResults.put(t, unparser.getResult());
+        }
+        Collections.sort(sortedMap.getContents(), new UnparserMapItemComparator(unparsedResults));
+        super.visit(sortedMap, _);
+
         return postpare();
     }
 
