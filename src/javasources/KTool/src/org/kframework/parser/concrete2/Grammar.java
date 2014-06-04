@@ -210,7 +210,7 @@ public class Grammar implements Serializable {
                 // Case 3 (See above)
                 if (ns instanceof NonTerminalState) {
                     ExitState es = ((NonTerminalState) ns).child.exitState;
-                    predecessors[inverseAllStates.get(es)].add(inverseAllStates.get(s));
+                    predecessors[inverseAllStates.get(s)].add(inverseAllStates.get(es));
                 }
             }
         }
