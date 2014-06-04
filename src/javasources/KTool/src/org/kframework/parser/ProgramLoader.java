@@ -146,6 +146,7 @@ public class ProgramLoader {
                     throw new ParseFailedException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
+                out = new ResolveVariableAttribute(context).visitNode(out);
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = new ResolveVariableAttribute(context).visitNode(out);
