@@ -359,6 +359,7 @@ public class Grammar implements Serializable {
             final int key;
             public OrderingInfo(int key) { this.key = key; }
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
+            public String toString() { return "" + key; }
         }
 
         public State(String name, NonTerminal nt) {

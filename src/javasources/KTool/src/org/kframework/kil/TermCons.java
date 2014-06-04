@@ -84,9 +84,7 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
                 for (int i = 0, j = 0; i < production.items.size(); i++) {
                     ProductionItem pi = production.items.get(i);
                     if (pi instanceof Terminal) {
-                        String terminall = pi.toString();
-                        terminall = terminall.substring(1, terminall.length() - 1);
-                        str += terminall + " ";
+                        str += ((Terminal) pi).getTerminal() + " ";
                     } else if (pi instanceof Sort)
                         str += contents.get(j++) + " ";
                 }

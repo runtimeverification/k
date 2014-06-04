@@ -66,7 +66,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 /**
                  * It may be more efficient to make it this way.
                  *
-                 * (|---+--------------+--<'_,_>--<loc>--|)
+                 * (|---+-------/------+--<'_,_>--<loc>--|)
                  *      |              |
                  *      |     +--------+
                  *      +---[E]---(",")--<Del>--+
