@@ -355,42 +355,52 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
-        BuiltinMap transformedMap = null;
-        if (builtinMap.hasFrame()) {
-            Term frame = (Term) builtinMap.frame().accept(this);
-            if (frame != builtinMap.frame()) {
-                transformedMap = BuiltinMap.of(Collections.<Term, Term>emptyMap(), frame);
-            }
-        }
-
-        for(Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
+        boolean changed = false;
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        
+        for (Map.Entry<Term, Term> entry : builtinMap) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
-
-            if (transformedMap == null && (key != entry.getKey() || value != entry.getValue())) {
-                if (builtinMap.hasFrame()) {
-                    transformedMap = new BuiltinMap(builtinMap.frame());
-                } else {
-                    transformedMap = new BuiltinMap();
-                }
-                for(Map.Entry<Term, Term> copyEntry : builtinMap.getEntries().entrySet()) {
-                    if (copyEntry.equals(entry)) {
+            
+            // first time encounter a changed entry
+            if (!changed && (key != entry.getKey() || value != entry.getValue())) {
+                changed = true;
+                // copy previous entries into the BuiltinMap being built
+                for (Map.Entry<Term, Term> copy : builtinMap) {
+                    if (copy.equals(entry)) {
+                        // cannot rely on reference identity check here
                         break;
                     }
-                    transformedMap.put(copyEntry.getKey(), copyEntry.getValue());
+                    builder.put(copy.getKey(), copy.getValue());
                 }
             }
-
-            if (transformedMap != null) {
-                transformedMap.put(key, value);
+            
+            if (changed) {
+                builder.put(key, value);
             }
         }
-
-        if (transformedMap != null) {
-            return transformedMap;
+        
+        // at this point, if changed is false, the BuiltinMap being built is still empty
+        if (builtinMap.hasFrame()) {
+            Variable oldFrame = builtinMap.frame();
+            Term transformedFrame = (Term) oldFrame.accept(this);
+            if (transformedFrame != oldFrame) {
+                if (!changed) {
+                    // the only change is the frame
+                    changed = true;
+                    builder.setEntriesAs(builtinMap);
+                }
+                builder.concat(transformedFrame);
+            } else {
+                builder.setFrame(oldFrame);
+            }
         } else {
-            return builtinMap;
+            // do nothing; if changed == true then all entries are already
+            // copied; if changed == false then we will simply return the
+            // original map later
         }
+        
+        return changed ? builder.build() : builtinMap;
     }
 
     @Override

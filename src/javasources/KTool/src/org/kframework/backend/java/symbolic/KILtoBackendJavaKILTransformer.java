@@ -426,12 +426,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.MapBuiltin node, Void _)  {
-        HashMap<Term, Term> entries = new HashMap<Term, Term>(node.elements().size());
+        BuiltinMap.Builder builder = BuiltinMap.builder();
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.elements().entrySet()) {
             Term key = (Term) this.visitNode(entry.getKey());
             Term value = (Term) this.visitNode(entry.getValue());
-            entries.put(key, value);
+            builder.put(key, value);
         }
 
         if (node.isLHSView()) {
@@ -440,21 +440,22 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 if (base instanceof MapUpdate) {
                     MapUpdate mapUpdate = (MapUpdate) base;
                     /* TODO(AndreiS): check key uniqueness */
-                    entries.putAll(mapUpdate.updateMap());
-                    return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), entries);
+                    builder.putAll(mapUpdate.updateMap());
+                    return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), builder.getEntries());
                 } else {
                     /* base instanceof Variable */
-                    return new BuiltinMap(entries, (Variable) base);
+                    builder.setFrame((Variable) base);
+                    return builder.build();
                 }
             } else {
-                return new BuiltinMap(entries);
+                return builder.build();
             }
         } else {
             ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
             for (org.kframework.kil.Term term : node.baseTerms()) {
                 baseTerms.add((Term) this.visitNode(term));
             }
-            baseTerms.add(new BuiltinMap(entries));
+            baseTerms.add(builder.build());
 
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
@@ -474,7 +475,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 //        for(org.kframework.kil.Term term: node.getContents()){
 //           Term backendTerm = this.transformTerm(term,this.definition);
 //        }
-        return new BuiltinMap();
+        return BuiltinMap.EMPTY_MAP;
     }
 
     @Override
