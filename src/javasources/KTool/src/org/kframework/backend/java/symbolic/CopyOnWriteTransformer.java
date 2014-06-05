@@ -291,48 +291,6 @@ public class CopyOnWriteTransformer implements Transformer {
                 return transformedKSeq;
             }
         }
-       
-//        List<Term> items = transformList(kSequence.getContents());
-//
-//        if (kSequence.hasFrame()) {
-//            Variable frame;
-//            Term transformedFrame = (Term) kSequence.frame().accept(this);
-//
-//            if (transformedFrame.kind() == Kind.K) {
-//                if (transformedFrame instanceof KSequence) {
-//                    if (items == kSequence.getContents()) {
-//                        items = new ArrayList<>(items);
-//                    }
-//                    items.addAll(((KSequence) transformedFrame).getContents());
-//                    frame = ((KSequence) transformedFrame).hasFrame() ?
-//                            ((KSequence) transformedFrame).frame() : null;
-//                } else {
-//                    frame = (Variable) transformedFrame;
-//                }
-//            } else {
-//                assert transformedFrame.kind() == Kind.KITEM;
-//
-//                if (items == kSequence.getContents()) {
-//                    items = new ArrayList<>(items);
-//                }
-//                items.add(transformedFrame);
-//                frame = null;
-//            }
-//
-//            if (items != kSequence.getContents() || frame != kSequence.frame()) {
-//                kSequence = new KSequence(ImmutableList.<Term>copyOf(items), frame);
-//            }
-//        } else {
-//            if (items != kSequence.getContents()) {
-//                kSequence = new KSequence(ImmutableList.<Term>copyOf(items));
-//            }
-//        }
-//
-//        if (kSequence.hasFrame() || kSequence.size() != 1) {
-//            return kSequence;
-//        } else {
-//            return kSequence.get(0);
-//        }
     }
 
     @Override
