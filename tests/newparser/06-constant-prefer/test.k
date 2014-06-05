@@ -3,7 +3,7 @@ module TEST
 
   configuration <k> $PGM:Exp </k>
   syntax Exp  ::= Int
-                | "-" Exp     [avoid]
+                | "-" Exp
                 | Exp "-" Exp
 
 endmodule
