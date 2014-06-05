@@ -113,7 +113,7 @@ public class ProgramLoader {
                 out = ((Rule) out).getBody();
             } else if (whatParser == ParserType.BINARY) {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
-            } else if (true || whatParser == ParserType.NEWPROGRAM) {
+            } else if (whatParser == ParserType.NEWPROGRAM) {
                 // load the new parser
                 // TODO(Radu): after the parser is in a good enough shape, replace the program parser
                 // TODO(Radu): (the default one) with this branch of the 'if'
