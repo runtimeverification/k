@@ -10,7 +10,6 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 
@@ -132,7 +131,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         }
 
         if (term.kind() == Kind.K && kind == Kind.KLIST) {
-            term = new KList(ImmutableList.of(term));
+            term = new KList(Lists.newArrayList(term));
         }
 
         return term;

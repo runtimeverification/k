@@ -13,7 +13,6 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -248,11 +247,11 @@ public class CopyOnWriteTransformer implements Transformer {
             }
 
             if (items != kList.getContents() || frame != kList.frame()) {
-                kList = new KList(ImmutableList.<Term>copyOf(items), frame);
+                kList = new KList(items, frame);
             }
         } else {
             if (items != kList.getContents()) {
-                kList = new KList(ImmutableList.<Term>copyOf(items));
+                kList = new KList(items);
             }
         }
 

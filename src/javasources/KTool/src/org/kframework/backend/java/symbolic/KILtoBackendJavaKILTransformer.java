@@ -251,12 +251,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
-        ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
+        List<Term> items = Lists.newArrayListWithCapacity(list.size());
         for (org.kframework.kil.Term term : list) {
-            builder.add((Term) this.visitNode(term));
+            items.add((Term) this.visitNode(term));
         }
 
-        return new KList(builder.build(), variable);
+        return new KList(items, variable);
     }
 
     @Override
