@@ -81,9 +81,7 @@ public abstract class Collection extends Term {
     public abstract int computeHash();
 
     @Override
-    public boolean equals(Object object) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract boolean equals(Object object);
 
     @Override
     public void accept(Visitor visitor) {

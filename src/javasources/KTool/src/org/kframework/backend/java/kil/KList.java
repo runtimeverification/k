@@ -1,6 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.common.collect.ImmutableList;
 
 import org.kframework.backend.java.symbolic.Matcher;
@@ -31,41 +34,64 @@ public class KList extends KCollection {
 
     private static final String SEPARATOR_NAME = ",, ";
     private static final String IDENTITY_NAME = "." + Kind.KLIST;
-    public static final KList EMPTY = new KList();
+    public static final KList EMPTY = new KList((Variable) null);
+    
+    /**
+     * A list of {@code Term}s contained in this {@code KList}.
+     */
+    private ImmutableList<Term> contents;
     
     private String sort;
 
-    public KList(ImmutableList<Term> items, Variable frame) {
-        super(items, frame, Kind.KLIST);
+    public KList(List<Term> items, Variable frame) {
+        super(frame, Kind.KLIST);
+
+        ImmutableList.Builder<Term> normalizedItemsBuilder = ImmutableList.builder();
+        for (Term term : items) {
+            // TODO (AndreiS): fix KItem projection
+            if (!(term instanceof Variable) && !(term instanceof KItemProjection) && (term.kind() == kind)) {
+                assert term instanceof KList :
+                    "associative use of KList(" + items + ", " + frame + ")";
+
+                KList kList = (KList) term;
+    
+                assert !kList.hasFrame() : "associative use of KCollection";
+    
+                normalizedItemsBuilder.addAll(kList.contents);
+            } else {
+                normalizedItemsBuilder.add(term);
+            }
+        }
+        this.contents = normalizedItemsBuilder.build();
     }
 
-    /*
-    public KList(ListIterator<Term> itemsIterator, Variable frame) {
-        super(itemsIterator, frame, "KList");
+    public KList(List<Term> items) {
+        this(items, null);
     }
-    */
 
     public KList(Variable frame) {
         super(frame, Kind.KLIST);
+        this.contents = ImmutableList.of();
     }
-
-    public KList(ImmutableList<Term> items) {
-        super(items, null, Kind.KLIST);
-    }
-
-    /*
-    public KList(ListIterator<Term> itemsIterator) {
-        super(itemsIterator, null, "KList");
-    }
-    */
-
-    private KList() {
-        super(null, Kind.KLIST);
+    
+    /**
+     * Private constructor only used for building KList fragment.
+     * @param contents
+     * @param frame
+     */
+    private KList(ImmutableList<Term> contents, Variable frame) {
+        super(frame, Kind.KLIST);
+        this.contents = contents;
     }
 
     @Override
     public KCollection fragment(int fromIndex) {
         return new KList(contents.subList(fromIndex, contents.size()), frame);
+    }
+
+    @Override
+    public List<Term> getContents() {
+        return contents;
     }
 
     @Override
