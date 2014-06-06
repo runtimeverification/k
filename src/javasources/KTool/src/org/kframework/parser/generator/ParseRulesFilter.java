@@ -16,6 +16,7 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.utils.CacheContainer;
+import org.kframework.parser.utils.CacheContainer.CachedSentence;
 import org.kframework.utils.XmlLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,7 +46,10 @@ public class ParseRulesFilter extends ParseForestTransformer {
     public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {
         if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
             long startTime = System.currentTimeMillis();
-            ASTNode config;
+            Sentence sentence;
+
+            int startLine = XmlLoader.getLocNumber(ss.getContentLocation(), 0);
+            int startColumn = XmlLoader.getLocNumber(ss.getContentLocation(), 1);
 
             if (!(cachedDef.sentences.containsKey(localModule + ss.getContent()))) {
                 String parsed = null;
@@ -61,42 +65,36 @@ public class ParseRulesFilter extends ParseForestTransformer {
 
                 // replace the old xml node with the newly parsed sentence
                 Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-                XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
+                XmlLoader.updateLocation(xmlTerm, startLine, startColumn);
                 XmlLoader.addFilename(xmlTerm, ss.getFilename());
                 XmlLoader.reportErrors(doc, ss.getType());
 
-                if (ss.getType().equals(Constants.CONTEXT))
-                    config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-                else if (ss.getType().equals(Constants.RULE))
-                    config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-                else { // should not reach here
-                    config = null;
-                    assert false : "Only context and rules have been implemented.";
-                }
-                Sentence st = (Sentence) config;
+                Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
                 assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
                 st.setLabel(ss.getLabel());
-                //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
                 st.setAttributes(ss.getAttributes());
 
-                // disambiguate rules
-                if (config.getFilename().endsWith("test.k")) {
-                    // this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
-                    int a = 1;
-                    a = a + 1;
+                if (Constants.CONTEXT.equals(ss.getType()))
+                    sentence = new org.kframework.kil.Context(st);
+                else if (Constants.RULE.equals(ss.getType()))
+                    sentence = new Rule(st);
+                else { // should not reach here
+                    sentence = null;
+                    assert false : "Only context and rules have been implemented. Found: " + ss.getType();
                 }
 
-                // store into cache
-                // TODO: see how to report ambiguities next time when loading from cache
-                // because it uses the same objects, the filters will disambiguate before serialization
-                cachedDef.sentences.put(localModule + ss.getContent(), (Sentence) config);
                 cachedDef.parsedSentences++;
             } else {
                 // load from cache
-                config = cachedDef.sentences.get(localModule + ss.getContent());
-                //System.out.println(ss.getLocation() + " " + config.getLocation());
-                // TODO: fix the location information
+                CachedSentence cs = cachedDef.sentences.get(localModule + ss.getContent());
+                sentence = cs.sentence;
+                // fix the location information
+                new UpdateLocationVisitor(context, startLine, startColumn,
+                                             cs.startLine, cs.startColumn).visitNode(sentence);
             }
+
+            cachedDef.sentences.put(localModule + ss.getContent(), cachedDef.new CachedSentence(sentence, startLine, startColumn));
+            cachedDef.totalSentences++;
 
             if (globalOptions.debug) {
                 try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
@@ -105,8 +103,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
                     e.printStackTrace();
                 }
             }
-            cachedDef.totalSentences++;
-            return config;
+            return sentence;
         }
         return ss;
     }

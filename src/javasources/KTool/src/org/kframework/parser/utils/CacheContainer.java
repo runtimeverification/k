@@ -24,5 +24,21 @@ public class CacheContainer implements Serializable {
     /**
      * Mapping from moduleName + the string representation of the rule to the AST representation
      */
-    public Map<String, Sentence> sentences = new HashMap<>();
+    public Map<String, CachedSentence> sentences = new HashMap<>();
+
+    /**
+     * Wrapper around the Sentence used just for caching purposes.
+     * I need to store the location information so I can update the future locations.
+     */
+    public class CachedSentence implements Serializable {
+        public final Sentence sentence;
+        public final int startLine;
+        public final int startColumn;
+
+        public CachedSentence(Sentence sentence, int startLine, int startColumn) {
+            this.sentence = sentence;
+            this.startLine = startLine;
+            this.startColumn = startColumn;
+        }
+    }
 }
