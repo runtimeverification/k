@@ -13,13 +13,14 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 
@@ -126,20 +127,57 @@ public class PatternMatcher extends AbstractMatcher {
             return Collections.emptyList();
         }
 
+        return evaluateConditions(rule, getMultiSubstitutions(matcher), context);
+    }
+    
+    public static Map<Variable, Term> nonAssocCommPatternMatch(Term subject, Term pattern, TermContext context) {
+        PatternMatcher matcher = new PatternMatcher(context);
+        if (!matcher.patternMatch(subject, pattern)) {
+            return null;
+        } else {
+            assert matcher.multiSubstitutions.isEmpty();
+            return matcher.fSubstitution;
+        }
+    }
+
+    /**
+     * Evaluates the side-conditions of a rule according to a given
+     * substitution.
+     * 
+     * @param rule
+     * @param substitution
+     * @param context
+     * @return the updated substitution on success; otherwise, null
+     */
+    public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitution,
+            TermContext context) {
+        List<Map<Variable, Term>> results = evaluateConditions(rule, Collections.singletonList(substitution), context);
+        assert results.size() <= 1;
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    /**
+     * Evaluates the side-conditions of a rule against a list of possible
+     * instantiations.
+     * 
+     * @param rule
+     * @param substitutions
+     * @param context
+     * @return a list of instantiations that satisfy the side-conditions; each
+     *         of which is updated with extra bindings introduced during the
+     *         evaluation
+     */
+    public static List<Map<Variable, Term>> evaluateConditions(Rule rule, List<Map<Variable, Term>> substitutions,
+            TermContext context) {
         /* handle fresh variables, data structure lookups, and side conditions */
-        List<Map<Variable, Term>> results = new ArrayList<Map<Variable, Term>>();
-        for (Map<Variable, Term> subst : getMultiSubstitutions(matcher)) {
+        List<Map<Variable, Term>> results = Lists.newArrayList();
+        for (Map<Variable, Term> crntSubst : substitutions) {
             /* add bindings for fresh variables used in the rule */
             for (Variable variable : rule.freshVariables()) {
-                subst.put(variable, FreshOperations.fresh(variable.sort(), context));
+                crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
             }
 
             /* evaluate data structure lookups/choices and add bindings for them */
-
-            // evaluate data structure lookups/choices may cause @{code subst}
-            // to split up into multiple substitutions which will be stored in
-            // @{code substitutions}
-            List<Map<Variable, Term>> substitutions = new ArrayList<>(Collections.singletonList(subst));
             for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
                 // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
                 Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
@@ -149,65 +187,57 @@ public class PatternMatcher extends AbstractMatcher {
                 assert lookupOrChoice instanceof DataStructureLookupOrChoice :
                     "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
-                List<Map<Variable, Term>> updatedSubsts = new ArrayList<>();
-                for (Map<Variable, Term> crntSubst : substitutions) {
-                    Term evalLookupOrChoice = lookupOrChoice.substituteAndEvaluate(crntSubst, context);
-                    if (evalLookupOrChoice instanceof Bottom) {
-                        /* the data-structure lookup or choice operation is undefined */
-                        continue;
-                    }
-
-                    if (evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
-                        /* the data-structure lookup or choice operation is pending due to symbolic argument(s) */
-
-                        // in other words, this is not really a valid match.
-                        // for example, matching ``<env>... X |-> V ...</env>''
-                        // against ``<env> Rho </env>'' will result in a pending
-                        // choice operation due to the unknown ``Rho''.
-                        continue;
-                    }
-
+                boolean resolved = false;
+                Term evalLookupOrChoice = lookupOrChoice.substituteAndEvaluate(crntSubst, context);
+                if (evalLookupOrChoice instanceof Bottom
+                        || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
+                    /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
+                    
+                    // when the operation is pending, it is not really a valid match
+                    // for example, matching ``<env>... X |-> V ...</env>''
+                    // against ``<env> Rho </env>'' will result in a pending
+                    // choice operation due to the unknown ``Rho''.
+                } else {
                     if (nonLookupOrChoice instanceof Variable) {
                         Variable variable = (Variable) nonLookupOrChoice;
                         if (checkOrderedSortedCondition(variable, evalLookupOrChoice, context)) {
-                            Map<Variable, Term> newSubst = new HashMap<Variable, Term>(crntSubst);
-                            newSubst.put(variable, evalLookupOrChoice);
-                            updatedSubsts.add(newSubst);
+                            resolved = true;
+                            crntSubst.put(variable, evalLookupOrChoice);
                         }
                     } else {
                         // the non-lookup term is not a variable and thus requires further pattern matching
-                        // for example: TODO(YilongL)
+                        // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
+                        //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
                         PatternMatcher lookupMatcher = new PatternMatcher(context);
                         if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
-                            // it's possible that multiple substitutions are viable from the pattern matching above
-                            for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
-                                Map<Variable, Term> composedSubst = composeSubstitution(subst1, crntSubst);
-                                if (composedSubst != null) {
-                                    updatedSubsts.add(composedSubst);
-                                }
-                            }
+                            resolved = true;
+                            assert lookupMatcher.multiSubstitutions.isEmpty();
+                            crntSubst = composeSubstitution(crntSubst, lookupMatcher.fSubstitution);
                         }
                     }
                 }
-                substitutions = updatedSubsts;
+                
+                if (!resolved) {
+                    crntSubst = null;
+                    break;
+                }
             }
 
             /* evaluate side conditions */
-            Iterator<Map<Variable, Term>> iter = substitutions.iterator();
-            while (iter.hasNext()) {
-                Map<Variable, Term> nextSubst = iter.next();
+            if (crntSubst != null) {
                 for (Term require : rule.requires()) {
-                    Term evaluatedReq = require.substituteAndEvaluate(nextSubst, context);
+                    Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
                     if (!evaluatedReq.equals(BoolToken.TRUE)) {
-                        iter.remove();
+                        crntSubst = null;
                         break;
                     }
                 }
             }
 
-            results.addAll(substitutions);
+            if (crntSubst != null) {
+                results.add(crntSubst);
+            }
         }
-
         return results;
     }
 
@@ -251,7 +281,8 @@ public class PatternMatcher extends AbstractMatcher {
             }
             return result;
         } else {
-            return Collections.singletonList(matcher.fSubstitution);
+            Map<Variable, Term> substitution = Maps.newHashMap(matcher.fSubstitution);
+            return Collections.singletonList(substitution);
         }
     }
 
@@ -264,7 +295,7 @@ public class PatternMatcher extends AbstractMatcher {
      *            the second substitution
      * @return the composed substitution on success; otherwise, {@code null}
      */
-    private static Map<Variable, Term> composeSubstitution(Map<Variable, Term> subst1, Map<Variable, Term> subst2) {
+    public static Map<Variable, Term> composeSubstitution(Map<Variable, Term> subst1, Map<Variable, Term> subst2) {
         Map<Variable, Term> result = new HashMap<Variable, Term>(subst1);
         for (Map.Entry<Variable, Term> entry : subst2.entrySet()) {
             Variable variable = entry.getKey();
