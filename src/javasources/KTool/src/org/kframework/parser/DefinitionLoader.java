@@ -49,6 +49,7 @@ import org.kframework.parser.generator.DefinitionSDF;
 import org.kframework.parser.generator.ParseConfigsFilter;
 import org.kframework.parser.generator.ParseRulesFilter;
 import org.kframework.parser.generator.ProgramSDF;
+import org.kframework.parser.utils.CacheContainer;
 import org.kframework.parser.utils.ResourceExtractor;
 import org.kframework.parser.utils.Sdf2Table;
 import org.kframework.utils.BinaryLoader;
@@ -204,9 +205,12 @@ public class DefinitionLoader {
 
             Stopwatch.instance().printIntermediate("File Gen Def");
 
+            String cacheFile = context.kompiled.getAbsolutePath() + "/defx-cache.bin";
             if (!oldSdf.equals(newSdf) || !new File(context.kompiled, "Rule.tbl").exists()
                     || !new File(context.kompiled, "Ground.tbl").exists()) {
                 try {
+                    // delete the file with the cached/partially parsed rules
+                    new File(cacheFile).delete();
                     // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     if (!context.kompileOptions.backend.documentation()) {
@@ -261,12 +265,30 @@ public class DefinitionLoader {
 
             // ----------------------------------- parse rules
             JavaClassesFactory.startConstruction(context);
-            def = (Definition) new ParseRulesFilter(context).visitNode(def);
+            CacheContainer cachedDef = new CacheContainer();
+            try {
+                // load definition if possible
+                if (new File(cacheFile).exists()) {
+                    cachedDef = BinaryLoader.load(CacheContainer.class, cacheFile);
+                }
+                cachedDef.totalSentences = 0;
+                cachedDef.parsedSentences = 0;
+
+                def = (Definition) new ParseRulesFilter(context, cachedDef).visitNode(def);
+                // last resort disambiguation
+                def = (Definition) new AmbFilter(context).visitNode(def);
+            } catch (ParseFailedException te) {
+                te.printStackTrace();
+            } finally {
+                // save definition
+                BinaryLoader.save(cacheFile, cachedDef);
+            }
+
             JavaClassesFactory.endConstruction();
             def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
 
 
-            Stopwatch.instance().printIntermediate("Parsing Rules");
+            Stopwatch.instance().printIntermediate("Parsing Rules [" + cachedDef.parsedSentences + "/" + cachedDef.totalSentences + "]");
 
             return def;
         } catch (ParseFailedException e) {

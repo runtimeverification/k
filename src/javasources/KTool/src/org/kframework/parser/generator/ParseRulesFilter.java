@@ -30,6 +30,7 @@ import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
+import org.kframework.parser.utils.CacheContainer;
 import org.kframework.utils.XmlLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,14 +38,17 @@ import org.w3c.dom.Node;
 
 public class ParseRulesFilter extends ParseForestTransformer {
     boolean checkInclusion = true;
+    final CacheContainer cachedDef;
 
     public ParseRulesFilter(Context context, boolean checkInclusion) {
         super("Parse Rules", context);
         this.checkInclusion = checkInclusion;
+        cachedDef = null;
     }
 
-    public ParseRulesFilter(Context context) {
+    public ParseRulesFilter(Context context, CacheContainer cachedDef) {
         super("Parse Rules", context);
+        this.cachedDef = cachedDef;
     }
 
     String localModule = null;
@@ -58,9 +62,9 @@ public class ParseRulesFilter extends ParseForestTransformer {
     public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {
         if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
             long startTime = System.currentTimeMillis();
-            try {
-                ASTNode config;
+            ASTNode config;
 
+            if (!(cachedDef.sentences.containsKey(localModule + ss.getContent()))) {
                 String parsed = null;
                 if (ss.containsAttribute("kore")) {
 
@@ -99,6 +103,11 @@ public class ParseRulesFilter extends ParseForestTransformer {
                     a = a + 1;
                 }
 
+                // store into cache
+                // TODO: see how to report ambiguities next time when loading from cache
+                // because it uses the same objects, the filters will disambiguate before serialization
+                cachedDef.sentences.put(localModule + ss.getContent(), (Sentence) config);
+
                 config = new SentenceVariablesFilter(context).visitNode(config);
                 config = new CellEndLabelFilter(context).visitNode(config);
                 if (checkInclusion)
@@ -128,10 +137,15 @@ public class ParseRulesFilter extends ParseForestTransformer {
                         e.printStackTrace();
                     }
                 }
-                return config;
-            } catch (ParseFailedException te) {
-                te.printStackTrace();
+                cachedDef.parsedSentences++;
+            } else {
+                // load from cache
+                config = cachedDef.sentences.get(localModule + ss.getContent());
+                System.out.println(ss.getLocation() + " " + config.getLocation());
+                // TODO: fix the location information
             }
+            cachedDef.totalSentences++;
+            return config;
         }
         return ss;
     }
