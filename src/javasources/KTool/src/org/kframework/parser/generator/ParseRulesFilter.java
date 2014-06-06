@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Formatter;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
@@ -16,21 +15,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
-import org.kframework.parser.concrete.disambiguate.AmbFilter;
-import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
-import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
-import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.InclusionFilter;
-import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
-import org.kframework.parser.concrete.disambiguate.PriorityFilter;
-import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
-import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.utils.CacheContainer;
 import org.kframework.utils.XmlLoader;
 import org.w3c.dom.Document;
@@ -38,12 +22,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseRulesFilter extends ParseForestTransformer {
-    boolean checkInclusion = true;
     final CacheContainer cachedDef;
 
     public ParseRulesFilter(Context context, boolean checkInclusion) {
         super("Parse Rules", context);
-        this.checkInclusion = checkInclusion;
         cachedDef = null;
     }
 
@@ -107,36 +89,14 @@ public class ParseRulesFilter extends ParseForestTransformer {
                 // store into cache
                 // TODO: see how to report ambiguities next time when loading from cache
                 // because it uses the same objects, the filters will disambiguate before serialization
-                cachedDef.sentences.put(localModule + ss.getContent(), (Sentence) SerializationUtils.clone(config));
+                cachedDef.sentences.put(localModule + ss.getContent(), (Sentence) config);
                 cachedDef.parsedSentences++;
             } else {
                 // load from cache
-                config = SerializationUtils.clone(cachedDef.sentences.get(localModule + ss.getContent()));
+                config = cachedDef.sentences.get(localModule + ss.getContent());
                 //System.out.println(ss.getLocation() + " " + config.getLocation());
                 // TODO: fix the location information
             }
-
-            config = new SentenceVariablesFilter(context).visitNode(config);
-            config = new CellEndLabelFilter(context).visitNode(config);
-            if (checkInclusion)
-                config = new InclusionFilter(localModule, context).visitNode(config);
-            config = new CellTypesFilter(context).visitNode(config);
-            config = new CorrectRewritePriorityFilter(context).visitNode(config);
-            config = new CorrectKSeqFilter(context).visitNode(config);
-            config = new CorrectCastPriorityFilter(context).visitNode(config);
-            // config = new CheckBinaryPrecedenceFilter().visitNode(config);
-            config = new PriorityFilter(context).visitNode(config);
-            config = new VariableTypeInferenceFilter(context).visitNode(config);
-            // config = new AmbDuplicateFilter(context).visitNode(config);
-            // config = new TypeSystemFilter(context).visitNode(config);
-            // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
-            // config = new TypeInferenceSupremumFilter(context).visitNode(config);
-            config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
-            config = new PreferAvoidFilter(context).visitNode(config);
-            config = new FlattenListsFilter(context).visitNode(config);
-            config = new AmbDuplicateFilter(context).visitNode(config);
-            // last resort disambiguation
-            config = new AmbFilter(context).visitNode(config);
 
             if (globalOptions.debug) {
                 try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
@@ -149,13 +109,5 @@ public class ParseRulesFilter extends ParseForestTransformer {
             return config;
         }
         return ss;
-    }
-
-    public boolean isCheckInclusion() {
-        return checkInclusion;
-    }
-
-    public void setCheckInclusion(boolean checkInclusion) {
-        this.checkInclusion = checkInclusion;
     }
 }

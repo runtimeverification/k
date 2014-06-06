@@ -46,6 +46,7 @@ import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.BasicParser;
 import org.kframework.parser.generator.Definition2SDF;
 import org.kframework.parser.generator.DefinitionSDF;
+import org.kframework.parser.generator.DisambiguateRulesFilter;
 import org.kframework.parser.generator.ParseConfigsFilter;
 import org.kframework.parser.generator.ParseRulesFilter;
 import org.kframework.parser.generator.ProgramSDF;
@@ -275,8 +276,6 @@ public class DefinitionLoader {
                 cachedDef.parsedSentences = 0;
 
                 def = (Definition) new ParseRulesFilter(context, cachedDef).visitNode(def);
-                // last resort disambiguation
-                def = (Definition) new AmbFilter(context).visitNode(def);
             } catch (ParseFailedException te) {
                 te.printStackTrace();
             } finally {
@@ -285,6 +284,11 @@ public class DefinitionLoader {
             }
 
             JavaClassesFactory.endConstruction();
+            try {
+                def = (Definition) new DisambiguateRulesFilter(context, true).visitNode(def);
+            } catch (ParseFailedException te) {
+                te.printStackTrace();
+            }
             def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
 
 
@@ -324,6 +328,7 @@ public class DefinitionLoader {
         // ----------------------------------- parse rules
         JavaClassesFactory.startConstruction(context);
         def = (Definition) new ParseRulesFilter(context, false).visitNode(def);
+        def = (Definition) new DisambiguateRulesFilter(context, false).visitNode(def);
         def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
 
         JavaClassesFactory.endConstruction();
