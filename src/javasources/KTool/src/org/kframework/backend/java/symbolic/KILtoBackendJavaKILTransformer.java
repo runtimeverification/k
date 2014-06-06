@@ -67,6 +67,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 
@@ -623,6 +624,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
 
         concreteCollectionSize = Collections.emptyMap();
+        
+        java.util.Map<String, Term> lhsOfReadCell = null;
+        java.util.Map<String, Term> rhsOfWriteCell = null;
+        if (node.isCompiledForFastRewriting()) {
+            lhsOfReadCell = Maps.newHashMap();
+            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getLhsOfReadCell().entrySet()) {
+                lhsOfReadCell.put(entry.getKey(), (Term) this.visitNode(entry.getValue()));
+            }
+            rhsOfWriteCell = Maps.newHashMap();
+            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getRhsOfWriteCell().entrySet()) {
+                rhsOfWriteCell.put(entry.getKey(), (Term) this.visitNode(entry.getValue()));
+            }
+        }
 
         Rule rule = new Rule(
                 node.getLabel(),
@@ -632,6 +646,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 ensures,
                 freshVariables,
                 lookups,
+                node.isCompiledForFastRewriting(),
+                lhsOfReadCell,
+                rhsOfWriteCell,
+                node.getRewritingSchedule(),
                 node.getAttributes(),
                 definition);
 
@@ -774,6 +792,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     equality.rightHandSide().evaluate(termContext));
         }
         
+        Map<String, Term> rhsOfWriteCell = null;
+        if (rule.isCompiledForFastRewriting()) {
+            rhsOfWriteCell = new HashMap<>();
+            for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+                rhsOfWriteCell.put(entry.getKey(), (Term) entry.getValue().evaluate(termContext));
+            }
+        }
+        
         Rule newRule = new Rule(
                 rule.label(),
                 rule.leftHandSide(),
@@ -782,6 +808,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 ensures,
                 rule.freshVariables(),
                 lookups,
+                rule.isCompiledForFastRewriting(),
+                rule.lhsOfReadCell(),
+                rhsOfWriteCell,
+                rule.instructions(),
                 rule.getAttributes(),
                 globalContext.def);
         return newRule.equals(rule) ? origRule : newRule;                

@@ -99,10 +99,19 @@ public class GroundRewriter {
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
-                for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
-                    results.add(constructNewSubjectTerm(rule, subst));
-                    if (results.size() == successorBound) {
+                if (rule.isCompiledForFastRewriting() && successorBound == 1) {
+                    // the following method could modify the subject
+                    boolean success = KAbstractRewriteMachine.rewrite(rule, subject, termContext);
+                    if (success) {
+                        results.add(subject);
                         return;
+                    }
+                } else {
+                    for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
+                        results.add(constructNewSubjectTerm(rule, subst));
+                        if (results.size() == successorBound) {
+                            return;
+                        }
                     }
                 }
             }

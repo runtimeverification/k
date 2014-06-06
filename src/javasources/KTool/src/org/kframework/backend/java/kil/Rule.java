@@ -4,6 +4,7 @@ package org.kframework.backend.java.kil;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 
@@ -42,6 +44,11 @@ public class Rule extends JavaSymbolicObject {
     private final boolean containsKCell;
     private final boolean hasUnboundVars;
     
+    private final boolean compiledForFastRewriting;
+    private final Map<String, Term> lhsOfReadCells;
+    private final Map<String, Term> rhsOfWriteCells;
+    private final List<String> instructions;
+    
     /**
      * Unbound variables in the rule before kompilation; that is, all variables
      * on the rhs which do not appear in either lhs or fresh condition(s).
@@ -62,6 +69,10 @@ public class Rule extends JavaSymbolicObject {
             Collection<Term> ensures,
             Collection<Variable> freshVariables,
             UninterpretedConstraint lookups,
+            boolean compiledForFastRewriting,
+            Map<String, Term> lhsOfReadCells,
+            Map<String, Term> rhsOfWriteCells,
+            List<String> instructions,
             Attributes attributes,
             Definition definition) {
         this.label = label;
@@ -71,6 +82,17 @@ public class Rule extends JavaSymbolicObject {
         this.ensures = ImmutableList.copyOf(ensures);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
+        this.compiledForFastRewriting = compiledForFastRewriting;
+        if (compiledForFastRewriting) {
+            this.lhsOfReadCells = ImmutableMap.copyOf(lhsOfReadCells);
+            this.rhsOfWriteCells = ImmutableMap.copyOf(rhsOfWriteCells);
+            this.instructions = ImmutableList.copyOf(instructions);
+        } else {
+            this.lhsOfReadCells = null;
+            this.rhsOfWriteCells = null;
+            this.instructions = null;
+        }
+                
         super.setAttributes(attributes);
 
         Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs(definition);
@@ -228,6 +250,22 @@ public class Rule extends JavaSymbolicObject {
 
     public Term rightHandSide() {
         return rightHandSide;
+    }
+    
+    public boolean isCompiledForFastRewriting() {
+        return compiledForFastRewriting;
+    }
+    
+    public Map<String, Term> lhsOfReadCell() {
+        return lhsOfReadCells;
+    }
+    
+    public Map<String, Term> rhsOfWriteCell() {
+        return rhsOfWriteCells;
+    }
+    
+    public List<String> instructions() {
+        return instructions;
     }
 
     @Override

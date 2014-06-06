@@ -3,6 +3,8 @@ package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
@@ -54,6 +56,20 @@ public class MacroExpander extends TermTransformer {
         }
         UninterpretedConstraint processedLookups
             = (UninterpretedConstraint) expandMacro(rule.lookups());
+ 
+        Map<String, Term> processedLhsOfReadCell = null;
+        Map<String, Term> processedRhsOfWriteCell = null;
+        if (rule.isCompiledForFastRewriting()) {
+            processedLhsOfReadCell = new HashMap<>();
+            for (Map.Entry<String, Term> entry : rule.lhsOfReadCell().entrySet()) {
+                processedLhsOfReadCell.put(entry.getKey(), processTerm(entry.getValue()));
+            }
+            processedRhsOfWriteCell = new HashMap<>();
+            for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+                processedRhsOfWriteCell.put(entry.getKey(), processTerm(entry.getValue()));
+            }
+        }
+
         return new Rule(
                 rule.label(),
                 processedLeftHandSide,
@@ -62,6 +78,10 @@ public class MacroExpander extends TermTransformer {
                 processedEnsures,
                 rule.freshVariables(),
                 processedLookups,
+                rule.isCompiledForFastRewriting(),
+                processedLhsOfReadCell,
+                processedRhsOfWriteCell,
+                rule.instructions(),
                 rule.getAttributes(),
                 definition);
     }
