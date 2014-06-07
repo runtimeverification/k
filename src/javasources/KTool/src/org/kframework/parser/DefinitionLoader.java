@@ -277,11 +277,12 @@ public class DefinitionLoader {
                 cachedDef = new HashMap<>();
 
             CacheLookupFilter clf = new CacheLookupFilter(context, cachedDef);
-            def = (Definition) clf.visitNode(def);
-            int cachedSentences = clf.getKept().size();
-
-            ParseRulesFilter prf = new ParseRulesFilter(context, clf.getKept());
+            int cachedSentences = 0;
+            ParseRulesFilter prf = null;
             try {
+                def = (Definition) clf.visitNode(def);
+                cachedSentences = clf.getKept().size();
+                prf = new ParseRulesFilter(context, clf.getKept());
                 def = (Definition) prf.visitNode(def);
             } catch (ParseFailedException te) {
                 te.printStackTrace();
