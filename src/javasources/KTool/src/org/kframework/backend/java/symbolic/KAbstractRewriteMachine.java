@@ -11,6 +11,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -33,7 +34,7 @@ public class KAbstractRewriteMachine {
     private Map<Variable, Term> substitution = Maps.newHashMap();
     
     // program counter
-    private int pc = 0;
+    private int pc = 1;
     private boolean success = true;
     
     private final TermContext context;
@@ -52,14 +53,38 @@ public class KAbstractRewriteMachine {
     
     private boolean rewrite() {
         execute(subject);
+        if (success) {
+            EvalTimer.start();
+            substitution = PatternMatcher.evaluateConditions(rule, substitution, context);
+            EvalTimer.stop();
+            
+            if (substitution != null) {
+                RewriteTimer.start();
+                for (Cell cell : writeCells) {
+                    Term newContent = rule.rhsOfWriteCell()
+                            .get(cell.getLabel())
+                            .substituteAndEvaluate(substitution, context);
+                    cell.unsafeSetContent(newContent);
+                }
+                RewriteTimer.stop();
+            } else {
+                success = false;
+            }
+        }
+        
         return success;
     }
+    
+    public static Stopwatch MatchingTimer = new Stopwatch();
+    public static Stopwatch EvalTimer = new Stopwatch();
+    public static Stopwatch RewriteTimer = new Stopwatch();
 
     private void execute(Cell<?> crntCell) {
         String cellLabel = crntCell.getLabel();
         if (isReadCell(cellLabel)) {
             // do matching
-            Map<Variable, Term> subst = PatternMatcher.patternMatch(crntCell, (Term) rule.lhsOfReadCell().get(cellLabel), context);
+            MatchingTimer.start();
+            Map<Variable, Term> subst = PatternMatcher.nonAssocCommPatternMatch(crntCell.getContent(), (Term) rule.lhsOfReadCell().get(cellLabel), context);         
             if (subst == null) {
                 success = false;
             } else {                    
@@ -68,6 +93,8 @@ public class KAbstractRewriteMachine {
                     success = false;
                 }
             }
+            MatchingTimer.stop();
+            
             if (!success) {
                 return;
             }
@@ -78,12 +105,7 @@ public class KAbstractRewriteMachine {
         
         while (true) {
             String nextInstr = getNextInstruction();
-            if (nextInstr == null) {
-                for (Cell cell : writeCells) {
-                    
-                }
-            }
-            
+           
             if (nextInstr.equals(INST_CHOICE)) {
                 // TODO(YilongL): ignore choice instruction for now
                 nextInstr = getNextInstruction();

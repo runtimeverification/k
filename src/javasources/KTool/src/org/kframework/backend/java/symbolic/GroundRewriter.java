@@ -57,6 +57,12 @@ public class GroundRewriter {
 
         stopwatch.stop();
         System.err.println("[" + step + ", " + stopwatch + "]");
+        System.err.printf("%s vs. %s(mc=%s, eval=%s, rew=%s) + %s\n",
+                OldRewriterTimer, AbstractRewriteMachineTimer,
+                KAbstractRewriteMachine.MatchingTimer,
+                KAbstractRewriteMachine.EvalTimer,
+                KAbstractRewriteMachine.RewriteTimer,
+                sw);
 
         return subject;
     }
@@ -81,6 +87,10 @@ public class GroundRewriter {
         return n < results.size() ? results.get(n) : null;
     }
 
+    public static Stopwatch OldRewriterTimer = new Stopwatch();
+    public static Stopwatch AbstractRewriteMachineTimer = new Stopwatch();
+    public static Stopwatch sw = new Stopwatch();
+    
     private void computeRewriteStep(Term subject, int successorBound) {
         results.clear();
 
@@ -100,19 +110,34 @@ public class GroundRewriter {
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
                 if (rule.isCompiledForFastRewriting() && successorBound == 1) {
-                    // the following method could modify the subject
-                    boolean success = KAbstractRewriteMachine.rewrite(rule, subject, termContext);
-                    if (success) {
-                        results.add(subject);
-                        return;
+                    /* if we are doing concrete execution and the rule has been compiled for K abstract machine */
+                    
+                    OldRewriterTimer.start();
+                    List<Map<Variable, Term>> matchingResults = getMatchingResults(subject, rule);
+                    Term referenceResult = null;
+                    for (Map<Variable, Term> subst : matchingResults) {
+                        referenceResult = constructNewSubjectTerm(rule, subst);
                     }
+                    OldRewriterTimer.stop();
+
+                    AbstractRewriteMachineTimer.start();
+                    if (KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
+                        assert matchingResults.size() == 1 && referenceResult.equals(subject);
+                        results.add(subject);
+                    } else {
+                        assert referenceResult == null;
+                    }
+                    AbstractRewriteMachineTimer.stop();
                 } else {
+                    sw.start();
                     for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
                         results.add(constructNewSubjectTerm(rule, subst));
                         if (results.size() == successorBound) {
+                            sw.stop();
                             return;
                         }
                     }
+                    sw.stop();
                 }
             }
             // If we've found matching results from one equivalence class then
