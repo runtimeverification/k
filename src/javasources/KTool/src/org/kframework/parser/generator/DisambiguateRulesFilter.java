@@ -1,15 +1,10 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
-import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.StringSentence;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -27,15 +22,6 @@ import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
-import org.kframework.parser.utils.CacheContainer;
-import org.kframework.utils.XmlLoader;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Formatter;
 
 public class DisambiguateRulesFilter extends ParseForestTransformer {
     boolean checkInclusion = true;

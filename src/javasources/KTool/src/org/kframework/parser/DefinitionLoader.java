@@ -3,7 +3,9 @@ package org.kframework.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -44,13 +46,14 @@ import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.BasicParser;
+import org.kframework.parser.generator.CacheLookupFilter;
 import org.kframework.parser.generator.Definition2SDF;
 import org.kframework.parser.generator.DefinitionSDF;
 import org.kframework.parser.generator.DisambiguateRulesFilter;
 import org.kframework.parser.generator.ParseConfigsFilter;
 import org.kframework.parser.generator.ParseRulesFilter;
 import org.kframework.parser.generator.ProgramSDF;
-import org.kframework.parser.utils.CacheContainer;
+import org.kframework.parser.utils.CachedSentence;
 import org.kframework.parser.utils.ResourceExtractor;
 import org.kframework.parser.utils.Sdf2Table;
 import org.kframework.utils.BinaryLoader;
@@ -266,24 +269,31 @@ public class DefinitionLoader {
 
             // ----------------------------------- parse rules
             JavaClassesFactory.startConstruction(context);
-            CacheContainer cachedDef = new CacheContainer();
-            try {
-                // load definition if possible
-                if (new File(cacheFile).exists()) {
-                    cachedDef = BinaryLoader.load(CacheContainer.class, cacheFile);
-                }
-                cachedDef.totalSentences = 0;
-                cachedDef.parsedSentences = 0;
+            Map<String, CachedSentence> cachedDef;
+            // load definition if possible
+            if (new File(cacheFile).exists())
+                cachedDef = BinaryLoader.load(Map.class, cacheFile);
+            else
+                cachedDef = new HashMap<>();
 
-                def = (Definition) new ParseRulesFilter(context, cachedDef).visitNode(def);
+            CacheLookupFilter clf = new CacheLookupFilter(context, cachedDef);
+            def = (Definition) clf.visitNode(def);
+            int cachedSentences = clf.getKept().size();
+
+            ParseRulesFilter prf = new ParseRulesFilter(context, clf.getKept());
+            try {
+                def = (Definition) prf.visitNode(def);
             } catch (ParseFailedException te) {
                 te.printStackTrace();
             } finally {
                 // save definition
-                BinaryLoader.save(cacheFile, cachedDef);
+                BinaryLoader.save(cacheFile, clf.getKept());
             }
-
             JavaClassesFactory.endConstruction();
+
+            // really important to do disambiguation after we save the cache to disk because
+            // the objects in the sentences are mutable, and we risk altering them and miss
+            // warning and error messages when kompiling next time around
             try {
                 def = (Definition) new DisambiguateRulesFilter(context, true).visitNode(def);
             } catch (ParseFailedException te) {
@@ -291,8 +301,7 @@ public class DefinitionLoader {
             }
             def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
 
-
-            Stopwatch.instance().printIntermediate("Parsing Rules [" + cachedDef.parsedSentences + "/" + cachedDef.totalSentences + "]");
+            Stopwatch.instance().printIntermediate("Parsing Rules [" + (clf.getKept().size() - cachedSentences) + "/" + clf.getKept().size() + "]");
 
             return def;
         } catch (ParseFailedException e) {
@@ -327,7 +336,7 @@ public class DefinitionLoader {
 
         // ----------------------------------- parse rules
         JavaClassesFactory.startConstruction(context);
-        def = (Definition) new ParseRulesFilter(context, false).visitNode(def);
+        def = (Definition) new ParseRulesFilter(context).visitNode(def);
         def = (Definition) new DisambiguateRulesFilter(context, false).visitNode(def);
         def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
 
