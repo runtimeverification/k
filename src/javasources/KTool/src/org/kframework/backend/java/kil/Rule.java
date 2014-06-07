@@ -44,9 +44,10 @@ public class Rule extends JavaSymbolicObject {
     private final boolean containsKCell;
     private final boolean hasUnboundVars;
     
-    private final boolean compiledForFastRewriting;
+    private boolean compiledForFastRewriting;
     private final Map<String, Term> lhsOfReadCells;
     private final Map<String, Term> rhsOfWriteCells;
+    private final Set<String> cellsToCopy;
     private final List<String> instructions;
     
     /**
@@ -72,6 +73,7 @@ public class Rule extends JavaSymbolicObject {
             boolean compiledForFastRewriting,
             Map<String, Term> lhsOfReadCells,
             Map<String, Term> rhsOfWriteCells,
+            Set<String> cellsToCopy,
             List<String> instructions,
             Attributes attributes,
             Definition definition) {
@@ -86,10 +88,12 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             this.lhsOfReadCells = ImmutableMap.copyOf(lhsOfReadCells);
             this.rhsOfWriteCells = ImmutableMap.copyOf(rhsOfWriteCells);
+            this.cellsToCopy = ImmutableSet.copyOf(cellsToCopy);
             this.instructions = ImmutableList.copyOf(instructions);
         } else {
             this.lhsOfReadCells = null;
             this.rhsOfWriteCells = null;
+            this.cellsToCopy = null;
             this.instructions = null;
         }
                 
@@ -262,6 +266,10 @@ public class Rule extends JavaSymbolicObject {
     
     public Map<String, Term> rhsOfWriteCell() {
         return rhsOfWriteCells;
+    }
+    
+    public Set<String> cellsToCopy() {
+        return cellsToCopy;
     }
     
     public List<String> instructions() {

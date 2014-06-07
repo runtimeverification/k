@@ -88,7 +88,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         
         return rule;
     }
-    
+
     @Override
     public ASTNode visit(Cell cell, Void _)  {
         if (!compiledForFastRewriting) {
@@ -129,6 +129,12 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     
     @Override
     public ASTNode visit(Rewrite node, Void _)  {
+        if (nestedCellCount == 0) {
+            /* TODO(YilongL): unable to handle the case where the top mentioned cell is inside a rewrite */
+            compiledForFastRewriting = false;
+            return node;
+        }
+        
         hasRewrite = true;
         return node;
     }

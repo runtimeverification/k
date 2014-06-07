@@ -594,6 +594,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     rule.isCompiledForFastRewriting(),
                     processedLhsOfReadCell,
                     processedRhsOfWriteCell,
+                    rule.cellsToCopy(),
                     rule.instructions(),
                     rule.getAttributes(),
                     definition);

@@ -34,6 +34,7 @@ public class Rule extends Sentence {
     private Set<String> cellsOfInterest;
     private Map<String, Term> lhsOfReadCell;
     private Map<String, Term> rhsOfWriteCell;
+    private Set<String> cellsToCopy;
     private List<String> rewSchedule;
 
     public Rule(Element element) {
@@ -49,6 +50,7 @@ public class Rule extends Sentence {
         cellsOfInterest = node.cellsOfInterest;
         lhsOfReadCell = node.lhsOfReadCell;
         rhsOfWriteCell = node.rhsOfWriteCell;
+        cellsToCopy = node.cellsToCopy;
         rewSchedule = node.rewSchedule;
     }
 
@@ -162,6 +164,14 @@ public class Rule extends Sentence {
 
     public void setRewritingSchedule(List<String> rewSchedule) {
         this.rewSchedule = ImmutableList.copyOf(rewSchedule);
+    }
+
+    public void setCellsToCopy(Set<String> cellsToCopy) {
+        this.cellsToCopy = ImmutableSet.copyOf(cellsToCopy);
+    }
+
+    public Set<String> getCellsToCopy() {
+        return cellsToCopy;
     }
 
 }

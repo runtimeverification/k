@@ -649,6 +649,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 node.isCompiledForFastRewriting(),
                 lhsOfReadCell,
                 rhsOfWriteCell,
+                node.getCellsToCopy(),
                 node.getRewritingSchedule(),
                 node.getAttributes(),
                 definition);
@@ -811,6 +812,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rule.isCompiledForFastRewriting(),
                 rule.lhsOfReadCell(),
                 rhsOfWriteCell,
+                rule.cellsToCopy(),
                 rule.instructions(),
                 rule.getAttributes(),
                 globalContext.def);

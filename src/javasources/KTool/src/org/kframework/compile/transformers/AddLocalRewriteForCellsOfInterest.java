@@ -1,6 +1,7 @@
 package org.kframework.compile.transformers;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
@@ -13,16 +14,19 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
     
     private enum Status { LHS, RHS }
 
     private Rule crntRule;
+    private String outerWriteCell = null;
     private Status status;
     
     private Map<String, Term> lhsOfReadCell;
-    private Map<String, Term> rhsOfWriteCell;    
+    private Map<String, Term> rhsOfWriteCell;  
+    private Set<String> cellsToCopy = Sets.newHashSet();
 
     public AddLocalRewriteForCellsOfInterest(Context context) {
         super("Add local rewrite for cells of interest", context);
@@ -51,6 +55,7 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
                 
         lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
         rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
+        cellsToCopy.clear();
         
         crntRule = rule;
         status = Status.LHS;
@@ -60,19 +65,24 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
         status = null;
         crntRule = null;
         
-        rule.setLhsOfReadCell(lhsOfReadCell);
-        rule.setRhsOfWriteCell(rhsOfWriteCell);
+        rule = rule.shallowCopy();
+        if (!cellsToCopy.isEmpty()) {
+            rule.setCompiledForFastRewriting(false);
+        } else {
+            rule.setLhsOfReadCell(lhsOfReadCell);
+            rule.setRhsOfWriteCell(rhsOfWriteCell);
+            rule.setCellsToCopy(cellsToCopy);
+        }
         
-//        System.out.println(rule);
-//        System.out.println(cell2Lhs);
-//        System.out.println(cell2Rhs);
-//        System.out.println("************");
         return rule;
     }
     
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-        if (crntRule == null || (crntRule != null && !crntRule.getCellsOfInterest().contains(cell.getLabel()))) {
+        if (crntRule == null
+                || (crntRule != null 
+                && !crntRule.getCellsOfInterest().contains(cell.getLabel()) 
+                && outerWriteCell == null)) {
             return super.visit(cell, _);
         }
         
@@ -81,8 +91,17 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
                 lhsOfReadCell.put(cell.getLabel(), cell.getContents());
             }
         } else {
-            if (crntRule.getWriteCells().contains(cell.getLabel())) {
-                rhsOfWriteCell.put(cell.getLabel(), cell.getContents());
+            if (outerWriteCell != null) {
+                cellsToCopy.add(outerWriteCell);
+            } else {
+                if (crntRule.getWriteCells().contains(cell.getLabel())) {
+                    rhsOfWriteCell.put(cell.getLabel(), cell.getContents());
+                    
+                    outerWriteCell = cell.getLabel();
+                    super.visit(cell, _);
+                    outerWriteCell = null;
+
+                }                
             }
         }        
 
