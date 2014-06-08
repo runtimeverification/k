@@ -38,7 +38,6 @@ public class KLabelConstant extends KLabel {
      * generates this {@code KLabelConstant}
      */
     private final boolean isFunction;
-    private final TermContext termContext;
 
     private KLabelConstant(String label, TermContext termContext) {
         this.label = label;
@@ -74,7 +73,6 @@ public class KLabelConstant extends KLabel {
             isFunction = true;
         }
         this.isFunction = isFunction;
-        this.termContext = termContext;
     }
 
     /**
@@ -172,10 +170,6 @@ public class KLabelConstant extends KLabel {
             cache.put(label, kLabelConstant);
         }
         return kLabelConstant;
-    }
-
-    public TermContext termContext() {
-        return termContext;
     }
 
     public boolean isBinder() {
