@@ -2,16 +2,11 @@
 package org.kframework.backend.java.kil;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.krun.api.io.FileSystem;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 
 /**
  * An object containing context specific to a particular configuration.
