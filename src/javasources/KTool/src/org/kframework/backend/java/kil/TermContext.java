@@ -16,22 +16,33 @@ public class TermContext extends JavaSymbolicObject {
     private BigInteger counter = BigInteger.ZERO;
     private final Definition def;
     private final FileSystem fs;
+    public final ConstrainedTerm.Data constrainedTermData;
 
-    private TermContext(Definition def, FileSystem fs) {
+    private TermContext(Definition def, ConstrainedTerm.Data constrainedTermData, FileSystem fs) {
         this.def = def;
         this.fs = fs;
+        this.constrainedTermData = constrainedTermData;
     }
 
     /**
      * Only used when the Term is part of a Definition instead of part of a
      * ConstrainedTerm.
      */
+    public static TermContext of(Definition def, ConstrainedTerm.Data constrainedTermData) {
+        return new TermContext(def, constrainedTermData, null);
+    }
+
+    public static TermContext of(Definition def, ConstrainedTerm.Data constrainedTermData,
+            FileSystem fs) {
+        return new TermContext(def, constrainedTermData, fs);
+    }
+
     public static TermContext of(Definition def) {
-        return new TermContext(def, null);
+        return new TermContext(def, null, null);
     }
 
     public static TermContext of(Definition def, FileSystem fs) {
-        return new TermContext(def, fs);
+        return new TermContext(def, null, fs);
     }
 
     public BigInteger getCounter() {

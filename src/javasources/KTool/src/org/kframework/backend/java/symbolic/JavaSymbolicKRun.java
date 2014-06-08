@@ -41,6 +41,7 @@ public class JavaSymbolicKRun implements KRun {
     private final KILtoBackendJavaKILTransformer transformer;
     //Liyi Li: add a build-in SymbolicRewriter to fix the simulation rules
     private SymbolicRewriter simulationRewriter;
+    private final BuiltinFunction builtins;
 
     public JavaSymbolicKRun(Context context) throws KRunExecutionException {
         /* context is unused for directory paths; the actual context is de-serialized */
@@ -53,7 +54,7 @@ public class JavaSymbolicKRun implements KRun {
         }
 
         /* initialize the builtin function table */
-        BuiltinFunction.init(definition);
+        builtins = new BuiltinFunction(definition);
 
         this.context = definition.context();
         this.context.kompiled = context.kompiled;

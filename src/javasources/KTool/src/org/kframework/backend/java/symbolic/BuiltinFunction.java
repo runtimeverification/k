@@ -55,9 +55,9 @@ public class BuiltinFunction {
      * Map of {@link KLabelConstant} representation of builtin (hooked) operations to
      * {@link Method} representation of Java implementation of said operations.
      */
-    private static final Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
+    private final Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
 
-    public static void init(Definition definition) {
+    public BuiltinFunction(Definition definition) {
         /* initialize {@code table} */
             String separator = System.getProperty("file.separator");
             String path = KPaths.getKBase(false) + separator + "include" + separator + "java";
