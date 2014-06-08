@@ -1284,4 +1284,24 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             });
         }
     }
+
+    public static class Data {
+        public final LinkedList<Equality> equalities;
+        public final Map<Variable, Term> substitution;
+        public final boolean isNormal;
+        public final TruthValue truthValue;
+
+        public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution,
+                boolean isNormal, TruthValue truthValue) {
+            this.equalities = equalities;
+            // TODO Auto-generated constructor stub
+            this.substitution = substitution;
+            this.isNormal = isNormal;
+            this.truthValue = truthValue;
+        }
+    }
+
+    public Data data() {
+        return new Data(equalities, substitution, isNormal, truthValue);
+    }
 }

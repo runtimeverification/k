@@ -508,4 +508,21 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         visitor.visit(this);
     }
 
+    public static class Data {
+
+        public Term term;
+        public SymbolicConstraint.Data lookups;
+        public SymbolicConstraint.Data constraint;
+
+        public Data(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint) {
+            this.term = term;
+            this.lookups = lookups.data();
+            this.constraint = constraint.data();
+        }
+
+    }
+
+    public Data data() {
+        return new Data(term, lookups, constraint);
+    }
 }
