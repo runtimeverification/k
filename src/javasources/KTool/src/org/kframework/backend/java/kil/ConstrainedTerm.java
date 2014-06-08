@@ -52,6 +52,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         this.lookups = lookups;
         this.constraint = constraint;
         this.context = context;
+        context.setConstrainedTermData(this.data());
     }
 
     public ConstrainedTerm(Term term, SymbolicConstraint constraint, TermContext context) {

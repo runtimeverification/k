@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KItemProjection;
@@ -88,6 +89,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
      */
     private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize
             = Collections.emptyMap();
+    private GlobalContext globalContext;
 
     public KILtoBackendJavaKILTransformer(Context context) {
         super("Transform KIL into java backend KIL", context);
@@ -101,19 +103,22 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         Definition transformedDef = (Definition) this.visitNode(node);
+        GlobalContext transformedDefGlobalContext = new GlobalContext(transformedDef, null);
         
-        Definition expandedDefinition = new MacroExpander(transformedDef).processDefinition();
-        return evaluateDefinition(expandedDefinition);
+        Definition expandedDefinition = new MacroExpander(TermContext.of(transformedDefGlobalContext)).processDefinition();
+        return evaluateDefinition(globalContext);
     }
 
     public Rule transformRule(org.kframework.kil.Rule node, Definition definition) {
         this.definition = definition;
+        this.globalContext = new GlobalContext(definition, null);
 
         Rule rule = null;
         try {
-            rule = new MacroExpander(definition).processRule((Rule) this.visitNode(node));
+            rule = new MacroExpander(TermContext.of(globalContext)).processRule((Rule) this.visitNode(node));
         } finally {
             this.definition = null;
+            this.globalContext = null;
         }
 
         return rule;
@@ -121,12 +126,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     public Term transformTerm(org.kframework.kil.Term node, Definition definition) {
         this.definition = definition;
+        this.globalContext = new GlobalContext(definition, null);
 
         Term term = null;
         try {
-            term = new MacroExpander(definition).processTerm((Term) this.visitNode(node));
+            term = new MacroExpander(TermContext.of(globalContext)).processTerm((Term) this.visitNode(node));
         } finally {
             this.definition = null;
+            this.globalContext = null;
         }
 
         return term;
@@ -159,7 +166,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (kList instanceof Variable) {
             kList = new KList((Variable) kList);
         }
-        return new KItem(kLabel, kList, TermContext.of(definition));
+        return new KItem(kLabel, kList, TermContext.of(globalContext));
     }
     
     @Override
@@ -372,7 +379,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                         result = new KItem(
                                 KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, definition),
                                 new KList(ImmutableList.of(result, baseTerm)),
-                                TermContext.of(definition));
+                                TermContext.of(globalContext));
                     }
                     return result;
                 }
@@ -415,7 +422,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 result = new KItem(
                         KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
-                        TermContext.of(definition));
+                        TermContext.of(globalContext));
             }
             return result;
         }
@@ -459,7 +466,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 result = new KItem(
                         KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
-                        TermContext.of(definition));
+                        TermContext.of(globalContext));
             }
             return result;
         }
@@ -649,7 +656,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 definition);
 
         if (freshRules) {
-            return rule.getFreshRule(TermContext.of(definition));
+            return rule.getFreshRule(TermContext.of(globalContext));
         }
         return rule;
     }
@@ -670,6 +677,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Definition node, Void _) {
         Definition definition = new Definition(context);
         this.definition = definition;
+        this.globalContext = new GlobalContext(definition, null);
 
         Module singletonModule = node.getSingletonModule();
 
@@ -699,6 +707,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         this.definition = null;
+        this.globalContext = null;
         return definition;
     }
     
@@ -709,7 +718,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
      *            the definition used for evaluation
      * @return the partially evaluated definition
      */
-    private static Definition evaluateDefinition(Definition definition) {
+    private static Definition evaluateDefinition(GlobalContext globalContext) {
+        Definition definition =  globalContext.def;
         /* replace the unevaluated rules defining functions with their partially evaluated counterparts */
         ArrayList<Rule> partiallyEvaluatedRules = new ArrayList<>();
         /* iterate until a fixpoint is reached, because the evaluation with functions uses Term#substituteAndEvalaute */
@@ -718,7 +728,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
             partiallyEvaluatedRules.clear();
             for (Rule rule : definition.functionRules().values()) {
-                Rule evaluatedRule = evaluateRule(rule, definition);
+                Rule evaluatedRule = evaluateRule(rule, globalContext);
                 partiallyEvaluatedRules.add(evaluatedRule);
 
                 if (!evaluatedRule.equals(rule)) {
@@ -737,7 +747,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         /* replace the unevaluated rules and macros with their partially evaluated counterparts */
         partiallyEvaluatedRules.clear();
         for (Rule rule : Iterables.concat(definition.rules(), definition.macros())) {
-            partiallyEvaluatedRules.add(evaluateRule(rule, definition));
+            partiallyEvaluatedRules.add(evaluateRule(rule, globalContext));
         }
         definition.rules().clear();
         definition.macros().clear();
@@ -755,8 +765,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
      * @return
      *          the partially evaluated rule
      */
-    private static Rule evaluateRule(Rule rule, Definition definition) {
-        TermContext termContext = TermContext.of(definition);
+    private static Rule evaluateRule(Rule rule, GlobalContext globalContext) {
+        TermContext termContext = TermContext.of(globalContext);
         // TODO(AndreiS): some evaluation is required in the LHS as well
         //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
 
@@ -793,7 +803,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rule.freshVariables(),
                 lookups,
                 rule.getAttributes(),
-                definition);
+                globalContext.def);
         return newRule.equals(rule) ? origRule : newRule;                
     }
 
