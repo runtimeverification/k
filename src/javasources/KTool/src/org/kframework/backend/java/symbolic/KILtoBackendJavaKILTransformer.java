@@ -172,7 +172,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KLabelConstant node, Void _)  {
-        return KLabelConstant.of(node.getLabel(), TermContext.of(definition));
+        return KLabelConstant.of(node.getLabel(), definition);
     }
 
     @Override
@@ -373,7 +373,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                             elementsRight));
                     for (Term baseTerm : baseTerms) {
                         result = new KItem(
-                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, TermContext.of(definition)),
+                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, definition),
                                 new KList(ImmutableList.of(result, baseTerm)),
                                 TermContext.of(definition));
                     }
@@ -416,7 +416,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
                 result = new KItem(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, TermContext.of(definition)),
+                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
                         TermContext.of(definition));
             }
@@ -460,7 +460,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
                 result = new KItem(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, TermContext.of(definition)),
+                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
                         TermContext.of(definition));
             }
@@ -691,14 +691,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         for (String kLabelName : singletonModule.getModuleKLabels()) {
-            definition.addKLabel(KLabelConstant.of(kLabelName, TermContext.of(definition)));
+            definition.addKLabel(KLabelConstant.of(kLabelName, definition));
         }
 
         /* collect the productions which have the attributes strict and seqstrict */
         Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
         productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
         for (Production production : productions) {
-            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), TermContext.of(definition)));
+            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), definition));
         }
 
         this.definition = null;

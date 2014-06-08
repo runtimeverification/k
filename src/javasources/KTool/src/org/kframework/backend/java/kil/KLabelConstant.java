@@ -39,9 +39,9 @@ public class KLabelConstant extends KLabel {
      */
     private final boolean isFunction;
 
-    private KLabelConstant(String label, TermContext termContext) {
+    private KLabelConstant(String label, Definition definition) {
         this.label = label;
-        productions = ImmutableList.copyOf(termContext.definition().context().productionsOf(label));
+        productions = ImmutableList.copyOf(definition.context().productionsOf(label));
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
@@ -83,12 +83,12 @@ public class KLabelConstant extends KLabel {
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, TermContext termContext) {
+    public static KLabelConstant of(String label, Definition definition) {
         assert label != null;
 
         KLabelConstant kLabelConstant = cache.get(label);
         if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, termContext);
+            kLabelConstant = new KLabelConstant(label, definition);
             cache.put(label, kLabelConstant);
         }
         return kLabelConstant;
