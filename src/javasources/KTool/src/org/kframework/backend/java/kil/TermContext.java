@@ -18,39 +18,25 @@ import com.google.common.collect.Table;
  */
 public class TermContext extends JavaSymbolicObject {
 
-    private static Map<Definition, TermContext> cache1 = new HashMap<Definition, TermContext>();
-    private static Table<Definition, FileSystem, TermContext> cache2 = HashBasedTable.create();
-
     private BigInteger counter = BigInteger.ZERO;
     private final Definition def;
     private final FileSystem fs;
-    
+
     private TermContext(Definition def, FileSystem fs) {
         this.def = def;
         this.fs = fs;
     }
-    
+
     /**
      * Only used when the Term is part of a Definition instead of part of a
      * ConstrainedTerm.
      */
     public static TermContext of(Definition def) {
-        TermContext termContext = cache1.get(def);
-        if (termContext == null) {
-            termContext = new TermContext(def, null);
-            cache1.put(def, termContext);
-        }
-        return termContext;
+        return new TermContext(def, null);
     }
 
     public static TermContext of(Definition def, FileSystem fs) {
-        assert fs != null;
-        TermContext termContext = cache2.get(def, fs);
-        if (termContext == null) {
-            termContext = new TermContext(def, fs);
-            cache2.put(def, fs, termContext);
-        }
-        return termContext;
+        return new TermContext(def, fs);
     }
 
     public BigInteger getCounter() {
