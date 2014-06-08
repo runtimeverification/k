@@ -33,7 +33,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class BuiltinFunction {
 
-    private static final String hookPropertiesFileName = "hooks.properties";
+    private final String hookPropertiesFileName = "hooks.properties";
 
     /**
      * Set of hook module names excluded from evaluation during compilation, when each rule's
@@ -43,14 +43,14 @@ public class BuiltinFunction {
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateDefinition(org.kframework.backend.java.kil.Definition)
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateRule(org.kframework.backend.java.kil.Rule, org.kframework.backend.java.kil.Definition)
      */
-    private static final ImmutableSet<String> hookMetaModules = ImmutableSet.of("#META-K",
+    private final ImmutableSet<String> hookMetaModules = ImmutableSet.of("#META-K",
             "MetaK", "Visitor", "#IO", "#FRESH");
 
     /**
      * Map of {@link KLabelConstant} representation of builtin (hooked) operations to
      * {@link Method} representation of Java implementation of said operations.
      */
-    private final Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
+    private Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
 
     public BuiltinFunction(Definition definition) {
         /* initialize {@code table} */
@@ -131,7 +131,7 @@ public class BuiltinFunction {
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      */
-    public static Term invoke(TermContext context, KLabelConstant label, Term... arguments)
+    public Term invoke(TermContext context, KLabelConstant label, Term... arguments)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Object[] args = Arrays.copyOf(arguments, arguments.length + 1, Object[].class);
         args[arguments.length] = context;
@@ -151,7 +151,7 @@ public class BuiltinFunction {
      * @return true if the given K label corresponds to a builtin operation;
      *         otherwise, false
      */
-    public static boolean isBuiltinKLabel(KLabelConstant label) {
+    public boolean isBuiltinKLabel(KLabelConstant label) {
         return table.containsKey(label);
     }
 

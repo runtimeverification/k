@@ -3,6 +3,7 @@ package org.kframework.backend.java.kil;
 
 import java.math.BigInteger;
 
+import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -16,10 +17,13 @@ public class TermContext extends JavaSymbolicObject {
     private BigInteger counter = BigInteger.ZERO;
     private final Definition def;
     private final FileSystem fs;
+    
+    public final BuiltinFunction builtins;
     public final ConstrainedTerm.Data constrainedTermData;
 
     private TermContext(Definition def, ConstrainedTerm.Data constrainedTermData, FileSystem fs) {
         this.def = def;
+        this.builtins = new BuiltinFunction(def);
         this.fs = fs;
         this.constrainedTermData = constrainedTermData;
     }

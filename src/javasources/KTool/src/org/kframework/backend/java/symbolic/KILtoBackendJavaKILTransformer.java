@@ -102,9 +102,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         Definition transformedDef = (Definition) this.visitNode(node);
         
-        /* initialize the builtin function table */
-        BuiltinFunction.init(transformedDef);
-
         Definition expandedDefinition = new MacroExpander(transformedDef).processDefinition();
         return evaluateDefinition(expandedDefinition);
     }
