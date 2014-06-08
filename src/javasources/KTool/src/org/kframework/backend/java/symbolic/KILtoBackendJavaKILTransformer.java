@@ -106,7 +106,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         GlobalContext transformedDefGlobalContext = new GlobalContext(transformedDef, null);
         
         Definition expandedDefinition = new MacroExpander(TermContext.of(transformedDefGlobalContext)).processDefinition();
-        return evaluateDefinition(globalContext);
+        return evaluateDefinition(new GlobalContext(expandedDefinition, null));
     }
 
     public Rule transformRule(org.kframework.kil.Rule node, Definition definition) {
@@ -719,7 +719,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
      * @return the partially evaluated definition
      */
     private static Definition evaluateDefinition(GlobalContext globalContext) {
-        Definition definition =  globalContext.def;
+        Definition definition = globalContext.def;
         /* replace the unevaluated rules defining functions with their partially evaluated counterparts */
         ArrayList<Rule> partiallyEvaluatedRules = new ArrayList<>();
         /* iterate until a fixpoint is reached, because the evaluation with functions uses Term#substituteAndEvalaute */
