@@ -27,7 +27,6 @@ import org.kframework.utils.BinaryLoader;
 import java.io.File;
 import java.util.*;
 
-import jdk.nashorn.internal.objects.Global;
 import edu.uci.ics.jung.graph.DirectedGraph;
 
 import org.kframework.utils.general.IndexingStatistics;
