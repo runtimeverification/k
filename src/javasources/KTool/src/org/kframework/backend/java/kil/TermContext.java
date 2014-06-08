@@ -3,7 +3,6 @@ package org.kframework.backend.java.kil;
 
 import java.math.BigInteger;
 
-import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
