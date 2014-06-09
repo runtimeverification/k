@@ -10,20 +10,29 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
-* Created by Traian on 04.06.2014.
-*/
+ * Collects all terms which are not bound by a binder.
+ * In some sense it is similar to computing the free variables
+ * However since we don't know for sure what can be bound and what not
+ * we simply remove the bound terms from all the others.
+ *
+ * @author TraianSF
+ */
 public class UnboundedTermsCollector extends PrePostVisitor {
     Multiset<Term> boundVariables;
     Set<Term> unboundedTerms;
 
-
+    /**
+     * Computes unbounded terms of a given term
+     * @param term --- the term to compute the set of unbounded terms for
+     * @return the set of unbounded terms in {@code term}
+     */
     public static Set<Term> getUnboundedTerms(Term term) {
         UnboundedTermsCollector collector = new UnboundedTermsCollector();
         term.accept(collector);
         return collector.unboundedTerms;
     }
 
-    public UnboundedTermsCollector() {
+    private UnboundedTermsCollector() {
         boundVariables = HashMultiset.create();
         unboundedTerms = new HashSet<>();
         preVisitor.addVisitor(new LocalVisitor() {
