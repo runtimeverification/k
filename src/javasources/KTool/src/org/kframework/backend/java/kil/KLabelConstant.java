@@ -38,6 +38,12 @@ public class KLabelConstant extends KLabel {
      * generates this {@code KLabelConstant}
      */
     private final boolean isFunction;
+    
+    private final boolean isSortPredicate;
+    
+    private final String predicateSort;
+    
+    private final TermContext termContext;
 
     private KLabelConstant(String label, Definition definition) {
         this.label = label;
@@ -49,6 +55,9 @@ public class KLabelConstant extends KLabel {
 
         boolean isFunction = false;
         if (!label.startsWith("is")) {
+            isSortPredicate = false;
+            predicateSort = null;
+            
             Iterator<Production> iterator = productions.iterator();
             if (iterator.hasNext()) {
                 Production fstProd = iterator.next();
@@ -73,6 +82,8 @@ public class KLabelConstant extends KLabel {
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
+            isSortPredicate = true;
+            predicateSort = label.substring("is".length());
         }
         this.isFunction = isFunction;
     }
@@ -112,6 +123,23 @@ public class KLabelConstant extends KLabel {
     @Override
     public boolean isFunction() {
         return isFunction;
+    }
+    
+    /**
+     * Returns true if this {@code KLabelConstant} is a sort membership
+     * predicate; otherwise, false.
+     */
+    public boolean isSortPredicate() {
+        return isSortPredicate;
+    }
+    
+    /**
+     * Returns the predicate sort if this {@code KLabelConstant} represents a
+     * sort membership predicate; otherwise, {@code null}.
+     */
+    public String getPredicateSort() {
+        assert isSortPredicate();
+        return predicateSort;
     }
 
     public String label() {

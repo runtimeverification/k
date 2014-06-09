@@ -135,8 +135,7 @@ public class Rule extends JavaSymbolicObject {
             unboundVars = null;
         }
         
-        isSortPredicate = isFunction()
-                && functionKLabel().toString().startsWith("is");
+        isSortPredicate = isFunction() && functionKLabel().isSortPredicate();
         if (isSortPredicate) {
             predSort = functionKLabel().toString().substring(2);
             
