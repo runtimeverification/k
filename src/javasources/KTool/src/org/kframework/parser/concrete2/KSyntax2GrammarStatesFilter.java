@@ -89,7 +89,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 deleteToken.next.add(IdState);
                 // NeIdsState.next.add(IdsNt.exitState); // added at the end
                 previous = labelState;
-            } else { // Using multiple non-terminals but slower. It also creates the correct ambiguities.
+            } else { // TODO: remove once the quadratic behaviors are sorted out
+                // Using multiple non-terminals but slower. It also creates the correct ambiguities.
                 // ************************************** start of list creation **********************
                 UserList ul = prd.getListDecl();
                 /**

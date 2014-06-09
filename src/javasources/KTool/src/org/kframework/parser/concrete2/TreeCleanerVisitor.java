@@ -36,7 +36,7 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         ASTNode vis;
         if (!tc.getProduction().containsAttribute("klabel"))
-            vis = super.visitNode(tc.getContents().get(0), _);
+            vis = this.visitNode(tc.getContents().get(0), _);
         else
             vis = super.visit(tc, _);
         return vis;
