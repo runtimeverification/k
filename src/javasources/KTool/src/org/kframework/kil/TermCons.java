@@ -57,7 +57,7 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
 
     public TermCons(String psort, List<Term> contents, Production production) {
         super(psort);
-        cons = "";
+        cons = null;
         this.contents = contents;
         this.production = production;
     }
@@ -137,28 +137,34 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (this == obj)
-            return true;
-        if (!(obj instanceof TermCons))
-            return false;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
         TermCons tc = (TermCons) obj;
 
-        if (!tc.getSort().equals(this.sort))
+        if (!tc.getSort().equals(sort))
             return false;
-        if (!tc.cons.equals(cons))
-            return false;
-
-        if (tc.contents.size() != contents.size())
-            return false;
-
+        if (cons != null ? !cons.equals(tc.cons) : tc.cons != null) return false;
+        if (!production.equals(tc.production)) return false;
+        if (contents.size() != tc.contents.size()) return false;
         for (int i = 0; i < tc.contents.size(); i++) {
             if (!tc.contents.get(i).equals(contents.get(i)))
                 return false;
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        if (upToDateHash) {
+            cachedHashCode = cons != null ? cons.hashCode() : 0;
+            cachedHashCode = 31 * cachedHashCode + production.hashCode();
+            for (Term t : contents)
+                cachedHashCode = 31 * cachedHashCode + t.hashCode();
+            upToDateHash = true;
+        }
+        return cachedHashCode;
     }
 
     @Override
@@ -189,18 +195,6 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         }
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        if (upToDateHash) {
-            cachedHashCode = sort.hashCode() + cons.hashCode();
-
-            for (Term t : contents)
-                cachedHashCode += t.hashCode();
-            upToDateHash = true;
-        }
-        return cachedHashCode;
     }
 
     @Override
