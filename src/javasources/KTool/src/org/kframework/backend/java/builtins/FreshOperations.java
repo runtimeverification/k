@@ -31,7 +31,7 @@ public class FreshOperations {
         }
 
         KItem freshFunction = new KItem(
-                KLabelConstant.of(name, context),
+                KLabelConstant.of(name, context.definition()),
                 new KList(ImmutableList.<Term>of(IntToken.of(context.incrementCounter()))),
                 context);
         return freshFunction.evaluateFunction(new SymbolicConstraint(context), context);
