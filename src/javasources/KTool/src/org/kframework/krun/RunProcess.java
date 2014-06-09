@@ -120,6 +120,9 @@ public class RunProcess {
             } else if (parser.contains("--parser rules")) {
                 if (!isNotFile) content = FileUtil.getFileContent(value);
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
+            } else if (parser.contains("--parser newprogram")) {
+                if (!isNotFile) content = FileUtil.getFileContent(value);
+                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.NEWPROGRAM);
             } else {
                 if (!isNotFile) content = FileUtil.getFileContent(value);
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
