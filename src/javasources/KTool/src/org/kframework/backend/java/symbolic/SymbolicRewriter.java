@@ -361,7 +361,7 @@ public class SymbolicRewriter {
      *            rewrite rule and the current subject term
      * @return the new subject term
      */
-    private ConstrainedTerm constructNewSubjectTerm(Rule rule, SymbolicConstraint constraint) {
+    public static ConstrainedTerm constructNewSubjectTerm(Rule rule, SymbolicConstraint constraint) {
         /*
          * TODO(YilongL): had to comment out the following assertion because
          * logik.k uses unification even in concrete execution mode

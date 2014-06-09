@@ -726,11 +726,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         /* replace the unevaluated rules and macros with their partially evaluated counterparts */
         partiallyEvaluatedRules.clear();
-        for (Rule rule : Iterables.concat(definition.rules(), definition.macros())) {
+        Iterable<Rule> rules = Iterables.concat(
+                definition.rules(),
+                definition.macros(),
+                definition.patternRules().values());
+        for (Rule rule : rules) {
             partiallyEvaluatedRules.add(evaluateRule(rule, globalContext));
         }
         definition.rules().clear();
         definition.macros().clear();
+        definition.patternRules().clear();
         definition.addRuleCollection(partiallyEvaluatedRules);
 
         return definition;

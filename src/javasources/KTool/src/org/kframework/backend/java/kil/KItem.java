@@ -413,7 +413,8 @@ public final class KItem extends Term {
     public boolean isSymbolic() {
         // TODO(AndreiS): handle KLabel variables
         //return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
-        return kLabel instanceof KLabel && ((KLabel) kLabel).isFunction();
+        return kLabel instanceof KLabel
+                && (((KLabel) kLabel).isFunction() || ((KLabel) kLabel).isPattern());
     }
 
     /**

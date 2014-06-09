@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
@@ -113,7 +112,7 @@ public class PatternMatcher extends AbstractMatcher {
                 KItem kItem = (KItem) subject;
                 Term kLabel = kItem.kLabel();
                 Term kList = kItem.kList();
-                if (kLabel.equals(rule.functionKLabel())) {
+                if (kLabel.equals(rule.definedKLabel())) {
                     failed = !matcher.patternMatch(kList, ((KItem) rule.leftHandSide()).kList());
                 }
             }

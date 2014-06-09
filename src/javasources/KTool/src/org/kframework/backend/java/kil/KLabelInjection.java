@@ -68,6 +68,11 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
+    public boolean isPattern() {
+        return false;
+    }
+
+    @Override
     public int computeHash() {
         return term.hashCode();
     }

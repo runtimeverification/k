@@ -39,6 +39,12 @@ public class KLabelConstant extends KLabel {
      */
     private final boolean isFunction;
 
+    /*
+     * boolean flag set iff a production tagged with "pattern" generates
+     * this {@code KLabelConstant}
+     */
+    private final boolean isPattern;
+
     private KLabelConstant(String label, Definition definition) {
         this.label = label;
         productions = definition != null ?
@@ -48,12 +54,14 @@ public class KLabelConstant extends KLabel {
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
         boolean isFunction = false;
+        boolean isPattern = false;
         if (!label.startsWith("is")) {
             Iterator<Production> iterator = productions.iterator();
             if (iterator.hasNext()) {
                 Production fstProd = iterator.next();
                 isFunction = fstProd.containsAttribute(Attribute.FUNCTION.getKey())
                         || fstProd.containsAttribute(Attribute.PREDICATE.getKey());
+                isPattern = fstProd.containsAttribute("pattern");
             }
             
             while (iterator.hasNext()) {
@@ -69,12 +77,17 @@ public class KLabelConstant extends KLabel {
                         + label
                         + " is a function symbol because there are multiple productions associated with this KLabel: "
                         + productions;
+                assert isPattern == production.containsAttribute("pattern") :
+                        "Cannot determine if the KLabel " + label
+                        + " is a pattern symbol because there are multiple productions associated with this KLabel: "
+                        + productions;
             }
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
         }
         this.isFunction = isFunction;
+        this.isPattern = isPattern;
     }
 
     /**
@@ -97,8 +110,8 @@ public class KLabelConstant extends KLabel {
     }
 
     /**
-     * Returns true iff no production tagged with "function" or "predicate" generates this {@code
-     * KLabelConstant}.
+     * Returns true iff no production tagged with "function" or "predicate" or "pattern"
+     * generates this {@code KLabelConstant}.
      */
     @Override
     public boolean isConstructor() {
@@ -112,6 +125,15 @@ public class KLabelConstant extends KLabel {
     @Override
     public boolean isFunction() {
         return isFunction;
+    }
+
+    /**
+     * Returns true iff a production tagged with "pattern" generates
+     * this {@code KLabelConstant}.
+     */
+    @Override
+    public boolean isPattern() {
+        return isPattern;
     }
 
     public String label() {
