@@ -23,27 +23,6 @@ public class TermContext extends JavaSymbolicObject {
         this.global = global;
     }
 
-    /**
-     * Only used when the Term is part of a Definition instead of part of a
-     * ConstrainedTerm.
-     */
-    //    public static TermContext of(Definition def, ConstrainedTerm.Data constrainedTermData) {
-    //        return new TermContext(def, constrainedTermData, null);
-    //    }
-    //
-    //    public static TermContext of(Definition def, ConstrainedTerm.Data constrainedTermData,
-    //            FileSystem fs) {
-    //        return new TermContext(def, constrainedTermData, fs);
-    //    }
-    //
-    //    public static TermContext of(Definition def) {
-    //        return new TermContext(def, null, null);
-    //    }
-    //
-    //    public static TermContext of(Definition def, FileSystem fs) {
-    //        return new TermContext(def, null, fs);
-    //    }
-
     public static TermContext of(GlobalContext global) {
         return new TermContext(global);
     }
