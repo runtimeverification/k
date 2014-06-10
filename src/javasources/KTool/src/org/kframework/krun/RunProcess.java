@@ -112,39 +112,52 @@ public class RunProcess {
         }        
         String content = value;
 
+        switch (parser) {
+            case "kast":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContent(value);
+                }
 
-        if (parser.startsWith("kast")) {
-            if (parser.contains("--parser ground")) {
-                if (!isNotFile) content = FileUtil.getFileContent(value);
-                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
-            } else if (parser.contains("--parser rules")) {
-                if (!isNotFile) content = FileUtil.getFileContent(value);
-                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
-            } else {
-                if (!isNotFile) content = FileUtil.getFileContent(value);
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
-            }
-        } else {
-            //external parser
-            List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
-            tokens.add(value);
-            Map<String, String> environment = new HashMap<>();
-            environment.put("KRUN_SORT", startSymbol);
-            environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
-            if (isNotFile) {
-                environment.put("KRUN_IS_NOT_FILE", "true");
-            }
-            this.execute(environment, tokens.toArray(new String[tokens.size()]));
+                break;
+            case "kast -e":
+                term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.PROGRAM);
+                break;
+            case "kast --parser ground":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContent(value);
+                }
+                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
+                break;
+            case "kast --parser ground -e":
+                term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.GROUND);
+                break;
+            case "kast --parser rules":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContent(value);
+                }
+                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
+                break;
+            default: //external parser
+                List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
+                tokens.add(value);
+                Map<String, String> environment = new HashMap<>();
+                environment.put("KRUN_SORT", startSymbol);
+                environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
+                if (isNotFile) {
+                    environment.put("KRUN_IS_NOT_FILE", "true");
+                }
+                this.execute(environment, tokens.toArray(new String[tokens.size()]));
 
-            if (this.getExitCode() != 0) {
-                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
-            }
+                if (this.getExitCode() != 0) {
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
+                }
 
-            String kast = this.getStdout() != null ? this.getStdout() : "";
+                String kast = this.getStdout() != null ? this.getStdout() : "";
 
-            //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
-            //TODO(dwightguth): parse the output of the external parser into real kil classes
-            term = new BackendTerm("", kast);
+                //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
+                //TODO(dwightguth): parse the output of the external parser into real kil classes
+                term = new BackendTerm("", kast);
         }
 
         return term;
