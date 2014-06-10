@@ -157,7 +157,7 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
 
     @Override
     public int hashCode() {
-        if (upToDateHash) {
+        if (!upToDateHash) {
             cachedHashCode = cons != null ? cons.hashCode() : 0;
             cachedHashCode = 31 * cachedHashCode + production.hashCode();
             for (Term t : contents)
