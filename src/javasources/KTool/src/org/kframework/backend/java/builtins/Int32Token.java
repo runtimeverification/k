@@ -229,7 +229,7 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHash() {
         return value;
     }
 

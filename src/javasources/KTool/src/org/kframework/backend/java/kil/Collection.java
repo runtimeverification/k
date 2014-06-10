@@ -3,12 +3,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 /**
@@ -83,9 +78,7 @@ public abstract class Collection extends Term {
     }
     
     @Override
-    public int hashCode() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract int computeHash();
 
     @Override
     public boolean equals(Object object) {

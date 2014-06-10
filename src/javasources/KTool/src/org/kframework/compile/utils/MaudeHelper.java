@@ -2,6 +2,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.BoolBuiltin;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.StringBuiltin;
@@ -30,6 +31,7 @@ public class MaudeHelper {
         basicSorts.add(BoolBuiltin.SORT_NAME);
         basicSorts.add(IntBuiltin.SORT_NAME);
         basicSorts.add(StringBuiltin.SORT_NAME);
+        basicSorts.add(FloatBuiltin.SORT_NAME);
 
         basicSorts.add(KSorts.BAG);
         basicSorts.add(KSorts.BAG_ITEM);
@@ -42,7 +44,6 @@ public class MaudeHelper {
 
         basicSorts.add("#Id");
         basicSorts.add("#Rat");
-        basicSorts.add("#Float");
         basicSorts.add("#ModelCheckerState");
         basicSorts.add("#ModelCheckResult");
         basicSorts.add("#LTLFormula");
@@ -54,6 +55,7 @@ public class MaudeHelper {
         constantSorts.add(BoolBuiltin.SORT_NAME);
         constantSorts.add(IntBuiltin.SORT_NAME);
         constantSorts.add(StringBuiltin.SORT_NAME);
+        constantSorts.add(FloatBuiltin.SORT_NAME);
 
         constantSorts.add(KSorts.KLABEL);
 
@@ -62,6 +64,5 @@ public class MaudeHelper {
         /* andreis: not sure if this two are needed */
         constantSorts.add("#Id");
         constantSorts.add("#Rat");
-        constantSorts.add("#Float");
     }
 }

@@ -36,7 +36,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Variable node, Void _)  {
-        if (MetaK.isComputationSort(node.getSort()))
+        if (MetaK.isComputationSort(node.getSort()) && !node.isFreshConstant())
             return kTrans.visitNode(node);
         return node;
     }
@@ -200,6 +200,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(Variable node, Void _)  {
+            if (node.isFreshConstant()) return node;
             if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
                 return node;
             }
@@ -209,7 +210,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
             if (node.getSort().equals(BoolBuiltin.SORT_NAME)
                     || node.getSort().equals(IntBuiltin.SORT_NAME)
-                    || node.getSort().equals("#Float")
+                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
                     || node.getSort().equals(StringBuiltin.SORT_NAME)) {
                 return node;
             }

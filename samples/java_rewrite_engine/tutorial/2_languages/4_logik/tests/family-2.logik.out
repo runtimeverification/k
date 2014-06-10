@@ -1,13 +1,3 @@
-Search results:
-
-Solution 1:
-Solution:K -->
-X:Term |-> david
-
-Solution 2:
-Solution:K -->
-X:Term |-> jim
-
-Solution 3:
-Solution:K -->
-X:Term |-> steve
+X:Term.*david
+X:Term.*jim
+X:Term.*steve

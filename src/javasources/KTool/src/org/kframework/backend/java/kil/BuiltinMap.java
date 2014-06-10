@@ -1,20 +1,23 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.apache.commons.collections15.map.UnmodifiableMap;
 import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 
 
 /**
@@ -24,28 +27,15 @@ import com.google.common.base.Joiner;
  *
  * @author AndreiS
  */
-public class BuiltinMap extends Collection {
+public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, Term>> {
 
+    public static final BuiltinMap EMPTY_MAP = new BuiltinMap();
+    
     private final Map<Term, Term> entries;
-
-    public BuiltinMap(Map<? extends Term, ? extends Term> entries, Variable frame) {
-        super(frame, Kind.KITEM);
-        this.entries = new HashMap<Term, Term>(entries);
-    }
-
-    public BuiltinMap(Variable frame) {
-        super(frame, Kind.KITEM);
-        entries = new HashMap<Term, Term>();
-    }
-
-    public BuiltinMap(Map<? extends Term,? extends Term> entries) {
+    
+    private BuiltinMap() {
         super(null, Kind.KITEM);
-        this.entries = new HashMap<Term, Term>(entries);
-    }
-
-    public BuiltinMap() {
-        super(null, Kind.KITEM);
-        entries = new HashMap<Term, Term>();
+        entries = Collections.emptyMap();
     }
 
     public Term get(Term key) {
@@ -53,19 +43,12 @@ public class BuiltinMap extends Collection {
     }
 
     public Map<Term, Term> getEntries() {
-        return Collections.unmodifiableMap(entries);
+        return UnmodifiableMap.decorate(entries);
     }
 
-    public Term put(Term key, Term value) {
-        return entries.put(key, value);
-    }
-
-    public void putAll(Map<Term, Term> entries) {
-        this.entries.putAll(entries);
-    }
-
-    public Term remove(Term key) {
-        return entries.remove(key);
+    @Override
+    public Iterator<Map.Entry<Term, Term>> iterator() {
+        return entries.entrySet().iterator();
     }
 
     @Override
@@ -100,12 +83,10 @@ public class BuiltinMap extends Collection {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
-            hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
-        }
+    public int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+        hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
         return hashCode;
     }
 
@@ -149,20 +130,103 @@ public class BuiltinMap extends Collection {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
+    
+    /**
+     * Private efficient constructor used by {@link BuiltinMap.Builder}.
+     * @param entries
+     * @param frame
+     */
+    private BuiltinMap(UnmodifiableMap<Term, Term> entries, Variable frame) {
+        super(frame, Kind.KITEM);
+        this.entries = entries;
+    }
 
-    public static BuiltinMap of(Map<? extends Term, ? extends Term> entries, Term frame) {
-        if (frame == null) {
-            return new BuiltinMap(entries);
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        
+        private boolean done = false;
+        
+        private Map<Term, Term> entries = new HashMap<>();
+        private Variable frame = null;
+
+        public void put(Term key, Term value) {
+            entries.put(key, value);
         }
-        if (frame instanceof Variable)
-            return new BuiltinMap(entries, (Variable) frame);
-        if (frame instanceof BuiltinMap) {
-            BuiltinMap builtinMap = (BuiltinMap) frame;
-            builtinMap = new BuiltinMap(builtinMap.entries, builtinMap.frame);
-            builtinMap.entries.putAll(entries);
-            return builtinMap;
+        
+        /**
+         * Copies all key-value pairs of the given map into the BuiltinMap being
+         * built.
+         * 
+         * @param map
+         */
+        public void putAll(Map<Term, Term> map) {
+            entries.putAll(map);
         }
-        assert false : "Frame can only be substituted by a Variable or a BuiltinMap, or deleted.";
-        return null;
+        
+        public Term remove(Term key) {
+            return entries.remove(key);
+        }
+        
+        public Map<Term, Term> getEntries() {
+            return UnmodifiableMap.decorate(entries);
+        }
+        
+        /**
+         * Sets the entries as the given {@code BuiltinMap} without copying the
+         * contents. Once the entries are set, no more modification is allowed.
+         * 
+         * @param map
+         */
+        public void setEntriesAs(BuiltinMap builtinMap) {
+            // builtinMap.entries must be an UnmodifiableMap
+            entries = builtinMap.entries;
+        }
+        
+        /**
+         * Sets the frame of the BuiltinMap being built. Once the frame is set,
+         * it cannot be changed.
+         * 
+         * @param frame
+         */
+        public void setFrame(Variable frame) {
+            this.frame = frame;
+        }
+        
+        /**
+         * Concatenates the BuiltinMap being built with another term, which can only
+         * be a {@code Variable} or {@code BuiltinMap}.
+         * 
+         * @param term
+         */
+        public void concat(Term term) {
+            if (term == null) {
+                return;
+            }
+            
+            if (term instanceof Variable) {
+                setFrame((Variable) term);
+            } else if (term instanceof BuiltinMap) {
+                BuiltinMap map = (BuiltinMap) term;
+                putAll(map.entries);
+                if (map.frame != null) {
+                    setFrame(map.frame);
+                }
+            } else {
+                assert false : "The concatenated term must be a Variable or BuiltinMap; found: " + term;
+            }
+        }
+        
+        public BuiltinMap build() {
+            Preconditions.checkArgument(!done, "Only one BuiltinMap can be built from a builder.");
+            done = true;
+            // YilongL: Guava's ImmutableMap.copyOf(entries) is not smart enough
+            // to avoid actually copying the entries, because entries is not an
+            // ImmutableMap yet; using Apache's decorate method because it would
+            // avoid creating nesting wrappers
+            return new BuiltinMap((UnmodifiableMap<Term, Term>) UnmodifiableMap.decorate(entries), frame);
+        }
     }
 }

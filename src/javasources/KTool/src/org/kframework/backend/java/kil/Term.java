@@ -13,6 +13,7 @@ import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
@@ -181,4 +182,23 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public int compareTo(Term o) {
         return toString().compareTo(o.toString());
     }
+    
+    /**
+     * Computes and caches the hashCode if it has not been computed yet.
+     * Otherwise, simply returns the cached value.
+     */
+    @Override
+    public final int hashCode() {
+        if (hashCode == Utils.NO_HASHCODE) {
+            hashCode = computeHash();
+            hashCode = hashCode == 0 ? 1 : hashCode;
+        }
+        return hashCode;
+    }
+    
+    /**
+     * (Re-)computes the hashCode of this {@code Term}.
+     * @return the hash code
+     */
+    public abstract int computeHash();
 }

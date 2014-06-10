@@ -387,7 +387,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                             +((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "")+" ";
                 }
             } else {
-                rawLabel = " "+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "")+" ";
+                rawLabel = ((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "");
             }
             if (child instanceof KList) {
                 java.util.List<Term> termList = ((KList)child).getContents();
@@ -404,7 +404,9 @@ public class UnparserFilterNew extends NonCachingVisitor {
                         }
                         this.visitNode(termList.get(i));
                     }
-                    indenter.write(rawLabelList[i]);
+                    for (; i < rawLabelList.length; i++) {
+                        indenter.write(rawLabelList[i]);
+                    }
                 }
             }
             else {

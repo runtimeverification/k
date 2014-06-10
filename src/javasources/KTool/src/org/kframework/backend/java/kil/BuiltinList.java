@@ -114,15 +114,13 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
-            hashCode = hashCode * Utils.HASH_PRIME + removeLeft;
-            hashCode = hashCode * Utils.HASH_PRIME + removeRight;
-            hashCode = hashCode * Utils.HASH_PRIME + elementsLeft.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
-        }
+    public int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+        hashCode = hashCode * Utils.HASH_PRIME + removeLeft;
+        hashCode = hashCode * Utils.HASH_PRIME + removeRight;
+        hashCode = hashCode * Utils.HASH_PRIME + elementsLeft.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
         return hashCode;
     }
 

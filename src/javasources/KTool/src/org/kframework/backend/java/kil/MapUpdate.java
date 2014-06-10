@@ -46,29 +46,29 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         if (!(map instanceof BuiltinMap)) {
             return this;
         }
-
         BuiltinMap builtinMap = ((BuiltinMap) map);
 
-        Map<Term, Term> entries = new HashMap<Term, Term>(builtinMap.getEntries());
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.putAll(builtinMap.getEntries());
         Set<Term> keysToRemove = new HashSet<Term>();
         for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
             Term nextKey = iterator.next();
-            if (entries.remove(nextKey) != null) {
+            if (builder.remove(nextKey) != null) {
                 keysToRemove.add(nextKey);
             }
         }
 
         if (removeSet.size() > keysToRemove.size()) {
+            // TODO(YilongL): why not return Bottom when there is no frame
             return new MapUpdate(builtinMap, Sets.difference(removeSet, keysToRemove), updateMap);
         }
 
-        entries.putAll(updateMap);
+        builder.putAll(updateMap);
 
         if (builtinMap.hasFrame()) {
-            return new BuiltinMap(entries, builtinMap.frame());
-        } else {
-            return new BuiltinMap(entries);
+            builder.setFrame(builtinMap.frame());
         }
+        return builder.build();
     }
 
     public Term map() {
@@ -100,13 +100,11 @@ public class MapUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
-        }
+    public int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
         return hashCode;
     }
 

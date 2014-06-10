@@ -5,6 +5,7 @@ import static org.kframework.kil.KLabelConstant.ANDBOOL_KLABEL;
 import static org.kframework.kil.KLabelConstant.BOOL_ANDBOOL_KLABEL;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
@@ -42,6 +43,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Module;
@@ -142,6 +144,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return IntToken.of(((IntBuiltin) node.getLabel()).bigIntegerValue());
             } else if (node.getLabel() instanceof StringBuiltin) {
                 return StringToken.of(((StringBuiltin) node.getLabel()).stringValue());
+            } else if (node.getLabel() instanceof FloatBuiltin) {
+                return FloatToken.of(
+                        ((FloatBuiltin) node.getLabel()).bigFloatValue(),
+                        ((FloatBuiltin) node.getLabel()).exponent());
             } else if (node.getLabel() instanceof GenericToken) {
                 return UninterpretedToken.of(
                         ((GenericToken) node.getLabel()).tokenSort(),
@@ -166,7 +172,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KLabelConstant node, Void _)  {
-        return KLabelConstant.of(node.getLabel(), TermContext.of(definition));
+        return KLabelConstant.of(node.getLabel(), definition);
     }
 
     @Override
@@ -367,7 +373,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                             elementsRight));
                     for (Term baseTerm : baseTerms) {
                         result = new KItem(
-                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, TermContext.of(definition)),
+                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, definition),
                                 new KList(ImmutableList.of(result, baseTerm)),
                                 TermContext.of(definition));
                     }
@@ -410,7 +416,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
                 result = new KItem(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, TermContext.of(definition)),
+                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
                         TermContext.of(definition));
             }
@@ -420,12 +426,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.MapBuiltin node, Void _)  {
-        HashMap<Term, Term> entries = new HashMap<Term, Term>(node.elements().size());
+        BuiltinMap.Builder builder = BuiltinMap.builder();
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.elements().entrySet()) {
             Term key = (Term) this.visitNode(entry.getKey());
             Term value = (Term) this.visitNode(entry.getValue());
-            entries.put(key, value);
+            builder.put(key, value);
         }
 
         if (node.isLHSView()) {
@@ -434,26 +440,27 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 if (base instanceof MapUpdate) {
                     MapUpdate mapUpdate = (MapUpdate) base;
                     /* TODO(AndreiS): check key uniqueness */
-                    entries.putAll(mapUpdate.updateMap());
-                    return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), entries);
+                    builder.putAll(mapUpdate.updateMap());
+                    return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), builder.getEntries());
                 } else {
                     /* base instanceof Variable */
-                    return new BuiltinMap(entries, (Variable) base);
+                    builder.setFrame((Variable) base);
+                    return builder.build();
                 }
             } else {
-                return new BuiltinMap(entries);
+                return builder.build();
             }
         } else {
             ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
             for (org.kframework.kil.Term term : node.baseTerms()) {
                 baseTerms.add((Term) this.visitNode(term));
             }
-            baseTerms.add(new BuiltinMap(entries));
+            baseTerms.add(builder.build());
 
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
                 result = new KItem(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, TermContext.of(definition)),
+                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
                         TermContext.of(definition));
             }
@@ -468,7 +475,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 //        for(org.kframework.kil.Term term: node.getContents()){
 //           Term backendTerm = this.transformTerm(term,this.definition);
 //        }
-        return new BuiltinMap();
+        return BuiltinMap.EMPTY_MAP;
     }
 
     @Override
@@ -684,14 +691,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         for (String kLabelName : singletonModule.getModuleKLabels()) {
-            definition.addKLabel(KLabelConstant.of(kLabelName, TermContext.of(definition)));
+            definition.addKLabel(KLabelConstant.of(kLabelName, definition));
         }
 
         /* collect the productions which have the attributes strict and seqstrict */
         Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
         productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
         for (Production production : productions) {
-            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), TermContext.of(definition)));
+            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), definition));
         }
 
         this.definition = null;

@@ -1,0 +1,19 @@
+Float2String(5.0) ==String "5e+00" andBool
+exponentFloat(5.0) ==Int 2 andBool
+eqMInt(significandFloat(5.0), mi(53, 5629499534213120)) andBool
+eqMInt(significandFloat(-0.25P5X2), mi(5, 4)) andBool
+roundFloat(-0.25p5x2, 53, 11) ==Float -0.25 andBool
+-0.25p5x2 =/=K -0.25p5x11 andBool
+1.0 /Float 0.0 ==Float Infinity andBool
+-1.0 /Float 0.0 ==Float -Infinity andBool
+0.0 /Float 0.0 ==K NaN andBool
+5.0 %Float Infinity ==Float 5.0 andBool
+rootFloat(8.0, 3) ==Float 2.0 andBool
+roundFloat(-0.25, 2, 2) ==Float -0.0 andBool
+-0.0 =/=K 0.0 andBool
+0.0 ==Float -0.0 andBool
+signFloat(-0.0) andBool
+atan2Float(-0.0, 1.0) ==K -0.0 andBool
+minFloat(NaN, 5.0) ==Float 5.0 andBool
+maxFloat(NaN, 5.0) ==Float 5.0 andBool
+true

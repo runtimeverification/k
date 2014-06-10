@@ -136,7 +136,7 @@ public final class IntToken extends Token {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHash() {
         return value.hashCode();
     }
 

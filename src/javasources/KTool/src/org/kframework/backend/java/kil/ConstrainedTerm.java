@@ -14,9 +14,7 @@ import java.util.Set;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
-import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Debug;
@@ -32,7 +30,7 @@ import org.kframework.krun.K;
  *
  * @author AndreiS
  */
-public class ConstrainedTerm extends Term {
+public class ConstrainedTerm extends JavaSymbolicObject {
     
     private static final Map<Definition, GroupProductionsBySort> cachedGroupProductionsBySort = 
             new HashMap<Definition, GroupProductionsBySort>();
@@ -49,7 +47,7 @@ public class ConstrainedTerm extends Term {
 
     public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint,
             TermContext context) {
-        super(term.kind);
+        super();
         this.term = term;
         this.lookups = lookups;
         this.constraint = constraint;
@@ -359,7 +357,7 @@ public class ConstrainedTerm extends Term {
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet())
                                 templCnstr.add(entry.getKey(), entry.getValue());
 
-                            for (Map.Entry<Term, Term> mapItem : map.getEntries().entrySet()) {
+                            for (Map.Entry<Term, Term> mapItem : map) {
                                 UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
                                 uninterpretedCnstr.add(key, mapItem.getKey());
                                 uninterpretedCnstrs.add(uninterpretedCnstr);
@@ -471,21 +469,6 @@ public class ConstrainedTerm extends Term {
     }
 
     @Override
-    public boolean isExactSort() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isSymbolic() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String sort() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -502,12 +485,11 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + lookups.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + constraint.hashCode();
-        }
+        // TODO(YilongL): I don't think ConstrainedTerm should derive Term
+        hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + lookups.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + constraint.hashCode();
         return hashCode;
     }
 
@@ -518,16 +500,6 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public ASTNode accept(Transformer transformer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term patten) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
         throw new UnsupportedOperationException();
     }
 

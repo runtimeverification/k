@@ -977,7 +977,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         equalities.addAll(equalityBuffer);
         equalityBuffer.clear();
 
-        Set<Equality> equalitiesToRemove = new HashSet<>();
+        List<Integer> equalitiesToRemove = new ArrayList<>();
         for (int i = 0; i < equalities.size(); ++i) {
             // YilongL: no need to evaluate after substitution because the LHS
             // of the rule and the subject term should have no function symbol
@@ -987,7 +987,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             equalities.set(i, equality);
 
             if (equality.isTrue()) {
-                equalitiesToRemove.add(equality);
+                equalitiesToRemove.add(i);
                 continue;
             } else if (equality.isFalse()) {
                 falsify(equality);
@@ -1018,7 +1018,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 continue;
             }
 
-            equalitiesToRemove.add(equality);
+            equalitiesToRemove.add(i);
 
             Map<Variable, Term> tempSubst = Collections.singletonMap(variable, term);
             composeSubstitution(tempSubst, context, false);
@@ -1027,17 +1027,18 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
 
             for (int j = 0; j < i; ++j) {
-                Equality previousEquality = equalities.get(j);
                 /*
                  * Do not modify the previousEquality if it has been added to
                  * the HashSet equalitiesToRemove since this may result in
                  * inconsistent hashCodes in the HashSet; besides, there is no
                  * need to do so
                  */
-                if (!equalitiesToRemove.contains(previousEquality)) {
-                    previousEquality.substituteAndEvaluate(tempSubst);
+                if (!equalitiesToRemove.contains(j)) {
+                    Equality previousEquality = equalities.get(j).substituteAndEvaluate(tempSubst);
+                    equalities.set(j, previousEquality);
+
                     if (previousEquality.isTrue()) {
-                        equalitiesToRemove.add(previousEquality);
+                        equalitiesToRemove.add(j);
                     } else if (previousEquality.isFalse()) {
                         falsify(previousEquality);
                         return;
@@ -1046,7 +1047,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
 
-        equalities.removeAll(equalitiesToRemove);
+        for (int i = equalitiesToRemove.size() - 1; i >= 0; --i) {
+            equalities.remove((int) equalitiesToRemove.get(i));
+        }
     }
 
     /**

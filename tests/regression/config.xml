@@ -85,14 +85,12 @@
   <test definition="issue552/issue.k" />
   <test definition="issue529/issue.k" />
   <test definition="defaultTerms1/issue.k" />
-<!-- TODO(Traian) uncomment this test once !X works in Maude
   <test
       definition="freshMOS/test.k"
       programs="freshMOS/programs"
       results="freshMOS/tests"
       extension="test"
       />
--->
   <test
       definition="openCells1/issue.k"
       programs="openCells1/programs"
@@ -299,17 +297,6 @@
   </test>
 
   <test
-      definition="basicFloat/issue.k"
-      programs="basicFloat"
-      results="basicFloat"
-      extension="issue"
-      >
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-  </test>
-  <test
       definition="follow/issue.k"
       programs="follow"
       results="follow"
@@ -425,6 +412,9 @@
            directory="generalized-strictness"
            programs="generalized-strictness"
            results="generalized-strictness" />
+
+  <include file="float/tests/config.xml"
+           directory="float" />
 
 </tests>
 

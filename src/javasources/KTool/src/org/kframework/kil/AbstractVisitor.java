@@ -721,6 +721,11 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     public R visit(StringBuiltin node, P p) throws E {
         return visit((Token) node, p);
     }
+    
+    @Override
+    public R visit(FloatBuiltin node, P p) throws E {
+        return visit((Token) node, p);
+    }
 
     @Override
     public R visit(GenericToken node, P p) throws E {
