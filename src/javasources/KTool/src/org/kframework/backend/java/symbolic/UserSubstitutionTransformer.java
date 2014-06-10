@@ -105,8 +105,6 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
             if (!(kItem.kLabel() instanceof KLabel) || !(kItem.kList() instanceof KList)) {
                 return super.transform(kItem);
             }
-            assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
-            assert kItem.kList() instanceof KList : "KList must be concrete";
 
             KLabel kLabel = (KLabel) kItem.kLabel();
             KList kList = (KList) kItem.kList();

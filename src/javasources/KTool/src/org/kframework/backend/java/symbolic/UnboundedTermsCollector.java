@@ -63,8 +63,6 @@ public class UnboundedTermsCollector extends PrePostVisitor {
         if (!(kItem.kLabel() instanceof KLabel) || !(kItem.kList() instanceof KList)) {
             return;
         }
-        assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
-        assert kItem.kList() instanceof KList : "KList must be concrete";
 
         KLabel kLabel = (KLabel) kItem.kLabel();
         KList kList = (KList) kItem.kList();
