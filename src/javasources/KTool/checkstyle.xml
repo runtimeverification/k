@@ -28,5 +28,8 @@
     </module>
   </module>
   <module name="FileTabCharacter" />
+  <module name="RegexpMultiline">
+    <property name="format" value="\r$" />
+  </module>
 <!--<module name="NewlineAtEndOfFile" />-->
 </module>
