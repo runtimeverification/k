@@ -194,7 +194,7 @@ module SUBSTITUTION
   rule #substituteFV(K:List, M:Map, FV) => #substituteList(K, M, FV, .List)
   rule #substituteFV(K:Map, M:Map, FV) => #substituteMap(K, M, FV, .Map)
 
-  syntax List ::= #substituteList(List, Map, Set, List)  [function]
+  syntax List ::= #substituteList(List, Map, Set, List)  [function, klabel(#substituteList2)]
   syntax Set ::= #substituteSet(Set, Map, Set, Set)  [function]
   syntax Map ::= #substituteMap(Map, Map, Set, Map)  [function]
 
@@ -286,8 +286,7 @@ module SUBSTITUTION
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T:K) => T
   rule freshVariables(SetItem(Tv:K) S:Set, T:K)
-    => freshVariables(S, T[#changeLabel(Tv',Tv)/Tv])
-    when fresh(Tv':K)
+    => freshVariables(S, T[#changeLabel(!Tv',Tv)/Tv])
 
   syntax K ::= #changeLabel(K,K)  [function]
   rule #changeLabel(_:KLabel(Ks:KList),L':KLabel(_)) => L'(Ks)
