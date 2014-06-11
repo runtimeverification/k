@@ -56,9 +56,11 @@ public class PreferAvoidFilter extends ParseForestTransformer {
             }
         }
 
-        if (result == amb)
-            return super.visit(result, _);
+        if (result instanceof Ambiguity)
+            // didn't manage to completely disambiguate, but I still need to go deeper into the tree
+            return super.visit((Ambiguity) result, _);
         else
+            // visit the preferred child
             return this.visitNode(result);
     }
 }

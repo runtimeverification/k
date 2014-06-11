@@ -24,7 +24,9 @@ public class UpdateAssocVisitor extends BasicVisitor {
             Set<Production> prods = SDFHelper.getProductionsForTag(c.getLabel(), context);
             for (Production p : prods) {
                 context.putAssoc(p.getCons(), prods);
-                if (!p.getAttributes().containsKey("left") && !p.getAttributes().containsKey("right") && !p.getAttributes().containsKey("non-assoc")) {
+                if (!p.getAttributes().containsKey(Constants.LEFT) &&
+                    !p.getAttributes().containsKey(Constants.RIGHT) &&
+                    !p.getAttributes().containsKey(Constants.NON_ASSOC)) {
                     p.addAttribute(pri.getAssoc(), "");
                 }
             }
@@ -36,7 +38,9 @@ public class UpdateAssocVisitor extends BasicVisitor {
     public Void visit(PriorityBlock pri, Void _) {
         if (!pri.getAssoc().equals("")) {
             for (Production p : pri.getProductions()) {
-                if (!p.getAttributes().containsKey("left") && !p.getAttributes().containsKey("right") && !p.getAttributes().containsKey("non-assoc")) {
+                if (!p.getAttributes().containsKey(Constants.LEFT) &&
+                    !p.getAttributes().containsKey(Constants.RIGHT) &&
+                    !p.getAttributes().containsKey(Constants.NON_ASSOC)) {
                     p.addAttribute(pri.getAssoc(), "");
                     context.putAssoc(p.getCons(), pri.getProductions());
                 }
