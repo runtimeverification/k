@@ -8,8 +8,6 @@
 -->
 <tests>
   <include file="../1_k/tests/config.xml" directory="1_k" />
-<!--
   <include file="../2_languages/tests/config.xml" directory="2_languages" />
--->
 </tests>
 
