@@ -280,6 +280,7 @@
       definition="tests/regression/java-rewrite-engine/strings/test.k"
       programs="tests/regression/java-rewrite-engine/strings/programs"
       results="tests/regression/java-rewrite-engine/strings/tests"
+	  skip="pdf"
       extensions="test"
       >
     <kompile-option name="-backend" value="java" />
@@ -361,6 +362,7 @@
       definition="tests/regression/issue#1/issue.k"
       programs="tests/regression/issue#1"
       results="tests/regression/issue#1"
+	  skip="pdf"
       extensions="issue"
       >
     <kompile-option name="-backend" value="java" />
@@ -375,6 +377,7 @@
       definition="tests/regression/issue#2/issue.k"
       programs="tests/regression/issue#2"
       results="tests/regression/issue#2"
+	  skip="pdf"
       extensions="issue"
       >
     <kompile-option name="-backend" value="java" />
@@ -429,6 +432,7 @@
       definition="tests/regression/java-rewrite-engine/visitor/imp.k"
       programs="tests/regression/java-rewrite-engine/visitor"
       results="tests/regression/java-rewrite-engine/visitor"
+	  skip="pdf"
       extension="imp" >
     <kompile-option name="-backend" value="java" />
     <all-programs>
@@ -441,6 +445,7 @@
       definition="tests/regression/java-rewrite-engine/cell_map/test.k"
       programs="tests/regression/java-rewrite-engine/cell_map"
       results="tests/regression/java-rewrite-engine/cell_map"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="-backend" value="java" />
@@ -453,6 +458,7 @@
       definition="tests/regression/java-rewrite-engine/cell_list/test.k"
       programs="tests/regression/java-rewrite-engine/cell_list"
       results="tests/regression/java-rewrite-engine/cell_list"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="-backend" value="java" />
@@ -466,6 +472,7 @@
       definition="tests/regression/java-rewrite-engine/rhs_map_constructor/test.k"
       programs="tests/regression/java-rewrite-engine/rhs_map_constructor"
       results="tests/regression/java-rewrite-engine/rhs_map_constructor"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="-backend" value="java" />
@@ -478,6 +485,7 @@
       definition="tests/regression/java-rewrite-engine/rhs_list_constructor/test.k"
       programs="tests/regression/java-rewrite-engine/rhs_list_constructor"
       results="tests/regression/java-rewrite-engine/rhs_list_constructor"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="-backend" value="java" />
@@ -491,6 +499,7 @@
       definition="tests/regression/java-rewrite-engine/smt_model/test.k"
       programs="tests/regression/java-rewrite-engine/smt_model"
       results="tests/regression/java-rewrite-engine/smt_model"
+	  skip="pdf"
       extension="test"
       >
     <kompile-option name="-backend" value="java" />

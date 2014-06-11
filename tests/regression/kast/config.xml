@@ -5,6 +5,7 @@
     definition="test.k"
     programs="."
     results="."
+    skip="pdf"
     posixInitScript="init.sh"
     extension="test">
     <program name="1.test">
