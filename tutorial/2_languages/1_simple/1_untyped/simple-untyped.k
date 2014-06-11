@@ -182,7 +182,7 @@ arguments. */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmts Exp ";" Exp ")" Block // Stmts and not Stmt, because macro expansion yields too general sort info, which fails unification
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -192,6 +192,17 @@ arguments. */
                 | "acquire" Exp ";"                     [strict]
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
+
+/*@ The reason we allow $\it Stmts$ as the first argument of \texttt{for}
+instead of $\it Stmt$ is because we want to allow more than one statement
+to be executed when the loop is initialized.  Also, as seens shorly, macros
+may expand one statement into more statements; for example, an initialized
+variable declaration statement $\tt var\,x=0;$ desugars into two statements,
+namely $\tt var\,x;\,x=0;$, so if we use $\it Stmt$ instead of $\it Stmts$
+in the production of $\tt for$ above then we risk that the macro expansion
+of statement $\tt var\,x=0;$ happens before the macro expansion of $\tt for$,
+also shown below, in which case the latter would not apply anymore because
+of syntactic mismatch. */
 
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
