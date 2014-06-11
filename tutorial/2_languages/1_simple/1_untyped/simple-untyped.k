@@ -79,7 +79,7 @@ are only included in the parser generated to parse programs (and used by the
 concrete identifiers that play a special role in the semantics, like
 \texttt{main} below. */
 
-  syntax Id ::= Token{"main"}
+  syntax Id ::= "main"
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and
@@ -410,13 +410,11 @@ dimensions (that's why we defined the expression lists strict!):
 Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
 To this aim, we introduce two special unique variable identifiers,
-\texttt{\$1} and \texttt{\$2}.  The first, \texttt{\$1}, is assigned the array
-reference value of the current array, so that we can redeclare the array
-inside the loop body with fewer dimensions.  The second variable,
-\texttt{\$2}, iterates through and initializes each element of the current
-dimension: */
+\texttt{\$1} and \texttt{\$2}.  The first variable, \texttt{\$1}, iterates
+through and initializes each element of the first dimension with an array
+of the remaining dimensions, declared as variable \texttt{\$2}: */
 
-  syntax Id ::= Token{"$1"} | Token{"$2"}
+  syntax Id ::= "$1" | "$2"
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
     => var X[N1];
        {
