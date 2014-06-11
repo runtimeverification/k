@@ -721,6 +721,19 @@ becomes automatically the next computation item without any additional
 
   rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
 
+/*@ A subtle aspect of the rule above is that $S_1$ is declared to have sort
+$\it Stmts$ and not $\it Stmt$.  That is because desugaring macros can indeed
+produce left associative sequential composition of statements.  For example,
+the code $\texttt{var\,x=0;\,x=1;}$ is desugared to
+$\texttt{(var\,x;\,x=0;)\,x=1;}$, so although originally the first term of
+the sequential composition had sort $\it Stmt$, after desugaring it became
+of sort $\it Stmts$.  Note that the attribute \texttt{[right]} associated
+to the sequential compositon production is an attribute of the syntax, and not
+of the semantics: e.g., it tells the parser to parse
+$\texttt{var\,x;\,x=0;\,x=1;}$ as $\texttt{var\,x;\,(x=0;\,x=1;)}$, but it
+does not tell the rewrite engine to rewrite $\texttt{(var\,x;\,x=0;)\,x=1;}$ to
+$\texttt{var\,x;\,(x=0;\,x=1;)}$. */
+
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
 value is simply discarded.  Common examples of expression statements are ones
