@@ -43,8 +43,13 @@ public class BuiltinFunction {
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateDefinition(org.kframework.backend.java.kil.Definition)
      * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateRule(org.kframework.backend.java.kil.Rule, org.kframework.backend.java.kil.Definition)
      */
-    private final ImmutableSet<String> hookMetaModules = ImmutableSet.of("#META-K",
-            "MetaK", "Visitor", "#IO", "#FRESH");
+    private final ImmutableSet<String> hookMetaModules = ImmutableSet.of(
+            "#META-K",
+            "MetaK",
+            "Visitor",
+            "#IO",
+            "#FRESH",
+            "Substitution");
 
     /**
      * Map of {@link KLabelConstant} representation of builtin (hooked) operations to

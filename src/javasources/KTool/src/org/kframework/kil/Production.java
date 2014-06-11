@@ -342,6 +342,18 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         throw new IllegalArgumentException("Index not found in production");
     }
 
+    /**
+     * Getter for the {@code binderMap} structure.
+     * The binder map is a MultiMap consisting of key -> value pairs
+     * representing the position of a bounded variable and the position
+     * of an expression in which it is bound.
+     *
+     * Important note:  Unlike the positions specified by user (which start at 1),
+     * the positions in binderMap are rebased to start at 0 as it
+     * is customary for Java collections.
+     *
+     * @return the binder map associated to this production
+     */
     public Multimap<Integer, Integer> getBinderMap() {
         return binderMap;
     }
