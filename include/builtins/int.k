@@ -2,7 +2,7 @@
 require "k-equal.k"
 module INT-SYNTAX-HOOKS
   imports #INT-INTERFACE
-  syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+")]
+  syntax #Int ::= Token{[\-\+]? [0-9]+} [regex("[\\+-]?\\d+"), prefer]
   syntax Int ::= #Int
 endmodule
 

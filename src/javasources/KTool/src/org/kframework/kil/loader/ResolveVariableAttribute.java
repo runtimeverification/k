@@ -26,7 +26,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             Token node = (Token) kapp.getLabel();
 
             /* this code needs to be refactored; this transformer is backend dependent
-            so whenever somebody refactores the backends should split this transformer
+            so whenever somebody refactors the backends should split this transformer
             for each backend.
              */
             if (K.backend.equals("maude")) {

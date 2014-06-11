@@ -110,7 +110,7 @@ public class Parser {
             /** The {@link State} that this StateCall is for */
             final State state;
 
-    //***************************** Start Boilerplate *****************************
+            //***************************** Start Boilerplate *****************************
             public Key(NonTerminalCall ntCall, int stateBegin, State state) {
                 assert ntCall != null; assert state != null;
                 this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
@@ -146,7 +146,7 @@ public class Parser {
         public int hashCode() {
             return this.key.hashCode();
         }
-    //***************************** End Boilerplate *****************************
+        //***************************** End Boilerplate *****************************
     }
 
     /**
@@ -197,7 +197,7 @@ public class Parser {
                     ((NonTerminalState)stateCall.key.state).isLookahead) {
                     stateEnd = stateCall.key.stateBegin;
                 }
-    //***************************** Start Boilerplate *****************************
+                //***************************** Start Boilerplate *****************************
                 this.stateCall = stateCall; this.stateEnd = stateEnd;
             }
 
@@ -237,7 +237,7 @@ public class Parser {
         public int hashCode() {
             return this.key.hashCode();
         }
-    //***************************** End Boilerplate *****************************
+        //***************************** End Boilerplate *****************************
     }
 
     /**
@@ -288,7 +288,7 @@ public class Parser {
             public final NonTerminal nt;
             /** The start position for parsing the {@link NonTerminal} */
             public final int ntBegin;
-    //***************************** Start Boilerplate *****************************
+            //***************************** Start Boilerplate *****************************
             public Key(NonTerminal nt, int ntBegin) {
                 assert nt != null;
                 // assert ntBegin == c.stateBegin for c in callers
@@ -323,7 +323,7 @@ public class Parser {
         public int hashCode() {
             return this.key.hashCode();
         }
-    //***************************** End Boilerplate *****************************
+        //***************************** End Boilerplate *****************************
     }
 
     ////////////////
@@ -654,6 +654,7 @@ public class Parser {
      * @return the result of parsing, as a Term
      */
     public Term parse(NonTerminal nt, int position) {
+        assert nt != null : "Start symbol cannot be null.";
         activateStateCall(s.stateCalls.get(new StateCall.Key(s.ntCalls.get(
             new NonTerminalCall.Key(nt, position)), position, nt.entryState)),
             Function.IDENTITY);
