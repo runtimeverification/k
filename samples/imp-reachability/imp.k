@@ -140,10 +140,9 @@ For each reachability formula given as input we have two corresponding generated
        <condition> Psi:Bool  </condition>
        =>
        <k> K </k>
-       <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
+       <state> a |-> !A':Int b |-> !B':Int x |-> X:Int y |-> Y:Int </state>
        <condition> Psi andBool 0 <=Int X andBool 0 <Int Y </condition>)
-       when fresh(B':Int) andBool fresh(A':Int)
-            andBool checkSat(Psi andBool notBool(0 <=Int X andBool 0 <Int Y)) ==K "unsat"
+       when checkSat(Psi andBool notBool(0 <=Int X andBool 0 <Int Y)) ==K "unsat"
       [transition]
 
   rule (<T>
@@ -164,13 +163,12 @@ For each reachability formula given as input we have two corresponding generated
        <condition> Psi:Bool  </condition>
        =>
        <k> K </k>
-       <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
+       <state> a |-> !A':Int b |-> !B':Int x |-> X:Int y |-> Y:Int </state>
        <condition>
          Psi andBool
-         X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y
+         X ==Int !A' *Int Y +Int !B' andBool !B' >=Int 0 andBool !B' <Int Y
        </condition>)
-       when fresh(B':Int) andBool fresh(A':Int)
-            andBool checkSat(Psi andBool notBool(X ==Int A *Int Y +Int B andBool B >=Int 0))
+       when checkSat(Psi andBool notBool(X ==Int A *Int Y +Int B andBool B >=Int 0))
                     ==K "unsat"
       [transition]
 
@@ -192,13 +190,12 @@ For each reachability formula given as input we have two corresponding generated
        <condition> Psi:Bool  </condition>
        =>
        <k> K </k>
-       <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
+       <state> a |-> !A':Int b |-> !B':Int x |-> X:Int y |-> Y:Int </state>
        <condition>
          Psi andBool 
-         (X ==Int A' *Int Y +Int B' andBool B' >=Int 0)
+         (X ==Int !A' *Int Y +Int !B' andBool !B' >=Int 0)
        </condition>)
-       when fresh(B':Int) andBool fresh(A':Int)
-            andBool checkSat(Psi andBool 
+       when checkSat(Psi andBool 
                              notBool (X ==Int A *Int Y +Int B andBool B >=Int 0 andBool Y <=Int B))
                     ==K "unsat"
        [transition]

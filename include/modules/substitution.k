@@ -114,7 +114,7 @@ module FREE-VARS
   syntax Set ::= #freeVars(KList)  [function]
   rule #freeVars(Ks:KList) => #freeVars(Ks:KList, .Set, .Set)
 
-  syntax Set ::= #freeVars(KList, Set, Set)  [function]
+  syntax Set ::= #freeVars(KList, Set, Set)  [function, klabel(#freevars2)]
   rule #freeVars(.KList, _, Free:Set) => Free
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
     => #freeVars(Ks, Bound, Free) when X in Bound
