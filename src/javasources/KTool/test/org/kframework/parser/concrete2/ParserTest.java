@@ -400,7 +400,7 @@ public class ParserTest {
             Term t1 = amb(klist(X));
             Term t2 = amb(klist(kapp("AA", t1, t1)));
             Term t3 = amb(klist(kapp("AA", t2, t1)), klist(kapp("AA", t1, t2)));
-            Term t4 = amb(klist(kapp("AA", t2, t2)), klist(kapp("AA", t1, t3)), klist(kapp("AA", t3, t1)));
+            Term t4 = amb(klist(kapp("AA", t3, t1)), klist(kapp("AA", t2, t2)), klist(kapp("AA", t1, t3)));
             Term expected = amb(klist(t4));
             Assert.assertEquals("AAA check: ", expected, result);
         }
