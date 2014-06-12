@@ -77,6 +77,7 @@ public class Constants {
     // Streams
     public static final String STDIN = "stdin";
     public static final String STDOUT = "stdout";
+    public static final String STDERR = "stderr";
 
     // Generated stuff
     public static final String GENERATED_FILENAME = "File System";

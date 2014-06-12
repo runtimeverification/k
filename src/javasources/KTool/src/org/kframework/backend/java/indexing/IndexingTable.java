@@ -8,6 +8,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.Production;
+import org.kframework.kil.loader.Constants;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -23,6 +24,8 @@ public class IndexingTable implements Serializable, RuleIndex{
     private Map<Index, List<Rule>> ruleTable;
     private Map<Index, List<Rule>> heatingRuleTable;
     private Map<Index, List<Rule>> coolingRuleTable;
+    private Map<Index, List<Rule>> instreamRuleTable;
+    private Map<Index, List<Rule>> outstreamRuleTable;
     private Map<Index, List<Rule>> simulationRuleTable;
     private List<Rule> unindexedRules;
     private final Definition definition;
@@ -34,7 +37,6 @@ public class IndexingTable implements Serializable, RuleIndex{
 
     @Override
     public void buildIndex() {
-
         /* populate the table of rules rewriting the top configuration */
         List<Index> indices = new ArrayList<Index>();
         indices.add(TopIndex.TOP);
@@ -64,12 +66,16 @@ public class IndexingTable implements Serializable, RuleIndex{
         ImmutableMap.Builder<Index, List<Rule>> mapBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Index, List<Rule>> heatingMapBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Index, List<Rule>> coolingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, List<Rule>> instreamMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, List<Rule>> outstreamMapBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Index, List<Rule>> simulationMapBuilder = ImmutableMap.builder();
 
         for (Index index : indices) {
             ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
             ImmutableList.Builder<Rule> heatingListBuilder = ImmutableList.builder();
             ImmutableList.Builder<Rule> coolingListBuilder = ImmutableList.builder();
+            ImmutableList.Builder<Rule> instreamListBuilder = ImmutableList.builder();
+            ImmutableList.Builder<Rule> outstreamListBuilder = ImmutableList.builder();
             ImmutableList.Builder<Rule> simulationListBuilder = ImmutableList.builder();
 
             for (Rule rule : definition.rules()) {
@@ -81,11 +87,18 @@ public class IndexingTable implements Serializable, RuleIndex{
                     if (index.isUnifiable(rule.indexingPair().second)) {
                         coolingListBuilder.add(rule);
                     }
-                } else if(rule.containsAttribute("alphaRule")){
+                } else if (rule.containsAttribute(Constants.STDIN)) {
+                    if (index.isUnifiable(rule.indexingPair().second)) {
+                        instreamListBuilder.add(rule);
+                    }
+                } else if (rule.containsAttribute(Constants.STDOUT) || rule.containsAttribute(Constants.STDERR)) {
+                    if (index.isUnifiable(rule.indexingPair().first)) {
+                        outstreamListBuilder.add(rule);
+                    }
+                } else if (rule.containsAttribute("alphaRule")){
                     if(index.isUnifiable(rule.indexingPair().first)) {
                         simulationListBuilder.add(rule);
                     }
-
                 } else {
                     if (index.isUnifiable(rule.indexingPair().first)) {
                         listBuilder.add(rule);
@@ -104,20 +117,32 @@ public class IndexingTable implements Serializable, RuleIndex{
             if (!rules.isEmpty()) {
                 coolingMapBuilder.put(index, rules);
             }
+            rules = instreamListBuilder.build();
+            if (!rules.isEmpty()) {
+                instreamMapBuilder.put(index, rules);
+            }
+            rules = outstreamListBuilder.build();
+            if (!rules.isEmpty()) {
+                outstreamMapBuilder.put(index, rules);
+            }
             rules = simulationListBuilder.build();
             if(!rules.isEmpty()){
-                simulationMapBuilder.put(index,rules);
+                simulationMapBuilder.put(index, rules);
             }
         }
         heatingRuleTable = heatingMapBuilder.build();
         coolingRuleTable = coolingMapBuilder.build();
+        instreamRuleTable = instreamMapBuilder.build();
+        outstreamRuleTable = outstreamMapBuilder.build();
         ruleTable = mapBuilder.build();
         simulationRuleTable = simulationMapBuilder.build();
 
         ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
         for (Rule rule : definition.rules()) {
-            if (!rule.containsKCell()) {
-                listBuilder.add(rule);
+            if (!rule.containsKCell() && !rule.containsAttribute(Constants.STDIN)
+                        && !rule.containsAttribute(Constants.STDOUT)
+                        && !rule.containsAttribute(Constants.STDERR)) {
+                    listBuilder.add(rule);
             }
         }
         unindexedRules = listBuilder.build();
@@ -154,8 +179,30 @@ public class IndexingTable implements Serializable, RuleIndex{
     @Override
     public List<Rule> getRules(Term term) {
         Set<Rule> rules = new LinkedHashSet<>();
+        ConfigurationTermIndex cfgTermIdx = term.getConfigurationTermIndex(definition);
 
-        for (IndexingPair pair : term.getIndexingPairs(definition)) {
+        /* give priority to IO rules */
+        for (IndexingPair pair : cfgTermIdx.getInstreamIndexingPairs()) {
+            if (instreamRuleTable.get(pair.second) != null) {
+                for (Rule rule : instreamRuleTable.get(pair.second)) {
+                    if (rule.lookups().equalities().size() <= cfgTermIdx.maxInputBufLen()) {
+                        rules.add(rule);
+                    }
+                }
+            }
+        }
+        
+        for (IndexingPair pair : cfgTermIdx.getOutstreamIndexingPairs()) {
+            if (outstreamRuleTable.get(pair.first) != null) {
+                for (Rule rule : outstreamRuleTable.get(pair.first)) {
+                    if (rule.lookups().equalities().size() <= cfgTermIdx.maxOutputBufLen()) {
+                        rules.add(rule);
+                    }
+                }
+            }
+        }
+        
+        for (IndexingPair pair : cfgTermIdx.getKCellIndexingPairs()) {
             if (ruleTable.get(pair.first) != null) {
                 rules.addAll(ruleTable.get(pair.first));
             }
@@ -165,7 +212,8 @@ public class IndexingTable implements Serializable, RuleIndex{
             if (coolingRuleTable.get(pair.second) != null) {
                 rules.addAll(coolingRuleTable.get(pair.second));
             }
-        }
+        }        
+        
         rules.addAll(unindexedRules);
         return new ArrayList<>(rules);
     }

@@ -14,16 +14,19 @@ import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint.Equality;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.loader.Constants;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -99,15 +102,30 @@ public class Rule extends JavaSymbolicObject {
                 
         super.setAttributes(attributes);
 
-        Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs(definition);
-        /*
-         * Compute indexing information only if the left-hand side of this rule has precisely one
-         * k cell; set indexing to top otherwise (this rule could rewrite any term).
-         */
-        if (indexingPairs.size() == 1) {
-            this.indexingPair = indexingPairs.iterator().next();
+        if (attributes.containsKey(Constants.STDIN)
+                || attributes.containsKey(Constants.STDOUT)
+                || attributes.containsKey(Constants.STDERR)) {
+            Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
+            BuiltinList streamList = listVar instanceof ConcreteCollectionVariable ? 
+                    new BuiltinList() : new BuiltinList(listVar);
+            for (Equality eq : Lists.reverse(lookups.equalities())) {
+                streamList.addLeft(eq.rightHandSide());
+            }
+            this.indexingPair = attributes.containsKey(Constants.STDIN) ? 
+                    IndexingPair.getInstreamIndexingPair(streamList, definition) :
+                    IndexingPair.getOutstreamIndexingPair(streamList, definition);
         } else {
-            this.indexingPair = IndexingPair.TOP;
+            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(definition);
+            
+            /*
+             * Compute indexing information only if the left-hand side of this rule has precisely one
+             * k cell; set indexing to top otherwise (this rule could rewrite any term).
+             */
+            if (indexingPairs.size() == 1) {
+                this.indexingPair = indexingPairs.iterator().next();
+            } else {
+                this.indexingPair = IndexingPair.TOP;
+            }
         }
 
         leftHandSide.accept(new BottomUpVisitor() {

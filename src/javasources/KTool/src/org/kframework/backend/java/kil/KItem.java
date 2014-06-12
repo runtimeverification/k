@@ -273,9 +273,6 @@ public final class KItem extends Term {
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
             } catch (InvocationTargetException e) {
-                // TODO(YilongL): is reflection/exception really the best way to
-                // deal with builtin functions? builtin functions are supposed to be
-                // super-fast...
                 Throwable t = e.getTargetException();
                 if (t instanceof Error) {
                     throw (Error)t;
