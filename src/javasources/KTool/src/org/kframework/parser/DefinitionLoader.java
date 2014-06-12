@@ -30,7 +30,7 @@ import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
+import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
@@ -263,7 +263,7 @@ public class DefinitionLoader {
             JavaClassesFactory.startConstruction(context);
             def = (Definition) new ParseRulesFilter(context).visitNode(def);
             JavaClassesFactory.endConstruction();
-            def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
+            def = (Definition) new NormalizeASTTransformer(context).visitNode(def);
 
 
             Stopwatch.instance().printIntermediate("Parsing Rules");
@@ -302,7 +302,7 @@ public class DefinitionLoader {
         // ----------------------------------- parse rules
         JavaClassesFactory.startConstruction(context);
         def = (Definition) new ParseRulesFilter(context, false).visitNode(def);
-        def = (Definition) new CorrectConstantsTransformer(context).visitNode(def);
+        def = (Definition) new NormalizeASTTransformer(context).visitNode(def);
 
         JavaClassesFactory.endConstruction();
 
@@ -347,7 +347,7 @@ public class DefinitionLoader {
         // config = new TypeInferenceSupremumFilter(context).visitNode(config);
         config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
         config = new PreferAvoidFilter(context).visitNode(config);
-        config = new CorrectConstantsTransformer(context).visitNode(config);
+        config = new NormalizeASTTransformer(context).visitNode(config);
         config = new FlattenListsFilter(context).visitNode(config);
         config = new AmbDuplicateFilter(context).visitNode(config);
         // last resort disambiguation
@@ -396,7 +396,7 @@ public class DefinitionLoader {
         // config = new TypeInferenceSupremumFilter(context).visitNode(config);
         config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
         config = new PreferAvoidFilter(context).visitNode(config);
-        config = new CorrectConstantsTransformer(context).visitNode(config);
+        config = new NormalizeASTTransformer(context).visitNode(config);
         config = new FlattenListsFilter(context).visitNode(config);
         config = new AmbDuplicateFilter(context).visitNode(config);
         // last resort disambiguation
@@ -438,7 +438,7 @@ public class DefinitionLoader {
         config = new TypeInferenceSupremumFilter(context).visitNode(config);
         config = new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context).visitNode(config);
         // config = new PreferAvoidFilter().visitNode(config);
-        config = new CorrectConstantsTransformer(context).visitNode(config);
+        config = new NormalizeASTTransformer(context).visitNode(config);
         config = new FlattenListsFilter(context).visitNode(config);
         config = new AmbDuplicateFilter(context).visitNode(config);
         // last resort disambiguation

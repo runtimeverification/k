@@ -19,7 +19,7 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
+import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete2.Grammar;
@@ -61,7 +61,7 @@ public class ProgramLoader {
 
         out = new PriorityFilter(context).visitNode(out);
         out = new PreferAvoidFilter(context).visitNode(out);
-        out = new CorrectConstantsTransformer(context).visitNode(out);
+        out = new NormalizeASTTransformer(context).visitNode(out);
         out = new AmbFilter(context).visitNode(out);
         out = new RemoveBrackets(context).visitNode(out);
 
