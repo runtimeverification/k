@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.kil.DataStructureChoice.Type;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -48,6 +49,11 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     }
 
     public Term set() {
+        return base();
+    }
+    
+    @Override
+    public Term base() {
         return set;
     }
 
@@ -64,6 +70,11 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     @Override
     public String sort() {
         return kind.toString();
+    }
+    
+    @Override
+    public Type type() {
+        return Type.SET_ELEMENT_CHOICE;
     }
 
     @Override

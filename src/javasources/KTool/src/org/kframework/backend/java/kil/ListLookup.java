@@ -42,6 +42,11 @@ public class ListLookup extends Term implements DataStructureLookup {
     }
 
     public Term list() {
+        return base();
+    }
+    
+    @Override
+    public Term base() {
         return list;
     }
 
@@ -60,6 +65,11 @@ public class ListLookup extends Term implements DataStructureLookup {
     @Override
     public String sort() {
         return kind.toString();
+    }
+
+    @Override
+    public Type type() {
+        return Type.LIST_LOOKUP;
     }
 
     @Override

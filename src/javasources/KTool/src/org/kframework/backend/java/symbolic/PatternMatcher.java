@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -151,10 +152,20 @@ public class PatternMatcher extends AbstractMatcher {
      */
     public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitution,
             TermContext context) {
+        count++;
         List<Map<Variable, Term>> results = evaluateConditions(rule, Collections.singletonList(substitution), context);
+        count--;
         assert results.size() <= 1;
         return results.isEmpty() ? null : results.get(0);
     }
+    
+    // TODO(YilongL): Unfortunately, I need the following stuff to profile, and
+    // this is the most convenient way for me to do that. I will clean it up
+    // when I am done
+    public static final Stopwatch evalTimer2 = new Stopwatch();
+    public static final Stopwatch evalTimer3 = new Stopwatch();
+    private static int count = 0;
+    public static int req = 0, sortcheck = 0, eq = 0;
 
     /**
      * Evaluates the side-conditions of a rule against a list of possible
@@ -178,7 +189,7 @@ public class PatternMatcher extends AbstractMatcher {
             }
 
             /* evaluate data structure lookups/choices and add bindings for them */
-            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {               
                 // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
                 Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
                         equality.leftHandSide() : equality.rightHandSide();
@@ -187,8 +198,9 @@ public class PatternMatcher extends AbstractMatcher {
                 assert lookupOrChoice instanceof DataStructureLookupOrChoice :
                     "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
+                Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst);
+                
                 boolean resolved = false;
-                Term evalLookupOrChoice = lookupOrChoice.substituteAndEvaluate(crntSubst, context);
                 if (evalLookupOrChoice instanceof Bottom
                         || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
                     /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
@@ -225,12 +237,19 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* evaluate side conditions */
             if (crntSubst != null) {
+                if (!evalTimer3.isRunning() && count > 0) {
+                    evalTimer3.start();
+                }
                 for (Term require : rule.requires()) {
+                    req++;
                     Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
                     if (!evaluatedReq.equals(BoolToken.TRUE)) {
                         crntSubst = null;
                         break;
                     }
+                }
+                if (evalTimer3.isRunning() && count > 0) {
+                    evalTimer3.stop();
                 }
             }
 
@@ -239,6 +258,50 @@ public class PatternMatcher extends AbstractMatcher {
             }
         }
         return results;
+    }
+
+    /**
+     * Private helper method to substitute and evaluate a
+     * {@link DataStructureLookupOrChoice} operation efficiently.
+     * <p>
+     * This method is more than 10x faster than simply calling
+     * {@code Term#substituteAndEvaluate(Map, TermContext)} on
+     * {@code lookupOrChoice}.
+     * 
+     * @param lookupOrChoice
+     * @param subst
+     *            the substitution map
+     * @return the evaluated data structure lookup or choice operation
+     */
+    private static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst) {
+        evalTimer2.start();
+        
+        Term evalLookupOrChoice = null;
+        if (lookupOrChoice instanceof DataStructureLookup) {
+            DataStructureLookup lookup = (DataStructureLookup) lookupOrChoice;
+            Term base = null, key = null;
+            if (lookup.base() instanceof Variable) {
+                base = subst.get(lookup.base());
+            }
+            key = subst.get(lookup.key());
+            Kind kind = lookupOrChoice.kind();
+            base = base == null ? lookup.base() : base;
+            key = key == null ? lookup.key() : key;
+
+            evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(lookup.type(), base, key, kind).evaluateLookup();
+        } else {
+            DataStructureChoice choice = (DataStructureChoice) lookupOrChoice;
+            Term base = null;
+            if (choice.base() instanceof Variable) {
+                base = subst.get(choice.base());
+            }
+            base = base == null ? choice.base() : base;
+            
+            evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(choice.type(), base).evaluateChoice();
+        }
+        
+        evalTimer2.stop();
+        return evalLookupOrChoice;
     }
 
     /**

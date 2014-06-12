@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.kil.DataStructureLookup.Type;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -62,6 +63,11 @@ public class SetLookup extends Term implements DataStructureLookup {
     @Override
     public String sort() {
         return BoolToken.SORT_NAME;
+    }
+    
+    @Override
+    public Type type() {
+        return Type.SET_LOOKUP;
     }
 
     @Override

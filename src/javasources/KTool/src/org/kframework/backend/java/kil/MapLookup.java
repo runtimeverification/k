@@ -27,7 +27,7 @@ public class MapLookup extends Term implements DataStructureLookup {
         if (!(map instanceof BuiltinMap)) {
             return this;
         }
-
+        
         Term value = ((BuiltinMap) map).get(key);
         if (value != null) {
             return value;
@@ -45,6 +45,11 @@ public class MapLookup extends Term implements DataStructureLookup {
     }
 
     public Term map() {
+        return base();
+    }
+    
+    @Override
+    public Term base() {
         return map;
     }
 
@@ -63,6 +68,11 @@ public class MapLookup extends Term implements DataStructureLookup {
     @Override
     public String sort() {
         return kind.toString();
+    }
+    
+    @Override
+    public Type type() {
+        return Type.MAP_LOOKUP;
     }
 
     @Override
