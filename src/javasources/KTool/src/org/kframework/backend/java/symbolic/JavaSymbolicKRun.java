@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Rule;
@@ -27,6 +28,7 @@ import java.io.File;
 import java.util.*;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
+
 import org.kframework.utils.general.IndexingStatistics;
 
 /**
@@ -51,9 +53,6 @@ public class JavaSymbolicKRun implements KRun {
         if (definition == null) {
             throw new KRunExecutionException("cannot load definition");
         }
-
-        /* initialize the builtin function table */
-        BuiltinFunction.init(definition);
 
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
@@ -95,7 +94,8 @@ public class JavaSymbolicKRun implements KRun {
         }
 
         Term term = Term.of(cfg, definition);
-        TermContext termContext = TermContext.of(definition, new PortableFileSystem());
+        GlobalContext globalContext = new GlobalContext(definition, new PortableFileSystem());
+        TermContext termContext = TermContext.of(globalContext);
         term = term.evaluate(termContext);
 
         if (K.pattern_matching) {
@@ -123,7 +123,8 @@ public class JavaSymbolicKRun implements KRun {
 
     @Override
     public KRunProofResult<Set<org.kframework.kil.Term>> prove(Module module, org.kframework.kil.Term cfg) throws KRunExecutionException {
-        TermContext termContext = TermContext.of(definition, new PortableFileSystem());
+        GlobalContext globalContext = new GlobalContext(definition, new PortableFileSystem());
+        TermContext termContext = TermContext.of(globalContext);
         Map<org.kframework.kil.Term, org.kframework.kil.Term> substitution = null;
         if (cfg != null) {
             cfg = run(cfg).getResult().getRawResult();
@@ -226,7 +227,7 @@ public class JavaSymbolicKRun implements KRun {
         pattern = (org.kframework.kil.Rule)builtinTransformer.visit(pattern, null);
         cfg = (org.kframework.kil.Term) builtinTransformer.visitNode(cfg);
 
-        TermContext termContext = TermContext.of(definition, fs);
+        GlobalContext globalContext = new GlobalContext(definition, fs);
         List<Rule> claims = Collections.emptyList();
         if (bound == null) {
             bound = -1;
@@ -248,11 +249,11 @@ public class JavaSymbolicKRun implements KRun {
         if (K.pattern_matching) {
             Term initialTerm = Term.of(cfg, definition);
             Term targetTerm = null;
-            GroundRewriter rewriter = new GroundRewriter(definition, termContext);
+            GroundRewriter rewriter = new GroundRewriter(definition, TermContext.of(globalContext));
             hits = rewriter.search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType);
         } else {
-            ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
+            ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), TermContext.of(globalContext));
             ConstrainedTerm targetTerm = null;
             SymbolicRewriter rewriter = new SymbolicRewriter(definition);
             hits = rewriter.search(initialTerm, targetTerm, claims,
@@ -324,7 +325,8 @@ public class JavaSymbolicKRun implements KRun {
                         stateMap));
         
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        final TermContext termContext = TermContext.of(definition, new PortableFileSystem());
+        GlobalContext globalContext = new GlobalContext(definition, new PortableFileSystem());
+        final TermContext termContext = TermContext.of(globalContext);
         ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
 
         List<TestGenResult> generatorResults = new ArrayList<TestGenResult>();

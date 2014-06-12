@@ -10,6 +10,7 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -28,10 +29,12 @@ public class StepRewriter {
     private final Stopwatch stopwatch = new Stopwatch();
     private Collection<ConstrainedTerm> constrainedTermResults = new ArrayList<ConstrainedTerm>();
     private Collection<Term> termResults = new ArrayList<Term>();
+    private GlobalContext globalContext;
 
     public StepRewriter(Collection<Rule> rules, Definition definition) {
         this.rules = new ArrayList<Rule>(rules);
         this.definition = definition;
+        this.globalContext = new GlobalContext(definition, null);
     }
 
     public Collection<Term> getAllSuccessors(Term term) {
@@ -119,7 +122,7 @@ public class StepRewriter {
 
         termResults = new ArrayList<Term>();
 
-        TermContext context = TermContext.of(definition);
+        TermContext context = TermContext.of(globalContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, context);
 
         SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);

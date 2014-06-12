@@ -38,10 +38,6 @@ public class CopyOnWriteTransformer implements Transformer {
         this.definition = context.definition();
     }
 
-    public CopyOnWriteTransformer(Definition definition) {
-        this(TermContext.of(definition));
-    }
-
     public CopyOnWriteTransformer() {
         this.context = null;
         this.definition = null;

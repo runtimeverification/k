@@ -14,24 +14,23 @@ import org.kframework.krun.api.io.FileSystem;
 public class TermContext extends JavaSymbolicObject {
 
     private BigInteger counter = BigInteger.ZERO;
-    private final Definition def;
-    private final FileSystem fs;
 
-    private TermContext(Definition def, FileSystem fs) {
-        this.def = def;
-        this.fs = fs;
+    public final GlobalContext global;
+
+    private ConstrainedTerm.Data topConstrainedTermData;
+
+    private TermContext(GlobalContext global) {
+        this.global = global;
     }
 
-    /**
-     * Only used when the Term is part of a Definition instead of part of a
-     * ConstrainedTerm.
-     */
-    public static TermContext of(Definition def) {
-        return new TermContext(def, null);
+    public static TermContext of(GlobalContext global) {
+        return new TermContext(global);
     }
 
-    public static TermContext of(Definition def, FileSystem fs) {
-        return new TermContext(def, fs);
+    public static TermContext of(GlobalContext global, ConstrainedTerm.Data topConstrainedTermData) {
+        TermContext termContext = new TermContext(global);
+        termContext.setConstrainedTermData(topConstrainedTermData);
+        return termContext;
     }
 
     public BigInteger getCounter() {
@@ -48,11 +47,19 @@ public class TermContext extends JavaSymbolicObject {
     }
 
     public Definition definition() {
-        return def;
+        return global.def;
     }
 
     public FileSystem fileSystem() {
-        return fs;
+        return global.fs;
+    }
+
+    public ConstrainedTerm.Data getConstrainedTermData() {
+        return topConstrainedTermData;
+    }
+
+    public void setConstrainedTermData(ConstrainedTerm.Data constrainedTermData) {
+        this.topConstrainedTermData = constrainedTermData;
     }
 
     @Override
@@ -64,5 +71,4 @@ public class TermContext extends JavaSymbolicObject {
     public void accept(Visitor visitor) {
         throw new UnsupportedOperationException();
     }
-
 }

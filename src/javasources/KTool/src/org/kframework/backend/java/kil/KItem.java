@@ -230,7 +230,7 @@ public final class KItem extends Term {
 
         if (kLabelConstant.label().startsWith("is")
                 || !context.definition().functionRules().get(kLabelConstant).isEmpty()
-                || BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+                || context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
             evaluable = true;
         }
         return evaluable;
@@ -263,10 +263,10 @@ public final class KItem extends Term {
         }
         KList kList = (KList) this.kList;
 
-        if (BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+        if (context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
             try {
                 Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
+                Term result = context.global.builtins.invoke(context, kLabelConstant, arguments);
                 if (result != null) {
                     assert result.kind() == Kind.KITEM:
                             "unexpected kind " + result.kind() + " of term " + result + ";"
