@@ -93,6 +93,8 @@ public class Context implements Serializable {
     private Poset subsorts = new Poset();
     public java.util.Set<String> definedSorts = Sort.getBaseSorts();
     private Poset priorities = new Poset();
+    private Poset assocLeft = new Poset();
+    private Poset assocRight = new Poset();
     private Poset modules = new Poset();
     private Poset fileRequirements = new Poset();
     public String startSymbolPgm = "K";
@@ -290,6 +292,22 @@ public class Context implements Serializable {
 
     public void finalizePriority() {
         priorities.transitiveClosure();
+    }
+
+    public void addLeftAssoc(String label1, String label2) {
+        assocLeft.addRelation(label1, label2);
+    }
+
+    public void addRightAssoc(String label1, String label2) {
+        assocRight.addRelation(label1, label2);
+    }
+
+    public boolean isLeftAssoc(String label1, String label2) {
+        return assocLeft.isInRelation(label1, label2);
+    }
+
+    public boolean isRightAssoc(String label1, String label2) {
+        return assocRight.isInRelation(label1, label2);
     }
 
     /**

@@ -6,6 +6,7 @@
 		  definition="01-list/test.k"
 		  programs="01-list/"
 		  extension="test"
+		  skip="pdf"
 		  results="01-list/">
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
@@ -16,25 +17,74 @@
 		  definition="02-arithmetic-expressions/test.k"
 		  programs="02-arithmetic-expressions/"
 		  extension="test"
+		  skip="pdf"
 		  results="02-arithmetic-expressions/">
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>
 	</test>
 
-	
-	<!-- TODO(Radu): once ktest can call kast, add programs for tests. See issue 
-		https://github.com/kframework/k/pull/397
-	-->
-	<test definition="03-arithmetic-expressions-amb/test.k" />
+    <test
+          definition="03-arithmetic-expressions-amb/test.k"
+          programs="03-arithmetic-expressions-amb/"
+          extension="test"
+		  skip="pdf"
+          results="03-arithmetic-expressions-amb/">
+        <all-programs>
+            <krun-option name="-parser" value="kast --parser newprogram" />
+        </all-programs>
+    </test>
 
-	<test definition="04-ambiguous-constructor/test.k" />
+    <test
+          definition="04-ambiguous-constructor/test.k"
+          programs="04-ambiguous-constructor/"
+          extension="test"
+		  skip="pdf"
+          results="04-ambiguous-constructor/">
+        <all-programs>
+            <krun-option name="-parser" value="kast --parser newprogram" />
+        </all-programs>
+    </test>
 
 	<test
 		  definition="05-reject-keywords/test.k"
 		  programs="05-reject-keywords/"
 		  extension="test"
+		  skip="pdf"
 		  results="05-reject-keywords/">
+		<all-programs>
+			<krun-option name="--parser" value="kast --parser newprogram" />
+		</all-programs>
+	</test>
+	
+	<test
+		  definition="06-constant-prefer/test.k"
+		  programs="06-constant-prefer/"
+		  extension="test"
+		  skip="pdf"
+		  results="06-constant-prefer/">
+		<all-programs>
+			<krun-option name="--parser" value="kast --parser newprogram" />
+		</all-programs>
+	</test>
+
+	<test
+		  definition="07-conslist/test.k"
+		  programs="07-conslist/"
+		  extension="test"
+		  skip="pdf"
+		  results="07-conslist/">
+		<all-programs>
+			<krun-option name="--parser" value="kast --parser newprogram" />
+		</all-programs>
+	</test>
+
+	<test
+		  definition="08-manual-reject/test.k"
+		  programs="08-manual-reject/"
+		  extension="test"
+	      skip="pdf"
+		  results="08-manual-reject/">
 		<all-programs>
 			<krun-option name="--parser" value="kast --parser newprogram" />
 		</all-programs>

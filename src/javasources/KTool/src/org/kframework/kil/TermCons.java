@@ -7,6 +7,7 @@ import java.util.List;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -18,6 +19,9 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     protected final String cons;
     protected java.util.List<Term> contents;
     protected Production production;
+
+    private int cachedHashCode = 0;
+    private boolean upToDateHash = false;
 
     public TermCons(Element element, Context context) {
         super(element);
@@ -51,6 +55,13 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         production = context.conses.get(cons);
     }
 
+    public TermCons(String psort, List<Term> contents, Production production) {
+        super(psort);
+        cons = null;
+        this.contents = contents;
+        this.production = production;
+    }
+
     public Production getProduction() {
         return production;
     }
@@ -59,16 +70,21 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     public String toString() {
         String str = "";
         if (production.items.size() > 0) {
-            if (production.items.get(0) instanceof UserList) {
+            if (production.isListDecl()) {
                 String separator = ((UserList) production.items.get(0)).separator;
-                str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
+                if (contents.size() == 0)
+                    str += "." + sort;
+                else {
+                    str += "'_" + separator + "_(";
+                    for (Term t : contents)
+                        str += t + ", ";
+                    str = str.substring(0, str.length()-2) + ")";
+                }
             } else
                 for (int i = 0, j = 0; i < production.items.size(); i++) {
                     ProductionItem pi = production.items.get(i);
                     if (pi instanceof Terminal) {
-                        String terminall = pi.toString();
-                        terminall = terminall.substring(1, terminall.length() - 1);
-                        str += terminall + " ";
+                        str += ((Terminal) pi).getTerminal() + " ";
                     } else if (pi instanceof Sort)
                         str += contents.get(j++) + " ";
                 }
@@ -89,11 +105,13 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     }
 
     public java.util.List<Term> getContents() {
+        upToDateHash = false;
         return contents;
     }
 
     public void setContents(java.util.List<Term> contents) {
         this.contents = contents;
+        upToDateHash = false;
     }
 
     public Term getSubterm(int idx) {
@@ -108,6 +126,10 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         return production.getArity();
     }
 
+    public boolean isListTerminator() {
+        return production.isListDecl() && contents.size() == 0;
+    }
+
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
@@ -115,28 +137,34 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (this == obj)
-            return true;
-        if (!(obj instanceof TermCons))
-            return false;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
         TermCons tc = (TermCons) obj;
 
-        if (!tc.getSort().equals(this.sort))
+        if (!tc.getSort().equals(sort))
             return false;
-        if (!tc.cons.equals(cons))
-            return false;
-
-        if (tc.contents.size() != contents.size())
-            return false;
-
+        if (cons != null ? !cons.equals(tc.cons) : tc.cons != null) return false;
+        if (!production.equals(tc.production)) return false;
+        if (contents.size() != tc.contents.size()) return false;
         for (int i = 0; i < tc.contents.size(); i++) {
             if (!tc.contents.get(i).equals(contents.get(i)))
                 return false;
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        if (!upToDateHash) {
+            cachedHashCode = cons != null ? cons.hashCode() : 0;
+            cachedHashCode = 31 * cachedHashCode + production.hashCode();
+            for (Term t : contents)
+                cachedHashCode = 31 * cachedHashCode + t.hashCode();
+            upToDateHash = true;
+        }
+        return cachedHashCode;
     }
 
     @Override
@@ -170,15 +198,6 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     }
 
     @Override
-    public int hashCode() {
-        int hash = sort.hashCode() + cons.hashCode();
-
-        for (Term t : contents)
-            hash += t.hashCode();
-        return hash;
-    }
-
-    @Override
     public TermCons shallowCopy() {
         return new TermCons(this);
     }
@@ -192,5 +211,4 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     public void setChildren(List<Term> children, Enum<?> cls) {
         this.contents = children;
     }
-
 }
