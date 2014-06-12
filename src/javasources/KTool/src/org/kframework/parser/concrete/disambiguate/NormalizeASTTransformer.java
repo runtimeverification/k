@@ -27,10 +27,8 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      */
     @Override
     public ASTNode visit(KApp kapp, Void _) throws ParseFailedException {
-        if (kapp.getChild() instanceof Variable){
-            if (!kapp.getChild().getSort().equals(KSorts.KLIST)) {
-                kapp.setChild(new KList(kapp.getChild()));
-            }
+        if (!kapp.getChild().getSort().equals(KSorts.KLIST)) {
+            kapp.setChild(new KList(kapp.getChild()));
         }
         return super.visit(kapp, _);
     }
