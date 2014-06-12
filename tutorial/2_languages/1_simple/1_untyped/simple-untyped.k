@@ -182,7 +182,7 @@ arguments. */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -192,6 +192,17 @@ arguments. */
                 | "acquire" Exp ";"                     [strict]
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
+
+/*@ The reason we allow $\it Stmts$ as the first argument of \texttt{for}
+instead of $\it Stmt$ is because we want to allow more than one statement
+to be executed when the loop is initialized.  Also, as seens shorly, macros
+may expand one statement into more statements; for example, an initialized
+variable declaration statement $\tt var\,x=0;$ desugars into two statements,
+namely $\tt var\,x;\,x=0;$, so if we use $\it Stmt$ instead of $\it Stmts$
+in the production of $\tt for$ above then we risk that the macro expansion
+of statement $\tt var\,x=0;$ happens before the macro expansion of $\tt for$,
+also shown below, in which case the latter would not apply anymore because
+of syntactic mismatch. */
 
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
@@ -358,23 +369,23 @@ $L\mapsto \bot$ is added to it, while the environment is frozen during the
 update operation $\textit{Env}[L/X]$.  The variable declaration command is
 also removed from the top of the computation cell and the fresh location
 counter is incremented.  The undefined symbol $\bot$ added in the store
-is of sort $K$, instead of $\it Val$, on purpose; this way, the store
-lookup rules will get stuck when one attempts to lookup an initialized
-location.  All the above happen in one transactional step, with
-the rule below.  Note also how configuration abstraction allows us to only
-mention the needed cells; indeed, as the configuration above states,
+is of sort $\it KItem$, instead of $\it Val$, on purpose; this way, the
+store lookup rules will get stuck when one attempts to lookup an
+uninitialized location.  All the above happen in one transactional step,
+with the rule below.  Note also how configuration abstraction allows us to
+only mention the needed cells; indeed, as the configuration above states,
 the \textsf{k} and \textsf{env} cells are actually located within a
 \textsf{thread} cell within the \textsf{threads} cell, but one needs
 not mention these: the configuration context of the rule is
 automatically transformed to match the declared configuration
 structure. */
 
-  syntax K ::= "undefined"  [latex(\bot)]
+  syntax KItem ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined ...</store>
-       <nextLoc> L:Int => L +Int 1 </nextLoc>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> undefined ...</store>
+       <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
 The \K semantics of the uni-dimensional array declaration is somehow similar
@@ -396,10 +407,10 @@ declarations. */
   context var _:Id[HOLE];
 
   rule <k> var X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(L +Int 1, N)
-                       (L +Int 1) ... (L +Int N) |-> undefined ...</store>
-       <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> array(L +Int 1, N)
+                          (L +Int 1) ... (L +Int N) |-> undefined ...</store>
+       <nextLoc> L => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
 /*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
@@ -410,20 +421,17 @@ dimensions (that's why we defined the expression lists strict!):
 Upon evaluating the array dimensions, the code generation rule below
 desugars multi-dimensional array declaration to uni-dimensional declarations.
 To this aim, we introduce two special unique variable identifiers,
-\texttt{\$1} and \texttt{\$2}.  The first, \texttt{\$1}, is assigned the array
-reference value of the current array, so that we can redeclare the array
-inside the loop body with fewer dimensions.  The second variable,
-\texttt{\$2}, iterates through and initializes each element of the current
-dimension: */
+\texttt{\$1} and \texttt{\$2}.  The first variable, \texttt{\$1}, iterates
+through and initializes each element of the first dimension with an array
+of the remaining dimensions, declared as variable \texttt{\$2}: */
 
   syntax Id ::= "$1" | "$2"
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
     => var X[N1];
        {
-         var $1=X;
-         for(var $2=0; $2 <= N1 - 1; ++$2) {
-           var X[N2,Vs];
-           $1[$2] = X;
+         for(var $1 = 0; $1 <= N1 - 1; ++$1) {
+           var $2[N2, Vs];
+           X[$1] = $2;
          }
        }
     [structural]
@@ -458,8 +466,8 @@ SIMPLE, also defined in \K (see \texttt{examples/simple/typed/static}),
 discards programs which do not respect this requirement. */
 
   rule <k> function F(Xs) S => . ...</k>
-       <env> Env => Env[L/F] </env>
-       <store>... . => L |-> lambda(Xs, S) ...</store>
+       <env> Env => Env[F <- L] </env>
+       <store>... .Map => L |-> lambda(Xs, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ When we are done with the first pass (pre-processing), the computation
@@ -480,10 +488,10 @@ having their names bound in the global environment and, as seen below, they
 are executed in that same global environment; all these mean, in particular,
 that the functions ``see'' each other, allowing for mutual recursion, etc. */
 
-  syntax K ::= "execute"
+  syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> . => Env </genv>  [structural]
+       <genv> .Map => Env </genv>  [structural]
 
 /*@ \section{Expressions}
 We next define the \K semantics of all the expression constructs. */
@@ -513,24 +521,24 @@ integers. */
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
 
 /*@ \subsection{Arithmetic operators}
 There is nothing special about the following rules.  They rewrite the
 language constructs to their library counterparts when their arguments
 become values of expected sorts: */
 
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule Str1:String + Str2:String => Str1 +String Str2
-  rule I1:Int - I2:Int => I1 -Int I2
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
-  rule - I:Int => 0 -Int I
-  rule I1:Int < I2:Int => I1 <Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int > I2:Int => I1 >Int I2
-  rule I1:Int >= I2:Int => I1 >=Int I2
+  rule I1 + I2 => I1 +Int I2
+  rule Str1 + Str2 => Str1 +String Str2
+  rule I1 - I2 => I1 -Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule - I => 0 -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
 
 /*@ The equality and inequality constructs reduce to syntactic comparison
 of the two argument values (which is what the equality on $K$ terms does). */
@@ -541,7 +549,7 @@ of the two argument values (which is what the equality on $K$ terms does). */
 /*@ The logical negation is clear, but the logical conjunction and disjunction
 are short-circuited: */
 
-  rule ! T:Bool => notBool(T)
+  rule ! T => notBool(T)
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
@@ -558,15 +566,17 @@ precise location; we prefer to do it this way to avoid locking the store.
 The semantics of the auxiliary \texttt{lookup} operation is straightforward,
 and is defined at the end of the file. */
 
-// It would be nice to get rid of the next two anywhere rules!
-//
-// Besides the top level of the computation, they are only needed
-// inside the lvalue wrapper.  Maybe add to K some additional notation?
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+// The following 4 rules could be replaced with only 2 rules, if we
+// had [anywhere] attributes.  On the other hand, the [anywhere] feature
+// would be underused, because it would only be used at the top of the
+// computation or inside the lvalue wrapper.  So it may not be worth,
+// or we may need to come up with a special notation allowing us to
+// enumerate contexts for [anywhere] rules.
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]            [structural]
+  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])    [structural]
 
-  rule array(L,_)[N:Int] => lookup(L +Int N)
-    [structural, anywhere]
+  rule array(L,_)[N:Int] => lookup(L +Int N)            [structural]
+  rule lvalue(array(L,_)[N:Int] => lookup(L +Int N))    [structural]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -608,11 +618,11 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax K ::=  (Map,K,ControlCellFragment)
+  syntax KItem ::=  (Map,K,ControlCellFragment)
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => mkDecls(Xs,Vs) S return; </k>
        <control>
-         <fstack> . => ListItem((Env,K,C)) ...</fstack>
+         <fstack> .List => ListItem((Env,K,C)) ...</fstack>
          C
        </control>
        <env> Env => GEnv </env>
@@ -620,7 +630,7 @@ nulary \texttt{return;} statements. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
-         <fstack> ListItem((Env,K,C)) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => .List ...</fstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -650,7 +660,7 @@ The \texttt{read()} expression construct simply evaluates to the next
 input value, at the same time discarding the input value from the
 \textsf{in} cell. */
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -720,7 +730,20 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
+
+/*@ A subtle aspect of the rule above is that $S_1$ is declared to have sort
+$\it Stmts$ and not $\it Stmt$.  That is because desugaring macros can indeed
+produce left associative sequential composition of statements.  For example,
+the code $\texttt{var\,x=0;\,x=1;}$ is desugared to
+$\texttt{(var\,x;\,x=0;)\,x=1;}$, so although originally the first term of
+the sequential composition had sort $\it Stmt$, after desugaring it became
+of sort $\it Stmts$.  Note that the attribute \texttt{[right]} associated
+to the sequential compositon production is an attribute of the syntax, and not
+of the semantics: e.g., it tells the parser to parse
+$\texttt{var\,x;\,x=0;\,x=1;}$ as $\texttt{var\,x;\,(x=0;\,x=1;)}$, but it
+does not tell the rewrite engine to rewrite $\texttt{(var\,x;\,x=0;)\,x=1;}$ to
+$\texttt{var\,x;\,(x=0;\,x=1;)}$. */
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
@@ -758,7 +781,7 @@ evaluated (recall that \texttt{print} is variadic).  We append each of
 its evaluated arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
   rule print(.Vals); => .  [structural]
 
@@ -788,23 +811,23 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax K ::= (Id,Stmts,K,Map,ControlCellFragment)
+  syntax KItem ::= (Id,Stmts,K,Map,ControlCellFragment)
 
-  syntax K ::= "popx"
+  syntax KItem ::= "popx"
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
+         <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
   rule <k> popx => . ...</k>
-       <xstack> _:ListItem => . ...</xstack>
+       <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
+         <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -859,7 +882,7 @@ threads have terminated. */
 
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
        <busy> Busy => Busy -Set keys(H) </busy>
-       <terminated>... . => SetItem(T) ...</terminated>
+       <terminated>... .Set => SetItem(T) ...</terminated>
 
 /*@ \subsubsection{Thread joining}
 Thread joining is now straightforward: all we need to do is to check whether
@@ -881,12 +904,12 @@ counter for the lock (the locks are re-entrant).  These two cases are captured
 by the two rules below: */
 
   rule <k> acquire V:Val; => . ...</k>
-       <holds>... . => V |-> 0 ...</holds>
-       <busy> Busy (. => SetItem(V)) </busy>
-    when (notBool(V in Busy:Set))  [acquire]
+       <holds>... .Map => V |-> 0 ...</holds>
+       <busy> Busy (.Set => SetItem(V)) </busy>
+    when (notBool(V in Busy))  [acquire]
 
   rule <k> acquire V; => . ...</k>
-       <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
+       <holds>... V:Val |-> (N => N +Int 1) ...</holds>
 
 /*@ \subsubsection{Release lock}
 Similarly, there are two corresponding cases to distinguish when a thread
@@ -898,11 +921,11 @@ from its \textsf{holds} cell and also from the the shared \textsf{busy} cell,
 so other threads can acquire it if they need to. */
 
   rule <k> release V:Val; => . ...</k>
-       <holds>... V |-> (N => N:Int -Int 1) ...</holds>
+       <holds>... V |-> (N => N -Int 1) ...</holds>
     when N >Int 0
 
-  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-       <busy>... SetItem(V) => . ...</busy>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+       <busy>... SetItem(V) => .Set ...</busy>
 
 /*@ \subsubsection{Rendezvous synchronization}
 In addition to synchronization through acquire and release of locks, SIMPLE
@@ -942,14 +965,14 @@ The operation below is straightforward.  Note that we tag it with the same
 both rules will be considered transitions when we include the \texttt{lookup}
 tag in the transition option of \texttt{kompile}. */
 
-  syntax K ::= lookup(Int)
+  syntax KItem ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 /*@ \subsubsection{Environment recovery}
 We have already discussed the environment recovery auxiliary operation in the
 IMP++ tutorial: */
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [structural]
 
 /*@  While theoretically sufficient, the basic definition for environment
@@ -1006,8 +1029,6 @@ corresponding store lookup operation. */
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  //context lvalue('_`[_`](_,,HOLE))
-  //context lvalue('_`[_`](HOLE,,_))
   context lvalue(_::Exp[HOLE::Exps])
   context lvalue(HOLE::Exp[_::Exps])
 
