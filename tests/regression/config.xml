@@ -416,5 +416,10 @@
   <include file="float/tests/config.xml"
            directory="float" />
 
+  <include file="user_substitution/tests/config.xml"
+           directory="user_substitution"
+           programs="user_substitution/tests"
+           results="user_substitution/tests" />
+
 </tests>
 
