@@ -114,7 +114,7 @@ module FREE-VARS
   syntax Set ::= #freeVars(KList)  [function]
   rule #freeVars(Ks:KList) => #freeVars(Ks:KList, .Set, .Set)
 
-  syntax Set ::= #freeVars(KList, Set, Set)  [function]
+  syntax Set ::= #freeVars(KList, Set, Set)  [function, klabel(#freevars2)]
   rule #freeVars(.KList, _, Free:Set) => Free
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
     => #freeVars(Ks, Bound, Free) when X in Bound
@@ -194,7 +194,7 @@ module SUBSTITUTION
   rule #substituteFV(K:List, M:Map, FV) => #substituteList(K, M, FV, .List)
   rule #substituteFV(K:Map, M:Map, FV) => #substituteMap(K, M, FV, .Map)
 
-  syntax List ::= #substituteList(List, Map, Set, List)  [function]
+  syntax List ::= #substituteList(List, Map, Set, List)  [function, klabel(#substituteList2)]
   syntax Set ::= #substituteSet(Set, Map, Set, Set)  [function]
   syntax Map ::= #substituteMap(Map, Map, Set, Map)  [function]
 
