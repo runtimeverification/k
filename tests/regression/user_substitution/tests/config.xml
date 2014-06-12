@@ -7,7 +7,6 @@
     programs="."
     extension="lambda"
     results="." >
-    <kompile-option name="--backend" value="java" />
   </test>
 
 </tests>
