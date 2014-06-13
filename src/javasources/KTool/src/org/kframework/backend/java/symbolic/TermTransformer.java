@@ -17,10 +17,6 @@ public class TermTransformer extends CopyOnWriteTransformer {
         super(context);
     }
 
-    public TermTransformer(Definition definition) {
-        super(definition);
-    }
-
     /**
      * Performs the transformation used for all {@code Term} nodes on a
      * {@code Term}.

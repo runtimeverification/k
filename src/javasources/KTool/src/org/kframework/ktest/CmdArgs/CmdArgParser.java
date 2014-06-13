@@ -67,16 +67,18 @@ public class CmdArgParser {
                 .withDescription("Maximum number of threads spawned for parallel execution.")
                 .create());
 
-
-        addOption(OptionBuilder.withLongOpt("ignore-white-spaces").hasArg().withArgName("on|off")
+        addOption(OptionBuilder.withLongOpt(Constants.IGNORE_WS).hasArg().withArgName("on|off")
                 .withDescription("Ignore white spaces when comparing results. (Default: on).")
                 .create());
-        addOption(OptionBuilder.withLongOpt("ignore-balanced-parentheses").hasArg()
+        addOption(OptionBuilder.withLongOpt(Constants.IGNORE_B_PARENS).hasArg()
                 .withArgName("on|off").withDescription("Ignore balanced parentheses when " +
                         "comparing results. (Default: on).").create());
 
-        addOption(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the " +
+        addOption(OptionBuilder.withLongOpt(Constants.DRY).withDescription("Dry run: print out the " +
                 "command to be executed without actual execution.").create());
+        addOption(OptionBuilder.withLongOpt(Constants.DEBUG).withDescription(
+                "Run in debugging mode (prints stack traces when uncaught exceptions are thrown)")
+                .create());
 
         cmdOpts = new PosixParser().parse(options, args);
     }

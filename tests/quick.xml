@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+
+<!-- 
+Very quick regression ktest. 
+
+Be very reluctant in adding any new tests here. Ideally, this test 
+will run a single definition (at least until we have very good incremental
+compilation) 
+
+If you want to test a particular scenario, add it to the special kool definition 
+used for the quick ktest.
+-->
+
+<tests>
+  <include file="regression/quick/config.xml" directory="tests/regression/quick" />
+</tests>

@@ -11,7 +11,9 @@ import java.util.Set;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
+import org.kframework.kil.Production;
 import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
 
 /**
  * An action that transforms an AST into another AST
@@ -69,14 +71,15 @@ public abstract class Rule implements Serializable {
      * Wraps the current KList with the given KLabel
      */
     public static class WrapLabelRule extends KListRule {
-        private final KLabel label;
+        private final Production label;
         private final String sort;
-        public WrapLabelRule(KLabel label, String sort) {
+        public WrapLabelRule(Production label, String sort) {
             assert label != null; assert sort != null;
             this.label = label; this.sort = sort;
         }
         protected KList apply(KList klist, MetaData metaData) {
-            Term term = new KApp(label, klist);
+            //Term term = new KApp(label, klist);
+            Term term = new TermCons(this.sort, klist.getContents(), label);
             term.setSort(this.sort);
             return new KList(Arrays.asList(term));
         }

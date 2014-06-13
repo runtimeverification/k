@@ -150,13 +150,13 @@ public class MetaK {
     }
 
     public static BuiltinMap variablesMap(Term term, TermContext context) {
+        BuiltinMap.Builder builder = BuiltinMap.builder();
         Set<Variable> variables = term.variableSet();
-        Map<MetaVariable, Variable> result = new HashMap<>(variables.size());
         for (Variable variable : variables) {
             assert variable instanceof Variable : "this function only applies on variables";
-            result.put(new MetaVariable(variable), variable);
+            builder.put(new MetaVariable(variable), variable);
         }
-        return BuiltinMap.of(result, null);
+        return builder.build();
     }
 
     /**

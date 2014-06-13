@@ -2,6 +2,7 @@
 package org.kframework.parser.generator;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
@@ -37,12 +39,31 @@ public class ProgramSDF {
         // collect the syntax from those modules
         ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
         CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv.terminals);
+        // visit all modules to collect all Terminals first
+        for (String modName : csmv.synModNames) {
+            Module m = def.getModulesMap().get(modName);
+            ctv.visitNode(m);
+        }
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv);
+        // generate SDF and states for the new parser, using the terminals collected from the
+        // previous step
         for (String modName : csmv.synModNames) {
             Module m = def.getModulesMap().get(modName);
             psdfv.visitNode(m);
-            ctv.visitNode(m);
             ks2gsf.visitNode(m);
+        }
+
+        // for each start sort in the grammar
+        // automatically add a production of the type K ::= <start-sort>
+        // this will allow the parser to accept any sort as input if the definition doesn't contain
+        // a configuration, or the $PGM variable has sort K
+        for (String sort : psdfv.startSorts) {
+            if (!Sort.isBasesort(sort) && !context.isListSort(sort)) {
+                List<ProductionItem> pi = new ArrayList<>();
+                pi.add(new Sort(sort));
+                Production prod = new Production(new Sort(KSorts.K), pi);
+                ks2gsf.visitNode(prod);
+            }
         }
 
         // save the new parser info

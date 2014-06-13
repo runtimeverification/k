@@ -47,10 +47,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         super(context);
     }
 
-    public PrePostTransformer(Definition definition) {
-        super(TermContext.of(definition));
-    }
-
     public PrePostTransformer() {
         super();
     }

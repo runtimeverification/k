@@ -310,6 +310,7 @@ public class TestCase {
                     ProgramProfile profile = getPgmOptions(pgmFilePath);
                     for (PgmArg arg : profile.getArgs())
                         args.add(arg);
+                    args.add(new PgmArg("--directory", definitionFilePath));
 
                     ret.add(new KRunProgram(
                             pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,

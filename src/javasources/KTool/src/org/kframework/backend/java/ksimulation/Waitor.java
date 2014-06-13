@@ -11,6 +11,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
@@ -62,13 +63,14 @@ public class Waitor extends Thread{
         
         
         Term term = Term.of(implTerm, impl.getDefinition());
-        TermContext termContext = TermContext.of(impl.getDefinition(), new PortableFileSystem());
-        ConstrainedTerm implConstraint = new ConstrainedTerm(term, termContext);
+        GlobalContext globalContext = new GlobalContext(impl.getDefinition(), new PortableFileSystem());
+        TermContext termContext0 = TermContext.of(globalContext);
+        ConstrainedTerm implConstraint = new ConstrainedTerm(term, termContext0);
         pair[0] = implConstraint;
         
         term = Term.of(specTerm, spec.getDefinition());
-        termContext = TermContext.of(spec.getDefinition(), new PortableFileSystem());
-        ConstrainedTerm specConstraint = new ConstrainedTerm(term, termContext);
+        TermContext termContext1 = TermContext.of(globalContext);
+        ConstrainedTerm specConstraint = new ConstrainedTerm(term, termContext1);
         pair[1] = specConstraint;
         
         
