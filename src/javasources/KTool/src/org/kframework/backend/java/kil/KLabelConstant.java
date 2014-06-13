@@ -43,8 +43,6 @@ public class KLabelConstant extends KLabel {
     
     private final String predicateSort;
     
-    private final TermContext termContext;
-
     private KLabelConstant(String label, Definition definition) {
         this.label = label;
         productions = definition != null ?
