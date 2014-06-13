@@ -1,11 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.List;
 
 import org.kframework.backend.java.symbolic.Matcher;
@@ -198,43 +194,32 @@ public class KSequence extends KCollection {
     }
     
     /**
-     * Serializes the {@link PStack} as a sequence of elements because it
-     * doesn't properly implement {@link Serializable}.
+     * When this {@code KSequence} is being serialized, serialize its proxy
+     * class instead.
      * 
-     * @param out
-     *            the output object stream
-     * @throws IOException
+     * @return the serialization proxy of this {@code KSequence}
      */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeObject(contents.toArray());
+    private Object writeReplace() {
+        return new SerializationProxy(this);
     }
     
-    /**
-     * Deserializes this {@code KSequence} object. In particular, it rebuilds
-     * the {@code contents} during deserialization.
-     * 
-     * @param in
-     *            the input object stream
-     * @throws IOException
-     * @throws ClassNotFoundException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws NoSuchFieldException
-     * @throws SecurityException
-     */
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException, IllegalArgumentException,
-            IllegalAccessException, NoSuchFieldException, SecurityException {
-        in.defaultReadObject();
+    private static class SerializationProxy implements Serializable {
+        
+        private List<Term> terms;
+        private Variable frame;
 
-        Object[] termArray = (Object[]) in.readObject();
-        PStack<Term> stack = ConsPStack.empty();
-        for (int i = termArray.length - 1; i >= 0; i--) {
-            stack = stack.plus((Term) termArray[i]);
+        private SerializationProxy(KSequence kSequence) {
+            /* converts the non-serializable PStack to normal list */
+            this.terms = Lists.newArrayList(kSequence.contents);
+            this.frame = kSequence.frame;
         }
-        Field f = KSequence.class.getDeclaredField("contents");
-        f.setAccessible(true);
-        f.set(this, stack);
+        
+        private Object readResolve() {
+            PStack<Term> stack = ConsPStack.empty();
+            for (Term term : Lists.reverse(terms)) {
+                stack = stack.plus(term);
+            }
+            return new KSequence(stack, frame);
+        }
     }
 }
