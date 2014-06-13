@@ -59,6 +59,15 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public int size() {
         return getContents().size();
     }
+    
+    /**
+     * {@code KCollection} is guaranteed to have only one frame; thus, they can
+     * always be used in the left-hand side of a rule.
+     */
+    @Override
+    public boolean isLHSView() {
+        return true;
+    }
 
     @Override
     public final boolean isExactSort() {
