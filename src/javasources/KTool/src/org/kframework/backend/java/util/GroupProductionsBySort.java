@@ -21,6 +21,7 @@ import org.kframework.kil.Sort;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 public class GroupProductionsBySort {
 
@@ -63,11 +64,11 @@ public class GroupProductionsBySort {
         List<Production> prods = prodsOfSort.get(sort);
         if (prods != null) {
             for (Production prod : prods) {
-                ImmutableList.Builder<Term> listBuilder = ImmutableList.builder();
+                List<Term> items = Lists.newArrayListWithCapacity(prod.getItems().size());
                 for (ProductionItem prodItem : prod.getItems())
                     if (prodItem instanceof Sort)
-                        listBuilder.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
-                KItem kitem = new KItem(klabelOfProd.get(prod), new KList(listBuilder.build()), context);
+                        items.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
+                KItem kitem = new KItem(klabelOfProd.get(prod), new KList(items), context);
                 freshTerms.add(kitem);
             }
         }

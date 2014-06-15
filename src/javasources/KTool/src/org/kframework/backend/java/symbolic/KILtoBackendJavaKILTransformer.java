@@ -66,6 +66,7 @@ import java.util.Set;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 
@@ -234,12 +235,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
-        ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
+        List<Term> items = Lists.newArrayListWithCapacity(list.size());
         for (org.kframework.kil.Term term : list) {
-            builder.add((Term) this.visitNode(term));
+            items.add((Term) this.visitNode(term));
         }
 
-        return new KSequence(builder.build(), variable);
+        return new KSequence(items, variable);
     }
 
     @Override
@@ -254,12 +255,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
-        ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
+        List<Term> items = Lists.newArrayListWithCapacity(list.size());
         for (org.kframework.kil.Term term : list) {
-            builder.add((Term) this.visitNode(term));
+            items.add((Term) this.visitNode(term));
         }
 
-        return new KList(builder.build(), variable);
+        return new KList(items, variable);
     }
 
     @Override

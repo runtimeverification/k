@@ -862,7 +862,7 @@ public class PatternMatcher extends AbstractMatcher {
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
-                kList = new KList(ImmutableList.copyOf(terms));
+                kList = new KList(terms);
             }
         }
         match(kList, patternKItem.kList());
