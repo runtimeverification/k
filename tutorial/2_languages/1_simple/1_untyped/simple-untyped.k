@@ -972,6 +972,8 @@ tag in the transition option of \texttt{kompile}. */
 We have already discussed the environment recovery auxiliary operation in the
 IMP++ tutorial: */
 
+// TODO: eliminate the env wrapper, like we did in IMP++
+
   syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [structural]
 
