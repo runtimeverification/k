@@ -20,7 +20,7 @@ public class KLabelInjection extends KLabel {
      * Returns an injection of the term into a {@link org.kframework.backend.java.kil.KItem}.
      */
     public static KItem injectionOf(Term term, TermContext context) {
-        return new KItem(new KLabelInjection(term), KList.EMPTY, context);
+        return KItem.of(new KLabelInjection(term), KList.EMPTY, context);
     }
 
     private final Term term;

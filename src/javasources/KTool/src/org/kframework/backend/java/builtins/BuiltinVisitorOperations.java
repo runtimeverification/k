@@ -9,8 +9,6 @@ import org.kframework.kil.ASTNode;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-
 
 /**
  * Provides a builtin implementation of a K visitor.
@@ -68,7 +66,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
 
     private Term visitNode(Term term) {
         visitParams.set(0, term);
-        term = new KItem(
+        term = KItem.of(
                 visitLabel,
                 new KList(visitParams),
                 context);
@@ -77,7 +75,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
 
     private boolean evaluateGuard(Term term) {
         ifParams.set(0, term);
-        KItem test = new KItem(
+        KItem test = KItem.of(
                 ifLabel,
                 new KList(ifParams),
                 context);

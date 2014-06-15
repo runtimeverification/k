@@ -167,7 +167,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (kList instanceof Variable) {
             kList = new KList((Variable) kList);
         }
-        return new KItem(kLabel, kList, TermContext.of(globalContext));
+        return KItem.of(kLabel, kList, TermContext.of(globalContext));
     }
     
     @Override
@@ -377,7 +377,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                             new ArrayList<Term>(),
                             elementsRight));
                     for (Term baseTerm : baseTerms) {
-                        result = new KItem(
+                        result = KItem.of(
                                 KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, definition),
                                 new KList(ImmutableList.of(result, baseTerm)),
                                 TermContext.of(globalContext));
@@ -420,7 +420,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
-                result = new KItem(
+                result = KItem.of(
                         KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
                         TermContext.of(globalContext));
@@ -464,7 +464,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
-                result = new KItem(
+                result = KItem.of(
                         KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, definition),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
                         TermContext.of(globalContext));

@@ -106,7 +106,7 @@ public class GappaPrinter extends BottomUpVisitor {
                         String newlabel = reverseComparisonOps.get(label);
                         if (newlabel != null) {
                             klabelCt = KLabelConstant.of(newlabel, constraint.termContext().definition());
-                            equalityLHS = new KItem(klabelCt, (KList) ((KItem) equalityLHS).kList(), constraint.termContext());
+                            equalityLHS = KItem.of(klabelCt, (KList) ((KItem) equalityLHS).kList(), constraint.termContext());
                             equalityRHS = BoolToken.TRUE;
                         }
                     }
