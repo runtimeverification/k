@@ -67,9 +67,8 @@ module IMP
   rule bool && bool => bool
 
 // Block
-  rule <k> {Ss} => Ss ~> tenv(Rho) ...</k> <tenv> Rho </tenv>
-  syntax K ::= tenv(Map)
-  rule <k> _:BlockOrStmtType ~> tenv(Rho) => block ...</k>
+  rule <k> {Ss} => Ss ~> Rho ...</k> <tenv> Rho </tenv>
+  rule <k> _:BlockOrStmtType ~> Rho => block ...</k>
        <tenv> _ => Rho </tenv>
 
 // Stmt
@@ -79,7 +78,7 @@ module IMP
   rule if (bool) block else block => stmt
   rule while (bool) block => stmt
 
-  rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv>... . => X |-> int ...</tenv>
+  rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv>... .Map => X |-> int ...</tenv>
   rule int .Ids; => stmt
 
   rule print(_:PrintableType,AEs => AEs);
