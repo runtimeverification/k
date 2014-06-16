@@ -58,48 +58,45 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(CellCollection cellCollection) {
-        boolean change = false;
-        Multimap<String, Cell> cells = ArrayListMultimap.create();
+        boolean changed = false;
+        Multimap<String, Cell> cellMap = ArrayListMultimap.create();
         for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
             Cell<?> cell = (Cell<?>) entry.getValue().accept(this);
-            cells.put(entry.getKey(), cell);
-            change = change || cell != entry.getValue();
+            cellMap.put(entry.getKey(), cell);
+            changed = changed || cell != entry.getValue();
         }
-        if (!change) {
-            cells = cellCollection.cellMap();
+        if (!changed) {
+            cellMap = cellCollection.cellMap();
         }
 
-        if (cellCollection.hasFrame()) {
-            Variable frame;
-            Term transformedFrame = (Term) cellCollection.frame().accept(this);
-            if (transformedFrame instanceof CellCollection) {
-                if (cells == cellCollection.cellMap()) {
-                    cells = ArrayListMultimap.create(cellCollection.cellMap());
+        // starting from now, !changed <=> cellMap == cellCollection.cellMap() 
+        List<Variable> transformedBaseTerms = Lists.newArrayList();
+        for (Variable variable : cellCollection.baseTerms()) {
+            Term transformedBaseTerm = (Term) variable.accept(this);
+            if (transformedBaseTerm instanceof CellCollection) {
+                if (!changed) {
+                    cellMap = ArrayListMultimap.create(cellCollection.cellMap());
+                    changed = true;
                 }
-                cells.putAll(((CellCollection) transformedFrame).cellMap());
-                frame = ((CellCollection) transformedFrame).hasFrame() ?
-                        ((CellCollection) transformedFrame).frame() : null;
-            } else if (transformedFrame instanceof Cell) {
-                if (cells == cellCollection.cellMap()) {
-                    cells = ArrayListMultimap.create(cellCollection.cellMap());
+                
+                CellCollection transformedCellCollection = (CellCollection) transformedBaseTerm;
+                cellMap.putAll(transformedCellCollection.cellMap());
+                transformedBaseTerms.addAll(transformedCellCollection.baseTerms());                
+            } else if (transformedBaseTerm instanceof Cell) {
+                if (!changed) {
+                    cellMap = ArrayListMultimap.create(cellCollection.cellMap());
+                    changed = true;
                 }
-                Cell<?> cell = (Cell<?>) transformedFrame;
-                cells.put(cell.getLabel(), cell);
-                frame = null;
+
+                Cell<?> transformedCell = (Cell<?>) transformedBaseTerm;
+                cellMap.put(transformedCell.getLabel(), transformedCell);
             } else {
-                frame = (Variable) transformedFrame;
-            }
-
-            if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
-                cellCollection = new CellCollection(cells, frame, definition.context());
-            }
-        } else {
-            if (cells != cellCollection.cellMap()) {
-                cellCollection = new CellCollection(cells, definition.context());
+                changed = changed || variable != transformedBaseTerm;
+                transformedBaseTerms.add((Variable) transformedBaseTerm);
             }
         }
-
-        return cellCollection;
+        
+        return changed ? new CellCollection(cellMap, transformedBaseTerms, definition.context()) : cellCollection;
     }
 
     @Override

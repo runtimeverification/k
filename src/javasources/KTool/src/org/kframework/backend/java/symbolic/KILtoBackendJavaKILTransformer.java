@@ -300,6 +300,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<MapUpdate>(node.getLabel(), (MapUpdate) content);
             } else if (content instanceof Variable) {
                 return new Cell<Term>(node.getLabel(), content);
+            } else if (content instanceof KItemProjection) {
+                return new Cell<KItemProjection>(node.getLabel(), (KItemProjection) content);
             } else if (content instanceof BuiltinMgu) {
                 return new Cell<BuiltinMgu>(node.getLabel(), (BuiltinMgu) content);
             } else {
@@ -309,14 +311,13 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.Bag node, Void _)
-             {
+    public ASTNode visit(org.kframework.kil.Bag node, Void _) {
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
         org.kframework.kil.Bag.flatten(contents,
                 ((org.kframework.kil.Bag) node).getContents());
 
         Multimap<String, Cell> cells = ArrayListMultimap.create();
-        Variable variable = null;
+        List<Variable> baseTerms = Lists.newArrayList();
         for (org.kframework.kil.Term term : contents) {
             if (term instanceof TermComment) {
                 continue;
@@ -324,16 +325,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             if (term instanceof org.kframework.kil.Cell) {
                 Cell<?> cell = (Cell<?>) this.visitNode(term);
                 cells.put(cell.getLabel(), cell);
-            } else if (variable == null
-                    && term instanceof org.kframework.kil.Variable
+            } else if (term instanceof org.kframework.kil.Variable
                     && (term.getSort().equals(org.kframework.kil.KSorts.BAG))) {
-                variable = (Variable) this.visitNode(term);
+                baseTerms.add((Variable) this.visitNode(term));
             } else {
                 throw new RuntimeException();
             }
         }
 
-        return new CellCollection(cells, variable, context);
+        return new CellCollection(cells, baseTerms, context);
     }
     
     @Override
@@ -565,7 +565,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(org.kframework.kil.Rule node, Void _)  {
         assert node.getBody() instanceof org.kframework.kil.Rewrite;
-
+        
         concreteCollectionSize = node.getConcreteDataStructureSize();
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
