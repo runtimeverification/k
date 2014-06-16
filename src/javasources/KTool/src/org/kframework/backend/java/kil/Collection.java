@@ -71,6 +71,14 @@ public abstract class Collection extends Term {
      * @return the size of the contents
      */
     public abstract int size();
+    
+    /**
+     * Checks if this {@code Collection} term is a proper left-hand side view.
+     * 
+     * @return {@code true} if this {@code Collection} term can be used as a
+     *         pattern on the left-hand side of a rule; otherwise, {@code false}
+     */
+    public abstract boolean isLHSView();
 
     @Override
     public final boolean isSymbolic() {

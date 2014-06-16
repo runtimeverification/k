@@ -1,18 +1,20 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
 
@@ -30,31 +32,34 @@ public class CellCollection extends Collection {
     private final Multimap<String, Cell> cells;
     
     /**
+     * Only allow {@code Variable}s as base terms for now.
+     */
+    private final List<Variable> baseTerms;
+    
+    /**
      * Contains {@code true} if the explicitly specified part of this cell
      * collection contains one or more types of cells whose multiplicity
      * attributes are {@code "*"}'s; otherwise, {@code false}.
      */
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasStar;
-
+    
     public CellCollection(Multimap<String, Cell> cells, Variable frame, Context context) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
+        this.baseTerms = frame != null ? 
+                Collections.<Variable>singletonList(frame) : 
+                Collections.<Variable>emptyList();
         
-        int numOfStarredCellTypes = 0;
-        for (String cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
-                numOfStarredCellTypes++;
-            } else {
-                assert cells.get(cellLabel).size() == 1:
-                        "cell label " + cellLabel + " does not have multiplicity='*', "
-                        + "but multiple cells found " + cells;
-            }
-        }
-
-        assert numOfStarredCellTypes <= 1 : 
-            "Multiple types of starred cells in one cell collection not supported at present";
-        hasStar = numOfStarredCellTypes > 0;
+        this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
+    }
+    
+    public CellCollection(Multimap<String, Cell> cells, List<Variable> baseTerms, Context context) {
+        super(getFrame(baseTerms), Kind.CELL_COLLECTION);
+        this.cells = ArrayListMultimap.create(cells);
+        this.baseTerms = ImmutableList.copyOf(baseTerms);
+        
+        this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
     }
 
     public CellCollection(Variable frame) {
@@ -62,11 +67,11 @@ public class CellCollection extends Collection {
     }
 
     public CellCollection(Multimap<String, Cell> cells, Context context) {
-        this(cells, null, context);
+        this(cells, (Variable) null, context);
     }
-
+    
     public CellCollection() {
-        this(ArrayListMultimap.<String, Cell>create(), null, null);
+        this(ArrayListMultimap.<String, Cell>create(), (Variable) null, null);
     }
 
     public java.util.Collection<Cell> cells() {
@@ -75,6 +80,10 @@ public class CellCollection extends Collection {
 
     public Multimap<String, Cell> cellMap() {
         return cells;
+    }
+    
+    public List<Variable> baseTerms() {
+        return baseTerms;
     }
 
     public boolean containsKey(String label) {
@@ -101,6 +110,21 @@ public class CellCollection extends Collection {
     @Override
     public int size() {
         return cells.size();
+    }
+    
+    @Override
+    public boolean hasFrame() {
+        assert isLHSView() : "This CellCollection cannot be used in the left-hand side of a rule";
+        return super.hasFrame();
+    }
+
+    /**
+     * Checks if this {@code CellCollection} contains at most one
+     * {@code Variable} as its frame variable.
+     */
+    @Override
+    public boolean isLHSView() {
+        return baseTerms.size() <= 1;
     }
 
     @Override
@@ -142,8 +166,11 @@ public class CellCollection extends Collection {
         for (Cell cell : cells.values()) {
             stringBuilder.append(cell);
         }
-        if (super.hasFrame()) {
-            stringBuilder.append(super.frame());
+        for (int i = 0; i < baseTerms.size(); i++) {
+            stringBuilder.append(baseTerms.get(i));
+            if (i < baseTerms.size() - 1) {
+                stringBuilder.append(" ");
+            }
         }
         return stringBuilder.toString();
     }
@@ -166,6 +193,35 @@ public class CellCollection extends Collection {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+    
+    private static int numOfTypesOfStarredSubcells(Multimap<String, Cell> cells, Context context) {
+        int count = 0;
+        for (String cellLabel : cells.keySet()) {
+            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
+                count++;
+            } else {
+                assert cells.get(cellLabel).size() == 1:
+                        "cell label " + cellLabel + " does not have multiplicity='*', "
+                        + "but multiple cells found " + cells;
+            }
+        }
+
+        assert count <= 1 : 
+            "Multiple types of starred cells in one cell collection not supported at present";
+        return count;
+    }
+    
+    /**
+     * Private helper method that gets the frame variable from a list of base
+     * terms.
+     * 
+     * @param baseTerms
+     * @return the frame if there is only one variable in the base terms;
+     *         otherwise, {@code null}
+     */
+    private static Variable getFrame(List<Variable> baseTerms) {
+        return (baseTerms.size() == 1) ? baseTerms.get(0) : null;
     }
 
     /**
@@ -220,7 +276,7 @@ public class CellCollection extends Collection {
         assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
 
         if (term instanceof CellCollection
-                && !((CellCollection) term).hasFrame()
+                && !((CellCollection) term).baseTerms().isEmpty()
                 && ((CellCollection) term).size() == 1) {
             term = ((CellCollection) term).cells().iterator().next();
         } 
