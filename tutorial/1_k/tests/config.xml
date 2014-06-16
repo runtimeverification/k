@@ -10,9 +10,7 @@
   <include file="../1_lambda/tests/config.xml" directory="1_lambda" />
   <include file="../2_imp/tests/config.xml" directory="2_imp" />
   <include file="../3_lambda++/tests/config.xml" directory="3_lambda++" />
-<!--
   <include file="../4_imp++/tests/config.xml" directory="4_imp++" />
--->
   <include file="../5_types/tests/config.xml" directory="5_types" />
 </tests>
 

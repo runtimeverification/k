@@ -2,28 +2,28 @@
     <k>
         .K
     </k>
-    <store>
-        #symNat(1) |-> 2
-        #symNat(2) |-> 10
-        #symNat(3) |-> 11
-        #symNat(4) |-> 0
-        #symNat(5) |-> 1
-        #symNat(6) |-> 4
-        #symNat(7) |-> 0
-        #symNat(8) |-> 0
-        #symNat(9) |-> 20
-        #symNat(10) |-> 10
-    </store>
     <env>
-        i |-> #symNat(1)
-        m |-> #symNat(2)
-        n |-> #symNat(3)
-        q |-> #symNat(4)
-        r |-> #symNat(5)
-        s |-> #symNat(6)
-        t |-> #symNat(7)
-        x |-> #symNat(8)
-        y |-> #symNat(9)
-        z |-> #symNat(10)
+        i |-> 1
+        m |-> 2
+        n |-> 3
+        q |-> 4
+        r |-> 5
+        s |-> 6
+        t |-> 7
+        x |-> 8
+        y |-> 9
+        z |-> 10
     </env>
+    <store>
+        1 |-> 2
+        2 |-> 10
+        3 |-> 11
+        4 |-> 0
+        5 |-> 1
+        6 |-> 4
+        7 |-> 0
+        8 |-> 0
+        9 |-> 20
+        10 |-> 10
+    </store>
 </T>
