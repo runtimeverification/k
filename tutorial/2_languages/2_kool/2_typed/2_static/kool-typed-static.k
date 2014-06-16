@@ -76,7 +76,7 @@ the syntax of statically typed SIMPLE. */
 
 /* Note: This paragraph is old, now we can do things better.  We keep
 it here only for historical reasons, to see how much we used to suffer :)
- 
+
 \paragraph{Annoying \K-tool technical problem:}
 Currently, the \K tool treats the ``non-terminal'' productions (i.e.,
 productions consisting of just one non-terminal), also called
@@ -178,7 +178,7 @@ the wrapper in the generated documentation, we associate it an
                 | "if" "(" Exp ")" Block "else" Block     [avoid, strict]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block               [strict]
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                        [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                [strict]
@@ -202,7 +202,7 @@ the wrapper in the generated documentation, we associate it an
 
   rule class C:Id S => class C extends Object S
 
-endmodule 
+endmodule
 
 
 /*@ \section{Static semantics}
@@ -405,7 +405,7 @@ checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <tenv> Rho => Rho[T / X] </tenv>
+       <tenv> Rho => Rho[X <- T] </tenv>
 
 
 /*@ \subsubsection{Class member declaration}
@@ -428,14 +428,14 @@ PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <ctenvT> Rho (. => X |-> T) </ctenvT>
+       <ctenvT> Rho (.Map => X |-> T) </ctenvT>
     when notBool(X in keys(Rho))
 
   rule <k> T:Type X:Id; => stuck(T X;) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
        <inClass> C:Id </inClass>
        <br/>
-       <out>... . => ListItem("Member \"" +String Id2String(X)
+       <out>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
                               +String Id2String(C) +String "\"!\n") </out>
     [structural]
@@ -551,7 +551,7 @@ instance of this rule). */
        (. => <task>
                 <k> checkType(class(C')) ~> S </k>
                 <inClass> C </inClass>
-                <ctenvT> . </ctenvT>
+                <ctenvT> .Map </ctenvT>
              </task>)  [structural]
 
 //@ \paragraph{Check for unique class names}
@@ -562,7 +562,7 @@ instance of this rule). */
   rule <T> (<classes>... <className> C </className>
                          <className> C </className>
             ...</classes> _ => .)
-           <out>... . => ListItem("Class \"" +String Id2String(C)
+           <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </out>
        </T>  [structural]
 
@@ -575,10 +575,10 @@ superclass relation, the second transitively closes it, and the third
 checks for cycles. */
 
   rule <extends> C </extends>
-       <extendsAll> . => SetItem(C) </extendsAll>  [structural]
+       <extendsAll> .Set => SetItem(C) </extendsAll>  [structural]
 
   rule <class>...
-         <extendsAll> SetItem(C) Cs:Set (. => SetItem(C')) </extendsAll>
+         <extendsAll> SetItem(C) Cs:Set (.Set => SetItem(C')) </extendsAll>
        ...</class>
        <class>... <className>C</className> <extends>C'</extends> ...</class>
     when notBool(C' in SetItem(C) Cs)  [structural]
@@ -587,7 +587,7 @@ checks for cycles. */
   rule <T> (<classes>... <className> C </className>
                          <extendsAll>... SetItem(C) ...</extendsAll>
             ...</classes> _ => .)
-           <out>... . => ListItem("Class \"" +String Id2String(C)
+           <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
        </T>  [structural]
 
@@ -617,7 +617,7 @@ current class type. */
 /*@ \subsubsection{Super}
 
 Similarly, \texttt{super} types to the parent class type.
-Note that for typing concerns, super can be considered as an object 
+Note that for typing concerns, super can be considered as an object
 (recall that this was not the case in the dynamic semantics). */
 
    rule <k> super => class(C') ...</k>
@@ -639,7 +639,7 @@ check, we need to know that \texttt{x} has been declared with type
 \texttt{int}; this information can only be found in the
 \textsf{ctenvT} cell.  Second, we should redirect non-local variable
 lookups in method tasks to corresponding member accesses (the
-local variables are handled by the rule borrowed from SIMPLE). 
+local variables are handled by the rule borrowed from SIMPLE).
 This is what the second rule below does.  Third, we should allow
 object member accesses as lvalues, which is done by the third rule
 below.  These last two rules therefore ensure that each necessary
@@ -654,7 +654,7 @@ atomically; thus, a class either has its complete type environment
 available, in which case these rules can safely apply, or its cell
 \textsf{ctenv} is not yet available, in which case these rules have to
 wait.  Finally, the sixth rule below reports an error when the
-\texttt{Object} class is reached. */ 
+\texttt{Object} class is reached. */
 
   rule <k> X:Id => T ...</k>
        <ctenvT>... X |-> T ...</ctenvT>
@@ -684,7 +684,7 @@ wait.  Finally, the sixth rule below reports an error when the
   rule <k> class(Object) . X:Id => stuck(class(Object) . X) ...</k>
        <inClass> C:Id </inClass>
        <br/>
-       <out>... . => ListItem("Member \"" +String Id2String(X)
+       <out>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
                               +String Id2String(C) +String "\")\n") </out>
     [structural]
@@ -715,7 +715,7 @@ of the language need to insert runtime checks for downcasting to be safe. */
          <className> C2 </className>
          <extendsAll> S2 </extendsAll>
        ...</class>
-       <out>... . => ListItem("Classes \"" +String Id2String(C1)
+       <out>... .List => ListItem("Classes \"" +String Id2String(C1)
                               +String "\" and \"" +String Id2String(C2)
                               +String "\" are incompatible!\n") </out>
     when notBool(C1 in S2) andBool notBool(C2 in S1)
@@ -741,7 +741,7 @@ the \textsf{tasks} cell has been removed. */
 // make sure that the class main and the method main() are declared.
 
   rule <task> <k> stmt => new Main(.Exps); </k>
-              (. => <tenv> . </tenv>
+              (. => <tenv> .Map </tenv>
                     <return> void </return>
                     <inClass> Main </inClass>)
        </task>
@@ -769,7 +769,7 @@ the \textsf{tasks} cell has been removed. */
 // cleanup tasks and output a success message when done
 
   rule (<tasks> .Bag </tasks> => .)
-       <out>... . => ListItem("Type checked!\n") </out>
+       <out>... .List => ListItem("Type checked!\n") </out>
     [structural]
 
 
@@ -779,7 +779,7 @@ the \textsf{tasks} cell has been removed. */
 
 The subclass relation introduces a subtyping relation.  */
 
-  syntax K ::= checkSubtype(Types,Types)
+  syntax KItem ::= checkSubtype(Types,Types)
 
   rule checkSubtype(T:Type, T) => .  [structural]
 
@@ -806,7 +806,7 @@ The subclass relation introduces a subtyping relation.  */
 Since now any $\it Id$ can be used as the type of a class, we need to
 check that the types used in the program actually exists */
 
-  syntax K ::= checkType(Types)
+  syntax KItem ::= checkType(Types)
 
   rule checkType(T:Type,Ts:Types) => checkType(T) ~> checkType(Ts)
     when Ts =/=K .Types  [structural]
@@ -832,7 +832,7 @@ below can only be function types.  See the definition of
 \texttt{checkSubtype} on function types at the end of this module (it
 is co-variant in the codomain and contra-variant in the domain). */
 
-  syntax K ::= checkMethod(Id,Type,Id)
+  syntax KItem ::= checkMethod(Id,Type,Id)
 
   rule <k> checkMethod(F:Id, T:Type, C:Id) => checkSubtype(T, T') ...</k>
        <className> C </className>
@@ -850,12 +850,9 @@ is co-variant in the codomain and contra-variant in the domain). */
 
 //@\subsubsection{Generic operations which could be part of the \K framework}
 
-  syntax K ::= stuck(K)  [latex(\framebox{${#1}$})]
+  syntax KItem ::= stuck(K)  [latex(\framebox{${#1}$})]
 
-  syntax K ::= "discard"
+  syntax KItem ::= "discard"
   rule _:KResult ~> discard => .  [structural]
-
-  rule Id2String(Main) => "Main"
-  rule Id2String(Object) => "Object"
 
 endmodule
