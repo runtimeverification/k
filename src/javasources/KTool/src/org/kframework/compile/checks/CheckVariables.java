@@ -62,7 +62,18 @@ public class CheckVariables extends BasicVisitor {
     @Override
     public Void visit(Variable node, Void _) {
         if (node.isFreshVariable() || node.isFreshConstant()) {
-             if (current == right  && !inCondition) {
+            if (!context.freshFunctionNames.containsKey(node.getSort())) {
+                GlobalSettings.kem.register(new KException(
+                        KException.ExceptionType.ERROR,
+                        KException.KExceptionGroup.COMPILER,
+                        "Unsupported sort of fresh variable: " + node.getSort()
+                                + "\nOnly sorts "
+                                + context.freshFunctionNames.keySet()
+                                + " admit fresh variables.", getName(), node
+                                .getFilename(), node.getLocation()));
+            }
+            
+            if (current == right  && !inCondition) {
                  Integer i = fresh.get(node);
                  if (i == null) i = new Integer(1);
                  else i = new Integer(i.intValue());
@@ -70,7 +81,7 @@ public class CheckVariables extends BasicVisitor {
                  return null;
              }
              //nodes are ok to be found in rhs
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                     KException.KExceptionGroup.COMPILER,
                     "Fresh variable \"" + node + "\" is bound in the " + "rule pattern.",
                     getName(), node.getFilename(), node.getLocation()
