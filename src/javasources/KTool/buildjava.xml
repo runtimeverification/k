@@ -39,6 +39,7 @@
 			<pathelement location="${javalibs}/mpfr_java-1.0-windows64.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0-linux32.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0-windows32.jar" />
+			<pathelement location="${javalibs}/mpfr_java-1.0-osx.jar" />
 			<pathelement location="${javalibs}/mpfr_java-1.0.jar" />
             <pathelement location="lib/junit.jar" />
             <pathelement location="lib/mockito-all.jar" />
