@@ -845,7 +845,7 @@ public class PatternMatcher extends AbstractMatcher {
         // TODO(AndreiS): deal with KLabel variables
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            if (kLabelConstant.isBinder()) {
+            if (kLabelConstant.isMetaBinder()) {
                 // TODO(AndreiS): deal with non-concrete KLists
                 assert kList instanceof KList;
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
@@ -862,7 +862,7 @@ public class PatternMatcher extends AbstractMatcher {
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
-                kList = new KList(ImmutableList.copyOf(terms));
+                kList = new KList(terms);
             }
         }
         match(kList, patternKItem.kList());

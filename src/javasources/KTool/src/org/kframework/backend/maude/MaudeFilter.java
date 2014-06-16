@@ -291,6 +291,7 @@ public class MaudeFilter extends BackendFilter {
         reject.add("kgeneratedlabel");
         reject.add("latex");
         reject.add("prefixlabel");
+        reject.add("regex");
 
         if (!reject.contains(entry.getKey())) {
             return false;
@@ -305,6 +306,7 @@ public class MaudeFilter extends BackendFilter {
         reject.add("kgeneratedlabel");
         reject.add("latex");
         reject.add("prefixlabel");
+        reject.add("regex");
 
         if (!reject.contains(attribute.getKey())) {
             if (!firstAttribute) {

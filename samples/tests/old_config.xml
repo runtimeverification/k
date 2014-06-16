@@ -2,29 +2,6 @@
 <!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 
 <tests>
-  <!-- AGENT -->
-  <test
-      definition="agent/agent.k"
-      programs="../agent/programs"
-      results="../../tests/examples/agent"
-      extension="agent"
-      >
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-    <program name="p22.agent">
-      <krun-option name="--output" value="pretty" />
-      <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
-    </program>
-    <program name="p23.agent">
-      <krun-option name="--output" value="pretty" />
-      <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
-    </program>
-  </test>
-
   <!-- Program Equivalence -->
   <test
       definition="prog-equiv/imp/peq.k"
@@ -34,35 +11,6 @@
       >
     <all-programs>
       <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-  </test>
-
-  <!-- IMP-HOARE -->
-  <test
-      definition="imp-hoare/imp.k"
-      programs="../imp-hoare/programs"
-      results="../imp-hoare/programs"
-      extension="imp"
-      >
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--color" value="off" />
-    </all-programs>
-  </test>
-
-  <!-- IMP-REACHABILITY -->
-  <test
-      definition="imp-reachability/imp.k"
-      programs="../imp-reachability"
-      results="../imp-reachability"
-      extension="imp"
-      exclude="pgm-1.imp pgm-2.imp pgm-3.imp"
-      >
-    <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--depth" value="5" />
-      <krun-option name="--parser" value="kast --parser ground" />
       <krun-option name="--color" value="off" />
     </all-programs>
   </test>

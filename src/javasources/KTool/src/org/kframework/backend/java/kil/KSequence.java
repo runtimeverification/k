@@ -1,14 +1,20 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.ImmutableList;
+import java.io.Serializable;
+import java.util.List;
 
 import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
+import org.pcollections.ConsPStack;
+import org.pcollections.Empty;
+import org.pcollections.PStack;
+
+import com.google.common.collect.Lists;
 
 
 /**
@@ -33,40 +39,103 @@ public class KSequence extends KCollection {
     private static final String IDENTITY_NAME = "." + Kind.K;
     public static final KSequence EMPTY = new KSequence();
     
+    /**
+     * Marked as {@code transient} because {@code PStack} doesn't implement the
+     * {@code Serializable} interface.
+     */
+    private transient final PStack<Term> contents;
     private String sort;
     
-    public KSequence(ImmutableList<Term> items, Variable frame) {
-        super(items, frame, Kind.K);
+    /**
+     * Concatenates a sequence of elements of sort K or KItem and a frame term.
+     * <p>
+     * Note: parameter {@code `List<Term> items'} can be modified by this
+     * factory method; it is the caller's responsibility to make a defensive
+     * copy when necessary.
+     * 
+     * @param items
+     * @param frame
+     * @return the resulting K sequence
+     */
+    public static KSequence of(List<Term> items, Term frame) {
+        if (frame != null) {
+            if (frame.kind() == Kind.K) {
+                if (frame instanceof KSequence) {
+                    KSequence kseq = (KSequence) frame;
+                    return new KSequence(items, new KSequence(kseq.contents, null), kseq.frame);
+                } else {
+                    // otherwise, frame must be a variable of sort K
+                }
+            } else {
+                assert frame.kind() == Kind.KITEM;
+                items.add(frame);
+                frame = null;
+            }
+        }
+        return new KSequence(items, (Variable) frame);
     }
+    
+    public KSequence(List<Term> items, Variable frame) {
+        this(items, null, frame);
+    }    
 
-    /*
-    public KSequence(ListIterator<Term> itemsIterator, Variable frame) {
-        super(itemsIterator, frame, "KSequence");
+    public KSequence(List<Term> items) {
+        this(items, null, null);
     }
-    */
-
-    public KSequence(Variable frame) {
+    
+    private KSequence(List<Term> items, KSequence kSequence, Variable frame) {
         super(frame, Kind.K);
-    }
+        
+        assert kSequence == null || !kSequence.hasFrame();
+        PStack<Term> stack = kSequence == null ? Empty.<Term>stack() : kSequence.contents;
 
-    public KSequence(ImmutableList<Term> items) {
-        super(items, null, Kind.K);
-    }
+        /* normalize (flatten) the items before creating the new KSequence */
+        for (Term term : Lists.reverse(items)) {
+            // TODO (AndreiS): fix KItem projection
+            if (!(term instanceof Variable) && !(term instanceof KItemProjection) && (term.kind() == kind)) {
+                assert term instanceof KSequence :
+                    "associative use of KSequence(" + items + ", " + frame + ")";
 
-    /*
-    public KSequence(ListIterator<Term> itemsIterator) {
-        super(itemsIterator, null, "KSequence");
-    }
-    */
+                KSequence kseq = (KSequence) term;
+    
+                assert !kseq.hasFrame() : "associative use of KSequence";
 
+                if (stack.isEmpty()) {
+                    stack = kseq.contents;
+                } else {
+                    stack = stack.plusAll(kseq.contents);
+                }
+            } else {
+                stack = stack.plus(term);
+            }
+        }
+        this.contents = stack;
+    }
+    
     private KSequence() {
         super(null, Kind.K);
+        contents = Empty.stack();
+    }
+
+    /**
+     * Private constructor only used for building KSequence fragment.
+     * @param contents
+     * @param frame
+     */
+    private KSequence(PStack<Term> contents, Variable frame) {
+        super(frame, Kind.K);
+        this.contents = contents;
     }
 
     @Override
-    public KCollection fragment(int fromIndex) {
-        return new KSequence(contents.subList(fromIndex, contents.size()), frame);
+    public KSequence fragment(int fromIndex) {
+        return new KSequence(contents.subList(fromIndex), frame);
     }
+    
+    @Override
+    public PStack<Term> getContents() {
+        return contents;
+    }    
 
     @Override
     public String sort() {
@@ -122,5 +191,35 @@ public class KSequence extends KCollection {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+    
+    /**
+     * When this {@code KSequence} is being serialized, serialize its proxy
+     * class instead.
+     * 
+     * @return the serialization proxy of this {@code KSequence}
+     */
+    private Object writeReplace() {
+        return new SerializationProxy(this);
+    }
+    
+    private static class SerializationProxy implements Serializable {
+        
+        private List<Term> terms;
+        private Variable frame;
+
+        private SerializationProxy(KSequence kSequence) {
+            /* converts the non-serializable PStack to normal list */
+            this.terms = Lists.newArrayList(kSequence.contents);
+            this.frame = kSequence.frame;
+        }
+        
+        private Object readResolve() {
+            PStack<Term> stack = ConsPStack.empty();
+            for (Term term : Lists.reverse(terms)) {
+                stack = stack.plus(term);
+            }
+            return new KSequence(stack, frame);
+        }
     }
 }

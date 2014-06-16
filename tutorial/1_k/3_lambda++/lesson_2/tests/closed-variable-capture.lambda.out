@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-closure ( x |-> #symNat(2) , y , (x y) )
+closure ( x |-> 2 , y , (x y) )

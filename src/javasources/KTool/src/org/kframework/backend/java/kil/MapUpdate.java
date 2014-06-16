@@ -46,29 +46,29 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         if (!(map instanceof BuiltinMap)) {
             return this;
         }
-
         BuiltinMap builtinMap = ((BuiltinMap) map);
 
-        Map<Term, Term> entries = new HashMap<Term, Term>(builtinMap.getEntries());
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.putAll(builtinMap.getEntries());
         Set<Term> keysToRemove = new HashSet<Term>();
         for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
             Term nextKey = iterator.next();
-            if (entries.remove(nextKey) != null) {
+            if (builder.remove(nextKey) != null) {
                 keysToRemove.add(nextKey);
             }
         }
 
         if (removeSet.size() > keysToRemove.size()) {
+            // TODO(YilongL): why not return Bottom when there is no frame
             return new MapUpdate(builtinMap, Sets.difference(removeSet, keysToRemove), updateMap);
         }
 
-        entries.putAll(updateMap);
+        builder.putAll(updateMap);
 
         if (builtinMap.hasFrame()) {
-            return new BuiltinMap(entries, builtinMap.frame());
-        } else {
-            return new BuiltinMap(entries);
+            builder.setFrame(builtinMap.frame());
         }
+        return builder.build();
     }
 
     public Term map() {

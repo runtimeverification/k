@@ -44,10 +44,36 @@ public class CheckSyntaxDecl extends BasicVisitor {
         int neTerminals = 0;
         int eTerminals = 0;
 
+        if (node.containsAttribute("bracket")) {
+            int countSorts = 0;
+            for (ProductionItem pi : node.getItems()) {
+                if (pi instanceof Sort)
+                    countSorts++;
+                else if (!(pi instanceof Terminal)) {
+                    String msg = "Bracket can be used on productions with Terminals and only one NonTerminal.";
+                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                }
+            }
+            if (countSorts != 1) {
+                String msg = "Bracket can be used on productions with Terminals and exactly one NonTerminal.";
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            }
+        }
+
         if (node.isSubsort()) {
             String sort = ((Sort) node.getItems().get(0)).getName();
             if (Sort.isBasesort(sort) && !context.isSubsorted(node.getSort(), sort)) {
                 String msg = "Extending  built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            }
+        }
+        if (node.containsAttribute("reject")) {
+            if (node.getItems().size() != 1) {
+                String msg = "Only single Terminals can be rejected.";
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            }
+            if (node.getItems().size() == 1 && !(node.getItems().get(0) instanceof Terminal)) {
+                String msg = "Only Terminals can be rejected.";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
         }

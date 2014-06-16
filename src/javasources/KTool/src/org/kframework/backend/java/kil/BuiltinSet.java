@@ -11,10 +11,8 @@ import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
-import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Set;
 
 
@@ -112,6 +110,17 @@ public class BuiltinSet extends Collection {
     @Override
     public int size() {
         return elements.size();
+    }
+    
+    /**
+     * {@code BuiltinSet} is guaranteed to have only one frame; thus, they can
+     * always be used in the left-hand side of a rule.
+     */
+    @Override
+    public boolean isLHSView() {
+        // TODO(YilongL): allow BuiltinSet to have a list of Terms instead of
+        // just substitution entries; revise the javadoc
+        return true;
     }
 
     @Override

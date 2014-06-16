@@ -609,7 +609,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         // TODO(AndreiS): deal with KLabel variables
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            if (kLabelConstant.isBinder()) {
+            if (kLabelConstant.isMetaBinder()) {
                 // TODO(AndreiS): deal with non-concrete KLists
                 assert kList instanceof KList;
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
@@ -626,7 +626,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
-                kList = new KList(ImmutableList.copyOf(terms));
+                kList = new KList(terms);
             }
         }
         unify(kList, patternKItem.kList());

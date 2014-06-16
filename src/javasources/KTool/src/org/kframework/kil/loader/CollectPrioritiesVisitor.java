@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.kframework.kil.Definition;
@@ -8,6 +9,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
+import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
@@ -27,6 +29,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
     }
 
     public Void visit(Syntax node, Void _) {
+        // collect left and right associativity
         for (int i = 0; i < node.getPriorityBlocks().size() - 1; i++) {
             PriorityBlock pb1 = node.getPriorityBlocks().get(i);
             PriorityBlock pb2 = node.getPriorityBlocks().get(i + 1);
@@ -45,6 +48,11 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                 }
             }
         }
+
+        // collect left and right associativity
+        for (PriorityBlock pb1 : node.getPriorityBlocks()) {
+            manageAssociativity(new HashSet<Production>(pb1.getProductions()), pb1.getAssoc());
+        }
         return null;
     }
 
@@ -58,8 +66,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                 Set<Production> prods1 = SDFHelper.getProductionsForTag(prd1.getLabel(), context);
                 for (KLabelConstant prd2 : pb2.getProductions()) {
                     // get all the productions annotated with tag2
-                    Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel(),
-                            context);
+                    Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel(), context);
                     // add all the relations between all the productions annotated with tag1 and tag 2
                     for (Production p1 : prods1) {
                         if (p1.isSubsort() && !p1.containsAttribute("klabel"))
@@ -74,5 +81,35 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
             }
         }
         return null;
+    }
+
+    public Void visit(PriorityExtendedAssoc node, Void _) {
+        Set<Production> prods = new HashSet<>();
+        for (KLabelConstant label : node.getChildren(null))
+            prods.addAll(SDFHelper.getProductionsForTag(label.getLabel(), context));
+
+        manageAssociativity(prods, node.getAssoc());
+        return null;
+    }
+
+    public void manageAssociativity(Set<Production> prods, String assoc) {
+        for (Production p1 : prods) {
+            if (p1.containsAttribute("klabel")) {
+                for (Production p2 : prods) {
+                    // collect the associativity for the entire block (production1 to production2)
+                    if (p1 != p2) {
+                        if (assoc.equals(Constants.LEFT) || assoc.equals(Constants.NON_ASSOC))
+                            context.addLeftAssoc(p1.getKLabel(), p2.getKLabel());
+                        if (assoc.equals(Constants.RIGHT) || assoc.equals(Constants.NON_ASSOC))
+                            context.addRightAssoc(p1.getKLabel(), p2.getKLabel());
+                    }
+                }
+                // collect the associativity for the production with itself
+                if (p1.containsAttribute(Constants.LEFT) || p1.containsAttribute(Constants.NON_ASSOC))
+                    context.addLeftAssoc(p1.getKLabel(), p1.getKLabel());
+                if (p1.containsAttribute(Constants.RIGHT) || p1.containsAttribute(Constants.NON_ASSOC))
+                    context.addRightAssoc(p1.getKLabel(), p1.getKLabel());
+            }
+        }
     }
 }

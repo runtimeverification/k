@@ -1,10 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-require "builtins/bag.k"
 require "builtins/set.k"
 
 
 module MAP
-  imports BAG
   imports SET
 
   /*@\section{Description} The Map represents a generalized associative array;

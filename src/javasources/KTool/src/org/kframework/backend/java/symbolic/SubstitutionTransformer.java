@@ -2,10 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.JavaSymbolicObject;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KCollectionFragment;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -13,8 +9,6 @@ import org.kframework.kil.ASTNode;
 
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -62,32 +56,7 @@ public class SubstitutionTransformer extends PrePostTransformer {
         public Term transform(Variable variable) {
             Term term = substitution.get(variable);
             if (term != null) {
-                if (term instanceof KCollectionFragment) {
-                    KCollectionFragment fragment = (KCollectionFragment) term;
-                    ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
-                    builder.addAll(fragment);
-
-                    KCollection kCollection;
-                    if (fragment.getKCollection() instanceof KSequence) {
-                        if (fragment.hasFrame()) {
-                            kCollection = new KSequence(builder.build(), fragment.frame());
-                        } else {
-                            kCollection = new KSequence(builder.build());
-                        }
-                    } else {
-                        assert fragment.getKCollection() instanceof KList;
-
-                        if (fragment.hasFrame()) {
-                            kCollection = new KList(builder.build(), fragment.frame());
-                        } else {
-                            kCollection = new KList(builder.build());
-                        }
-                    }
-
-                    return kCollection;
-                } else {
-                    return term;
-                }
+                return term;
             } else {
                 return variable;
             }

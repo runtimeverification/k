@@ -52,7 +52,7 @@ int app1(void->int f) {
   return f();
 }
 
-int app2(int->int f, intx) {
+int app2(int->int f, int x) {
   return f(x);
 }
 

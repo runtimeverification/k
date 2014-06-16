@@ -11,16 +11,22 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KLabel;
-import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.Token;
+import org.kframework.kil.UserList;
 import org.kframework.parser.concrete2.Grammar.NonTerminal;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.RuleState;
+import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.parser.concrete2.Rule.WrapLabelRule;
 
 public class ParserTest {
@@ -394,7 +400,7 @@ public class ParserTest {
             Term t1 = amb(klist(X));
             Term t2 = amb(klist(kapp("AA", t1, t1)));
             Term t3 = amb(klist(kapp("AA", t2, t1)), klist(kapp("AA", t1, t2)));
-            Term t4 = amb(klist(kapp("AA", t1, t3)), klist(kapp("AA", t2, t2)), klist(kapp("AA", t3, t1)));
+            Term t4 = amb(klist(kapp("AA", t3, t1)), klist(kapp("AA", t2, t2)), klist(kapp("AA", t1, t3)));
             Term expected = amb(klist(t4));
             Assert.assertEquals("AAA check: ", expected, result);
         }
@@ -692,23 +698,99 @@ public class ParserTest {
     }
     */
 
+    @Test
+    public void testListAmbiguity() throws Exception {
+        // Int
+        // (|-----([\+-]?\d+)------|)
+        NonTerminal intNt = new NonTerminal("Int");
+        PrimitiveState ints = new RegExState("Int-State", intNt, Pattern.compile("[\\+-]?\\d+"), "Int");
+        intNt.entryState.next.add(ints);
+        ints.next.add(intNt.exitState);
+
+        // Exp
+        /**
+         * (|--+---[Int]------<wrap>--------------+---|)
+         *     |                                  |
+         *     +---("-")---<del>---[Exp]---<'-_>--+
+         */
+        NonTerminal expNt = new NonTerminal("Exp");
+
+        NonTerminalState expInt = new NonTerminalState("Int-nts(Exp)", expNt, intNt, false);
+        Production p22 = prod("Exp", new Sort("Int"));
+        RuleState rs2 = new RuleState("Exp-wrapInt", expNt, new WrapLabelRule(p22, "Int"));
+        expNt.entryState.next.add(expInt);
+        expInt.next.add(rs2);
+        rs2.next.add(expNt.exitState);
+
+        PrimitiveState minus = new RegExState("Minus-State", expNt, Pattern.compile("-", Pattern.LITERAL), KSorts.K);
+        RuleState deleteToken = new RuleState("Minus-Delete", expNt, new DeleteRule(1, true));
+        NonTerminalState expExp = new NonTerminalState("Exp-nts(Exp)", expNt, expNt, false);
+        Production p1 = prod("Exp", new Terminal("-"), new Sort("Exp"));
+        p1.putAttribute("klabel", "'-_");
+        RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1, "Int"));
+        expNt.entryState.next.add(minus);
+        minus.next.add(deleteToken);
+        deleteToken.next.add(expExp);
+        expExp.next.add(rs1);
+        rs1.next.add(expNt.exitState);
+
+        // Exps
+        /**
+         * (|-------[Exp]--------------+----<'_,_>-------|)
+         *            ^                |
+         *            +--<del>--(",")--+
+         */
+        NonTerminal expsNt = new NonTerminal("Exps");
+        NonTerminalState expExps = new NonTerminalState("Exp-nts(Exps)", expsNt, expNt, false);
+        Production p2 = prod("Exps", new UserList("Exp", ","));
+        PrimitiveState separator = new RegExState("Sep-State", expsNt, Pattern.compile(",", Pattern.LITERAL), KSorts.K);
+        RuleState deleteToken2 = new RuleState("Separator-Delete", expsNt, new DeleteRule(1, true));
+        p2.putAttribute("klabel", "'_,_");
+        RuleState labelList = new RuleState("RuleStateExps", expsNt, new WrapLabelRule(p2, "Exps"));
+        expsNt.entryState.next.add(expExps);
+        expExps.next.add(expExps); // circularity
+        separator.next.add(deleteToken2);
+        deleteToken2.next.add(expExps);
+        expExps.next.add(labelList);
+        labelList.next.add(expsNt.exitState);
+
+        Grammar grammar = new Grammar();
+        grammar.add(expsNt);
+        grammar.compile();
+
+        Term result = new Parser("-1").parse(expsNt, 0);
+        //System.out.println(result);
+        Term result2 = (Term) new TreeCleanerVisitor(null).visitNode(result);
+        //System.out.println(result2);
+
+        Term one = Token.kAppOf("Int", "1");
+        Term mone = Token.kAppOf("Int", "-1");
+        Term mexp = new TermCons("Exp", Arrays.asList(one), p1);
+        Term expected = new TermCons("Exps", Arrays.<Term>asList(amb(mexp, mone)), p2);
+
+        Assert.assertEquals("The error: ", expected.toString(), result2.toString());
+    }
     public static Ambiguity amb(Term ... terms) {
         return new Ambiguity(KSorts.K, Arrays.asList(terms));
-    }
-
-    public static KApp kapp(String label, Term ... terms) {
-        return KApp.of(label(label), terms);
-    }
-
-    public static KList klist(Term ... terms) {
-        return new KList(Arrays.asList(terms));
     }
 
     public static KApp token(String x) {
         return Token.kAppOf(KSorts.K, x);
     }
 
-    public static KLabel label(String x) {
-        return new KLabelConstant(x);
+    public static Production prod(String sort, ProductionItem... pi) {
+        return new Production(new Sort(sort), Arrays.<ProductionItem>asList(pi));
+    }
+
+    public static TermCons kapp(String label, Term ... terms) {
+        return new TermCons(KSorts.K, Arrays.asList(terms), label(label));
+    }
+
+    public static KList klist(Term ... terms) {
+        return new KList(Arrays.asList(terms));
+    }
+
+    public static Production label(String x) {
+        return prod(KSorts.K, new UserList(KSorts.K, x));
     }
 }

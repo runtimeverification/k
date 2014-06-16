@@ -8,6 +8,7 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 
 
 /**
@@ -21,8 +22,8 @@ public class MacroExpander extends TermTransformer {
 
     private final StepRewriter rewriter;
 
-    public MacroExpander(Definition definition) {
-        super(definition);
+    public MacroExpander(TermContext context) {
+        super(context);
         rewriter = new StepRewriter(definition.macros(), definition);
     }
 

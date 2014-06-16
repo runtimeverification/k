@@ -52,6 +52,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         this.lookups = lookups;
         this.constraint = constraint;
         this.context = context;
+        context.setConstrainedTermData(this.data());
     }
 
     public ConstrainedTerm(Term term, SymbolicConstraint constraint, TermContext context) {
@@ -357,7 +358,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet())
                                 templCnstr.add(entry.getKey(), entry.getValue());
 
-                            for (Map.Entry<Term, Term> mapItem : map.getEntries().entrySet()) {
+                            for (Map.Entry<Term, Term> mapItem : map) {
                                 UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
                                 uninterpretedCnstr.add(key, mapItem.getKey());
                                 uninterpretedCnstrs.add(uninterpretedCnstr);
@@ -508,4 +509,21 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         visitor.visit(this);
     }
 
+    public static class Data {
+
+        public Term term;
+        public SymbolicConstraint.Data lookups;
+        public SymbolicConstraint.Data constraint;
+
+        public Data(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint) {
+            this.term = term;
+            this.lookups = lookups.data();
+            this.constraint = constraint.data();
+        }
+
+    }
+
+    public Data data() {
+        return new Data(term, lookups, constraint);
+    }
 }

@@ -8,7 +8,8 @@ module BF-SYNTAX
   /*@ 
       The syntax of the language consists in eight commands: > < + - . , [ ]
   */ 
-  syntax Ignore ::= Token{~[\>\<\+\-\.\,\[\]\ \n\r\t]+} [onlyLabel]
+  syntax Ignore ::= Token{~[\>\<\+\-\.\,\[\]\ \n\r\t]+}
+                   [regex("[^\\>\\<\\+\\-\\.\\,\\[\\]\\ \n\r\t]+"), onlyLabel]
   syntax Instruction  ::= ">" 
   	 	      	| "<" 
 			| "+" 
