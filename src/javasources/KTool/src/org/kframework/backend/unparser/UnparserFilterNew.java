@@ -266,6 +266,8 @@ public class UnparserFilterNew extends NonCachingVisitor {
         
         private java.util.Map<Term, String> unparsedResults;
         
+        private AlphanumComparator comparator = new AlphanumComparator();
+        
         public UnparserBagItemComparator(java.util.Map<Term, String> unparsedResults) {
             this.unparsedResults = unparsedResults;
         }
@@ -290,7 +292,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
             // case 4: o1 and o2 are cells with the same label
             String s1 = unparsedResults.get(o1);
             String s2 = unparsedResults.get(o2);
-            return s1.compareTo(s2);
+            return comparator.compare(s1, s2);
         }
         
     };
