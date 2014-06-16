@@ -205,7 +205,7 @@ type the actual construct. */
                 | "if" "(" Exp ")" Block "else" Block      [avoid, strict]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block                [strict]
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
@@ -230,6 +230,7 @@ course, including the types of the involved variables. */
 
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
@@ -342,9 +343,9 @@ the array dimension into the type until the array becomes a simple
 variable. */
 
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
-       <gtenv> Rho (. => X |-> T) </gtenv>
+       <gtenv> Rho (.Map => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
-  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
+  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[X <- T] </tenv>
 
   context _:Type _::Exp[HOLE::Exps];
 // The rule below may need to sort E to Exp in the future, if the
@@ -377,7 +378,7 @@ entire code of the function body needs to type anyway. */
 
   rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F;...</k> </task>
        (. => <task>
-               <k> mkDecls(Ps) S </k> <tenv> . </tenv> <return> T </return>
+               <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <return> T </return>
              </task>)
     [structural]
 
@@ -391,7 +392,7 @@ generate a function task executing \texttt{main()} to ensure that it
 types (remove this task creation if you do not want your type system
 to reject programs without a \texttt{main} function). */
 
-  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> . </tenv>) </task>
+  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> .Map </tenv>) </task>
     [structural]
 
 /*@ \subsection{Collecting the terminated tasks}
