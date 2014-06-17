@@ -190,7 +190,7 @@ public class MetaK {
         if (null == r.getAttributes())
             return false;
         for (Attribute any : anywheres) {
-            if (any.getValue() == r.getAttribute(any.getKey()))
+            if (any.getValue().equals(r.getAttribute(any.getKey())))
                 return true;
         }
         return false;
