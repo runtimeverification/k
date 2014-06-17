@@ -18,12 +18,14 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
+import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 
@@ -45,8 +47,7 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("serial")
 public final class KItem extends Term {
     
-    private static KItem LIST_TERMINATOR = new KItem(KLabelConstant.of("'.List{\",\"}", null), 
-            KList.EMPTY, "#ListOf#Bot{\",\"}", true);
+    private static final Map<KLabelConstant, KItem> LIST_TERMINATORS = Maps.newHashMap();
 
     private final Term kLabel;
     private final Term kList;
@@ -55,9 +56,29 @@ public final class KItem extends Term {
     private Boolean evaluable = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
-        if (kLabel.equals(LIST_TERMINATOR.kLabel())) {
+        Definition definition = termContext.definition();
+        
+        KItem listTerminator = LIST_TERMINATORS.get(kLabel);
+        if (listTerminator != null) {
             assert kList.equals(KList.EMPTY);
-            return LIST_TERMINATOR;
+            return listTerminator;
+        }
+
+        if (kLabel instanceof KLabelConstant) {
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            String separator = definition.context().listLabelSeparator.get(kLabelConstant.label());
+            if (separator != null) {
+                KLabelConstant unitLabel = KLabelConstant.of(
+                        org.kframework.compile.utils.MetaK.getListUnitLabel(separator), 
+                        null);
+                KItem newListTerminator = new KItem(
+                        unitLabel,
+                        KList.EMPTY,
+                        CompleteSortLatice.getUserListName(CompleteSortLatice.BOTTOM_SORT_NAME, separator),
+                        true);
+                LIST_TERMINATORS.put(unitLabel, newListTerminator);
+                return newListTerminator;
+            }
         }
         
         return new KItem(kLabel, kList, termContext);
@@ -78,7 +99,7 @@ public final class KItem extends Term {
 
         Definition definition = termContext.definition();
         Context context = definition.context();
-
+        
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
@@ -153,14 +174,6 @@ public final class KItem extends Term {
                     possibleSorts.add(production.getSort());
                 }
             }
-            // YilongL: the following is not needed because LIST_TERMINATOR is cached
-//            else {    /* productions.size() == 0 */
-//                /* a list terminator does not have conses */
-//                Set<String> listSorts = context.listLabels.get(((KLabelConstant) LIST_TERMINATOR.kLabel).label());
-//                if (listSorts != null) {
-//                    sorts.addAll(listSorts);
-//                }
-//            }
 
             /* no production matches this KItem */
             if (sorts.isEmpty()) {

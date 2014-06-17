@@ -88,6 +88,7 @@ public class Context implements Serializable {
     public Map<String, String> cellSorts = new HashMap<String, String>();
     public Map<String, Production> listConses = new HashMap<String, Production>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
+    public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
     
@@ -205,6 +206,7 @@ public class Context implements Serializable {
         String separator = ((UserList) p.getItems().get(0)).getSeparator();
         String label = MetaK.getListUnitLabel(separator);
         Set<String> s = listLabels.get(label);
+        listLabelSeparator.put(label, separator);
         if (s == null)
             listLabels.put(label, s = new HashSet<String>());
         s.add(p.getSort());
