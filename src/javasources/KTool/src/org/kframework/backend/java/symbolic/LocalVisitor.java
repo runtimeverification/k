@@ -123,11 +123,6 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(KCollectionFragment kCollectionFragment) {
-        visit((Collection) kCollectionFragment);
-    }
-
-    @Override
     public void visit(KLabel kLabel) {
         visit((Term) kLabel);
     }

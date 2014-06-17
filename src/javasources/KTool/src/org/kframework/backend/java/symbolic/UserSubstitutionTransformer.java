@@ -62,32 +62,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
         public ASTNode transform(Term variable) {
             Term replacement = substitution.get(variable);
             if (replacement != null) {
-                if (replacement instanceof KCollectionFragment) {
-                    KCollectionFragment fragment = (KCollectionFragment) replacement;
-                    ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
-                    builder.addAll(fragment);
-
-                    KCollection kCollection;
-                    if (fragment.getKCollection() instanceof KSequence) {
-                        if (fragment.hasFrame()) {
-                            kCollection = new KSequence(builder.build(), fragment.frame());
-                        } else {
-                            kCollection = new KSequence(builder.build());
-                        }
-                    } else {
-                        assert fragment.getKCollection() instanceof KList;
-
-                        if (fragment.hasFrame()) {
-                            kCollection = new KList(builder.build(), fragment.frame());
-                        } else {
-                            kCollection = new KList(builder.build());
-                        }
-                    }
-
-                    return kCollection;
-                } else {
-                    return new DoneTransforming(replacement);
-                }
+                return new DoneTransforming(replacement);
             } else {
                 return variable;
             }

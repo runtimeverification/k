@@ -639,7 +639,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
-                kList = new KList(ImmutableList.copyOf(terms));
+                kList = new KList(terms);
             }
         }
         unify(kList, patternKItem.kList());

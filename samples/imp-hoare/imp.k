@@ -122,15 +122,15 @@ module IMP
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
   rule <k> int (X:Id,Xs:AExps => Xs); _:Pre _:Post _:Stmt </k> 
-       <env> Rho:Map (.Map => X |-> L) </env>
-       <store>... .Map => (L |-> 0) </store>
-       when notBool (X in keys(Rho)) andBool fresh(L:Int)
+       <env> Rho:Map (.Map => X |-> !L) </env>
+       <store>... .Map => (!L |-> 0) </store>
+       when notBool (X in keys(Rho))
 
   // symbolic arrays
   rule <k> int (X:Id [S:#Int] ,Xs:Ids => Xs); _:Pre _:Post St:Stmt </k>
-       <env> Rho:Map (.Map => X |-> L) </env>
-       <store>... (.Map => L |-> array(AL, S) AL |-> #symArray(X) ) </store>
-       when notBool (X in keys(Rho)) andBool fresh(L:Int) andBool fresh(AL:Int)
+       <env> Rho:Map (.Map => X |-> !L) </env>
+       <store>... (.Map => !L |-> array(!AL, S) !AL |-> #symArray(X) ) </store>
+       when notBool (X in keys(Rho))
 
   rule int .AExps ; P:Pre P':Post S:Stmt => P ~> P' ~> S [structural]
 
@@ -210,7 +210,7 @@ module IMP
 //@ Generate fresh map
   syntax K ::= "generateFresh" "(" Map ")"
   rule <k> generateFresh(L:Int |-> V:Int E:Map) => generateFresh(E) ...</k>
-       <store>... L |-> (V => V') ...</store> when fresh(V':Int)
+       <store>... L |-> (V => !V') ...</store>
   rule <k> generateFresh(.Map) => . ...</k>
   rule <k> generateFresh(L:Int |-> array(AL:Int, Size:Int) E:Map) => generateFresh(E) ...</k>
   rule <k> generateFresh(L:Int |-> A:Array E:Map) => generateFresh(E) ...</k>

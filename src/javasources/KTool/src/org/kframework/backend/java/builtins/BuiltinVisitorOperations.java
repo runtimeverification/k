@@ -70,7 +70,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
         visitParams.set(0, term);
         term = new KItem(
                 visitLabel,
-                new KList(ImmutableList.copyOf(visitParams)),
+                new KList(visitParams),
                 context);
         return term.evaluate(context);
     }
@@ -79,7 +79,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
         ifParams.set(0, term);
         KItem test = new KItem(
                 ifLabel,
-                new KList(ImmutableList.copyOf(ifParams)),
+                new KList(ifParams),
                 context);
         // TODO: Think about what happens when test has symbolic values in it.
         return test.evaluate(context) == BoolToken.TRUE;

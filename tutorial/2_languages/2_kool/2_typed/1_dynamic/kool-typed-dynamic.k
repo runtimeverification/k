@@ -107,7 +107,7 @@ untyped KOOL.  */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -209,18 +209,18 @@ KOOL).  */
   syntax KResult ::= Val
 
 
-  syntax K ::= undefined(Type)  [latex(\bot_{#1})]
+  syntax KItem ::= undefined(Type)  [latex(\bot_{#1})]
 
   rule <k> T:Type X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined(T) ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 
   rule <k> T:Type X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(T, L +Int 1, N)
-                       (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> array(T, L +Int 1, N)
+                          (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
@@ -250,31 +250,37 @@ KOOL).  */
        <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 
 
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule Str1:String + Str2:String => Str1 +String Str2
-  rule I1:Int - I2:Int => I1 -Int I2
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
-  rule - I:Int => 0 -Int I
-  rule I1:Int < I2:Int => I1 <Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int > I2:Int => I1 >Int I2
-  rule I1:Int >= I2:Int => I1 >=Int I2
+  rule I1 + I2 => I1 +Int I2
+  rule Str1 + Str2 => Str1 +String Str2
+  rule I1 - I2 => I1 -Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule - I => 0 -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule ! T:Bool => notBool(T)
+  rule ! T => notBool(T)
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
   rule false || E => E
 
 
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+//    [structural, anywhere]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]  [structural]
+  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])  [structural]
 
+//  rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
+//    when N >=Int 0 andBool N <Int M  [structural, anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [structural, anywhere]
+    when N >=Int 0 andBool N <Int M  [structural]
+  rule lvalue(array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N))
+    when N >=Int 0 andBool N <Int M  [structural]
 
   rule sizeOf(array(_,_,N)) => N
 
@@ -284,7 +290,7 @@ KOOL).  */
     [structural]
 
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
 
 
   context (HOLE => lvalue(HOLE)) = _
@@ -307,21 +313,21 @@ KOOL).  */
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 
 
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
        <busy> Busy => Busy -Set keys(H) </busy>
-       <terminated>... . => SetItem(T) ...</terminated>
+       <terminated>... .Set => SetItem(T) ...</terminated>
 
   rule <k> join T:Int; => . ...</k>
        <terminated>... SetItem(T) ...</terminated>
 
   rule <k> acquire V:Val; => . ...</k>
-       <holds>... . => V |-> 0 ...</holds>
-       <busy> Busy (. => SetItem(V)) </busy>
+       <holds>... .Map => V |-> 0 ...</holds>
+       <busy> Busy (.Set => SetItem(V)) </busy>
     when (notBool(V in Busy:Set))  [acquire]
 
   rule <k> acquire V; => . ...</k>
@@ -331,8 +337,8 @@ KOOL).  */
        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
     when N >Int 0
 
-  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-       <busy>... SetItem(V) => . ...</busy>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+       <busy>... SetItem(V) => .Set ...</busy>
 
   rule <k> rendezvous V:Val; => . ...</k>
        <k> rendezvous V; => . ...</k>  [rendezvous]
@@ -344,10 +350,10 @@ KOOL).  */
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}
 
-  syntax K ::= lookup(Int)
+  syntax KItem ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
   rule (env(_) => .) ~> env(_)  [structural]
 
@@ -395,8 +401,8 @@ get more from the existing SIMPLE constructs. */
 
 Like in untyped KOOL. */
 
-  syntax K ::= "execute"
-  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
+  syntax KItem ::= "execute"
+  rule <k> execute => new Main(.Exps); </k> <env> .Map </env>  [structural]
 
 
 /*@ \subsubsection{Method application}
@@ -426,17 +432,17 @@ current status of the \textsf{return} cell and then pop it when the
 method returns.  We have to do the same with the current object
 environment, so we group them together in the stack frame.  */
 
-  syntax K ::=  (Map,K,ControlCellFragment)
+  syntax KItem ::= (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(_->T,Class,OL,Ps,S)(Vs:Vals) ~> K
            => mkDecls(Ps,Vs) S return; </k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
        <br/>
        <control>
           C
-          <fstack> . => ListItem((Env, K, C <crntObj> Obj' </crntObj>
-                                   <return> T' </return>)) ...</fstack>
+          <fstack> .List => ListItem((Env, K, C <crntObj> Obj' </crntObj>
+                                       <return> T' </return>)) ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
           <return> T' => T </return>
        </control>
@@ -453,7 +459,7 @@ unchanged.  */
            => subtype(typeOf(V), T) ~> true? ~> unsafeCast(V, T) ~> K
        </k>
        <control>
-         <fstack> ListItem((Env, K, C)) => . ...</fstack>
+         <fstack> ListItem((Env, K, C)) => .List ...</fstack>
          (<return> T:Type </return> _ => C)
        </control>
        <env> _ => Env </env>
@@ -485,24 +491,24 @@ values are allowed to be stored in each location.  */
 Exceptions are propagated now until a catch that can handle them is
 encountered. */
 
-  syntax K ::= (Param,Stmt,K,Map,ControlCellFragment)
-  syntax K ::= "popx"
+  syntax KItem ::= (Param,Stmt,K,Map,ControlCellFragment)
+  syntax KItem ::= "popx"
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => ListItem((P, S2, K, Env, C)) ...</xstack>
+         <xstack> .List => ListItem((P, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
   rule <k> popx => . ...</k>
-       <xstack> _:ListItem => . ...</xstack>
+       <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _
         => if (subtype(typeOf(V),T)) { T X = V; S2 } else { throw V; } ~> K
        </k>
        <control>
-         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => . ...</xstack>
+         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => .List ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -550,8 +556,8 @@ the only difference is the addition of the types. */
   rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
        <crntClass> C </crntClass>
        <location> OL </location>
-       <env> Env => Env[L/F] </env>
-       <store>... . => L|->methodClosure(getTypes(Ps)->T,C,OL,Ps,S) ...</store>
+       <env> Env => Env[F <- L] </env>
+       <store>... .Map => L|->methodClosure(getTypes(Ps)->T,C,OL,Ps,S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 
@@ -565,11 +571,11 @@ order to be recovered after the creation of the new object.  Only the
 first rule below needs to be changed; the others are identical to
 those in untyped KOOL. */
 
-  syntax K ::= (Id,EnvCellSort)
+  syntax KItem ::= (Id,EnvCellSort)
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> (storeObj ~> ((Class(Vs)); return this;)) </k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
        <br/>
        <control> C
@@ -579,11 +585,11 @@ those in untyped KOOL. */
                       <location> L </location>
          </crntObj>
          <return> T => Class </return>
-         <fstack> . => ListItem((Env, K, C <return>T</return> <crntObj>Obj</crntObj>))
+         <fstack> .List => ListItem((Env, K, C <return>T</return> <crntObj>Obj</crntObj>))
          ...</fstack>
        </control>
 
-  syntax K ::= create(Id)
+  syntax KItem ::= create(Id)
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
@@ -593,24 +599,24 @@ those in untyped KOOL. */
 
   rule <k> create(Object) => . ...</k>  [structural]
 
-  syntax K ::= setCrntClass(Id)
+  syntax KItem ::= setCrntClass(Id)
 
   rule <k> setCrntClass(C) => . ...</k>
        <crntClass> _ => C </crntClass>  [structural]
 
-  syntax K ::= "addEnvLayer"
+  syntax KItem ::= "addEnvLayer"
 
   rule <k> addEnvLayer => . ...</k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
-       <envStack> . => ListItem((Class, <env>Env</env>)) ...</envStack>
+       <envStack> .List => ListItem((Class, <env>Env</env>)) ...</envStack>
     [structural]
 
-  syntax K ::= "storeObj"
+  syntax KItem ::= "storeObj"
 
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L:Int </location> => .) </crntObj>
-       <store>... . => L |-> objectClosure(Obj) ...</store>
+       <store>... .Map => L |-> objectClosure(Obj) ...</store>
 
 
 /*@ \subsubsection{Self reference}
@@ -630,17 +636,33 @@ Like in untyped KOOL. */
 
   context HOLE . _ when (HOLE =/=K super)
 
-  rule objectClosure(<crntClass> Class:Id </crntClass>
+/*  rule objectClosure(<crntClass> Class:Id </crntClass>
                      <envStack>... ListItem((Class,EnvC:Bag)) EStack </envStack>)
        . X:Id
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
+    [structural]*/
+  rule objectClosure(<crntClass> Class:Id </crntClass>
+                     <envStack> ListItem((Class,EnvC:Bag)) EStack </envStack>)
+       . X:Id
+    => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
     [structural]
+  rule objectClosure(<crntClass> Class:Id </crntClass>
+                     <envStack> (ListItem((Class':Id,EnvC:Bag)) => .List) EStack </envStack>)
+       . X:Id
+    when Class =/=K Class' [structural]
 
-  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
+/*  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class </crntClass>
        <envStack>... ListItem((Class,EnvC:Bag)) EStack </envStack>
+    [structural]*/
+  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
+       <crntClass> Class:Id </crntClass>
+       <envStack> ListItem((Class,EnvC:Bag)) EStack </envStack>
     [structural]
-
+  rule <k> super . X ...</k>
+       <crntClass> Class:Id </crntClass>
+       <envStack> (ListItem((Class':Id,EnvC:Bag)) => .List) EStack </envStack>
+    when Class =/=K Class' [structural]
 
 /*@\subsubsection{Method invocation}
 
@@ -659,11 +681,20 @@ The method lookup is the same as in untyped KOOL.  */
   rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
 
-  rule <k> (super . X
+/*  rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
        <envStack>... ListItem((Class,_)) EStack </envStack>
+    [structural]*/
+  rule <k> (super . X
+            => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
+       <crntClass> Class:Id </crntClass>
+       <envStack> ListItem((Class,_)) EStack </envStack>
     [structural]
+  rule <k> (super . X)(_:Exps)...</k>
+       <crntClass> Class:Id </crntClass>
+       <envStack> (ListItem((Class':Id,_)) => .List) EStack </envStack>
+    when Class =/=K Class' [structural]
 
   context HOLE(_:Exps)
     when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_`[_`]
@@ -679,10 +710,10 @@ Like in untyped KOOL.  */
   rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem((C::Id,_)) => . ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
-  rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
+  rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
 
 
 /*@ \subsubsection{Cast}
@@ -706,24 +737,38 @@ Like in untyped KOOL. */
 
   context lvalue(HOLE . _)
 
-  rule lvalue(objectClosure(<crntClass> C </crntClass>
+/*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... ListItem((C,EnvC:Bag)) EStack </envStack>)
               . X
               => lookupMember(<envStack> ListItem((C,EnvC)) EStack </envStack>,
+                              X))  [structural]*/
+  rule lvalue(objectClosure(<crntClass> C:Id </crntClass>
+                            <envStack> ListItem((C,EnvC:Bag)) EStack </envStack>)
+              . X
+              => lookupMember(<envStack> ListItem((C,EnvC)) EStack </envStack>,
                               X))  [structural]
+  rule lvalue(objectClosure(<crntClass> C </crntClass>
+                            <envStack> (ListItem((C',EnvC:Bag)) => .List) EStack </envStack>)
+              . X)
+    when C =/=K C' [structural]
 
 
 /*@ \subsubsection{Lookup member}
 
 Like in untyped KOOL. */
 
-  syntax K ::= lookupMember(EnvStackCellSort,Id)  [function]
+  syntax KItem ::= lookupMember(EnvStackCellSort,Id)  [function]
 
   rule lookupMember(<envStack> ListItem((_, <env>... X |-> L ...</env>))
                     ...</envStack>, X) => lookup(L)
 
-  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => .
-                    ...</envStack>, X)  when notBool(X in keys(Env))
+  // TODO: fix rule below as shown once we support functions with deep rewrites
+  // rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => .List
+  //                     ...</envStack>, X)
+  //   when notBool(X in keys(Env))
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) L </envStack>, X)
+    => lookupMember(<envStack> L </envStack>, X)
+    when notBool(X in keys(Env))
 
 
 //@ \subsubsection{\texttt{typeOf} for the additional values}
@@ -778,7 +823,7 @@ the subtype relation above. */
 A generic computational guard: it allows the computation to continue
 only if a prefix guard evaluates to true. */
 
-  syntax K ::= "true?"
+  syntax KItem ::= "true?"
   rule true ~> true? => .  [structural]
 
 endmodule

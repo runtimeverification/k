@@ -207,6 +207,18 @@
     </all-programs>
   </test>
 
+  <test
+      definition="bag/test.k"
+      programs="bag"
+      results="bag"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
   <include file="user_substitution/tests/config.xml" directory="user_substitution" />
 
 

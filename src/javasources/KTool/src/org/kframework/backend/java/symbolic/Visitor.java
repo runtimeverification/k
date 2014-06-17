@@ -32,7 +32,6 @@ public interface Visitor {
     public void visit(KItem kItem);
     public void visit(KItemProjection kItemProjection);
     public void visit(KCollection kCollection);
-    public void visit(KCollectionFragment kCollectionFragment);
     public void visit(KLabel kLabel);
     public void visit(KList kList);
     public void visit(KSequence kSequence);

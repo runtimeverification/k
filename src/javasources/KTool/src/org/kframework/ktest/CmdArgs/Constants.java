@@ -25,4 +25,8 @@ public class Constants {
     public static final String PDF_STEP = "pdf";
     public static final String KRUN_STEP = "krun";
 
+    public static final String IGNORE_WS = "ignore-white-spaces";
+    public static final String IGNORE_B_PARENS = "ignore-balanced-parentheses";
+    public static final String DRY = "dry";
+    public static final String DEBUG = "debug";
 }

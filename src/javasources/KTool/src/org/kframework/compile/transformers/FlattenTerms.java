@@ -9,6 +9,7 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.krun.K;
+import org.kframework.utils.StringUtil;
 
 import java.util.*;
 
@@ -92,12 +93,17 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
             String l = tc.getLocation();
             String f = tc.getFilename();
-            Production ppp = context.conses.get(tc.getCons());
+            Production ppp = tc.getProduction();
             KList lok = new KList(l, f);
             for (Term t : tc.getContents()) {
                 lok.getContents().add((Term) this.visitNode(t));
             }
-            return new KApp(l, f, KLabelConstant.of(ppp.getKLabel(), context), lok);
+            String label;
+            if (tc.isListTerminator())
+                label = tc.getProduction().getListDecl().getTerminatorKLabel();
+            else
+                label = ppp.getKLabel();
+            return new KApp(l, f, KLabelConstant.of(label, context), lok);
         }
 
         @Override

@@ -1,0 +1,8 @@
+[Warning] Inner Parser: Parsing ambiguity. Arbitrarily choosing the first.
+1: Exp ::= Exp "(" Exp ")"
+   ((new C ( x )) . y) ( z )
+2: Exp ::= "new" Exp "(" Exp ")"
+   new ((C ( x )) . y) ( z )
+        File: a.test
+        Location: (1,1,1,14)
+        Compilation Phase: Ambiguity filter

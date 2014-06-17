@@ -160,7 +160,7 @@ public class Grammar implements Serializable {
     }
 
     /**
-     * Calculates Nullability and OrderinInfo for all the states in the grammar.
+     * Calculates Nullability and OrderingInfo for all the states in the grammar.
      * Must be called before being handed over to the parser, but after
      * the grammar is finished being built.
      */
@@ -187,7 +187,7 @@ public class Grammar implements Serializable {
             predecessors[i] = new ArrayList<>();
         }
 
-        // A state "A" must preceed another state "B" if it is possible to get from a StateReturn
+        // A state "A" must precede another state "B" if it is possible to get from a StateReturn
         // of A to a StateReturn of B without consuming input.
         // There are three ways for this to happen:
         // (1) A.next contains B and B is nullable
@@ -210,7 +210,7 @@ public class Grammar implements Serializable {
                 // Case 3 (See above)
                 if (ns instanceof NonTerminalState) {
                     ExitState es = ((NonTerminalState) ns).child.exitState;
-                    predecessors[inverseAllStates.get(es)].add(inverseAllStates.get(s));
+                    predecessors[inverseAllStates.get(s)].add(inverseAllStates.get(es));
                 }
             }
         }
@@ -266,6 +266,7 @@ public class Grammar implements Serializable {
      */
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
         public final String name;
+        private final int hashCode;
         /**
          * The first state of the state machine for the non-terminal.
          */
@@ -292,6 +293,7 @@ public class Grammar implements Serializable {
         public NonTerminal(String name) {
             assert name != null && !name.equals("") : "NonTerminal name cannot be null or empty.";
             this.name = name;
+            hashCode = name.hashCode();
             this.entryState = new EntryState(name + "-entry", this);
             this.exitState = new ExitState(name + "-exit", this);
         }
@@ -328,7 +330,7 @@ public class Grammar implements Serializable {
 
         @Override
         public int hashCode() {
-            return name.hashCode();
+            return hashCode;
         }
     }
 
@@ -357,6 +359,7 @@ public class Grammar implements Serializable {
             final int key;
             public OrderingInfo(int key) { this.key = key; }
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
+            public String toString() { return Integer.toString(key); }
         }
 
         public State(String name, NonTerminal nt) {

@@ -7,6 +7,7 @@ import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
 import org.kframework.krun.K;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.StringUtil;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -424,10 +425,14 @@ public class UnparserFilter extends NonCachingVisitor {
             UserList userList = (UserList) production.getItems().get(0);
             String separator = userList.getSeparator();
             java.util.List<Term> contents = termCons.getContents();
-            this.visitNode(contents.get(0));
-            if (!(contents.get(1) instanceof ListTerminator)) {
-                indenter.write(separator + " ");
-                this.visitNode(contents.get(1));
+            if (contents.size() == 0) {
+                indenter.write("." + production.getSort());
+            } else {
+                this.visitNode(contents.get(0));
+                if (!(contents.get(1) instanceof ListTerminator)) {
+                    indenter.write(separator + " ");
+                    this.visitNode(contents.get(1));
+                }
             }
         } else {
             int where = 0;

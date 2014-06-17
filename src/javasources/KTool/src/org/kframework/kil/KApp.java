@@ -147,10 +147,15 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof KApp))
-            return false;
-        KApp k = (KApp) o;
-        return label.equals(k.label) && child.equals(k.child);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        KApp kApp = (KApp) o;
+
+        if (!child.equals(kApp.child)) return false;
+        if (!label.equals(kApp.label)) return false;
+
+        return true;
     }
 
     @Override

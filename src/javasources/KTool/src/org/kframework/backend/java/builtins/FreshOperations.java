@@ -8,7 +8,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -32,7 +32,7 @@ public class FreshOperations {
 
         KItem freshFunction = new KItem(
                 KLabelConstant.of(name, context.definition()),
-                new KList(ImmutableList.<Term>of(IntToken.of(context.incrementCounter()))),
+                new KList(Lists.newArrayList((Term) IntToken.of(context.incrementCounter()))),
                 context);
         return freshFunction.evaluateFunction(new SymbolicConstraint(context), context);
     }

@@ -9,18 +9,5 @@
       extension="imp"
       >
   </test>
-
-  <test
-      definition="imp.k"
-      programs="."
-      results="."
-      extension="imp"
-      >
-    <kompile-option name="--backend" value="java" />
-    <kompile-option name="--directory" value="imp-java_kompiled" />
-    <all-programs>
-      <krun-option  name="--directory" value="imp-java_kompiled" />
-    </all-programs>
-  </test>
 </tests>
 

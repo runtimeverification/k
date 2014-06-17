@@ -209,7 +209,7 @@ for the KOOL object-oriented constructs.
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-        	| "for" "(" Stmt Exp ";" Exp ")" Block
+        	| "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -327,7 +327,7 @@ their object's environment.  The semantics of function return actually
 stays unchanged.  Also, the semantics of program initialization is
 different: now we have to create an instance of the \texttt{Main}
 class which also calls the constructor \texttt{Main()}, while in
-SIMPLE we only had to invoke the function \texttt{Main()}. 
+SIMPLE we only had to invoke the function \texttt{Main()}.
 Finally, the semantics of thread spawning needs to change, too: the
 parent thread needs to also share its object environment with the
 spawned thread (in addition to its local environment, like in SIMPLE).
@@ -353,20 +353,20 @@ object and method closures. */
 /*@ The semantics below are taken verbatim from the untyped SIMPLE
 definition. */
 
-  syntax K ::= "undefined"  [latex(\bot)]
+  syntax KItem ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 
   context var _:Id[HOLE];
 
   rule <k> var X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(L +Int 1, N)
-                       (L +Int 1) ... (L +Int N) |-> undefined ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> array(L +Int 1, N)
+                          (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
@@ -394,32 +394,37 @@ definition. */
        <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 
 
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule Str1:String + Str2:String => Str1 +String Str2
-  rule I1:Int - I2:Int => I1 -Int I2
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
-  rule - I:Int => 0 -Int I
-  rule I1:Int < I2:Int => I1 <Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int > I2:Int => I1 >Int I2
-  rule I1:Int >= I2:Int => I1 >=Int I2
+  rule I1 + I2 => I1 +Int I2
+  rule Str1 + Str2 => Str1 +String Str2
+  rule I1 - I2 => I1 -Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule - I => 0 -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
 
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule ! T:Bool => notBool(T)
+  rule ! T => notBool(T)
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
   rule false || E => E
 
 
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+//    [structural, anywhere]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]  [structural]
+  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])  [structural]
 
-  rule array(L,_)[N:Int] => lookup(L +Int N)
-    [structural, anywhere]
+//  rule array(L,_)[N:Int] => lookup(L +Int N)
+//    [structural, anywhere]
+  rule array(L,_)[N:Int] => lookup(L +Int N)  [structural]
+  rule lvalue(array(L,_)[N:Int] => lookup(L +Int N))  [structural]
+
 
   rule sizeOf(array(_,N)) => N
 
@@ -430,7 +435,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
-         <fstack> ListItem((Env,K,C)) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => .List ...</fstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -439,7 +444,7 @@ interestingly, the semantics of return stays unchanged. */
   rule return; => return nothing;   [macro]
 
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
 
 
   context (HOLE => lvalue(HOLE)) = _
@@ -452,7 +457,7 @@ interestingly, the semantics of return stays unchanged. */
   rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
 
 
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1::Stmts S2::Stmts => S1 ~> S2  [structural]
 
   rule _:Val; => .
 
@@ -461,28 +466,28 @@ interestingly, the semantics of return stays unchanged. */
 
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
   rule print(.Vals); => .  [structural]
 
 
-  syntax K ::= (Id,Stmt,K,Map,ControlCellFragment)
+  syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
 
-  syntax K ::= "popx"
+  syntax KItem ::= "popx"
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
+         <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
   rule <k> popx => . ...</k>
-       <xstack> _:ListItem => . ...</xstack>
+       <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
+         <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -495,14 +500,14 @@ from SIMPLE unchanged. */
 
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
        <busy> Busy => Busy -Set keys(H) </busy>
-       <terminated>... . => SetItem(T) ...</terminated>
+       <terminated>... .Set => SetItem(T) ...</terminated>
 
   rule <k> join T:Int; => . ...</k>
        <terminated>... SetItem(T) ...</terminated>
 
   rule <k> acquire V:Val; => . ...</k>
-       <holds>... . => V |-> 0 ...</holds>
-       <busy> Busy (. => SetItem(V)) </busy>
+       <holds>... .Map => V |-> 0 ...</holds>
+       <busy> Busy (.Set => SetItem(V)) </busy>
     when (notBool(V in Busy:Set))  [acquire]
 
   rule <k> acquire V; => . ...</k>
@@ -512,8 +517,8 @@ from SIMPLE unchanged. */
        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
     when N >Int 0
 
-  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-       <busy>... SetItem(V) => . ...</busy>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+       <busy>... SetItem(V) => .Set ...</busy>
 
   rule <k> rendezvous V:Val; => . ...</k>
        <k> rendezvous V; => . ...</k>  [rendezvous]
@@ -524,10 +529,10 @@ from SIMPLE unchanged. */
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
-  syntax K ::= lookup(Int)
+  syntax KItem ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
   rule (env(_) => .) ~> env(_)  [structural]
 
@@ -574,8 +579,8 @@ of the \textsf{env} cell below is just a sanity check, to make sure
 that the user has not declared anything but classes at the top level
 of the program. */
 
-  syntax K ::= "execute" 
-  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
+  syntax KItem ::= "execute"
+  rule <k> execute => new Main(.Exps); </k> <env> .Map </env>  [structural]
 
 /*@ The semantics of \texttt{new} (defined below) requires the
 execution of all the class' declarations (and also of its
@@ -617,16 +622,16 @@ switch to method closure's class and object environment and execute
 the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
-  syntax K ::=  (Map,K,ControlCellFragment)
+  syntax KItem ::= (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
        <br/>
        <control>
           C
-          <fstack> . => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
+          <fstack> .List => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
           ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
        </control>
@@ -690,8 +695,8 @@ understand and reason about if one overuses these features. */
   rule <k> method F:Id(Xs:Ids) S => . ...</k>
        <crntClass> Class:Id </crntClass>
        <location> OL:Int </location>
-       <env> Env => Env[L/F] </env>
-       <store>... . => L |-> methodClosure(Class,OL,Xs,S) ...</store>
+       <env> Env => Env[F <- L] </env>
+       <store>... .Map => L |-> methodClosure(Class,OL,Xs,S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 
@@ -715,20 +720,20 @@ shortly).  The location where the object will be stored is also made
 available in the \textsf{crntObj} cell, so that method closures can
 refer to it (see rule above). */
 
-  syntax ListItem ::= (Id,BagItem)
+  syntax KItem ::= (Id,BagItem) // TODO: used to be ListItem; explain this
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
        <br/>
        <control> C
          <crntObj> Obj
                    => <crntClass> Object </crntClass>
-                      <envStack> (Object, <env>.Map</env>) </envStack>
+                      <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
                       <location> L </location>
          </crntObj>
-         <fstack> . => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
+         <fstack> .List => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
        </control>
 
 /*@ The creation of a new object (the memory allocation part only) is
@@ -738,7 +743,7 @@ for each class on the path from the instance class to the root of the
 hierarchy there is a layer including the memory allocated for the
 members (both fields and methods) of that class. */
 
-  syntax K ::= create(Id)
+  syntax KItem ::= create(Id)
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
@@ -753,7 +758,7 @@ This is necessary to be done at each layer, because the current class
 of the object is enclosed as part of the method closures (see the
 semantics of method declarations above). */
 
-  syntax K ::= setCrntClass(Id)
+  syntax KItem ::= setCrntClass(Id)
 
   rule <k> setCrntClass(C) => . ...</k>
        <crntClass> _ => C </crntClass>  [structural]
@@ -763,12 +768,12 @@ current object and gets ready for the next layer by clearing the
 environment (note that \texttt{create} expects the environment to be
 empty). */
 
-  syntax K ::= "addEnvLayer"
+  syntax KItem ::= "addEnvLayer"
 
   rule <k> addEnvLayer => . ...</k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
-       <envStack> . => (Class, <env>Env</env>) ...</envStack>
+       <envStack> .List => ListItem((Class, <env>Env</env>)) ...</envStack>
     [structural]
 
 /*@ The following operation stores the created object at the location
@@ -779,11 +784,11 @@ stored at its location and that all method closures are aware of it,
 the location is unnecessary and thus we delete it from the
 \textsf{crntObj} cell. */
 
-  syntax K ::= "storeObj"
+  syntax KItem ::= "storeObj"
 
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L:Int </location> => .) </crntObj>
-       <store>... . => L |-> objectClosure(Obj) ...</store>
+       <store>... .Map => L |-> objectClosure(Obj) ...</store>
 
 
 /*@ \subsubsection{Self reference}
@@ -821,17 +826,37 @@ invocations see the entire object, as needed for dynamic method dispatch. */
 
   context HOLE._::Id when (HOLE =/=K super)
 
-  rule objectClosure(<crntClass> Class:Id </crntClass>
+// TODO: explain how Assoc matching has been replaced with two rules here.
+// Maybe also improve it a bit.
+
+/*  rule objectClosure(<crntClass> Class:Id </crntClass>
                      <envStack>... (Class,EnvC) EStack </envStack>)
        . X:Id
     => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
-    [structural]
+    [structural]*/
 
-  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
+  rule objectClosure(<crntClass> Class:Id </crntClass>
+                     <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
+       . X:Id
+    => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
+    [structural]
+  rule objectClosure(<crntClass> Class:Id </crntClass>
+                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
+       . X:Id
+    when Class =/=K Class'  [structural]
+
+/*  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class </crntClass>
        <envStack>... (Class,EnvC) EStack </envStack>
+    [structural]*/
+  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
+       <crntClass> Class:Id </crntClass>
+       <envStack> ListItem((Class,_)) EStack </envStack>
     [structural]
-
+  rule <k> super . X ...</k>
+       <crntClass> Class </crntClass>
+       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+    when Class =/=K Class'  [structural]
 
 /*@\subsubsection{Method invocation}
 
@@ -868,11 +893,20 @@ method call or the array access.  */
   rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
 
-  rule <k> (super . X
+/*  rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
        <envStack>... (Class,_) EStack </envStack>
+    [structural]*/
+  rule <k> (super . X
+            => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
+       <crntClass> Class </crntClass>
+       <envStack> ListItem((Class,_)) EStack </envStack>
     [structural]
+  rule <k> (super . X)(_:Exps) ...</k>
+       <crntClass> Class </crntClass>
+       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+    when Class =/=K Class'  [structural]
 
   context HOLE(_:Exps)
     when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_`[_`]
@@ -896,20 +930,21 @@ desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it only gets stuck when its first
 argument does not evaluate to an object.  */
 
-  rule objectClosure(<envStack> (C,_) ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
+//TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
-  rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
+  rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
 
 
 /*@ \subsubsection{Cast}
 
 In untyped KOOL, we prefer to not check the validity of casting.  In
 other words, any cast is allowed on any object, simply changing the
-current class of the object to the desired class.  The execution will 
+current class of the object to the desired class.  The execution will
 get stuck later if one attempts to access a field which is not
 available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
@@ -941,23 +976,39 @@ member's location based on the current class of the object. */
 
   context lvalue(HOLE . _)
 
-  rule lvalue(objectClosure(<crntClass> C </crntClass>
+/*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... (C,EnvC) EStack </envStack>)
               . X
               => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
+                              X))  [structural]*/
+  rule lvalue(objectClosure(<crntClass> Class </crntClass>
+                            <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
+              . X
+              => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
                               X))  [structural]
+  rule lvalue(objectClosure(<crntClass> Class </crntClass>
+                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
+              . X)
+    when Class =/=K Class'  [structural]
+
 
 /*@ \subsubsection{Lookup member}
 
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy. */
 
-  syntax K ::= lookupMember(BagItem,Id)  [function]
+  syntax KItem ::= lookupMember(BagItem,Id)  [function]
 
-  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
+//  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
+//    => lookup(L)
+  rule lookupMember(<envStack> ListItem((_, <env>... X|->L ...</env>)) ...</envStack>, X)
     => lookup(L)
 
-  rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
+//  rule lookupMember(<envStack> (_, <env> Env </env>) => .List ...</envStack>, X)
+//    when notBool(X in keys(Env))
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) Rest </envStack>, X) =>
+       lookupMember(<envStack> Rest </envStack>, X)
     when notBool(X in keys(Env))
+//TODO: beautify the above
 
 endmodule

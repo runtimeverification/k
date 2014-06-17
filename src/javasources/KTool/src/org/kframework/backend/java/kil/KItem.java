@@ -498,7 +498,7 @@ public final class KItem extends Term {
      */
     public static boolean isInjectionWrapper(KItem kItem) {
         return kItem.kLabel.getClass() == KLabelInjection.class && kItem.kList instanceof KList
-                && ((KList) kItem.kList).contents.isEmpty();
+                && ((KList) kItem.kList).getContents().isEmpty();
     }
 
     /**

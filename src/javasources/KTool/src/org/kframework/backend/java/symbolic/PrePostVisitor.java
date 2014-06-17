@@ -91,8 +91,8 @@ public class PrePostVisitor implements Visitor {
         for (Cell<?> cell : cellCollection.cells()) {
             cell.accept(this);
         }
-        if (cellCollection.hasFrame()) {
-            cellCollection.frame().accept(this);
+        for (Variable variable : cellCollection.baseTerms()) {
+            variable.accept(this);
         }
         cellCollection.accept(postVisitor);
     }
@@ -220,19 +220,6 @@ public class PrePostVisitor implements Visitor {
         if (kCollection.hasFrame())
             kCollection.frame().accept(this);
         kCollection.accept(postVisitor);
-    }
-
-    @Override
-    public void visit(KCollectionFragment kCollectionFragment) {
-        preVisitor.resetProceed();
-        kCollectionFragment.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        for (Term term : kCollectionFragment) {
-            term.accept(this);
-        }
-        if (kCollectionFragment.hasFrame())
-            kCollectionFragment.frame().accept(this);
-        kCollectionFragment.accept(postVisitor);
     }
 
     @Override
