@@ -212,7 +212,7 @@ be a value, so that we will never heat on it. */
 
 //  rule <k> & X => L ...</k>  <env>... X |-> L </env>
   syntax Val ::= "ref"
-  rule <k> ref V:Val => !L:Int ...</k> <store>... . => !L |-> V ...</store>
+  rule <k> ref V:Val => !L:Int ...</k> <store>... .Map => !L |-> V ...</store>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
   rule <k> L:Int := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
   rule V:Val; E => E
