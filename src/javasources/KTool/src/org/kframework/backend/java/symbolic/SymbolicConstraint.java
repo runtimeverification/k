@@ -105,7 +105,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          */
         public Equality falsifyingEquality;
         
-        public final SymbolicUnifier.Data unifierData;
+        public SymbolicUnifier.Data unifierData;
 
         public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution, 
                 TruthValue truthValue, boolean isNormal, SymbolicUnifier.Data unifierData) {
@@ -114,6 +114,37 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             this.truthValue = truthValue;
             this.isNormal = isNormal;
             this.unifierData = unifierData;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((equalities == null) ? 0 : equalities.hashCode());
+            result = prime * result + ((substitution == null) ? 0 : substitution.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Data other = (Data) obj;
+            if (equalities == null) {
+                if (other.equalities != null)
+                    return false;
+            } else if (!equalities.equals(other.equalities))
+                return false;
+            if (substitution == null) {
+                if (other.substitution != null)
+                    return false;
+            } else if (!substitution.equals(other.substitution))
+                return false;
+            return true;
         }
     }
 
@@ -439,6 +470,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * one-to-one relationship between unifiers and constraints.
      */
     private final SymbolicUnifier unifier;
+    
+    public SymbolicConstraint(Data data, TermContext context) {
+        this.data = data;
+        this.context = context;
+        this.definition = context.definition();
+        this.unifier = new SymbolicUnifier(this, data.unifierData, context);
+    }
 
     public SymbolicConstraint(SymbolicConstraint constraint, TermContext context) {
         this(context);
@@ -447,10 +485,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public SymbolicConstraint(TermContext context) {
-        this.context = context;
-        this.definition = context.definition();
-        unifier = new SymbolicUnifier(this, context);
-        this.data = new Data(new LinkedList<Equality>(), new HashMap<Variable, Term>(), TruthValue.TRUE, true, unifier.data);
+        this(new Data(
+                new LinkedList<Equality>(), new HashMap<Variable, Term>(), TruthValue.TRUE, true, 
+                new SymbolicUnifier.Data()), 
+                context);
     }
 
     public TermContext termContext() {
@@ -889,7 +927,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             assert unifier.data.multiConstraints.size() <= 2;
 
             List<SymbolicConstraint> multiConstraints = new ArrayList<SymbolicConstraint>();
-            Iterator<Collection<SymbolicConstraint>> iterator = unifier.data.multiConstraints.iterator();
+            Iterator<Collection<SymbolicConstraint>> iterator = unifier.multiConstraints().iterator();
             if (unifier.data.multiConstraints.size() == 1) {
                 for (SymbolicConstraint constraint : iterator.next()) {
                     constraint.addAll(this);
@@ -1217,16 +1255,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         SymbolicConstraint constraint = (SymbolicConstraint) object;
-        return data.equalities.equals(constraint.data.equalities)
-               && data.substitution.equals(constraint.data.substitution);
+        return data.equals(constraint.data);
     }
 
     @Override
     public int hashCode() {
         // TODO(YilongL): normalize and sort equalities?
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + data.equalities.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + data.substitution.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + data.hashCode();
         return hashCode;
     }
 
@@ -1299,20 +1335,4 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             });
         }
     }
-
-//    public static class Data {
-//        public final LinkedList<Equality> equalities;
-//        public final Map<Variable, Term> substitution;
-//        public final boolean isNormal;
-//        public final TruthValue truthValue;
-//
-//        public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution,
-//                boolean isNormal, TruthValue truthValue) {
-//            this.equalities = equalities;
-//            // TODO Auto-generated constructor stub
-//            this.substitution = substitution;
-//            this.isNormal = isNormal;
-//            this.truthValue = truthValue;
-//        }
-//    }
 }
