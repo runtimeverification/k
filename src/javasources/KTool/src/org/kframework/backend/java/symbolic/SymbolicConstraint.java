@@ -26,7 +26,6 @@ import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.K;
 
 import java.util.ArrayList;
@@ -269,9 +268,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     }
                     return true;
                 } else {
-                    return definition.context().getCommonSubsorts(ImmutableSet.<String>of(
+                    return definition.context().hasCommonSubsort(
                         (leftHandSide).sort(),
-                        (rightHandSide).sort())).isEmpty();
+                        (rightHandSide).sort());
                 }
             }
         }
