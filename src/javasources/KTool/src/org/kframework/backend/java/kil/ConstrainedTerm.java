@@ -93,18 +93,20 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     private final TermContext context;
 
-    private SymbolicConstraint lookups;
+    private final SymbolicConstraint lookups;
 
-    private SymbolicConstraint constraint;
+    private final SymbolicConstraint constraint;
+    
+    public ConstrainedTerm(Data data, TermContext context) {
+        this.data = data;
+        this.context = context;
+        this.lookups = new SymbolicConstraint(data.lookupsData, context);
+        this.constraint = new SymbolicConstraint(data.constraintData, context);
+    }
 
     public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint,
             TermContext context) {
-        super();
-        this.data = new Data(term, lookups.data, constraint.data);
-        this.lookups = new SymbolicConstraint(data.lookupsData, context);
-        this.constraint = new SymbolicConstraint(data.constraintData, context);
-        this.context = context;
-//        context.setConstrainedTermData(this.data());
+        this(new Data(term, lookups.data, constraint.data), context);
     }
 
     public ConstrainedTerm(Term term, SymbolicConstraint constraint, TermContext context) {
