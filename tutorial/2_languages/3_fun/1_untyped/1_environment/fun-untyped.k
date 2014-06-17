@@ -216,7 +216,7 @@ not the constuctor name itsef. */
 /*@ A function is essentially a ``\texttt{|}''-separated ordered
 sequence of cases, each case of the form ``\verb|pattern -> expression|'',
 preceded by the language construct \texttt{fun}.  Patterns will be defined
-shortly, both for the builtin lists and for user-defined constructors.  
+shortly, both for the builtin lists and for user-defined constructors.
 Recall that the syntax we define in \K is not meant to serve as a
 ultimate parser for the defined language, but rather as a convenient
 notation for \K abstract syntax trees, which we prefer when we write
@@ -319,7 +319,7 @@ user-defined types are quoted identifiers. */
 /*@ Types can be basic types, function types, or user-defined
 parametric types.  In the dynamic semantics we are going to simply ignore
 all the type declations, so here the syntax of types below is only useful
-for generating the desired parser.  To avoid syntactic ambiguities with 
+for generating the desired parser.  To avoid syntactic ambiguities with
 the arrow construct for function cases, we use the symbol \verb|-->| as
 a constructor for function types:  */
 
@@ -434,20 +434,20 @@ add more values later.  */
 
 //@ \subsection{Arithmetic expressions}
 
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule S1:String ^ S2:String => S1 +String S2
-  rule I1:Int - I2:Int => I1 -Int I2
-//  rule - I:Int => 0 -Int I
-  rule I1:Int < I2:Int => I1 <Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int > I2:Int => I1 >Int I2
-  rule I1:Int >= I2:Int => I1 >=Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule I1 + I2 => I1 +Int I2
+  rule S1 ^ S2 => S1 +String S2
+  rule I1 - I2 => I1 -Int I2
+//  rule - I => 0 -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule ! T:Bool => notBool(T)
+  rule ! T => notBool(T)
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
@@ -651,7 +651,7 @@ language in the \K tutorial and many other languages provided with the
 \K distribution.  The first ``anywhere'' rule below shows an elegant
 way to achieve the benefits of tail recursion in \K.  */
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)  // TODO: get rid of env
   rule (env(_) => .) ~> env(_)  [anywhere]
   rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>
     [structural]
@@ -662,29 +662,29 @@ The meaning of these operations has already been explained when we
 discussed the \texttt{let} and \texttt{letrec} language constructs
 above. */
 
-  syntax K ::= bindTo(Names,Exps)         [strict(2)]
-             | bindTo(Map)
-             | bind(Names)
+  syntax KItem ::= bindTo(Names,Exps)         [strict(2)]
+                 | bindTo(Map)
+                 | bind(Names)
 
   rule bindTo(Xs:Names,Vs:Vals) => bindTo(getMatching(Xs,Vs))
 
   rule bindTo(.Map) => .  [structural]
-  rule <k> bindTo((X:Name |-> V:Val => .) _) ...</k>
-       <env> Rho => Rho[!L:Int/X] </env>
-       <store>... . => !L |-> V ...</store>
-  [structural]
+  rule <k> bindTo((X:Name |-> V:Val => .Map) _:Map) ...</k>
+       <env> Rho => Rho[X <- !L:Int] </env>
+       <store>... .Map => !L |-> V ...</store>
+    [structural]
 
   rule bind(.Names) => .                  [structural]
   rule <k> bind(X:Name,Xs => Xs) ...</k>
-       <env> Rho => Rho[!L:Int/X] </env>
-  [structural]
+       <env> Rho => Rho[X <- !L:Int] </env>
+    [structural]
 
-  syntax K ::= assignTo(Names,Exps)  [strict(2)]
+  syntax KItem ::= assignTo(Names,Exps)  [strict(2)]
 
   rule <k> assignTo(.Names,.Vals) => . ...</k>            [structural]
   rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
        <env>... X |-> L ...</env>
-       <store>... . => L |-> V ...</store>              [structural]
+       <store>... .Map => L |-> V ...</store>             [structural]
 
 /*@ \subsubsection{Getters}
 
