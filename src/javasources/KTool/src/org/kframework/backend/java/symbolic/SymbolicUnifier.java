@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -47,28 +48,40 @@ import com.google.common.collect.Multimap;
  */
 public class SymbolicUnifier extends AbstractUnifier {
 
-    /**
-     * Represents the existing {@code SymbolicConstraint} before invoking this
-     * unifier and then becomes the overall {@code SymbolicConstraint} after the
-     * unification is done.
-     */
-    private SymbolicConstraint fConstraint;
-    
+    public static class Data {
+        /**
+         * Represents the existing {@code SymbolicConstraint} before invoking this
+         * unifier and then becomes the overall {@code SymbolicConstraint} after the
+         * unification is done.
+         */
+        public SymbolicConstraint fConstraint;
+        /**
+         * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
+         */
+        public Collection<Collection<SymbolicConstraint>> multiConstraints;
+        
+        //TODO: the fields should be final
+        
+        public Data(SymbolicConstraint fConstraint,
+                Collection<Collection<SymbolicConstraint>> multiConstraints) {
+            super();
+            this.fConstraint = fConstraint;
+            this.multiConstraints = multiConstraints;
+        }
+    }
+
     /**
      * TODO(YilongL)
      */
     private boolean isStarNested;
     
-    /**
-     * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
-     */
-    public final java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
+    public final Data data;
+
     private final TermContext termContext;
 
     public SymbolicUnifier(SymbolicConstraint constraint, TermContext context) {
-        this.fConstraint = constraint;
         this.termContext = context;
-        multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
+        this.data = new Data(constraint, new ArrayList<java.util.Collection<SymbolicConstraint>>());
     }
 
     /**
@@ -81,7 +94,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     public boolean unify(SymbolicConstraint.Equality equality) {
         try {
             isStarNested = false;
-            multiConstraints.clear();
+            data.multiConstraints.clear();
             unify(equality.leftHandSide(), equality.rightHandSide());
             return true;
         } catch (UnificationFailure e) {
@@ -134,7 +147,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             /* add symbolic constraint */
-            fConstraint.add(term, otherTerm);
+            data.fConstraint.add(term, otherTerm);
             // YilongL: not the right time to check the truth value because it
             // may change the equalities
             // if (fConstraint.isFalse()) {
@@ -358,7 +371,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
             // temporarily store the current constraint at a safe place before
             // starting to search for multiple unifiers
-            SymbolicConstraint mainConstraint = fConstraint;
+            SymbolicConstraint mainConstraint = data.fConstraint;
             isStarNested = true;
 
             java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
@@ -366,7 +379,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             // start searching for all possible unifiers
             do {
                 // clear the constraint before each attempt of unification
-                fConstraint = new SymbolicConstraint(termContext);
+                data.fConstraint = new SymbolicConstraint(termContext);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
@@ -385,15 +398,15 @@ public class SymbolicUnifier extends AbstractUnifier {
                 cm.putAll(cellMap);
 
                 if (otherFrame != null) {
-                    fConstraint.add(new CellCollection(cm, context), otherFrame);
+                    data.fConstraint.add(new CellCollection(cm, context), otherFrame);
                 } else {
                     if (!cm.isEmpty()) fail(cellCollection, otherCellCollection);
                 }
-                constraints.add(fConstraint);
+                constraints.add(data.fConstraint);
             } while (generator.generate());
 
             // restore the current constraint after searching
-            fConstraint = mainConstraint;
+            data.fConstraint = mainConstraint;
             isStarNested = false;
 
             if (constraints.isEmpty()) {
@@ -401,9 +414,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             if (constraints.size() == 1) {
-                fConstraint.addAll(constraints.iterator().next());
+                data.fConstraint.addAll(constraints.iterator().next());
             } else {
-                multiConstraints.add(constraints);
+                data.multiConstraints.add(constraints);
             }
         }
     }
@@ -510,22 +523,22 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (frame != null) {
             if (otherFrame != null) {
                 if (cellMap.isEmpty() && otherCellMap.isEmpty()) {
-                    fConstraint.add(frame, otherFrame);
+                    data.fConstraint.add(frame, otherFrame);
                 } else if (cellMap.isEmpty()) {
-                    fConstraint.add(frame, new CellCollection(otherCellMap, otherFrame, context));
+                    data.fConstraint.add(frame, new CellCollection(otherCellMap, otherFrame, context));
                 } else if (otherCellMap.isEmpty()) {
-                    fConstraint.add(new CellCollection(cellMap, frame, context), otherFrame);
+                    data.fConstraint.add(new CellCollection(cellMap, frame, context), otherFrame);
                 } else {
                     Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.toString());
-                    fConstraint.add(frame, new CellCollection(otherCellMap, variable, context));
-                    fConstraint.add(new CellCollection(cellMap, variable, context), otherFrame);
+                    data.fConstraint.add(frame, new CellCollection(otherCellMap, variable, context));
+                    data.fConstraint.add(new CellCollection(cellMap, variable, context), otherFrame);
                 }
             } else {
                 if (!cellMap.isEmpty()) {
                     return false;
                 }
 
-                fConstraint.add(frame, new CellCollection(otherCellMap, context));
+                data.fConstraint.add(frame, new CellCollection(otherCellMap, context));
             }
         } else {
             if (otherFrame != null) {
@@ -533,7 +546,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     return false;
                 }
 
-                fConstraint.add(new CellCollection(cellMap, context), otherFrame);
+                data.fConstraint.add(new CellCollection(cellMap, context), otherFrame);
             } else {
                 if (!cellMap.isEmpty() || !otherCellMap.isEmpty()) {
                     return false;
@@ -722,19 +735,19 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (!kCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
             }
-            fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
+            data.fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
         } else if (otherKCollection.size() < kCollection.size()) {
             if (!otherKCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
             }
-            fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
+            data.fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
         } else {
             if (kCollection.hasFrame() && otherKCollection.hasFrame()) {
-                fConstraint.add(kCollection.frame(), otherKCollection.frame());
+                data.fConstraint.add(kCollection.frame(), otherKCollection.frame());
             } else if (kCollection.hasFrame()) {
-                fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
+                data.fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
             } else if (otherKCollection.hasFrame()) {
-                fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
+                data.fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
             }
         }
     }

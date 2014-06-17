@@ -517,8 +517,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         public Data(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint) {
             this.term = term;
-            this.lookups = lookups.data();
-            this.constraint = constraint.data();
+            this.lookups = lookups.data;
+            this.constraint = constraint.data;
         }
 
     }
