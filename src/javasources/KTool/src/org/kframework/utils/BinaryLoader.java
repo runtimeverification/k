@@ -19,15 +19,14 @@ public class BinaryLoader {
                     "Could not write to " + fileName));
         }
     }
-    
+
     public static <T> T load(Class<T> cls, String fileName) {
         return cls.cast(load(fileName));
     }
 
     public static Object load(String fileName) {
-        try (ObjectInputStream deserializer
-                 = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fileName)))) {
-            return deserializer.readObject();
+        try {
+            return loadWithThrow(fileName);
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
