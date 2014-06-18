@@ -35,10 +35,16 @@ public class BinaryLoader {
                     KException.KExceptionGroup.CRITICAL, "Kompiled definition is out of date with "
                     + "the latest version of the K tool. Please re-run kompile and try again."));
         } catch (IOException e) {
-
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
                     "Could not read from " + fileName));
         }
         return null;
-    }    
+    }
+
+    public static Object loadWithThrow(String fileName) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream deserializer
+                     = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fileName)))) {
+            return deserializer.readObject();
+        }
+    }
 }
