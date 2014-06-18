@@ -95,11 +95,13 @@ public class Poset implements Serializable {
      * 
      */
     public String getLUB(Set<String> subset) {
-        if (subset == null || subset.size() == 0)
+        if (subset == null || subset.size() == 0) {
             return null;
-        if (subset.size() == 1)
+        }
+        if (subset.size() == 1) {
             return subset.iterator().next();
-        List<String> candidates = new ArrayList<String>();
+        }
+        List<String> upperBounds = new ArrayList<String>();
         for (String elem : elements) {
             boolean isGTESubset = true;
             for (String subsetElem : subset) {
@@ -109,18 +111,36 @@ public class Poset implements Serializable {
                 }
             }
             if (isGTESubset) {
-                candidates.add(elem);
+                upperBounds.add(elem);
             }
         }
-        if (candidates.size() == 0)
+        if (upperBounds.size() == 0) {
             return null;
-        String lub = candidates.get(0);
-        for (int i = 1; i < candidates.size(); ++i) {
-            if (isInRelation(lub, candidates.get(i))) {
-                lub = candidates.get(i);
+        }
+
+        String candidate = null;
+        for (String upperBound : upperBounds) {
+            if (candidate == null) {
+                candidate = upperBound;
+            } else {
+                if (isInRelation(candidate, upperBound)) {
+                    candidate = upperBound;
+                } else if (!isInRelation(upperBound, candidate)) {
+                    /* no relation between upperBound and candidate; none of them is the LUB */
+                    candidate = null;
+                }
             }
         }
-        return lub;
+        /* if there is a LUB, it must be candidate */
+        if (candidate != null) {
+            for (String upperBound : upperBounds) {
+                if (upperBound != candidate && !isInRelation(upperBound, candidate)) {
+                    candidate = null;
+                    break;
+                }
+            }
+        }
+        return candidate;
     }
 
     /**
