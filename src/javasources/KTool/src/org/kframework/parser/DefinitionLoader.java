@@ -275,11 +275,10 @@ public class DefinitionLoader {
                 @SuppressWarnings("unchecked")
                 Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.loadWithThrow(cacheFile);
                 cachedDef = cachedDefTemp;
-            } catch (Exception e) {
+            } catch (IOException | ClassNotFoundException e) {
                 // it means the cache is not valid, or it doesn't exist
                 cachedDef = new HashMap<>();
             }
-
 
             CacheLookupFilter clf = new CacheLookupFilter(context, cachedDef);
             int cachedSentences = 0;
