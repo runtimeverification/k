@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -47,28 +48,84 @@ import com.google.common.collect.Multimap;
  */
 public class SymbolicUnifier extends AbstractUnifier {
 
+    public static class Data {
+        /**
+         * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
+         */
+        public Collection<Collection<SymbolicConstraint.Data>> multiConstraints;
+        
+        //TODO: the fields should be final
+        
+        public Data(Collection<Collection<SymbolicConstraint.Data>> multiConstraints) {
+            this.multiConstraints = multiConstraints;
+        }
+        
+        public Data() {
+            this(new ArrayList<java.util.Collection<SymbolicConstraint.Data>>());
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((multiConstraints == null) ? 0 : multiConstraints.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Data other = (Data) obj;
+            if (multiConstraints == null) {
+                if (other.multiConstraints != null)
+                    return false;
+            } else if (!multiConstraints.equals(other.multiConstraints))
+                return false;
+            return true;
+        }
+    }
+
+    /**
+     * TODO(YilongL)
+     */
+    private boolean isStarNested;
+    
+    public final Data data;
+
+    private final TermContext termContext;
+
     /**
      * Represents the existing {@code SymbolicConstraint} before invoking this
      * unifier and then becomes the overall {@code SymbolicConstraint} after the
      * unification is done.
      */
     private SymbolicConstraint fConstraint;
-    
-    /**
-     * TODO(YilongL)
-     */
-    private boolean isStarNested;
-    
-    /**
-     * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
-     */
-    public final java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
-    private final TermContext termContext;
 
     public SymbolicUnifier(SymbolicConstraint constraint, TermContext context) {
+        this(constraint, new Data(), context);
+    }
+
+    public SymbolicUnifier(SymbolicConstraint constraint, Data data, TermContext context) {
         this.fConstraint = constraint;
         this.termContext = context;
-        multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
+        this.data = data;
+    }
+    
+    public Collection<Collection<SymbolicConstraint>> multiConstraints() {
+        ArrayList<Collection<SymbolicConstraint>> multiConstraints = new ArrayList<>();
+        for(Collection<SymbolicConstraint.Data> mcd: data.multiConstraints) {
+            ArrayList<SymbolicConstraint> mc = new ArrayList<>();
+            for(SymbolicConstraint.Data scd: mcd)
+                mc.add(new SymbolicConstraint(scd, termContext));
+            multiConstraints.add(mc);
+        }            
+        return multiConstraints;
     }
 
     /**
@@ -81,7 +138,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     public boolean unify(SymbolicConstraint.Equality equality) {
         try {
             isStarNested = false;
-            multiConstraints.clear();
+            data.multiConstraints.clear();
             unify(equality.leftHandSide(), equality.rightHandSide());
             return true;
         } catch (UnificationFailure e) {
@@ -403,7 +460,10 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (constraints.size() == 1) {
                 fConstraint.addAll(constraints.iterator().next());
             } else {
-                multiConstraints.add(constraints);
+                List<SymbolicConstraint.Data> constraintsData = new ArrayList<>(); 
+                for(SymbolicConstraint c : constraints)
+                    constraintsData.add(c.data);
+                data.multiConstraints.add(constraintsData);
             }
         }
     }
