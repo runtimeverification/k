@@ -271,12 +271,14 @@ public class DefinitionLoader {
             JavaClassesFactory.startConstruction(context);
             Map<String, CachedSentence> cachedDef;
             // load definition if possible
-            if (new File(cacheFile).exists()) {
+            try {
                 @SuppressWarnings("unchecked")
-                Map<String, CachedSentence> cachedDefTemp = BinaryLoader.load(Map.class, cacheFile);
+                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.loadWithThrow(cacheFile);
                 cachedDef = cachedDefTemp;
-            } else
+            } catch (IOException | ClassNotFoundException e) {
+                // it means the cache is not valid, or it doesn't exist
                 cachedDef = new HashMap<>();
+            }
 
             CacheLookupFilter clf = new CacheLookupFilter(context, cachedDef);
             int cachedSentences = 0;
