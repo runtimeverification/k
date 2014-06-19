@@ -97,7 +97,7 @@ module K-FUNCTIONAL-VISITOR
    */
   // TODO(AndreiS): fix this declaration; cannot declare a function
   // with variable number of arguments
-  syntax Bool ::= "$visitTrue" "(" KItem ")"   [function]
+  syntax Bool ::= "$visitTrue" "(" KItem ")"   [function, klabel('$visitTrue)]
   rule '$visitTrue(_:KList) => true
 
   /*

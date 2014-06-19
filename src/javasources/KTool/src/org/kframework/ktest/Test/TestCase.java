@@ -308,10 +308,17 @@ public class TestCase {
                     // set krun args
                     List<PgmArg> args = new LinkedList<>();
                     ProgramProfile profile = getPgmOptions(pgmFilePath);
-                    for (PgmArg arg : profile.getArgs())
+                    boolean hasDirectory = false;
+                    for (PgmArg arg : profile.getArgs()) {
+                        if (arg.arg.equals("--directory")) {
+                            hasDirectory = true;
+                        }
                         args.add(arg);
-                    args.add(new PgmArg("--directory", definitionFilePath));
-
+                    }
+                    if (!hasDirectory) {
+                        args.add(new PgmArg("--directory", definitionFilePath));
+                    }
+                    
                     ret.add(new KRunProgram(
                             pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,
                             getNewOutputFilePath(outputFileName), profile.isRegex()));

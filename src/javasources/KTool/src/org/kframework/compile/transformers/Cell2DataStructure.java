@@ -11,6 +11,8 @@ import org.kframework.kil.CellList;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Term;
@@ -38,6 +40,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     public static final String LIST_CELL_ATTRIBUTE_NAME = "list";
     public static final String MAP_CELL_ATTRIBUTE_NAME = "map";
     public static final String KEY_CELL_ATTRIBUTE_NAME = "key";
+    
+    public static final String MAP_CELL_CELL_LABEL_PREFIX = "value-cell-label-prefix-";
 
     public Cell2DataStructure(Context context) {
         super("Transform cells with key attribute to maps", context);
@@ -101,7 +105,11 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
-            elementsLeft.add(elementCell);
+            if (context.kompileOptions.backend.java()) {
+                elementsLeft.add(elementCell);                
+            } else {
+                elementsLeft.add(KApp.of(new KInjectedLabel(elementCell)));
+            }
         }
 
         int rightIndex;
@@ -113,7 +121,11 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
-            elementsRight.add(elementCell);
+            if (context.kompileOptions.backend.java()) {
+                elementsRight.add(elementCell);                
+            } else {
+                elementsRight.add(KApp.of(new KInjectedLabel(elementCell)));
+            }
         }
 
         Collection<Term> terms = new ArrayList<>();
@@ -146,8 +158,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
                 Term key = null;
                 Cell value = new Cell();
-                value.setLabel("value_cell_label_prefix_" + entryCell.getLabel());
-                value.setEndLabel("value_cell_label_prefix_" + entryCell.getLabel());
+                value.setLabel(MAP_CELL_CELL_LABEL_PREFIX + entryCell.getLabel());
+                value.setEndLabel(MAP_CELL_CELL_LABEL_PREFIX + entryCell.getLabel());
                 Bag valueContent = new Bag();
                 value.setContents(valueContent);
                 for (Term entryCellTerm : entryCellContent.getContents()) {
@@ -162,6 +174,11 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
                 assert key != null : "there should be exactly one key cell";
                 entries.put(key, value);
+                if (context.kompileOptions.backend.java()) {
+                    entries.put(key, value);  
+                } else {
+                    entries.put(key, KApp.of(new KInjectedLabel(value)));
+                }
             } else if (term instanceof Variable) {
                 terms.add(new Variable(((Variable) term).getName(), mapSort.name()));
             } else {

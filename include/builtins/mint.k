@@ -16,6 +16,10 @@ module MINT
   /* Machine integer of bit width and value. */
   syntax MInt ::= mi(Int, Int)    [function, hook(#MINT:constructor)]
 
+  // needed because maude doesn't generate predicates for functions, but in
+  // the maude backend mi isn't really a function
+  rule isMInt(mi(_, _)) => true [predicate]
+
   /* Function returning the bit width of this machine integer. */
   syntax Int ::= bitwidthMInt(MInt)   [function, hook(#MINT:bitwidth)]
 
@@ -259,7 +263,7 @@ module MINT
    */
   rule shlMInt(mi(N:Int, I:Int), M:Int) => mi(N, I <<Int M)
   rule ashrMInt(mi(N:Int, I:Int), M:Int) => mi(N, I >>Int M)
-  rule lshrMInt(mi(N:Int, I:Int), M:Int) => mi(N, (I &Int umaxMInt(N)) <<Int M)
+  rule lshrMInt(mi(N:Int, I:Int), M:Int) => mi(N, (I &Int umaxMInt(N)) >>Int M)
 
   /*
    * Comparison operations
@@ -319,7 +323,7 @@ module MINT
   rule
     extractMInt(mi(N:Int, I:Int), M1:Int, M2:Int)
   =>
-    mi(M2 -Int M1, (I >>Int M1) &Int umaxMInt(M2 -Int M1))
+    mi(M2 -Int M1, (I >>Int (N -Int M2)) &Int umaxMInt(M2 -Int M1))
   when (M1 <Int M2) andBool (M1 <=Int N) andBool (M2 <=Int N)
 
   /*

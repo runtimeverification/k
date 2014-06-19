@@ -4,6 +4,7 @@ package org.kframework.krun;
 import org.kframework.backend.kore.ToKAppTransformer;
 import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -151,7 +152,9 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-        if (cell.getLabel().matches(".*-fragment")) {
+        // TODO(AndreiS): fix the printing of the cells which are representing maps
+        if (cell.getLabel().matches(".*-fragment")
+                || cell.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
             return this.visitNode(cell.getContents());
         }
         return super.visit(cell, _);
