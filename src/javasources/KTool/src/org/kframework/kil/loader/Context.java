@@ -190,7 +190,6 @@ public class Context implements Serializable {
 //            labels.put(label, s = new HashSet<String>());
 //        }
 //        s.add(cons);
-        putLabel(p.getLabel(), cons);
         putLabel(p.getKLabel(), cons);
     }
     

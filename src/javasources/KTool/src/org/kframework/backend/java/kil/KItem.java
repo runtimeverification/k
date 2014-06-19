@@ -23,7 +23,11 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -189,8 +193,11 @@ public final class KItem extends Term {
              * correctly parsed.
              */
             sort = sorts.size() == 1 ? sorts.iterator().next() : context.getGLBSort(sorts);
-            assert sort != null && !sort.equals("null"):
-                    "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
+            if (sort == null) {
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+                        KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " + 
+                                this.toString() + "\nPossible least sorts are: " + sorts)); 
+            }
             /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
             isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
         } else {    
