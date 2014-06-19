@@ -43,7 +43,7 @@ module STRING-HOOKS
   syntax Int ::= "String2Int" "(" String ")"	 [function, klabel(String2Int), hook(#CONVERSION:string2int)]
   syntax String ::= "Int2String" "(" Int ")"	 [function, klabel(Int2String), hook(#CONVERSION:int2string)]
   syntax String ::= "Base2String" "(" Int "," Int ")" [function, klabel(Base2String), hook(#CONVERSION:base2string)]
-  syntax String ::= "String2Base" "(" String "," Int ")" [function, klabel(String2Base), hook(#CONVERSION:string2base)]
+  syntax Int ::= "String2Base" "(" String "," Int ")" [function, klabel(String2Base), hook(#CONVERSION:string2base)]
 
 
   syntax String ::= "KLabel2String" "(" KLabel ")"  [function, klabel(KLabel2String)]
