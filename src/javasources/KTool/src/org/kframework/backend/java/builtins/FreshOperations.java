@@ -30,7 +30,7 @@ public class FreshOperations {
             throw new UnsupportedOperationException();
         }
 
-        KItem freshFunction = new KItem(
+        KItem freshFunction = KItem.of(
                 KLabelConstant.of(name, context.definition()),
                 new KList(Lists.newArrayList((Term) IntToken.of(context.incrementCounter()))),
                 context);

@@ -41,7 +41,9 @@ public class KLabelConstant extends KLabel {
 
     private KLabelConstant(String label, Definition definition) {
         this.label = label;
-        productions = ImmutableList.copyOf(definition.context().productionsOf(label));
+        productions = definition != null ?
+                ImmutableList.<Production>copyOf(definition.context().productionsOf(label)) : 
+                ImmutableList.<Production>of();
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
