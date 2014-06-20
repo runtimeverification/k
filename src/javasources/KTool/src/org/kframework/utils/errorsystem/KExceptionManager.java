@@ -20,7 +20,7 @@ public class KExceptionManager {
     public void register(KException exception) {
         exceptions.add(exception);
         if (exception.type == ExceptionType.ERROR)
-            throw new KEMException();
+            throw new KEMException(exception);
     }
 
     public void print() {
@@ -37,7 +37,11 @@ public class KExceptionManager {
      * @author dwightguth
      */
     public static class KEMException extends RuntimeException {
-        private KEMException() {}
+        public final KException exception;
+        private KEMException(KException e) {
+            super();
+            this.exception = e;
+        }
     }
 
     public List<KException> getExceptions() {
