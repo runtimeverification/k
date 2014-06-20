@@ -39,16 +39,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
     }
 
     @Override    
-    public ASTNode visit(MapItem ast, Void _)  {
-        prepare(ast);
-        ASTNode result = super.visit(ast, _);
-        boolean needsParens = postpare();
-        if (needsParens)
-            return new Bracket((Term)result, context);
-        return result;
-    }
-
-    @Override    
     public ASTNode visit(Cell ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -114,10 +104,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         NONASSOC,
         ASSOC,
         NONE;
-
-        public boolean equals2(Associativity o) {
-            return this == o || this == NONE || o == NONE;
-        }
     }
 
     private enum Fixity {
@@ -136,8 +122,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                 }
             }
             return tc.getProduction().getArity() == 1;
-        } else if (t instanceof MapItem) {
-            return false;
         } else if (t instanceof CollectionItem) {
             return true;
         } else if (t instanceof Cell || t instanceof Freezer || t instanceof KInjectedLabel) {
@@ -223,7 +207,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             if (!(p.getItems().get(p.getItems().size() - 1) instanceof Terminal))
                 set.add(Fixity.BARE_RIGHT);
             return set;
-        } else if (t instanceof Collection || t instanceof MapItem || t instanceof Freezer) {
+        } else if (t instanceof Collection || t instanceof Freezer) {
             return EnumSet.allOf(Fixity.class);
         } else if (t instanceof CollectionItem || t instanceof Cell) {
             return EnumSet.noneOf(Fixity.class);
@@ -251,11 +235,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         } else if (outer instanceof Collection) {
             Collection c = (Collection)outer;
             childTerms = c.getContents();
-        } else if (outer instanceof MapItem) {
-            MapItem m = (MapItem)outer;
-            childTerms = new ArrayList<Term>();
-            childTerms.add(m.getKey());
-            childTerms.add(m.getValue());
         } else if (outer instanceof CollectionItem || outer instanceof Cell || outer instanceof KInjectedLabel || outer instanceof Freezer) {
             return EnumSet.allOf(Fixity.class);
         } else if (outer instanceof KApp) {
@@ -320,7 +299,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                 }
             }
             return set;
-        } else if (outer instanceof List || outer instanceof Set || outer instanceof Map || outer instanceof Bag) {
+        } else if (outer instanceof Bag) {
             return EnumSet.allOf(Fixity.class);
         } else if (outer instanceof Collection) {
             //KList or KSequence
@@ -336,11 +315,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             if (i != c.getContents().size())
                 set.remove(Fixity.BARE_RIGHT);
             return set;
-        } else if (outer instanceof MapItem) {
-            MapItem m = (MapItem) outer;
-            if (contains(m.getKey(), inner, context))
-                return EnumSet.of(Fixity.BARE_LEFT);
-            return EnumSet.of(Fixity.BARE_RIGHT);
         } else if (outer instanceof CollectionItem) {
             return EnumSet.noneOf(Fixity.class);
         } else if (outer instanceof Cell) {
@@ -375,7 +349,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             KInjectedLabel lbl = (KInjectedLabel)outer;
             String sort = lbl.getTerm().getSort();
             if (MetaK.isKSort(sort)) {
-                sort = lbl.getInjectedSort(sort);
+                sort = KInjectedLabel.getInjectedSort(sort);
                 if (!context.isSubsortedEq(sort, inner.getSort())) {
                     return true;
                 }
@@ -433,14 +407,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         rightCapture.pop();
         boolean needsParens = parens.pop();
         return needsParens;
-    }
-
-    private boolean getImplicitPriority(Term inner, Term outer) {
-    //    if (getFixity(inner).size() > 0 && getFixity(outer).size() == 0)
-    //        return true;
-    //    if (getFixity(inner).size() > 0 && !isUnary(inner) && getFixity(outer).size() > 0 && isUnary(outer))
-    //        return true;
-        return false;
     }
 
     private boolean needsParentheses(Term inner, Term outer, Term leftCapture, Term rightCapture)  {

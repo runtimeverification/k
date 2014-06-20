@@ -244,21 +244,6 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(ListItem listItem, Void _) {
-        throw new RuntimeException("don't know how to kast ListItem");
-    }
-
-    @Override
-    public Void visit(SetItem setItem, Void _) {
-        throw new RuntimeException("don't know how to kast SetItem");
-    }
-
-    @Override
-    public Void visit(MapItem mapItem, Void _) {
-        throw new RuntimeException("don't know how to kast MapItem");
-    }
-
-    @Override
     public Void visit(Hole hole, Void _) {
         throw new RuntimeException("don't know how to kast Hole");
     }
@@ -288,23 +273,8 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.List list, Void _) {
-        throw new RuntimeException("don't know how to kast List");
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Map map, Void _) {
-        throw new RuntimeException("don't know how to kast Map");
-    }
-
-    @Override
     public Void visit(Bag bag, Void _) {
         throw new RuntimeException("don't know how to kast Bag");
-    }
-    
-    @Override
-    public Void visit(org.kframework.kil.Set set, Void _) {
-        throw new RuntimeException("don't know how to kast Set");
     }
 
     @Override

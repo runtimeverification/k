@@ -47,14 +47,6 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(MapItem ast, Void _) throws ParseFailedException {
-        boolean tmp = atTop;
-        atTop = false;
-        ASTNode result = super.visit(ast, _);
-        return postpare((Term)result, tmp);
-    }
-
-    @Override
     public ASTNode visit(Cell ast, Void _) throws ParseFailedException {
         boolean tmp = atTop;
         atTop = false;
@@ -160,22 +152,6 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         return ast;
     }
 
-    private class GetRealLocation extends BasicVisitor {
-        public GetRealLocation(Term ast, Context context) {
-            super("Find term in parse forest", context);
-            this.ast = ast;
-        }
-        private Term ast;
-        public Term realTerm;
-
-        public Void visit(Term t, Void _) {
-            if (t.contains(ast)) {
-                realTerm = t;
-            }
-            return null;
-        }
-    }
-
     private class TraverseForest extends ParseForestTransformer {
         public TraverseForest(Term ast, org.kframework.kil.loader.Context context) {
             super("Determine if term needs parentheses", context);
@@ -184,7 +160,6 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         private Term ast;
         public boolean needsParens;
         private boolean hasTerm;
-        private boolean needsCast;
         private String realLocation;
 
         public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {

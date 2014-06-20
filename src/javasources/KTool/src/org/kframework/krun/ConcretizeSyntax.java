@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import org.kframework.backend.kore.ToKAppTransformer;
 import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.kil.*;
@@ -10,16 +11,17 @@ import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
 public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
+    private final ToKAppTransformer toKApp;
 
     public ConcretizeSyntax(Context context) {
         super("Abstract K to Syntax K", context);
+        toKApp = new ToKAppTransformer(context);
     }
 
     @Override
@@ -178,59 +180,21 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         return new Bag(contents);
     }
     
-    Comparator<Term> unparserLexicalComparator = new Comparator<Term>() {
-
-        @Override
-        public int compare(Term o1, Term o2) {
-            UnparserFilterNew unparser = new UnparserFilterNew(context);
-            unparser.visitNode(o1);
-            String s1 = unparser.getResult();
-            unparser = new UnparserFilterNew(context);
-            unparser.visitNode(o2);
-            String s2 = unparser.getResult();
-            return s1.compareTo(s2);
-        }
-        
-    };
-    
     @Override
     public ASTNode visit(MapBuiltin map, Void _) {
-        Map result = new Map();
-        for (java.util.Map.Entry<Term, Term> entry : map.elements().entrySet()) {
-            result.add(new MapItem((Term)this.visitNode(entry.getKey()), (Term)this.visitNode(entry.getValue())));
-        }
-        Collections.sort(result.getContents(), unparserLexicalComparator);
-        for (Term base : map.baseTerms()) {
-            result.add((Term)this.visitNode(base));
-        }
-        return result;
+        Term kapp = (Term) toKApp.visitNode(super.visit(map, _));
+        return this.visitNode(kapp);
     }
     
     @Override
     public ASTNode visit(ListBuiltin list, Void _) {
-        org.kframework.kil.List result = new org.kframework.kil.List();
-        for (Term element : list.elementsLeft()) {
-            result.add(new ListItem((Term)this.visitNode(element)));
-        }
-        for (Term base : list.baseTerms()) {
-            result.add((Term)this.visitNode(base));
-        }
-        for (Term element : list.elementsRight()) {
-            result.add((Term)this.visitNode(new ListItem(element)));
-        }
-        return result;
+        Term kapp = (Term) toKApp.visitNode(super.visit(list, _));
+        return this.visitNode(kapp);
     }
     
     @Override
     public ASTNode visit(SetBuiltin set, Void _) {
-        org.kframework.kil.Set result = new org.kframework.kil.Set();
-        for (Term element : set.elements()) {
-            result.add(new ListItem((Term)this.visitNode(element)));
-        }
-        Collections.sort(result.getContents(), unparserLexicalComparator);
-        for (Term base : set.baseTerms()) {
-            result.add((Term)this.visitNode(base));
-        }
-        return result;
+        Term kapp = (Term) toKApp.visitNode(super.visit(set, _));
+        return this.visitNode(kapp);
     }
 }

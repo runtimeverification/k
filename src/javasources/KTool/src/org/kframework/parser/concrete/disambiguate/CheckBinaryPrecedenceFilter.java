@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
@@ -40,25 +39,6 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
         parentks = null;
         parentmi = null;
         return visit((Term) rw, _);
-    }
-
-    @Override
-    public ASTNode visit(MapItem mi, Void _) throws ParseFailedException {
-        parent = null;
-        parentks = null;
-
-        Term t = mi.getKey();
-        parentmi = t instanceof Rewrite || t instanceof Ambiguity ? mi : null;
-        mi.setKey((Term) this.visitNode(t));
-
-        t = mi.getValue();
-        parentmi = t instanceof Rewrite || t instanceof Ambiguity ? mi : null;
-        mi.setValue((Term) this.visitNode(t));
-
-        parentks = null;
-        parent = null;
-        parentmi = null;
-        return visit((Term) mi, _);
     }
 
     @Override

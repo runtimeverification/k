@@ -12,14 +12,8 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.List;
-import org.kframework.kil.ListItem;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Set;
-import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
@@ -102,30 +96,6 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
         return node;
     }
 
-    @Override
-    public ASTNode visit(List node, Void _)  {
-
-        if (node.getContents().isEmpty()) {
-            return new KApp(KLabelConstant.of("'.MyList"), KList.EMPTY);
-        }
-
-        java.util.List<Term> contents = transformTerms(node.getContents());
-
-        return new KApp(KLabelConstant.of("'_List_"), new KList(contents));
-    }
-
-    @Override
-    public ASTNode visit(Set node, Void _)  {
-
-        if (node.getContents().isEmpty()) {
-            return new KApp(KLabelConstant.of("'.MySet"), KList.EMPTY);
-        }
-
-        java.util.List<Term> contents = transformTerms(node.getContents());
-
-        return new KApp(KLabelConstant.of("'_Set_"), new KList(contents));
-    }
-
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
@@ -138,20 +108,6 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
 
         ASTNode transform = super.visit(node, _);
         return transform;
-    }
-
-    @Override
-    public ASTNode visit(Map node, Void _)  {
-//        System.out.println("TR: " + node);
-
-        if (node.getContents().isEmpty()) {
-//            return new Empty("MyMap");
-            return new KApp(KLabelConstant.of("'.MyMap"), KList.EMPTY);
-        }
-
-        java.util.List<Term> contents = transformTerms(node.getContents());
-
-        return new KApp(KLabelConstant.of("'_Map_"), new KList(contents));
     }
 
     @Override
@@ -219,35 +175,6 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
         java.util.List<Term> contents = transformTerms(node.getContents());
 
         return new KApp(KLabelConstant.of(newLabel), new KList(contents));
-    }
-
-    @Override
-    public ASTNode visit(MapItem node, Void _)  {
-
-//        System.out.println(node);
-
-        Term key = (Term) this.visitNode(node.getKey());
-        Term value = (Term) this.visitNode(node.getValue());
-
-        java.util.List<Term> contents = new ArrayList<>();
-        contents.add(key);
-        contents.add(value);
-
-        return new KApp(KLabelConstant.of("'_|->_"), new KList(contents));
-    }
-
-    @Override
-    public ASTNode visit(ListItem node, Void _)  {
-        java.util.List<Term> contents = new ArrayList<>();
-        contents.add((Term) this.visitNode(node.getItem()));
-        return new KApp(KLabelConstant.of("'MyListItem"), new KList(contents));
-    }
-
-    @Override
-    public ASTNode visit(SetItem node, Void _)  {
-        java.util.List<Term> contents = new ArrayList<>();
-        contents.add((Term) this.visitNode(node.getItem()));
-        return new KApp(KLabelConstant.of("'MySetItem"), new KList(contents));
     }
 
     private boolean isCollection(String sort) {

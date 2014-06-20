@@ -47,17 +47,11 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(Ambiguity node, P p) throws E;
     public R visit(Bag node, P p) throws E;
     public R visit(KSequence node, P p) throws E;
-    public R visit(List node, P p) throws E;
     public R visit(KList node, P p) throws E;
-    public R visit(org.kframework.kil.Map node, P p) throws E;
-    public R visit(Set node, P p) throws E;
     // </Collections>
     public R visit(CollectionItem node, P p) throws E;
     // <CollectionItems>
     public R visit(BagItem node, P p) throws E;
-    public R visit(ListItem node, P p) throws E;
-    public R visit(MapItem node, P p) throws E;
-    public R visit(SetItem node, P p) throws E;
     // </CollectionItems>
     // <BuiltinDataStructure>
     public R visit(BuiltinLookup node, P p) throws E;

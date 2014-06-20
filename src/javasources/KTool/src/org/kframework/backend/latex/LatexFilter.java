@@ -389,14 +389,6 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(MapItem mi, Void _) {
-        this.visitNode(mi.getKey());
-        result.append("\\mapsto");
-        this.visitNode(mi.getItem());
-        return null;
-    }
-
-    @Override
     public Void visit(KSequence k, Void _) {
         if (k.getContents().isEmpty()) printEmpty(KSort.K.name());
         else printList(k.getContents(), "\\kra");
