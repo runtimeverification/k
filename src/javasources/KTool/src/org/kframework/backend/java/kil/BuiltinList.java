@@ -187,7 +187,7 @@ public class BuiltinList extends Collection {
             return iterator.next();
         }
         // TODO(AndreiS): use correct kind/sort
-        if (frame == null) return new Bottom(Kind.K);
+        if (frame == null) return Bottom.of(Kind.K);
         java.util.Collection<Term> left = elementsLeft;
         java.util.Collection<Term> right = elementsRight;
         if (onLeft) {

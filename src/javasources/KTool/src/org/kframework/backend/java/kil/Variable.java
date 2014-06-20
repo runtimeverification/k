@@ -18,7 +18,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Variable extends Term {
+public class Variable extends Term implements Immutable {
 
     protected static final String VARIABLE_PREFIX = "_";
     protected static int counter = 0;

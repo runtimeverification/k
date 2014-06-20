@@ -42,7 +42,7 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
         if (!((BuiltinMap) map).getEntries().isEmpty()) {
             return ((BuiltinMap) map).getEntries().keySet().iterator().next();
         } else if (((BuiltinMap) map).isEmpty()) {
-            return new Bottom(kind);
+            return Bottom.of(kind);
         } else {
             return this;
         }

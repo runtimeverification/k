@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Immutable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;

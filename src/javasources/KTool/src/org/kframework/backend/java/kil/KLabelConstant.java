@@ -22,7 +22,7 @@ import com.google.common.collect.Multimap;
  *
  * @author AndreiS
  */
-public class KLabelConstant extends KLabel {
+public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /* KLabelConstant cache */
     private static final HashMap<String, KLabelConstant> cache = new HashMap<String, KLabelConstant>();

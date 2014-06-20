@@ -20,7 +20,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Token extends Term {
+public abstract class Token extends Term implements Immutable {
 
     public static Token of(String sort, String value) {
         switch (sort) {
