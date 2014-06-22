@@ -453,6 +453,11 @@ public final class KItem extends Term {
         hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return kLabel.hasCell() || kList.hasCell();
+    }
 
     @Override
     public String toString() {

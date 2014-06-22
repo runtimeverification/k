@@ -75,6 +75,11 @@ public abstract class Token extends Term implements Immutable {
         hashCode = hashCode * Utils.HASH_PRIME + value().hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected final boolean computeHasCell() {
+        return false;
+    }
 
     @Override
     public boolean equals(Object object) {

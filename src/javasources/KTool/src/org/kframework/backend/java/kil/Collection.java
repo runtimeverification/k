@@ -87,6 +87,9 @@ public abstract class Collection extends Term {
     
     @Override
     public abstract int computeHash();
+    
+    @Override
+    protected abstract boolean computeHasCell();
 
     @Override
     public abstract boolean equals(Object object);

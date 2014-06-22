@@ -159,6 +159,11 @@ public class CellCollection extends Collection {
         hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return true;
+    }
 
     @Override
     public String toString() {

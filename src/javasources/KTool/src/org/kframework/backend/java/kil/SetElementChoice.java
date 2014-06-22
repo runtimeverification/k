@@ -80,6 +80,11 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     public int computeHash() {
         return set.hashCode();
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public boolean equals(Object object) {

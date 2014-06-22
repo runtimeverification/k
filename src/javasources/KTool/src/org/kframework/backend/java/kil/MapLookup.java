@@ -82,6 +82,11 @@ public class MapLookup extends Term implements DataStructureLookup {
         hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public boolean equals(Object object) {

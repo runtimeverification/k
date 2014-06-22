@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -106,6 +105,11 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
         return hashCode;
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

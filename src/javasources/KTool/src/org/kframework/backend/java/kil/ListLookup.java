@@ -79,6 +79,11 @@ public class ListLookup extends Term implements DataStructureLookup {
         hashCode = hashCode * Utils.HASH_PRIME + list.hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public boolean equals(Object object) {

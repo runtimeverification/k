@@ -109,6 +109,11 @@ public class Cell<T extends Term> extends Term {
         hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return true;
+    }
 
     @Override
     public String toString() {

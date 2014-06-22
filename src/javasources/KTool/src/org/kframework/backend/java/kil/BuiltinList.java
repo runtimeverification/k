@@ -142,6 +142,24 @@ public class BuiltinList extends Collection {
         hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Term term : elementsLeft) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        for (Term term : elementsRight) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void accept(Unifier unifier, Term pattern) {

@@ -161,6 +161,11 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     public int computeHash() {
         return label.hashCode();
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return false;
+    }
 
     @Override
     public String toString() {

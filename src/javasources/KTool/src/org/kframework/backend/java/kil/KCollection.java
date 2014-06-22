@@ -86,6 +86,16 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         hashCode = hashCode * Utils.HASH_PRIME + getContents().hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected final boolean computeHasCell() {
+        for (Term term : getContents()) {
+            if (term.hasCell()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public String toString() {

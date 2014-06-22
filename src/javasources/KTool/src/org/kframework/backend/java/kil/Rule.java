@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
@@ -23,10 +24,13 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Constants;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 
 
 /**
@@ -50,7 +54,9 @@ public class Rule extends JavaSymbolicObject {
     private boolean compiledForFastRewriting;
     private final Map<String, Term> lhsOfReadCells;
     private final Map<String, Term> rhsOfWriteCells;
+    private final Set<Variable> variablesToCopy;
     private final Set<String> cellsToCopy;
+    private final Boolean hasGroundCellOnRHS;
     private final List<String> instructions;
     
     /**
@@ -91,13 +97,35 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             this.lhsOfReadCells = ImmutableMap.copyOf(lhsOfReadCells);
             this.rhsOfWriteCells = ImmutableMap.copyOf(rhsOfWriteCells);
+            
+            Multiset<Variable> multiset = HashMultiset.create();
+            for (Term term : rhsOfWriteCells.values()) {
+                multiset.addAll(term.variableSet());
+            }
+            for (Term term : lhsOfReadCells.values()) {
+                multiset.removeAll(term.variableSet());
+            }
+            variablesToCopy = ImmutableSet.copyOf(multiset);
+            
             this.cellsToCopy = ImmutableSet.copyOf(cellsToCopy);
             this.instructions = ImmutableList.copyOf(instructions);
+            this.hasGroundCellOnRHS = null;
         } else {
             this.lhsOfReadCells = null;
             this.rhsOfWriteCells = null;
+            this.variablesToCopy = null;
             this.cellsToCopy = null;
             this.instructions = null;
+            final MutableBoolean hasGroundCellOnRHS = new MutableBoolean(false);
+            rightHandSide.accept(new BottomUpVisitor() {
+                @Override
+                public void visit(Cell cell) {
+                    if (cell.isGround()) {
+                        hasGroundCellOnRHS.setValue(true);
+                    }
+                }
+            });
+            this.hasGroundCellOnRHS = hasGroundCellOnRHS.getValue();
         }
                 
         super.setAttributes(attributes);
@@ -171,20 +199,6 @@ public class Rule extends JavaSymbolicObject {
     }
 
     private boolean tempContainsKCell = false;
-    
-    /*
-    public Rule(Term leftHandSide, Term rightHandSide, Term requires) {
-        this(leftHandSide, rightHandSide, requires, null);
-    }
-
-    public Rule(Term leftHandSide, Term rightHandSide, Attributes attributes) {
-        this(leftHandSide, rightHandSide, null, attributes);
-    }
-
-    public Rule(Term leftHandSide, Term rightHandSide) {
-        this(leftHandSide, rightHandSide, null, null);
-    }
-    */
     
     public String label() {
         return label;
@@ -285,8 +299,16 @@ public class Rule extends JavaSymbolicObject {
         return rhsOfWriteCells;
     }
     
+    public Set<Variable> variablesToCopy() {
+        return variablesToCopy;
+    }
+    
     public Set<String> cellsToCopy() {
         return cellsToCopy;
+    }
+    
+    public boolean hasGroundCellOnRHS() {
+        return hasGroundCellOnRHS;
     }
     
     public List<String> instructions() {

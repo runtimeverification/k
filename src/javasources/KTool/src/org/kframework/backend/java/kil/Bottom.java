@@ -61,6 +61,11 @@ public class Bottom extends Term implements MaximalSharing {
     public int computeHash() {
         return kind.hashCode();
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return false;
+    }
 
     @Override
     public ASTNode accept(Transformer transformer) {

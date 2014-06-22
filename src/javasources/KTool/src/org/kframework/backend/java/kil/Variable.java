@@ -130,6 +130,11 @@ public class Variable extends Term implements Immutable {
     }
 
     @Override
+    protected boolean computeHasCell() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return name + ":" + sort;
     }

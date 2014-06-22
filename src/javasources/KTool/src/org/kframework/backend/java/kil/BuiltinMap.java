@@ -100,6 +100,18 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
         hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
         return hashCode;
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Map.Entry<Term, Term> entry : entries.entrySet()) {
+            hasCell = hasCell || entry.getKey().hasCell() || entry.getValue().hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public String toString() {

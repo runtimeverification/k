@@ -62,6 +62,11 @@ public class KItemProjection extends Term {
     public int computeHash() {
         return term.hashCode();
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return term.hasCell();
+    }
 
     @Override
     public boolean equals(Object object) {

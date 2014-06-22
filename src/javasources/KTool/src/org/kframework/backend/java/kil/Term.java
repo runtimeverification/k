@@ -3,7 +3,6 @@
 package org.kframework.backend.java.kil;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.kframework.backend.java.indexing.BottomIndex;
 import org.kframework.backend.java.indexing.ConfigurationTermIndex;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
@@ -21,9 +20,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +34,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
 
     protected final Kind kind;
     // protected final boolean normalized;
+    
+    private Boolean hasCell = null;
 
     protected Term(Kind kind) {
         this.kind = kind;
@@ -136,6 +135,22 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Returns a {@code String} representation of the sort of this object.
      */
     public abstract String sort();
+    
+    /**
+     * @return {@code true} if this term has {@code Cell} inside; otherwise,
+     *         {@code false}
+     */
+    public boolean hasCell() {
+        if (hasCell == null) {
+            hasCell = computeHasCell();
+        }
+        return hasCell;
+    }
+    
+    /**
+     * Checks if this term has {@code Cell} inside.
+     */
+    protected abstract boolean computeHasCell();
 
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating

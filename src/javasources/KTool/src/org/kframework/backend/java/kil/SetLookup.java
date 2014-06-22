@@ -2,7 +2,6 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.DataStructureLookup.Type;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -76,6 +75,11 @@ public class SetLookup extends Term implements DataStructureLookup {
         hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + base.hashCode();
         return hashCode;
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

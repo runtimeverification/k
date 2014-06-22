@@ -96,6 +96,11 @@ public class SetUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;

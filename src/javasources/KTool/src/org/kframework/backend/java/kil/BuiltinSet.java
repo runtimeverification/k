@@ -159,6 +159,18 @@ public class BuiltinSet extends Collection {
     }
 
     @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Term term : elements) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }

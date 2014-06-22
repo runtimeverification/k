@@ -71,6 +71,11 @@ public class KLabelInjection extends KLabel {
     public int computeHash() {
         return term.hashCode();
     }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return term.hasCell();
+    }
 
     @Override
     public String toString() {

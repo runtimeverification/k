@@ -83,6 +83,11 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
     }
 
     @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
