@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.HashMap;
@@ -68,6 +69,14 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
     @Override
     public String value() {
         return value;
+    }
+    
+    @Override
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        return hashCode;
     }
 
     @Override

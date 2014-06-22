@@ -98,17 +98,17 @@ public class Variable extends Term implements Immutable {
     }
 
     @Override
-    public boolean isExactSort() {
+    public final boolean isExactSort() {
         return false;
     }
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return true;
     }
 
     @Override
-    public boolean equals(Object object) {
+    public final boolean equals(Object object) {
         if (this == object) {
             return true;
         }
@@ -122,7 +122,7 @@ public class Variable extends Term implements Immutable {
     }
 
     @Override
-    public int computeHash() {
+    protected final int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
@@ -130,7 +130,7 @@ public class Variable extends Term implements Immutable {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected final boolean computeHasCell() {
         return false;
     }
 

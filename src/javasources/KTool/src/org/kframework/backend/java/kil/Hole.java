@@ -43,7 +43,7 @@ public final class Hole extends Term implements MaximalSharing {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return System.identityHashCode(this);
     }
     

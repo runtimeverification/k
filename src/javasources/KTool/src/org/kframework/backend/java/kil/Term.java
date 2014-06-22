@@ -140,7 +140,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * @return {@code true} if this term has {@code Cell} inside; otherwise,
      *         {@code false}
      */
-    public boolean hasCell() {
+    public final boolean hasCell() {
         if (hasCell == null) {
             hasCell = computeHasCell();
         }
@@ -232,7 +232,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     @Override
-    public int compareTo(Term o) {
+    public final int compareTo(Term o) {
         return toString().compareTo(o.toString());
     }
     
@@ -253,5 +253,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * (Re-)computes the hashCode of this {@code Term}.
      * @return the hash code
      */
-    public abstract int computeHash();
+    protected abstract int computeHash();
+    
+    @Override
+    public abstract boolean equals(Object object);
 }

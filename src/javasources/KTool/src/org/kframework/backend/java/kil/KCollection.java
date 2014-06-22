@@ -35,7 +35,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      */
     public abstract KCollection fragment(int fromIndex);
 
-    public Term get(int index) {
+    public final Term get(int index) {
         return getContents().get(index);
     }
 
@@ -45,7 +45,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public abstract List<Term> getContents();
 
     @Override
-    public Iterator<Term> iterator() {
+    public final Iterator<Term> iterator() {
         return getContents().iterator();
     }
 
@@ -56,7 +56,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      * @return the size of the contents
      */
     @Override
-    public int size() {
+    public final int size() {
         return getContents().size();
     }
     
@@ -80,7 +80,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    public int computeHash() {
+    protected final int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
         hashCode = hashCode * Utils.HASH_PRIME + getContents().hashCode();

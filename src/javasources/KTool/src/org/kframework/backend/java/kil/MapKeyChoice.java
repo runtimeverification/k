@@ -78,7 +78,7 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return map.hashCode();
     }
 

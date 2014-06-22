@@ -103,7 +103,7 @@ public class Cell<T extends Term> extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();

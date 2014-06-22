@@ -94,7 +94,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
         hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();

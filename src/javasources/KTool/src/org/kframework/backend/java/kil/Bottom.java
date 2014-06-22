@@ -58,7 +58,7 @@ public class Bottom extends Term implements MaximalSharing {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return kind.hashCode();
     }
     

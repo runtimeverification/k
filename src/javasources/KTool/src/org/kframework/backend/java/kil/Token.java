@@ -54,12 +54,12 @@ public abstract class Token extends Term implements Immutable {
     public abstract String value();
 
     @Override
-    public boolean isGround() {
+    public final boolean isGround() {
         return true;
     }
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return false;
     }
 
@@ -67,32 +67,10 @@ public abstract class Token extends Term implements Immutable {
     public Set<Variable> variableSet() {
         return Collections.emptySet();
     }
-
-    @Override
-    public int computeHash() {
-        int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + sort().hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + value().hashCode();
-        return hashCode;
-    }
-    
+   
     @Override
     protected final boolean computeHasCell() {
         return false;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof Token)) {
-            return false;
-        }
-
-        Token token = (Token) object;
-        return sort().equals(token.sort()) && value().equals(token.value());
     }
 
     @Override

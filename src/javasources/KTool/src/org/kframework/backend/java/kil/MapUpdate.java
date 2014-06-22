@@ -99,7 +99,7 @@ public class MapUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();

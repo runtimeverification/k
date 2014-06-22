@@ -127,7 +127,7 @@ public abstract class BitVector<T extends Number> extends Token {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + bitwidth;

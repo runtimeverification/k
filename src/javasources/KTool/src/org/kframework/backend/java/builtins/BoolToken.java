@@ -68,7 +68,7 @@ public final class BoolToken extends Token implements MaximalSharing {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return Boolean.valueOf(value).hashCode();
     }
 

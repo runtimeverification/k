@@ -446,7 +446,7 @@ public final class KItem extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + kLabel.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + kList.hashCode();

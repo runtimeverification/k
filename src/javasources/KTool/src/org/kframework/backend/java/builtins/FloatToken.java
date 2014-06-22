@@ -90,7 +90,7 @@ public class FloatToken extends Token implements MaximalSharing {
     }
     
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return value.hashCode() * 31 + exponent;
     }
 

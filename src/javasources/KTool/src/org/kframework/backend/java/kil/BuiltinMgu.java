@@ -90,7 +90,7 @@ public class BuiltinMgu extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return Utils.HASH_PRIME + constraint.hashCode();
     }
     

@@ -77,7 +77,7 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return set.hashCode();
     }
     
