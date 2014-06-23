@@ -455,7 +455,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                     indenter.write(rawLabel);
                 } else{
                     int i = 0;
-                    String [] rawLabelList = rawLabel.split("_");
+                    String [] rawLabelList = rawLabel.split("_", -1);
                     int lastIdx = termList.size() - 1;
                     if (termList.get(lastIdx) instanceof ListTerminator) {
                         termList.remove(lastIdx);
