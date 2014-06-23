@@ -631,16 +631,19 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
             Solver solver = context.MkSolver();
             for (Equality equality : data.equalities) {
-                solver.Assert(context.MkEq(
-                        ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                        ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+                try {
+                    solver.Assert(context.MkEq(
+                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
+                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+                } catch (UnsupportedOperationException e) {
+                    /* it is sound to skip the equalities that cannot be translated */
+                    // TODO(AndreiS): fix this translation and the exceptions
+                    e.printStackTrace();
+                }
+                result = solver.Check() == Status.UNSATISFIABLE;
+                context.Dispose();
             }
-            result = solver.Check() == Status.UNSATISFIABLE;
-            context.Dispose();
         } catch (Z3Exception e) {
-            e.printStackTrace();
-        } catch (UnsupportedOperationException e) {
-            // TODO(AndreiS): fix this translation and the exceptions
             e.printStackTrace();
         }
         return result;
@@ -820,7 +823,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     // TODO(AndreiS): need support for parametric type MInt{32}, in order to
                     // translate to SMT
                     } else {
-                        throw new RuntimeException();
+                        throw new UnsupportedOperationException(
+                                "unexpected variable sort " + variable.sort());
                     }
                     variableNames[i] = context.MkSymbol(variable.name());
                     ++i;
@@ -847,7 +851,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
                 result = solver.Check() == Status.UNSATISFIABLE;
                 context.Dispose();
-            } catch (Z3Exception e) {
+            } catch (UnsupportedOperationException | Z3Exception e) {
                 e.printStackTrace();
             }
         }

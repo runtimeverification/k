@@ -252,19 +252,28 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     }
 
     @Override
-    public List<BitVector> toDigits(int digitBase) {
-        assert digitBase > 0;
+    public BitVector extract(int beginIndex, int endIndex) {
+        int resultBitwidth = endIndex - beginIndex;
+        BigInteger mask = BigInteger.ONE.shiftLeft(resultBitwidth).subtract(BigInteger.ONE);
+        return BitVector.of(
+                value.shiftRight(bitwidth - endIndex).and(mask),
+                resultBitwidth);
+    }
+
+    @Override
+    public List<BitVector> toDigits(int digitBitWidth, int count) {
+        assert digitBitWidth > 0;
+        assert digitBitWidth * count <= bitwidth;
 
         List<BitVector> digits = new ArrayList<>();
         BigInteger unsignedValue = unsignedValue();
-        for (int i = 0; i * digitBase < bitwidth; ++i) {
-            digits.add(BitVector.of(
-                    unsignedValue.remainder(BigInteger.ONE.shiftLeft(digitBase)),
-                    digitBase));
-            unsignedValue = unsignedValue.shiftRight(digitBase);
+
+        BigInteger mask = BigInteger.ONE.shiftLeft(digitBitWidth).subtract(BigInteger.ONE);
+        for (int i = 0, j = bitwidth - digitBitWidth; i < count;  ++i, j -= digitBitWidth) {
+            digits.add(BitVector.of(unsignedValue.shiftRight(j).and(mask), digitBitWidth));
         }
 
-        return Lists.reverse(digits);
+        return digits;
     }
 
     private BuiltinList getBuiltinList(BigInteger result, boolean overflow) {
