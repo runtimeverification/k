@@ -4,7 +4,9 @@ package org.kframework.kil;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 
 /**
@@ -105,6 +107,21 @@ public class ListBuiltin extends CollectionBuiltin {
             default:
                 return super.getChildren(type);
         }
+    }
+    
+    @Override
+    public Term toKApp(Context context) {
+        List<Term> items = new ArrayList<>();
+        for (Term element : elementsLeft()) {
+            items.add(KApp.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, element));
+        }
+        for (Term base : baseTerms()) {
+            items.add(base);
+        }
+        for (Term element : elementsRight()) {
+            items.add(KApp.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, (Term) element));
+        }
+        return toKApp(items);
     }
 
 }

@@ -444,22 +444,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     }
 
     @Override
-    public R visit(org.kframework.kil.List node, P p) throws E {
-        return visit((Collection) node, p);
-    }
-
-    @Override
     public R visit(KList node, P p) throws E {
-        return visit((Collection) node, p);
-    }
-
-    @Override
-    public R visit(org.kframework.kil.Map node, P p) throws E {
-        return visit((Collection) node, p);
-    }
-
-    @Override
-    public R visit(Set node, P p) throws E {
         return visit((Collection) node, p);
     }
 
@@ -471,22 +456,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
 
     @Override
     public R visit(BagItem node, P p) throws E {
-        return visit((CollectionItem) node, p);
-    }
-
-    @Override
-    public R visit(ListItem node, P p) throws E {
-        return visit((CollectionItem) node, p);
-    }
-
-    @Override
-    public R visit(MapItem node, P p) throws E {
-        node = genericVisitChild(node, p, mutableChild(MapItem.class), CollectionItem.Children.KEY);
-        return visit((CollectionItem) node, p);
-    }
-
-    @Override
-    public R visit(SetItem node, P p) throws E {
         return visit((CollectionItem) node, p);
     }
 

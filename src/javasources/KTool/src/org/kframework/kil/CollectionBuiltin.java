@@ -94,4 +94,9 @@ public class CollectionBuiltin extends DataStructureBuiltin {
         }
     }
 
+    @Override
+    public Term toKApp(Context context) {
+        throw new UnsupportedOperationException("cannot convert abstract collection to KApp");
+    }
+
 }

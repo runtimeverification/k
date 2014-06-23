@@ -5,10 +5,15 @@ import com.google.common.collect.Multimap;
 import org.kframework.backend.java.kil.*;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.ListBuiltin;
+import org.kframework.kil.MapBuiltin;
+import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -126,54 +131,56 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(BuiltinSet set) {
-        // TODO(AndreiS): use BuiltinMap
-        List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elements = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
         for (Term entry : set.elements()) {
-            items.add(new org.kframework.kil.SetItem(
-                    (org.kframework.kil.Term) entry.accept(this)));
+            elements.add((org.kframework.kil.Term)entry.accept(this));
         }
-        Collections.sort(items);
+        Collections.sort(elements);
         if (set.hasFrame()) {
-            items.add((org.kframework.kil.Term) set.frame().accept(this));
+            baseTerms.add((org.kframework.kil.Term) set.frame().accept(this));
         }
-        return new org.kframework.kil.Set(items);
+        return new SetBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT), 
+                baseTerms, elements);
     }
+    
 
-     @Override
+    @Override
     public ASTNode transform(BuiltinList builtinList) {
-        // TODO(AndreiS): use BuiltinList
-        List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elementsLeft = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elementsRight = new ArrayList<org.kframework.kil.Term>();
         for (Term entry : builtinList.elementsLeft()) {
-            items.add(new org.kframework.kil.ListItem(
-                    (org.kframework.kil.Term) entry.accept(this)));
+            elementsLeft.add((org.kframework.kil.Term)entry.accept(this));
         }
-         if (builtinList.hasFrame()) {
-             items.add((org.kframework.kil.Term) builtinList.frame().accept(this));
-         }
+        if (builtinList.hasFrame()) {
+            baseTerms.add((org.kframework.kil.Term) builtinList.frame().accept(this));
+        }
         for (Term entry : builtinList.elementsRight()) {
-            items.add(new org.kframework.kil.ListItem(
-                    (org.kframework.kil.Term) entry.accept(this)));
+            elementsRight.add((org.kframework.kil.Term)entry.accept(this));
         }
-        return new org.kframework.kil.List(items);
+        return new ListBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT), 
+                baseTerms, elementsLeft, elementsRight);
     }
 
     @Override
     public ASTNode transform(BuiltinMap map) {
-        // TODO(AndreiS): use BuiltinMap
         final Map<Term, Term> entries = map.getEntries();
         List<Term> keys = new ArrayList<Term>(entries.keySet());
         Collections.sort(keys);
-        List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
+        Map<org.kframework.kil.Term, org.kframework.kil.Term> elements = new HashMap<>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<>();
         for (Term key : keys) {
             Term value = entries.get(key);
-            items.add(new org.kframework.kil.MapItem(
+            elements.put(
                     (org.kframework.kil.Term) key.accept(this),
-                    (org.kframework.kil.Term) value.accept(this)));
+                    (org.kframework.kil.Term) value.accept(this));
         }
         if (map.hasFrame()) {
-            items.add((org.kframework.kil.Term) map.frame().accept(this));
+            baseTerms.add((org.kframework.kil.Term) map.frame().accept(this));
         }
-        return new org.kframework.kil.Map(items);
+        return new MapBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT),
+                baseTerms, elements);
     }
 
     @Override

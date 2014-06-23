@@ -9,7 +9,6 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.krun.K;
-import org.kframework.utils.StringUtil;
 
 import java.util.*;
 
@@ -142,11 +141,6 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(CollectionItem node, Void _)  {
-            return KApp.of(new KInjectedLabel((Term) trans.visitNode(node)));
-        }
-
-        @Override
-        public ASTNode visit(MapItem node, Void _)  {
             return KApp.of(new KInjectedLabel((Term) trans.visitNode(node)));
         }
 

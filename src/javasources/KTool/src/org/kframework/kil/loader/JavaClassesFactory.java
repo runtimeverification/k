@@ -21,16 +21,10 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.List;
-import org.kframework.kil.ListItem;
 import org.kframework.kil.ListTerminator;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.Set;
-import org.kframework.kil.SetItem;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
@@ -92,21 +86,11 @@ public class JavaClassesFactory {
                 return KList.EMPTY;
             } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.BAG)) {
                 return Bag.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.LIST)) {
-                return List.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.MAP)) {
-                return Map.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.SET)) {
-                return Set.EMPTY;
             } else {
                 // user defined empty list
                 return new ListTerminator(element, null);
             }
         }
-        if (KSorts.SET.equals(element.getNodeName()))
-            return new Set(element);
-        if (KSorts.SET_ITEM.equals(element.getNodeName()))
-            return new SetItem(element);
         if (Constants.CONFIG.equals(element.getNodeName()))
             return new Configuration(element);
         if (Constants.CELL.equals(element.getNodeName()))
@@ -119,20 +103,12 @@ public class JavaClassesFactory {
             return new BagItem(element);
         if (Constants.KSEQUENCE.equals(element.getNodeName()))
             return new KSequence(element);
-        if (KSorts.MAP.equals(element.getNodeName()))
-            return new Map(element);
-        if (KSorts.MAP_ITEM.equals(element.getNodeName()))
-            return new MapItem(element);
         if (Constants.CONTEXT.equals(element.getNodeName()))
             return new org.kframework.kil.Context(element);
         if (Constants.HOLE.equals(element.getNodeName()))
             return Hole.KITEM_HOLE;
         if (Constants.FREEZERHOLE.equals(element.getNodeName()))
             return new FreezerHole(element);
-        if (KSorts.LIST.equals(element.getNodeName()))
-            return new List(element);
-        if (KSorts.LIST_ITEM.equals(element.getNodeName()))
-            return new ListItem(element);
         if (Constants.DEFINITION.equals(element.getNodeName()))
             return new Definition(element);
         if (Constants.AMB.equals(element.getNodeName()))

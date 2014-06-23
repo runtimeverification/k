@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -302,5 +303,21 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         default:
             throw new AssertionError("unexpected child type " + type.name());
         }
+    }
+    
+    public abstract Term toKApp(Context context);
+    
+    public Term toKApp(List<Term> items) {
+        if(items.isEmpty()){
+            return KApp.of(sort().unitLabel());
+        }
+        
+        Term current = items.get(items.size() - 1);
+        
+        for(int i = items.size() - 2; i >= 0; --i){
+            current = KApp.of(sort().constructorLabel(), items.get(i), current);
+        }
+        
+        return current;
     }
 }

@@ -49,7 +49,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.ListItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
