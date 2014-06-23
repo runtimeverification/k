@@ -78,7 +78,7 @@ public class Poset implements Serializable {
         return start;
     }
 
-    private abstract class BoundType {
+    private abstract class BoundType implements Serializable {
         public abstract boolean isInRelation(String first, String second);
         
         public Table<String, String, Set<String>> cache;
