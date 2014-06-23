@@ -37,12 +37,12 @@ module LAMBDA
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
   syntax Exp ::= Exp "->" Exp  [strict]
 
-  rule lambda X . E:Exp => !T:Type -> E[!T/X]
-  rule T1:Type T2:Type => T1 = (T2 -> !T:Type) ~> !T
+  rule lambda X . E:Exp => ?T:Type -> E[?T/X]
+  rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
   rule let X = E in E' => (lambda X . E') E                             [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
-  rule mu X . E => (!T:Type -> !T) E[!T/X] 
+  rule mu X . E => (?T:Type -> ?T) E[?T/X] 
 
   syntax K ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
