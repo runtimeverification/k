@@ -415,7 +415,7 @@ public class PatternMatcher extends AbstractMatcher {
      *
      * @param variable
      *            the variable
-     * @param term
+     * @param data.term
      *            the term
      */
     private void addSubstitution(Map<Variable, Term> substitution) {

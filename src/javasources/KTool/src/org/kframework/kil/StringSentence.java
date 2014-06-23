@@ -17,7 +17,7 @@ public class StringSentence extends ModuleItem {
 
     public StringSentence(String content, String contentLocation, String type, String label) {
         this.content = content;
-                this.contentLocation = contentLocation;
+        this.contentLocation = contentLocation;
         this.type = type;
         this.label = label;
     }

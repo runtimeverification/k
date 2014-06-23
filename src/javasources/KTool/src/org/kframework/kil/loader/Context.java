@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
+import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -39,6 +40,7 @@ import java.util.Set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
@@ -86,6 +88,7 @@ public class Context implements Serializable {
     public Map<String, String> cellSorts = new HashMap<String, String>();
     public Map<String, Production> listConses = new HashMap<String, Production>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
+    public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
     
@@ -154,11 +157,12 @@ public class Context implements Serializable {
     }
 
     private void initSubsorts() {
-        subsorts.addRelation(KSorts.KLIST, "K");
-        subsorts.addRelation(KSorts.KLIST, "KResult");
-        subsorts.addRelation("K", "KResult");
-        subsorts.addRelation("K", KSorts.KITEM);
-        subsorts.addRelation("Bag", "BagItem");
+        subsorts.addElement(KSorts.KLABEL);
+        subsorts.addRelation(KSorts.KLIST, KSorts.K);
+        subsorts.addRelation(KSorts.KLIST, KSorts.KRESULT);
+        subsorts.addRelation(KSorts.K, KSorts.KRESULT);
+        subsorts.addRelation(KSorts.K, KSorts.KITEM);
+        subsorts.addRelation(KSorts.BAG, KSorts.BAG_ITEM);
     }
 
     // TODO(dwightguth): remove these fields and replace with injected dependencies
@@ -186,7 +190,6 @@ public class Context implements Serializable {
 //            labels.put(label, s = new HashSet<String>());
 //        }
 //        s.add(cons);
-        putLabel(p.getLabel(), cons);
         putLabel(p.getKLabel(), cons);
     }
     
@@ -202,6 +205,7 @@ public class Context implements Serializable {
         String separator = ((UserList) p.getItems().get(0)).getSeparator();
         String label = MetaK.getListUnitLabel(separator);
         Set<String> s = listLabels.get(label);
+        listLabelSeparator.put(label, separator);
         if (s == null)
             listLabels.put(label, s = new HashSet<String>());
         s.add(p.getSort());
@@ -257,32 +261,78 @@ public class Context implements Serializable {
     }
 
     /**
-     * find the LUB of a list of sorts
+     * Finds the LUB (Least Upper Bound) of a given set of sorts.
+     * 
+     * @param sorts
+     *            the given set of sorts
+     * @return the sort which is the LUB of the given set of sorts on success;
+     *         otherwise {@code null}
      */
     public String getLUBSort(Set<String> sorts) {
         return subsorts.getLUB(sorts);
     }
     
+    /**
+     * Finds the LUB (Least Upper Bound) of a given set of sorts.
+     * 
+     * @param sorts
+     *            the given set of sorts
+     * @return the sort which is the LUB of the given set of sorts on success;
+     *         otherwise {@code null}
+     */
     public String getLUBSort(String... sorts) {
         return subsorts.getLUB(Sets.newHashSet(sorts));
     }
 
     /**
-     * find the GLB of a list of sorts
+     * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
+     * 
+     * @param sorts
+     *            the given set of sorts
+     * @return the sort which is the GLB of the given set of sorts on success;
+     *         otherwise {@code null}
      */
     public String getGLBSort(Set<String> sorts) {
         return subsorts.getGLB(sorts);
     }
     
     /**
-     * Finds the most general common subsorts of a given set of sorts
+     * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
      * 
      * @param sorts
      *            the given set of sorts
-     * @return an immutable set of the most general common subsorts
+     * @return the sort which is the GLB of the given set of sorts on success;
+     *         otherwise {@code null}
      */
-    public Set<String> getCommonSubsorts(Set<String> sorts) {
-        return subsorts.getMaximalLowerBounds(sorts);
+    public String getGLBSort(String... sorts) {
+        return subsorts.getGLB(Sets.newHashSet(sorts));
+    }
+    
+    /**
+     * Checks if there is any well-defined common subsort of a given set of
+     * sorts.
+     * 
+     * @param sorts
+     *            the given set of sorts
+     * @return {@code true} if there is at least one well-defined common
+     *         subsort; otherwise, {@code false}
+     */
+    public boolean hasCommonSubsort(String... sorts) {
+        Set<String> maximalLowerBounds = subsorts.getMaximalLowerBounds(Lists.newArrayList(sorts));
+        
+        if (maximalLowerBounds.isEmpty()) {
+            return false;
+        } else if (maximalLowerBounds.size() == 1) {
+            String sort = maximalLowerBounds.iterator().next();
+            /* checks if the only common subsort is undefined */
+            if (sort.equals(CompleteSortLatice.BOTTOM_SORT_NAME)
+                    || isListSort(sort)
+                    && getListElementSort(sort).equals(CompleteSortLatice.BOTTOM_SORT_NAME)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     public void addPriority(String bigPriority, String smallPriority) {
@@ -372,7 +422,11 @@ public class Context implements Serializable {
         subsorts.addRelation(bigSort, smallSort);
     }
 
-    public void finalizeSubsorts() {
+    /**
+     * Computes the transitive closure of the subsort relation to make it
+     * becomes a partial order set.
+     */
+    public void computeSubsortTransitiveClosure() {
         List<String> circuit = subsorts.checkForCycles();
         if (circuit != null) {
             String msg = "Circularity detected in subsorts: ";

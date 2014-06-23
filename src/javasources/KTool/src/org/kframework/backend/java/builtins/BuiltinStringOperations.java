@@ -101,6 +101,10 @@ public class BuiltinStringOperations {
     public static IntToken string2base(StringToken term, IntToken base, TermContext context) {
         return IntToken.of(new BigInteger(term.stringValue(), base.intValue()));
     }
+    
+    public static StringToken base2string(IntToken integer, IntToken base, TermContext context) {
+        return StringToken.of(integer.bigIntegerValue().toString(base.intValue()));
+    }
 
     public static FloatToken string2float(StringToken term, TermContext context) {
         try {

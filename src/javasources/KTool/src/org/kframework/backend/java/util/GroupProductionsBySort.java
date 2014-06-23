@@ -68,7 +68,7 @@ public class GroupProductionsBySort {
                 for (ProductionItem prodItem : prod.getItems())
                     if (prodItem instanceof Sort)
                         items.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
-                KItem kitem = new KItem(klabelOfProd.get(prod), new KList(items), context);
+                KItem kitem = KItem.of(klabelOfProd.get(prod), new KList(items), context);
                 freshTerms.add(kitem);
             }
         }

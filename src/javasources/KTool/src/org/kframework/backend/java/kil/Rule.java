@@ -178,7 +178,7 @@ public class Rule extends JavaSymbolicObject {
     /**
      * Gets the predicate sort if this rule is a sort predicate rule.
      */
-    public String getPredSort() {
+    public String predicateSort() {
         assert isSortPredicate;
         
         return predSort;
@@ -187,7 +187,7 @@ public class Rule extends JavaSymbolicObject {
     /**
      * Gets the argument of the sort predicate if this rule is a sort predicate rule. 
      */
-    public KItem getSortPredArgument() {
+    public KItem sortPredicateArgument() {
         assert isSortPredicate;
 
         return sortPredArg;

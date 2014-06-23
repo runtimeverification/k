@@ -93,6 +93,16 @@ public class BuiltinList extends Collection {
     public boolean isLHSView() {
         return true;
     }
+    
+    /**
+     * Checks if this {@code BuiltinList} is actually a list update operation.
+     * 
+     * @return {@code true} if there is pending update operation on this
+     *         {@code BuiltinList}; otherwise, {@code false}
+     */
+    public boolean isUpdate() {
+        return removeLeft != 0 || removeRight != 0;
+    }
 
     @Override
     public boolean isExactSort() {

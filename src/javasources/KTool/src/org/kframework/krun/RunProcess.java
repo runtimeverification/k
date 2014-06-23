@@ -138,6 +138,12 @@ public class RunProcess {
                 }
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
                 break;
+            case "kast --parser binary":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContent(value);
+                }
+                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.BINARY);
+                break;
             default: //external parser
                 List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
                 tokens.add(value);

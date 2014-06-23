@@ -173,7 +173,7 @@ public class TestCaseGenerationUtil {
         // TODO(YilongL): This is cheating; fix it!
         switch (sort) {
         case "Block":
-            return new KItem(KLabelConstant.of("'{}", termContext.definition()), KList.EMPTY, termContext);
+            return KItem.of(KLabelConstant.of("'{}", termContext.definition()), KList.EMPTY, termContext);
             
         case "BExp":
             return BoolToken.TRUE;

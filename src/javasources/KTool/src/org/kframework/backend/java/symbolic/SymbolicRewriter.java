@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.indexing.Index;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.RuleIndex;
