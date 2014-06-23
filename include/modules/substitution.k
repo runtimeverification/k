@@ -117,9 +117,8 @@ module FREE-VARS
   syntax Set ::= #freeVars(KList, Set, Set)  [function, klabel(#freevars2)]
   rule #freeVars(.KList, _, Free:Set) => Free
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
-    => #freeVars(Ks, Bound, Free) when X in Bound
-  rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
-    => #freeVars(Ks, Bound, Free SetItem(X)) when notBool(X in Bound)
+    => #if X in Bound ==K true #then #freeVars(Ks, Bound, Free) #else
+     #freeVars(Ks, Bound, Free SetItem(X)) #fi
   rule #freeVars((L:KLabel(Ks:KList) => Ks),, _, _, _)
     when (isVariable(L(Ks)) =/=K true) andBool
          (isBinder(L(Ks)) =/=K true) andBool
@@ -182,7 +181,7 @@ module SUBSTITUTION
 
   rule #substituteFV(Y:Variable, M:Map Y |-> V, _) => V
   rule #substituteFV(Y:Variable, M:Map, _) => Y
-    when notBool (Y in keys(M))
+    when Y in keys(M) =/=K true
   
   rule #substituteFV(K:K, M:Map, FV) => #substituteBinder(K, M, FV)
     when isBinder(K)
