@@ -94,7 +94,7 @@ constructs. */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-        	| "for" "(" Stmt Exp ";" Exp ")" Block
+        	| "for" "(" Stmts Exp ";" Exp ")" Block
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -112,6 +112,7 @@ constructs. */
 
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
@@ -188,11 +189,11 @@ location and then never allow that type to change.  The typed
 undefined values effectively assign both a type and an undefined value
 to a location. */
 
-  syntax K ::= undefined(Type)  [latex(\bot_{#1})]
+  syntax KItem ::= undefined(Type)  [latex(\bot_{#1})]
 
   rule <k> T:Type X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined(T) ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 /*@ \subsubsection{Array Declaration}
@@ -201,9 +202,9 @@ in untyped SIMPLE, but we have to make sure that we associate the
 right type to the allocated locations. */
 
   rule <k> T:Type X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(T, L +Int 1, N)
-                       (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> array(T, L +Int 1, N)
+                          (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
@@ -214,6 +215,8 @@ ones is also similar to that in untyped SIMPLE, although we have to
 make sure that all the declared variables have the right types.  The
 auxiliary operation \texttt{T<Vs>}, defined at the end of the file,
 adds the length of \texttt{Vs} dimensions to the type \texttt{T}. */
+
+// TODO: Check the desugaring below to be consistent with the one for untyped simple
 
   syntax Id ::= "$1" | "$2"
   rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
@@ -233,17 +236,17 @@ of the lambda abstraction.  In the spirit of dynamic typing, we will
 make sure that parameters are well typed when the function is invoked. */
 
   rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
-       <env> Env => Env[L/F] </env>
-       <store>... . => L |-> lambda(T, Ps, S) ...</store>
+       <env> Env => Env[F <- L] </env>
+       <store>... .Map => L |-> lambda(T, Ps, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ \subsection{Calling \texttt{main()}}
 When done with the first pass, call \texttt{main()}. */
 
-  syntax K ::= "execute"
+  syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> . => Env </genv>  [structural]
+       <genv> .Map => Env </genv>  [structural]
 
 //@ \subsection{Expressions}
 
@@ -261,20 +264,20 @@ When done with the first pass, call \texttt{main()}. */
 
 //@ \subsubsection{Arithmetic operators}
 
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule Str1:String + Str2:String => Str1 +String Str2
-  rule I1:Int - I2:Int => I1 -Int I2
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
-  rule - I:Int => 0 -Int I
-  rule I1:Int < I2:Int => I1 <Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int > I2:Int => I1 >Int I2
-  rule I1:Int >= I2:Int => I1 >=Int I2
+  rule I1 + I2 => I1 +Int I2
+  rule Str1 + Str2 => Str1 +String Str2
+  rule I1 - I2 => I1 -Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule - I => 0 -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule ! T:Bool => notBool(T)
+  rule ! T => notBool(T)
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true
@@ -284,11 +287,17 @@ When done with the first pass, call \texttt{main()}. */
 
 Check array bounds, as part of the dynamic typing policy. */
 
+// Same comment as for simple untyped regarding [anywhere]
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+    [structural]
+  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals]) => lvalue(V[N1][N2, Vs])
+    [structural]
 
+// Same comment as for simple untyped regarding [anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [structural, anywhere]
+    when N >=Int 0 andBool N <Int M  [structural]
+  rule lvalue(array(_:Type, L:Int, M:Int)[N:Int]) => lvalue(lookup(L +Int N))
+    when N >=Int 0 andBool N <Int M  [structural]
 
 //@ \subsubsection{Size of an array}
 
@@ -301,11 +310,11 @@ Note that the operation \texttt{mkDecls} now declares properly typed
 instantiated variables, and that the semantics of \texttt{return} also
 checks that that type of the returned value is expected one. */
 
-  syntax K ::=  (Type,Map,K,ControlCellFragment)
+  syntax KItem ::= (Type,Map,K,ControlCellFragment)
 
   rule <k> lambda(T,Ps,S)(Vs:Vals) ~> K => mkDecls(Ps,Vs) S return; </k>
        <control>
-         <fstack> . => ListItem((T',Env,K,C)) ...</fstack>
+         <fstack> .List => ListItem((T',Env,K,C)) ...</fstack>
          <return> T' => T </return>
          C
        </control>
@@ -314,7 +323,7 @@ checks that that type of the returned value is expected one. */
 
   rule <k> return V:Val; ~> _ => V ~> K </k>
        <control>
-         <fstack> ListItem((T',Env,K,C)) => . ...</fstack>
+         <fstack> ListItem((T',Env,K,C)) => .List ...</fstack>
          <return> T => T' </return>
          (_ => C)
        </control>
@@ -331,7 +340,7 @@ completed to return the \texttt{nothing} value tagged as expected. */
 
 //@ \subsubsection{Read}
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
 
 /*@ \subsubsection{Assignment}
 The assignment now checks that the type of the assigned location is
@@ -370,7 +379,7 @@ preserved: */
 
 We only allow printing integers and strings: */
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 
@@ -382,23 +391,23 @@ the innermost try-catch paramete.  To keep things simple, for the time
 being we can assume that SIMPLE only throws and catches integer
 values, in which case our semantics below works fine: */
 
- syntax K ::= (Param,Stmt,K,Map,ControlCellFragment)  // Param instead of Id
+  syntax KItem ::= (Param,Stmt,K,Map,ControlCellFragment)  // Param instead of Id
 
-  syntax K ::= "popx"
+  syntax KItem ::= "popx"
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => ListItem((P, S2, K, Env, C)) ...</xstack>
+         <xstack> .List => ListItem((P, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
   rule <k> popx => . ...</k>
-       <xstack> _:ListItem => . ...</xstack>
+       <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { T X = V; S2 } ~> K </k>
        <control>
-         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => . ...</xstack>
+         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => .List ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -421,7 +430,7 @@ values, in which case our semantics below works fine: */
 
    rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
         <busy> Busy => Busy -Set keys(H) </busy>
-        <terminated>... . => SetItem(T) ...</terminated>
+        <terminated>... .Set => SetItem(T) ...</terminated>
 
 //@ {Thread joining}
 
@@ -431,8 +440,8 @@ values, in which case our semantics below works fine: */
 //@ {Acquire lock}
 
    rule <k> acquire V:Val; => . ...</k>
-        <holds>... . => V |-> 0 ...</holds>
-        <busy> Busy (. => SetItem(V)) </busy>
+        <holds>... .Map => V |-> 0 ...</holds>
+        <busy> Busy (.Set => SetItem(V)) </busy>
      when (notBool(V in Busy:Set))  [acquire]
 
    rule <k> acquire V; => . ...</k>
@@ -444,8 +453,8 @@ values, in which case our semantics below works fine: */
         <holds>... V |-> (N => N:Int -Int 1) ...</holds>
       when N >Int 0
 
-   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-        <busy>... SetItem(V) => . ...</busy>
+   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+        <busy>... SetItem(V) => .Set ...</busy>
 
 //@ {Rendezvous synchronization}
 
@@ -463,12 +472,13 @@ into a list of variable declarations. */
 
 //@ Location lookup.
 
-  syntax K ::= lookup(Int)
+  syntax KItem ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 //@ Environment recovery.
+// TOD: same comment regarding env(...) as for simple untyped
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
   rule (env(_) => .) ~> env(_)  [structural]
 
@@ -509,7 +519,7 @@ into a list of variable declarations. */
   rule typeOf(undefined(T)) => T
   rule typeOf(nothing(T)) => T
 
-//@ List of types of a parameter.       
+//@ List of types of a parameter.
   syntax Types ::= getTypes(Params)  [function]
   rule getTypes(T:Type _:Id) => T, .Types   // I would like to not use .Types
   rule getTypes(T:Type _:Id, P, Ps) => T, getTypes(P,Ps)

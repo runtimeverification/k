@@ -690,8 +690,8 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
     }
 
-    private KRunState loadConf(File f) throws IOException {
-        return BinaryLoader.load(KRunState.class, f.getAbsolutePath());
+    private KRunState loadConf(File f) {
+        return BinaryLoader.load(KRunState.class, f.getAbsolutePath(), definitionHelper.globalOptions.debug);
     }
 
     public void loadConf() {
@@ -710,7 +710,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                         commandProcessor.getKrun(),
                         definitionHelper)),
                         "Tab resulted from loading :" + file.getName());
-            } catch (IOException | ClassCastException e) {
+            } catch (ClassCastException e) {
                 showMessage("Unable to load configuration from file");
             }
         }

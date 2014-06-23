@@ -85,6 +85,25 @@ public class BuiltinList extends Collection {
         return elementsLeft.size() + elementsRight.size();
     }
 
+    /**
+     * {@code BuiltinList} is guaranteed to have only one frame; thus, they can
+     * always be used in the left-hand side of a rule.
+     */
+    @Override
+    public boolean isLHSView() {
+        return true;
+    }
+    
+    /**
+     * Checks if this {@code BuiltinList} is actually a list update operation.
+     * 
+     * @return {@code true} if there is pending update operation on this
+     *         {@code BuiltinList}; otherwise, {@code false}
+     */
+    public boolean isUpdate() {
+        return removeLeft != 0 || removeRight != 0;
+    }
+
     @Override
     public boolean isExactSort() {
         return true;

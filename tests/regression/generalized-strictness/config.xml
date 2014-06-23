@@ -5,6 +5,7 @@
   <test definition="test"
         programs="."
         extension="test"
+	    skip="pdf"
         results="." >
         <all-programs>
           <krun-option name="--output" value="pretty" />

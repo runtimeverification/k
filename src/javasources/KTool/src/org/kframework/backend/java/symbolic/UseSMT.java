@@ -31,7 +31,7 @@ public class UseSMT implements Serializable {
             return null;
         }
 
-        BuiltinMap result = new BuiltinMap();   
+        BuiltinMap.Builder resultBuilder = BuiltinMap.builder();
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
             KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
@@ -42,8 +42,6 @@ public class UseSMT implements Serializable {
             
             
             if(solver.Check() == Status.SATISFIABLE){
-                
-                Map<Term,Term> entries = new HashMap<Term,Term>();
                 
                 Model model = solver.Model();
                 FuncDecl[] consts = model.ConstDecls();
@@ -56,7 +54,7 @@ public class UseSMT implements Serializable {
                     
                     IntToken avalue = IntToken.of(Integer.parseInt(resultFrg.toString()));
                     
-                    result.put((Term)akey,(Term)avalue);
+                    resultBuilder.put((Term)akey, (Term)avalue);
                 }
                 
                 
@@ -68,6 +66,6 @@ public class UseSMT implements Serializable {
             // TODO(AndreiS): fix this translation and the exceptions
             e.printStackTrace();
         }
-        return result;
+        return resultBuilder.build();
     }
 }

@@ -118,24 +118,29 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             return super.visit(node, _);
         }
         
-        // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
-        if (productions.size() > 1) {
-            GlobalSettings.kem.register(new KException(
-                    KException.ExceptionType.WARNING,
-                    KException.KExceptionGroup.COMPILER,
-                    "unable to transform the KApp: " + node
-                    + "\nbecause of multiple productions associated:\n"
-                    + productions,
-                    getName(),
-                    filename,
-                    location));
-        }
-
         Term[] arguments = new Term[kList.getContents().size()];
         for (int i = 0; i < kList.getContents().size(); ++i) {
             arguments[i] = (Term) this.visitNode(kList.getContents().get(i));
         }
-
+        
+        if (sort.constructorLabel().equals(kLabelConstant.getLabel())
+                || sort.elementLabel().equals(kLabelConstant.getLabel())
+                || sort.unitLabel().equals(kLabelConstant.getLabel())
+                || sort.type().equals(KSorts.MAP)) {
+            // TODO(AndreiS): the lines below should work once KLabelConstant are properly created
+            if (productions.size() > 1) {
+                GlobalSettings.kem.register(new KException(
+                        KException.ExceptionType.WARNING,
+                        KException.KExceptionGroup.COMPILER,
+                        "unable to transform the KApp: " + node
+                        + "\nbecause of multiple productions associated:\n"
+                        + productions,
+                        getName(),
+                        filename,
+                        location));
+            }
+        }
+        
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
             DataStructureBuiltin dataStructure = DataStructureBuiltin.of(sort, arguments);
             if (status == Status.LHS && !dataStructure.isLHSView()) {

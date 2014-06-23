@@ -120,7 +120,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             }
 
             // TODO(AndreiS): subsort queries should implement lazy subsort computation
-            context.finalizeSubsorts();
+            context.computeSubsortTransitiveClosure();
         } while (change);
 
         /*

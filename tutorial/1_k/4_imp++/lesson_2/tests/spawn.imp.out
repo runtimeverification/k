@@ -3,10 +3,10 @@
         "x = " ~> HOLE ~> print ( HOLE ) ; ~> x = (read ( )) ; ~> spawn x 
           = (x / 2) ; ~> spawn x = (x + 10) ; ~> print ( x, "\n" ) ;
     </k>
-    <store>
-        #symNat(1) |-> 0
-    </store>
     <env>
-        x |-> #symNat(1)
+        x |-> 1
     </env>
+    <store>
+        1 |-> 0
+    </store>
 </T>

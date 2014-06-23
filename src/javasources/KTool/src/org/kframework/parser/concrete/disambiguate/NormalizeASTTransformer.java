@@ -2,21 +2,35 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
 import org.kframework.kil.GenericToken;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
-import java.util.ArrayList;
+public class NormalizeASTTransformer extends ParseForestTransformer {
+    public NormalizeASTTransformer(Context context) {
+        super(NormalizeASTTransformer.class.getName(), context);
+    }
 
-public class CorrectConstantsTransformer extends ParseForestTransformer {
-    public CorrectConstantsTransformer(Context context) {
-        super(CorrectConstantsTransformer.class.getName(), context);
+    /**
+     * A rule like P:Ptr => . when isKResult(P)
+     * would create an AST where the variable P from the side condition wouldn't be wrapped
+     * by a KList object. Adding a separate step which checks for exactly this case.
+     */
+    @Override
+    public ASTNode visit(KApp kapp, Void _) throws ParseFailedException {
+        if (!kapp.getChild().getSort().equals(KSorts.KLIST)) {
+            kapp.setChild(new KList(kapp.getChild()));
+        }
+        return super.visit(kapp, _);
     }
 
     /**

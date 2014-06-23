@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
@@ -40,9 +41,9 @@ public class Definition extends JavaSymbolicObject {
     private final List<Rule> rules;
     private final List<Rule> macros;
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
+    private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
-    private final Set<KLabelConstant> sortPredLabels;
     private final Context context;
     private RuleIndex index;
 
@@ -52,7 +53,6 @@ public class Definition extends JavaSymbolicObject {
         macros = new ArrayList<Rule>();
         kLabels = new HashSet<KLabelConstant>();
         frozenKLabels = new HashSet<KLabelConstant>();
-        sortPredLabels = new HashSet<KLabelConstant>();
     }
 
     public void addFrozenKLabel(KLabelConstant frozenKLabel) {
@@ -79,7 +79,7 @@ public class Definition extends JavaSymbolicObject {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
             functionRules.put(rule.functionKLabel(), rule);
             if (rule.isSortPredicate()) {
-                sortPredLabels.add(rule.functionKLabel());
+                sortPredicateRules.put((KLabelConstant) rule.sortPredicateArgument().kLabel(), rule);                
             }
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
@@ -105,6 +105,13 @@ public class Definition extends JavaSymbolicObject {
     public Multimap<KLabelConstant, Rule> functionRules() {
         return functionRules;
     }
+    
+    public Collection<Rule> sortPredicateRulesOn(KLabelConstant kLabel) {
+        if (sortPredicateRules.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return sortPredicateRules.get(kLabel);
+    }
 
     public Set<KLabelConstant> frozenKLabels() {
         return frozenKLabels;
@@ -114,10 +121,6 @@ public class Definition extends JavaSymbolicObject {
         return Collections.unmodifiableSet(kLabels);
     }
     
-    public Set<KLabelConstant> sortPredLabels() {
-        return sortPredLabels;
-    }
-
     public List<Rule> macros() {
         // TODO(AndreiS): fix this issue with modifiable collections
         //return Collections.unmodifiableList(macros);

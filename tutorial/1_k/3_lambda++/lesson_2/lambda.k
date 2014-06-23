@@ -15,16 +15,17 @@ module LAMBDA
   syntax Exp ::= Val
   syntax KResult ::= Val
 
-  rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k> <env> Rho </env>
+  rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
+       <env> Rho </env>
     [structural]
-  rule <k> closure(Rho,X,E) V:Val => E ~> env(Rho') ...</k>
-       <env> Rho' => Rho[N/X] </env>
-       <store>... . => (N |-> V) ...</store>
-    when fresh(N:Nat)
-  rule <k> X => V ...</k> <env>...X|->N...</env> <store>...N|->V...</store>
+  rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
+       <env> Rho' => Rho[X <- !N] </env>
+       <store>... .Map => (!N:Int |-> V) ...</store>
+  rule <k> X => V ...</k>
+       <env>... X |-> N ...</env>
+       <store>... N |-> V ...</store>
 
 // Auxiliary task
-  syntax K ::= env(Map)
-  rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>
+  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
     [structural]
 endmodule

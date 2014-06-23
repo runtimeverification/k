@@ -538,7 +538,7 @@ public class StringUtil {
             StringBuilder sb = new StringBuilder();
             for (String arg : args) {
                 sb.append('"');
-                sb.append(StringUtils.replace(StringUtils.replace(arg, "\\", "\\\\"), "\"", "\\\""));
+                sb.append(StringUtils.replace(arg, "\"", "\\\""));
                 sb.append("\" ");
             }
             sb.deleteCharAt(sb.length() - 1);

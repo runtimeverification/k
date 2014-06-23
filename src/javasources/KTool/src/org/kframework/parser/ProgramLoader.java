@@ -18,10 +18,11 @@ import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
-import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
+import org.kframework.parser.concrete.disambiguate.NormalizeASTTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete2.Grammar;
+import org.kframework.parser.concrete2.MakeConsList;
 import org.kframework.parser.concrete2.Parser;
 import org.kframework.parser.concrete2.Parser.ParseError;
 import org.kframework.parser.concrete2.TreeCleanerVisitor;
@@ -59,7 +60,7 @@ public class ProgramLoader {
 
         out = new PriorityFilter(context).visitNode(out);
         out = new PreferAvoidFilter(context).visitNode(out);
-        out = new CorrectConstantsTransformer(context).visitNode(out);
+        out = new NormalizeASTTransformer(context).visitNode(out);
         out = new AmbFilter(context).visitNode(out);
         out = new RemoveBrackets(context).visitNode(out);
 
@@ -110,12 +111,12 @@ public class ProgramLoader {
                 }
                 out = ((Rule) out).getBody();
             } else if (whatParser == ParserType.BINARY) {
-                out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
+                out = BinaryLoader.load(Term.class, filename, context);
             } else if (whatParser == ParserType.NEWPROGRAM) {
                 // load the new parser
                 // TODO(Radu): after the parser is in a good enough shape, replace the program parser
                 // TODO(Radu): (the default one) with this branch of the 'if'
-                Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
+                Grammar grammar = (Grammar) BinaryLoader.load(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin", context);
 
                 Parser parser = new Parser(content);
                 out = parser.parse(grammar.get(startSymbol), 0);
@@ -123,8 +124,16 @@ public class ProgramLoader {
                     System.out.println("Raw: " + out + "\n");
                 try {
                     out = new TreeCleanerVisitor(context).visitNode(out);
+                    out = new MakeConsList(context).visitNode(out);
                     if (context.globalOptions.debug)
                         System.out.println("Clean: " + out + "\n");
+                    out = new PriorityFilter(context).visitNode(out);
+                    out = new PreferAvoidFilter(context).visitNode(out);
+                    if (context.globalOptions.debug)
+                        System.out.println("Filtered: " + out + "\n");
+                    out = new AmbFilter(context).visitNode(out);
+                    out = new RemoveBrackets(context).visitNode(out);
+                    out = new FlattenTerms(context).visitNode(out);
                 } catch (ParseFailedException te) {
                     ParseError perror = parser.getErrors();
 
@@ -132,13 +141,11 @@ public class ProgramLoader {
                         "Parse error: unexpected end of file." :
                         "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
                     String loc = "(" + perror.line + "," + perror.column + "," +
-                            perror.line + "," + (perror.column + 1) + ")";
+                                       perror.line + "," + (perror.column + 1) + ")";
                     throw new ParseFailedException(new KException(
                             ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
                 }
-                out = new PriorityFilter(context).visitNode(out);
-                out = new PreferAvoidFilter(context).visitNode(out);
-                out = new AmbFilter(context).visitNode(out);
+                out = new ResolveVariableAttribute(context).visitNode(out);
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = new ResolveVariableAttribute(context).visitNode(out);

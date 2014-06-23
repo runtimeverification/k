@@ -18,7 +18,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 
     public Void visit(Definition def, Void _) {
         super.visit(def, _);
-        context.finalizeSubsorts();
+        context.computeSubsortTransitiveClosure();
         return null;
     }
 

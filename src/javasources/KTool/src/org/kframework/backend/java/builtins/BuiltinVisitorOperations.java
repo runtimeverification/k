@@ -9,8 +9,6 @@ import org.kframework.kil.ASTNode;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-
 
 /**
  * Provides a builtin implementation of a K visitor.
@@ -68,18 +66,18 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
 
     private Term visitNode(Term term) {
         visitParams.set(0, term);
-        term = new KItem(
+        term = KItem.of(
                 visitLabel,
-                new KList(ImmutableList.copyOf(visitParams)),
+                new KList(visitParams),
                 context);
         return term.evaluate(context);
     }
 
     private boolean evaluateGuard(Term term) {
         ifParams.set(0, term);
-        KItem test = new KItem(
+        KItem test = KItem.of(
                 ifLabel,
-                new KList(ImmutableList.copyOf(ifParams)),
+                new KList(ifParams),
                 context);
         // TODO: Think about what happens when test has symbolic values in it.
         return test.evaluate(context) == BoolToken.TRUE;

@@ -15,9 +15,7 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
 import org.kframework.backend.java.symbolic.UnificationFailure;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -150,13 +148,13 @@ public class MetaK {
     }
 
     public static BuiltinMap variablesMap(Term term, TermContext context) {
+        BuiltinMap.Builder builder = BuiltinMap.builder();
         Set<Variable> variables = term.variableSet();
-        Map<MetaVariable, Variable> result = new HashMap<>(variables.size());
         for (Variable variable : variables) {
             assert variable instanceof Variable : "this function only applies on variables";
-            result.put(new MetaVariable(variable), variable);
+            builder.put(new MetaVariable(variable), variable);
         }
-        return BuiltinMap.of(result, null);
+        return builder.build();
     }
 
     /**
@@ -170,6 +168,6 @@ public class MetaK {
      */
     public static KItem getKLabel(KItem kItem, TermContext context) {
         // TODO(AndreiS): handle KLabel variables
-        return new KItem(new KLabelInjection(kItem.kLabel()), KList.EMPTY, context);
+        return KItem.of(new KLabelInjection(kItem.kLabel()), KList.EMPTY, context);
     }
 }

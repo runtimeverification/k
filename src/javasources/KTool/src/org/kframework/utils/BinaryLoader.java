@@ -16,10 +16,14 @@ public class BinaryLoader {
     }
     
     public static void save(String fileName, Object o, Context context) {
+        save(fileName, o, context.globalOptions.debug);
+    }
+    
+    public static void save(String fileName, Object o, boolean debug) {
         try {
             save(fileName, o);
         } catch (IOException e) {
-            if (context.globalOptions.debug) {
+            if (debug) {
                 e.printStackTrace();
             }
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
@@ -38,7 +42,7 @@ public class BinaryLoader {
         }
     }
     
-    public static <T> T load(Class<T> cls, String fileName) throws ObjectStreamException, IOException {
+    public static <T> T load(Class<T> cls, String fileName) throws IOException, ClassNotFoundException {
         return cls.cast(load(fileName));
     }
     
@@ -49,6 +53,8 @@ public class BinaryLoader {
     public static <T> T load(Class<T> cls, String fileName, boolean debug) {
         try {
             return load(cls, fileName);
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
             if (debug) {
                 e.printStackTrace();
@@ -66,12 +72,10 @@ public class BinaryLoader {
         return null;
     }
 
-    public static Object load(String fileName) throws ObjectStreamException, IOException {
+    public static Object load(String fileName) throws IOException, ClassNotFoundException {
         try (ObjectInputStream deserializer
-                 = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fileName)))) {
+                     = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fileName)))) {
             return deserializer.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new AssertionError("Something wrong with deserialization", e);
         }
     }
 }

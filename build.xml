@@ -227,6 +227,7 @@
         <checkstyle config="${javasources}/KTool/checkstyle-copyright.xml">
             <fileset dir="/" includes="${checkstyle.files}">
                 <!-- TODO: exclude files here which should not be given copyright notices -->
+                <exclude name="**/src/com/davekoelle/**" />
             </fileset>
         </checkstyle>
     </target>

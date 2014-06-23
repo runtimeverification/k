@@ -38,11 +38,12 @@ public class KLabelConstant extends KLabel {
      * generates this {@code KLabelConstant}
      */
     private final boolean isFunction;
-    private final TermContext termContext;
 
-    private KLabelConstant(String label, TermContext termContext) {
+    private KLabelConstant(String label, Definition definition) {
         this.label = label;
-        productions = ImmutableList.copyOf(termContext.definition().context().productionsOf(label));
+        productions = definition != null ?
+                ImmutableList.<Production>copyOf(definition.context().productionsOf(label)) : 
+                ImmutableList.<Production>of();
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
@@ -74,7 +75,6 @@ public class KLabelConstant extends KLabel {
             isFunction = true;
         }
         this.isFunction = isFunction;
-        this.termContext = termContext;
     }
 
     /**
@@ -85,12 +85,12 @@ public class KLabelConstant extends KLabel {
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, TermContext termContext) {
+    public static KLabelConstant of(String label, Definition definition) {
         assert label != null;
 
         KLabelConstant kLabelConstant = cache.get(label);
         if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, termContext);
+            kLabelConstant = new KLabelConstant(label, definition);
             cache.put(label, kLabelConstant);
         }
         return kLabelConstant;
@@ -174,13 +174,17 @@ public class KLabelConstant extends KLabel {
         return kLabelConstant;
     }
 
-    public TermContext termContext() {
-        return termContext;
+    public boolean isMetaBinder() {
+        return hasAttribute("metabinder");
     }
 
     public boolean isBinder() {
+        return hasAttribute("binder");
+    }
+
+    private boolean hasAttribute(String attribute) {
         for (Production production : productions) {
-            if (production.containsAttribute("binder")) {
+            if (production.containsAttribute(attribute)) {
                 return true;
                 //assuming is binder if one production says so.
             }
@@ -188,10 +192,17 @@ public class KLabelConstant extends KLabel {
         return false;
     }
 
+    /**
+     * Searches for and retieves (if found) a binder map for this label
+     * See {@link org.kframework.kil.Production#getBinderMap()}
+     *
+     * @return the binder map for this label (or {@code null} if no binder map was defined.
+     */
     public Multimap<Integer, Integer> getBinderMap() {
         for (Production production : productions) {
-            if (production.containsAttribute("binder")) {
-                return production.getBinderMap();
+            Multimap<Integer, Integer> binderMap = production.getBinderMap();
+            if (binderMap != null) {
+                return binderMap;
                 //assuming is binder if one production says so.
             }
         }

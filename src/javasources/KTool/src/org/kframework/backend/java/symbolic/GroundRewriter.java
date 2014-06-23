@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.ConstrainedTerm;

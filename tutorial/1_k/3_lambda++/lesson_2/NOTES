@@ -1,3 +1,11 @@
+* Explain the new "fresh", namely !N:Int
+
+* Explain the new "evn recovery", which is just V ~> Env
+
+The above make some the issues below obsolete.
+
+--------
+
 * The fresh(S:Sort) predicate needs to be explained better.
 
 Mea culpa: It is explained better in Tutorial 4 (on IMP++), Lesson 2.  I did
