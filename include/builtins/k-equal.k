@@ -97,4 +97,10 @@ module K-EQUAL-HOOKS
   rule .KList =KList .KList => true
   rule (_:K,,_:KList) =KList .KList => false
   rule .KList =KList (_:K,,_:KList) => false
+
+ 
+  // TODO(dwightguth): fix once bags are K
+  syntax Bool ::= left:
+				  Bag "==Bag" Bag           [function, hook(#K-EQUAL:_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+				| Bag "=/=Bag" Bag          [function, hook(#K-EQUAL:_=/=K_), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 endmodule
