@@ -211,8 +211,8 @@ public class Poset implements Serializable {
         if (!bounds.isEmpty()) {
             Set<String> nonClosestBs = new HashSet<String>();
             for (String bound1 : bounds) {
-                // if bound1 has been identified as non-maximal, elements less than
-                // that must have been also identified as non-maximal in the same
+                // if bound1 has been identified as non-closest, elements closer than
+                // that must have been also identified as non-closest in the same
                 // outer loop
                 if (!nonClosestBs.contains(bound1)) {
                     for (String bound2 : bounds) {
