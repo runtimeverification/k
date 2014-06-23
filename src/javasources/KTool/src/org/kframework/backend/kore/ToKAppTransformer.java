@@ -176,114 +176,20 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
         
         return new KApp(new KLabelConstant("Map:update"),new KList(newArg));
     }
-
-    private Comparator<Term> unparserLexicalComparator = new Comparator<Term>() {
-        AlphanumComparator comparator = new AlphanumComparator();
-        @Override
-        public int compare(Term o1, Term o2) {
-            UnparserFilterNew unparser = new UnparserFilterNew(context);
-            unparser.visitNode(o1);
-            String s1 = unparser.getResult();
-            unparser = new UnparserFilterNew(context);
-            unparser.visitNode(o2);
-            String s2 = unparser.getResult();
-            return comparator.compare(s1, s2);
-        }
-        
-    };
     
     @Override
     public ASTNode visit(SetBuiltin node, Void _) {
-        
-        ArrayList<Term> items = new ArrayList<>();
-        for (Term element : node.elements()) {
-            items.add(KApp.of(DataStructureSort.DEFAULT_SET_ITEM_LABEL, (Term) this.visitNode(element)));
-        }
-        Collections.sort(items, unparserLexicalComparator);
-        for (Term base : node.baseTerms()) {
-            items.add((Term)this.visitNode(base));
-        }
-        
-        if(items.size()==0){
-            
-            return KApp.of(DataStructureSort.DEFAULT_SET_UNIT_LABEL);
-        }
-
-        Term basedKapp = items.get(items.size()-1);
-        
-        for(int i = items.size()-2; i >= 0; --i){
-            
-            ArrayList<Term> tempTerm = new ArrayList<Term>();
-            tempTerm.add(items.get(i));
-            tempTerm.add(basedKapp);
-            basedKapp = new KApp(new KLabelConstant(DataStructureSort.DEFAULT_SET_LABEL),new KList(tempTerm));
-        }
-        
-        return basedKapp;
+        return ((SetBuiltin)super.visit(node, _)).toKApp(context);
     }
     
     @Override
     public ASTNode visit(ListBuiltin node, Void _) {
-        
-        ArrayList<Term> items = new ArrayList<>();
-        for (Term element : node.elementsLeft()) {
-            items.add(KApp.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, (Term) this.visitNode(element)));
-        }
-        for (Term base : node.baseTerms()) {
-            items.add((Term)this.visitNode(base));
-        }
-        for (Term element : node.elementsRight()) {
-            items.add(KApp.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, (Term) this.visitNode(element)));
-        }
-        
-        if(items.size()==0){
-            
-            return KApp.of(DataStructureSort.DEFAULT_LIST_UNIT_LABEL);
-        }
-
-        Term basedKapp = items.get(items.size()-1);
-        
-        for(int i = items.size()-2; i >= 0; --i){
-            
-            ArrayList<Term> tempTerm = new ArrayList<Term>();
-            tempTerm.add(items.get(i));
-            tempTerm.add(basedKapp);
-            basedKapp = new KApp(new KLabelConstant(DataStructureSort.DEFAULT_LIST_LABEL),new KList(tempTerm));
-        }
-        
-        return basedKapp;
+        return ((ListBuiltin)super.visit(node, _)).toKApp(context);
     }
     
     @Override
     public ASTNode visit(MapBuiltin node, Void _) {
-        
-        ArrayList<Term> items = new ArrayList<Term>();
-        
-        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-            items.add(KApp.of(DataStructureSort.DEFAULT_MAP_ITEM_LABEL, 
-                    (Term)this.visitNode(entry.getKey()), (Term)this.visitNode(entry.getValue())));
-        }
-        Collections.sort(items, unparserLexicalComparator);
-        for (Term base : node.baseTerms()) {
-            items.add((Term)this.visitNode(base));
-        }
-        
-        if(items.size()==0){
-            
-            return KApp.of(DataStructureSort.DEFAULT_MAP_UNIT_LABEL);
-        }
-        
-        Term basedKapp = items.get(items.size()-1);
-        
-        for(int i = items.size()-2; i >= 0; --i){
-            
-            ArrayList<Term> tempTerm = new ArrayList<Term>();
-            tempTerm.add(items.get(i));
-            tempTerm.add(basedKapp);
-            basedKapp = new KApp(new KLabelConstant(DataStructureSort.DEFAULT_MAP_LABEL),new KList(tempTerm));
-        }
-        
-        return basedKapp;
+        return ((MapBuiltin)super.visit(node, _)).toKApp(context);
     }
     
 }
