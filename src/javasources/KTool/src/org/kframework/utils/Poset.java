@@ -168,14 +168,14 @@ public class Poset implements Serializable {
     private Set<String> getBounds(Set<String> subset, BoundType type) {
         Set<String> bounds = new HashSet<String>();
         for (String elem : elements) {
-            boolean isLTESubset = true;
+            boolean isBound = true;
             for (String subsetElem : subset) {
                 if (!(type.isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
-                    isLTESubset = false;
+                    isBound = false;
                     break;
                 }
             }
-            if (isLTESubset) {
+            if (isBound) {
                 bounds.add(elem);
             }
         }
@@ -199,25 +199,25 @@ public class Poset implements Serializable {
             Iterator<String> iter = subset.iterator();
             String arg0 = iter.next();
             String arg1 = iter.next();
-            Set<String> mlbs = type.cache.get(arg0, arg1);
-            if (mlbs != null) {
-                return mlbs;
+            Set<String> cachedBound = type.cache.get(arg0, arg1);
+            if (cachedBound != null) {
+                return cachedBound;
             }
         }
         
         Set<String> bounds = getBounds(subset, type);
         
-        /* find maximal lower bounds from the candidate lower bounds */
+        /* find closest bounds from the candidate bounds */
         if (!bounds.isEmpty()) {
             Set<String> nonClosestBs = new HashSet<String>();
-            for (String lb1 : bounds) {
-                // if lb1 has been identified as non-maximal, elements less than
+            for (String bound1 : bounds) {
+                // if bound1 has been identified as non-maximal, elements less than
                 // that must have been also identified as non-maximal in the same
                 // outer loop
-                if (!nonClosestBs.contains(lb1)) {
-                    for (String lb2 : bounds) {
-                        if (type.isInRelation(lb1, lb2)) {
-                            nonClosestBs.add(lb2);
+                if (!nonClosestBs.contains(bound1)) {
+                    for (String bound2 : bounds) {
+                        if (type.isInRelation(bound1, bound2)) {
+                            nonClosestBs.add(bound2);
                         }
                     }
                 }
