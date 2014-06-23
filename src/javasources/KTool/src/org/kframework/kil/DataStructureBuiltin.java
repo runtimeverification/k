@@ -308,17 +308,16 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     public abstract Term toKApp(Context context);
     
     public Term toKApp(List<Term> items) {
-        if(items.size()==0){
-            
+        if(items.isEmpty()){
             return KApp.of(sort().unitLabel());
         }
         
-        Term basedKapp = items.get(items.size()-1);
+        Term current = items.get(items.size() - 1);
         
-        for(int i = items.size()-2; i >= 0; --i){
-            basedKapp = KApp.of(sort().constructorLabel(), items.get(i), basedKapp);
+        for(int i = items.size() - 2; i >= 0; --i){
+            current = KApp.of(sort().constructorLabel(), items.get(i), current);
         }
         
-        return basedKapp;
+        return current;
     }
 }
