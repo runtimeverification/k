@@ -270,7 +270,7 @@ public final class KRunOptions {
             return s;
         }
         org.kframework.parser.concrete.KParser
-        .ImportTblRule(configurationCreation.definitionLoading.directory());
+        .ImportTblRule(configurationCreation.definitionLoading.definition());
         return DefinitionLoader.parsePattern(
                 patternToParse,
                 "Command line pattern",

@@ -8,16 +8,16 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 public class DefinitionLoadingOptions {
-    @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the kompiled " +
+    @Parameter(names={"--definition", "-d"}, description="Path to the directory in which the kompiled " +
             "K definition resides. The default is the unique, only directory with the suffix '-kompiled' " +
             "in the current directory. A definition may also be specified with the 'KRUN_COMPILED_DEF' " +
             "environment variable, in which case it is used if the option is not specified on the command line.")
-    private File directory;
+    private File definition;
     
-    public File directory() {
-        if (directory == null) {
+    public File definition() {
+        if (definition == null) {
             if (System.getenv("KRUN_COMPILED_DEF") != null) {
-                directory = new File(System.getenv("KRUN_COMPILED_DEF"));
+                definition = new File(System.getenv("KRUN_COMPILED_DEF"));
             } else {
                 File[] dirs = new File(".").listFiles(new FilenameFilter() {
                     @Override
@@ -28,25 +28,25 @@ public class DefinitionLoadingOptions {
     
                 for (int i = 0; i < dirs.length; i++) {
                     if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
-                        if (directory != null) {
+                        if (definition != null) {
                             throw new ParameterException("Multiple compiled definitions found in the "
-                                    + "current working directory: " + directory.getAbsolutePath() + " and " +
+                                    + "current working directory: " + definition.getAbsolutePath() + " and " +
                                     dirs[i].getAbsolutePath());
                         } else {
-                            directory = dirs[i];
+                            definition = dirs[i];
                         }
                     }
                 }
                 
-                if (directory == null) {
+                if (definition == null) {
                     throw new ParameterException("Could not find a compiled definition. " +
                             "Use --directory to specify one.");
                 }
             }
         }
-        if (!directory.isDirectory()) {
-            throw new ParameterException("Does not exist or not a directory: " + directory.getAbsolutePath());
+        if (!definition.isDirectory()) {
+            throw new ParameterException("Does not exist or not a directory: " + definition.getAbsolutePath());
         }
-        return directory;
+        return definition;
     }
 }

@@ -66,7 +66,7 @@ public class KastFrontEnd {
             String source = options.source();
 
         
-            File compiledFile = options.definitionLoading.directory();
+            File compiledFile = options.definitionLoading.definition();
             Context context;
             KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath(), options.global.debug);
             

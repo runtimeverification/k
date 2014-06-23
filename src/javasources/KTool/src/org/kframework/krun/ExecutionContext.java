@@ -55,7 +55,7 @@ public class ExecutionContext {
         this.sw = sw;
         
         KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class,
-                new File(ccOptions.definitionLoading.directory(),
+                new File(ccOptions.definitionLoading.definition(),
                         "kompile-options.bin").getAbsolutePath(), krunOptions.global.debug);
         //merge krun options into kompile options object
         kompileOptions.global = krunOptions.global;
@@ -65,12 +65,12 @@ public class ExecutionContext {
         context = new Context(krunOptions, ccOptions, kompileOptions);
 
         context.dotk = new File(
-                ccOptions.definitionLoading.directory().getParent() + File.separator
+                ccOptions.definitionLoading.definition().getParent() + File.separator
                         + ".k");
         if (!context.dotk.exists()) {
             context.dotk.mkdirs();
         }
-        context.kompiled = ccOptions.definitionLoading.directory();
+        context.kompiled = ccOptions.definitionLoading.definition();
 
         sw.printIntermediate("Initializing definition paths");
 
