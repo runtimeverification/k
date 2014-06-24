@@ -108,8 +108,8 @@ public class KRunner {
     }
 
     private static String maudeEscapePath(String original) {
-	// backslash-escape white spaces, backslashes, and double quotes
-	return original.replaceAll("[\\s\"\\\\]", "\\\\$0");
+        // backslash-escape white spaces, backslashes, and double quotes
+        return original.replaceAll("[\\s\"\\\\]", "\\\\$0");
     }
 
     public int run() {
