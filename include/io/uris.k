@@ -120,9 +120,9 @@ module URIS
   rule ListItem(#parseInput(Sort:String, Delimiters:String)) ListItem(#buffer(S:String => substrString(S, 1, lengthString(S)))) _:List when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1 [stdin]
   
   rule ListItem(#buffer(_)) (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
-  rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List) ListItem(#buffer(_)) [stdout, stderr]
+  rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List) ListItem(#buffer(_)) _:List [stdout, stderr]
   rule ListItem(#buffer(_)) (ListItem(.K) => .List) ListItem(#istream(_:Int)) [stdin]
-  rule ListItem(#ostream(_:Int)) (ListItem(.K) => .List) ListItem(#buffer(_)) [stdout, stderr]
+  rule ListItem(#ostream(_:Int)) (ListItem(.K) => .List) ListItem(#buffer(_)) _:List [stdout, stderr]
 
 // ------------------------------
 // Dynamic parsing
