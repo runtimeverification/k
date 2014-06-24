@@ -117,9 +117,8 @@ module FREE-VARS
   syntax Set ::= #freeVars(KList, Set, Set)  [function, klabel(#freevars2)]
   rule #freeVars(.KList, _, Free:Set) => Free
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
-    => #freeVars(Ks, Bound, Free) when X in Bound
-  rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
-    => #freeVars(Ks, Bound, Free SetItem(X)) when notBool(X in Bound)
+    => #if X in Bound ==K true #then #freeVars(Ks, Bound, Free) #else
+     #freeVars(Ks, Bound, Free SetItem(X)) #fi
   rule #freeVars((L:KLabel(Ks:KList) => Ks),, _, _, _)
     when (isVariable(L(Ks)) =/=K true) andBool
          (isBinder(L(Ks)) =/=K true) andBool
@@ -182,7 +181,7 @@ module SUBSTITUTION
 
   rule #substituteFV(Y:Variable, M:Map Y |-> V, _) => V
   rule #substituteFV(Y:Variable, M:Map, _) => Y
-    when notBool (Y in keys(M))
+    when Y in keys(M) =/=K true
   
   rule #substituteFV(K:K, M:Map, FV) => #substituteBinder(K, M, FV)
     when isBinder(K)
@@ -276,13 +275,12 @@ module SUBSTITUTION
 // Grigore: I added the operation below here, because I want it to be
 // generic.  I don't know how to generate globablly fresh variables
 // of desired type any other way ... sorry.  This is used in type inference
-/******** Soon to be *******************
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T) => T
   rule freshVariables(SetItem(Tv) S:Set, T)
     => freshVariables(S, T[#freshSym(Tv)/Tv])
-*/
 
+/*
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T:K) => T
   rule freshVariables(SetItem(Tv:K) S:Set, T:K)
@@ -290,5 +288,5 @@ module SUBSTITUTION
 
   syntax K ::= #changeLabel(K,K)  [function]
   rule #changeLabel(_:KLabel(Ks:KList),L':KLabel(_)) => L'(Ks)
-
+*/
 endmodule
