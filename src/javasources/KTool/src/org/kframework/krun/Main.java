@@ -48,6 +48,7 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
@@ -181,7 +182,7 @@ public class Main {
 //            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
-                    output.put("$noIO", DataStructureBuiltin.element(myList, noIO));
+                    output.put("$noIO", noIO);
                 }
 //            } else {
 //                output.put("$noIO", new ListItem(noIO));
@@ -191,7 +192,7 @@ public class Main {
 //            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
-                    output.put("$noIO", DataStructureBuiltin.empty(myList));
+                    output.put("$noIO", KSequence.EMPTY);
                 }
 //            } else {
 //                output.put("$noIO", org.kframework.kil.List.EMPTY);

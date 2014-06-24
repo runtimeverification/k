@@ -121,6 +121,8 @@ module URIS
   
   rule ListItem(#buffer(_)) (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
   rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List) ListItem(#buffer(_)) [stdout, stderr]
+  rule ListItem(#buffer(_)) (ListItem(.K) => .List) ListItem(#istream(_:Int)) [stdin]
+  rule ListItem(#ostream(_:Int)) (ListItem(.K) => .List) ListItem(#buffer(_)) [stdout, stderr]
 
 // ------------------------------
 // Dynamic parsing

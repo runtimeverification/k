@@ -15,36 +15,45 @@ import org.kframework.kil.visitors.Visitor;
  * @author TraianSF
  */
 public class ListBuiltin extends CollectionBuiltin {
-    private final Collection<Term> elementsRight;
+    private final List<Term> elementsRight;
 
-    public ListBuiltin(DataStructureSort sort, Collection<Term> baseTerms, Collection<Term> elementsLeft,
-                       Collection<Term> elementsRight) {
+    private ListBuiltin(DataStructureSort sort, List<Term> baseTerms, List<Term> elementsLeft,
+                       List<Term> elementsRight) {
         super(sort, baseTerms, elementsLeft);
         this.elementsRight = elementsRight;
     }
 
-    public Collection<Term> elementsLeft() {
+    public List<Term> elementsLeft() {
         return elements();
     }
 
-    public Collection<Term> elementsRight() {
-        return Collections.unmodifiableCollection(elementsRight);
+    public List<Term> elementsRight() {
+        return Collections.unmodifiableList(elementsRight);
+    }
+    
+    @Override
+    public List<Term> elements() {
+        return Collections.unmodifiableList((List<Term>) elements);
+    }
+    
+    @Override
+    public List<Term> baseTerms() {
+        return Collections.unmodifiableList((List<Term>) baseTerms);
     }
     
     @Override
     public DataStructureBuiltin shallowCopy(Collection<Term> terms) {
-        return ListBuiltin.of(sort(), elementsLeft(), elementsRight(), terms);
+        return ListBuiltin.of(sort(), (List<Term>)terms, elementsLeft(), elementsRight());
     }
     
     @Override
     public CollectionBuiltin shallowCopy(Collection<Term> terms,
             Collection<Term> elements) {
-        return ListBuiltin.of(sort(), elements, elementsRight(), terms);
+        return ListBuiltin.of(sort(), (List<Term>)terms, (List<Term>)elements, elementsRight());
     }
 
-    // TODO(YilongL): shouldn't elementsLeft and elementsRight have type java.util.List?
-    public static ListBuiltin of(DataStructureSort sort, Collection<Term> elementsLeft, Collection<Term> elementsRight,
-                       Collection<Term> terms) {
+    public static ListBuiltin of(DataStructureSort sort, List<Term> terms, List<Term> elementsLeft,
+                       List<Term> elementsRight) {
         ArrayList<Term> left = new ArrayList<Term>(elementsLeft);
         ArrayList<Term> base = new ArrayList<Term>();
         ArrayList<Term> right = new ArrayList<Term>();
@@ -54,8 +63,8 @@ public class ListBuiltin extends CollectionBuiltin {
                 ListBuiltin listBuiltin = (ListBuiltin) term;
                 assert listBuiltin.sort().equals(sort) : "inner lists are expected to have the same sort for now, found " + sort + " and " + listBuiltin.sort();
 //              Recurse to make sure there are no additional nested inner ListBuiltins
-                listBuiltin = ListBuiltin.of(listBuiltin.sort(), listBuiltin.elementsLeft(), listBuiltin.elementsRight(),
-                        listBuiltin.baseTerms());
+                listBuiltin = ListBuiltin.of(listBuiltin.sort(), listBuiltin.baseTerms(), listBuiltin.elementsLeft(),
+                        listBuiltin.elementsRight());
                 Collection<Term> listBuiltinBase = listBuiltin.baseTerms();
                 Collection<Term> listBuiltinLeft = listBuiltin.elementsLeft();
                 Collection<Term> listBuiltinRight = listBuiltin.elementsRight();
@@ -85,6 +94,10 @@ public class ListBuiltin extends CollectionBuiltin {
             }
         }
         right.addAll(elementsRight);
+        if (base.isEmpty()) {
+            left.addAll(right);
+            right.clear();
+        }
         return new ListBuiltin(sort, base, left, right);
     }
 

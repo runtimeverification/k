@@ -50,7 +50,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList());
         } else if (sort.type().equals(KSorts.LIST)) {
-            return new ListBuiltin(sort,
+            return ListBuiltin.of(sort,
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList(), Collections.<Term>emptyList());
         } else if (sort.type().equals(KSorts.MAP)) {
@@ -73,7 +73,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                     + argument.length;
 
             if (sort.type().equals(KSorts.LIST)) {
-                ListBuiltin l = new ListBuiltin(
+                ListBuiltin l = ListBuiltin.of(
                         sort,
                         Collections.<Term>emptyList(),
                         Collections.singletonList(argument[0]),
@@ -154,12 +154,8 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                     break;
                 }
 
-                for (Term element : listBuiltin.elementsRight()) {
-                    elementsRight.add(0, element);
-                }
-                for (Term element : listBuiltin.elementsLeft()) {
-                    elementsRight.add(0, element);
-                }
+                elementsRight.addAll(0, listBuiltin.elementsRight());
+                elementsRight.addAll(0, listBuiltin.elementsLeft());
             }
 
             if (leftIndex == rightIndex && argument[rightIndex] instanceof ListBuiltin) {
@@ -173,7 +169,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                 terms.addAll(Arrays.asList(argument).subList(leftIndex, rightIndex + 1));
             }
 
-            return ListBuiltin.of(sort, elementsLeft, elementsRight, terms);
+            return ListBuiltin.of(sort, terms, elementsLeft, elementsRight);
         } else if (sort.type().equals(KSorts.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
             Collection<Term> terms = new ArrayList<Term>();
