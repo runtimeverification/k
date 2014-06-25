@@ -57,40 +57,16 @@ public class ListBuiltin extends CollectionBuiltin {
         ArrayList<Term> left = new ArrayList<Term>(elementsLeft);
         ArrayList<Term> base = new ArrayList<Term>();
         ArrayList<Term> right = new ArrayList<Term>();
-        boolean lhs = true;
-        for (Term term : terms) {
-            if (term instanceof ListBuiltin) {
-                ListBuiltin listBuiltin = (ListBuiltin) term;
-                assert listBuiltin.sort().equals(sort) : "inner lists are expected to have the same sort for now, found " + sort + " and " + listBuiltin.sort();
-//              Recurse to make sure there are no additional nested inner ListBuiltins
-                listBuiltin = ListBuiltin.of(listBuiltin.sort(), listBuiltin.baseTerms(), listBuiltin.elementsLeft(),
-                        listBuiltin.elementsRight());
-                Collection<Term> listBuiltinBase = listBuiltin.baseTerms();
-                Collection<Term> listBuiltinLeft = listBuiltin.elementsLeft();
-                Collection<Term> listBuiltinRight = listBuiltin.elementsRight();
-                if (lhs) {
-                    left.addAll(listBuiltinLeft);
-                    if (!listBuiltinBase.isEmpty()) {
-                        lhs = false;
-                        base.addAll(listBuiltinBase);
-                        right.addAll(listBuiltinRight);
-                    } else {
-                        left.addAll(listBuiltinRight);
-                    }
-                } else {
-                    assert listBuiltinLeft.isEmpty() : "left terms no longer allowed here";
-                    if (!listBuiltinBase.isEmpty()) {
-                        assert right.isEmpty() : "we cannot add base terms if right terms have been already added";
-                        assert listBuiltinLeft.isEmpty() : "inner list cannot have elements on the left";
-                        base.addAll(listBuiltinBase);
-                    } else {
-                        right.addAll(listBuiltinLeft);
-                    }
-                    right.addAll(listBuiltinRight);
-                }
+        if (!terms.isEmpty()) {
+            if (terms.get(0) instanceof ListBuiltin 
+                    || terms.get(terms.size() - 1) instanceof ListBuiltin) {
+                ListBuiltin nestedListBuiltin = (ListBuiltin) DataStructureBuiltin.of(sort, 
+                        terms.toArray(new Term[terms.size()]));
+                left.addAll(nestedListBuiltin.elementsLeft());
+                base.addAll(nestedListBuiltin.baseTerms());
+                right.addAll(nestedListBuiltin.elementsRight());        
             } else {
-                lhs = false;
-                base.add(term);
+                base.addAll(terms);
             }
         }
         right.addAll(elementsRight);
