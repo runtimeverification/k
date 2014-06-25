@@ -16,7 +16,7 @@ module UNIFICATION
   syntax K ::= applyMgu(Mgu,K)       [function, hook(Unification:applyMgu), latex({#1}({#2}))]  // applies Mgu to any term
   rule applyMgu(Theta:Mgu,K) => applySubst(Theta,K)
 
-  syntax Set ::= applyMgu(Mgu,Set)  [function, latex({#1}({#2}))]
+//  syntax Set ::= applyMgu(Mgu,Set)  [function, latex({#1}({#2}))]
   rule applyMgu(_, .Set) => .Set
   rule applyMgu(Theta:Mgu, SetItem(K:K) S:Set)
     => SetItem(applyMgu(Theta,K)) applyMgu(Theta,S)
@@ -154,19 +154,19 @@ constraint.
   rule accumulateVars(#vars(Xs:KList)) => #vars(Xs)   [structural, anywhere]
 
 
-  syntax Map ::= applyMgu(Mgu, Map) [function]
+//  syntax Map ::= applyMgu(Mgu, Map) [function]
   rule applyMgu(Mgu, ((X |-> V) M:Map))
     => (X |-> applyMgu(Mgu,V)) applyMgu(Mgu, M)
   rule applyMgu(_,.Map) => .Map
 
 
   syntax Map ::= #metaVariablesMap(K) [function]
-  rule #metaVariablesMap(K:K) => #metaVarsMap(getVars(K))
+  rule #metaVariablesMap(K:K) => #metaVarsMap(getVars(K), .Map)
 
-  syntax Map ::= #metaVarsMap(K) [function]
-  rule #metaVarsMap(#vars((X:K => .KList),,_))
-       (.Map => #tokenToString(X) |-> X)
-  rule #metaVarsMap(#vars(.KList)) => .Map
+  syntax Map ::= #metaVarsMap(K, Map) [function]
+  rule #metaVarsMap(#vars((X:K => .KList),,_),
+       M:Map (.Map => #tokenToString(X) |-> X))
+  rule #metaVarsMap(#vars(.KList), M:Map) => M:Map
 
 //  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
@@ -195,11 +195,14 @@ constraint.
 
 // Turns an Mgu into a Map, ignoring the symbolic bindings
   syntax Map ::= Mgu2Map(K) [function]
+  rule Mgu2Map(K) => Mgu2MapHelper(K, .Map)
 
-  rule Mgu2Map(subst((eqn(K1:K,,_:K) => .KList),,_))
+  syntax Map ::= Mgu2MapHelper(K, Map) [function]
+
+  rule Mgu2MapHelper(subst((eqn(K1:K,,_:K) => .KList),,_), _)
     when isSymbolicK(K1)   // ignore symbolic bindings
-  rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
-       (. => K1 |-> K2)
+  rule Mgu2MapHelper(subst((eqn(K1:K,,K2:K) => .KList),,_), M:Map
+       (.Map => K1 |-> K2))
     when isSymbolicK(K1) =/=K true
 
 /*
@@ -223,7 +226,7 @@ constraint.
 */
 
 
-  rule Mgu2Map(subst(.KList)) => .Map
+  rule Mgu2MapHelper(subst(.KList), M:Map) => M
 
 
 

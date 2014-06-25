@@ -6,7 +6,6 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 public class PosetTest {
@@ -33,7 +32,13 @@ public class PosetTest {
     @Test
     public void testGetMaximalLowerBounds() throws Exception {
         Assert.assertEquals(Sets.newHashSet("B0", "B1"), 
-                poset.getMaximalLowerBounds(Lists.newArrayList("A0", "A1", "A2")));
+                poset.getMaximalLowerBounds(Sets.newHashSet("A0", "A1", "A2")));
+    }
+    
+    @Test
+    public void testGetMinimalUpperBounds() throws Exception {
+        Assert.assertEquals(Sets.newHashSet("A0", "A1", "A2"),
+                poset.getMinimalUpperBounds(Sets.newHashSet("B0", "B1")));
     }
     
     @Test
