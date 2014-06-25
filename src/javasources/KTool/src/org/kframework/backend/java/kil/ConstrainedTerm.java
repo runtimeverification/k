@@ -155,28 +155,48 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.add(data.term, constrainedTerm.data.term);
         unificationConstraint.simplify();
-        Set<Variable> variables = constrainedTerm.variableSet();
+
+        if (unificationConstraint.isFalse()) {
+            return null;
+        }
+
+        unificationConstraint.addAll(constrainedTerm.lookups);
+        unificationConstraint.addAll(constrainedTerm.constraint);
+        unificationConstraint.simplify();
+
+        unificationConstraint.expandPatterns(unificationConstraint, false);
+        unificationConstraint.simplify();
+
+        Set<Variable> variables = unificationConstraint.variableSet();
         variables.removeAll(variableSet());
         unificationConstraint.orientSubstitution(variables);
-        if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
+        if (unificationConstraint.isFalse()
+                || !unificationConstraint.substitution().keySet().containsAll(variables)) {
             return null;
         }
 
-        SymbolicConstraint implicationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
-        implicationConstraint.addAll(unificationConstraint);
-        implicationConstraint.addAll(constrainedTerm.lookups);
-        implicationConstraint.addAll(constrainedTerm.constraint);
-        implicationConstraint.simplify();
-        implicationConstraint.orientSubstitution(variables);
-        implicationConstraint = implicationConstraint.substituteWithBinders(implicationConstraint.substitution(), context);
+        SymbolicConstraint leftHandSide = new SymbolicConstraint(constrainedTerm.termContext());
+        leftHandSide.addAll(constraint);
+        leftHandSide.simplify();
 
+        SymbolicConstraint rightHandSide = new SymbolicConstraint(constrainedTerm.termContext());
+        for (Map.Entry<Variable, Term> entry : unificationConstraint.substitution().entrySet()) {
+            if (!variables.contains(entry.getKey())) {
+                rightHandSide.add(entry.getKey(), entry.getValue());
+            }
+        }
+        for (Equality equality : unificationConstraint.equalities()) {
+            rightHandSide.add(equality.leftHandSide(), equality.rightHandSide());
+        }
+        rightHandSide.simplify();
+
+        if (!leftHandSide.implies(rightHandSide, variables)) {
+            return null;
+        }
+
+        unificationConstraint.addAll(lookups);
         unificationConstraint.addAll(constraint);
         unificationConstraint.simplify();
-        if (!unificationConstraint.implies(implicationConstraint)) {
-            return null;
-        }
-
-        unificationConstraint.addAll(implicationConstraint);
 
         return unificationConstraint;
     }
@@ -241,6 +261,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             if (candidate.isFalse()) {
                 continue;
             }
+
+            // TODO(AndreiS): find a better place for pattern expansion
+            candidate.expandPatterns(candidate, true);
+            candidate.simplify();
 
             if (!K.do_kompilation) {
                 /*

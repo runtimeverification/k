@@ -3,16 +3,7 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
-import org.kframework.backend.java.symbolic.BottomUpVisitor;
-import org.kframework.backend.java.symbolic.Evaluator;
-import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.backend.java.symbolic.LocalEvaluator;
-import org.kframework.backend.java.symbolic.Matchable;
-import org.kframework.backend.java.symbolic.SubstitutionTransformer;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.symbolic.Unifiable;
+import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
@@ -176,6 +167,10 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     @Override
     public Term substituteWithBinders(Variable variable, Term term, TermContext context) {
         return (Term) super.substituteWithBinders(variable, term, context);
+    }
+
+    public Term expandPatterns(SymbolicConstraint constraint, boolean narrow, TermContext context) {
+        return PatternExpander.expand(this, constraint, narrow, context);
     }
 
     @Override

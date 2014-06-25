@@ -37,9 +37,6 @@ import java.util.List;
  */
 public class CompileDataStructures extends CopyOnWriteTransformer {
 
-    private enum Status { LHS, RHS, CONDITION }
-
-    private Status status;
     private String location;
     private String filename;
 
@@ -58,13 +55,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                 + "CompileDataStructures pass should be applied after ResolveRewrite pass";
 
         Rewrite rewrite = (Rewrite) node.getBody();
-        status = Status.LHS;
         Term lhs = (Term) this.visitNode(rewrite.getLeft());
-        status = Status.RHS;
         Term rhs = (Term) this.visitNode(rewrite.getRight());
         Term requires;
         if (node.getRequires() != null) {
-            status = Status.CONDITION;
             requires = (Term) this.visitNode(node.getRequires());
         } else {
             requires = null;
@@ -142,20 +136,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
         
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
-            DataStructureBuiltin dataStructure = DataStructureBuiltin.of(sort, arguments);
-            if (status == Status.LHS && !dataStructure.isLHSView()) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
-                        "unexpected left-hand side data structure format; "
-                        + "expected elements and at most one variable\n"
-                        + node,
-                        getName(),
-                        filename,
-                        location));
-                return null;
-            }
-            return dataStructure;
+            return DataStructureBuiltin.of(sort, arguments);
         } else if (sort.elementLabel().equals(kLabelConstant.getLabel())) {
             /* TODO(AndreiS): check sort restrictions */
             return DataStructureBuiltin.element(sort, arguments);

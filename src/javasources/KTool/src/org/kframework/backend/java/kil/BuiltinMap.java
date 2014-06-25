@@ -1,11 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.collections15.map.UnmodifiableMap;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -15,6 +11,12 @@ import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -36,6 +38,21 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     private BuiltinMap() {
         super(null, Kind.KITEM);
         entries = Collections.emptyMap();
+    }
+
+    public static Term concatenationMap(List<Term> maps, TermContext context) {
+        if (maps.isEmpty()) {
+            return BuiltinMap.EMPTY_MAP;
+        }
+
+        Term result = maps.get(0);
+        for (int i = 1; i < maps.size(); ++i) {
+            result = KItem.of(
+                    KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, context.definition()),
+                    new KList(ImmutableList.of(result, maps.get(i))),
+                    context);
+        }
+        return result;
     }
 
     public Term get(Term key) {
@@ -188,8 +205,6 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
         /**
          * Sets the entries as the given {@code BuiltinMap} without copying the
          * contents. Once the entries are set, no more modification is allowed.
-         * 
-         * @param map
          */
         public void setEntriesAs(BuiltinMap builtinMap) {
             // builtinMap.entries must be an UnmodifiableMap

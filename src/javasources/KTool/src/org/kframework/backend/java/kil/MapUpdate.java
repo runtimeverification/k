@@ -1,22 +1,16 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
-import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import org.kframework.kil.MapBuiltin;
 
 /**
  *
@@ -38,37 +32,45 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         this.updateMap = ImmutableMap.copyOf(updateMap);
     }
 
-    public Term evaluateUpdate() {
+    public Term evaluateUpdate(TermContext context) {
         if (removeSet.isEmpty() && updateMap().isEmpty()) {
             return map;
         }
 
-        if (!(map instanceof BuiltinMap)) {
+        // TODO(AndreiS): hack to deal with maps with multiple patterns
+        if (!BuiltinMapUtils.isNormalMap(map)) {
             return this;
         }
-        BuiltinMap builtinMap = ((BuiltinMap) map);
-
         BuiltinMap.Builder builder = BuiltinMap.builder();
-        builder.putAll(builtinMap.getEntries());
-        Set<Term> keysToRemove = new HashSet<Term>();
-        for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            Term nextKey = iterator.next();
-            if (builder.remove(nextKey) != null) {
-                keysToRemove.add(nextKey);
+        builder.putAll(BuiltinMapUtils.getMapEntries(map));
+
+        List<Term> mapItems = new ArrayList<>();
+        mapItems.addAll(BuiltinMapUtils.getMapPatterns(map));
+        mapItems.addAll(BuiltinMapUtils.getMapVariables(map));
+
+        Set<Term> pendingRemoveSet = new HashSet<>();
+        for (Term key : removeSet) {
+            if (builder.remove(key) == null) {
+                pendingRemoveSet.add(key);
             }
         }
 
-        if (removeSet.size() > keysToRemove.size()) {
+        if (!pendingRemoveSet.isEmpty()) {
             // TODO(YilongL): why not return Bottom when there is no frame
-            return new MapUpdate(builtinMap, Sets.difference(removeSet, keysToRemove), updateMap);
+            if (!builder.getEntries().isEmpty()) {
+                mapItems.add(builder.build());
+            }
+            return new MapUpdate(
+                    BuiltinMap.concatenationMap(mapItems, context),
+                    pendingRemoveSet,
+                    updateMap);
         }
 
         builder.putAll(updateMap);
-
-        if (builtinMap.hasFrame()) {
-            builder.setFrame(builtinMap.frame());
+        if (!builder.getEntries().isEmpty()) {
+            mapItems.add(builder.build());
         }
-        return builder.build();
+        return BuiltinMap.concatenationMap(mapItems, context);
     }
 
     public Term map() {

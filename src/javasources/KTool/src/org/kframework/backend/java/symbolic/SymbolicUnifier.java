@@ -1,14 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.google.common.collect.*;
 import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
@@ -34,11 +29,8 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.loader.Context;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 
 
 /**
@@ -179,6 +171,12 @@ public class SymbolicUnifier extends AbstractUnifier {
                "kind mismatch between " + term + " (" + term.kind() + ")"
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";
 
+        // TODO(AndreiS): treat Map unification less adhoc
+        if (BuiltinMapUtils.isNormalMap(term) && BuiltinMapUtils.isNormalMap(otherTerm)) {
+            unifyMap(term, otherTerm, true);
+            return;
+        }
+
         if (term.isSymbolic() || otherTerm.isSymbolic()) {
             // TODO(YilongL): can we move this adhoc code to another place?
             /* special case for concrete collections  */
@@ -205,6 +203,113 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
+    public boolean unifyMap(Term term, Term otherTerm, boolean addUnchanged) {
+        assert BuiltinMapUtils.getBuiltinMapUtils(term).rest.isEmpty();
+        assert BuiltinMapUtils.getBuiltinMapUtils(otherTerm).rest.isEmpty();
+
+        Map<Term, Term> entries = BuiltinMapUtils.getMapEntries(term);
+        Map<Term, Term> otherEntries = BuiltinMapUtils.getMapEntries(otherTerm);
+        Set<Term> commonKeys = Sets.intersection(entries.keySet(), otherEntries.keySet());
+        Map<Term, Term> remainingEntries = new HashMap<>();
+        Map<Term, Term> otherRemainingEntries = new HashMap<>();
+        for (Term key : commonKeys) {
+            unify(entries.get(key), otherEntries.get(key));
+        }
+        for (Term key : entries.keySet()) {
+            if (!commonKeys.contains(key)) {
+                remainingEntries.put(key, entries.get(key));
+            }
+        }
+        for (Term key : otherEntries.keySet()) {
+            if (!commonKeys.contains(key)) {
+                otherRemainingEntries.put(key, otherEntries.get(key));
+            }
+        }
+
+        List<KItem> patterns = BuiltinMapUtils.getMapPatterns(term);
+        List<KItem> otherPatterns = BuiltinMapUtils.getMapPatterns(otherTerm);
+        Set<KItem> unifiedPatterns = new HashSet<>();
+        Set<KItem> otherUnifiedPatterns = new HashSet<>();
+        List<KItem> remainingPatterns = new ArrayList<>();
+        List<KItem> otherRemainingPatterns = new ArrayList<>();
+        for (KItem pattern : patterns) {
+            for (KItem otherPattern : otherPatterns) {
+                if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
+                    ImmutableList<Term> patternOutput = pattern.getPatternOutput();
+                    ImmutableList<Term> otherPatternOutput = otherPattern.getPatternOutput();
+                    for (int i = 0; i < patternOutput.size(); ++i) {
+                        unify(patternOutput.get(i), otherPatternOutput.get(i));
+                    }
+                    unifiedPatterns.add(pattern);
+                    otherUnifiedPatterns.add(otherPattern);
+                }
+            }
+        }
+        for (KItem pattern : patterns) {
+            if (!unifiedPatterns.contains(pattern)) {
+                remainingPatterns.add(pattern);
+            }
+        }
+        for (KItem otherPattern : otherPatterns) {
+            if (!otherUnifiedPatterns.contains(otherPattern)) {
+                otherRemainingPatterns.add(otherPattern);
+            }
+        }
+
+        List<Variable> variables = BuiltinMapUtils.getMapVariables(term);
+        List<Variable> otherVariables = BuiltinMapUtils.getMapVariables(otherTerm);
+        Set<Variable> commonVariables = Sets.intersection(
+                ImmutableSet.copyOf(variables),
+                ImmutableSet.copyOf(otherVariables));
+        List<Variable> remainingVariables = new ArrayList<>();
+        List<Variable> otherRemainingVariables = new ArrayList<>();
+        for (Variable variable : variables) {
+            if (!commonVariables.contains(variable)) {
+                remainingVariables.add(variable);
+            }
+        }
+        for (Variable otherVariable : otherVariables) {
+            if (!commonVariables.contains(otherVariable)) {
+                otherRemainingVariables.add(otherVariable);
+            }
+        }
+
+        if (remainingEntries.isEmpty() && remainingPatterns.isEmpty() && remainingVariables.isEmpty()
+                && !(otherRemainingEntries.isEmpty() && otherRemainingPatterns.isEmpty())) {
+            fail(term, otherTerm);
+        }
+        if (otherRemainingEntries.isEmpty() && otherRemainingPatterns.isEmpty() && otherRemainingVariables.isEmpty()
+                && !(remainingEntries.isEmpty() && remainingPatterns.isEmpty())) {
+            fail(term, otherTerm);
+        }
+
+        if (!(commonKeys.isEmpty() && unifiedPatterns.isEmpty() && commonVariables.isEmpty()) || addUnchanged) {
+            List<Term> mapItems = new ArrayList<>();
+            if (!remainingEntries.isEmpty()) {
+                BuiltinMap.Builder builder = BuiltinMap.builder();
+                builder.putAll(remainingEntries);
+                mapItems.add(builder.build());
+            }
+            mapItems.addAll(remainingPatterns);
+            mapItems.addAll(remainingVariables);
+            List<Term> otherMapItems = new ArrayList<>();
+            if (!otherRemainingEntries.isEmpty()) {
+                BuiltinMap.Builder otherBuilder = BuiltinMap.builder();
+                otherBuilder.putAll(otherRemainingEntries);
+                otherMapItems.add(otherBuilder.build());
+            }
+            otherMapItems.addAll(otherRemainingPatterns);
+            otherMapItems.addAll(otherRemainingVariables);
+
+            fConstraint.add(
+                    BuiltinMap.concatenationMap(mapItems, termContext),
+                    BuiltinMap.concatenationMap(otherMapItems, termContext));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public void unify(BuiltinList builtinList, Term term) {
         assert !(term instanceof Variable);
@@ -227,8 +332,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 //        if (builtinMap.equals(BuiltinMap.EMPTY) && term.equals(BuiltinMap.EMPTY))
 //            return;
 
-        throw new UnsupportedOperationException(
-                "map matching is only supported when one of the maps is a variable.");
+        //throw new UnsupportedOperationException(
+        //        "map matching is only supported when one of the maps is a variable.");
+        this.fail(builtinMap, term);
     }
 
     @Override

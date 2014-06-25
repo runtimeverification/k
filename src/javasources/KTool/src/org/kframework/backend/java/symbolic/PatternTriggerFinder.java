@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.KItem;
@@ -8,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Finds map patterns candidates for expansion.
+ *
+ * @see org.kframework.backend.java.symbolic.PatternExpander
+ *
  * @author AndreiS
  */
 public class PatternTriggerFinder extends BottomUpVisitor {

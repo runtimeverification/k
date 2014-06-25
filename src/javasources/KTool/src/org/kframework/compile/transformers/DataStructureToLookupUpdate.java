@@ -21,6 +21,9 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.krun.CommandlineOptions;
+import org.kframework.krun.K;
+import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -47,7 +50,6 @@ import java.util.Set;
  * @author AndreiS
  */
 @KilProperty.Requires({KilProperty.TOP_REWRITING, KilProperty.COMPILED_DATA_STRUCTURES})
-@KilProperty.Ensures(KilProperty.NO_DATA_STRUCTURE_PATTERN_MATCHING)
 public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
     private interface VariableCache {
@@ -119,6 +121,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private Map<Variable, Integer> concreteSize = new HashMap<>();
     private ArrayList<VariableCache> queue = new ArrayList<>();
     private Status status;
+    private String location;
+    private String filename;
 
     public DataStructureToLookupUpdate(Context context) {
         super("Compile maps into load and store operations", context);
@@ -130,9 +134,15 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                "expected rewrite at the top of rule " + node + ". "
                + "DataStructureToLookupUpdate pass should be applied after ResolveRewrite pass.";
 
+        if (!K.prove.equals("")) {
+            return node;
+        }
+
         reverseMap.clear();
         concreteSize.clear();
         queue.clear();
+        location = node.getLocation();
+        filename = node.getFilename();
 
         Rewrite rewrite = (Rewrite) node.getBody();
 
@@ -282,6 +292,10 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         returnNode.setConcreteDataStructureSize(
                 new HashMap<>(returnNode.getConcreteDataStructureSize()));
         returnNode.getConcreteDataStructureSize().putAll(concreteSize);
+
+        location = null;
+        filename = null;
+
         return returnNode;
     }
 
@@ -289,7 +303,18 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     public ASTNode visit(ListBuiltin node, Void _)  {
         node = (ListBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
-            assert node.isLHSView();
+            if (!node.isLHSView()) {
+                GlobalSettings.kem.register(new KException(
+                        KException.ExceptionType.ERROR,
+                        KException.KExceptionGroup.CRITICAL,
+                        "unexpected left-hand side data structure format; "
+                        + "expected elements and at most one variable\n"
+                        + node,
+                        getName(),
+                        filename,
+                        location));
+                return null;
+            }
 
             if (node.elementsLeft().isEmpty() && node.elementsRight().isEmpty()
                     && node.hasViewBase()) {
@@ -382,7 +407,18 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     public ASTNode visit(MapBuiltin node, Void _)  {
         node = (MapBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
-            assert node.isLHSView();
+            if (!node.isLHSView()) {
+                GlobalSettings.kem.register(new KException(
+                        KException.ExceptionType.ERROR,
+                        KException.KExceptionGroup.CRITICAL,
+                        "unexpected left-hand side data structure format; "
+                        + "expected elements and at most one variable\n"
+                        + node,
+                        getName(),
+                        filename,
+                        location));
+                return null;
+            }
 
             if (node.elements().isEmpty() && node.hasViewBase()) {
                     return node.viewBase();
@@ -455,7 +491,18 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     public ASTNode visit(SetBuiltin node, Void _)  {
         node = (SetBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
-            assert node.isLHSView();
+            if (!node.isLHSView()) {
+                GlobalSettings.kem.register(new KException(
+                        KException.ExceptionType.ERROR,
+                        KException.KExceptionGroup.CRITICAL,
+                        "unexpected left-hand side data structure format; "
+                        + "expected elements and at most one variable\n"
+                        + node,
+                        getName(),
+                        filename,
+                        location));
+                return null;
+            }
 
             if (node.elements().isEmpty() && node.hasViewBase()) {
                 return node.viewBase();

@@ -97,7 +97,7 @@ public class LocalEvaluator extends LocalTransformer {
 
     @Override
     public ASTNode transform(MapUpdate mapUpdate) {
-        return mapUpdate.evaluateUpdate();
+        return mapUpdate.evaluateUpdate(context);
     }
 
 }

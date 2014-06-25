@@ -450,15 +450,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 baseTerms.add((Term) this.visitNode(term));
             }
             baseTerms.add(builder.build());
-
-            Term result = baseTerms.get(0);
-            for (int i = 1; i < baseTerms.size(); ++i) {
-                result = KItem.of(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, definition),
-                        new KList(ImmutableList.of(result, baseTerms.get(i))),
-                        TermContext.of(globalContext));
-            }
-            return result;
+            return BuiltinMap.concatenationMap(baseTerms, TermContext.of(globalContext));
         }
     }
 
