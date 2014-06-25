@@ -98,7 +98,7 @@ reject programs which throw uncaught exceptions.
 \end{itemize}
 Like in untyped SIMPLE, some constructs can be desugared into a
 smaller set of basic constructs.  In general, it should be clear why a
-program does not type by looking at the top of the textsf{k} cells in
+program does not type by looking at the top of the \textsf{k} cells in
 its stuck configuration. */
 
 
