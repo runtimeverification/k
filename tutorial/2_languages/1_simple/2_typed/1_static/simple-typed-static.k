@@ -364,7 +364,7 @@ to its declared function type), but also adds a task into the
 \textsf{tasks} cell.  The task consists of a typing of the statement
 declaring all the function parameters followed by the function body,
 together with the expected return type of the function.  The
-\texttt{types} and \texttt{mkDecls} functions, defined at the end of
+\texttt{getTypes} and \texttt{mkDecls} functions, defined at the end of
 the file in the section on auxiliary operations, extracts the list of
 types and makes a sequence of variable declarations from a list of
 function parameters, respectively.  Note that, although in the dynamic
