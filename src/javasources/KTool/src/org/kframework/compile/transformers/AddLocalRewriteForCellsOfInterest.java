@@ -3,6 +3,7 @@ package org.kframework.compile.transformers;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -10,7 +11,9 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 import com.google.common.collect.Maps;
@@ -66,33 +69,34 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
         crntRule = null;
         
         rule = rule.shallowCopy();
-        if (!cellsToCopy.isEmpty()) {
-            rule.setCompiledForFastRewriting(false);
-        } else {
-            rule.setLhsOfReadCell(lhsOfReadCell);
-            rule.setRhsOfWriteCell(rhsOfWriteCell);
-            rule.setCellsToCopy(cellsToCopy);
-        }
+        rule.setLhsOfReadCell(lhsOfReadCell);
+        rule.setRhsOfWriteCell(rhsOfWriteCell);
+        rule.setCellsToCopy(cellsToCopy);
         
         return rule;
     }
     
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-        if (crntRule == null
-                || (crntRule != null 
-                && !crntRule.getCellsOfInterest().contains(cell.getLabel()) 
-                && outerWriteCell == null)) {
+        if (crntRule == null) {
             return super.visit(cell, _);
         }
-        
+        if (!crntRule.getCellsOfInterest().contains(cell.getLabel()) 
+                && outerWriteCell == null) {
+            return super.visit(cell, _);
+        }
+
         if (status == Status.LHS) {
             if (crntRule.getReadCells().contains(cell.getLabel())) {
                 lhsOfReadCell.put(cell.getLabel(), cell.getContents());
             }
         } else {
             if (outerWriteCell != null) {
-                cellsToCopy.add(outerWriteCell);
+                if (isGroundCell(cell)) {
+                    cellsToCopy.add(outerWriteCell);
+                } else {
+                    super.visit(cell, _);
+                }
             } else {
                 if (crntRule.getWriteCells().contains(cell.getLabel())) {
                     rhsOfWriteCell.put(cell.getLabel(), cell.getContents());
@@ -100,11 +104,24 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
                     outerWriteCell = cell.getLabel();
                     super.visit(cell, _);
                     outerWriteCell = null;
-
                 }                
             }
         }        
 
         return cell;
+    }
+
+    private boolean isGroundCell(Cell cell) {
+        final MutableBoolean isGround = new MutableBoolean(true);
+        BasicVisitor variableCollector = new BasicVisitor(context) {
+            @Override
+            public Void visit(Variable variable, Void _) {
+                isGround.setValue(false);
+                return null;
+            }
+        };
+        variableCollector.visitNode(cell);
+        
+        return isGround.getValue();
     }
 }

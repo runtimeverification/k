@@ -37,8 +37,6 @@ public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
     private Deque<String> cellStack = new ArrayDeque<>();
     private Map<String, Set<String>> containingCells = new HashMap<>();
 
-    private int numOfAssocCommMatching;
-
     public GenerateRewritingSchedule(Context context) {
         super("Generate rewriting schedule", context);
     }
@@ -100,18 +98,11 @@ public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
         }
 
         schedule.clear();
-        numOfAssocCommMatching = 0;
         // do not care about the return node; there will be no transformation
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
 
         rule = rule.shallowCopy();
-        if (numOfAssocCommMatching > 1) {
-            // TODO(YilongL): right now, we cannot handle more than one AC-matching in the rule
-            rule.setCompiledForFastRewriting(false);
-            return rule;
-        } else {
-            rule.setRewritingSchedule(schedule);
-        }
+        rule.setRewritingSchedule(schedule);
         
 //        System.out.println(rule);
 //        System.out.println(rule.getCellsOfInterest());
@@ -148,7 +139,6 @@ public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
             }
             
             if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
-                numOfAssocCommMatching++;
                 schedule.add(KAbstractRewriteMachine.INST_CHOICE);
             }
             

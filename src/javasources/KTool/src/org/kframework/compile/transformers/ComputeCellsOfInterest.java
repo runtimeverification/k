@@ -130,7 +130,12 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rewrite node, Void _)  {
         if (nestedCellCount == 0) {
-            /* TODO(YilongL): unable to handle the case where the top mentioned cell is inside a rewrite */
+            /* TODO(YilongL): unable to handle the case where the top mentioned
+             * cell is inside a rewrite, e.g.:
+             *   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
+             *         <busy> Busy => Busy -Set keys(H) </busy>
+             *         <terminated>... .Set => SetItem(T) ...</terminated>
+             */
             compiledForFastRewriting = false;
             return node;
         }
