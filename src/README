@@ -67,6 +67,10 @@ Common error messages:
 +  Git is not accessible in the command line. Please reinstall git and make
    make sure to check to option to make it available in the command line.
 
+- Can't find/access AST Node typecom.puppycrawl.tools.checkstyle.api.DetailAST
++ Make sure no version of antlr is installed in the ant system classpath other
+  than antlr 2.7.7.
+
 Sometimes javac dependency resolution fails to recognize changed files and
 would fail to build. Try 'ant clean' and rebuild the entire project.
 
