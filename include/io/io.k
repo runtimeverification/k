@@ -78,4 +78,8 @@ module IO
 
   rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List)
        ListItem(#buffer(_)) [stdout, stderr]
+
+  rule #stdin => 0
+  rule #stdout => 1
+  rule #stderr => 2
 endmodule
