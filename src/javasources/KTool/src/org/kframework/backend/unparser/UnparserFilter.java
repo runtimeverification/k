@@ -8,7 +8,6 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.utils.ColorUtil;
-import org.kframework.utils.StringUtil;
 
 import java.awt.Color;
 import java.util.LinkedList;
@@ -516,33 +515,6 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(ListItem listItem, Void _) {
-        prepare(listItem);
-        indenter.write("ListItem(");
-        super.visit(listItem, _);
-        indenter.write(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(SetItem setItem, Void _) {
-        prepare(setItem);
-        indenter.write("SetItem(");
-        super.visit(setItem, _);
-        indenter.write(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(MapItem mapItem, Void _) {
-        prepare(mapItem);
-        this.visitNode(mapItem.getKey());
-        indenter.write(" |-> ");
-        this.visitNode(mapItem.getValue());
-        return postpare();
-    }
-
-    @Override
     public Void visit(Hole hole, Void _) {
         prepare(hole);
         indenter.write("HOLE");
@@ -596,30 +568,9 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.List list, Void _) {
-        prepare(list);
-        super.visit(list, _);
-        return postpare();
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Map map, Void _) {
-        prepare(map);
-        super.visit(map, _);
-        return postpare();
-    }
-
-    @Override
     public Void visit(Bag bag, Void _) {
         prepare(bag);
         super.visit(bag, _);
-        return postpare();
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Set set, Void _) {
-        prepare(set);
-        super.visit(set, _);
         return postpare();
     }
 

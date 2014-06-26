@@ -428,13 +428,6 @@ public class HTMLFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(MapItem mi, Void _) {
-        this.visitNode(mi.getKey());
-        result.append("<span text-size=\"large\"> &#x21a6; </span>");
-        return this.visitNode(mi.getItem());
-    }
-
-    @Override
     public Void visit(KSequence k, Void _) {
         if (k.isEmpty()) {
             printEmpty("K");

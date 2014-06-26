@@ -213,17 +213,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(org.kframework.kil.List node, Void _)  {
-        List<org.kframework.kil.Term> list = new ArrayList<>();
-        KILtoBackendJavaKILTransformer.flattenList(list, node.getContents());
-        if (list.isEmpty()){
-            return KList.EMPTY;
-        }
-        //TODO(OwolabiL): What should happen when the list is not empty?
-        return super.visit(node, _);
-    }
-
-    @Override
     public ASTNode visit(org.kframework.kil.KSequence node, Void _)  {
         List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
         KILtoBackendJavaKILTransformer.flattenKSequence(list, node.getContents());
@@ -471,16 +460,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
             return result;
         }
-    }
-
-    @Override
-    public ASTNode visit(org.kframework.kil.Map node, Void _)  {
-    //TODO(Owolabi): Make this work for non-empty Maps.
-
-//        for(org.kframework.kil.Term term: node.getContents()){
-//           Term backendTerm = this.transformTerm(term,this.definition);
-//        }
-        return BuiltinMap.EMPTY_MAP;
     }
 
     @Override
@@ -833,18 +812,4 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
     }
-
-    private static void flattenList(
-            List<org.kframework.kil.Term> flatList,
-            List<org.kframework.kil.Term> nestedList) {
-        for (org.kframework.kil.Term term : nestedList) {
-            if (term instanceof org.kframework.kil.List) {
-                org.kframework.kil.List list = (org.kframework.kil.List) term;
-                KILtoBackendJavaKILTransformer.flattenKList(flatList, list.getContents());
-            } else {
-                flatList.add(term);
-            }
-        }
-    }
-
 }

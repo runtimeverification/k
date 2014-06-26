@@ -761,32 +761,6 @@ public class MaudeFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(ListItem listItem, Void _) {
-        result.append("ListItem(");
-        this.visitNode(listItem.getItem());
-        result.append(")");
-        return null;
-    }
-
-    @Override
-    public Void visit(SetItem setItem, Void _) {
-        result.append("SetItem(");
-        this.visitNode(setItem.getItem());
-        result.append(")");
-        return null;
-    }
-
-    @Override
-    public Void visit(MapItem mapItem, Void _) {
-        result.append("_|->_(");
-        this.visitNode(mapItem.getKey());
-        result.append(",");
-        this.visitNode(mapItem.getValue());
-        result.append(")");
-        return null;
-    }
-
-    @Override
     public Void visit(DataStructureBuiltin dataStructure, Void _) {
         result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
 
@@ -936,7 +910,7 @@ public class MaudeFilter extends BackendFilter {
         String sort = term.getSort().equals("K") ? "KList" : term.getSort();
         if (MetaK.isKSort(sort)) {
             //result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
-            result.append(kInjectedLabel.getInjectedSort(sort));
+            result.append(KInjectedLabel.getInjectedSort(sort));
             result.append("2KLabel_(");
         } else if (MetaK.isCellSort(sort)){
             result.append(sort + "2KLabel_(");
@@ -975,20 +949,6 @@ public class MaudeFilter extends BackendFilter {
         return null;
     }
 
-    @Override
-    public Void visit(org.kframework.kil.List list, Void _) {
-        this.visit((Collection) list, _);
-        return null;
-        // throw new RuntimeException("don't know how to maudify List");
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Map map, Void _) {
-        this.visit((Collection) map, _);
-        return null;
-        // throw new RuntimeException("don't know how to maudify Map");
-    }
-
     /**
      * Pretty printing a Bag to Maude.
      *
@@ -1012,13 +972,6 @@ public class MaudeFilter extends BackendFilter {
         return null;
 //        this.visit((Collection) bag);
         // throw new RuntimeException("don't know how to maudify Bag");
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Set set, Void _) {
-        this.visit((Collection) set, _);
-        return null;
-        // throw new RuntimeException("don't know how to maudify Set");
     }
 
     @Override

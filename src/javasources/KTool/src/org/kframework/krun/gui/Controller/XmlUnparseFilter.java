@@ -30,10 +30,8 @@ import org.kframework.kil.KLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.ListItem;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
@@ -41,7 +39,6 @@ import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -295,7 +292,6 @@ public class XmlUnparseFilter extends BasicVisitor {
             }
         }
         String colorCode = "";
-        Cell declaredCell = context.cells.get(cell.getLabel());
         buffer.append("<" + cell.getLabel() + attributes + ">");
         if (inConfiguration && inTerm == 0) {
             buffer.append("\n");
@@ -500,36 +496,6 @@ public class XmlUnparseFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(ListItem listItem, Void _) {
-
-        prepare(listItem);
-        buffer.append("ListItem(");
-        super.visit(listItem, _);
-        buffer.append(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(SetItem setItem, Void _) {
-
-        prepare(setItem);
-        buffer.append("SetItem(");
-        super.visit(setItem, _);
-        buffer.append(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(MapItem mapItem, Void _) {
-
-        prepare(mapItem);
-        this.visitNode(mapItem.getKey());
-        buffer.append(StringEscapeUtils.escapeXml(" |-> "));
-        this.visitNode(mapItem.getValue());
-        return postpare();
-    }
-
-    @Override
     public Void visit(Hole hole, Void _) {
 
         buffer.append("HOLE");
@@ -558,7 +524,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
         if (MetaK.isKSort(term.getSort())) {
-            buffer.append(StringEscapeUtils.escapeXml(kInjectedLabel
+            buffer.append(StringEscapeUtils.escapeXml(KInjectedLabel
                     .getInjectedSort(term.getSort())));
             buffer.append("2KLabel ");
         } else {
@@ -589,34 +555,10 @@ public class XmlUnparseFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.List list, Void _) {
-
-        prepare(list);
-        super.visit(list, _);
-        return postpare();
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Map map, Void _) {
-
-        prepare(map);
-        super.visit(map, _);
-        return postpare();
-    }
-
-    @Override
     public Void visit(Bag bag, Void _) {
 
         prepare(bag);
         super.visit(bag, _);
-        return postpare();
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Set set, Void _) {
-
-        prepare(set);
-        super.visit(set, _);
         return postpare();
     }
 

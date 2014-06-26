@@ -373,7 +373,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                  * return the base term instead */
                 return baseTerms.get(0);
             } else {
-                return ListBuiltin.of(node.sort(), elementsLeft, elementsRight, baseTerms);
+                return ListBuiltin.of(node.sort(), baseTerms, elementsLeft, elementsRight);
             }
         }
     }

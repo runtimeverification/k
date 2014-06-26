@@ -224,11 +224,6 @@ public class JavaSymbolicKRun implements KRun {
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         FileSystem fs = new PortableFileSystem();
 
-        // Change Map, List, and Set to MyMap, MyList, and MySet.
-        CompileToBuiltins builtinTransformer = new CompileToBuiltins(context);
-        pattern = (org.kframework.kil.Rule)builtinTransformer.visit(pattern, null);
-        cfg = (org.kframework.kil.Term) builtinTransformer.visitNode(cfg);
-
         GlobalContext globalContext = new GlobalContext(definition, fs);
         List<Rule> claims = Collections.emptyList();
         if (bound == null) {

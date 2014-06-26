@@ -44,7 +44,6 @@ import java.util.Set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
@@ -339,7 +338,7 @@ public class Context implements Serializable {
      *         subsort; otherwise, {@code false}
      */
     public boolean hasCommonSubsort(String... sorts) {
-        Set<String> maximalLowerBounds = subsorts.getMaximalLowerBounds(Lists.newArrayList(sorts));
+        Set<String> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
         
         if (maximalLowerBounds.isEmpty()) {
             return false;

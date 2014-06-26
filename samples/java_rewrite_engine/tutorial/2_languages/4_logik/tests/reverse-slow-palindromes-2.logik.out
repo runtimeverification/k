@@ -1,1 +1,1 @@
-A:Term \|-> C:Term\nB:Term \|-> B:Term\nC:Term \|-> C
+A:Term \|-> C:Term\s+B:Term \|-> B:Term\s+C:Term \|-> C

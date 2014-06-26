@@ -3,6 +3,11 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Evaluates predicates and functions without doing tree traversal.
@@ -30,15 +35,29 @@ public class LocalEvaluator extends LocalTransformer {
         return constraint;
     }
     
+    private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
+    
     @Override
     public ASTNode transform(KItem kItem) {
-        // TODO(YilongL): shall we consider cache evaluation result in certain cases?
-        Term evaluatedTerm = kItem.evaluateFunction(constraint, context);
-        // TODO(YilongL): had to comment out the following assertion because the visitor/imp.k somehow fails here
-//        if (kItem.isGround() && kItem.isEvaluable(context)) {
-//            assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;
-//        }
-        return evaluatedTerm;
+        try {
+            // TODO(YilongL): shall we consider cache evaluation result in certain cases?
+            Term evaluatedTerm = kItem.evaluateFunction(constraint, context);
+            // TODO(YilongL): had to comment out the following assertion because the visitor/imp.k somehow fails here
+    //        if (kItem.isGround() && kItem.isEvaluable(context)) {
+    //            assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;
+    //        }
+            return evaluatedTerm;
+        } catch (StackOverflowError e) {
+            if (context.definition().context().globalOptions.debug) {
+                e.printStackTrace();
+            }
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    TRACE_MSG));
+            throw e; //unreachable
+        } catch (KEMException e) {
+            e.exception.addTraceFrame(kItem.kLabel().toString());
+            throw e;
+        }
     }
 
     @Override

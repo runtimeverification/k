@@ -262,11 +262,31 @@ public final class BuiltinBitVectorOperations {
         }
     }
 
-    public static BuiltinList toDigits(BitVector term, IntToken bitwidth, TermContext context) {
-        return new BuiltinList(term.toDigits(bitwidth.intValue()));
+    public static BitVector concatenate(BitVector term1, BitVector term2, TermContext context) {
+        return term1.concatenate(term2);
     }
 
-    public static BitVector fromDigits(BuiltinList digitList, IntToken bitwidth, TermContext context) {
+    public static BitVector extract(
+            BitVector term,
+            IntToken beginIndex,
+            IntToken endIndex,
+            TermContext context) {
+        return term.extract(beginIndex.intValue(), endIndex.intValue());
+    }
+
+    public static BuiltinList toDigits(
+            BitVector term,
+            IntToken bitwidth,
+            IntToken count,
+            TermContext context) {
+        if (bitwidth.intValue() > 0 && bitwidth.intValue() * count.intValue() <= term.bitwidth) {
+            return new BuiltinList(term.toDigits(bitwidth.intValue(), count.intValue()));
+        } else {
+            return null;
+        }
+    }
+
+    public static BitVector fromDigits(BuiltinList digitList, TermContext context) {
         if (!digitList.hasFrame()) {
             List<BitVector> digits;
             try {
@@ -276,7 +296,7 @@ public final class BuiltinBitVectorOperations {
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException(digitList + " is not a list of bitvectors");
             }
-            return BitVector.fromDigits(digits, bitwidth.intValue());
+            return BitVector.fromDigits(digits);
         } else {
             throw new IllegalArgumentException(digitList + " contains list variables");
         }
