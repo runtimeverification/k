@@ -159,7 +159,7 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
         for (Term entry : builtinList.elementsRight()) {
             elementsRight.add((org.kframework.kil.Term)entry.accept(this));
         }
-        return new ListBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT), 
+        return ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT), 
                 baseTerms, elementsLeft, elementsRight);
     }
 

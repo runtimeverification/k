@@ -93,7 +93,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         List<Term> cellItems = cellContent.getContents();
 
         int leftIndex;
-        Collection<Term> elementsLeft = new ArrayList<>();
+        List<Term> elementsLeft = new ArrayList<>();
         for (leftIndex = 0; leftIndex < cellItems.size(); ++leftIndex) {
             Term term = cellItems.get(leftIndex);
             if (!(term instanceof Cell)) {
@@ -105,7 +105,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         }
 
         int rightIndex;
-        Collection<Term> elementsRight = new ArrayList<>();
+        List<Term> elementsRight = new ArrayList<>();
         for (rightIndex = cellItems.size() - 1; rightIndex >= leftIndex; --rightIndex) {
             Term term = cellItems.get(rightIndex);
             if (!(term instanceof Cell)) {
@@ -116,7 +116,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             elementsRight.add(elementCell);
         }
 
-        Collection<Term> terms = new ArrayList<>();
+        List<Term> terms = new ArrayList<>();
         for (int index = leftIndex; index <= rightIndex; ++index) {
             Term term = cellItems.get(index);
             if (term instanceof Cell) {
@@ -128,7 +128,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
         }
 
-        return new ListBuiltin(listSort, terms, elementsLeft, elementsRight);
+        return ListBuiltin.of(listSort, terms, elementsLeft, elementsRight);
     }
 
     private MapBuiltin getMapBuiltin(Bag cellContent, CellMap cellMap) {

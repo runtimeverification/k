@@ -178,7 +178,7 @@
 	</target>
 
     <target name="junit" depends="test-build">
-       <junit haltonfailure="true" fork="true" dir="${javasources}/KTool">
+       <junit fork="true" dir="${javasources}/KTool" forkmode="once" failureproperty="junit.failed">
          <formatter type="plain" usefile="false" />
          <classpath>
            <pathelement location="${javasources}/KTool/bin/" />
@@ -192,7 +192,9 @@
          <batchtest>
            <fileset dir="${javasources}/KTool/test" includes="**/*.java" />
          </batchtest>
+         <jvmarg value="-ea" />
        </junit>
+       <fail message="JUnit tests failed!" if="junit.failed" />
     </target>
 
     <taskdef resource="checkstyletask.properties"

@@ -557,7 +557,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             protected ListBuiltin doCopy(ListBuiltin node,
                     java.util.Collection<Term> items,
                     DataStructureBuiltin.ListChildren _) {
-                return new ListBuiltin(node.sort(), node.baseTerms(), node.elementsLeft(), items);
+                return ListBuiltin.of(node.sort(), (List<Term>)node.baseTerms(), node.elementsLeft(), (List<Term>)items);
             }
         
         }, DataStructureBuiltin.ListChildren.ELEMENTS_RIGHT);
