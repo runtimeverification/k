@@ -379,12 +379,7 @@ public class Main {
                     if (krs instanceof KRunState) {
                         Term res = ((KRunState) krs).getRawResult();
                         krun.setBackendOption("io", false);
-                        if (K.backend.equals("java")) {
-                            result = krun.search(0, 0, K.searchType, patternRule, makeConfiguration(res, null, rp, false, context), steps);
-                        }
-                        if (K.backend.equals("maude")) {
-                            result = krun.search(null, null, K.searchType, patternRule, res, steps);
-                        }
+                        result = krun.search(null, null, K.searchType, patternRule, res, steps);
                     }else {
                         org.kframework.utils.Error.report("Pattern matching after execution is not supported by search\nand model checking");
                     }
