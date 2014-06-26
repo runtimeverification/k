@@ -130,7 +130,12 @@ public class BasicParser {
                 this.moduleItems.add(di);
                 if (di instanceof Module) {
                     Module m = (Module) di;
-                    this.modulesMap.put(m.getName(), m);
+                    Module previous = this.modulesMap.put(m.getName(), m);
+                    if (previous != null) {
+                        String msg = "Found two modules with the same name: " + m.getName();
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                                KExceptionGroup.CRITICAL, msg, m.getFilename(), m.getLocation()));
+                    }
                 }
             }
         }
