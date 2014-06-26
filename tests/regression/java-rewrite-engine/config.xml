@@ -106,6 +106,42 @@
   </test>
 
   <test
+      definition="visitor/imp.k"
+      programs="visitor"
+      results="visitor"
+      extension="imp" >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="cell_map/test.k"
+      programs="cell_map"
+      results="cell_map"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+  <test
+      definition="cell_list/test.k"
+      programs="cell_list"
+      results="cell_list"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+
+
+  <test
       definition="cell_map/test.k"
       programs="cell_map"
       results="cell_map"
@@ -204,6 +240,18 @@
     <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="machine_integers/test.k"
+      programs="machine_integers"
+      results="machine_integers"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
     </all-programs>
   </test>
 

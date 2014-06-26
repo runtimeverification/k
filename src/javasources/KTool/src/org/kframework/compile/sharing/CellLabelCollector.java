@@ -1,7 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
+import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Multiplicity;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.loader.Context;
@@ -35,6 +37,10 @@ public class CellLabelCollector extends BasicVisitor {
     @Override
     public Void visit(Cell cell, Void _) {
         cellLabels.add(cell.getLabel());
+        if (cell.getMultiplicity() == Multiplicity.SOME ||
+                cell.getMultiplicity() == Multiplicity.ANY) {
+            cellLabels.add(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX + cell.getLabel());
+        }
         return super.visit(cell, _);
     }    
 }

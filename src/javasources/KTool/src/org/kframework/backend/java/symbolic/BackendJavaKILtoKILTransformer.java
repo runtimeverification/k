@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.Multimap;
 import org.kframework.backend.java.kil.*;
+import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
@@ -36,15 +37,15 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Cell cell) {
+        final String label = cell.getLabel();
         // TODO(AndreiS): fix the printing of the cells which are representing maps
-        if (cell.getLabel().startsWith("value_cell_label_prefix_")) {
-            currentCell = configurationStructureMap.get(cell.getLabel().substring("value_cell_label_prefix_".length())).cell;
-            return cell.getContent().accept(this);
+        if (cell.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
+            currentCell = configurationStructureMap.get(label.substring(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX.length())).cell;
+        } else {
+            currentCell = configurationStructureMap.get(label).cell;
         }
 
         org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
-        final String label = cell.getLabel();
-        currentCell = configurationStructureMap.get(label).cell;
         returnCell.setLabel(label);
         returnCell.setEndLabel(label);
         returnCell.setContents((org.kframework.kil.Term) cell.getContent().accept(this));

@@ -2,7 +2,7 @@
 require "io/uris.k"
 require "builtins/list.k"
 
-module IO
+module K-IO
   imports LIST
   imports URIS
 
