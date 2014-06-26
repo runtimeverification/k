@@ -2,15 +2,15 @@
 require "int.k"
 require "seq.k"
 
-module K-IO-SYNTAX imports SEQ-SYNTAX
+module IO-SYNTAX imports SEQ-SYNTAX
   imports INT-EXP-SYNTAX
   syntax Exp ::= "read" [read]
                | "print" Exp [prnt, strict]
 endmodule
 
   
-module K-IO 
-  imports K-IO-SYNTAX
+module IO 
+  imports IO-SYNTAX
   imports SEQ
   imports INT-EXP 
   configuration <k> $PGM:Exp </k>  
