@@ -81,4 +81,9 @@ public class Ambiguity extends Collection {
             return false;
         return true;
     }
+
+    @Override
+    public int hashCode() {
+        return Sets.newHashSet(contents).hashCode();
+    }
 }
