@@ -130,7 +130,7 @@ public class CheckVariables extends BasicVisitor {
                     exType = KException.ExceptionType.WARNING;
                 GlobalSettings.kem.register(new KException(exType,
                         KException.KExceptionGroup.COMPILER,
-                        "Unbounded variable " + v.toString() + " should start with ? or ! to make it fresh.",
+                        "Unbounded variable " + v.toString() + "should start with ? or ! to make it fresh.",
                         getName(), v.getFilename(), v.getLocation()));
             }
         }
