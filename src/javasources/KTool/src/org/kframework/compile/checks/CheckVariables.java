@@ -7,6 +7,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.HashMap;
@@ -121,19 +122,16 @@ public class CheckVariables extends BasicVisitor {
             }
             if (!left.containsKey(v)) {
                 node.addAttribute(UNBOUND_VARS, "");
-                
+                ExceptionType exType;
                 /* matching logic relaxes this restriction */
-                if (!options.backend.java()) {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.COMPILER,
-                            "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
-                } else {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
-                            KException.KExceptionGroup.COMPILER,
-                            "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
-                }
+                if (!options.backend.java())
+                    exType = KException.ExceptionType.ERROR;
+                else
+                    exType = KException.ExceptionType.WARNING;
+                GlobalSettings.kem.register(new KException(exType,
+                        KException.KExceptionGroup.COMPILER,
+                        "Unbounded variable " + v.toString() + " should start with ? or ! to make it fresh.",
+                        getName(), v.getFilename(), v.getLocation()));
             }
         }
         for (Map.Entry<Variable,Integer> e : left.entrySet()) {
