@@ -44,20 +44,20 @@ public class PdfBackend extends BasicBackend {
             IOUtils.toString(process.getInputStream());
             process.waitFor();
             if (process.exitValue() != 0) {
+                String latexLogFile = FilenameUtils.removeExtension(latexFile.getName()) + ".log";
+                copyFile(new File(context.dotk, latexLogFile), new File(latexLogFile));
                 GlobalSettings.kem.register(
-                        new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
+                        new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER,
                                 "pdflatex returned a non-zero exit code. " +
                                 "The pdf might be generated, but with bugs. " +
                                 "Please inspect the latex logs."));
-                String latexLogFile = FilenameUtils.removeExtension(latexFile.getName()) + ".log";
-                copyFile(new File(context.dotk, latexLogFile), new File(latexLogFile));
             }
             sw.printIntermediate("Latex2PDF");
 
             return new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf");
         } catch (IOException | InterruptedException e) {
             GlobalSettings.kem.register(
-                    new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER,
                             "Cannot generate the pdf version of the definition. " +
                             "It seems that `pdflatex` is not installed or is not in your path. " +
                             "To generate the pdf version you can run `pdflatex` having as " +
