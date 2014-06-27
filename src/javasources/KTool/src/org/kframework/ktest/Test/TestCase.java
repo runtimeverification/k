@@ -331,7 +331,7 @@ public class TestCase {
                         args.add(arg);
                     }
                     if (!hasDirectory) {
-                        args.add(new PgmArg("--definition", compiledDir.getAbsolutePath()));
+                        args.add(new PgmArg("--directory", compiledDir.getAbsolutePath()));
                     }
                     ret.add(new KRunProgram(
                             pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,

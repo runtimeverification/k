@@ -8,7 +8,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 public class DefinitionLoadingOptions {
-    @Parameter(names={"--definition", "-d"}, description="Path to the directory in which the kompiled " +
+    @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the kompiled " +
             "K definition resides. The default is the unique, only directory with the suffix '-kompiled' " +
             "in the current directory. A definition may also be specified with the 'KRUN_COMPILED_DEF' " +
             "environment variable, in which case it is used if the option is not specified on the command line.")
