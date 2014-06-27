@@ -70,7 +70,7 @@
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="--directory" value="freshMOS-java_kompiled" />
+    <kompile-option name="--output" value="freshMOS-java_kompiled" />
     <all-programs>
       <krun-option  name="--directory" value="freshMOS-java_kompiled" />
     </all-programs>

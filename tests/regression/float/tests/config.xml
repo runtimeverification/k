@@ -4,7 +4,7 @@
 <tests>
   <test definition="test.k" programs="." results=". ../java" extension="test">
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="--directory" value="java_kompiled" />
+    <kompile-option name="--output" value="java_kompiled" />
     <all-programs>
       <krun-option name="--parser" value="kast --parser ground" />
       <krun-option name="--directory" value="java_kompiled" />
