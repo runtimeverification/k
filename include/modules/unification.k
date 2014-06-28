@@ -117,7 +117,7 @@ Note that ~> is not handled  and neither are binding operations.
   rule substitute(X:K,, K:K,, L:List,,Ks:KList) 
     => substituteList(X, K, L),, substitute(X,, K,, Ks)
 
-  syntax List ::= substituteList(K,K,List)
+  syntax List ::= substituteList(K,K,List) [function]
 
   rule substituteList(X:K, K:K, .List) => .List
   rule substituteList(X:K, K:K, ListItem(K1:K) L:List)

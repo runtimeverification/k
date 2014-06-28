@@ -426,5 +426,10 @@
            programs="user_substitution/tests"
            results="user_substitution/tests" />
 
+  <include file="list-applyMGU/tests/config.xml"
+           directory="list-applyMGU"
+           programs="list-applyMGU/tests"
+           results="list-applyMGU/tests" />
+
 </tests>
 

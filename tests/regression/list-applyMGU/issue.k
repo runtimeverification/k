@@ -1,0 +1,18 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+require "modules/unification.k"
+
+module ISSUE
+  imports UNIFICATION
+  syntax K ::= "a" | "b"
+  syntax Variable ::= "x"
+  configuration <k> a ~> b </k> <list> ListItem(x) </list>
+                <mgu> updateMgu(.Mgu, x, "success") </mgu>
+                <out stream="stdout"> .List </out>
+
+  rule <k> a => . ...</k> <list> L:List => applyMgu(Theta:K, L) </list>
+       <mgu> Theta:K </mgu>
+
+  rule <k> b => . ...</k> <list> ListItem(I) </list> 
+            <out>... .List => ListItem(I) </out>
+endmodule
+
