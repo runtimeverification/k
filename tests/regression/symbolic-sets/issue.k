@@ -1,4 +1,4 @@
-// Copyright (c) 2012 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 
 module ISSUE
   syntax K ::= "a" | "b"
