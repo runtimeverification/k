@@ -1,3 +1,5 @@
+// Copyright (c) 2012 K Team. All Rights Reserved.
+
 module ISSUE
   syntax K ::= "a" | "b"
   configuration <k> a ~> b </k> <set> SetItem(1) </set>
