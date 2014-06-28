@@ -109,8 +109,19 @@ Note that ~> is not handled  and neither are binding operations.
   rule substitute(X:K,,K:K,,X) => K   [structural, anywhere]
   rule substitute(X:K,,K:K,,L:KLabel(Ks:KList))
     => L:KLabel(substitute(X,,K,,Ks))
-    when X =/=K L:KLabel(Ks)
+    when X =/=K L:KLabel(Ks) 
+     andBool (isCollection(L(Ks)) =/=K true)
    [structural, anywhere]
+
+  //TODO:  Consider implementing substitute for other collections, too
+  rule substitute(X:K,, K:K,, L:List,,Ks:KList) 
+    => substituteList(X, K, L),, substitute(X,, K,, Ks)
+
+  syntax List ::= substituteList(K,K,List) [function]
+
+  rule substituteList(X:K, K:K, .List) => .List
+  rule substituteList(X:K, K:K, ListItem(K1:K) L:List)
+    => ListItem(substitute(X,,K,, K1)) substituteList(X,K,L)
 
   syntax K ::= "unify" "(" K "," K ")" [function]
   rule unify(K1, K2) => unifyEqs(subst(.KList),,eqns(eqn(K1,,K2)))
