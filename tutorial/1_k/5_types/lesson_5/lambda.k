@@ -36,7 +36,7 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
   syntax Exp ::= Exp "->" Exp  [strict]
-  rule <k> lambda X:Id . E => ?T:Type -> E ~> tenv(TEnv) ...</k>
+  rule <k> lambda X:Id . E:Exp => ?T:Type -> E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1

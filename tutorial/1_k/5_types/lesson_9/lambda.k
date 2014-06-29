@@ -48,7 +48,7 @@ module LAMBDA
        <mgu> Theta:Mgu </mgu>
        <tenv> TEnv
         => TEnv[X <- (forall freeVariables(applyMgu(Theta, T)) -Set
-                        freeVariables(applyMgu(Theta, values(TEnv)))
+                             freeVariables(applyMgu(Theta, values(TEnv)))
                 ) applyMgu(Theta, T)]
        </tenv>
   rule <k> X:Id => freshVariables(Tvs,T) ...</k>
