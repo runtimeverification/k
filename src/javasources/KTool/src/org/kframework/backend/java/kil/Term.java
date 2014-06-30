@@ -5,13 +5,12 @@ package org.kframework.backend.java.kil;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.backend.java.indexing.ConfigurationTermIndex;
 import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
+import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.backend.java.symbolic.LocalEvaluator;
 import org.kframework.backend.java.symbolic.Matchable;
-import org.kframework.backend.java.symbolic.SubstitutionTransformer;
+import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
@@ -23,6 +22,7 @@ import org.kframework.utils.general.IndexingStatistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -217,9 +217,39 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
             return this;
         }
 
-        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
-        transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
-        return (Term) accept(transformer);
+        // YilongL: comment out the slow implementation
+//        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
+//        transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
+//        return (Term) accept(transformer);
+        SubstituteAndEvaluateTransformer transformer = new SubstituteAndEvaluateTransformer(substitution, context);
+        return (Term) this.accept(transformer);
+    }
+    
+    /**
+     * Similar to {@link Term#substituteAndEvaluate(Map, TermContext)} except
+     * that this method will copy the terms used for substitution whenever
+     * necessary in order to avoid undesired sharing of mutable terms.
+     * 
+     * @param substitution
+     *            the substitution map; TODO(YilongL): this may become a
+     *            multi-map in the future when the pattern matching algorithm
+     *            allows us to record multiple equal terms binding to a variable
+     *            for the sake of maximizing term reuse
+     * @param variablesToReuse
+     *            a set of variables in the substitution whose binding terms can
+     *            be reused to build the new term
+     * @param context
+     * @return a new term obtained by applying substitution
+     */
+    public Term copyOnShareSubstAndEval(
+            Map<Variable, ? extends Term> substitution,
+            Set<Variable> variablesToReuse, TermContext context) {
+        if (substitution.isEmpty() || isGround()) {
+            return this;
+        }
+        CopyOnShareSubstAndEvalTransformer transformer = new CopyOnShareSubstAndEvalTransformer(
+                substitution, variablesToReuse, context);
+        return (Term) this.accept(transformer);
     }
 
      /**
