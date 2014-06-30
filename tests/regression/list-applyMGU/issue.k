@@ -5,14 +5,19 @@ module ISSUE
   imports UNIFICATION
   syntax K ::= "a" | "b"
   syntax Variable ::= "x"
-  configuration <k> a ~> b </k> <list> ListItem(x) </list>
+  configuration <k> a ~> b </k>
+                <list> ListItem(x) </list> <set> SetItem(x) </list>
                 <mgu> updateMgu(.Mgu, x, "success") </mgu>
                 <out stream="stdout"> .List </out>
 
-  rule <k> a => . ...</k> <list> L:List => applyMgu(Theta:K, L) </list>
+  rule <k> a => . ...</k> 
+       <list> L:List => applyMgu(Theta:K, L) </list>
+       <set> S:Set => applyMgu(Theta:K, S) </set>
        <mgu> Theta:K </mgu>
 
-  rule <k> b => . ...</k> <list> ListItem(I) </list> 
-            <out>... .List => ListItem(I) </out>
+  rule <k> b => . ...</k> 
+       <list> ListItem("success") </list> 
+       <set> SetItem("success") </set> 
+       <out>... .List => ListItem("success") </out>
 endmodule
 
