@@ -166,7 +166,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         /* remove rules that are from k dist */
         steps.add(new RemovePreincludedRules(context));
         
-        steps.add(new AddLocalRewriteForCellsOfInterest(context));
+        steps.add(new AddLocalRewritesUnderCells(context));
         steps.add(new GenerateRewritingSchedule(context));
 
         steps.add(new LastStep(this, context));

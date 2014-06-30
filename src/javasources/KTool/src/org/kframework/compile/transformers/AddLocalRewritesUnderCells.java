@@ -1,5 +1,7 @@
 package org.kframework.compile.transformers;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,7 +13,6 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -19,7 +20,15 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
+/**
+ * Adds local rewrites under the cells of interest computed in
+ * {@link ComputeCellsOfInterest} pass. This pass needs to be placed after the
+ * last pass that transforms the rewrite rule.
+ * 
+ * @author YilongL
+ * 
+ */
+public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
     
     private enum Status { LHS, RHS }
 
@@ -31,8 +40,8 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
     private Map<String, Term> rhsOfWriteCell;  
     private Set<String> cellsToCopy = Sets.newHashSet();
 
-    public AddLocalRewriteForCellsOfInterest(Context context) {
-        super("Add local rewrite for cells of interest", context);
+    public AddLocalRewritesUnderCells(Context context) {
+        super("Add local rewrites under cells of interest", context);
     }    
     
     @Override
@@ -53,6 +62,15 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rule rule, Void _)  {
         if (!rule.isCompiledForFastRewriting()) {
+            if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
+                Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
+                rule = rule.shallowCopy();
+                if (hasGroundCell(rhs)) {
+                    rule.setCellsToCopy(Collections.singleton(rhs.getLabel()));
+                } else {
+                    rule.setCellsToCopy(Collections.<String>emptySet());
+                }
+            }
             return rule;
         }
                 
@@ -67,7 +85,7 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
         this.visitNode(((Rewrite) rule.getBody()).getRight());
         status = null;
         crntRule = null;
-        
+
         rule = rule.shallowCopy();
         rule.setLhsOfReadCell(lhsOfReadCell);
         rule.setRhsOfWriteCell(rhsOfWriteCell);
@@ -110,18 +128,38 @@ public class AddLocalRewriteForCellsOfInterest extends CopyOnWriteTransformer {
 
         return cell;
     }
-
-    private boolean isGroundCell(Cell cell) {
-        final MutableBoolean isGround = new MutableBoolean(true);
-        BasicVisitor variableCollector = new BasicVisitor(context) {
+    
+    private boolean hasGroundCell(Cell outerCell) {
+        final MutableBoolean hasGroundCell = new MutableBoolean(false);
+        new BasicVisitor(context) {
+            
+            Set<Cell> visitedCells = Collections.newSetFromMap(new IdentityHashMap<Cell, Boolean>());
+            
             @Override
-            public Void visit(Variable variable, Void _) {
-                isGround.setValue(false);
+            public Void visit(Cell cell, Void _) {
+                if (hasGroundCell.booleanValue()) {
+                    return null;
+                }
+                if (visitedCells.contains(cell)) {
+                    // this cell has been visited before and obviously it's not
+                    // a ground cell; otherwise, hasGroundCell must have been
+                    // set to true and the traversal is terminated
+                    return null;
+                }
+                super.visit(cell, _);
+                
+                visitedCells.add(cell);
+                if (!hasGroundCell.booleanValue()) {
+                    hasGroundCell.setValue(isGroundCell(cell));
+                }
                 return null;
             }
-        };
-        variableCollector.visitNode(cell);
-        
-        return isGround.getValue();
+        }.visitNode(outerCell);
+        return hasGroundCell.booleanValue();
     }
+
+    private boolean isGroundCell(Cell cell) {
+        return cell.variables().isEmpty();
+    }
+
 }
