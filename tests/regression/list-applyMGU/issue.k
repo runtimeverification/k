@@ -6,7 +6,7 @@ module ISSUE
   syntax K ::= "a" | "b"
   syntax Variable ::= "x"
   configuration <k> a ~> b </k>
-                <list> ListItem(x) </list> <set> SetItem(x) </list>
+                <list> ListItem(x) </list> <set> SetItem(x) </set>
                 <mgu> updateMgu(.Mgu, x, "success") </mgu>
                 <out stream="stdout"> .List </out>
 
