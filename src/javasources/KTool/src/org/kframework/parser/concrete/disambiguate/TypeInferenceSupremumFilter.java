@@ -49,16 +49,16 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
                 if (t instanceof TermCons) {
                     // finally, try to find the <strike> maximum </strike> minimum
                     for (Term tm2 : group) {
-                        boolean min = true;
+                        boolean max = true;
                         Production tcBig = ((TermCons) tm2).getProduction();
                         for (Term tm22 : group) {
                             Production tcSmall = ((TermCons) tm22).getProduction();
-                            if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
-                                min = false;
+                            if (tm2 != tm22 && isSubsorted(tcSmall, tcBig)) {
+                                max = false;
                                 break;
                             }
                         }
-                        if (min)
+                        if (max)
                             maxterms.add(tm2);
                     }
                 } else if (t instanceof Variable) {

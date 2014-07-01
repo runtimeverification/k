@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,5 +42,30 @@ public class VarHashMap extends HashMap<String, Set<String>> {
         } else
             return false;
         return true;
+    }
+
+    public void add(String key, String value) {
+        Set<String> sorts = this.get(key);
+        if (sorts == null) {
+            sorts = new HashSet<>();
+            this.put(key, sorts);
+        }
+        sorts.add(value);
+    }
+
+    public VarHashMap addAll(VarHashMap that) {
+        for (Map.Entry<String, Set<String>> entry : that.entrySet())
+            if (this.containsKey(entry.getKey()))
+                this.get(entry.getKey()).addAll(entry.getValue());
+            else
+                this.put(entry.getKey(), new HashSet<>(entry.getValue()));
+        return this;
+    }
+
+    public VarHashMap deepClone() {
+        VarHashMap that = new VarHashMap();
+        for (Map.Entry<String, Set<String>> entry : this.entrySet())
+            that.put(entry.getKey(), new HashSet<>(entry.getValue()));
+        return that;
     }
 }
