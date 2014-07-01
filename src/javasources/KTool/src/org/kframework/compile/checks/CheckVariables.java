@@ -7,7 +7,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.HashMap;
@@ -122,15 +121,9 @@ public class CheckVariables extends BasicVisitor {
             }
             if (!left.containsKey(v)) {
                 node.addAttribute(UNBOUND_VARS, "");
-                ExceptionType exType;
-                /* matching logic relaxes this restriction */
-                if (!options.backend.java())
-                    exType = KException.ExceptionType.ERROR;
-                else
-                    exType = KException.ExceptionType.WARNING;
-                GlobalSettings.kem.register(new KException(exType,
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                         KException.KExceptionGroup.COMPILER,
-                        "Unbounded variable " + v.toString() + "should start with ? or ! to make it fresh.",
+                        "Unbounded variable " + v.toString() + "should start with ? or !.",
                         getName(), v.getFilename(), v.getLocation()));
             }
         }
@@ -140,8 +133,7 @@ public class CheckVariables extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(KException
                         .ExceptionType.ERROR,
                         KException.KExceptionGroup.COMPILER,
-                        "Variable " + key + " has the same name as a fresh " +
-                                "variable.",
+                        "Variable " + key + " has the same name as a fresh variable.",
                         getName(), key.getFilename(), key.getLocation()));
             }
             if (MetaK.isAnonVar(key)) continue;
@@ -150,7 +142,7 @@ public class CheckVariables extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.HIDDENWARNING,
                         KException.KExceptionGroup.COMPILER,
                         "Singleton variable " + key.toString() + ".\n" +
-                                "    If this is not a spelling mistake, please consider using anonymous variables.",
+                        "    If this is not a spelling mistake, please consider using anonymous variables.",
                         getName(), key.getFilename(), key.getLocation()));
             }
         }
