@@ -147,7 +147,7 @@ public class MetaK {
         return new BuiltinSet(trueVariables);
     }
 
-    public static BuiltinMap variablesMap(Term term, TermContext context) {
+    public static Term variablesMap(Term term, TermContext context) {
         BuiltinMap.Builder builder = BuiltinMap.builder();
         Set<Variable> variables = term.variableSet();
         for (Variable variable : variables) {

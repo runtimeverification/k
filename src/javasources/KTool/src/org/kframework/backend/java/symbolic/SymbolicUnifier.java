@@ -29,7 +29,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.KSorts;
+import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.loader.Context;
 
 
@@ -172,8 +172,9 @@ public class SymbolicUnifier extends AbstractUnifier {
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";
 
         // TODO(AndreiS): treat Map unification less adhoc
-        if (BuiltinMapUtils.isNormalMap(term) && BuiltinMapUtils.isNormalMap(otherTerm)) {
-            unifyMap(term, otherTerm, true);
+        if (term instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()
+                && otherTerm instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()) {
+            unifyMap((BuiltinMap) term, (BuiltinMap) otherTerm, true);
             return;
         }
 
@@ -203,13 +204,12 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
-    public boolean unifyMap(Term term, Term otherTerm, boolean addUnchanged) {
-        assert BuiltinMapUtils.getBuiltinMapUtils(term).rest.isEmpty();
-        assert BuiltinMapUtils.getBuiltinMapUtils(otherTerm).rest.isEmpty();
+    public boolean unifyMap(BuiltinMap map, BuiltinMap otherMap, boolean addUnchanged) {
+        assert map.mapFunctions().isEmpty() && otherMap.mapFunctions().isEmpty();
 
-        Map<Term, Term> entries = BuiltinMapUtils.getMapEntries(term);
-        Map<Term, Term> otherEntries = BuiltinMapUtils.getMapEntries(otherTerm);
-        Set<Term> commonKeys = Sets.intersection(entries.keySet(), otherEntries.keySet());
+        Map<Term, Term> entries = map.getEntries();
+        Map<Term, Term> otherEntries = otherMap.getEntries();
+        Set<Term> commonKeys = Sets.intersection(map.getEntries().keySet(), otherEntries.keySet());
         Map<Term, Term> remainingEntries = new HashMap<>();
         Map<Term, Term> otherRemainingEntries = new HashMap<>();
         for (Term key : commonKeys) {
@@ -226,8 +226,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
 
-        List<KItem> patterns = BuiltinMapUtils.getMapPatterns(term);
-        List<KItem> otherPatterns = BuiltinMapUtils.getMapPatterns(otherTerm);
+        List<KItem> patterns = map.mapPatterns();
+        List<KItem> otherPatterns = otherMap.mapPatterns();
         Set<KItem> unifiedPatterns = new HashSet<>();
         Set<KItem> otherUnifiedPatterns = new HashSet<>();
         List<KItem> remainingPatterns = new ArrayList<>();
@@ -256,8 +256,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
 
-        List<Variable> variables = BuiltinMapUtils.getMapVariables(term);
-        List<Variable> otherVariables = BuiltinMapUtils.getMapVariables(otherTerm);
+        List<Variable> variables = map.mapVariables();
+        List<Variable> otherVariables = otherMap.mapVariables();
         Set<Variable> commonVariables = Sets.intersection(
                 ImmutableSet.copyOf(variables),
                 ImmutableSet.copyOf(otherVariables));
@@ -274,36 +274,36 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
 
-        if (remainingEntries.isEmpty() && remainingPatterns.isEmpty() && remainingVariables.isEmpty()
-                && !(otherRemainingEntries.isEmpty() && otherRemainingPatterns.isEmpty())) {
-            fail(term, otherTerm);
+        if (remainingEntries.isEmpty()
+                && remainingPatterns.isEmpty()
+                && remainingVariables.isEmpty()
+                && !otherRemainingEntries.isEmpty()) {
+            fail(map, otherMap);
         }
-        if (otherRemainingEntries.isEmpty() && otherRemainingPatterns.isEmpty() && otherRemainingVariables.isEmpty()
-                && !(remainingEntries.isEmpty() && remainingPatterns.isEmpty())) {
-            fail(term, otherTerm);
+        if (otherRemainingEntries.isEmpty()
+                && otherRemainingPatterns.isEmpty()
+                && otherRemainingVariables.isEmpty()
+                && !remainingEntries.isEmpty()) {
+            fail(map, otherMap);
         }
 
         if (!(commonKeys.isEmpty() && unifiedPatterns.isEmpty() && commonVariables.isEmpty()) || addUnchanged) {
-            List<Term> mapItems = new ArrayList<>();
-            if (!remainingEntries.isEmpty()) {
-                BuiltinMap.Builder builder = BuiltinMap.builder();
-                builder.putAll(remainingEntries);
-                mapItems.add(builder.build());
-            }
-            mapItems.addAll(remainingPatterns);
-            mapItems.addAll(remainingVariables);
-            List<Term> otherMapItems = new ArrayList<>();
-            if (!otherRemainingEntries.isEmpty()) {
-                BuiltinMap.Builder otherBuilder = BuiltinMap.builder();
-                otherBuilder.putAll(otherRemainingEntries);
-                otherMapItems.add(otherBuilder.build());
-            }
-            otherMapItems.addAll(otherRemainingPatterns);
-            otherMapItems.addAll(otherRemainingVariables);
+            BuiltinMap.Builder builder = BuiltinMap.builder();
+            builder.putAll(remainingEntries);
+            builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
+            builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
 
-            fConstraint.add(
-                    BuiltinMap.concatenationMap(mapItems, termContext),
-                    BuiltinMap.concatenationMap(otherMapItems, termContext));
+            BuiltinMap.Builder otherBuilder = BuiltinMap.builder();
+            otherBuilder.putAll(otherRemainingEntries);
+            otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
+            otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
+
+            Term remainingMap = builder.build();
+            Term otherRemainingMap = otherBuilder.build();
+            if (!(remainingMap instanceof BuiltinMap && ((BuiltinMap) remainingMap).isEmpty())
+                    || !(otherRemainingMap instanceof BuiltinMap && ((BuiltinMap) otherRemainingMap).isEmpty())) {
+                fConstraint.add(remainingMap, otherRemainingMap);
+            }
             return true;
         } else {
             return false;

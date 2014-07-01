@@ -326,7 +326,7 @@ public class CopyOnWriteTransformer implements Transformer {
         boolean changed = false;
         BuiltinMap.Builder builder = BuiltinMap.builder();
         
-        for (Map.Entry<Term, Term> entry : builtinMap) {
+        for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
             
@@ -334,7 +334,7 @@ public class CopyOnWriteTransformer implements Transformer {
             if (!changed && (key != entry.getKey() || value != entry.getValue())) {
                 changed = true;
                 // copy previous entries into the BuiltinMap being built
-                for (Map.Entry<Term, Term> copy : builtinMap) {
+                for (Map.Entry<Term, Term> copy : builtinMap.getEntries().entrySet()) {
                     if (copy.equals(entry)) {
                         // cannot rely on reference identity check here
                         break;
@@ -347,27 +347,29 @@ public class CopyOnWriteTransformer implements Transformer {
                 builder.put(key, value);
             }
         }
-        
-        // at this point, if changed is false, the BuiltinMap being built is still empty
-        if (builtinMap.hasFrame()) {
-            Variable oldFrame = builtinMap.frame();
-            Term transformedFrame = (Term) oldFrame.accept(this);
-            if (transformedFrame != oldFrame) {
-                if (!changed) {
-                    // the only change is the frame
-                    changed = true;
-                    builder.setEntriesAs(builtinMap);
-                }
-                builder.concat(transformedFrame);
-            } else {
-                builder.setFrame(oldFrame);
-            }
-        } else {
-            // do nothing; if changed == true then all entries are already
-            // copied; if changed == false then we will simply return the
-            // original map later
+        /* special case for maps composed only of entries */
+        if (builtinMap.isEntryBuiltinMap()) {
+            return changed ? builder.build() : builtinMap;
         }
-        
+
+        if (!changed) {
+            builder.putAll(builtinMap.getEntries());
+        }
+        for (KItem kItem : builtinMap.mapPatterns()) {
+            Term term = (Term) kItem.accept(this);
+            changed = changed || (term != kItem);
+            builder.concatenate(term);
+        }
+        for (Variable variable : builtinMap.mapVariables()) {
+            Term term = (Term) variable.accept(this);
+            changed = changed || (term != variable);
+            builder.concatenate(term);
+        }
+        for (Term term : builtinMap.mapFunctions()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
+        }
         return changed ? builder.build() : builtinMap;
     }
 

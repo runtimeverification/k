@@ -41,7 +41,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
 
@@ -84,6 +83,8 @@ public class PatternMatcher extends AbstractMatcher {
      */
     private boolean isStarNested;
 
+    private final boolean isLemma;
+
     private final TermContext termContext;
 
     /**
@@ -99,7 +100,7 @@ public class PatternMatcher extends AbstractMatcher {
      *         {@code false}
      */
     public static boolean matchable(Term subject, Term pattern, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(context);
+        PatternMatcher matcher = new PatternMatcher(false, context);
         try {
             matcher.match(subject, pattern);
         } catch (PatternMatchingFailure e) {
@@ -126,7 +127,7 @@ public class PatternMatcher extends AbstractMatcher {
      *         variables in the pattern to sub-terms in the subject)
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(context);
+        PatternMatcher matcher = new PatternMatcher(rule.containsAttribute("lemma"), context);
         
         boolean failed = true;
         if (rule.isFunction()) {
@@ -199,7 +200,7 @@ public class PatternMatcher extends AbstractMatcher {
                     } else {
                         // the non-lookup term is not a variable and thus requires further pattern matching
                         // for example: TODO(YilongL)
-                        PatternMatcher lookupMatcher = new PatternMatcher(context);
+                        PatternMatcher lookupMatcher = new PatternMatcher(rule.containsAttribute("lemma"), context);
                         if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
                             // it's possible that multiple substitutions are viable from the pattern matching above
                             for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
@@ -301,7 +302,8 @@ public class PatternMatcher extends AbstractMatcher {
         return result;
     }
 
-    private PatternMatcher(TermContext context) {
+    private PatternMatcher(boolean isLemma, TermContext context) {
+        this.isLemma = isLemma;
         this.termContext = context;
         multiSubstitutions = new ArrayList<Collection<Map<Variable, Term>>>();
     }
@@ -373,7 +375,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* add substitution */
             addSubstitution(variable, subject);
-        } else if (subject.isSymbolic()) {
+        } else if (subject.isSymbolic() && !isLemma) {
             fail(subject, pattern);
         } else {
             /* match */

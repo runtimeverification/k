@@ -113,6 +113,6 @@ rule
         N1:Int => ?N2:Int
     </nextLoc>
 </T>
-//ensures ?A ==K C @ rev(B)
+ensures ?A ==K rev(B) @ C
 endmodule
 

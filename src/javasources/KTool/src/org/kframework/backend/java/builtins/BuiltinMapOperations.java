@@ -5,7 +5,6 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
 
 import com.google.common.base.Preconditions;
 
@@ -27,25 +26,11 @@ public class BuiltinMapOperations {
         return new BuiltinSet(elements);
     }
 
-    public static BuiltinMap construct(BuiltinMap term1, BuiltinMap term2, TermContext context) {
-        Preconditions.checkArgument(!term1.hasFrame() || !term2.hasFrame(), 
-                "both map arguments have frames, but the combined map cannot have two frames");
-        
-        Variable frame = null;
-        if (term1.hasFrame()) {
-            frame = term1.frame();
-        } else if (term2.hasFrame()) {
-            frame = term2.frame();
-        }
-
-        BuiltinMap.Builder builder = BuiltinMap.builder();
-        builder.putAll(term1.getEntries());
-        builder.putAll(term2.getEntries());
-        builder.setFrame(frame);
-        return builder.build();
+    public static Term construct(BuiltinMap term1, BuiltinMap term2, TermContext context) {
+        return BuiltinMap.concatenate(term1, term2);
     }
 
-    public static BuiltinMap update(BuiltinMap term, Term key, Term value, TermContext context) {
+    public static Term update(BuiltinMap term, Term key, Term value, TermContext context) {
         Preconditions.checkArgument(!term.hasFrame(), "argument " + term + " has frame");
         
         BuiltinMap.Builder builder = BuiltinMap.builder();

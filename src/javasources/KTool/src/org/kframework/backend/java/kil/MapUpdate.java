@@ -9,8 +9,6 @@ import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import org.kframework.kil.MapBuiltin;
 
 /**
  *
@@ -37,16 +35,12 @@ public class MapUpdate extends Term implements DataStructureUpdate {
             return map;
         }
 
-        // TODO(AndreiS): hack to deal with maps with multiple patterns
-        if (!BuiltinMapUtils.isNormalMap(map)) {
+        if (!(map instanceof BuiltinMap)) {
             return this;
         }
-        BuiltinMap.Builder builder = BuiltinMap.builder();
-        builder.putAll(BuiltinMapUtils.getMapEntries(map));
 
-        List<Term> mapItems = new ArrayList<>();
-        mapItems.addAll(BuiltinMapUtils.getMapPatterns(map));
-        mapItems.addAll(BuiltinMapUtils.getMapVariables(map));
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.concatenate(map);
 
         Set<Term> pendingRemoveSet = new HashSet<>();
         for (Term key : removeSet) {
@@ -57,20 +51,11 @@ public class MapUpdate extends Term implements DataStructureUpdate {
 
         if (!pendingRemoveSet.isEmpty()) {
             // TODO(YilongL): why not return Bottom when there is no frame
-            if (!builder.getEntries().isEmpty()) {
-                mapItems.add(builder.build());
-            }
-            return new MapUpdate(
-                    BuiltinMap.concatenationMap(mapItems, context),
-                    pendingRemoveSet,
-                    updateMap);
+            return new MapUpdate(builder.build(), pendingRemoveSet, updateMap);
         }
 
         builder.putAll(updateMap);
-        if (!builder.getEntries().isEmpty()) {
-            mapItems.add(builder.build());
-        }
-        return BuiltinMap.concatenationMap(mapItems, context);
+        return builder.build();
     }
 
     public Term map() {

@@ -188,6 +188,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         for (Equality equality : unificationConstraint.equalities()) {
             rightHandSide.add(equality.leftHandSide(), equality.rightHandSide());
         }
+        for (Map.Entry<Variable, Term> entry : leftHandSide.substitution().entrySet()) {
+            rightHandSide.add(entry.getKey(), entry.getValue());
+        }
         rightHandSide.simplify();
 
         if (!leftHandSide.implies(rightHandSide, variables)) {
@@ -436,7 +439,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet())
                                 templCnstr.add(entry.getKey(), entry.getValue());
 
-                            for (Map.Entry<Term, Term> mapItem : map) {
+                            for (Map.Entry<Term, Term> mapItem : map.getEntries().entrySet()) {
                                 UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
                                 uninterpretedCnstr.add(key, mapItem.getKey());
                                 uninterpretedCnstrs.add(uninterpretedCnstr);

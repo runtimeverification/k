@@ -534,7 +534,10 @@ public final class KItem extends Term {
 
             unificationConstraint.add(outputKList, ruleOutputKList);
             unificationConstraint.simplify();
-            results.add(SymbolicRewriter.constructNewSubjectTerm(rule, unificationConstraint));
+            results.add(SymbolicRewriter.constructNewSubjectTerm(
+                    rule,
+                    unificationConstraint,
+                    variableSet()));
         }
 
         if (results.size() == 1) {

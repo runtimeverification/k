@@ -427,31 +427,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term value = (Term) this.visitNode(entry.getValue());
             builder.put(key, value);
         }
-
-        if (node.isLHSView()) {
-            if (node.hasViewBase()) {
-                Term base = (Term) this.visitNode(node.viewBase());
-                if (base instanceof MapUpdate) {
-                    MapUpdate mapUpdate = (MapUpdate) base;
-                    /* TODO(AndreiS): check key uniqueness */
-                    builder.putAll(mapUpdate.updateMap());
-                    return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), builder.getEntries());
-                } else {
-                    /* base instanceof Variable */
-                    builder.setFrame((Variable) base);
-                    return builder.build();
-                }
-            } else {
-                return builder.build();
-            }
-        } else {
-            ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
-            for (org.kframework.kil.Term term : node.baseTerms()) {
-                baseTerms.add((Term) this.visitNode(term));
-            }
-            baseTerms.add(builder.build());
-            return BuiltinMap.concatenationMap(baseTerms, TermContext.of(globalContext));
+        for (org.kframework.kil.Term term : node.baseTerms()) {
+            builder.concatenate((Term) this.visitNode(term));
         }
+        return builder.build();
     }
 
     @Override
@@ -496,15 +475,22 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Variable node, Void _)  {
+        String name = node.getName();
+        if (node.isFreshVariable()) {
+           name = "?" + name;
+        } else if (node.isFreshConstant()) {
+            name = "!" + name;
+        }
+
         if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
-            return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
+            return new Variable(name, Kind.CELL_COLLECTION.toString());
         }
 
         if (node.getSort().equals(org.kframework.kil.KSorts.K)) {
-            return new Variable(node.getName(), KSorts.KSEQUENCE);
+            return new Variable(name, KSorts.KSEQUENCE);
         }
         if (node.getSort().equals(org.kframework.kil.KSorts.KLIST)) {
-            return new Variable(node.getName(), KSorts.KLIST);
+            return new Variable(name, KSorts.KLIST);
         }
 
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
@@ -522,15 +508,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
             if (concreteCollectionSize.containsKey(node)) {
                 return new ConcreteCollectionVariable(
-                        node.getName(),
+                        name,
                         sort,
                         concreteCollectionSize.get(node));
             } else {
-                return new Variable(node.getName(), sort);
+                return new Variable(name, sort);
             }
         }
 
-        return new Variable(node.getName(), node.getSort());
+        return new Variable(name, node.getSort());
     }
 
     @Override
@@ -550,7 +536,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Collection<Term> ensures = new ArrayList<>();
         if (node.getEnsures() != null) {
-            transformConjunction(requires, (Term) this.visitNode(node.getEnsures()));
+            transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
         }
 
         UninterpretedConstraint lookups = new UninterpretedConstraint();

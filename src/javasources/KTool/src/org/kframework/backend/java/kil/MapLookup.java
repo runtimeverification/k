@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.BuiltinMapUtils;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -25,14 +24,6 @@ public class MapLookup extends Term implements DataStructureLookup {
     }
 
     public Term evaluateLookup() {
-        // TODO(AndreiS): hack to deal with maps with multiple patterns
-        if (map instanceof KItem) {
-            Term result = BuiltinMapUtils.getMapEntries(map).get(key);
-            if (result != null) {
-                return result;
-            }
-        }
-
         if (!(map instanceof BuiltinMap)) {
             return this;
         }

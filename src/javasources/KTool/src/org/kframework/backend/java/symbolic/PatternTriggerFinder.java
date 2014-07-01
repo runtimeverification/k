@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.MapLookup;
@@ -21,7 +22,10 @@ public class PatternTriggerFinder extends BottomUpVisitor {
 
     @Override
     public void visit(MapLookup mapLookup) {
-        for (KItem pattern : BuiltinMapUtils.getMapPatterns(mapLookup.map())) {
+        if (!(mapLookup.map() instanceof BuiltinMap)) {
+            return;
+        }
+        for (KItem pattern : ((BuiltinMap) mapLookup.map()).mapPatterns()) {
             // TODO(AndreiS): refine to only consider input parameters
             if (((KList) pattern.kList()).getContents().contains(mapLookup.key())) {
                 patterns.add(pattern);

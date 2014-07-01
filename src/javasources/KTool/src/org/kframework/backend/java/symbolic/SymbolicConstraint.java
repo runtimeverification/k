@@ -2,32 +2,16 @@
 
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.Sets;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.JavaSymbolicObject;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Production;
 import org.kframework.krun.K;
 
@@ -290,8 +274,28 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             // merely a simple sanity check
             // assert leftHandSide.kind() == rightHandSide.kind();
 
+            /* eliminate */
+            if (isTermEquality(leftHandSide) && rightHandSide == BoolToken.TRUE) {
+                KList kList = (KList) (((KItem) leftHandSide).kList());
+                leftHandSide = kList.get(0);
+                rightHandSide = kList.get(1);
+
+            }
+            if (isTermEquality(rightHandSide) && leftHandSide == BoolToken.TRUE) {
+                KList kList = (KList) (((KItem) rightHandSide).kList());
+                leftHandSide = kList.get(0);
+                rightHandSide = kList.get(1);
+
+            }
+
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
+        }
+
+        public boolean isTermEquality(Term leftHandSide) {
+            return leftHandSide instanceof KItem
+                    && ((KItem) leftHandSide).kLabel() instanceof KLabelConstant
+                    && ((KLabelConstant) ((KItem) leftHandSide).kLabel()).label().equals("'_==K_");
         }
 
         public Term leftHandSide() {
@@ -516,8 +520,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return leftHandSide + SEPARATOR + rightHandSide;
         }
 
-        public boolean isSimplifiable() {
-            return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic();
+        public boolean isSimplifiableByCurrentAlgorithm() {
+            return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic()
+                    && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap);
         }
     }
 
@@ -742,10 +747,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * applying the substitution to the RHS of a rule. It then removes all
      * bindings of anonymous variables.
      */
-    public void eliminateAnonymousVariables() {
+    public void eliminateAnonymousVariables(Set<Variable> nonAnonymousVariables) {
         for (Iterator<Variable> iterator = data.substitution.keySet().iterator(); iterator.hasNext();) {
             Variable variable = iterator.next();
-            if (variable.isAnonymous()) {
+            if (!nonAnonymousVariables.contains(variable)) {
                 iterator.remove();
             }
         }
@@ -1051,7 +1056,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             simplifyingEqualities = true;
             for (Iterator<Equality> iterator = data.equalities.iterator(); iterator.hasNext();) {
                 Equality equality = iterator.next();
-                if (equality.isSimplifiable()) {
+                if (equality.isSimplifiableByCurrentAlgorithm()) {
                     // if both sides of the equality could be further
                     // decomposed, discharge the equality
                     iterator.remove();
@@ -1064,10 +1069,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     }
 
                     change = true;
-                } else if (BuiltinMapUtils.isNormalMap(equality.leftHandSide)
-                        && BuiltinMapUtils.isNormalMap(equality.rightHandSide)) {
+                } else if (equality.leftHandSide instanceof BuiltinMap
+                        && ((BuiltinMap) equality.leftHandSide).isUnifiableByCurrentAlgorithm()
+                        && equality.rightHandSide instanceof BuiltinMap
+                        && ((BuiltinMap) equality.rightHandSide).isUnifiableByCurrentAlgorithm()) {
                     try {
-                        if (unifier.unifyMap(equality.leftHandSide, equality.rightHandSide, false)) {
+                        if (unifier.unifyMap(
+                                (BuiltinMap) equality.leftHandSide,
+                                (BuiltinMap) equality.rightHandSide, false)) {
                             iterator.remove();
                             change = true;
                         }
@@ -1127,7 +1136,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             // of the rule and the subject term should have no function symbol
             // inside; in other words, only side conditions need to be evaluated
             // and they should have been taken care of in method add(Term,Term)
-            Equality equality = data.equalities.get(i).substitute(data.substitution);
+            Equality equality = data.equalities.get(i).substituteAndEvaluate(data.substitution);
             data.equalities.set(i, equality);
 
             if (equality.isTrue()) {
