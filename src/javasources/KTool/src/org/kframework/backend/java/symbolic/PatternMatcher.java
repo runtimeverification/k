@@ -14,12 +14,11 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.util.Profiler;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -65,7 +64,7 @@ public class PatternMatcher extends AbstractMatcher {
     private boolean isStarNested;
 
     private final TermContext termContext;
-
+    
     /**
      * Checks if the subject term matches the pattern.
      *
@@ -128,7 +127,8 @@ public class PatternMatcher extends AbstractMatcher {
             return Collections.emptyList();
         }
 
-        return evaluateConditions(rule, getMultiSubstitutions(matcher), context);
+        return evaluateConditions(rule,
+                    getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions), context);
     }
     
     public static Map<Variable, Term> nonAssocCommPatternMatch(Term subject, Term pattern, TermContext context) {
@@ -140,32 +140,6 @@ public class PatternMatcher extends AbstractMatcher {
             return matcher.fSubstitution;
         }
     }
-
-    /**
-     * Evaluates the side-conditions of a rule according to a given
-     * substitution.
-     * 
-     * @param rule
-     * @param substitution
-     * @param context
-     * @return the updated substitution on success; otherwise, null
-     */
-    public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitution,
-            TermContext context) {
-        count++;
-        List<Map<Variable, Term>> results = evaluateConditions(rule, Collections.singletonList(substitution), context);
-        count--;
-        assert results.size() <= 1;
-        return results.isEmpty() ? null : results.get(0);
-    }
-    
-    // TODO(YilongL): Unfortunately, I need the following stuff to profile, and
-    // this is the most convenient way for me to do that. I will clean it up
-    // when I am done
-    public static final Stopwatch evalTimer2 = new Stopwatch();
-    public static final Stopwatch evalTimer3 = new Stopwatch();
-    private static int count = 0;
-    public static int req = 0, sortcheck = 0, eq = 0;
 
     /**
      * Evaluates the side-conditions of a rule against a list of possible
@@ -235,22 +209,21 @@ public class PatternMatcher extends AbstractMatcher {
                 }
             }
 
+            
             /* evaluate side conditions */
             if (crntSubst != null) {
-                if (!evalTimer3.isRunning() && count > 0) {
-                    evalTimer3.start();
-                }
+                Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
                 for (Term require : rule.requires()) {
-                    req++;
+                    // TODO(YilongL): in the future, we may have to accumulate
+                    // the substitution obtained from evaluating the side
+                    // condition
                     Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
                     if (!evaluatedReq.equals(BoolToken.TRUE)) {
                         crntSubst = null;
                         break;
                     }
                 }
-                if (evalTimer3.isRunning() && count > 0) {
-                    evalTimer3.stop();
-                }
+                Profiler.stopTimer(Profiler.EVALUATE_REQUIRES_TIMER);
             }
 
             if (crntSubst != null) {
@@ -274,7 +247,7 @@ public class PatternMatcher extends AbstractMatcher {
      * @return the evaluated data structure lookup or choice operation
      */
     private static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst) {
-        evalTimer2.start();
+        Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
         
         Term evalLookupOrChoice = null;
         if (lookupOrChoice instanceof DataStructureLookup) {
@@ -300,29 +273,28 @@ public class PatternMatcher extends AbstractMatcher {
             evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(choice.type(), base).evaluateChoice();
         }
         
-        evalTimer2.stop();
+        Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
         return evalLookupOrChoice;
     }
 
     /**
-     * Private helper method which constructs all possible variable bindings of
-     * the pattern term to match the subject term, given the pattern matcher
-     * object that is used to perform the matching.
+     * Helper method which constructs all possible variable bindings of
+     * the pattern term to match the subject term.
      *
-     * @param matcher
-     *            the pattern matcher
      * @return all possible substitutions of the pattern term to match the
      *         subject term
      */
-    private static List<Map<Variable, Term>> getMultiSubstitutions(PatternMatcher matcher) {
-        if (!matcher.multiSubstitutions.isEmpty()) {
-            assert matcher.multiSubstitutions.size() <= 2;
+    public static List<Map<Variable, Term>> getMultiSubstitutions(
+            Map<Variable, Term> fSubstitution,
+            Collection<Collection<Map<Variable, Term>>> multiSubstitutions) {
+        if (!multiSubstitutions.isEmpty()) {
+            assert multiSubstitutions.size() <= 2;
 
             List<Map<Variable, Term>> result = new ArrayList<Map<Variable, Term>>();
-            Iterator<Collection<Map<Variable, Term>>> iterator = matcher.multiSubstitutions.iterator();
-            if (matcher.multiSubstitutions.size() == 1) {
+            Iterator<Collection<Map<Variable, Term>>> iterator = multiSubstitutions.iterator();
+            if (multiSubstitutions.size() == 1) {
                 for (Map<Variable, Term> subst : iterator.next()) {
-                    Map<Variable, Term> composedSubst = composeSubstitution(matcher.fSubstitution, subst);
+                    Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst);
                     if (composedSubst != null) {
                         result.add(composedSubst);
                     }
@@ -332,8 +304,9 @@ public class PatternMatcher extends AbstractMatcher {
                 Collection<Map<Variable, Term>> otherSubstitutions = iterator.next();
                 for (Map<Variable, Term> subst1 : substitutions) {
                     for (Map<Variable, Term> subst2 : otherSubstitutions) {
-                        Map<Variable, Term> composedSubst = composeSubstitution(matcher.fSubstitution, subst1);
+                        Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst1);
                         if (composedSubst != null) {
+                            // TODO(YilongL): might be able to exploit the fact that composedSubst can be safely mutated
                             composedSubst = composeSubstitution(composedSubst, subst2);
                             if (composedSubst != null) {
                                 result.add(composedSubst);
@@ -344,7 +317,7 @@ public class PatternMatcher extends AbstractMatcher {
             }
             return result;
         } else {
-            Map<Variable, Term> substitution = Maps.newHashMap(matcher.fSubstitution);
+            Map<Variable, Term> substitution = Maps.newHashMap(fSubstitution);
             return Collections.singletonList(substitution);
         }
     }

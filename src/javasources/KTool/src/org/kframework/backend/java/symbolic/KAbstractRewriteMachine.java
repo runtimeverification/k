@@ -1,17 +1,17 @@
 package org.kframework.backend.java.symbolic;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.Profiler;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -32,10 +32,12 @@ public class KAbstractRewriteMachine {
     private final List<Cell> writeCells = Lists.newArrayList();
     
     private Map<Variable, Term> substitution = Maps.newHashMap();
+    private Collection<Collection<Map<Variable, Term>>> multiSubstitutions = Lists.newArrayList();
     
     // program counter
     private int pc = 1;
     private boolean success = true;
+    private boolean isStarNested = false;
     
     private final TermContext context;
     
@@ -54,19 +56,31 @@ public class KAbstractRewriteMachine {
     private boolean rewrite() {
         execute(subject);
         if (success) {
-            EvalTimer.start();
-            substitution = PatternMatcher.evaluateConditions(rule, substitution, context);
-            EvalTimer.stop();
+            Profiler.startTimer(Profiler.EVALUATE_SIDE_CONDITIONS_TIMER);
+            List<Map<Variable, Term>> solutions = PatternMatcher.evaluateConditions(rule,
+                        PatternMatcher.getMultiSubstitutions(substitution, multiSubstitutions), context);
+            Profiler.stopTimer(Profiler.EVALUATE_SIDE_CONDITIONS_TIMER);
             
-            if (substitution != null) {
-                RewriteTimer.start();
-                for (Cell cell : writeCells) {
-                    Term newContent = rule.rhsOfWriteCell()
-                            .get(cell.getLabel())
-                            .substituteAndEvaluate(substitution, context);
+            if (!solutions.isEmpty()) {
+                Map<Variable, Term> solution = solutions.get(0);
+
+                Profiler.startTimer(Profiler.LOCAL_REWRITE_BUILD_RHS_TIMER);
+                // YilongL: cannot use solution.keySet() as variablesToReuse
+                // because read-only cell may have already used up the binding
+                // term
+                Transformer substAndEvalTransformer = new CopyOnShareSubstAndEvalTransformer(
+                        solution, rule.reusableLhsVariables().elementSet(),
+                        context);
+                
+                for (Cell<Term> cell : writeCells) {
+                    Term writeCellPattern = rule.rhsOfWriteCell().get(cell.getLabel());
+                    if (rule.cellsToCopy().contains(cell.getLabel())) {
+                        writeCellPattern = DeepCloner.clone(writeCellPattern);
+                    }
+                    Term newContent = (Term) writeCellPattern.accept(substAndEvalTransformer);
                     cell.unsafeSetContent(newContent);
                 }
-                RewriteTimer.stop();
+                Profiler.stopTimer(Profiler.LOCAL_REWRITE_BUILD_RHS_TIMER);
             } else {
                 success = false;
             }
@@ -75,15 +89,11 @@ public class KAbstractRewriteMachine {
         return success;
     }
     
-    public static Stopwatch MatchingTimer = new Stopwatch();
-    public static Stopwatch EvalTimer = new Stopwatch();
-    public static Stopwatch RewriteTimer = new Stopwatch();
-
     private void execute(Cell<?> crntCell) {
         String cellLabel = crntCell.getLabel();
         if (isReadCell(cellLabel)) {
             // do matching
-            MatchingTimer.start();
+            Profiler.startTimer(Profiler.PATTERN_MATCH_TIMER);
             Map<Variable, Term> subst = PatternMatcher.nonAssocCommPatternMatch(crntCell.getContent(), (Term) rule.lhsOfReadCell().get(cellLabel), context);         
             if (subst == null) {
                 success = false;
@@ -93,7 +103,7 @@ public class KAbstractRewriteMachine {
                     success = false;
                 }
             }
-            MatchingTimer.stop();
+            Profiler.stopTimer(Profiler.PATTERN_MATCH_TIMER);
             
             if (!success) {
                 return;
@@ -106,22 +116,53 @@ public class KAbstractRewriteMachine {
         while (true) {
             String nextInstr = getNextInstruction();
            
-            if (nextInstr.equals(INST_CHOICE)) {
-                // TODO(YilongL): ignore choice instruction for now
-                nextInstr = getNextInstruction();
-            }
-            
             if (nextInstr.equals(INST_UP)) {
                 return;
             }
-            
-            // nextInstr == cell label
-            String nextCellLabel = nextInstr;
-            Iterator<Cell> cellIter = ((CellCollection) crntCell.getContent()).cellMap().get(nextCellLabel).iterator();
-            Cell<?> nextCell = cellIter.next();
-            execute(nextCell);
-            if (!success) {
-                return;
+
+            if (nextInstr.equals(INST_CHOICE)) {
+                assert !isStarNested : "nested cells with multiplicity='*' not supported";
+                isStarNested = true;
+                
+                Map<Variable, Term> oldSubstitution = substitution;
+                substitution = Maps.newHashMap();
+                Collection<Map<Variable, Term>> substitutions = Lists.newArrayList();
+
+                nextInstr = getNextInstruction();
+                int oldPC = pc;
+                int newPC = -1;
+                for (Cell cell : ((CellCollection) crntCell.getContent()).cellMap().get(nextInstr)) {
+                    assert success;
+                    pc = oldPC;
+                    execute(cell);
+                    if (!success) {
+                        // flag success must be true before execute the cell
+                        success = true;
+                        continue;
+                    } else {
+                        newPC = pc;
+                        substitutions.add(substitution);
+                        substitution = Maps.newHashMap();
+                    }
+                }
+                
+                isStarNested = false;
+                if (substitutions.isEmpty()) {
+                    success = false;
+                    return;
+                } else {
+                    pc = newPC;
+                    multiSubstitutions.add(substitutions);
+                    substitution = oldSubstitution;
+                }
+            } else {
+                // nextInstr == cell label
+                Iterator<Cell> cellIter = ((CellCollection) crntCell.getContent()).cellMap().get(nextInstr).iterator();
+                Cell<?> nextCell = cellIter.next();
+                execute(nextCell);
+                if (!success) {
+                    return;
+                }
             }
         }
     }

@@ -20,6 +20,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
+import org.kframework.backend.java.util.Profiler;
 import org.kframework.krun.api.SearchType;
 
 import com.google.common.base.Stopwatch;
@@ -34,7 +35,7 @@ public class GroundRewriter {
     private final List<Term> results = new ArrayList<>();
     private boolean transition;
     private RuleIndex ruleIndex;
-
+    
     public GroundRewriter(Definition definition, TermContext termContext) {
         ruleIndex = definition.getIndex();
         this.termContext = termContext;
@@ -43,12 +44,30 @@ public class GroundRewriter {
 
     public Term rewrite(Term subject, int bound) {
         stopwatch.start();
-
+        
+        /* first break any possible sharing of mutable terms introduced by macro
+         * expansion or front-end */
+        subject = EliminateUnsafeSharingTransformer.transformTerm(subject, termContext);
+        
         for (step = 0; step != bound; ++step) {
-            /* get the first solution */
+            /* Invariant: 
+             *   no sharing between mutable terms inside the subject
+             *  
+             * In order to maintain this invariant, we need to make sure 
+             * the application of the following rules will not introduce
+             * any undesired sharing:
+             *   - rules kompiled for fast rewrite
+             *   - rules not kompiled for fast rewrite
+             *   - function rules
+             *   
+             * Basically all we need to do is to replace the normal subst&eval
+             * transformer with the copy-on-share version and supply it with 
+             * the correct reusable variables obtained from the pattern match
+             * phase */
             computeRewriteStep(subject, 1);
             Term result = getTransition(0);
             if (result != null) {
+//                UnsafeSharingDetector.visitTerm(result);
                 subject = result;
             } else {
                 break;
@@ -57,12 +76,7 @@ public class GroundRewriter {
 
         stopwatch.stop();
         System.err.println("[" + step + ", " + stopwatch + "]");
-        System.err.printf("%s vs. %s(mc=%s, eval=%s, rew=%s) + %s\n",
-                OldRewriterTimer, AbstractRewriteMachineTimer,
-                KAbstractRewriteMachine.MatchingTimer,
-                KAbstractRewriteMachine.EvalTimer,
-                KAbstractRewriteMachine.RewriteTimer,
-                sw);
+        Profiler.printResult();
 
         return subject;
     }
@@ -80,17 +94,16 @@ public class GroundRewriter {
      * @return a list of rules that could be applied
      */
     private List<Rule> getRules(Term term) {
-        return ruleIndex.getRules(term);
+        Profiler.startTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
+        List<Rule> rules = ruleIndex.getRules(term);
+        Profiler.stopTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
+        return rules;
     }
-
+    
     private Term getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
     }
 
-    public static Stopwatch OldRewriterTimer = new Stopwatch();
-    public static Stopwatch AbstractRewriteMachineTimer = new Stopwatch();
-    public static Stopwatch sw = new Stopwatch();
-    
     private void computeRewriteStep(Term subject, int successorBound) {
         results.clear();
 
@@ -109,35 +122,25 @@ public class GroundRewriter {
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
-                if (rule.isCompiledForFastRewriting() && successorBound == 1) {
-                    /* if we are doing concrete execution and the rule has been compiled for K abstract machine */
-                    
-                    OldRewriterTimer.start();
-                    List<Map<Variable, Term>> matchingResults = getMatchingResults(subject, rule);
-                    Term referenceResult = null;
-                    for (Map<Variable, Term> subst : matchingResults) {
-                        referenceResult = constructNewSubjectTerm(rule, subst);
-                    }
-                    OldRewriterTimer.stop();
-
-                    AbstractRewriteMachineTimer.start();
-                    if (KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
-                        assert matchingResults.size() == 1 && referenceResult.equals(subject);
+                boolean succeed = false;
+                if (rule.isCompiledForFastRewriting()) {
+                    Profiler.startTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
+                    if (succeed = KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
                         results.add(subject);
-                    } else {
-                        assert referenceResult == null;
                     }
-                    AbstractRewriteMachineTimer.stop();
+                    Profiler.stopTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
                 } else {
-                    sw.start();
+                    Profiler.startTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
                     for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
                         results.add(constructNewSubjectTerm(rule, subst));
-                        if (results.size() == successorBound) {
-                            sw.stop();
-                            return;
-                        }
+                        succeed = true;
+                        break;
                     }
-                    sw.stop();
+                    Profiler.stopTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
+                }
+                
+                if (succeed) {
+                    return;
                 }
             }
             // If we've found matching results from one equivalence class then
@@ -148,11 +151,11 @@ public class GroundRewriter {
             }
         }
     }
-    
+
     private void computeRewriteStep(Term subject) {
         computeRewriteStep(subject, -1);
     }
-
+        
     /**
      * Constructs the new subject term by applying the resulting substitution
      * map of pattern matching to the right-hand side of the rewrite rule.
@@ -165,7 +168,10 @@ public class GroundRewriter {
      * @return the new subject term
      */
     private Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
-        return rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
+        Term rhs = rule.cellsToCopy().contains(((Cell) rule.rightHandSide()).getLabel()) ?
+                DeepCloner.clone(rule.rightHandSide()) : rule.rightHandSide();
+        return rhs.copyOnShareSubstAndEval(substitution, 
+                rule.reusableLhsVariables().elementSet(), termContext);
     }
 
     /**

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.kframework.backend.java.kil.Immutable;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.util.Profiler;
 
 import com.rits.cloning.Cloner;
 
@@ -23,7 +24,10 @@ public class DeepCloner {
     }
             
     public static Term clone(Term term) {
-        return cloner.deepClone(term);
+        Profiler.startTimer(Profiler.DEEP_CLONE_TIMER);
+        Term deepClone = cloner.deepClone(term);
+        Profiler.stopTimer(Profiler.DEEP_CLONE_TIMER);
+        return deepClone;
     }
     
     /**

@@ -332,7 +332,14 @@ public final class KItem extends Term {
                     /* rename rule variables in the rule RHS */
                     rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
                 }
-                rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                if (K.do_fast_exec) {
+                    rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                            solution, 
+                            rule.reusableLhsVariables().elementSet(),
+                            context);
+                } else { 
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                }
 
                 /* update the constraint */
                 if (K.do_kompilation || K.do_concrete_exec) {
