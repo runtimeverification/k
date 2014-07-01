@@ -28,20 +28,8 @@ public class CheckSortTopUniqueness extends BasicVisitor {
             msg += KSorts.KLIST + ", ";
             count++;
         }
-        if (context.isSubsorted("List", node.getSort().getName())) {
-            msg += "List, ";
-            count++;
-        }
         if (context.isSubsorted("Bag", node.getSort().getName())) {
             msg += "Bag, ";
-            count++;
-        }
-        if (context.isSubsorted("Map", node.getSort().getName())) {
-            msg += "Map, ";
-            count++;
-        }
-        if (context.isSubsorted("Set", node.getSort().getName())) {
-            msg += "Set, ";
             count++;
         }
         if (count > 1) {

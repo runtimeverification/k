@@ -40,6 +40,10 @@ context-free syntax
 	%%"(" BagItem ")"	-> BagItem {bracket}
 	"(" Bag ")"			-> Bag {cons("Bag1Bracket")}
 
+	DotDz				-> Map  {cons("Map1Empty")}
+	DotDz				-> Set  {cons("Set1Empty")}
+	DotDz				-> List {cons("List1Empty")}
+
 	"." -> DotDz
 
 context-free restrictions
