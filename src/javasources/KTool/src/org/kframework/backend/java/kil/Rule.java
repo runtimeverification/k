@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
@@ -16,6 +15,7 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint.Equality;
+import org.kframework.backend.java.symbolic.VariableOccurrencesCounter;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.compile.checks.CheckVariables;
@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -54,9 +54,8 @@ public class Rule extends JavaSymbolicObject {
     private boolean compiledForFastRewriting;
     private final Map<String, Term> lhsOfReadCells;
     private final Map<String, Term> rhsOfWriteCells;
-    private final Set<Variable> variablesToCopy;
+    private final Multiset<Variable> reusableLhsVariables;
     private final Set<String> cellsToCopy;
-    private final Boolean hasGroundCellOnRHS;
     private final List<String> instructions;
     
     /**
@@ -93,41 +92,7 @@ public class Rule extends JavaSymbolicObject {
         this.ensures = ImmutableList.copyOf(ensures);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
-        this.compiledForFastRewriting = compiledForFastRewriting;
-        if (compiledForFastRewriting) {
-            this.lhsOfReadCells = ImmutableMap.copyOf(lhsOfReadCells);
-            this.rhsOfWriteCells = ImmutableMap.copyOf(rhsOfWriteCells);
-            
-            Multiset<Variable> multiset = HashMultiset.create();
-            for (Term term : rhsOfWriteCells.values()) {
-                multiset.addAll(term.variableSet());
-            }
-            for (Term term : lhsOfReadCells.values()) {
-                multiset.removeAll(term.variableSet());
-            }
-            variablesToCopy = ImmutableSet.copyOf(multiset);
-            
-            this.cellsToCopy = ImmutableSet.copyOf(cellsToCopy);
-            this.instructions = ImmutableList.copyOf(instructions);
-            this.hasGroundCellOnRHS = null;
-        } else {
-            this.lhsOfReadCells = null;
-            this.rhsOfWriteCells = null;
-            this.variablesToCopy = null;
-            this.cellsToCopy = null;
-            this.instructions = null;
-            final MutableBoolean hasGroundCellOnRHS = new MutableBoolean(false);
-            rightHandSide.accept(new BottomUpVisitor() {
-                @Override
-                public void visit(Cell cell) {
-                    if (cell.isGround()) {
-                        hasGroundCellOnRHS.setValue(true);
-                    }
-                }
-            });
-            this.hasGroundCellOnRHS = hasGroundCellOnRHS.getValue();
-        }
-                
+        
         super.setAttributes(attributes);
 
         if (attributes.containsKey(Constants.STDIN)
@@ -196,6 +161,58 @@ public class Rule extends JavaSymbolicObject {
             predSort = null;
             sortPredArg = null;
         }
+        
+        // setting fields related to fast rewriting
+        this.compiledForFastRewriting = compiledForFastRewriting;
+        this.lhsOfReadCells       = compiledForFastRewriting ? ImmutableMap.copyOf(lhsOfReadCells) : null;
+        this.rhsOfWriteCells      = compiledForFastRewriting ? ImmutableMap.copyOf(rhsOfWriteCells) : null;
+        this.reusableLhsVariables = computeReusableLhsVariables();
+        this.cellsToCopy          = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
+        this.instructions         = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
+    }
+
+    private Multiset<Variable> computeReusableLhsVariables() {
+        Multiset<Variable> lhsVariablesToReuse = HashMultiset.create();
+        if (compiledForFastRewriting) {
+            Set<Term> lhsOfReadOnlyCell = Sets.newHashSet();
+            for (Map.Entry<String, Term> entry : lhsOfReadCells.entrySet()) {
+                String cellLabel = entry.getKey();
+                Term lhs = entry.getValue();
+                if (rhsOfWriteCells.containsKey(cellLabel)) {
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(lhs));
+                } else {
+                    lhsOfReadOnlyCell.add(lhs);
+                }
+            }
+            for (Equality eq : lookups.equalities()) {
+                assert eq.leftHandSide() instanceof DataStructureLookupOrChoice;
+                if (eq.leftHandSide() instanceof DataStructureLookup) {
+                    DataStructureLookup lookup = (DataStructureLookup) eq.leftHandSide();
+                    Term value = eq.rightHandSide();
+                    
+                    if (!lhsOfReadOnlyCell.contains(lookup.base())) {
+                        // do not double count base variable again
+                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(lookup.key()));
+                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(value));                
+                    }
+                }
+            }
+        } else {
+            lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(leftHandSide));
+            for (Equality eq : lookups.equalities()) {
+                assert eq.leftHandSide() instanceof DataStructureLookupOrChoice;
+                if (eq.leftHandSide() instanceof DataStructureLookup) {
+                    DataStructureLookup lookup = (DataStructureLookup) eq.leftHandSide();
+                    Term value = eq.rightHandSide();
+                    
+                    // do not double count base variable again
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(lookup.key()));
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(value));                
+                }
+            }
+        }
+
+        return lhsVariablesToReuse;
     }
 
     private boolean tempContainsKCell = false;
@@ -299,16 +316,12 @@ public class Rule extends JavaSymbolicObject {
         return rhsOfWriteCells;
     }
     
-    public Set<Variable> variablesToCopy() {
-        return variablesToCopy;
+    public Multiset<Variable> reusableLhsVariables() {
+        return reusableLhsVariables;
     }
     
     public Set<String> cellsToCopy() {
         return cellsToCopy;
-    }
-    
-    public boolean hasGroundCellOnRHS() {
-        return hasGroundCellOnRHS;
     }
     
     public List<String> instructions() {

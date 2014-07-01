@@ -12,9 +12,7 @@ import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 
 /**
@@ -29,7 +27,6 @@ public class Rule extends Sentence {
     private Map<Variable, Integer> concreteDataStructureSize = Collections.emptyMap();
     
     private boolean compiledForFastRewriting = false;
-    // TODO(YilongL): cache the sets later
     // TODO(YilongL): maybe build a CellInfo class?
     private Set<String> cellsOfInterest;
     private Map<String, Term> lhsOfReadCell;
