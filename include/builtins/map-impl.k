@@ -57,7 +57,7 @@ module MAP-IMPL
 
   /* map inclusion */
 //  syntax Bool ::= Map "<=Map" Map    [function, hook(Map:inclusion)]
-  rule (K1 |-> K2 Map1:Map) <=Map (K1 |-> K2 Map2:Map)
+  rule (K1:K |-> K2:K Map1:Map) <=Map (K1 |-> K2 Map2:Map)
         =>
        (Map1 <=Map Map2)
   rule .Map <=Map _:Map => true
