@@ -977,7 +977,7 @@ member's location based on the current class of the object. */
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context lvalue(HOLE . _)
+  context lvalue((HOLE . _)<:Exp)
 
 /*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... (C,EnvC) EStack </envStack>)
