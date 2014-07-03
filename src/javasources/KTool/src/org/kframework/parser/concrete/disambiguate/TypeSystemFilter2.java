@@ -87,6 +87,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
                 (Term) this.visitNode(node.getLeft()),
                 (Term) this.visitNode(node.getRight()),
                 context);
+        result.setSort(maxSort);
         return result;
     }
 }

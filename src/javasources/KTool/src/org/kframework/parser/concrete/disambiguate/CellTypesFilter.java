@@ -8,6 +8,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Rewrite;
@@ -41,6 +42,9 @@ public class CellTypesFilter extends ParseForestTransformer {
     @Override
     public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
         String sort = context.cellSorts.get(cell.getLabel());
+        // if the k cell is opened, then the sort should be K because of ... desugaring
+        if (cell.getLabel().equals("k") && cell.getEllipses() != Ellipses.NONE)
+            sort = KSorts.K;
 
         if (sort == null) {
             if (cell.getLabel().equals("k"))
@@ -103,6 +107,7 @@ public class CellTypesFilter extends ParseForestTransformer {
         @Override
         public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
             Rewrite result = new Rewrite(node);
+            result.setSort(expectedSort);
             result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
             return result;
         }
