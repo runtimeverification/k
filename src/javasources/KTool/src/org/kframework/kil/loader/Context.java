@@ -231,6 +231,8 @@ public class Context implements Serializable {
         if (sort == null) {
             sort = c.getContents().getSort();
         }
+        if (sort.equals(KSorts.BAG_ITEM))
+            sort = KSorts.BAG;
         cellSorts.put(c.getLabel(), sort);
     }
 
