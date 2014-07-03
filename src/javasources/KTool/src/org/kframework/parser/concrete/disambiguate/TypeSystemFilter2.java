@@ -61,7 +61,16 @@ public class TypeSystemFilter2 extends LocalTransformer {
         if (terms.size() == 1) {
             return terms.get(0);
         }
-        node.setContents(terms);
+        // try to be greedy and select only the terms that are directly subsorted to the context sort
+        ArrayList<Term> subsorted = new ArrayList<>();
+        for (Term trm : node.getContents()) {
+            if (context.isSubsortedEq(maxSort, trm.getSort()))
+                subsorted.add(trm);
+        }
+        if (subsorted.size() > 0)
+            node.setContents(subsorted);
+        else
+            node.setContents(terms);
         return node;
     }
 

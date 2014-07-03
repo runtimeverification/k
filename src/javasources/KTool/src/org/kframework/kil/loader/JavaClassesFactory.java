@@ -79,18 +79,8 @@ public class JavaClassesFactory {
             return new KApp(element, context);
         if (KSorts.KLIST.equals(element.getNodeName()))
             return new KList(element);
-        if (Constants.EMPTY.equals(element.getNodeName())) {
-            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.K)) {
-                return KSequence.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.KLIST)) {
-                return KList.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.BAG)) {
-                return Bag.EMPTY;
-            } else {
-                // user defined empty list
-                return new ListTerminator(element, null);
-            }
-        }
+        if (Constants.EMPTY.equals(element.getNodeName()))
+            return new ListTerminator(element, null);
         if (Constants.CONFIG.equals(element.getNodeName()))
             return new Configuration(element);
         if (Constants.CELL.equals(element.getNodeName()))

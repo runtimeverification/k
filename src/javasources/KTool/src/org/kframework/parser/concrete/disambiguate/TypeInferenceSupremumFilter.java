@@ -8,6 +8,7 @@ import java.util.Set;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Lexical;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
@@ -61,7 +62,7 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
                         if (max)
                             maxterms.add(tm2);
                     }
-                } else if (t instanceof Variable) {
+                } else if (t instanceof Variable || t instanceof ListTerminator) {
                     // for variables only, find maximum
                     for (Term t1 : group) {
                         boolean max = true;

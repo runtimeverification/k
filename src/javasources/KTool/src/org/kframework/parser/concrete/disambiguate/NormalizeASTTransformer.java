@@ -2,10 +2,13 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Bag;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -53,5 +56,31 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
             }
         }
         return super.visit(tc, _);
+    }
+
+    /**
+     * The rest of kompile works with these classes. The front end though needs an unified way
+     * of looking at the "." productions to make it easier to disambiguate.
+     */
+    public ASTNode visit(ListTerminator lt, Void _) throws ParseFailedException {
+        if (lt.getSort().equals(KSorts.K)) {
+            return KSequence.EMPTY;
+        } else if (lt.getSort().equals(KSorts.KLIST)) {
+            return KList.EMPTY;
+        } else if (lt.getSort().equals(KSorts.BAG)) {
+            return Bag.EMPTY;
+        // TODO: unfortunately, these 3 are kind of a hack. Normally should be declared directly in K
+        // but at the moment because we are using SDF, I have to declare the dots directly in
+        // SDF in order to avoid certain types of ambiguities.
+        // with the new parser I should be able to
+        } else if (lt.getSort().equals(KSorts.LIST)) {
+            return KApp.of("'.List");
+        } else if (lt.getSort().equals(KSorts.MAP)) {
+            return KApp.of("'.Map");
+        } else if (lt.getSort().equals(KSorts.SET)) {
+            return KApp.of("'.Set");
+        }
+        // user defined empty list
+        return lt;
     }
 }
