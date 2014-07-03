@@ -121,19 +121,10 @@ public class CheckVariables extends BasicVisitor {
             }
             if (!left.containsKey(v)) {
                 node.addAttribute(UNBOUND_VARS, "");
-                
-                /* matching logic relaxes this restriction */
-                if (!options.backend.java()) {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.COMPILER,
-                            "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
-                } else {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
-                            KException.KExceptionGroup.COMPILER,
-                            "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
-                }
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+                        KException.KExceptionGroup.COMPILER,
+                        "Unbounded variable " + v.toString() + "should start with ? or !.",
+                        getName(), v.getFilename(), v.getLocation()));
             }
         }
         for (Map.Entry<Variable,Integer> e : left.entrySet()) {
@@ -142,8 +133,7 @@ public class CheckVariables extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(KException
                         .ExceptionType.ERROR,
                         KException.KExceptionGroup.COMPILER,
-                        "Variable " + key + " has the same name as a fresh " +
-                                "variable.",
+                        "Variable " + key + " has the same name as a fresh variable.",
                         getName(), key.getFilename(), key.getLocation()));
             }
             if (MetaK.isAnonVar(key)) continue;
@@ -152,7 +142,7 @@ public class CheckVariables extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.HIDDENWARNING,
                         KException.KExceptionGroup.COMPILER,
                         "Singleton variable " + key.toString() + ".\n" +
-                                "    If this is not a spelling mistake, please consider using anonymous variables.",
+                        "    If this is not a spelling mistake, please consider using anonymous variables.",
                         getName(), key.getFilename(), key.getLocation()));
             }
         }
