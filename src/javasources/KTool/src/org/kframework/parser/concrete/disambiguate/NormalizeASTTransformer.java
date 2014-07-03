@@ -17,6 +17,10 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 public class NormalizeASTTransformer extends ParseForestTransformer {
     public NormalizeASTTransformer(Context context) {
@@ -63,22 +67,29 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      * of looking at the "." productions to make it easier to disambiguate.
      */
     public ASTNode visit(ListTerminator lt, Void _) throws ParseFailedException {
+        ASTNode result = null;
         if (lt.getSort().equals(KSorts.K)) {
-            return KSequence.EMPTY;
+            result = KSequence.EMPTY;
         } else if (lt.getSort().equals(KSorts.KLIST)) {
-            return KList.EMPTY;
+            result = KList.EMPTY;
         } else if (lt.getSort().equals(KSorts.BAG)) {
-            return Bag.EMPTY;
+            result = Bag.EMPTY;
         // TODO: unfortunately, these 3 are kind of a hack. Normally should be declared directly in K
         // but at the moment because we are using SDF, I have to declare the dots directly in
         // SDF in order to avoid certain types of ambiguities.
         // with the new parser I should be able to
         } else if (lt.getSort().equals(KSorts.LIST)) {
-            return KApp.of("'.List");
+            result = KApp.of("'.List");
         } else if (lt.getSort().equals(KSorts.MAP)) {
-            return KApp.of("'.Map");
+            result = KApp.of("'.Map");
         } else if (lt.getSort().equals(KSorts.SET)) {
-            return KApp.of("'.Set");
+            result = KApp.of("'.Set");
+        }
+        if (result != null) {
+            String msg = "Inferring the sort of . as being " + lt.getSort();
+            GlobalSettings.kem.register(new KException( ExceptionType.HIDDENWARNING,
+                                                        KExceptionGroup.LISTS, msg,
+                                                        lt.getFilename(), lt.getLocation()));
         }
         // user defined empty list
         return lt;
