@@ -1033,8 +1033,8 @@ corresponding store lookup operation. */
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  context lvalue(_:Exp[HOLE::Exp])
-  context lvalue(HOLE::Exp[_:Exp])
+  context lvalue(_:Exp[HOLE:>Exp])
+  context lvalue(HOLE:>Exp[_:Exp])
 
 // Finally, return the address of the desired object member
 

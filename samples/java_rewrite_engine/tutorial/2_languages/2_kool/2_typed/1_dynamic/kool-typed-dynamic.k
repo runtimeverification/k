@@ -225,7 +225,7 @@ KOOL).  */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 
 
   syntax Id ::= Token{"$1"} | Token{"$2"}
@@ -363,8 +363,8 @@ KOOL).  */
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_::Exp[HOLE::Exps])
-  context lvalue(HOLE::Exp[_::Exps])
+  context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(HOLE:>Exp[_:>Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
