@@ -90,6 +90,7 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
             GlobalSettings.kem.register(new KException( ExceptionType.HIDDENWARNING,
                                                         KExceptionGroup.LISTS, msg,
                                                         lt.getFilename(), lt.getLocation()));
+            return result;
         }
         // user defined empty list
         return lt;
