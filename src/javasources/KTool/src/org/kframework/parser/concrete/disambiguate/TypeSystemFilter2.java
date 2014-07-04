@@ -61,16 +61,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
         if (terms.size() == 1) {
             return terms.get(0);
         }
-        // try to be greedy and select only the terms that are directly subsorted to the context sort
-        ArrayList<Term> subsorted = new ArrayList<>();
-        for (Term trm : node.getContents()) {
-            if (context.isSubsortedEq(maxSort, trm.getSort()))
-                subsorted.add(trm);
-        }
-        if (subsorted.size() > 0)
-            node.setContents(subsorted);
-        else
-            node.setContents(terms);
+        node.setContents(terms);
         return node;
     }
 
@@ -88,6 +79,13 @@ public class TypeSystemFilter2 extends LocalTransformer {
                 (Term) this.visitNode(node.getRight()),
                 context);
         result.setSort(maxSort);
+        // if the left hand side is a function, check to see if the right hand side has the same sort
+        if (node.getLeft() instanceof TermCons && ((TermCons) node.getLeft()).getProduction().containsAttribute("function")) {
+            TypeSystemFilter2 tsf = new TypeSystemFilter2(node.getLeft().getSort(), context);
+            node.setRight((Term) tsf.visitNode(node.getRight()), context);
+            result.setSort(node.getLeft().getSort());
+        }
+
         return result;
     }
 }

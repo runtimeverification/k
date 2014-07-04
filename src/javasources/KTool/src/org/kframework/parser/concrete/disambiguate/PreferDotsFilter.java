@@ -1,20 +1,23 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.ListTerminator;
+import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.ParseForestTransformer;
@@ -23,9 +26,11 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
-public class CellTypesFilter extends ParseForestTransformer {
+import java.util.ArrayList;
 
-    public CellTypesFilter(org.kframework.kil.loader.Context context) {
+public class PreferDotsFilter extends ParseForestTransformer {
+
+    public PreferDotsFilter(Context context) {
         super("Cell types", context);
     }
 
@@ -61,7 +66,7 @@ public class CellTypesFilter extends ParseForestTransformer {
         }
 
         if (sort != null) {
-            cell.setContents((Term) new CellTypesFilter2(context, sort, cell.getLabel()).visitNode(cell.getContents()));
+            cell.setContents((Term) new CellTypesFilter2(sort, context).visitNode(cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
             throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
@@ -69,6 +74,34 @@ public class CellTypesFilter extends ParseForestTransformer {
         return super.visit(cell, _);
     }
 
+    @Override
+    public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
+        // choose only the allowed subsorts for a TermCons
+        if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
+            UserList ulist = (UserList) tc.getProduction().getItems().get(0);
+            tc.getContents().set(0, (Term) new CellTypesFilter2(ulist.getSort(), context).visitNode(tc.getContents().get(0)));
+            tc.getContents().set(1, (Term) new CellTypesFilter2(tc.getProduction().getSort(), context).visitNode(tc.getContents().get(1)));
+        } else {
+            int j = 0;
+            Production prd = tc.getProduction();
+            for (int i = 0; i < prd.getItems().size(); i++) {
+                if (prd.getItems().get(i) instanceof Sort) {
+                    Sort sort = (Sort) prd.getItems().get(i);
+                    Term child = (Term) tc.getContents().get(j);
+                    tc.getContents().set(j, (Term) new TypeSystemFilter2(sort.getName(), context).visitNode(child));
+                    j++;
+                }
+            }
+        }
+
+        return super.visit(tc, _);
+    }
+
+    @Override
+    public ASTNode visit(Cast cast, Void _) throws ParseFailedException {
+        cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), context).visitNode(cast.getContent()));
+        return super.visit(cast, _);
+    }
     /**
      * A new class (nested) that goes down one level (jumps over Ambiguity) and checks to see if there is a KSequence
      * 
@@ -79,12 +112,10 @@ public class CellTypesFilter extends ParseForestTransformer {
      */
     public class CellTypesFilter2 extends LocalTransformer {
         String expectedSort;
-        String cellLabel;
 
-        public CellTypesFilter2(Context context, String expectedSort, String cellLabel) {
+        public CellTypesFilter2(String expectedSort, Context context) {
             super("org.kframework.parser.concrete.disambiguate.CellTypesFilter2", context);
             this.expectedSort = expectedSort;
-            this.cellLabel = cellLabel;
         }
 
         @Override
@@ -93,7 +124,7 @@ public class CellTypesFilter extends ParseForestTransformer {
             if (!context.isSubsortedEq(expectedSort, trm.getSort()) &&
                 !(trm.getSort().equals(KSorts.K) && context.isSubsortedEq(KSorts.K, expectedSort))) {
                 // if the found sort is not a subsort of what I was expecting
-                String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
+                String msg = "Wrong type in cell '" + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
                 throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
             }
             return trm;
@@ -138,7 +169,16 @@ public class CellTypesFilter extends ParseForestTransformer {
             if (terms.size() == 1) {
                 return terms.get(0);
             }
-            node.setContents(terms);
+            // try to be greedy and select only the terms that are directly subsorted to the cell sort
+            ArrayList<Term> subsorted = new ArrayList<>();
+            for (Term trm : node.getContents()) {
+                if (trm instanceof ListTerminator && context.isSubsortedEq(expectedSort, trm.getSort()))
+                    subsorted.add(trm);
+            }
+            if (subsorted.size() > 0)
+                node.setContents(subsorted);
+            else
+                node.setContents(terms);
             return node;
         }
     }
