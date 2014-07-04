@@ -85,11 +85,13 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
         } else if (lt.getSort().equals(KSorts.SET)) {
             result = KApp.of("'.Set");
         }
-        if (result != null && !lt.isUserTyped()) {
-            String msg = "Inferring the sort of . as being " + lt.getSort();
-            GlobalSettings.kem.register(new KException( ExceptionType.HIDDENWARNING,
-                                                        KExceptionGroup.LISTS, msg,
-                                                        lt.getFilename(), lt.getLocation()));
+        if (result != null) {
+            if (!lt.isUserTyped()) {
+                String msg = "Inferring the sort of . as being " + lt.getSort();
+                GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING,
+                        KExceptionGroup.LISTS, msg,
+                        lt.getFilename(), lt.getLocation()));
+            }
             return result;
         }
         // user defined empty list
