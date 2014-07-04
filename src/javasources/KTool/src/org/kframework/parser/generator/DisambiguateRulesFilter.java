@@ -46,9 +46,9 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         config = new CellEndLabelFilter(context).visitNode(config);
         if (checkInclusion)
             config = new InclusionFilter(localModule, context).visitNode(config);
+        config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
-        config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);

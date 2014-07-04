@@ -369,10 +369,10 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
+        config = new CellTypesFilter(context).visitNode(config);
         config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
-        config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
@@ -419,10 +419,10 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
+        config = new CellTypesFilter(context).visitNode(config);
         config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
-        config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
@@ -467,9 +467,9 @@ public class DefinitionLoader {
         // TODO: don't allow rewrites
         config = new SentenceVariablesFilter(context).visitNode(config);
         config = new CellEndLabelFilter(context).visitNode(config);
+        config = new CellTypesFilter(context).visitNode(config);
         // config = new CorrectRewritePriorityFilter().visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
-        config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         // config = new InclusionFilter(localModule).visitNode(config);
