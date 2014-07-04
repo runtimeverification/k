@@ -182,10 +182,18 @@ rules
 
 
 	to-xml2:
-		a#(b) -> $[<empty sort="[sort]" loc="[loc]"/>
+		a#(b) -> $[<empty sort="[sort]" loc="[loc]" userTyped="true"/>
 		]
-		where <string-ends-with(|"Empty")> a
-		where mydebug(!"Empty: ")
+		where <string-ends-with(|"12Empty")> a
+		where mydebug(!"Empty12: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(b) -> $[<empty sort="[sort]" loc="[loc]" userTyped="false"/>
+		]
+		where <string-ends-with(|"1Empty")> a
+		where mydebug(!"Empty1: ")
 		where sort := <getSort> a
 		where loc := <getLocAsString>
 
