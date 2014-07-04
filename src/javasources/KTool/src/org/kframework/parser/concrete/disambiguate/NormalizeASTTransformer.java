@@ -86,6 +86,8 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
             result = KApp.of("'.Set");
         }
         if (result != null) {
+            result.setFilename(lt.getFilename());
+            result.setLocation(lt.getLocation());
             if (!lt.isUserTyped()) {
                 String msg = "Inferring the sort of . as being " + lt.getSort();
                 GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING,

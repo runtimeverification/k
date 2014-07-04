@@ -18,19 +18,19 @@ public class TypeSystemFilter2 extends LocalTransformer {
     private final boolean strict;
 
     public TypeSystemFilter2(String maxSort, org.kframework.kil.loader.Context context) {
-        super("Type system", context);
+        super(TypeSystemFilter2.class.getName(), context);
         this.maxSort = maxSort;
         strict = false;
     }
 
     public TypeSystemFilter2(String maxSort, boolean strict, org.kframework.kil.loader.Context context) {
-        super("Type system", context);
+        super(TypeSystemFilter2.class.getName(), context);
         this.maxSort = maxSort;
         this.strict = strict;
     }
 
     public TypeSystemFilter2(TypeSystemFilter2 tsf, Context context) {
-        super("Type system", context);
+        super(TypeSystemFilter2.class.getName(), context);
         this.maxSort = tsf.maxSort;
         this.strict = tsf.strict;
     }
@@ -51,6 +51,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
                     KExceptionGroup.CRITICAL,
                     "type error: unexpected term '" + trm + "' of sort '" + trm.getSort()
                             + "', expected sort '" + maxSort + "'.",
+                    getName(),
                     trm.getFilename(),
                     trm.getLocation());
             throw new ParseFailedException(kex);

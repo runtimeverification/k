@@ -26,7 +26,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
     private CorrectCastPriorityFilter2 secondFilter;
 
     public CorrectCastPriorityFilter(Context context) {
-        super("Correct Cast priority", context);
+        super(CorrectCastPriorityFilter.class.getName(), context);
         secondFilter = new CorrectCastPriorityFilter2(context);
     }
 
@@ -59,7 +59,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
      */
     public class CorrectCastPriorityFilter2 extends LocalTransformer {
         public CorrectCastPriorityFilter2(Context context) {
-            super("org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter2", context);
+            super(CorrectCastPriorityFilter2.class.getName(), context);
         }
 
         @Override

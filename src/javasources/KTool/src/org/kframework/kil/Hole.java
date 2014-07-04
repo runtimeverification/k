@@ -13,16 +13,16 @@ public class Hole extends Term {
 
     public static final Hole KITEM_HOLE = new Hole(KSorts.KITEM);
 
-    private Hole(Element element) {
+    public Hole(Element element) {
         super(element);
-        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+        this.sort = KSorts.KITEM;
     }
 
-    private Hole(Hole hole) {
+    public Hole(Hole hole) {
         super(hole);
     }
 
-    private Hole(String sort) {
+    public Hole(String sort) {
         super(sort);
 
         assert sort.equals(KSorts.KITEM);

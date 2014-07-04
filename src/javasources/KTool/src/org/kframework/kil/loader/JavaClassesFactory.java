@@ -96,7 +96,7 @@ public class JavaClassesFactory {
         if (Constants.CONTEXT.equals(element.getNodeName()))
             return new org.kframework.kil.Context(element);
         if (Constants.HOLE.equals(element.getNodeName()))
-            return Hole.KITEM_HOLE;
+            return new Hole(element);
         if (Constants.FREEZERHOLE.equals(element.getNodeName()))
             return new FreezerHole(element);
         if (Constants.DEFINITION.equals(element.getNodeName()))
