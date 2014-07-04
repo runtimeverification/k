@@ -43,7 +43,7 @@ public class TypeSystemFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cast cast, Void _) throws ParseFailedException {
-        cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), context).visitNode(cast.getContent()));
+        cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), true, context).visitNode(cast.getContent()));
         return super.visit(cast, _);
     }
 }

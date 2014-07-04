@@ -82,7 +82,7 @@ public class CellTypesFilter extends ParseForestTransformer {
         String cellLabel;
 
         public CellTypesFilter2(Context context, String expectedSort, String cellLabel) {
-            super("org.kframework.parser.concrete.disambiguate.CellTypesFilter2", context);
+            super(CellTypesFilter2.class.getName(), context);
             this.expectedSort = expectedSort;
             this.cellLabel = cellLabel;
         }

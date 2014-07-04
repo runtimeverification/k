@@ -165,7 +165,7 @@ public class Definition2SDF {
         sdf.append("\n");
         for (Sort s : psdfv.userSorts) {
             if (!s.isBaseSort()) {
-                sdf.append("     K CastTypeDz \"" + s.getName() + "\"    -> " + StringUtil.escapeSortName(s.getName()) + "DzVar    {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+                sdf.append("     K CastTypeDz \"" + s.getName() + "\"    -> VariableDz    {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
             }
         }
         sdf.append("     K CastTypeDz \"K\"        -> VariableDz    {cons(\"K1Cast\")}\n");
