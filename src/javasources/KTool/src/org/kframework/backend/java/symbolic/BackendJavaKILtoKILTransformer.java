@@ -2,6 +2,12 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.Multimap;
+
+import org.kframework.backend.java.builtins.BitVector;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -24,7 +30,7 @@ import java.util.Map;
  *
  * @author: AndreiS
  */
-public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
+public class BackendJavaKILtoKILTransformer implements Transformer {
 
     private final Context context;
     private final ConfigurationStructureMap configurationStructureMap;
@@ -33,6 +39,25 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
     public BackendJavaKILtoKILTransformer(Context context) {
         this.context = context;
         configurationStructureMap = context.getConfigurationStructureMap();
+    }
+    
+    @Override
+    public String getName() {
+        return this.getClass().toString();
+    }
+    
+    /**
+     * Private helper method that translates Java backend specific KIL term back
+     * to generic KIL term.
+     * 
+     * @param term
+     *            the term to be translated
+     * @return the translated term
+     */
+    private ASTNode transformUnsupportedJavaKILTerm(Term term) {
+        return new org.kframework.kil.KApp(
+                new org.kframework.kil.KLabelConstant("'#BackendJavaKIL(" + term.toString() + ")"),
+                new org.kframework.kil.KList());
     }
 
     @Override
@@ -204,6 +229,111 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
         return new org.kframework.kil.KApp(
                 new org.kframework.kil.KLabelConstant("'someMgu(" + mgu.constraint().toString() + ")"),
                 new org.kframework.kil.KList());
+    }
+
+    @Override
+    public ASTNode transform(BitVector bitVector) {
+        return transform((Token) bitVector);
+    }
+
+    @Override
+    public ASTNode transform(BoolToken boolToken) {
+        return transform((Token) boolToken);
+    }
+
+    @Override
+    public ASTNode transform(Collection collection) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(ConstrainedTerm constrainedTerm) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(IntToken intToken) {
+        return transform((Token) intToken);
+    }
+
+    @Override
+    public ASTNode transform(KCollection kCollection) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(KLabel kLabel) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(ListLookup listLookup) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        return transformUnsupportedJavaKILTerm(mapKeyChoice);
+    }
+
+    @Override
+    public ASTNode transform(MapLookup mapLookup) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public ASTNode transform(MapUpdate mapUpdate) {
+        return transformUnsupportedJavaKILTerm(mapUpdate);
+    }
+
+    @Override
+    public ASTNode transform(MetaVariable metaVariable) {
+        return transform((Token) metaVariable);
+    }
+
+    @Override
+    public ASTNode transform(Rule rule) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        return transformUnsupportedJavaKILTerm(setElementChoice);
+    }
+
+    @Override
+    public ASTNode transform(SetLookup setLookup) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(SetUpdate setUpdate) {
+        return transformUnsupportedJavaKILTerm(setUpdate);
+    }
+
+    @Override
+    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(StringToken stringToken) {
+        return transform((Token) stringToken);
+    }
+
+    @Override
+    public ASTNode transform(Term node) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedToken uninterpretedToken) {
+        return transform((Token) uninterpretedToken);
     }
 
 }
