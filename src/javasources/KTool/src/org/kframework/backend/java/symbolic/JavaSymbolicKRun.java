@@ -99,8 +99,8 @@ public class JavaSymbolicKRun implements KRun {
         term = term.evaluate(termContext);
 
         if (K.pattern_matching) {
-            GroundRewriter groundRewriter = new GroundRewriter(definition, termContext);
-            ConstrainedTerm rewriteResult = new ConstrainedTerm(groundRewriter.rewrite(term, bound), termContext);
+            FastDestructiveRewriter rewriter = new FastDestructiveRewriter(definition, termContext);
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(rewriter.rewrite(term, bound), termContext);
             return rewriteResult;
         } else {
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);

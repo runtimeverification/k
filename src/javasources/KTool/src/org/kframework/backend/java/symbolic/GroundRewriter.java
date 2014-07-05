@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
@@ -19,92 +18,33 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
-import org.kframework.backend.java.util.Profiler;
 import org.kframework.krun.api.SearchType;
 
 import com.google.common.base.Stopwatch;
 
-// TODO(YilongL): extract common functionalities with SymbolicRewriter to superclass
-public class GroundRewriter {
+public class GroundRewriter extends AbstractRewriter {
     
-    private final TermContext termContext;
-    private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = new Stopwatch();
-    private int step;
-    private final List<Term> results = new ArrayList<>();
     private boolean transition;
-    private RuleIndex ruleIndex;
-    
+
     public GroundRewriter(Definition definition, TermContext termContext) {
-        ruleIndex = definition.getIndex();
-        this.termContext = termContext;
-        this.strategy = new TransitionCompositeStrategy(definition.context().kompileOptions.transition);
+        super(definition, termContext);
     }
 
+    @Override
     public Term rewrite(Term subject, int bound) {
         stopwatch.start();
-        
-        /* first break any possible sharing of mutable terms introduced by macro
-         * expansion or front-end */
-        subject = EliminateUnsafeSharingTransformer.transformTerm(subject, termContext);
-        
-        for (step = 0; step != bound; ++step) {
-            /* Invariant: 
-             *   no sharing between mutable terms inside the subject
-             *  
-             * In order to maintain this invariant, we need to make sure 
-             * the application of the following rules will not introduce
-             * any undesired sharing:
-             *   - rules kompiled for fast rewrite
-             *   - rules not kompiled for fast rewrite
-             *   - function rules
-             *   
-             * Basically all we need to do is to replace the normal subst&eval
-             * transformer with the copy-on-share version and supply it with 
-             * the correct reusable variables obtained from the pattern match
-             * phase */
-            computeRewriteStep(subject, 1);
-            Term result = getTransition(0);
-            if (result != null) {
-//                UnsafeSharingDetector.visitTerm(result);
-                subject = result;
-            } else {
-                break;
-            }
-        }
 
+        subject = super.rewrite(subject, bound);
+        
         stopwatch.stop();
         System.err.println("[" + step + ", " + stopwatch + "]");
-        Profiler.printResult();
 
         return subject;
     }
 
-    public Term rewrite(Term subject) {
-        return rewrite(subject, -1);
-    }
-
-    /**
-     * Gets the rules that could be applied to a given term according to the
-     * rule indexing mechanism.
-     *
-     * @param term
-     *            the given term
-     * @return a list of rules that could be applied
-     */
-    private List<Rule> getRules(Term term) {
-        Profiler.startTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
-        List<Rule> rules = ruleIndex.getRules(term);
-        Profiler.stopTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
-        return rules;
-    }
-    
-    private Term getTransition(int n) {
-        return n < results.size() ? results.get(n) : null;
-    }
-
-    private void computeRewriteStep(Term subject, int successorBound) {
+    @Override
+    protected final void computeRewriteStep(Term subject, int successorBound) {
         results.clear();
 
         if (successorBound == 0) {
@@ -122,25 +62,11 @@ public class GroundRewriter {
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
-                boolean succeed = false;
-                if (rule.isCompiledForFastRewriting()) {
-                    Profiler.startTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
-                    if (succeed = KAbstractRewriteMachine.rewrite(rule, subject, termContext)) {
-                        results.add(subject);
+                for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
+                    results.add(constructNewSubjectTerm(rule, subst));
+                    if (results.size() == successorBound) {
+                        return;
                     }
-                    Profiler.stopTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
-                } else {
-                    Profiler.startTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
-                    for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
-                        results.add(constructNewSubjectTerm(rule, subst));
-                        succeed = true;
-                        break;
-                    }
-                    Profiler.stopTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
-                }
-                
-                if (succeed) {
-                    return;
                 }
             }
             // If we've found matching results from one equivalence class then
@@ -151,40 +77,11 @@ public class GroundRewriter {
             }
         }
     }
-
-    private void computeRewriteStep(Term subject) {
-        computeRewriteStep(subject, -1);
+    
+    @Override
+    protected Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
+        return rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
     }
-        
-    /**
-     * Constructs the new subject term by applying the resulting substitution
-     * map of pattern matching to the right-hand side of the rewrite rule.
-     * 
-     * @param rule
-     *            the rewrite rule
-     * @param substitution
-     *            a substitution map that maps variables in the left-hand side
-     *            of the rewrite rule to sub-terms of the current subject term
-     * @return the new subject term
-     */
-    private Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
-        Term rhs = rule.cellsToCopy().contains(((Cell) rule.rightHandSide()).getLabel()) ?
-                DeepCloner.clone(rule.rightHandSide()) : rule.rightHandSide();
-        return rhs.copyOnShareSubstAndEval(substitution, 
-                rule.reusableLhsVariables().elementSet(), termContext);
-    }
-
-    /**
-     * Returns a list of symbolic constraints obtained by unifying the two
-     * constrained terms.
-     * <p>
-     * This method is extracted to simplify the profiling script.
-     * </p>
-     */
-    private List<Map<Variable,Term>> getMatchingResults(Term subject, Rule rule) {
-        return PatternMatcher.patternMatch(subject, rule, termContext);
-    }
-
 
     // Unifies the term with the pattern, and returns a map from variables in
     // the pattern to the terms they unify with. Returns null if the term
@@ -233,18 +130,7 @@ public class GroundRewriter {
         return map;
     }
 
-    /**
-     *
-     * @param initialTerm
-     * @param targetTerm not implemented yet
-     * @param rules not implemented yet
-     * @param pattern the pattern we are searching for
-     * @param bound a negative value specifies no bound
-     * @param depth a negative value specifies no bound
-     * @param searchType defines when we will attempt to match the pattern
-
-     * @return a list of substitution mappings for results that matched the pattern
-     */
+    @Override
     public List<Map<Variable,Term>> search(
             Term initialTerm,
             Term targetTerm,
