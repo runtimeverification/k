@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.symbolic.KAbstractRewriteMachine;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;

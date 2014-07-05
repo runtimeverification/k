@@ -332,7 +332,13 @@ public class PatternMatcher extends AbstractMatcher {
      * @return the composed substitution on success; otherwise, {@code null}
      */
     public static Map<Variable, Term> composeSubstitution(Map<Variable, Term> subst1, Map<Variable, Term> subst2) {
-        Map<Variable, Term> result = new HashMap<Variable, Term>(subst1);
+        if (subst1.size() < subst2.size()) {
+            Map<Variable, Term> tmp = subst1;
+            subst1 = subst2;
+            subst2 = tmp;
+        }
+        
+        Map<Variable, Term> result = new HashMap<>(subst1);
         for (Map.Entry<Variable, Term> entry : subst2.entrySet()) {
             Variable variable = entry.getKey();
             Term term = entry.getValue();
@@ -344,6 +350,34 @@ public class PatternMatcher extends AbstractMatcher {
             }
         }
         return result;
+    }
+    
+    /**
+     * Composes a list of substitutions.
+     * 
+     * @param substs
+     *            a list of substitutions
+     * @return the composed substitution on success; otherwise, {@code null}
+     */
+    @SafeVarargs
+    public static Map<Variable, Term> composeSubstitution(Map<Variable, Term>... substs) {
+        switch (substs.length) {
+        case 0:
+            return null;
+
+        case 1:
+            return substs[0];
+            
+        case 2:
+            return composeSubstitution(substs[0], substs[1]);
+            
+        default:
+            Map<Variable, Term> subst = substs[0];
+            for (int idx = 1; idx < substs.length; idx++) {
+                subst = composeSubstitution(subst, substs[idx]);
+            }
+            return subst;
+        }
     }
 
     private PatternMatcher(TermContext context) {
