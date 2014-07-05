@@ -13,7 +13,6 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -105,14 +104,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         /* top level cell mentioned in the rule */
         if (nestedCellCount == 0) {
             cellsOfInterest.add(cellLabel);
-            
-            Term pattern = cell.getContents() instanceof Rewrite ? ((Rewrite) cell.getContents()).getLeft() : cell.getContents();
-            if (!(pattern instanceof Variable)) {
-                readCell2LHS.put(cellLabel, null);
-            } else if (pattern instanceof Variable && !((Variable) pattern).toString().startsWith("_")) {
-                readCell2LHS.put(cellLabel, null);
-            }
-
+            readCell2LHS.put(cellLabel, null);
             hasRewrite = false;
         }
         

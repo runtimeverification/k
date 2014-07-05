@@ -33,6 +33,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
     private enum Status { LHS, RHS }
 
     private Rule crntRule;
+    private boolean hasAssocCommMatching;
     private String outerWriteCell = null;
     private Status status;
     
@@ -73,7 +74,8 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
             }
             return rule;
         }
-                
+        
+        hasAssocCommMatching = false;
         lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
         rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
         cellsToCopy.clear();
@@ -81,6 +83,12 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         crntRule = rule;
         status = Status.LHS;
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
+        if (hasAssocCommMatching) {
+            rule = rule.shallowCopy();
+            rule.setCompiledForFastRewriting(false);
+            return rule;
+        }
+        
         status = Status.RHS;
         this.visitNode(((Rewrite) rule.getBody()).getRight());
         status = null;
@@ -103,9 +111,12 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
                 && outerWriteCell == null) {
             return super.visit(cell, _);
         }
-
+        
         if (status == Status.LHS) {
             if (crntRule.getReadCells().contains(cell.getLabel())) {
+                if (hasAssocCommMatching(cell)) {
+                    hasAssocCommMatching = true;
+                }
                 lhsOfReadCell.put(cell.getLabel(), cell.getContents());
             }
         } else {
@@ -129,6 +140,34 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         return cell;
     }
     
+    private boolean hasAssocCommMatching(Cell cell) {
+        final MutableBoolean hasACMatching = new MutableBoolean(false);
+        new BasicVisitor(context) {
+            
+            @Override
+            public Void visit(Cell cell, Void _) {
+                if (hasACMatching.booleanValue()) {
+                    return null;
+                }
+                super.visit(cell, _);
+                
+                if (!hasACMatching.booleanValue()) {
+                    for (Term term : cell.getCellTerms()) {
+                        if (term instanceof Cell) {
+                            if (context.getConfigurationStructureMap().get((Cell) term).isStarOrPlus()) {
+                                hasACMatching.setValue(true);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                return null;
+            }
+        }.visitNode(cell);
+        return hasACMatching.booleanValue();
+    }
+
     private boolean hasGroundCell(Cell outerCell) {
         final MutableBoolean hasGroundCell = new MutableBoolean(false);
         new BasicVisitor(context) {
