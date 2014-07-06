@@ -27,10 +27,6 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
  * Therefore, this pass must be performed before {@link AddTopCellRules} but
  * after {@link AddKCell} & {@link AddStreamCells}.
  * 
- * TODO(YilongL): Consider how to compute cells of interest when
- * {@link Cell2DataStructure} is involved. Probably the best way is to hack
- * {@code Cell2DataStructure}.
- * 
  * @author YilongL
  * 
  */
