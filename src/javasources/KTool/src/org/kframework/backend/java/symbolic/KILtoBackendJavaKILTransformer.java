@@ -650,7 +650,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 lhsOfReadCell,
                 rhsOfWriteCell,
                 node.getCellsToCopy(),
-                node.getRewritingSchedule(),
+                node.getInstructions(),
                 node.getAttributes(),
                 definition);
 

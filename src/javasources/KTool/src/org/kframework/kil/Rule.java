@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
@@ -32,7 +33,7 @@ public class Rule extends Sentence {
     private Map<String, Term> lhsOfReadCell;
     private Map<String, Term> rhsOfWriteCell;
     private Set<String> cellsToCopy;
-    private List<String> rewSchedule;
+    private List<Instruction> instructions;
 
     public Rule(Element element) {
         super(element);
@@ -48,7 +49,7 @@ public class Rule extends Sentence {
         lhsOfReadCell = node.lhsOfReadCell;
         rhsOfWriteCell = node.rhsOfWriteCell;
         cellsToCopy = node.cellsToCopy;
-        rewSchedule = node.rewSchedule;
+        instructions = node.instructions;
     }
 
     public Rule() {
@@ -155,12 +156,12 @@ public class Rule extends Sentence {
         this.rhsOfWriteCell = Maps.newHashMap(rhsOfWriteCell);
     }
 
-    public List<String> getRewritingSchedule() {
-        return rewSchedule;
+    public List<Instruction> getInstructions() {
+        return instructions;
     }
 
-    public void setRewritingSchedule(List<String> rewSchedule) {
-        this.rewSchedule = ImmutableList.copyOf(rewSchedule);
+    public void setInstructions(List<Instruction> instructions) {
+        this.instructions = ImmutableList.copyOf(instructions);
     }
 
     public void setCellsToCopy(Set<String> cellsToCopy) {

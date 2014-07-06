@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
+import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -32,7 +32,7 @@ public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
     private enum Status { CONFIGURATION, RULE }
     
     private Status status;
-    private List<String> schedule = new ArrayList<>();
+    private List<Instruction> schedule = new ArrayList<>();
     private Set<String> cellsToVisit = new HashSet<>();
     private Deque<String> cellStack = new ArrayDeque<>();
     private Map<String, Set<String>> containingCells = new HashMap<>();
@@ -102,7 +102,7 @@ public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
 
         rule = rule.shallowCopy();
-        rule.setRewritingSchedule(schedule);
+        rule.setInstructions(schedule);
         
 //        System.out.println(rule);
 //        System.out.println(rule.getCellsOfInterest());
@@ -139,12 +139,12 @@ public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
             }
             
             if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
-                schedule.add(KAbstractRewriteMachine.INST_CHOICE);
+                schedule.add(Instruction.CHOICE);
             }
             
-            schedule.add(cellLabel);
+            schedule.add(Instruction.GOTO(cellLabel));
             cell = (Cell) super.visit(cell, _);
-            schedule.add(KAbstractRewriteMachine.INST_UP);
+            schedule.add(Instruction.UP);
 
             return cell;
         } else {

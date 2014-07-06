@@ -29,19 +29,16 @@ import com.google.common.collect.Maps;
  */
 public class KAbstractRewriteMachine {
     
-    public static final String INST_UP = "UP";
-    public static final String INST_CHOICE = "*";
-    public static final String INST_END = "END";
-    
     private final Rule rule;
     private final Cell<?> subject;
-    private final List<String> instructions;
+    private final List<Instruction> instructions;
 
     private ExtendedSubstitution fExtSubst = new ExtendedSubstitution();
     private List<List<ExtendedSubstitution>> fMultiExtSubsts = Lists.newArrayList();
     
     // program counter
     private int pc = 1;
+    private Instruction nextInstr;
     private boolean success = true;
     private boolean isStarNested = false;
     
@@ -141,13 +138,13 @@ public class KAbstractRewriteMachine {
         }
         
         while (true) {
-            String nextInstr = nextInstruction();
+            nextInstr = nextInstruction();
            
-            if (nextInstr.equals(INST_UP)) {
+            if (nextInstr == Instruction.UP) {
                 return;
             }
 
-            if (nextInstr.equals(INST_CHOICE)) {
+            if (nextInstr == Instruction.CHOICE) {
                 assert !isStarNested : "nested cells with multiplicity='*' not supported";
                 isStarNested = true; // start of AC-matching
                 
@@ -158,7 +155,7 @@ public class KAbstractRewriteMachine {
                 nextInstr = nextInstruction();
                 int oldPC = pc; // pgm counter before AC-matching
                 int newPC = -1; // pgm counter on success
-                for (Cell<?> cell : getSubCellsByLabel(crntCell, nextInstr)) {
+                for (Cell<?> cell : getSubCellsByLabel(crntCell, nextInstr.cellLabel())) {
                     pc = oldPC;
                     match(cell);
                     if (success) {
@@ -182,8 +179,7 @@ public class KAbstractRewriteMachine {
                     fExtSubst = oldExtSubst;
                 }
             } else {
-                // nextInstr == cell label
-                Iterator<Cell> iter = getSubCellsByLabel(crntCell, nextInstr).iterator();
+                Iterator<Cell> iter = getSubCellsByLabel(crntCell, nextInstr.cellLabel()).iterator();
                 if (iter.hasNext()) {
                     Cell<?> nextCell = iter.next();
                     match(nextCell);
@@ -212,7 +208,7 @@ public class KAbstractRewriteMachine {
         return results.isEmpty() ? null : results.get(0);
     }
    
-    private String nextInstruction() {
+    private Instruction nextInstruction() {
         return instructions.get(pc++);
     }
 

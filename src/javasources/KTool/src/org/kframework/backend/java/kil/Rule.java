@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -56,7 +57,7 @@ public class Rule extends JavaSymbolicObject {
     private final Map<String, Term> rhsOfWriteCells;
     private final Multiset<Variable> reusableLhsVariables;
     private final Set<String> cellsToCopy;
-    private final List<String> instructions;
+    private final List<Instruction> instructions;
     
     /**
      * Unbound variables in the rule before kompilation; that is, all variables
@@ -82,7 +83,7 @@ public class Rule extends JavaSymbolicObject {
             Map<String, Term> lhsOfReadCells,
             Map<String, Term> rhsOfWriteCells,
             Set<String> cellsToCopy,
-            List<String> instructions,
+            List<Instruction> instructions,
             Attributes attributes,
             Definition definition) {
         this.label = label;
@@ -324,7 +325,7 @@ public class Rule extends JavaSymbolicObject {
         return cellsToCopy;
     }
     
-    public List<String> instructions() {
+    public List<Instruction> instructions() {
         return instructions;
     }
 
