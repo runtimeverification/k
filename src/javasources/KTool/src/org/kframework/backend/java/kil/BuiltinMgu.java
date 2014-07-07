@@ -93,5 +93,10 @@ public class BuiltinMgu extends Term {
     public int computeHash() {
         return Utils.HASH_PRIME + constraint.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "Mgu(" + constraint.toString() + ")";
+    }
 
 }

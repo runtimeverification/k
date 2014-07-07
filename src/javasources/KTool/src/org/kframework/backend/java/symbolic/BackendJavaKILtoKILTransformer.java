@@ -54,10 +54,8 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
      *            the term to be translated
      * @return the translated term
      */
-    private ASTNode transformUnsupportedJavaKILTerm(Term term) {
-        return new org.kframework.kil.KApp(
-                new org.kframework.kil.KLabelConstant("'#BackendJavaKIL(" + term.toString() + ")"),
-                new org.kframework.kil.KList());
+    private ASTNode transformJavaBackendSpecificTerm(Term term) {
+        return new org.kframework.kil.BackendTerm(term.sort(), term.toString());
     }
 
     @Override
@@ -226,9 +224,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(BuiltinMgu mgu) {
         // TODO(YilongL): properly translate the Mgu into KItem form using the toK function
-        return new org.kframework.kil.KApp(
-                new org.kframework.kil.KLabelConstant("'someMgu(" + mgu.constraint().toString() + ")"),
-                new org.kframework.kil.KList());
+        return transformJavaBackendSpecificTerm(mgu);
     }
 
     @Override
@@ -243,12 +239,12 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Collection collection) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("This method should never be called");
     }
 
     @Override
     public ASTNode transform(ConstrainedTerm constrainedTerm) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
@@ -258,32 +254,32 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KCollection kCollection) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("This method should never be called");
     }
 
     @Override
     public ASTNode transform(KLabel kLabel) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("This method should never be called");
     }
 
     @Override
     public ASTNode transform(ListLookup listLookup) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
     public ASTNode transform(MapKeyChoice mapKeyChoice) {
-        return transformUnsupportedJavaKILTerm(mapKeyChoice);
+        return transformJavaBackendSpecificTerm(mapKeyChoice);
     }
 
     @Override
     public ASTNode transform(MapLookup mapLookup) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
     
     @Override
     public ASTNode transform(MapUpdate mapUpdate) {
-        return transformUnsupportedJavaKILTerm(mapUpdate);
+        return transformJavaBackendSpecificTerm(mapUpdate);
     }
 
     @Override
@@ -293,27 +289,27 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Rule rule) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
     public ASTNode transform(SetElementChoice setElementChoice) {
-        return transformUnsupportedJavaKILTerm(setElementChoice);
+        return transformJavaBackendSpecificTerm(setElementChoice);
     }
 
     @Override
     public ASTNode transform(SetLookup setLookup) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
     public ASTNode transform(SetUpdate setUpdate) {
-        return transformUnsupportedJavaKILTerm(setUpdate);
+        return transformJavaBackendSpecificTerm(setUpdate);
     }
 
     @Override
     public ASTNode transform(SymbolicConstraint symbolicConstraint) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
@@ -323,12 +319,12 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Term node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("This method should never be called");
     }
 
     @Override
     public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented, yet");
     }
 
     @Override
