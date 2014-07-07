@@ -17,10 +17,10 @@ module VARIABLE
 // returns an actual set of variables.  Well, I just added it, please check.
 
   syntax Set ::= getVariables(K)  [function]  // public
-  rule getVariables(K) => #getVars(K)
+  rule getVariables(K:K) => #getVars(K)
 
   syntax Set ::= #getVars(K)  [function] 
-  rule #getVars(K) => #getVars1(K, .Set)
+  rule #getVars(K:K) => #getVars1(K, .Set)
 
   syntax Set ::= #getVars1(KList, Set)  [function]
   rule #getVars1((X:Variable => .KList),,_, (.Set => SetItem(X)) _:Set)
@@ -28,11 +28,11 @@ module VARIABLE
     when (isVariable(L(Ks)) =/=K true) andBool
          (isCollection(L(Ks)) =/=K true)
   rule #getVars1(.KList, S:Set) => S
-  rule #getVars1((.KList => I),,(ListItem(I) => .List) _:List,,_, _)
+  rule #getVars1((.KList => I:K),,(ListItem(I) => .List) _:List,,_, _)
   rule #getVars1((.List => .KList),,_, _)
-  rule #getVars1((.KList => I),,(SetItem(I) => .Set) _:Set,,_, _)
+  rule #getVars1((.KList => I:K),,(SetItem(I) => .Set) _:Set,,_, _)
   rule #getVars1((.Set => .KList),,_, _)
-  rule #getVars1((.KList => Key,,Value),,(Key |-> Value => .Map) _:Map,,_, _)
+  rule #getVars1((.KList => Key:K,,Value:K),,(Key |-> Value => .Map) _:Map,,_, _)
   rule #getVars1((.Map => .KList),,_, _)
   rule #getVars1((K1:KItem ~> K2:KItem ~> K:K => K1,,K2,,K),,_, _)
   rule #getVars1((.K => .KList),,_, _) 
@@ -123,11 +123,11 @@ module FREE-VARS
     when (isVariable(L(Ks)) =/=K true) andBool
          (isBinder(L(Ks)) =/=K true) andBool
          (isCollection(L(Ks)) =/=K true)
-  rule #freeVars((.KList => I),, (ListItem(I) => .List) _:List,,_, _, _)
+  rule #freeVars((.KList => I:K),, (ListItem(I) => .List) _:List,,_, _, _)
   rule #freeVars((.List => .KList),,_, _, _)
-  rule #freeVars((.KList => I),, (SetItem(I) => .Set) _:Set,,_, _, _)
+  rule #freeVars((.KList => I:K),, (SetItem(I) => .Set) _:Set,,_, _, _)
   rule #freeVars((.Set => .KList),,_, _, _)
-  rule #freeVars((.KList => Key,,Value),, (Key |-> Value => .Map) _:Map,,_, _, _)
+  rule #freeVars((.KList => Key:K,,Value:K),, (Key |-> Value => .Map) _:Map,,_, _, _)
   rule #freeVars((.Map => .KList),,_, _, _)
 
 
@@ -136,7 +136,7 @@ module FREE-VARS
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
-  rule #freeVars((K1:KItem ~> K2:KItem ~> K => K1,,K2,,K),,_, _, _)
+  rule #freeVars((K1:KItem ~> K2:KItem ~> K:K => K1,,K2,,K),,_, _, _)
 
   syntax Set ::= #freeVarsBinder(K, Set)  [function]
   rule #freeVarsBinder(K:K, Bound:Set)
