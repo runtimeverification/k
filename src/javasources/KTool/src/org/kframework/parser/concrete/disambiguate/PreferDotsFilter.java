@@ -13,6 +13,7 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -46,6 +47,49 @@ public class PreferDotsFilter extends ParseForestTransformer {
     }
 
     @Override
+    public ASTNode visit(Rule rl, Void _) throws ParseFailedException {
+        if (rl.getBody() instanceof Ambiguity) {
+            for (Term t : ((Ambiguity) rl.getBody()).getContents()) {
+                if (t instanceof Rewrite)
+                    processRW((Rewrite) t);
+            }
+        }
+        if (rl.getBody() instanceof Rewrite) {
+            processRW((Rewrite) rl.getBody());
+        }
+
+        return super.visit(rl, _);
+    }
+
+    private void processRW(Rewrite node) throws ParseFailedException {
+        // if the left hand side is a function, check to see if the right hand side has the same sort
+        if (node.getLeft() instanceof TermCons && ((TermCons) node.getLeft()).getProduction().containsAttribute("function")) {
+            node.setRight(preferWeak(node.getLeft().getSort(), node.getRight()), context);
+            node.setSort(node.getLeft().getSort());
+        }
+    }
+
+    private Term preferWeak(String expectedSort, Term t) throws ParseFailedException {
+        t = (Term) new TypeSystemFilter2(expectedSort, context).visitNode(t);
+        if (t instanceof Ambiguity) {
+            Ambiguity node = (Ambiguity) t;
+            ArrayList<Term> eqSort = new ArrayList<>();
+
+            for (Term trm : node.getContents()) {
+                if (context.isSubsortedEq(expectedSort, trm.getSort()))
+                    eqSort.add(trm);
+            }
+            if (eqSort.size() == 0)
+                return t;
+            else if (eqSort.size() == 1)
+                return eqSort.get(0);
+            node.setContents(eqSort);
+            return node;
+        }
+        return t;
+    }
+
+    @Override
     public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
         String sort = context.cellSorts.get(cell.getLabel());
         // if the k cell is opened, then the sort should be K because of ... desugaring
@@ -66,7 +110,7 @@ public class PreferDotsFilter extends ParseForestTransformer {
         }
 
         if (sort != null) {
-            cell.setContents((Term) prefer(sort, cell.getContents()));
+            cell.setContents((Term) preferStrict(sort, cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
             throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
@@ -79,8 +123,8 @@ public class PreferDotsFilter extends ParseForestTransformer {
         // choose only the allowed subsorts for a TermCons
         if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
-            tc.getContents().set(0, (Term) prefer(ulist.getSort(), tc.getContents().get(0)));
-            tc.getContents().set(1, (Term) prefer(tc.getProduction().getSort(), tc.getContents().get(1)));
+            tc.getContents().set(0, (Term) preferStrict(ulist.getSort(), tc.getContents().get(0)));
+            tc.getContents().set(1, (Term) preferStrict(tc.getProduction().getSort(), tc.getContents().get(1)));
         } else {
             int j = 0;
             Production prd = tc.getProduction();
@@ -99,7 +143,7 @@ public class PreferDotsFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cast cast, Void _) throws ParseFailedException {
-        cast.setContent((Term) prefer(cast.getInnerSort(), cast.getContent()));
+        cast.setContent((Term) preferStrict(cast.getInnerSort(), cast.getContent()));
         return super.visit(cast, _);
     }
 
@@ -107,7 +151,7 @@ public class PreferDotsFilter extends ParseForestTransformer {
      * Given the context from the visitor, match on an ambiguity node, and choose only those terms
      * that have exactly the sort of the context. If the result is 0, keep the original ambiguity.
      */
-    private ASTNode prefer(String expectedSort, Term t) {
+    private ASTNode preferStrict(String expectedSort, Term t) {
         if (t instanceof Ambiguity) {
             Ambiguity node = (Ambiguity) t;
             ArrayList<Term> eqSort = new ArrayList<>();

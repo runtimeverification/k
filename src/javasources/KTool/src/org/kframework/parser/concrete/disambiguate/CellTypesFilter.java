@@ -11,7 +11,9 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -110,13 +112,6 @@ public class CellTypesFilter extends ParseForestTransformer {
             Rewrite result = new Rewrite(node);
             result.setSort(expectedSort);
             result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
-            // if the left hand side is a function, check to see if the right hand side has the same sort
-            if (node.getLeft() instanceof TermCons && ((TermCons) node.getLeft()).getProduction().containsAttribute("function")) {
-                TypeSystemFilter2 tsf = new TypeSystemFilter2(node.getLeft().getSort(), context);
-                node.setRight((Term) tsf.visitNode(node.getRight()), context);
-                result.setSort(node.getLeft().getSort());
-            }
-
             return result;
         }
 
