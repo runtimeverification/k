@@ -5,7 +5,7 @@ module ISSUE
   imports UNIFICATION
   syntax K ::= "a" | "b"
   syntax Variable ::= "x"
-  configuration <k> a ~> b </k>
+  configuration <k> $PGM:K ~> b </k>
                 <list> ListItem(x) </list> <set> SetItem(x) </set>
                 <mgu> updateMgu(.Mgu, x, "success") </mgu>
                 <out stream="stdout"> .List </out>
