@@ -583,7 +583,7 @@ exceptions which are not caught. */
 /*@ The function \texttt{mkDecls} turns a list of parameters into a
 list of variable declarations. */
 
-  syntax Decl ::= mkDecls(Params)  [function]
+  syntax Stmts ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 

@@ -525,7 +525,7 @@ from SIMPLE unchanged. */
 
 //@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
-  syntax Decl ::= mkDecls(Ids,Vals)  [function]
+  syntax Stmts ::= mkDecls(Ids,Vals)  [function]
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 

@@ -346,7 +346,7 @@ KOOL).  */
 
 //@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
 
-  syntax Decl ::= mkDecls(Params,Vals)  [function]
+  syntax Stmts ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}
