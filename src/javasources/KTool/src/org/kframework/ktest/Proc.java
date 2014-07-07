@@ -272,8 +272,9 @@ public class Proc<T> implements Runnable {
                 } catch (MatchFailure e) {
                     // outputs don't match
                     System.out.format(
-                            "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
-                            red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
+                        "%sERROR: [%s] output doesn't match with expected output " +
+                        "%s (time: %d ms)%s%n",
+                        red, logStr, expectedOut.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
                     reportOutMatch(e.getMessage());
                     if (verbose)
                         System.out.println(getReason());
@@ -318,8 +319,9 @@ public class Proc<T> implements Runnable {
                 } catch (MatchFailure e) {
                     // error outputs don't match
                     System.out.format(
-                            "%sERROR: [%s] throwed error, but expected error message doesn't match "+
-                                    "(time: %d ms)%s%n", red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
+                        "%sERROR: [%s] throwed error, but expected error message doesn't match " +
+                        "%s (time: %d ms)%s%n",
+                        red, logStr, expectedErr.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
                     reportErrMatch(e.getMessage());
                 }
             }
