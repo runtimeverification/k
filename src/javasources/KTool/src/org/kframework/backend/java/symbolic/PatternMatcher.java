@@ -476,7 +476,7 @@ public class PatternMatcher extends AbstractMatcher {
      *         successfully; otherwise, {@code false}
      */
     private static boolean checkOrderedSortedCondition(Variable variable, Term term, TermContext termContext) {
-        return termContext.definition().context().isSubsortedEq(variable.sort(), term.sort());
+        return termContext.definition().subsorts().isSubsortedEq(variable.sort(), term.sort());
     }
 
     /**

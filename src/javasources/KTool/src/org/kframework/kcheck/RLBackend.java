@@ -216,7 +216,7 @@ public class RLBackend extends BasicBackend implements Backend {
             pattern = DefinitionLoader.parsePattern(
                     K.pattern,
                     "Command line pattern",
-                    KSorts.BAG,
+                    KSorts.BAG.name(),
                     context);
             defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern),

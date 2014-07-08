@@ -237,7 +237,7 @@ public class GappaPrinter extends BottomUpVisitor {
                 right.accept(this);
                 closeParens(right);
                 result.append(")");
-                right = UninterpretedToken.of("#Float", "0.0");
+                right = UninterpretedToken.of(Sort.of("#Float"), "0.0");
             } else {
                 openParens(left);
                 left.accept(this);

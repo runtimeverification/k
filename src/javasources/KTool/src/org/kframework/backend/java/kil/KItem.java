@@ -17,11 +17,11 @@ import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -56,7 +56,7 @@ public final class KItem extends Term {
     private final Term kLabel;
     private final Term kList;
     private final boolean isExactSort;
-    private final String sort;
+    private final Sort sort;
     private Boolean evaluable = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
@@ -81,7 +81,7 @@ public final class KItem extends Term {
                 KItem newListTerminator = new KItem(
                         unitLabel,
                         KList.EMPTY,
-                        CompleteSortLatice.getUserListName(CompleteSortLatice.BOTTOM_SORT_NAME, separator),
+                        Sort.of(CompleteSortLatice.getUserListName(CompleteSortLatice.BOTTOM_SORT_NAME, separator)),
                         true);
                 LIST_TERMINATORS.put(unitLabel, newListTerminator);
                 return newListTerminator;
@@ -91,7 +91,7 @@ public final class KItem extends Term {
         return new KItem(kLabel, kList, termContext);
     }
     
-    private KItem(Term kLabel, Term kList, String sort, boolean isExactSort) {
+    private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
         super(Kind.KITEM);
         this.kLabel = kLabel;
         this.kList = kList;
@@ -105,15 +105,15 @@ public final class KItem extends Term {
         this.kList = kList;
 
         Definition definition = termContext.definition();
-        Context context = definition.context();
+        Subsorts subsorts = definition.subsorts();
         
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             List<Production> productions = kLabelConstant.productions();
             
-            Set<String> sorts = Sets.newHashSet();
-            Set<String> possibleSorts = Sets.newHashSet();
+            Set<Sort> sorts = Sets.newHashSet();
+            Set<Sort> possibleSorts = Sets.newHashSet();
 
             if (!K.do_kompilation) {
                 /**
@@ -156,9 +156,9 @@ public final class KItem extends Term {
                                 term = ((KLabelInjection) kItem.kLabel).term();
                             }
                         }
-                        String childSort = term.sort();
+                        Sort childSort = term.sort();
     
-                        if (!context.isSubsortedEq(production.getChildSort(idx), childSort)) {
+                        if (!subsorts.isSubsortedEq(Sort.of(production.getChildSort(idx)), childSort)) {
                             mustMatch = false;
                             /*
                              * YilongL: the following analysis can be made more
@@ -167,7 +167,7 @@ public final class KItem extends Term {
                              * compute for our purpose
                              */
                             mayMatch = !term.isExactSort()
-                                    && context.hasCommonSubsort(production.getChildSort(idx), childSort);
+                                    && subsorts.hasCommonSubsort(Sort.of(production.getChildSort(idx)), childSort);
                         }
                         idx++;
                     }
@@ -176,15 +176,15 @@ public final class KItem extends Term {
                 }
 
                 if (mustMatch) {
-                    sorts.add(production.getSort());
+                    sorts.add(Sort.of(production.getSort()));
                 } else if (mayMatch) {
-                    possibleSorts.add(production.getSort());
+                    possibleSorts.add(Sort.of(production.getSort()));
                 }
             }
 
             /* no production matches this KItem */
             if (sorts.isEmpty()) {
-                sorts.add(kind.toString());
+                sorts.add(kind.asSort());
             }
 
             /*
@@ -195,7 +195,7 @@ public final class KItem extends Term {
              * we must have an ambiguous grammar with which this KItem cannot be
              * correctly parsed.
              */
-            sort = sorts.size() == 1 ? sorts.iterator().next() : context.getGLBSort(sorts);
+            sort = sorts.size() == 1 ? sorts.iterator().next() : subsorts.getGLBSort(sorts);
             if (sort == null) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
                         KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " + 
@@ -209,7 +209,7 @@ public final class KItem extends Term {
                 assert kList.equals(KList.EMPTY);
             }
             
-            sort = kind.toString();
+            sort = kind.asSort();
             isExactSort = false;
         }
     }
@@ -302,7 +302,7 @@ public final class KItem extends Term {
         // applying user-defined rules to allow the users to provide their
         // own rules for checking sort membership
         if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
-            Term checkResult = SortMembership.check(this, context.definition().context());
+            Term checkResult = SortMembership.check(this, context.definition());
             if (checkResult != this) {
                 return checkResult;
             }
@@ -412,11 +412,8 @@ public final class KItem extends Term {
         return kLabel instanceof KLabel && ((KLabel) kLabel).isFunction();
     }
 
-    /**
-     * @return a {@code String} representation of the sort of this K application.
-     */
     @Override
-    public String sort() {
+    public Sort sort() {
         return sort;
     }
 
@@ -425,7 +422,7 @@ public final class KItem extends Term {
      *         {@code KItem} when its {@code KLabel} is a constructor;
      *         otherwise, null;
      */
-    public Set<String> possibleMinimalSorts() {
+    public Set<Sort> possibleMinimalSorts() {
         // TODO(YilongL): reconsider the use of this method when doing test generation
         throw new UnsupportedOperationException();
     }

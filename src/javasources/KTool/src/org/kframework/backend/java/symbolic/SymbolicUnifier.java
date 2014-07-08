@@ -576,7 +576,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                 } else if (otherCellMap.isEmpty()) {
                     fConstraint.add(new CellCollection(cellMap, frame, context), otherFrame);
                 } else {
-                    Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.toString());
+                    Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.asSort());
                     fConstraint.add(frame, new CellCollection(otherCellMap, variable, context));
                     fConstraint.add(new CellCollection(cellMap, variable, context), otherFrame);
                 }

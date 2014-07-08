@@ -40,7 +40,7 @@ public class Z3Term extends Term {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         throw new UnsupportedOperationException();
     }
 

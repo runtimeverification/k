@@ -33,7 +33,7 @@ public final class Hole extends Term implements MaximalSharing {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return KSorts.KITEM;
     }
 

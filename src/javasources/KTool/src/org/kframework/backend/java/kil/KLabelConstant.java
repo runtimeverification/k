@@ -41,7 +41,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     
     private final boolean isSortPredicate;
     
-    private final String predicateSort;
+    private final Sort predicateSort;
     
     private KLabelConstant(String label, Definition definition) {
         this.label = label;
@@ -81,7 +81,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
             isSortPredicate = true;
-            predicateSort = label.substring("is".length());
+            predicateSort = Sort.of(label.substring("is".length()));
         }
         this.isFunction = isFunction;
     }
@@ -135,7 +135,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      * Returns the predicate sort if this {@code KLabelConstant} represents a
      * sort membership predicate; otherwise, {@code null}.
      */
-    public String getPredicateSort() {
+    public Sort getPredicateSort() {
         assert isSortPredicate();
         return predicateSort;
     }

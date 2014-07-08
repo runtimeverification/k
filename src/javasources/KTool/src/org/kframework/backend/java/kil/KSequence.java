@@ -44,7 +44,7 @@ public class KSequence extends KCollection {
      * {@code Serializable} interface.
      */
     private transient final PStack<Term> contents;
-    private String sort;
+    private Sort sort;
 
     /**
      * Concatenates a sequence of elements of sort K or KItem and a frame term.
@@ -141,7 +141,7 @@ public class KSequence extends KCollection {
     }    
 
     @Override
-    public String sort() {
+    public Sort sort() {
         if (sort != null) {
             return sort;
         }

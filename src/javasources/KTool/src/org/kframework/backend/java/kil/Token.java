@@ -8,7 +8,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.Collections;
@@ -22,14 +21,13 @@ import java.util.Set;
  */
 public abstract class Token extends Term implements Immutable {
 
-    public static Token of(String sort, String value) {
-        switch (sort) {
-            case BoolToken.SORT_NAME:
-                return BoolToken.of(Boolean.parseBoolean(value));
-            case IntToken.SORT_NAME:
-                return IntToken.of(value);
-            default:
-                return UninterpretedToken.of(sort, value);
+    public static Token of(Sort sort, String value) {
+        if (sort.equals(BoolToken.SORT)) {
+            return BoolToken.of(Boolean.parseBoolean(value));
+        } else if (sort.equals(IntToken.SORT)) {
+            return IntToken.of(value);
+        } else {
+            return UninterpretedToken.of(sort, value);
         }
     }
 
@@ -42,11 +40,8 @@ public abstract class Token extends Term implements Immutable {
         return true;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this token.
-     */
     @Override
-    public abstract String sort();
+    public abstract Sort sort();
 
     /**
      * Returns a {@code String} representation of the (uninterpreted) value of this token.

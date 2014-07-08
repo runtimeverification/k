@@ -129,7 +129,7 @@ public class BuiltinSet extends Collection {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return KSorts.SET;
     }
 

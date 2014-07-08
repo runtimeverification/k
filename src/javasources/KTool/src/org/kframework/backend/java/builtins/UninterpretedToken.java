@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.MaximalSharing;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -24,12 +25,12 @@ import java.util.Map;
 public final class UninterpretedToken extends Token implements MaximalSharing {
 
     /* Token cache */
-    private static final Map<String, Map <String, UninterpretedToken>> cache = new HashMap<String, Map <String, UninterpretedToken>>();
+    private static final Map<Sort, Map<String, UninterpretedToken>> cache = new HashMap<>();
 
-    private final String sort;
+    private final Sort sort;
     private final String value;
 
-    private UninterpretedToken(String sort, String value) {
+    private UninterpretedToken(Sort sort, String value) {
         this.sort = sort;
         this.value = value;
     }
@@ -39,7 +40,7 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
      * UninterpretedToken instances are cached to ensure uniqueness (subsequent invocations of
      * this method with the same sort and value return the same {@code UninterpretedToken} object).
      */
-    public static UninterpretedToken of(String sort, String value) {
+    public static UninterpretedToken of(Sort sort, String value) {
         Map<String, UninterpretedToken> sortCache = cache.get(sort);
         if (sortCache == null) {
             sortCache = new HashMap<String, UninterpretedToken>();
@@ -55,11 +56,8 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
         return cachedGenericToken;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this UninterpretedToken.
-     */
     @Override
-    public String sort() {
+    public Sort sort() {
         return sort;
     }
 

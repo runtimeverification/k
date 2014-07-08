@@ -133,8 +133,8 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override

@@ -73,7 +73,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         // TODO(AndreiS): track the original sort from the grammar
         return KSorts.MAP;
     }

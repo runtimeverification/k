@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Constants;
@@ -56,7 +57,7 @@ public class IndexingTable implements Serializable, RuleIndex{
         //        indices.add(new FreezerIndex(frozenKLabel, i));
         //    }
         //}
-        for (String sort : definition.builtinSorts()) {
+        for (Sort sort : definition.builtinSorts()) {
             indices.add(new TokenIndex(sort));
         }
 

@@ -40,7 +40,7 @@ public class KList extends KCollection {
      */
     private ImmutableList<Term> contents;
     
-    private String sort;
+    private Sort sort;
 
     public KList(List<Term> items, Variable frame) {
         super(frame, Kind.KLIST);
@@ -94,7 +94,7 @@ public class KList extends KCollection {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         if (sort != null) {
             return sort;
         }

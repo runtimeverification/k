@@ -243,12 +243,12 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
 
     public static Z3Term valueOf(Variable variable, Context context) {
         try {
-            if (variable.sort().equals(BoolToken.SORT_NAME)) {
+            if (variable.sort().equals(BoolToken.SORT)) {
                 //if (boundVariables.contains(variable)) {}
                 return new Z3Term(context.MkBoolConst(variable.name()));
-            } else if (variable.sort().equals(IntToken.SORT_NAME)) {
+            } else if (variable.sort().equals(IntToken.SORT)) {
                 return new Z3Term(context.MkIntConst(variable.name()));
-            } else if (variable.sort().equals(BitVector.SORT_NAME)) {
+            } else if (variable.sort().equals(BitVector.SORT)) {
                 // TODO(AndreiS): allow for bitvector variables of any bitwidth
                 return new Z3Term(context.MkBVConst(variable.name(), Integer.SIZE));
             } else {

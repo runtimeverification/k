@@ -10,12 +10,12 @@ public class ConcreteCollectionVariable extends Variable {
 
     private final int concreteSize;
 
-    public ConcreteCollectionVariable(String name, String sort, boolean anonymous, int concreteSize) {
+    public ConcreteCollectionVariable(String name, Sort sort, boolean anonymous, int concreteSize) {
         super(name, sort, anonymous);
         this.concreteSize = concreteSize;
     }
 
-    public ConcreteCollectionVariable(String name, String sort, int concreteSize) {
+    public ConcreteCollectionVariable(String name, Sort sort, int concreteSize) {
         this(name, sort, false, concreteSize);
     }
 

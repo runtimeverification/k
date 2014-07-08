@@ -110,7 +110,7 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return KSorts.LIST;
     }
 

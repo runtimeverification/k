@@ -94,7 +94,7 @@ public class MapUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return map.sort();
     }
 
