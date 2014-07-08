@@ -98,5 +98,10 @@ public class BuiltinMgu extends Term {
     protected boolean computeHasCell() {
         return false;
     }
+    
+    @Override
+    public String toString() {
+        return "Mgu(" + constraint.toString() + ")";
+    }
 
 }
