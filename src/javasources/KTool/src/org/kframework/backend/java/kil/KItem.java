@@ -61,7 +61,10 @@ public final class KItem extends Term {
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
         Definition definition = termContext.definition();
-        
+
+        // TODO(AndreiS): remove defensive coding
+        kList = KCollection.upKind(kList, Kind.KLIST);
+
         KItem listTerminator = LIST_TERMINATORS.get(kLabel);
         if (listTerminator != null) {
             assert kList.equals(KList.EMPTY);

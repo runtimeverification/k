@@ -21,8 +21,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
@@ -43,7 +41,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
@@ -336,9 +333,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                             leftHandSide.sort(),
                             rightHandSide.sort());
                 } else {
-                    return null == definition.context().getGLBSort(ImmutableSet.of(
+                    return !definition.context().hasCommonSubsort(
                             leftHandSide.sort(),
-                            rightHandSide.sort()));
+                            rightHandSide.sort());
                 }
             } else {
                 if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
