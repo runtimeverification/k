@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.rewritemachine.Instruction;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -24,11 +25,13 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 /**
+ * Generates {@link Instruction}s of rewrite rules to be executed by the
+ * {@link KAbstractRewriteMachine}.
  * 
  * @author YilongL
- *
+ * 
  */
-public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
+public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer {
     
     private enum Status { CONFIGURATION, RULE }
     
@@ -38,8 +41,8 @@ public class GenerateRewritingSchedule extends CopyOnWriteTransformer {
     private Deque<String> cellStack = new ArrayDeque<>();
     private Map<String, Set<String>> containingCells = new HashMap<>();
 
-    public GenerateRewritingSchedule(Context context) {
-        super("Generate rewriting schedule", context);
+    public GenerateKRewriteMachineInstructions(Context context) {
+        super("Generate K rewrite machine instructions", context);
     }
     
     @Override

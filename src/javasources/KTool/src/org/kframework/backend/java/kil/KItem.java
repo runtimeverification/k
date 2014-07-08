@@ -335,7 +335,7 @@ public final class KItem extends Term {
                 if (K.do_fast_exec) {
                     rightHandSide = rightHandSide.copyOnShareSubstAndEval(
                             solution, 
-                            rule.reusableLhsVariables().elementSet(),
+                            rule.reusableVariables().elementSet(),
                             context);
                 } else { 
                     rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);

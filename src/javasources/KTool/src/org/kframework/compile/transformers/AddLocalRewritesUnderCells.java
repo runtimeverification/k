@@ -23,8 +23,22 @@ import com.google.common.collect.Sets;
 
 /**
  * Adds local rewrites under the cells of interest computed in
- * {@link ComputeCellsOfInterest} pass. This pass needs to be placed after the
- * last pass that transforms the rewrite rule.
+ * {@link ComputeCellsOfInterest} pass. Local rewrites are rewrite operations
+ * that are not pushed to the top but just under the cells instead. For example,
+ * consider the following rule:
+ * 
+ * <pre>
+ * {@code 
+ * rule <k> X:Id => I:Int ...</k> 
+ *      <env>... X |-> L ...</env> 
+ *      <store>... L |-> I ...</store>}
+ * </pre>
+ * 
+ * The local rewrite of the k cell would be `X:Id ~> K:K => V:Int ~> K:K', where
+ * the original rewrite operation is pushed just one level up to under the k cell.
+ * <p>
+ * This pass needs to be placed after the last pass that transforms the rewrite
+ * rule.
  * 
  * @author YilongL
  * 

@@ -11,6 +11,7 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.rewritemachine.Instruction;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -52,11 +53,34 @@ public class Rule extends JavaSymbolicObject {
     private final boolean containsKCell;
     private final boolean hasUnboundVars;
     
+    /**
+     * Specifies whether this rule has been compiled to generate instructions
+     * for the {@link KAbstractRewriteMachine}.
+     */
     private boolean compiledForFastRewriting;
+    /**
+     * Left-hand sides of the local rewrite operations under read cells; such
+     * left-hand sides are used as patterns to match against the subject term.
+     */
     private final Map<String, Term> lhsOfReadCells;
+    /**
+     * Right-hand sides of the local rewrite operations under write cells.
+     */
     private final Map<String, Term> rhsOfWriteCells;
-    private final Multiset<Variable> reusableLhsVariables;
-    private final Set<String> cellsToCopy;
+    /**
+     * @see Rule#computeReusableBoundVars()
+     */
+    private final Multiset<Variable> reusableVariables;
+    /**
+     * Ground cells inside the right-hand side of this rule. Since cells are
+     * mutable, they must be copied when the RHS is instantiated to avoid
+     * undesired sharing.
+     */
+    private final Set<String> groundCells;
+    /**
+     * Instructions generated from this rule to be executed by the
+     * {@link KAbstractRewriteMachine}.
+     */
     private final List<Instruction> instructions;
     
     /**
@@ -165,17 +189,31 @@ public class Rule extends JavaSymbolicObject {
         
         // setting fields related to fast rewriting
         this.compiledForFastRewriting = compiledForFastRewriting;
-        this.lhsOfReadCells       = compiledForFastRewriting ? ImmutableMap.copyOf(lhsOfReadCells) : null;
-        this.rhsOfWriteCells      = compiledForFastRewriting ? ImmutableMap.copyOf(rhsOfWriteCells) : null;
-        this.reusableLhsVariables = computeReusableLhsVariables();
-        this.cellsToCopy          = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
-        this.instructions         = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
+        this.lhsOfReadCells     = compiledForFastRewriting ? ImmutableMap.copyOf(lhsOfReadCells) : null;
+        this.rhsOfWriteCells    = compiledForFastRewriting ? ImmutableMap.copyOf(rhsOfWriteCells) : null;
+        this.reusableVariables  = computeReusableBoundVars();
+        this.groundCells        = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
+        this.instructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
     }
 
-    private Multiset<Variable> computeReusableLhsVariables() {
+    /**
+     * Private helper method that computes bound variables that can be reused to
+     * instantiate the right-hand sides of the local rewrite operations.
+     * <p>
+     * Essentially, reusable bound variables are
+     * <li>variables that occur in the left-hand sides of the rewrite operations
+     * under read-write cells, plus
+     * <li>variables in the key and value positions of data structure operations
+     * (they are initially in the left-hand sides but moved to side conditions
+     * during compilation)
+     * 
+     * @return a multi-set representing reusable bound variables
+     */
+    private Multiset<Variable> computeReusableBoundVars() {
         Multiset<Variable> lhsVariablesToReuse = HashMultiset.create();
         if (compiledForFastRewriting) {
             Set<Term> lhsOfReadOnlyCell = Sets.newHashSet();
+            /* add all variables that occur in the left-hand sides of read-write cells */
             for (Map.Entry<String, Term> entry : lhsOfReadCells.entrySet()) {
                 String cellLabel = entry.getKey();
                 Term lhs = entry.getValue();
@@ -185,6 +223,8 @@ public class Rule extends JavaSymbolicObject {
                     lhsOfReadOnlyCell.add(lhs);
                 }
             }
+            /* add variables that occur in the key and value positions of data
+             * structure lookup operations under read-write cells */
             for (Equality eq : lookups.equalities()) {
                 assert eq.leftHandSide() instanceof DataStructureLookupOrChoice;
                 if (eq.leftHandSide() instanceof DataStructureLookup) {
@@ -317,12 +357,12 @@ public class Rule extends JavaSymbolicObject {
         return rhsOfWriteCells;
     }
     
-    public Multiset<Variable> reusableLhsVariables() {
-        return reusableLhsVariables;
+    public Multiset<Variable> reusableVariables() {
+        return reusableVariables;
     }
     
     public Set<String> cellsToCopy() {
-        return cellsToCopy;
+        return groundCells;
     }
     
     public List<Instruction> instructions() {

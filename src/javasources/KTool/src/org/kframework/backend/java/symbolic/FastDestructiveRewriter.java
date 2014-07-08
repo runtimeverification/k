@@ -136,7 +136,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                 DeepCloner.clone(rule.rightHandSide()) : 
                 rule.rightHandSide();
         return rhs.copyOnShareSubstAndEval(substitution, 
-                rule.reusableLhsVariables().elementSet(), termContext);
+                rule.reusableVariables().elementSet(), termContext);
     }
 
     @Override

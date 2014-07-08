@@ -58,6 +58,8 @@ public class Cell<T extends Term> extends Term {
     }
     
     /**
+     * TODO(DwightG): Fix this with dependency injection
+     * <p>
      * Unsafe operation to set the content of the {@code Cell}; this method
      * violates the immutability contract on {@code Term} and its subclasses.
      * This method is only used in the {@link KAbstractRewriteMachine} to allow

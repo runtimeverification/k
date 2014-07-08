@@ -167,7 +167,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new RemovePreincludedRules(context));
         
         steps.add(new AddLocalRewritesUnderCells(context));
-        steps.add(new GenerateRewritingSchedule(context));
+        steps.add(new GenerateKRewriteMachineInstructions(context));
 
         steps.add(new LastStep(this, context));
 

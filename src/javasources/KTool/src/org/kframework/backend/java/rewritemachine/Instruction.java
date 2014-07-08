@@ -9,10 +9,14 @@ import org.kframework.backend.java.util.Utils;
 
 import com.google.common.collect.Maps;
 
+/**
+ * Represents instructions of the {@link KAbstractRewriteMachine}.
+ * 
+ * @author YilongL
+ * 
+ */
 public final class Instruction implements Serializable {
     
-    private static final long serialVersionUID = -4395918031714809591L;
-
     public enum Type {
         UP, CHOICE, GOTO
     }
