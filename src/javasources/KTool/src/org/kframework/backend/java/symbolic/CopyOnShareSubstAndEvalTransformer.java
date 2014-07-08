@@ -27,6 +27,7 @@ public class CopyOnShareSubstAndEvalTransformer extends SubstituteAndEvaluateTra
         super(substitution, context);
         assert K.do_fast_exec;
         this.reusableVariables = Sets.newHashSet(reusableVariables);
+        this.copyOnShareSubstAndEval = true;
     }
     
     @Override

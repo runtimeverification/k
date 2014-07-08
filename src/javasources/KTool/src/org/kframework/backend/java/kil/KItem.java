@@ -11,9 +11,9 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.PatternMatcher;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -236,15 +236,18 @@ public final class KItem extends Term {
 
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
-     *
-     * @param constraint
-     *            the existing symbolic constraint that needs to be taken into
-     *            consideration when evaluating this function
+     * 
+     * @param copyOnShareSubstAndEval
+     *            specifies whether to use
+     *            {@link CopyOnShareSubstAndEvalTransformer} when applying
+     *            user-defined function rules
+     * 
      * @param context
      *            a term context
+     * 
      * @return the evaluated result on success, or this {@code KItem} otherwise
      */
-    public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
+    public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
         if (!isEvaluable(context)) {
             return this;
         }
@@ -332,27 +335,13 @@ public final class KItem extends Term {
                     /* rename rule variables in the rule RHS */
                     rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
                 }
-                if (K.do_fast_exec) {
+                if (copyOnShareSubstAndEval) {
                     rightHandSide = rightHandSide.copyOnShareSubstAndEval(
                             solution, 
                             rule.reusableVariables().elementSet(),
                             context);
                 } else { 
                     rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-                }
-
-                /* update the constraint */
-                if (K.do_kompilation || K.do_concrete_exec) {
-                    // in kompilation and concrete execution mode, the
-                    // evaluation of user-defined functions will not create
-                    // new constraints
-                } else {
-                    if (constraint != null) {
-                        throw new RuntimeException(
-                                "Fix it; need to find a proper way to update "
-                                        + "the constraint without interferring with the "
-                                        + "potential ongoing normalization process");
-                    }
                 }
 
                 if (rule.containsAttribute("owise")) {

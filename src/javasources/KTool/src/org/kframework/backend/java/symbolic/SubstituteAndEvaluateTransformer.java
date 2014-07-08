@@ -27,6 +27,8 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     
     protected final Map<Variable, ? extends Term> substitution;
     
+    protected boolean copyOnShareSubstAndEval = false;
+    
     /*
      * YilongL: it turns out that not doing variableSet update along with
      * substituteAndEvaluate costs significant overhead; not sure why but I am
@@ -38,7 +40,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
         this.substitution = substitution;
     }
     
-    private boolean proceed(JavaSymbolicObject object) {
+    protected boolean proceed(JavaSymbolicObject object) {
         Set<Variable> set1 = object.variableSet();
         Set<Variable> set2 = substitution.keySet();
         if (set1.size() > set2.size()) {
@@ -133,7 +135,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
         return proceed(kItem) ? 
                 ((KItem) super.transform(
                         BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem, context)))
-                .evaluate(context) : kItem;
+                .evaluateFunction(copyOnShareSubstAndEval, context) : kItem;
     }
 
     @Override
