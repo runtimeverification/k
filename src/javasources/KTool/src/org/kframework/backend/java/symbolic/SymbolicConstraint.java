@@ -384,9 +384,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                             return true;
                         }
                     }
-                    return null == definition.context().getGLBSort(ImmutableSet.of(
+                    return !definition.context().hasCommonSubsort(
                             leftHandSide.sort(),
-                            rightHandSide.sort()));
+                            rightHandSide.sort());
                 }
             } else {
                 if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
