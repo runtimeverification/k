@@ -42,13 +42,18 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
         if (!((BuiltinMap) map).getEntries().isEmpty()) {
             return ((BuiltinMap) map).getEntries().keySet().iterator().next();
         } else if (((BuiltinMap) map).isEmpty()) {
-            return new Bottom(kind);
+            return Bottom.of(kind);
         } else {
             return this;
         }
     }
 
     public Term map() {
+        return base();
+    }
+    
+    @Override
+    public Term base() {
         return map;
     }
 
@@ -66,10 +71,20 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
     public String sort() {
         return kind.toString();
     }
+    
+    @Override
+    public Type type() {
+        return Type.MAP_KEY_CHOICE;
+    }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return map.hashCode();
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

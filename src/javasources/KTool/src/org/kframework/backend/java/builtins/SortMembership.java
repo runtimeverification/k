@@ -40,7 +40,7 @@ public class SortMembership {
                 && ((KList) kItem.kList()).size() == 1
                 && !((KList) kItem.kList()).hasFrame();
 
-        String predicateSort = ((KLabelConstant) kItem.kLabel()).label().substring("is".length());
+        String predicateSort = ((KLabelConstant) kItem.kLabel()).getPredicateSort();
         if (!context.getAllSorts().contains(predicateSort)) {
             return kItem;
         }

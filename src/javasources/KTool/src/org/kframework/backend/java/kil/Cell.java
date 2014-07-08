@@ -1,13 +1,13 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.KSorts;
 
 
 /**
@@ -27,7 +27,7 @@ public class Cell<T extends Term> extends Term {
 
     private final String label;
     private final Kind contentKind;
-    private final T content;
+    private T content;
 
     public Cell(String label, T content) {
         super(Kind.CELL);
@@ -55,6 +55,24 @@ public class Cell<T extends Term> extends Term {
 
     public T getContent() {
         return content;
+    }
+    
+    /**
+     * TODO(DwightG): Fix this with dependency injection
+     * <p>
+     * Unsafe operation to set the content of the {@code Cell}; this method
+     * violates the immutability contract on {@code Term} and its subclasses.
+     * This method is only used in the {@link KAbstractRewriteMachine} to allow
+     * efficient in-place rewriting; as a result, it is the caller's
+     * responsibility to make defensive copy before calling this operation to
+     * avoid modifying shared {@code Cell}s. Besides, this operation should be
+     * used together with some mechanism to properly invalidates the cached
+     * hashCode of all the affected {@code Term}s.
+     * 
+     * @param content the new content
+     */
+    public void unsafeSetContent(T content) {
+        this.content = content;
     }
 
     @Override
@@ -87,11 +105,16 @@ public class Cell<T extends Term> extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
         return hashCode;
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return true;
     }
 
     @Override

@@ -5,6 +5,8 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
+import com.google.common.collect.Sets;
+
 import java.util.Stack;
 
 /**
@@ -41,12 +43,16 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
         cfg.multiplicity = node.getMultiplicity();
         cfg.id = node.getId();
         cfg.cell = node;
+        cfg.ancestorIds = Sets.newHashSet();
         if (!ancestors.empty()) {
             ConfigurationStructure parent = ancestors.peek();
             cfg.level = parent.level+1;
             cfg.parent = parent;
             if (cfg.level > maxLevel) maxLevel = cfg.level;
             parent.sons.put(cfg.id, cfg);
+            for (ConfigurationStructure cfgStruct : ancestors) {
+                cfg.ancestorIds.add(cfgStruct.id);
+            }
         }
         ancestors.push(cfg);
         super.visit(node, _);

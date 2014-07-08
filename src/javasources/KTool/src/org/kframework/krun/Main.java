@@ -1226,6 +1226,7 @@ public class Main {
             }
             if (cmd.hasOption("pattern-matching")) {
                 K.pattern_matching  = true;
+                K.do_fast_exec = K.do_concrete_exec && K.pattern_matching && !K.do_search;
             }
             // printing the output according to the given options
             if (K.help) {

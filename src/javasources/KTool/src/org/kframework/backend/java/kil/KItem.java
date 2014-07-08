@@ -11,9 +11,9 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.PatternMatcher;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -226,7 +226,7 @@ public final class KItem extends Term {
             return false;
         }
 
-        if (kLabelConstant.label().startsWith("is")
+        if (kLabelConstant.isSortPredicate()
                 || !context.definition().functionRules().get(kLabelConstant).isEmpty()
                 || context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
             evaluable = true;
@@ -236,15 +236,18 @@ public final class KItem extends Term {
 
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
-     *
-     * @param constraint
-     *            the existing symbolic constraint that needs to be taken into
-     *            consideration when evaluating this function
+     * 
+     * @param copyOnShareSubstAndEval
+     *            specifies whether to use
+     *            {@link CopyOnShareSubstAndEvalTransformer} when applying
+     *            user-defined function rules
+     * 
      * @param context
      *            a term context
+     * 
      * @return the evaluated result on success, or this {@code KItem} otherwise
      */
-    public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
+    public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
         if (!isEvaluable(context)) {
             return this;
         }
@@ -273,9 +276,6 @@ public final class KItem extends Term {
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
             } catch (InvocationTargetException e) {
-                // TODO(YilongL): is reflection/exception really the best way to
-                // deal with builtin functions? builtin functions are supposed to be
-                // super-fast...
                 Throwable t = e.getTargetException();
                 if (t instanceof Error) {
                     throw (Error)t;
@@ -298,7 +298,7 @@ public final class KItem extends Term {
         // TODO(YilongL): maybe we can move sort membership evaluation after
         // applying user-defined rules to allow the users to provide their
         // own rules for checking sort membership
-        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1) {
+        if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
             Term checkResult = SortMembership.check(this, context.definition().context());
             if (checkResult != this) {
                 return checkResult;
@@ -335,20 +335,13 @@ public final class KItem extends Term {
                     /* rename rule variables in the rule RHS */
                     rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
                 }
-                rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-
-                /* update the constraint */
-                if (K.do_kompilation || K.do_concrete_exec) {
-                    // in kompilation and concrete execution mode, the
-                    // evaluation of user-defined functions will not create
-                    // new constraints
-                } else {
-                    if (constraint != null) {
-                        throw new RuntimeException(
-                                "Fix it; need to find a proper way to update "
-                                        + "the constraint without interferring with the "
-                                        + "potential ongoing normalization process");
-                    }
+                if (copyOnShareSubstAndEval) {
+                    rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                            solution, 
+                            rule.reusableVariables().elementSet(),
+                            context);
+                } else { 
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
                 }
 
                 if (rule.containsAttribute("owise")) {
@@ -449,12 +442,17 @@ public final class KItem extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + kLabel.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + kList.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
         return hashCode;
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return kLabel.hasCell() || kList.hasCell();
     }
 
     @Override

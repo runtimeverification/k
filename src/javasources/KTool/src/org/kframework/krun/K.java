@@ -96,6 +96,7 @@ public class K {
     private static Color terminalColor = null;
     public static boolean do_kompilation = false;
     public static boolean do_concrete_exec = false;
+    public static boolean do_fast_exec = false;
     public static boolean do_search = false;
     public static boolean do_testgen = false; // generate tests from semantics
     public static boolean do_indexing = false; // index the rules before rewriting

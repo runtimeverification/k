@@ -4,6 +4,7 @@ package org.kframework.compile.utils;
 import org.kframework.kil.Cell;
 
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * For each Cell, this class contains a reference to the cell itself, its id, a
@@ -16,6 +17,7 @@ import java.io.Serializable;
 public class ConfigurationStructure implements Serializable {
     public Cell cell;
     public String id;
+    public Set<String> ancestorIds;
     public ConfigurationStructure parent = null;
     public ConfigurationStructureMap sons = new ConfigurationStructureMap();
     public Cell.Multiplicity multiplicity;

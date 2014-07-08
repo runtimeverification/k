@@ -282,11 +282,11 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                         if (lhsOfEq instanceof KItem && ((KItem) lhsOfEq).kLabel().toString().equals("'_=/=K_")) {
                             Term mbPredicate = ((KList) ((KItem) lhsOfEq).kList()).get(0);
                             if (!(mbPredicate instanceof KItem)) continue;
-                            if (!((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().startsWith("is"))
+                            if (!((KLabelConstant) ((KItem) mbPredicate).kLabel()).isSortPredicate())
                                 continue;
 
                             // retrieve sort name of the predicate
-                            String sortName = ((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().substring("is".length());
+                            String sortName = ((KLabelConstant) ((KItem) mbPredicate).kLabel()).getPredicateSort();
 
                             // retrieve the argument; which must be a variable
                             Variable arg = (Variable) ((KList) ((KItem) mbPredicate).kList()).get(0);
@@ -323,7 +323,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                         // dissolve positive membership predicates
                         if (eq1.toString().startsWith("isKResult(")) {
                             KItem mbPredicate = (KItem) eq1.leftHandSide();
-                            String sortName = ((KLabelConstant) mbPredicate.kLabel()).label().substring("is".length());
+                            String sortName = ((KLabelConstant) mbPredicate.kLabel()).getPredicateSort();
                             Variable arg = (Variable) ((KList) mbPredicate.kList()).get(0);
 
                             // construct common part of the new constraints

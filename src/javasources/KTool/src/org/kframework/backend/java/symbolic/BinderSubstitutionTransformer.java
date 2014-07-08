@@ -32,12 +32,17 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 
         @Override
         public ASTNode transform(KItem kItem) {
-            // TODO(AndreiS): fix binder when dealing with KLabel variables and non-concrete KLists
-            if (!(kItem.kLabel() instanceof KLabel) || !(kItem.kList() instanceof KList)) {
-                return super.transform(kItem);
-            }
-            assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
-            assert kItem.kList() instanceof KList : "KList must be concrete";
+            kItem = binderSensitiveSubstitute(kItem, context);
+            return super.transform(kItem);
+        }
+
+    }
+    
+    public static KItem binderSensitiveSubstitute(KItem kItem, TermContext context) {
+        // TODO(AndreiS): fix binder when dealing with KLabel variables and non-concrete KLists
+        if (kItem.kLabel() instanceof KLabel && kItem.kList() instanceof KList) {
+//            assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
+//            assert kItem.kList() instanceof KList : "KList must be concrete";
 
             KLabel kLabel = (KLabel) kItem.kLabel();
             KList kList = (KList) kItem.kList();
@@ -60,7 +65,8 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 //                    }
                 }
             }
-            return super.transform(kItem);
         }
+        return kItem;
     }
+
 }

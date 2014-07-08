@@ -42,6 +42,11 @@ public class ListLookup extends Term implements DataStructureLookup {
     }
 
     public Term list() {
+        return base();
+    }
+    
+    @Override
+    public Term base() {
         return list;
     }
 
@@ -63,11 +68,21 @@ public class ListLookup extends Term implements DataStructureLookup {
     }
 
     @Override
-    public int computeHash() {
+    public Type type() {
+        return Type.LIST_LOOKUP;
+    }
+
+    @Override
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + list.hashCode();
         return hashCode;
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.MaximalSharing;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -19,7 +20,7 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public final class IntToken extends Token {
+public final class IntToken extends Token implements MaximalSharing {
 
     public static final String SORT_NAME = "Int";
 
@@ -136,7 +137,7 @@ public final class IntToken extends Token {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return value.hashCode();
     }
 

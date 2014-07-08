@@ -15,17 +15,23 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
+import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Translates a builtin data structure (list, map, set) from a {@link Cell} representation
@@ -42,6 +48,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     public static final String KEY_CELL_ATTRIBUTE_NAME = "key";
     
     public static final String MAP_CELL_CELL_LABEL_PREFIX = "value-cell-label-prefix-";
+    
+    private Set<String> cellMapLabels = Sets.newHashSet();
 
     public Cell2DataStructure(Context context) {
         super("Transform cells with key attribute to maps", context);
@@ -50,6 +58,59 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Configuration configuration, Void _) {
         return configuration;
+    }
+    
+    @Override
+    public ASTNode visit(Rule rule, Void _) {
+        if (!rule.isCompiledForFastRewriting()) {
+            return super.visit(rule, _);
+        }
+        
+        cellMapLabels.clear();
+        
+        rule = (Rule) super.visit(rule, _);
+        /* compiling cell to cell map changes the cells of interest used for fast rewriting */
+        if (!cellMapLabels.isEmpty()) {
+            Set<String> cellsOfInterest = Sets.newHashSet(rule.getCellsOfInterest());
+            Map<String, Term> lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
+            Map<String, Term> rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
+            Set<String> cellMapLabelsToAdd = Sets.newHashSet();
+            
+            Iterator<String> iter = cellsOfInterest.iterator();
+            while (iter.hasNext()) {
+                String cellLabel = iter.next();
+                
+                Set<String> intersect = Sets.intersection(
+                                context.getConfigurationStructureMap().get(cellLabel).ancestorIds,
+                                cellMapLabels);
+                /* lift the cell of interest to the level of cell map */
+                if (!intersect.isEmpty()) {
+                    iter.remove();
+                    
+                    assert intersect.size() == 1;
+                    String cellMapLabel = intersect.iterator().next();
+                    cellMapLabelsToAdd.add(cellMapLabel);
+                    
+                    /* update lhsOfReadCell & rhsOfWriteCell accordingly */
+                    if (lhsOfReadCell.containsKey(cellLabel)) {
+                        lhsOfReadCell.put(cellMapLabel, null);
+                        lhsOfReadCell.remove(cellLabel);
+                    }
+                    if (rhsOfWriteCell.containsKey(cellLabel)) {
+                        rhsOfWriteCell.put(cellMapLabel, null);
+                        rhsOfWriteCell.remove(cellLabel);
+                    }
+                }
+            }
+            cellsOfInterest.addAll(cellMapLabelsToAdd);
+            
+            rule = rule.shallowCopy();
+            rule.setCellsOfInterest(cellsOfInterest);
+            rule.setLhsOfReadCell(lhsOfReadCell);
+            rule.setRhsOfWriteCell(rhsOfWriteCell);
+        }
+        
+        return rule;
     }
 
     @Override
@@ -60,6 +121,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
             return super.visit(cell, _);
+        } else if (cellDataStructure instanceof CellMap) {
+            cellMapLabels.add(cellDataStructure.dataStructureCellLabel());
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());

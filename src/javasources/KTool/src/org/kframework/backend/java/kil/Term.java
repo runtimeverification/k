@@ -2,24 +2,27 @@
 
 package org.kframework.backend.java.kil;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.kframework.backend.java.indexing.ConfigurationTermIndex;
 import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
+import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.backend.java.symbolic.LocalEvaluator;
 import org.kframework.backend.java.symbolic.Matchable;
-import org.kframework.backend.java.symbolic.SubstitutionTransformer;
+import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.util.Utils;
+import org.kframework.kil.loader.Constants;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -31,6 +34,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
 
     protected final Kind kind;
     // protected final boolean normalized;
+    
+    private Boolean hasCell = null;
 
     protected Term(Kind kind) {
         this.kind = kind;
@@ -56,21 +61,53 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Returns a {@link List} view of the indexing pairs.
+     * Returns a {@link List} view of the indexing pairs from the {@code k}
+     * cells of this {@code Term}.
      */
-    public List<IndexingPair> getIndexingPairs(final Definition definition) {
+    public List<IndexingPair> getKCellIndexingPairs(final Definition definition) {
         final List<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
                 if (cell.getLabel().equals("k")) {
-                    indexingPairs.add(IndexingPair.getIndexingPair(cell.getContent(), definition));
+                    indexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
                 } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
                     super.visit(cell);
                 }
             }
         });
         return indexingPairs;
+    }
+    
+    public ConfigurationTermIndex getConfigurationTermIndex(final Definition definition) {
+        final List<IndexingPair> kCellIndexingPairs = new ArrayList<>();
+        final List<IndexingPair> instreamIndexingPairs = new ArrayList<>();
+        final List<IndexingPair> outstreamIndexingPairs = new ArrayList<>();
+        final MutableInt maxInputBufLen = new MutableInt(-1);
+        final MutableInt maxOutputBufLen = new MutableInt(-1);
+        accept(new BottomUpVisitor() {
+            @Override
+            public void visit(Cell cell) {
+                String cellLabel = cell.getLabel();
+                String streamCellAttr = definition.context().getConfigurationStructureMap().get(cellLabel).cell.getCellAttribute("stream");
+                if (cellLabel.equals("k")) {
+                    kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
+                } else if (Constants.STDIN.equals(streamCellAttr)) {
+                    BuiltinList instream = (BuiltinList) cell.getContent();
+                    instreamIndexingPairs.add(IndexingPair.getInstreamIndexingPair(instream, definition));
+                    maxInputBufLen.setValue(Math.max(maxInputBufLen.intValue(), instream.size()));
+                } else if (Constants.STDOUT.equals(streamCellAttr) || Constants.STDERR.equals(streamCellAttr)) {
+                    BuiltinList outstream = (BuiltinList) cell.getContent();
+                    outstreamIndexingPairs.add(IndexingPair.getOutstreamIndexingPair(outstream, definition));
+                    maxOutputBufLen.setValue(Math.max(maxOutputBufLen.intValue(), outstream.size()));
+                } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
+                    super.visit(cell);
+                }
+            }
+        });
+        return new ConfigurationTermIndex(kCellIndexingPairs,
+                instreamIndexingPairs, outstreamIndexingPairs,
+                maxInputBufLen.intValue(), maxOutputBufLen.intValue());
     }
 
     /**
@@ -98,6 +135,22 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Returns a {@code String} representation of the sort of this object.
      */
     public abstract String sort();
+    
+    /**
+     * @return {@code true} if this term has {@code Cell} inside; otherwise,
+     *         {@code false}
+     */
+    public final boolean hasCell() {
+        if (hasCell == null) {
+            hasCell = computeHasCell();
+        }
+        return hasCell;
+    }
+    
+    /**
+     * Checks if this term has {@code Cell} inside.
+     */
+    protected abstract boolean computeHasCell();
 
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating
@@ -164,9 +217,39 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
             return this;
         }
 
-        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
-        transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
-        return (Term) accept(transformer);
+        // YilongL: comment out the slow implementation
+//        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
+//        transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
+//        return (Term) accept(transformer);
+        SubstituteAndEvaluateTransformer transformer = new SubstituteAndEvaluateTransformer(substitution, context);
+        return (Term) this.accept(transformer);
+    }
+    
+    /**
+     * Similar to {@link Term#substituteAndEvaluate(Map, TermContext)} except
+     * that this method will copy the terms used for substitution whenever
+     * necessary in order to avoid undesired sharing of mutable terms.
+     * 
+     * @param substitution
+     *            the substitution map; TODO(YilongL): this may become a
+     *            multi-map in the future when the pattern matching algorithm
+     *            allows us to record multiple equal terms binding to a variable
+     *            for the sake of maximizing term reuse
+     * @param variablesToReuse
+     *            a set of variables in the substitution whose binding terms can
+     *            be reused to build the new term
+     * @param context
+     * @return a new term obtained by applying substitution
+     */
+    public Term copyOnShareSubstAndEval(
+            Map<Variable, ? extends Term> substitution,
+            Set<Variable> variablesToReuse, TermContext context) {
+        if (substitution.isEmpty() || isGround()) {
+            return this;
+        }
+        CopyOnShareSubstAndEvalTransformer transformer = new CopyOnShareSubstAndEvalTransformer(
+                substitution, variablesToReuse, context);
+        return (Term) this.accept(transformer);
     }
 
      /**
@@ -179,7 +262,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     @Override
-    public int compareTo(Term o) {
+    public final int compareTo(Term o) {
         return toString().compareTo(o.toString());
     }
     
@@ -200,5 +283,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * (Re-)computes the hashCode of this {@code Term}.
      * @return the hash code
      */
-    public abstract int computeHash();
+    protected abstract int computeHash();
+    
+    @Override
+    public abstract boolean equals(Object object);
 }

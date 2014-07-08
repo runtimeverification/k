@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.java.kil.MaximalSharing;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -15,7 +16,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.FloatBuiltin;
 import org.kframework.mpfr.BigFloat;
 
-public class FloatToken extends Token {
+public class FloatToken extends Token implements MaximalSharing {
 
     public static final String SORT_NAME = "Float";
     
@@ -89,7 +90,7 @@ public class FloatToken extends Token {
     }
     
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return value.hashCode() * 31 + exponent;
     }
 

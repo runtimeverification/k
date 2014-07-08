@@ -20,7 +20,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Token extends Term {
+public abstract class Token extends Term implements Immutable {
 
     public static Token of(String sort, String value) {
         switch (sort) {
@@ -54,12 +54,12 @@ public abstract class Token extends Term {
     public abstract String value();
 
     @Override
-    public boolean isGround() {
+    public final boolean isGround() {
         return true;
     }
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return false;
     }
 
@@ -67,27 +67,10 @@ public abstract class Token extends Term {
     public Set<Variable> variableSet() {
         return Collections.emptySet();
     }
-
+   
     @Override
-    public int computeHash() {
-        int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + sort().hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + value().hashCode();
-        return hashCode;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof Token)) {
-            return false;
-        }
-
-        Token token = (Token) object;
-        return sort().equals(token.sort()) && value().equals(token.value());
+    protected final boolean computeHasCell() {
+        return false;
     }
 
     @Override
