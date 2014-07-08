@@ -508,7 +508,6 @@ public final class KItem extends Term {
         KList inputKList = new KList(getPatternInput());
         KList outputKList = new KList(getPatternOutput());
         for (Rule rule : context.definition().patternRules().get(kLabel)) {
-            assert rule.requires().isEmpty() && rule.ensures().isEmpty();
             KList ruleInputKList = new KList(((KItem) rule.leftHandSide()).getPatternInput());
             KList ruleOutputKList = new KList(((KItem) rule.leftHandSide()).getPatternOutput());
             SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
@@ -525,6 +524,7 @@ public final class KItem extends Term {
                     globalConstraint.add(equality.leftHandSide(), equality.rightHandSide());
                 }
                 globalConstraint.addAll(unificationConstraint);
+                globalConstraint.addAll(rule.requires());
                 globalConstraint.simplify();
                 if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
                     continue;
@@ -533,9 +533,19 @@ public final class KItem extends Term {
                 if (!unificationConstraint.isMatching(ruleInputKList.variableSet())) {
                     continue;
                 }
+
+                SymbolicConstraint requires = new SymbolicConstraint(context);
+                requires.addAll(rule.requires());
+                requires.addAll(unificationConstraint);
+                requires.simplify();
+                requires.orientSubstitution(ruleInputKList.variableSet());
+                if (!constraint.implies(requires, ruleInputKList.variableSet)) {
+                    continue;
+                }
             }
 
             unificationConstraint.add(outputKList, ruleOutputKList);
+            unificationConstraint.addAll(rule.ensures());
             unificationConstraint.simplify();
             results.add(SymbolicRewriter.constructNewSubjectTerm(
                     rule,

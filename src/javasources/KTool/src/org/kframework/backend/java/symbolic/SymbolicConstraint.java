@@ -2,16 +2,31 @@
 
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.Sets;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Production;
 import org.kframework.krun.K;
 

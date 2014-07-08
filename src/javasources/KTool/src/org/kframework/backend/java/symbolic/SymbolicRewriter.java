@@ -390,6 +390,8 @@ public class SymbolicRewriter {
                 constraint.termContext());
         /* eliminate anonymous variables */
         constraint.eliminateAnonymousVariables(existingVariables);
+        // TODO(AndreiS): functions not being evaluated is becoming quite annoying
+        result = result.evaluate(constraint.termContext());
 
         /*
         System.err.println("rule \n\t" + rule);

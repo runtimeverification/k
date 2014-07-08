@@ -151,9 +151,9 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
         // TODO(AndreiS): assert that there are not any unevaluated functions in this term
-        if (substitution.isEmpty() || isGround()) {
-            return this;
-        }
+        //if (substitution.isEmpty() || isGround()) {
+        //    return this;
+        //}
 
         SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
         transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
