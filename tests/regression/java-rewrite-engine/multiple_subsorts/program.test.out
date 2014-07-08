@@ -1,0 +1,3 @@
+<k>
+    isKResult(_45:Sort) ~> _46:KResult ==K _45
+</k>
