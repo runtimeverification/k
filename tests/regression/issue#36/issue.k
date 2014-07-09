@@ -4,7 +4,7 @@ Expected:
 'L(res(X))
 */
 module ISSUE
-  configuration <k> 'L('A(.KList)) ~> $PGM:K </k>
+  configuration <k> 'L('A(.KList)) </k>
 
   syntax KLabel  ::= "'L" | "'A"
   syntax K ::= "dummy"

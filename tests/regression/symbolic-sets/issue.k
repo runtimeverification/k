@@ -2,7 +2,7 @@
 
 module ISSUE
   syntax K ::= "a" | "b"
-  configuration <k> $PGM:K ~> b </k> <set> SetItem(1) </set>
+  configuration <k> a ~> b </k> <set> SetItem(1) </set>
                 <out stream="stdout"> .List </out>
 
   rule <k> a => . ...</k> <set>... .Set => SetItem(?I:Int) ...</set>

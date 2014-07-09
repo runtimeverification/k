@@ -4,7 +4,7 @@ module ISSUE
   syntax Id ::= "a"
   syntax K ::= "start"
 
-  configuration <k> $PGM:K </k> <out stream="stdout"> .List </out>
+  configuration <k> start </k> <out stream="stdout"> .List </out>
 
   rule <k> start => ` a ...</k> <out>... .List => ListItem("ok") </out>
 endmodule
