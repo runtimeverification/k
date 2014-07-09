@@ -90,8 +90,18 @@ public class BuiltinMgu extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return Utils.HASH_PRIME + constraint.hashCode();
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return false;
+    }
+    
+    @Override
+    public String toString() {
+        return "Mgu(" + constraint.toString() + ")";
     }
 
 }

@@ -45,7 +45,7 @@ public class KSequence extends KCollection {
      */
     private transient final PStack<Term> contents;
     private String sort;
-    
+
     /**
      * Concatenates a sequence of elements of sort K or KItem and a frame term.
      * <p>
@@ -72,7 +72,7 @@ public class KSequence extends KCollection {
                 frame = null;
             }
         }
-        return new KSequence(items, (Variable) frame);
+        return new KSequence(items, null, (Variable) frame);
     }
     
     public KSequence(List<Term> items, Variable frame) {
@@ -93,6 +93,7 @@ public class KSequence extends KCollection {
         for (Term term : Lists.reverse(items)) {
             // TODO (AndreiS): fix KItem projection
             if (!(term instanceof Variable) && !(term instanceof KItemProjection) && (term.kind() == kind)) {
+                // TODO(YilongL): the condition above seems hacky
                 assert term instanceof KSequence :
                     "associative use of KSequence(" + items + ", " + frame + ")";
 
@@ -103,7 +104,9 @@ public class KSequence extends KCollection {
                 if (stack.isEmpty()) {
                     stack = kseq.contents;
                 } else {
-                    stack = stack.plusAll(kseq.contents);
+                    stack = kseq.contents.size() <= 1 ? 
+                            stack.plusAll(kseq.contents) : 
+                            stack.plusAll(Lists.reverse(Lists.newArrayList(kseq.contents)));
                 }
             } else {
                 stack = stack.plus(term);

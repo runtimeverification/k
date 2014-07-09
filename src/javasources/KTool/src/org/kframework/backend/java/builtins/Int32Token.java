@@ -238,7 +238,7 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return value;
     }
 

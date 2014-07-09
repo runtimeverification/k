@@ -100,9 +100,10 @@ public class JavaSymbolicKRun implements KRun {
         GlobalContext globalContext = new GlobalContext(definition, new PortableFileSystem());
         TermContext termContext = TermContext.of(globalContext);
         term = term.evaluate(termContext);
+
         if (context.javaExecutionOptions.patternMatching) {
-            GroundRewriter groundRewriter = new GroundRewriter(definition, termContext);
-            ConstrainedTerm rewriteResult = new ConstrainedTerm(groundRewriter.rewrite(term, bound), termContext);
+            FastDestructiveRewriter rewriter = new FastDestructiveRewriter(definition, termContext);
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(rewriter.rewrite(term, bound), termContext);
             return rewriteResult;
         } else {
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);

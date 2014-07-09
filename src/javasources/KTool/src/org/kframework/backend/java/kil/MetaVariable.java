@@ -5,6 +5,7 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 
@@ -66,6 +67,14 @@ public class MetaVariable extends Token {
      */
     public String variableSort() {
         return sort;
+    }
+    
+    @Override
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        return hashCode;
     }
 
     @Override

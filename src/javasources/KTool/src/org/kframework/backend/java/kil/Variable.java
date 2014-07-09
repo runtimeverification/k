@@ -18,7 +18,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Variable extends Term {
+public class Variable extends Term implements Immutable {
 
     protected static final String VARIABLE_PREFIX = "_";
     protected static int counter = 0;
@@ -98,17 +98,17 @@ public class Variable extends Term {
     }
 
     @Override
-    public boolean isExactSort() {
+    public final boolean isExactSort() {
         return false;
     }
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return true;
     }
 
     @Override
-    public boolean equals(Object object) {
+    public final boolean equals(Object object) {
         if (this == object) {
             return true;
         }
@@ -122,11 +122,16 @@ public class Variable extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected final int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected final boolean computeHasCell() {
+        return false;
     }
 
     @Override

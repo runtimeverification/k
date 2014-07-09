@@ -17,6 +17,10 @@ public final class JavaExecutionOptions {
         return K.tool() == K.Tool.KRUN && !generateTests;
     }
     
+    public boolean fastExecution(boolean search) {
+        return concreteExecution() && patternMatching && !search;
+    }
+    
     @Parameter(names="--indexing-stats", description="Measure indexing-related information.")
     public boolean indexingStats = false;
     

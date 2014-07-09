@@ -13,7 +13,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.kil.loader.Context;
 
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Utility class for checking sort membership predicates.
@@ -40,7 +39,7 @@ public class SortMembership {
                 && ((KList) kItem.kList()).size() == 1
                 && !((KList) kItem.kList()).hasFrame();
 
-        String predicateSort = ((KLabelConstant) kItem.kLabel()).label().substring("is".length());
+        String predicateSort = ((KLabelConstant) kItem.kLabel()).getPredicateSort();
         if (!context.getAllSorts().contains(predicateSort)) {
             return kItem;
         }
@@ -51,7 +50,7 @@ public class SortMembership {
             return context.isSubsortedEq(predicateSort, termSort) ? BoolToken.TRUE : BoolToken.FALSE;
         } else if (context.isSubsortedEq(predicateSort, termSort)) {
             return BoolToken.TRUE;
-        } else if (null == context.getGLBSort(ImmutableSet.<String>of(predicateSort, termSort))) {
+        } else if (!context.hasCommonSubsort(predicateSort, termSort)) {
             return BoolToken.FALSE;
         } else {
             return kItem;

@@ -84,12 +84,6 @@ public abstract class Collection extends Term {
     public final boolean isSymbolic() {
         return false;
     }
-    
-    @Override
-    public abstract int computeHash();
-
-    @Override
-    public abstract boolean equals(Object object);
 
     @Override
     public void accept(Visitor visitor) {

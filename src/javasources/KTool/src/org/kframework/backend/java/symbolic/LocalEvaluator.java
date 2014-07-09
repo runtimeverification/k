@@ -17,6 +17,9 @@ import org.kframework.utils.general.GlobalSettings;
 public class LocalEvaluator extends LocalTransformer {
     
     /**
+     * TODO(YilongL): this field needs to be removed; this was added long time
+     * ago for test generation; definitely not the right solution
+     * <p>
      * The symbolic constraint of the {@code ConstrainedTerm} which contains the
      * terms to be evaluated by this evaluator.
      */
@@ -41,7 +44,7 @@ public class LocalEvaluator extends LocalTransformer {
     public ASTNode transform(KItem kItem) {
         try {
             // TODO(YilongL): shall we consider cache evaluation result in certain cases?
-            Term evaluatedTerm = kItem.evaluateFunction(constraint, context);
+            Term evaluatedTerm = kItem.evaluateFunction(false, context);
             // TODO(YilongL): had to comment out the following assertion because the visitor/imp.k somehow fails here
     //        if (kItem.isGround() && kItem.isEvaluable(context)) {
     //            assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;

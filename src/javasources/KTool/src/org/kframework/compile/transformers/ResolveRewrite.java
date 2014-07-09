@@ -39,7 +39,7 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _)  {
-        return node;    //To change body of overridden methods use File | Settings | File Templates.
+        return node;
     }
 
     public enum LRHS {

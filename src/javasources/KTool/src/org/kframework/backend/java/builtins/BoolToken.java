@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.MaximalSharing;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -15,7 +16,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public final class BoolToken extends Token {
+public final class BoolToken extends Token implements MaximalSharing {
 
     public static final String SORT_NAME = "Bool";
 
@@ -67,7 +68,7 @@ public final class BoolToken extends Token {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return Boolean.valueOf(value).hashCode();
     }
 

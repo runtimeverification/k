@@ -33,6 +33,7 @@ public class Definition extends JavaSymbolicObject {
             "Bool",
             "Int",
             "Float",
+            "Char",
             "String",
             "List",
             "Set",

@@ -65,8 +65,18 @@ public class Z3Term extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return System.identityHashCode(this);
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return this == object;
     }
 
 }

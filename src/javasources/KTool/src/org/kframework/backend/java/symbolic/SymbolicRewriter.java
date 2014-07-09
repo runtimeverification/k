@@ -135,7 +135,7 @@ public class SymbolicRewriter {
      */
     private List<Rule> getSimulationRules(Term term) {
         List<Rule> rules = new ArrayList<Rule>();
-        for (IndexingPair pair : term.getIndexingPairs(definition)) {
+        for (IndexingPair pair : term.getKCellIndexingPairs(definition)) {
             if (((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first) != null) {
                 rules.addAll(((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first));
             }
