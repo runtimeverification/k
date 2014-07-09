@@ -142,7 +142,7 @@ public class ExecutionContext {
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
             if (!context.configVarSorts.containsKey(name)) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.CRITICAL, 
                         "User specified configuration variable " + name + " which does not exist."));
             }
             String startSymbol = context.configVarSorts.get(name);
