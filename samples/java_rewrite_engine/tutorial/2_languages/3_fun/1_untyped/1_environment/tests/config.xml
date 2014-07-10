@@ -27,7 +27,6 @@
         <kompile-option name="--backend" value="java" />
         <kompile-option name="-o" value="pattern-matching" />
         <all-programs>
-            <krun-option name="-d" value="pattern-matching" />
             <krun-option name="--pattern-matching" />
             <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
         </all-programs>
