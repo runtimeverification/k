@@ -61,8 +61,9 @@ public class CheckVariables extends BasicVisitor {
 
     @Override
     public Void visit(Variable node, Void _) {
-        if (node.isFreshVariable() || node.isFreshConstant()) {
-            if (!context.freshFunctionNames.containsKey(node.getSort())) {
+        boolean freshConstant = node.isFreshConstant();
+        if (node.isFreshVariable() || freshConstant) {
+            if (freshConstant && !context.freshFunctionNames.containsKey(node.getSort())) {
                 GlobalSettings.kem.register(new KException(
                         KException.ExceptionType.ERROR,
                         KException.KExceptionGroup.COMPILER,
