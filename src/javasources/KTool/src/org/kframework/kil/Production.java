@@ -147,6 +147,10 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return attributes.get("cons");
     }
 
+    /**
+     * Use .getKLabel() if you want the klabel
+     */
+    @Deprecated
     public String getLabel() {
         String label = attributes.get("prefixlabel");
         if (label == null) {
