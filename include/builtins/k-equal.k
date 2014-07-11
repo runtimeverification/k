@@ -71,7 +71,7 @@ module K-EQUAL-HOOKS
   rule Lbl1:KLabel =/=KLabel Lbl2:KLabel => notBool(Lbl1 ==KLabel Lbl2)
 
   // equality over lists
-  syntax Bool ::= List "==List" List [function]
+  syntax Bool ::= List "==List" List [function, hook(KEqual:_==List_)]
   rule ListItem(K1:K) L1:List ==List ListItem(K2:K) L2:List
        =>
        K1 ==K K2 andBool L1 ==List L2
@@ -80,7 +80,7 @@ module K-EQUAL-HOOKS
   rule .List ==List .List => true
 
   // disequality over lists
-  syntax Bool ::= List "=/=List" List [function]
+  syntax Bool ::= List "=/=List" List [function, hook(KEqual:_=/=List_)]
   rule L1:List =/=List L2:List => notBool(L1 ==List L2)
 
   syntax Bool ::= K "=K" K                  [function]
