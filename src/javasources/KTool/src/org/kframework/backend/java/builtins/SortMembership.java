@@ -13,7 +13,6 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
-import org.kframework.kil.loader.Context;
 
 /**
  * Utility class for checking sort membership predicates.

@@ -117,10 +117,6 @@ public class Subsorts implements Serializable {
         return candidate;
     }
     
-    public Sort getGLBSort(Sort... sorts) {
-        return getGLBSort(Sets.newHashSet(sorts));
-    }
-
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
         return context.hasCommonSubsort(sort1.name(), sort2.name());
     }

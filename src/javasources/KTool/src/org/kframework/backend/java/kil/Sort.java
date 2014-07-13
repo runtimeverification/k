@@ -80,7 +80,6 @@ public final class Sort implements MaximalSharing, Serializable {
         return sort;
     }
     
-    // TODO(YilongL): I really need to get rid of all Set<Sort> by replacing them with array of boolean or BitSet?
     public static Set<Sort> of(Collection<String> names) {
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         for (String name : names) {
