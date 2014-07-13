@@ -62,6 +62,10 @@ public final class Sort implements MaximalSharing, Serializable {
     /**
      * Gets the corresponding {@code Sort} from its {@code String}
      * representation.
+     * <p>
+     * This method shall <b>NOT</b> be used to initialize static {@code Sort}
+     * data outside of this class because it will assign a wrong ordinal to that
+     * {@code Sort}.
      * 
      * @param name
      *            the name of the sort
@@ -124,6 +128,9 @@ public final class Sort implements MaximalSharing, Serializable {
              * preserve the original ordinal */
             sort = this;
             cache.put(name, sort);
+        } else {
+            assert this.ordinal == sort.ordinal : "ordinal of sort " + name
+                    + " changes after deserialization.";
         }
         return sort;
     }
