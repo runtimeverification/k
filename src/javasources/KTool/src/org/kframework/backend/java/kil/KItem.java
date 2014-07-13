@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kil;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,8 +30,10 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 
 
 /**
@@ -52,6 +55,8 @@ import com.google.common.collect.Sets;
 public final class KItem extends Term {
     
     private static final Map<KLabelConstant, KItem> LIST_TERMINATORS = Maps.newHashMap();
+
+    private static final Table<Definition, CacheMapKey, CacheMapValue> CACHE = HashBasedTable.create();
 
     private final Term kLabel;
     private final Term kList;
@@ -110,6 +115,23 @@ public final class KItem extends Term {
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            
+            /* at runtime, checks if the result has been cached */
+            CacheMapKey cacheMapKey = null;
+            CacheMapValue cacheMapVal = null;
+            boolean enableCache = !K.do_kompilation
+                    && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
+            if (enableCache) {
+                cacheMapKey = new CacheMapKey(kLabelConstant, (KList) kList);
+                cacheMapVal = CACHE.get(definition, cacheMapKey);
+                if (cacheMapVal != null) {
+                    sort = cacheMapVal.sort;
+                    isExactSort = cacheMapVal.isExactSort;
+                    return;
+                }
+            }
+            
+            /* cache miss, start computing sort information */
             List<Production> productions = kLabelConstant.productions();
             
             Set<Sort> sorts = Sets.newHashSet();
@@ -127,10 +149,10 @@ public final class KItem extends Term {
                  */
                 /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
                 for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
-                    if (MetaK.matchable(kList,rule.sortPredicateArgument().kList(), termContext)
+                    if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
                             .equals(BoolToken.TRUE)) {
                         sorts.add(rule.predicateSort());
-                    } else if (MetaK.unifiable(kList,rule.sortPredicateArgument().kList(), termContext)
+                    } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
                             .equals(BoolToken.TRUE)) {
                         possibleSorts.add(rule.predicateSort());
                     }
@@ -158,7 +180,7 @@ public final class KItem extends Term {
                         }
                         Sort childSort = term.sort();
     
-                        if (!subsorts.isSubsortedEq(Sort.of(production.getChildSort(idx)), childSort)) {
+                        if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.name())) {
                             mustMatch = false;
                             /*
                              * YilongL: the following analysis can be made more
@@ -167,7 +189,7 @@ public final class KItem extends Term {
                              * compute for our purpose
                              */
                             mayMatch = !term.isExactSort()
-                                    && subsorts.hasCommonSubsort(Sort.of(production.getChildSort(idx)), childSort);
+                                    && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.name());
                         }
                         idx++;
                     }
@@ -182,11 +204,6 @@ public final class KItem extends Term {
                 }
             }
 
-            /* no production matches this KItem */
-            if (sorts.isEmpty()) {
-                sorts.add(kind.asSort());
-            }
-
             /*
              * YilongL: we are taking the GLB of all sorts because it is the
              * most precise sort information we can get without losing
@@ -195,7 +212,7 @@ public final class KItem extends Term {
              * we must have an ambiguous grammar with which this KItem cannot be
              * correctly parsed.
              */
-            sort = sorts.size() == 1 ? sorts.iterator().next() : subsorts.getGLBSort(sorts);
+            sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
             if (sort == null) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
                         KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " + 
@@ -203,6 +220,12 @@ public final class KItem extends Term {
             }
             /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
             isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
+            
+            /* cache the computed result */
+            if (enableCache) {
+                cacheMapVal = new CacheMapValue(sort, isExactSort);
+                CACHE.put(definition, cacheMapKey, cacheMapVal);
+            }
         } else {    
             /* not a KLabelConstant or the kList contains a frame variable */
             if (kLabel instanceof KLabelInjection) {
@@ -213,7 +236,7 @@ public final class KItem extends Term {
             isExactSort = false;
         }
     }
-
+    
     public boolean isEvaluable(TermContext context) {
         if (evaluable != null) {
             return evaluable;
@@ -446,7 +469,6 @@ public final class KItem extends Term {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + kLabel.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + kList.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
     
@@ -478,6 +500,73 @@ public final class KItem extends Term {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+    
+    /**
+     * The sort information of this {@code KItem}, namely {@link KItem#sort} and
+     * {@link KItem#isExactSort}, depends only on the {@code KLabelConstant} and
+     * the sorts of its children.
+     */
+    private static final class CacheMapKey {
+        
+        final KLabelConstant kLabelConstant;
+        final Sort[] sorts;
+        final boolean[] bools;
+        final int hashCode;
+        
+        public CacheMapKey(KLabelConstant kLabelConstant, KList kList) {
+            this.kLabelConstant = kLabelConstant;
+            sorts = new Sort[kList.size()];
+            bools = new boolean[kList.size()];
+            int idx = 0;
+            for (Term term : kList) {
+                if (term instanceof KItem){
+                    KItem kItem = (KItem) term;
+                    if (kItem.kLabel instanceof KLabelInjection) {
+                        term = ((KLabelInjection) kItem.kLabel).term();
+                    }
+                }
+                sorts[idx] = term.sort();
+                bools[idx] = term.isExactSort();
+                idx++;
+            }
+            hashCode = computeHash();
+        }
+        
+        private int computeHash() {
+            int hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + kLabelConstant.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + Arrays.deepHashCode(sorts);
+            hashCode = hashCode * Utils.HASH_PRIME + Arrays.hashCode(bools);
+            return hashCode;
+        }
+        
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+        
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof CacheMapKey)) {
+                return false;
+            }
+            CacheMapKey key = (CacheMapKey) object;
+            return kLabelConstant.equals(key.kLabelConstant)
+                    && Arrays.deepEquals(sorts, key.sorts)
+                    && Arrays.equals(bools, key.bools);
+        }
+    }
+    
+    private static final class CacheMapValue {
+        
+        final Sort sort;
+        final boolean isExactSort;
+        
+        CacheMapValue(Sort sort, boolean isExactSort) {
+            this.sort = sort;
+            this.isExactSort = isExactSort;
+        }
     }
 
 }
