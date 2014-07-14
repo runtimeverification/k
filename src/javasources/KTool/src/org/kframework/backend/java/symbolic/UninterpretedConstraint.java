@@ -11,9 +11,7 @@ import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -99,7 +97,7 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
     /**
      * @return an unmodifiable view of the equalities
      */
-    public Collection<Equality> equalities() {
+    public List<Equality> equalities() {
         return Collections.unmodifiableList(equalities);
     }
 

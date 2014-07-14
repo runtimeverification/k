@@ -455,7 +455,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                     indenter.write(rawLabel);
                 } else{
                     int i = 0;
-                    String [] rawLabelList = rawLabel.split("_");
+                    String [] rawLabelList = rawLabel.split("_", -1);
                     int lastIdx = termList.size() - 1;
                     if (termList.get(lastIdx) instanceof ListTerminator) {
                         termList.remove(lastIdx);
@@ -615,33 +615,6 @@ public class UnparserFilterNew extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(ListItem listItem, Void _) {
-        prepare(listItem);
-        indenter.write("ListItem(");
-        super.visit(listItem, _);
-        indenter.write(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(SetItem setItem, Void _) {
-        prepare(setItem);
-        indenter.write("SetItem(");
-        super.visit(setItem, _);
-        indenter.write(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(MapItem mapItem, Void _) {
-        prepare(mapItem);
-        this.visitNode(mapItem.getKey());
-        indenter.write(" |-> ");
-        this.visitNode(mapItem.getValue());
-        return postpare();
-    }
-
-    @Override
     public Void visit(Hole hole, Void _) {
         prepare(hole);
         indenter.write("HOLE");
@@ -695,59 +668,9 @@ public class UnparserFilterNew extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.List list, Void _) {
-        prepare(list);
-        super.visit(list, _);
-        return postpare();
-    }
-    
-    private class UnparserMapItemComparator implements Comparator<Term> {
-        
-        private java.util.Map<Term, String> unparsedResults;
-        private AlphanumComparator comparator = new AlphanumComparator();
-        
-        public UnparserMapItemComparator(java.util.Map<Term, String> unparsedResults) {
-            this.unparsedResults = unparsedResults;
-        }
-
-        @Override
-        public int compare(Term o1, Term o2) {
-            String s1 = unparsedResults.get(o1);
-            String s2 = unparsedResults.get(o2);
-            return comparator.compare(s1, s2);
-        }
-        
-    };
-
-    @Override
-    public Void visit(org.kframework.kil.Map map, Void _) {
-        prepare(map);
-        
-        org.kframework.kil.Map sortedMap = map.shallowCopy();
-        sortedMap.setContents(new ArrayList<>(sortedMap.getContents()));
-        java.util.Map<Term, String> unparsedResults = new HashMap<>();
-        for (Term t : sortedMap.getContents()) {
-            UnparserFilterNew unparser = new UnparserFilterNew(context);
-            unparser.visitNode(t);
-            unparsedResults.put(t, unparser.getResult());
-        }
-        Collections.sort(sortedMap.getContents(), new UnparserMapItemComparator(unparsedResults));
-        super.visit(sortedMap, _);
-
-        return postpare();
-    }
-
-    @Override
     public Void visit(Bag bag, Void _) {
         prepare(bag);
         super.visit(bag, _);
-        return postpare();
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Set set, Void _) {
-        prepare(set);
-        super.visit(set, _);
         return postpare();
     }
 

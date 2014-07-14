@@ -99,8 +99,8 @@ public class JavaSymbolicKRun implements KRun {
         term = term.evaluate(termContext);
 
         if (K.pattern_matching) {
-            GroundRewriter groundRewriter = new GroundRewriter(definition, termContext);
-            ConstrainedTerm rewriteResult = new ConstrainedTerm(groundRewriter.rewrite(term, bound), termContext);
+            FastDestructiveRewriter rewriter = new FastDestructiveRewriter(definition, termContext);
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(rewriter.rewrite(term, bound), termContext);
             return rewriteResult;
         } else {
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
@@ -221,11 +221,6 @@ public class JavaSymbolicKRun implements KRun {
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         FileSystem fs = new PortableFileSystem();
-
-        // Change Map, List, and Set to MyMap, MyList, and MySet.
-        CompileToBuiltins builtinTransformer = new CompileToBuiltins(context);
-        pattern = (org.kframework.kil.Rule)builtinTransformer.visit(pattern, null);
-        cfg = (org.kframework.kil.Term) builtinTransformer.visitNode(cfg);
 
         GlobalContext globalContext = new GlobalContext(definition, fs);
         List<Rule> claims = Collections.emptyList();

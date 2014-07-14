@@ -98,6 +98,7 @@ public abstract class BasicBackend implements Backend {
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
         steps.add(new CompileDataStructures(context));
+        steps.add(new Cell2DataStructure(context));
         steps.add(new ResolveSupercool(context));
         steps.add(new AddStrictStar(context));
         steps.add(new AddDefaultComputational(context));

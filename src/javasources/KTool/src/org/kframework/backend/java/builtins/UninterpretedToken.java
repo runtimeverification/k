@@ -1,12 +1,14 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.MaximalSharing;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.HashMap;
@@ -19,7 +21,7 @@ import java.util.Map;
  * 
  * @author AndreiS
  */
-public final class UninterpretedToken extends Token {
+public final class UninterpretedToken extends Token implements MaximalSharing {
 
     /* Token cache */
     private static final Map<String, Map <String, UninterpretedToken>> cache = new HashMap<String, Map <String, UninterpretedToken>>();
@@ -67,6 +69,14 @@ public final class UninterpretedToken extends Token {
     @Override
     public String value() {
         return value;
+    }
+    
+    @Override
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        return hashCode;
     }
 
     @Override

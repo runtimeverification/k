@@ -22,7 +22,7 @@ import com.google.common.collect.Multimap;
  *
  * @author AndreiS
  */
-public class KLabelConstant extends KLabel {
+public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /* KLabelConstant cache */
     private static final HashMap<String, KLabelConstant> cache = new HashMap<String, KLabelConstant>();
@@ -38,15 +38,24 @@ public class KLabelConstant extends KLabel {
      * generates this {@code KLabelConstant}
      */
     private final boolean isFunction;
-
+    
+    private final boolean isSortPredicate;
+    
+    private final String predicateSort;
+    
     private KLabelConstant(String label, Definition definition) {
         this.label = label;
-        productions = ImmutableList.copyOf(definition.context().productionsOf(label));
+        productions = definition != null ?
+                ImmutableList.<Production>copyOf(definition.context().productionsOf(label)) : 
+                ImmutableList.<Production>of();
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
         boolean isFunction = false;
         if (!label.startsWith("is")) {
+            isSortPredicate = false;
+            predicateSort = null;
+            
             Iterator<Production> iterator = productions.iterator();
             if (iterator.hasNext()) {
                 Production fstProd = iterator.next();
@@ -71,6 +80,8 @@ public class KLabelConstant extends KLabel {
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
+            isSortPredicate = true;
+            predicateSort = label.substring("is".length());
         }
         this.isFunction = isFunction;
     }
@@ -111,6 +122,23 @@ public class KLabelConstant extends KLabel {
     public boolean isFunction() {
         return isFunction;
     }
+    
+    /**
+     * Returns true if this {@code KLabelConstant} is a sort membership
+     * predicate; otherwise, false.
+     */
+    public boolean isSortPredicate() {
+        return isSortPredicate;
+    }
+    
+    /**
+     * Returns the predicate sort if this {@code KLabelConstant} represents a
+     * sort membership predicate; otherwise, {@code null}.
+     */
+    public String getPredicateSort() {
+        assert isSortPredicate();
+        return predicateSort;
+    }
 
     public String label() {
         return label;
@@ -130,8 +158,13 @@ public class KLabelConstant extends KLabel {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return label.hashCode();
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        return false;
     }
 
     @Override

@@ -22,6 +22,6 @@ module AUTO-INCLUDED-MODULE
   imports LIST-IMPL
   imports MAP-IMPL
   imports SET-IMPL
-  imports IO
+  imports K-IO
   imports K-LISTK-EXTRAS
 endmodule

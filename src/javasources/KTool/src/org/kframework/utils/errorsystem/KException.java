@@ -11,6 +11,7 @@ public class KException {
     private final String location;
     private final String message;
     private String compilationPhase = null;
+    private StringBuilder trace = new StringBuilder();
 
     private static final Map<ExceptionType, String> types;
     private static final Map<KExceptionGroup, String> labels;
@@ -57,7 +58,8 @@ public class KException {
 
     @Override
     public String toString() {
-        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
+        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message 
+            + trace.toString() + traceTail()
             + (filename == null ? "" : "\n\tFile: " + filename)
             + (location == null ? "" : "\n\tLocation: " + location)
             + (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
@@ -66,5 +68,31 @@ public class KException {
 
     public String getMessage() {
         return message;
+    }
+    
+    private String traceTail() {
+        if (identicalFrames > 1) {
+            return " * " + identicalFrames;
+        }
+        return "";
+    }
+    
+    private int frames = 0;
+    private int identicalFrames = 1;
+    private String lastFrame;
+    public void addTraceFrame(String frame) {
+        if (frames < 1024) {
+            if (frame.equals(lastFrame)) {
+                identicalFrames++;
+            } else {
+                if (identicalFrames > 1) {
+                    trace.append(" * " + identicalFrames);
+                    identicalFrames = 1;
+                }
+                trace.append("\n  " + frame);
+                lastFrame = frame;
+                frames++;
+            }
+        }
     }
 }

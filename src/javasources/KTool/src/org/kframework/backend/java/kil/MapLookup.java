@@ -27,14 +27,14 @@ public class MapLookup extends Term implements DataStructureLookup {
         if (!(map instanceof BuiltinMap)) {
             return this;
         }
-
+        
         Term value = ((BuiltinMap) map).get(key);
         if (value != null) {
             return value;
         } else if (map.isGround() && key.isGround()) {
-            return new Bottom(kind);
+            return Bottom.of(kind);
         } else if (((BuiltinMap) map).isEmpty()) {
-            return new Bottom(kind);
+            return Bottom.of(kind);
         } else {
             return this;
         }
@@ -45,6 +45,11 @@ public class MapLookup extends Term implements DataStructureLookup {
     }
 
     public Term map() {
+        return base();
+    }
+    
+    @Override
+    public Term base() {
         return map;
     }
 
@@ -64,13 +69,23 @@ public class MapLookup extends Term implements DataStructureLookup {
     public String sort() {
         return kind.toString();
     }
+    
+    @Override
+    public Type type() {
+        return Type.MAP_LOOKUP;
+    }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
         return hashCode;
+    }
+    
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

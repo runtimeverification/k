@@ -9,7 +9,6 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.krun.K;
-import org.kframework.utils.StringUtil;
 
 import java.util.*;
 
@@ -146,57 +145,13 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(MapItem node, Void _)  {
-            return KApp.of(new KInjectedLabel((Term) trans.visitNode(node)));
-        }
-
-        @Override
         public ASTNode visit(CollectionBuiltin node, Void _)  {
-            /* just for LHS for now */
-            assert (node.isLHSView() || node.isElementCollection());
-
-            LinkedHashSet<Term> elements = new LinkedHashSet<>(node.elements().size());
-            for (Term term : node.elements()) {
-                Term transformedTerm = (Term) trans.visitNode(term);
-                elements.add(transformedTerm);
-            }
-
-            ArrayList<Term> terms = new ArrayList<>(node.baseTerms().size());
-            if (node.isLHSView()) {
-                Variable frame = node.viewBase();
-                frame.setSort(node.sort().type());
-                terms.add(frame);
-            }
-
-            return KApp.of(new KInjectedLabel(CollectionBuiltin.of(
-                    node.sort(),
-                    terms,
-                    elements)));
+            throw new AssertionError("should always flatten before compiling data structures");
         }
 
         @Override
         public ASTNode visit(MapBuiltin node, Void _)  {
-            /* just for LHS for now */
-            assert (node.isLHSView() || node.isElementCollection());
-
-            LinkedHashMap<Term, Term> elements = new LinkedHashMap<>(node.elements().size());
-            for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-                Term transformedKey = (Term) trans.visitNode(entry.getKey());
-                Term transformedValue = (Term) trans.visitNode(entry.getValue());
-                elements.put(transformedKey, transformedValue);
-            }
-
-            ArrayList<Term> terms = new ArrayList<>(node.baseTerms().size());
-            if (node.isLHSView()) {
-                Variable frame = node.viewBase();
-                frame.setSort(node.sort().type());
-                terms.add(frame);
-            }
-
-            return KApp.of(new KInjectedLabel(new MapBuiltin(
-                    node.sort(),
-                    terms,
-                    elements)));
+            throw new AssertionError("should always flatten before compiling data structures");
         }
 
         @Override

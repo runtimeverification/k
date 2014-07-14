@@ -15,6 +15,6 @@ module AUTO-INCLUDED-MODULE
   imports LIST
   imports MAP
   imports SET
-  imports IO
+  imports K-IO
 endmodule
 

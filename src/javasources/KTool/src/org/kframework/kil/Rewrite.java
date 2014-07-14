@@ -49,8 +49,12 @@ public class Rewrite extends Term {
     private void recomputeSort(Context context) {
         if (left instanceof Ambiguity || right instanceof Ambiguity)
             super.getSort();
-        else
+        else {
             sort = context.getLUBSort(left.getSort(), right.getSort());
+            // TODO: use the context to disambiguate which LUB can be used, for now use K
+            if (sort == null)
+                sort = KSorts.K;
+        }
     }
 
     public Term getLeft() {

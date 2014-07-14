@@ -1,1 +1,1 @@
-\QL:Term |-> cons ( c, cons ( X:Term, cons ( a, nil ) ) )\E\n\QT:Term |-> cons ( a, cons ( X, cons ( c, nil ) ) )\E\n\QX:Term |-> X\E
+\QL:Term |-> cons ( c, cons ( X:Term, cons ( a, nil ) ) ) T:Term |-> cons ( a,\E\s*\Qcons ( X, cons ( c, nil ) ) ) X:Term |-> X\E

@@ -249,7 +249,7 @@ module IMP
   rule mapLeftEq(X:Int |-> A:Array Rest:Map, X |-> A Rest2:Map) => mapLeftEq(Rest, Rest2)
   rule mapLeftEq(. , _) => true
   rule mapLeftEq(X:Int |-> _:Int _:Map, Right:Map) => false when notBool(X in keys(Right))
-  rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==Set .Set)
+  rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==K .Set)
 
 //@ Compiler issues
   // subsort issue? 

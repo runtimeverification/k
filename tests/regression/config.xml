@@ -416,10 +416,20 @@
   <include file="float/tests/config.xml"
            directory="float" />
 
+  <include file="symbolic-sets/tests/config.xml"
+           directory="symbolic-sets"
+           programs="symbolic-sets/tests"
+           results="symbolic-sets/tests" />
+
   <include file="user_substitution/tests/config.xml"
            directory="user_substitution"
            programs="user_substitution/tests"
            results="user_substitution/tests" />
+
+  <include file="list-applyMGU/tests/config.xml"
+           directory="list-applyMGU"
+           programs="list-applyMGU/tests"
+           results="list-applyMGU/tests" />
 
 </tests>
 

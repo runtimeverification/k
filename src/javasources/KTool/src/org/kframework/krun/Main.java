@@ -49,7 +49,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.ListItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
@@ -380,12 +379,7 @@ public class Main {
                     if (krs instanceof KRunState) {
                         Term res = ((KRunState) krs).getRawResult();
                         krun.setBackendOption("io", false);
-                        if (K.backend.equals("java")) {
-                            result = krun.search(0, 0, K.searchType, patternRule, makeConfiguration(res, null, rp, false, context), steps);
-                        }
-                        if (K.backend.equals("maude")) {
-                            result = krun.search(null, null, K.searchType, patternRule, res, steps);
-                        }
+                        result = krun.search(null, null, K.searchType, patternRule, res, steps);
                     }else {
                         org.kframework.utils.Error.report("Pattern matching after execution is not supported by search\nand model checking");
                     }
@@ -1232,6 +1226,7 @@ public class Main {
             }
             if (cmd.hasOption("pattern-matching")) {
                 K.pattern_matching  = true;
+                K.do_fast_exec = K.do_concrete_exec && K.pattern_matching && !K.do_search;
             }
             // printing the output according to the given options
             if (K.help) {

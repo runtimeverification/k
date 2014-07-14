@@ -88,11 +88,16 @@ public class SetUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + set.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

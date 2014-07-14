@@ -2,7 +2,7 @@
 require "io/uris.k"
 require "builtins/list.k"
 
-module IO
+module K-IO
   imports LIST
   imports URIS
 
@@ -38,7 +38,7 @@ module IO
 
 
   // Send first char from the buffer to the server
-  rule ListItem(#ostream((. => #write(N, S)) ~> N:Int))
+  rule ListItem(#ostream((.K => #write(N, S)) ~> N:Int))
        ListItem(#buffer(S:String => ""))
        _:List
     when S =/=String "" [stdout, stderr]
@@ -77,5 +77,10 @@ module IO
        (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
 
   rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List)
-       ListItem(#buffer(_)) [stdout, stderr]
+       ListItem(#buffer(_)) 
+       _:List [stdout, stderr]
+
+  rule #stdin => 0
+  rule #stdout => 1
+  rule #stderr => 2
 endmodule

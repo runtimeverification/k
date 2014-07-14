@@ -17,10 +17,10 @@ module VARIABLE
 // returns an actual set of variables.  Well, I just added it, please check.
 
   syntax Set ::= getVariables(K)  [function]  // public
-  rule getVariables(K) => #getVars(K)
+  rule getVariables(K:K) => #getVars(K)
 
   syntax Set ::= #getVars(K)  [function] 
-  rule #getVars(K) => #getVars1(K, .Set)
+  rule #getVars(K:K) => #getVars1(K, .Set)
 
   syntax Set ::= #getVars1(KList, Set)  [function]
   rule #getVars1((X:Variable => .KList),,_, (.Set => SetItem(X)) _:Set)
@@ -28,11 +28,11 @@ module VARIABLE
     when (isVariable(L(Ks)) =/=K true) andBool
          (isCollection(L(Ks)) =/=K true)
   rule #getVars1(.KList, S:Set) => S
-  rule #getVars1((.KList => I),,(ListItem(I) => .List) _:List,,_, _)
+  rule #getVars1((.KList => I:K),,(ListItem(I) => .List) _:List,,_, _)
   rule #getVars1((.List => .KList),,_, _)
-  rule #getVars1((.KList => I),,(SetItem(I) => .Set) _:Set,,_, _)
+  rule #getVars1((.KList => I:K),,(SetItem(I) => .Set) _:Set,,_, _)
   rule #getVars1((.Set => .KList),,_, _)
-  rule #getVars1((.KList => Key,,Value),,(Key |-> Value => .Map) _:Map,,_, _)
+  rule #getVars1((.KList => Key:K,,Value:K),,(Key |-> Value => .Map) _:Map,,_, _)
   rule #getVars1((.Map => .KList),,_, _)
   rule #getVars1((K1:KItem ~> K2:KItem ~> K:K => K1,,K2,,K),,_, _)
   rule #getVars1((.K => .KList),,_, _) 
@@ -117,18 +117,17 @@ module FREE-VARS
   syntax Set ::= #freeVars(KList, Set, Set)  [function, klabel(#freevars2)]
   rule #freeVars(.KList, _, Free:Set) => Free
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
-    => #freeVars(Ks, Bound, Free) when X in Bound
-  rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
-    => #freeVars(Ks, Bound, Free SetItem(X)) when notBool(X in Bound)
+    => #if X in Bound ==K true #then #freeVars(Ks, Bound, Free) #else
+     #freeVars(Ks, Bound, Free SetItem(X)) #fi
   rule #freeVars((L:KLabel(Ks:KList) => Ks),, _, _, _)
     when (isVariable(L(Ks)) =/=K true) andBool
          (isBinder(L(Ks)) =/=K true) andBool
          (isCollection(L(Ks)) =/=K true)
-  rule #freeVars((.KList => I),, (ListItem(I) => .List) _:List,,_, _, _)
+  rule #freeVars((.KList => I:K),, (ListItem(I) => .List) _:List,,_, _, _)
   rule #freeVars((.List => .KList),,_, _, _)
-  rule #freeVars((.KList => I),, (SetItem(I) => .Set) _:Set,,_, _, _)
+  rule #freeVars((.KList => I:K),, (SetItem(I) => .Set) _:Set,,_, _, _)
   rule #freeVars((.Set => .KList),,_, _, _)
-  rule #freeVars((.KList => Key,,Value),, (Key |-> Value => .Map) _:Map,,_, _, _)
+  rule #freeVars((.KList => Key:K,,Value:K),, (Key |-> Value => .Map) _:Map,,_, _, _)
   rule #freeVars((.Map => .KList),,_, _, _)
 
 
@@ -137,7 +136,7 @@ module FREE-VARS
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
-  rule #freeVars((K1:KItem ~> K2:KItem ~> K => K1,,K2,,K),,_, _, _)
+  rule #freeVars((K1:KItem ~> K2:KItem ~> K:K => K1,,K2,,K),,_, _, _)
 
   syntax Set ::= #freeVarsBinder(K, Set)  [function]
   rule #freeVarsBinder(K:K, Bound:Set)
@@ -182,7 +181,7 @@ module SUBSTITUTION
 
   rule #substituteFV(Y:Variable, M:Map Y |-> V, _) => V
   rule #substituteFV(Y:Variable, M:Map, _) => Y
-    when notBool (Y in keys(M))
+    when Y in keys(M) =/=K true
   
   rule #substituteFV(K:K, M:Map, FV) => #substituteBinder(K, M, FV)
     when isBinder(K)
@@ -276,13 +275,12 @@ module SUBSTITUTION
 // Grigore: I added the operation below here, because I want it to be
 // generic.  I don't know how to generate globablly fresh variables
 // of desired type any other way ... sorry.  This is used in type inference
-/******** Soon to be *******************
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T) => T
   rule freshVariables(SetItem(Tv) S:Set, T)
     => freshVariables(S, T[#freshSym(Tv)/Tv])
-*/
 
+/*
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T:K) => T
   rule freshVariables(SetItem(Tv:K) S:Set, T:K)
@@ -290,5 +288,5 @@ module SUBSTITUTION
 
   syntax K ::= #changeLabel(K,K)  [function]
   rule #changeLabel(_:KLabel(Ks:KList),L':KLabel(_)) => L'(Ks)
-
+*/
 endmodule

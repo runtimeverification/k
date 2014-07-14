@@ -10,22 +10,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.collections15.set.UnmodifiableSet;
+import com.google.common.collect.ArrayTable;
+import com.google.common.collect.Table;
+
 public class Poset implements Serializable {
 
+    private boolean cacheEnabled = false;
+    
     private java.util.Set<Tuple> relations = new HashSet<Tuple>();
     private java.util.Set<String> elements = new HashSet<String>();
-    
+        
     /**
      * Returns a unmodifiable view of elements in this poset.
      */
     public java.util.Set<String> getElements() {
         return java.util.Collections.unmodifiableSet(elements);
     }
+    
+    public void addElement(String element) {
+        elements.add(element);
+        invalidateCache();
+    }
 
     public void addRelation(String big, String small) {
         relations.add(new Tuple(big, small));
         elements.add(big);
         elements.add(small);
+        invalidateCache();
     }
 
     public boolean isInRelation(String big, String small) {
@@ -66,6 +78,28 @@ public class Poset implements Serializable {
         return start;
     }
 
+    private abstract class BoundType implements Serializable {
+        public abstract boolean isInRelation(String first, String second);
+        
+        public Table<String, String, Set<String>> cache;
+    }
+    
+    private BoundType lowerBound = new BoundType() {
+        
+        @Override
+        public boolean isInRelation(String first, String second) {
+            return Poset.this.isInRelation(first, second);
+        }
+    };
+    
+    private BoundType upperBound = new BoundType() {
+        
+        @Override
+        public boolean isInRelation(String first, String second) {
+            return Poset.this.isInRelation(second, first);
+        }
+    };
+
     /**
      * finds the least upper bound of a subset of the elements of
      * 
@@ -77,32 +111,7 @@ public class Poset implements Serializable {
      * 
      */
     public String getLUB(Set<String> subset) {
-        if (subset == null || subset.size() == 0)
-            return null;
-        if (subset.size() == 1)
-            return subset.iterator().next();
-        List<String> candidates = new ArrayList<String>();
-        for (String elem : elements) {
-            boolean isGTESubset = true;
-            for (String subsetElem : subset) {
-                if (!(isInRelation(elem, subsetElem) || elem.equals(subsetElem))) {
-                    isGTESubset = false;
-                    break;
-                }
-            }
-            if (isGTESubset) {
-                candidates.add(elem);
-            }
-        }
-        if (candidates.size() == 0)
-            return null;
-        String lub = candidates.get(0);
-        for (int i = 1; i < candidates.size(); ++i) {
-            if (isInRelation(lub, candidates.get(i))) {
-                lub = candidates.get(i);
-            }
-        }
-        return lub;
+        return getUniqueBound(subset, upperBound);
     }
 
     /**
@@ -116,32 +125,119 @@ public class Poset implements Serializable {
      * 
      */
     public String getGLB(Set<String> subset) {
-        if (subset == null || subset.size() == 0)
+        return getUniqueBound(subset, lowerBound);
+    }
+    
+    private String getUniqueBound(Set<String> subset, BoundType type) {
+        if (subset == null || subset.size() == 0) {
             return null;
-        if (subset.size() == 1)
+        }
+        if (subset.size() == 1) {
             return subset.iterator().next();
-        List<String> candidates = new ArrayList<String>();
-        for (String elem : elements) {
-            boolean isLTESubset = true;
-            for (String subsetElem : subset) {
-                if (!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
-                    isLTESubset = false;
+        }
+        Set<String> lowerBounds = getBounds(subset, type);
+        if (lowerBounds.size() == 0) {
+            return null;
+        }
+        
+        String candidate = null;
+        for (String lowerBound : lowerBounds) {
+            if (candidate == null) {
+                candidate = lowerBound;
+            } else {
+                if (type.isInRelation(lowerBound, candidate)) {
+                    candidate = lowerBound;
+                } else if (!type.isInRelation(candidate, lowerBound)) {
+                    /* no relation between lowerBound and candidate; none of them is the GLB */
+                    candidate = null;
+                }
+            }
+        }
+        /* if there is a GLB, it must be candidate */
+        if (candidate != null) {
+            for (String lowerBound : lowerBounds) {
+                if (lowerBound != candidate && !type.isInRelation(candidate, lowerBound)) {
+                    candidate = null;
                     break;
                 }
             }
-            if (isLTESubset) {
-                candidates.add(elem);
+        }
+        return candidate;
+    }
+
+    private Set<String> getBounds(Set<String> subset, BoundType type) {
+        Set<String> bounds = new HashSet<String>();
+        for (String elem : elements) {
+            boolean isBound = true;
+            for (String subsetElem : subset) {
+                if (!(type.isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
+                    isBound = false;
+                    break;
+                }
+            }
+            if (isBound) {
+                bounds.add(elem);
             }
         }
-        if (candidates.size() == 0)
-            return null;
-        String glb = candidates.get(0);
-        for (int i = 1; i < candidates.size(); ++i) {
-            if (isInRelation(candidates.get(i), glb)) {
-                glb = candidates.get(i);
+        return bounds;
+    }
+    
+    private Set<String> getClosestBounds(Set<String> subset, BoundType type) {
+        assert elements.containsAll(subset);
+        
+        if (subset == null || subset.size() == 0) {
+            return Collections.emptySet();
+        }
+        if (subset.size() == 1) {
+            return Collections.singleton(subset.iterator().next());
+        }
+        
+        if (subset.size() == 2) {
+            if (!cacheEnabled) {
+                initializeCache();
+            }
+            Iterator<String> iter = subset.iterator();
+            String arg0 = iter.next();
+            String arg1 = iter.next();
+            Set<String> cachedBound = type.cache.get(arg0, arg1);
+            if (cachedBound != null) {
+                return cachedBound;
             }
         }
-        return glb;
+        
+        Set<String> bounds = getBounds(subset, type);
+        
+        /* find closest bounds from the candidate bounds */
+        if (!bounds.isEmpty()) {
+            Set<String> nonClosestBs = new HashSet<String>();
+            for (String bound1 : bounds) {
+                // if bound1 has been identified as non-closest, elements closer than
+                // that must have been also identified as non-closest in the same
+                // outer loop
+                if (!nonClosestBs.contains(bound1)) {
+                    for (String bound2 : bounds) {
+                        if (type.isInRelation(bound1, bound2)) {
+                            nonClosestBs.add(bound2);
+                        }
+                    }
+                }
+            }
+        
+            bounds.removeAll(nonClosestBs);
+        }
+
+        /* make it immutable */
+        bounds = UnmodifiableSet.decorate(bounds);
+
+        /* cache the result for the most common use case */
+        if (subset.size() == 2) {
+            Iterator<String> iter = subset.iterator();
+            String arg0 = iter.next();
+            String arg1 = iter.next();
+            type.cache.put(arg0, arg1, bounds);
+            type.cache.put(arg1, arg0, bounds);
+        }
+        return bounds;
     }
     
     /**
@@ -152,51 +248,31 @@ public class Poset implements Serializable {
      * @return an immutable set of the maximal lower bounds
      */
     public Set<String> getMaximalLowerBounds(Set<String> subset) {
-        assert elements.containsAll(subset);
-         
-        if (subset == null || subset.size() == 0) {
-            return Collections.emptySet();
-        }
-        if (subset.size() == 1) {
-            return Collections.singleton(subset.iterator().next());
-        }
-
-        /* find lower bounds of the given subset */
-        Set<String> lowerBounds = new HashSet<String>();
-        for (String elem : elements) {
-            boolean isLTESubset = true;
-            for (String subsetElem : subset) {
-                if (!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
-                    isLTESubset = false;
-                    break;
-                }
-            }
-            if (isLTESubset) {
-                lowerBounds.add(elem);
-            }
-        }
-        
-        /* find maximal lower bounds from the candidate lower bounds */
-        if (lowerBounds.size() == 0) {
-            return Collections.emptySet();
-        }
-        Set<String> nonMaximalLBs = new HashSet<String>();
-        for (String lb1 : lowerBounds) {
-            // if lb1 has been identified as non-maximal, elements less than
-            // that must have been also identified as non-maximal in the same
-            // outer loop
-            if (!nonMaximalLBs.contains(lb1)) {
-                for (String lb2 : lowerBounds) {
-                    if (isInRelation(lb1, lb2)) {
-                        nonMaximalLBs.add(lb2);
-                    }
-                }
-            }
-        }
-        
-        lowerBounds.removeAll(nonMaximalLBs);
-        return Collections.unmodifiableSet(lowerBounds);
+        return getClosestBounds(subset, lowerBound);
     }
+    
+    /**
+     * Finds the minimal upper bounds of a subset of the elements in this poset.
+     * 
+     * @param subset
+     *            the subset of elements
+     * @return an immutable set of the minimal upper bounds
+     */
+    public Set<String> getMinimalUpperBounds(Set<String> subset) {
+        return getClosestBounds(subset, upperBound);
+    }
+    
+    private void invalidateCache() {
+        cacheEnabled = false;
+        lowerBound.cache = null;
+        upperBound.cache = null;
+    }
+    
+    private void initializeCache() {
+        cacheEnabled = true;
+        lowerBound.cache = ArrayTable.create(elements, elements);
+        upperBound.cache = ArrayTable.create(elements, elements);
+    }    
 
     private class Tuple implements Serializable {
         private String big, small;

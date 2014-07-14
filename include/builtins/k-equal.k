@@ -29,27 +29,6 @@ module K-EQUAL-HOOKS
   rule #if true #then K:K #else _:K #fi => K
   rule #if false #then _:K #else K:K #fi => K
 
-  // equality over sets
-  syntax Bool ::= Set "==Set" Set    [function]
-  rule Set1:Set ==Set Set2:Set => (Set1 <=Set Set2) andBool (Set2 <=Set Set1)
-
-  // disequality over sets
-  syntax Bool ::= Set "=/=Set" Set   [function]
-  rule Set1:Set =/=Set Set2:Set => notBool(Set1 ==Set Set2)
-
-  // equality over maps
-  syntax Bool ::= Map "==Map" Map    [function]
-
-  rule Map1:Map ==Map Map2:Map
-       =>
-      (Map1 <=Map Map2) andBool (Map2 <=Map Map1)
-
-
-  // disequality over maps
-  syntax Bool ::= Map "=/=Map" Map   [function]
-  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2)
-
-
   // equality over KList
   syntax Bool ::= KList "==KList" KList    [function, hook(KEqual:_==KList_)]
 
@@ -70,19 +49,6 @@ module K-EQUAL-HOOKS
     [function, hook(KEqual:_=/=KLabel_), latex({#1}\mathrel{\neq_{\it KLabel}}{#2})]
   rule Lbl1:KLabel =/=KLabel Lbl2:KLabel => notBool(Lbl1 ==KLabel Lbl2)
 
-  // equality over lists
-  syntax Bool ::= List "==List" List [function]
-  rule ListItem(K1:K) L1:List ==List ListItem(K2:K) L2:List
-       =>
-       K1 ==K K2 andBool L1 ==List L2
-  rule .List ==List ListItem(_:K) _:List => false
-  rule ListItem(_:K) _:List ==List .List => false
-  rule .List ==List .List => true
-
-  // disequality over lists
-  syntax Bool ::= List "=/=List" List [function]
-  rule L1:List =/=List L2:List => notBool(L1 ==List L2)
-
   syntax Bool ::= K "=K" K                  [function]
                 | List "=List" List         [function]
                 | Set "=Set" Set            [function]
@@ -97,4 +63,10 @@ module K-EQUAL-HOOKS
   rule .KList =KList .KList => true
   rule (_:K,,_:KList) =KList .KList => false
   rule .KList =KList (_:K,,_:KList) => false
+
+ 
+  // TODO(dwightguth): fix once bags are K
+  syntax Bool ::= left:
+				  Bag "==Bag" Bag           [function, hook(#K-EQUAL:_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+				| Bag "=/=Bag" Bag          [function, hook(#K-EQUAL:_=/=K_), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 endmodule

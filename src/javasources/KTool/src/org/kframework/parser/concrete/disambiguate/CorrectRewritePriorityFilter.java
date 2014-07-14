@@ -6,12 +6,13 @@ import java.util.List;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Configuration;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -29,6 +30,16 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
     public CorrectRewritePriorityFilter(Context context) {
         super("Correct Rewrite priority", context);
         secondFilter = new CorrectRewriteFilter2(context);
+    }
+
+    @Override
+    public ASTNode visit(Configuration cfg, Void _) throws ParseFailedException {
+        return cfg;
+    }
+
+    @Override
+    public ASTNode visit(Syntax syn, Void _) throws ParseFailedException {
+        return syn;
     }
 
     @Override
@@ -76,14 +87,6 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
         assert ks.getContents().size() <= 2;
 
         return super.visit(ks, _);
-    }
-
-    @Override
-    public ASTNode visit(MapItem mi, Void _) throws ParseFailedException {
-        mi.setKey((Term) secondFilter.visitNode(mi.getKey()));
-        mi.setValue((Term) secondFilter.visitNode(mi.getValue()));
-
-        return super.visit(mi, _);
     }
 
     @Override

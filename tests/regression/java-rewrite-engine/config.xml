@@ -68,6 +68,32 @@
       <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
+  
+  <test
+      definition="list/issue146/test.k"
+      programs="list/issue146/programs"
+      results="list/issue146/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+  
+  <test
+      definition="list/issue709/test.k"
+      programs="list/issue709/programs"
+      results="list/issue709/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
 
   <test
       definition="set/test1/test1.k"
@@ -104,6 +130,42 @@
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
+
+  <test
+      definition="visitor/imp.k"
+      programs="visitor"
+      results="visitor"
+      extension="imp" >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="cell_map/test.k"
+      programs="cell_map"
+      results="cell_map"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+  <test
+      definition="cell_list/test.k"
+      programs="cell_list"
+      results="cell_list"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+
 
   <test
       definition="cell_map/test.k"
@@ -208,9 +270,33 @@
   </test>
 
   <test
+      definition="machine_integers/test.k"
+      programs="machine_integers"
+      results="machine_integers"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+  <test
       definition="bag/test.k"
       programs="bag"
       results="bag"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="multiple_subsorts/test.k"
+      programs="multiple_subsorts"
+      results="multiple_subsorts"
       extension="test"
       >
     <kompile-option name="--backend" value="java" />

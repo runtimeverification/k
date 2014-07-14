@@ -106,7 +106,7 @@ module URIS
   rule ListItem(#buffer(Buffer:String => Buffer +String S)) (ListItem(S:String) => .List) _:List [stdout, stderr]
 
   // Send first char from the buffer to the server
-  rule ListItem(#ostream((. => #write(N, S)) ~> N:Int)) ListItem(#buffer(S:String => "")) _:List
+  rule ListItem(#ostream((.K => #write(N, S)) ~> N:Int)) ListItem(#buffer(S:String => "")) _:List
     when S =/=String "" [stdout, stderr]
 
   // read one character at a time until we read whitespace

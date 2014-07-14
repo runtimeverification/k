@@ -766,7 +766,7 @@ public class ParserTest {
         Term one = Token.kAppOf("Int", "1");
         Term mone = Token.kAppOf("Int", "-1");
         Term mexp = new TermCons("Exp", Arrays.asList(one), p1);
-        Term expected = new TermCons("Exps", Arrays.<Term>asList(amb(mexp, mone)), p2);
+        Term expected = new TermCons("Exps", Arrays.<Term>asList(amb(mone, mexp)), p2);
 
         Assert.assertEquals("The error: ", expected.toString(), result2.toString());
     }

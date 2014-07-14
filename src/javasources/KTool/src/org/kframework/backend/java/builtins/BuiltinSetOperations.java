@@ -34,11 +34,8 @@ public class BuiltinSetOperations {
     }
 
     public static BuiltinSet difference(BuiltinSet term1, BuiltinSet term2, TermContext context) {
-        if (!term1.isGround()) {
-            throw new IllegalArgumentException("first argument " + term1 + " is not ground");
-        }
-        if (!term2.isGround()) {
-            throw new IllegalArgumentException("second argument " + term2 + " is not ground");
+        if (!term1.isGround() || !term2.isGround()) {
+            return null;
         }
 
         Set<Term> elements = new HashSet<Term>(term1.elements());
@@ -47,11 +44,8 @@ public class BuiltinSetOperations {
     }
 
     public static BoolToken in(Term term1, BuiltinSet term2, TermContext context) {
-        if (!term1.isGround()) {
-            throw new IllegalArgumentException("first argument " + term1 + " is not ground");
-        }
-        if (!term2.isGround()) {
-            throw new IllegalArgumentException("second argument " + term2 + " is not ground");
+        if (!term1.isGround() || !term2.isGround()) {
+            return null;
         }
 
         return BoolToken.of(term2.elements().contains(term1));

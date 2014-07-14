@@ -444,22 +444,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     }
 
     @Override
-    public R visit(org.kframework.kil.List node, P p) throws E {
-        return visit((Collection) node, p);
-    }
-
-    @Override
     public R visit(KList node, P p) throws E {
-        return visit((Collection) node, p);
-    }
-
-    @Override
-    public R visit(org.kframework.kil.Map node, P p) throws E {
-        return visit((Collection) node, p);
-    }
-
-    @Override
-    public R visit(Set node, P p) throws E {
         return visit((Collection) node, p);
     }
 
@@ -471,22 +456,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
 
     @Override
     public R visit(BagItem node, P p) throws E {
-        return visit((CollectionItem) node, p);
-    }
-
-    @Override
-    public R visit(ListItem node, P p) throws E {
-        return visit((CollectionItem) node, p);
-    }
-
-    @Override
-    public R visit(MapItem node, P p) throws E {
-        node = genericVisitChild(node, p, mutableChild(MapItem.class), CollectionItem.Children.KEY);
-        return visit((CollectionItem) node, p);
-    }
-
-    @Override
-    public R visit(SetItem node, P p) throws E {
         return visit((CollectionItem) node, p);
     }
 
@@ -588,7 +557,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
             protected ListBuiltin doCopy(ListBuiltin node,
                     java.util.Collection<Term> items,
                     DataStructureBuiltin.ListChildren _) {
-                return new ListBuiltin(node.sort(), node.baseTerms(), node.elementsLeft(), items);
+                return ListBuiltin.of(node.sort(), (List<Term>)node.baseTerms(), node.elementsLeft(), (List<Term>)items);
             }
         
         }, DataStructureBuiltin.ListChildren.ELEMENTS_RIGHT);

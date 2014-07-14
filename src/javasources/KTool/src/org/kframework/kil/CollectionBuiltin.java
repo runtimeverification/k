@@ -12,9 +12,9 @@ import java.util.Collections;
  *
  * @author AndreiS
  */
-public class CollectionBuiltin extends DataStructureBuiltin {
+public abstract class CollectionBuiltin extends DataStructureBuiltin {
 
-    private final Collection<Term> elements;
+    protected final Collection<Term> elements;
 
     public CollectionBuiltin(
             DataStructureSort sort,
@@ -22,15 +22,6 @@ public class CollectionBuiltin extends DataStructureBuiltin {
             Collection<Term> elements) {
         super(sort, baseTerms);
         this.elements = elements;
-    }
-
-    public static CollectionBuiltin of(DataStructureSort sort,
-                                       Collection<Term> baseTerms,
-                                       Collection<Term> elements) {
-        if (sort.type().equals(KSorts.LIST)) {
-            return new CollectionBuiltin(sort, baseTerms, elements);
-        }
-        return new SetBuiltin(sort, baseTerms, elements);
     }
 
     public Collection<Term> elements() {
@@ -42,19 +33,7 @@ public class CollectionBuiltin extends DataStructureBuiltin {
         return elements.isEmpty() && super.baseTerms.isEmpty();
     }
 
-    @Override
-    public Term shallowCopy() {
-        return new CollectionBuiltin(dataStructureSort, baseTerms, elements);
-    }
-    
-    @Override
-    public DataStructureBuiltin shallowCopy(Collection<Term> baseTerms) {
-        return shallowCopy(baseTerms, elements);
-    }
-    
-    public CollectionBuiltin shallowCopy(Collection<Term> baseTerms, Collection<Term> elements) {
-        return new CollectionBuiltin(dataStructureSort, baseTerms, elements);
-    }
+    public abstract CollectionBuiltin shallowCopy(Collection<Term> baseTerms, Collection<Term> elements);
 
     @Override
     public int hashCode() {
@@ -92,6 +71,11 @@ public class CollectionBuiltin extends DataStructureBuiltin {
             default:
                 return super.getChildren(type);
         }
+    }
+
+    @Override
+    public Term toKApp(Context context) {
+        throw new UnsupportedOperationException("cannot convert abstract collection to KApp");
     }
 
 }

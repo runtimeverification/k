@@ -25,15 +25,11 @@ import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.KSort;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.ListItem;
 import org.kframework.kil.ListTerminator;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
@@ -190,7 +186,7 @@ public class MetaK {
         if (null == r.getAttributes())
             return false;
         for (Attribute any : anywheres) {
-            if (any.getValue() == r.getAttribute(any.getKey()))
+            if (any.getValue().equals(r.getAttribute(any.getKey())))
                 return true;
         }
         return false;
@@ -244,31 +240,13 @@ public class MetaK {
             public Void visit(KSequence node, Void _) { return null; }
 
             @Override
-            public Void visit(org.kframework.kil.List node, Void _) { return null; }
-
-            @Override
-            public Void visit(ListItem node, Void _) { return null; }
-
-            @Override
             public Void visit(TermCons node, Void _) { return null; }
-
-            @Override
-            public Void visit(org.kframework.kil.Set node, Void _) { return null; }
-
-            @Override
-            public Void visit(SetItem node, Void _) { return null; }
 
             @Override
             public Void visit(KApp node, Void _) { return null; }
 
             @Override
             public Void visit(KList node, Void _) { return null; }
-
-            @Override
-            public Void visit(Map node, Void _) { return null; }
-
-            @Override
-            public Void visit(MapItem node, Void _) { return null; }
 
             @Override
             public Void visit(UserList node, Void _) { return null; }
