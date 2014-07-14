@@ -11,12 +11,12 @@ module IMP-SYNTAX
   imports SYMBOLIC-ARRAY-SYNTAX
 
   syntax AExp  ::= Int | Id
-  	         | AExp "[" AExp "]"          [strict]
+  	             | AExp "[" AExp "]"          [strict]
                  > left:
-		   AExp "*" AExp              [left, strict]
+		           AExp "*" AExp              [left, strict]
                  | AExp "/" AExp              [left, strict]
                  > left:
-		   AExp "+" AExp              [left, strict]
+		           AExp "+" AExp              [left, strict]
                  | AExp "-" AExp              [left, strict]
                  > "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -32,7 +32,7 @@ module IMP-SYNTAX
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
-		 > Stmt Stmt                  [left]
+		         > Stmt Stmt                  [left]
   syntax Pgm   ::= "int" AExps ";" Stmt
   syntax AExps ::= List{AExp,","}
   syntax Ids   ::= List{Id,","}
@@ -122,13 +122,13 @@ module IMP
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
   rule <k> int (X:Id,Xs:AExps => Xs); _:Pre _:Post _:Stmt </k> 
-       <env> Rho:Map (.Map => X |-> !L) </env>
+       <env> Rho:Map (.Map => X |-> !L:Int) </env>
        <store>... .Map => (!L |-> 0) </store>
        when notBool (X in keys(Rho))
 
   // symbolic arrays
   rule <k> int (X:Id [S:#Int] ,Xs:Ids => Xs); _:Pre _:Post St:Stmt </k>
-       <env> Rho:Map (.Map => X |-> !L) </env>
+       <env> Rho:Map (.Map => X |-> !L:Int) </env>
        <store>... (.Map => !L |-> array(!AL, S) !AL |-> #symArray(X) ) </store>
        when notBool (X in keys(Rho))
 
@@ -210,7 +210,7 @@ module IMP
 //@ Generate fresh map
   syntax K ::= "generateFresh" "(" Map ")"
   rule <k> generateFresh(L:Int |-> V:Int E:Map) => generateFresh(E) ...</k>
-       <store>... L |-> (V => !V') ...</store>
+       <store>... L |-> (V => !V':Int) ...</store>
   rule <k> generateFresh(.Map) => . ...</k>
   rule <k> generateFresh(L:Int |-> array(AL:Int, Size:Int) E:Map) => generateFresh(E) ...</k>
   rule <k> generateFresh(L:Int |-> A:Array E:Map) => generateFresh(E) ...</k>
@@ -249,7 +249,7 @@ module IMP
   rule mapLeftEq(X:Int |-> A:Array Rest:Map, X |-> A Rest2:Map) => mapLeftEq(Rest, Rest2)
   rule mapLeftEq(. , _) => true
   rule mapLeftEq(X:Int |-> _:Int _:Map, Right:Map) => false when notBool(X in keys(Right))
-  rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==Set .Set)
+  rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==K .Set)
 
 //@ Compiler issues
   // subsort issue? 

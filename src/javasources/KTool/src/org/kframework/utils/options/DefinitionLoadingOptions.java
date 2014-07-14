@@ -12,41 +12,50 @@ public class DefinitionLoadingOptions {
             "K definition resides. The default is the unique, only directory with the suffix '-kompiled' " +
             "in the current directory. A definition may also be specified with the 'KRUN_COMPILED_DEF' " +
             "environment variable, in which case it is used if the option is not specified on the command line.")
-    private File definition;
+    private File directory;
     
     public File definition() {
-        if (definition == null) {
-            if (System.getenv("KRUN_COMPILED_DEF") != null) {
-                definition = new File(System.getenv("KRUN_COMPILED_DEF"));
-            } else {
-                File[] dirs = new File(".").listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File current, String name) {
-                        return new File(current, name).isDirectory();
-                    }
-                });
-    
-                for (int i = 0; i < dirs.length; i++) {
-                    if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
-                        if (definition != null) {
-                            throw new ParameterException("Multiple compiled definitions found in the "
-                                    + "current working directory: " + definition.getAbsolutePath() + " and " +
-                                    dirs[i].getAbsolutePath());
-                        } else {
-                            definition = dirs[i];
-                        }
-                    }
-                }
-                
-                if (definition == null) {
-                    throw new ParameterException("Could not find a compiled definition. " +
-                            "Use --directory to specify one.");
+        File directory = null;
+        File[] dirs = directory().listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+
+        for (int i = 0; i < dirs.length; i++) {
+            if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
+                if (directory != null) {
+                    throw new ParameterException("Multiple compiled definitions found in the "
+                            + "current working directory: " + directory.getAbsolutePath() + " and " +
+                            dirs[i].getAbsolutePath());
+                } else {
+                    directory = dirs[i];
                 }
             }
         }
-        if (!definition.isDirectory()) {
-            throw new ParameterException("Does not exist or not a directory: " + definition.getAbsolutePath());
+        
+        if (directory == null) {
+            throw new ParameterException("Could not find a compiled definition. " +
+                    "Use --directory to specify one.");
         }
-        return definition;
+        if (!directory.isDirectory()) {
+            throw new ParameterException("Does not exist or not a directory: " + directory.getAbsolutePath());
+        }
+        return directory;
+    }
+    
+    private File directory() {
+        if (directory == null) {
+            if (System.getenv("KRUN_COMPILED_DEF") != null) {
+                directory = new File(System.getenv("KRUN_COMPILED_DEF"));
+            } else {
+                directory = new File(".");
+            }
+        }
+        if (!directory.isDirectory()) {
+            throw new ParameterException("Does not exist or not a directory: " + directory.getAbsolutePath());
+        }
+        return directory;
     }
 }
