@@ -1,4 +1,4 @@
-package org.kframework.kast;
+package org.kframework.utils.options;
 
 import static org.junit.Assert.*;
 
@@ -8,11 +8,11 @@ import org.junit.Test;
 
 import com.beust.jcommander.JCommander;
 
-public class KastOptionsTest {
+public class DefinitionLoadingOptionsTest {
 
     @Test
     public void testReadDefinition() {
-        KastOptions options = new KastOptions();
+        DefinitionLoadingOptions options = new DefinitionLoadingOptions();
         new JCommander(options, "--directory", "share/test-files");
         assertEquals(new File("share/test-files/test-kompiled"), options.definition());
         assertTrue(options.definition().exists());
