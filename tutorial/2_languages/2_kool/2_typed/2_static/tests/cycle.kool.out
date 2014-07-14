@@ -1,1 +1,2 @@
-Class "C2" is in a cycle!
+Class \\"C2\\" is in a cycle!
+Class \\"C1\\" is in a cycle!

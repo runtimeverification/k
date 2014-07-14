@@ -10,6 +10,9 @@
       <all-programs>
         <krun-option name="--output" value="none"/>
       </all-programs>
+      <program name="cycle.kool" regex="true">
+        <krun-option name="--search" />
+      </program>
   </test>
 
 </tests>

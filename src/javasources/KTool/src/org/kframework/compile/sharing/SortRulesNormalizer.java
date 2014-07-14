@@ -20,6 +20,13 @@ public class SortRulesNormalizer extends CopyOnWriteTransformer {
         Collections.sort(module.getItems(), new Comparator<ModuleItem>() {
             @Override
             public int compare(ModuleItem arg0, ModuleItem arg1) {
+                int x;
+                if ((x = arg0.getFilename().compareTo(arg1.getFilename())) != 0) {
+                    return x;
+                }
+                if ((x = arg0.getLocation().compareTo(arg1.getLocation())) != 0) {
+                    return x;
+                }
                 return arg0.toString().compareTo(arg1.toString());
             }
         });

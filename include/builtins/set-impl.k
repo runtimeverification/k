@@ -30,8 +30,8 @@ module SET-IMPL
 
   /* element membership */
 //  syntax Bool ::= K "in" Set    [function, hook(Set:in)]
-  rule K:K in SetItem(K) _:Set => true
-  rule K1:K in SetItem(K2:K) S:Set => K1 =K K2 orBool K1 in S
+  rule K1:K in SetItem(K2:K) _:Set => true when K1 =K K2
+  rule K1:K in SetItem(K2:K) S:Set => K1 in S when notBool(K1 =K K2)
   rule _ in .Set => false
 
   /* set cardinality */
