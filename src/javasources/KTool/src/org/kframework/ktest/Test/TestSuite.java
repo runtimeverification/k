@@ -117,6 +117,7 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
 
+        //TODO(dwightguth): inject the terminal color
         String colorCode = ColorUtil.RgbToAnsi(ret ? "green" : "red", colorSetting, Color.BLACK);
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
