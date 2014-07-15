@@ -25,8 +25,9 @@
             exclude="constructor-bst-sorting stuck-letrec polymorphism-6"
             >
         <kompile-option name="--backend" value="java" />
-        <kompile-option name="-o" value="pattern-matching-kompiled" />
+        <kompile-option name="-d" value="pattern-matching" />
         <all-programs>
+            <krun-option name="-d" value="pattern-matching" />
             <krun-option name="--pattern-matching" />
             <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
         </all-programs>

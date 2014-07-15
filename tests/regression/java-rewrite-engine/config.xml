@@ -136,7 +136,7 @@
       programs="visitor"
       results="visitor"
       extension="imp" >
-    <kompile-option name="--output" value="maude_kompiled" />
+    <kompile-option name="--directory" value="maude_kompiled" />
     <all-programs>
       <krun-option name="--directory" value="maude_kompiled" />
     </all-programs>
@@ -148,7 +148,7 @@
       results="cell_map"
       extension="test"
       >
-    <kompile-option name="--output" value="maude_kompiled" />
+    <kompile-option name="--directory" value="maude_kompiled" />
     <all-programs>
       <krun-option name="--directory" value="maude_kompiled" />
     </all-programs>
@@ -159,7 +159,7 @@
       results="cell_list"
       extension="test"
       >
-    <kompile-option name="--output" value="maude_kompiled" />
+    <kompile-option name="--directory" value="maude_kompiled" />
     <all-programs>
       <krun-option name="--directory" value="maude_kompiled" />
     </all-programs>
@@ -275,7 +275,7 @@
       results="machine_integers"
       extension="test"
       >
-    <kompile-option name="--output" value="maude_kompiled" />
+    <kompile-option name="--directory" value="maude_kompiled" />
     <all-programs>
       <krun-option name="--directory" value="maude_kompiled" />
     </all-programs>

@@ -20,10 +20,11 @@
       extension="bf"
       >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="--output" value="java_kompiled" />
+    <kompile-option name="--directory" value="java_kompiled" />
     <all-programs>
       <krun-option name="--output" value="none" />
       <krun-option name="--color" value="off" />
+      <krun-option name="--directory" value="java_kompiled" />
     </all-programs>
   </test>
 </tests>

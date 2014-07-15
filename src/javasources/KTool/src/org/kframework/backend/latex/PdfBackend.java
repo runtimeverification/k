@@ -64,7 +64,7 @@ public class PdfBackend extends BasicBackend {
         File latexFile = latexBackend.getLatexFile();
         File pdfFile = generatePdf(latexFile);
         if (pdfFile.exists()) {
-            copyFile(pdfFile, options.output());
+            copyFile(pdfFile, new File(options.directory, FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
         }
     }
 

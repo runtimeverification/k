@@ -25,8 +25,9 @@
             exclude="cycle.kool"
             >
         <kompile-option name="--backend" value="java" />
-        <kompile-option name="-o" value="pattern-matching-kompiled" />
+        <kompile-option name="-d" value="pattern-matching" />
         <all-programs>
+            <krun-option name="-d" value="pattern-matching" />
             <krun-option name="--pattern-matching" />
             <krun-option name="--smt" value="none" />
             <krun-option name="--output" value="none" />

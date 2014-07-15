@@ -19,11 +19,6 @@ public class TestCase {
      * Absolute path of K definition file.
      */
     private final Annotated<String, LocationData> definition;
-    
-    /**
-     * Path to compiled definition
-     */
-    private final File compiledDir;
 
     /**
      * Absolute paths of program files directories.
@@ -79,16 +74,6 @@ public class TestCase {
                     ProgramProfile krunOpts,
                     Map<String, ProgramProfile> pgmSpecificKRunOpts,
                     Set<KTestStep> skips) throws InvalidConfigError {
-        File definitionFile = new File(definition.getObj());
-        File output = new File(definitionFile.getParentFile(), 
-                FilenameUtils.removeExtension(definitionFile.getName()) + "-kompiled");
-        for (PgmArg arg : kompileOpts) {
-            if (arg.arg.equals("--output")) {
-                output = new File(definitionFile.getParentFile(), arg.val);
-            }
-        }
-        this.compiledDir = output;
-        
         // programs and results should be ordered set because of how search algorithm works
         this.definition = definition;
         this.programs = programs;
@@ -325,14 +310,15 @@ public class TestCase {
                     ProgramProfile profile = getPgmOptions(pgmFilePath);
                     boolean hasDirectory = false;
                     for (PgmArg arg : profile.getArgs()) {
-                        if (arg.arg.equals("--directory")) {
+                        if (arg.arg.equals("--directory") || arg.arg.equals("-d")) {
                             hasDirectory = true;
                         }
                         args.add(arg);
                     }
                     if (!hasDirectory) {
-                        args.add(new PgmArg("--directory", compiledDir.getAbsolutePath()));
+                        args.add(new PgmArg("--directory", definitionFilePath));
                     }
+                    
                     ret.add(new KRunProgram(
                             pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,
                             getNewOutputFilePath(outputFileName), profile.isRegex()));

@@ -60,7 +60,10 @@
       extension="issue"
       >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="--output" value="tokenconstants-java_kompiled" />
+    <kompile-option name="--directory" value="tokenconstants-java_kompiled" />
+    <program name="test.issue">
+      <krun-option  name="--directory" value="tokenconstants-java_kompiled" />
+    </program>
   </test>
 
   <test
@@ -70,7 +73,7 @@
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="--output" value="freshMOS-java_kompiled" />
+    <kompile-option name="--directory" value="freshMOS-java_kompiled" />
     <all-programs>
       <krun-option  name="--directory" value="freshMOS-java_kompiled" />
     </all-programs>
