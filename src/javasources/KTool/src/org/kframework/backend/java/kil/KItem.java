@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -88,7 +87,6 @@ public final class KItem extends Term {
         this.kList = kList;
 
         Definition definition = termContext.definition();
-        Subsorts subsorts = definition.subsorts();
         
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
@@ -109,101 +107,14 @@ public final class KItem extends Term {
                 }
             }
             
-            /* cache miss, start computing sort information */
-            List<Production> productions = kLabelConstant.productions();
-            
-            Set<Sort> sorts = Sets.newHashSet();
-            Set<Sort> possibleSorts = Sets.newHashSet();
-
-            if (!K.do_kompilation) {
-                /**
-                 * Sort checks in the Java engine are not implemented as
-                 * rewrite rules, so we need to precompute the sort of
-                 * terms. However, right now, we also want to allow users
-                 * to provide user-defined sort predicate rules, e.g.
-                 *      ``rule isVal(cons V:Val) => true''
-                 * to express the same meaning as overloaded productions
-                 * which are not allowed to write in the current front-end.
-                 */
-                /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
-                for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
-                    if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
-                            .equals(BoolToken.TRUE)) {
-                        sorts.add(rule.predicateSort());
-                    } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
-                            .equals(BoolToken.TRUE)) {
-                        possibleSorts.add(rule.predicateSort());
-                    }
-                }
-            }
-
-            for (Production production : productions) {
-                boolean mustMatch = true;
-                boolean mayMatch = true;
-                
-                if (((KList) kList).size() == production.getArity()) {
-                    /* check if the production can match this KItem */
-                    int idx = 0;
-                    for (Term term : (KList) kList) {
-                        if (!mayMatch) {
-                            break;
-                        }
-    
-                        /* extract the actual term in case it's injected in klabel */
-                        if (term instanceof KItem){
-                            KItem kItem = (KItem) term;
-                            if (kItem.kLabel instanceof KLabelInjection) {
-                                term = ((KLabelInjection) kItem.kLabel).term();
-                            }
-                        }
-                        Sort childSort = term.sort();
-    
-                        if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.name())) {
-                            mustMatch = false;
-                            /*
-                             * YilongL: the following analysis can be made more
-                             * precise by considering all possible sorts of the
-                             * term; however, it would be too expensive to
-                             * compute for our purpose
-                             */
-                            mayMatch = !term.isExactSort()
-                                    && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.name());
-                        }
-                        idx++;
-                    }
-                } else {
-                    mustMatch = mayMatch = false;
-                }
-
-                if (mustMatch) {
-                    sorts.add(Sort.of(production.getSort()));
-                } else if (mayMatch) {
-                    possibleSorts.add(Sort.of(production.getSort()));
-                }
-            }
-
-            /*
-             * YilongL: we are taking the GLB of all sorts because it is the
-             * most precise sort information we can get without losing
-             * information. e.g. sorts = [Types, #ListOfId{","}, Exps] => sort =
-             * #ListOfId{","}. On the other hand, if the GLB doesn't exist, then
-             * we must have an ambiguous grammar with which this KItem cannot be
-             * correctly parsed.
-             */
-            sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
-            if (sort == null) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                        KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " + 
-                                this.toString() + "\nPossible least sorts are: " + sorts)); 
-            }
-            /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
-            isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
-            
-            /* cache the computed result */
+            /* cache miss, compute sort information and cache it */
+            cacheTabVal = computeSort(kLabelConstant, termContext);
             if (enableCache) {
-                cacheTabVal = new CacheTableValue(sort, isExactSort);
                 SORT_CACHE_TABLE.put(definition, cacheTabColKey, cacheTabVal);
             }
+            
+            sort = cacheTabVal.sort;
+            isExactSort = cacheTabVal.isExactSort;
         } else {    
             /* not a KLabelConstant or the kList contains a frame variable */
             if (kLabel instanceof KLabelInjection) {
@@ -215,6 +126,101 @@ public final class KItem extends Term {
         }
     }
     
+    private CacheTableValue computeSort(
+            KLabelConstant kLabelConstant, TermContext termContext) {
+        Definition definition = termContext.definition();
+        Subsorts subsorts = definition.subsorts();
+
+        Set<Sort> sorts = Sets.newHashSet();
+        Set<Sort> possibleSorts = Sets.newHashSet();
+
+        if (!K.do_kompilation) {
+            /**
+             * Sort checks in the Java engine are not implemented as
+             * rewrite rules, so we need to precompute the sort of
+             * terms. However, right now, we also want to allow users
+             * to provide user-defined sort predicate rules, e.g.
+             *      ``rule isVal(cons V:Val) => true''
+             * to express the same meaning as overloaded productions
+             * which are not allowed to write in the current front-end.
+             */
+            /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
+            for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
+                if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
+                        .equals(BoolToken.TRUE)) {
+                    sorts.add(rule.predicateSort());
+                } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
+                        .equals(BoolToken.TRUE)) {
+                    possibleSorts.add(rule.predicateSort());
+                }
+            }
+        }
+        
+        for (Production production : kLabelConstant.productions()) {
+            boolean mustMatch = true;
+            boolean mayMatch = true;
+            
+            if (((KList) kList).size() == production.getArity()) {
+                /* check if the production can match this KItem */
+                int idx = 0;
+                for (Term term : (KList) kList) {
+                    if (!mayMatch) {
+                        break;
+                    }
+
+                    /* extract the actual term in case it's injected in klabel */
+                    if (term instanceof KItem){
+                        KItem kItem = (KItem) term;
+                        if (kItem.kLabel instanceof KLabelInjection) {
+                            term = ((KLabelInjection) kItem.kLabel).term();
+                        }
+                    }
+                    Sort childSort = term.sort();
+
+                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.name())) {
+                        mustMatch = false;
+                        /*
+                         * YilongL: the following analysis can be made more
+                         * precise by considering all possible sorts of the
+                         * term; however, it would be too expensive to
+                         * compute for our purpose
+                         */
+                        mayMatch = !term.isExactSort()
+                                && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.name());
+                    }
+                    idx++;
+                }
+            } else {
+                mustMatch = mayMatch = false;
+            }
+
+            if (mustMatch) {
+                sorts.add(Sort.of(production.getSort()));
+            } else if (mayMatch) {
+                possibleSorts.add(Sort.of(production.getSort()));
+            }
+        }
+        
+        /*
+         * YilongL: we are taking the GLB of all sorts because it is the
+         * most precise sort information we can get without losing
+         * information. e.g. sorts = [Types, #ListOfId{","}, Exps] => sort =
+         * #ListOfId{","}. On the other hand, if the GLB doesn't exist, then
+         * we must have an ambiguous grammar with which this KItem cannot be
+         * correctly parsed.
+         */
+        Sort sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
+        if (sort == null) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
+                    KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " + 
+                            this.toString() + "\nPossible least sorts are: " + sorts)); 
+        }
+        /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
+        boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
+        
+        return new CacheTableValue(sort, isExactSort);
+    }
+
     public boolean isEvaluable(TermContext context) {
         if (evaluable != null) {
             return evaluable;
