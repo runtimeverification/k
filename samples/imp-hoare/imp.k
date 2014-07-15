@@ -11,12 +11,12 @@ module IMP-SYNTAX
   imports SYMBOLIC-ARRAY-SYNTAX
 
   syntax AExp  ::= Int | Id
-  	             | AExp "[" AExp "]"          [strict]
+                 | AExp "[" AExp "]"          [strict]
                  > left:
-		           AExp "*" AExp              [left, strict]
+                   AExp "*" AExp              [left, strict]
                  | AExp "/" AExp              [left, strict]
                  > left:
-		           AExp "+" AExp              [left, strict]
+                   AExp "+" AExp              [left, strict]
                  | AExp "-" AExp              [left, strict]
                  > "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -32,19 +32,19 @@ module IMP-SYNTAX
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
-		         > Stmt Stmt                  [left]
+                 > Stmt Stmt                  [left]
   syntax Pgm   ::= "int" AExps ";" Stmt
   syntax AExps ::= List{AExp,","}
   syntax Ids   ::= List{Id,","}
 
   syntax Stmt ::= "while " "(" BExp ")" "invariant" ":" Assert Block
   syntax Assert ::= BExp
-		  | "not" Assert		[strict]
-  	 	  | Assert "and" Assert		[left, strict]
-		  > Assert "or" Assert		[left, strict]
-		  > Assert "implies" Assert     [left, strict]
-		  | "forall" Ids "(" Assert ")" [strict(2)]
-		  | "exists" Ids "(" Assert ")" [strict(2)]
+          | "not" Assert                [strict]
+          | Assert "and" Assert         [left, strict]
+          > Assert "or" Assert          [left, strict]
+          > Assert "implies" Assert     [left, strict]
+          | "forall" Ids "(" Assert ")" [strict(2)]
+          | "exists" Ids "(" Assert ")" [strict(2)]
 
   syntax Pre   ::= "pre"  ":" Assert
   syntax Post  ::= "post" ":" Assert
@@ -52,8 +52,8 @@ module IMP-SYNTAX
 
   // Values   
   syntax Val ::= Int | Bool | Array
-  	       | "array" "(" Int "," Int ")" 
-	       | "loc" "(" AExp ")"
+           | "array" "(" Int "," Int ")" 
+           | "loc" "(" AExp ")"
   syntax AExp ::= Val
 
 endmodule
@@ -65,10 +65,10 @@ module IMP
   syntax KResult ::= Val
 
   configuration <T color="yellow">
-		  <k color="green"> $PGM:Program </k>
-		  <env color="black"> .Map </env>
-                  <store color="blue"> .Map </store>
-		  <condition color="red"> true </condition>
+          <k color="green"> $PGM:Program </k>
+          <env color="black"> .Map </env>
+          <store color="blue"> .Map </store>
+          <condition color="red"> true </condition>
                 </T>
 
 //@ IMP concrete semantics
@@ -163,7 +163,7 @@ module IMP
 
 //@ Assume
   syntax K ::= "assume" "(" K ")"
-	     | "assumeStrict" "(" K ")" [strict]
+         | "assumeStrict" "(" K ")" [strict]
 
   rule assume(Psi:K) => assumeStrict(A2M(Psi))
   rule <k> assumeStrict(m2k(E:Map, Phi:K)) => . ...</k>
@@ -173,7 +173,7 @@ module IMP
 //@ Match
   syntax K ::= "match"  "(" K ")" [strict]
   rule <k> match(m2k(Ea:Map, Phia:K))
-	   => . // checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
+       => . // checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
        ...</k>
        <store> Ec:Map </store>
        <condition> Phic:Bool </condition>
@@ -181,7 +181,7 @@ module IMP
 
 // debug rule
   rule <k> match(m2k(Ea:Map, Phia:K))
-	   => SMTLibQuery(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
+       => SMTLibQuery(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
        ...</k>
        <store> Ec:Map </store>
        <condition> Phic:Bool </condition>
