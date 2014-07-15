@@ -66,11 +66,12 @@ public class CheckSyntaxDecl extends BasicVisitor {
         if (node.isSubsort()) {
             String sort = ((Sort) node.getItems().get(0)).getName();
             if (Sort.isBasesort(sort) && !context.isSubsorted(node.getSort(), sort)) {
-                String msg = "Subsorted to built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
+                String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
         }
         
+        // TODO(YilongL & Radu): enforce this check for Maude as well; update definitions accordingly  
         if (context.kompileOptions.backend.java()
                 && !node.getFilename().startsWith(KPaths.getKBase(false) + File.separator + "include") 
                 && node.getSort().equals(KSorts.K)) {
