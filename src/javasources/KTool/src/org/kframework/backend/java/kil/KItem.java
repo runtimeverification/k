@@ -20,7 +20,6 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.krun.K;
@@ -31,7 +30,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -54,9 +52,7 @@ import com.google.common.collect.Table;
 @SuppressWarnings("serial")
 public final class KItem extends Term {
     
-    private static final Map<KLabelConstant, KItem> LIST_TERMINATORS = Maps.newHashMap();
-
-    private static final Table<Definition, CacheMapKey, CacheMapValue> CACHE = HashBasedTable.create();
+    private static final Table<Definition, CacheTableColKey, CacheTableValue> SORT_CACHE_TABLE = HashBasedTable.create();
 
     private final Term kLabel;
     private final Term kList;
@@ -65,38 +61,20 @@ public final class KItem extends Term {
     private Boolean evaluable = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
-        Definition definition = termContext.definition();
-
         // TODO(AndreiS): remove defensive coding
         kList = KCollection.upKind(kList, Kind.KLIST);
 
-        KItem listTerminator = LIST_TERMINATORS.get(kLabel);
-        if (listTerminator != null) {
-            assert kList.equals(KList.EMPTY);
-            return listTerminator;
-        }
-
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            String separator = definition.context().listLabelSeparator.get(kLabelConstant.label());
-            if (separator != null) {
-                KLabelConstant unitLabel = KLabelConstant.of(
-                        org.kframework.compile.utils.MetaK.getListUnitLabel(separator), 
-                        null);
-                KItem newListTerminator = new KItem(
-                        unitLabel,
-                        KList.EMPTY,
-                        Sort.of(CompleteSortLatice.getUserListName(CompleteSortLatice.BOTTOM_SORT_NAME, separator)),
-                        true);
-                LIST_TERMINATORS.put(unitLabel, newListTerminator);
-                return newListTerminator;
+            if (kLabelConstant.isListLabel()) {
+                return kLabelConstant.getListTerminator();
             }
         }
         
         return new KItem(kLabel, kList, termContext);
     }
     
-    private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
+    KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
         super(Kind.KITEM);
         this.kLabel = kLabel;
         this.kList = kList;
@@ -117,16 +95,16 @@ public final class KItem extends Term {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             
             /* at runtime, checks if the result has been cached */
-            CacheMapKey cacheMapKey = null;
-            CacheMapValue cacheMapVal = null;
+            CacheTableColKey cacheTabColKey = null;
+            CacheTableValue cacheTabVal = null;
             boolean enableCache = !K.do_kompilation
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
-                cacheMapKey = new CacheMapKey(kLabelConstant, (KList) kList);
-                cacheMapVal = CACHE.get(definition, cacheMapKey);
-                if (cacheMapVal != null) {
-                    sort = cacheMapVal.sort;
-                    isExactSort = cacheMapVal.isExactSort;
+                cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
+                cacheTabVal = SORT_CACHE_TABLE.get(definition, cacheTabColKey);
+                if (cacheTabVal != null) {
+                    sort = cacheTabVal.sort;
+                    isExactSort = cacheTabVal.isExactSort;
                     return;
                 }
             }
@@ -223,8 +201,8 @@ public final class KItem extends Term {
             
             /* cache the computed result */
             if (enableCache) {
-                cacheMapVal = new CacheMapValue(sort, isExactSort);
-                CACHE.put(definition, cacheMapKey, cacheMapVal);
+                cacheTabVal = new CacheTableValue(sort, isExactSort);
+                SORT_CACHE_TABLE.put(definition, cacheTabColKey, cacheTabVal);
             }
         } else {    
             /* not a KLabelConstant or the kList contains a frame variable */
@@ -507,14 +485,14 @@ public final class KItem extends Term {
      * {@link KItem#isExactSort}, depends only on the {@code KLabelConstant} and
      * the sorts of its children.
      */
-    private static final class CacheMapKey {
+    private static final class CacheTableColKey {
         
         final KLabelConstant kLabelConstant;
         final Sort[] sorts;
         final boolean[] bools;
         final int hashCode;
         
-        public CacheMapKey(KLabelConstant kLabelConstant, KList kList) {
+        public CacheTableColKey(KLabelConstant kLabelConstant, KList kList) {
             this.kLabelConstant = kLabelConstant;
             sorts = new Sort[kList.size()];
             bools = new boolean[kList.size()];
@@ -548,22 +526,22 @@ public final class KItem extends Term {
         
         @Override
         public boolean equals(Object object) {
-            if (!(object instanceof CacheMapKey)) {
+            if (!(object instanceof CacheTableColKey)) {
                 return false;
             }
-            CacheMapKey key = (CacheMapKey) object;
+            CacheTableColKey key = (CacheTableColKey) object;
             return kLabelConstant.equals(key.kLabelConstant)
                     && Arrays.deepEquals(sorts, key.sorts)
                     && Arrays.equals(bools, key.bools);
         }
     }
     
-    private static final class CacheMapValue {
+    private static final class CacheTableValue {
         
         final Sort sort;
         final boolean isExactSort;
         
-        CacheMapValue(Sort sort, boolean isExactSort) {
+        CacheTableValue(Sort sort, boolean isExactSort) {
             this.sort = sort;
             this.isExactSort = isExactSort;
         }
