@@ -7,6 +7,7 @@
       programs="../../programs"
       extension="kool"
       results="." >
+      <kompile-option name="--transition" value="inheritance-cycle" />
       <all-programs>
         <krun-option name="--output" value="none"/>
       </all-programs>

@@ -589,7 +589,7 @@ checks for cycles. */
             ...</classes> _ => .)
            <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
-       </T>  [transition]
+       </T>  [inheritance-cycle]
 
 
 /*@ \subsubsection{New}
