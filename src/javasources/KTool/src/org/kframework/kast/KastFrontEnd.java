@@ -69,7 +69,7 @@ public class KastFrontEnd {
 
         
             org.kframework.kil.Definition javaDef = null;
-            File compiledFile = options.directory();
+            File compiledFile = options.definition();
             Context context;
             KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
             
