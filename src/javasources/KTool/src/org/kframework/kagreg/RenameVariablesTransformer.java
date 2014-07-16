@@ -14,7 +14,7 @@ public class RenameVariablesTransformer extends CopyOnWriteTransformer {
         this.renameStrategy = renameStrategy;
         assert this.renameStrategy != null;
     }
-    
+
     @Override
     public ASTNode visit(Variable variable, Void _)  {
         variable = (Variable)super.visit(variable, _);

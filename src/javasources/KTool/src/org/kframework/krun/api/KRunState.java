@@ -42,7 +42,7 @@ public class KRunState implements Serializable{
     */
     private Term rawResult;
     private Integer stateId;
-    
+
     protected Context context;
 
     public KRunState(Term rawResult, Context context) {
@@ -68,11 +68,11 @@ public class KRunState implements Serializable{
                         }
                     };
                     variableCollector.visitNode(result);
-                    
+
                     /* add brackets */
                     AddBracketsFilter2 filter = new AddBracketsFilter2(context);
                     result = (Term) filter.visitNode(result);
-                    
+
                     /* initialize the substitution map of the filter using existing free variables */
                     Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
                     for (Variable var : existingFreeVariables) {
@@ -142,7 +142,7 @@ public class KRunState implements Serializable{
         return stateId;
     }
 
-    public void setStateId(Integer stateId) {    
+    public void setStateId(Integer stateId) {
         this.stateId = stateId;
     }
 
@@ -150,8 +150,8 @@ public class KRunState implements Serializable{
     public boolean equals(Object o) {
         if (!(o instanceof KRunState)) return false;
         KRunState s = (KRunState)o;
-        /*jung uses intensively equals while drawing graphs 
-          use SemanticEquals since it caches results 
+        /*jung uses intensively equals while drawing graphs
+          use SemanticEquals since it caches results
         */
         return SemanticEqual.checkEquality(rawResult, s.rawResult);
     }

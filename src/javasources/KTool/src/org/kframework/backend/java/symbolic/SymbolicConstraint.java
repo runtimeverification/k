@@ -100,10 +100,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          * It is null is this constraint is not false.
          */
         public Equality falsifyingEquality;
-        
+
         public SymbolicUnifier.Data unifierData;
 
-        public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution, 
+        public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution,
                 TruthValue truthValue, boolean isNormal, SymbolicUnifier.Data unifierData) {
             this.equalities = equalities;
             this.substitution = substitution;
@@ -466,7 +466,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * one-to-one relationship between unifiers and constraints.
      */
     private final SymbolicUnifier unifier;
-    
+
     public SymbolicConstraint(Data data, TermContext context) {
         this.data = data;
         this.context = context;
@@ -482,8 +482,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public SymbolicConstraint(TermContext context) {
         this(new Data(
-                new LinkedList<Equality>(), new HashMap<Variable, Term>(), TruthValue.TRUE, true, 
-                new SymbolicUnifier.Data()), 
+                new LinkedList<Equality>(), new HashMap<Variable, Term>(), TruthValue.TRUE, true,
+                new SymbolicUnifier.Data()),
                 context);
     }
 

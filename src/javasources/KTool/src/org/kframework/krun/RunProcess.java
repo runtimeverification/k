@@ -109,7 +109,7 @@ public class RunProcess {
 
         if (startSymbol == null) {
             startSymbol = context.startSymbolPgm;
-        }        
+        }
         String content = value;
 
         switch (parser) {

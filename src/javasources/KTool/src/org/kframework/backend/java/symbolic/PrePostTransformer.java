@@ -13,7 +13,7 @@ import org.kframework.kil.visitors.Visitor;
  * <li>pre-processing that node;
  * <li>applying transformation recursively on its children;
  * <li>post-processing that node.
- * 
+ *
  * @author AndreiS
  */
 public abstract class PrePostTransformer extends CopyOnWriteTransformer {
@@ -156,7 +156,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         kItemProjection = (KItemProjection) super.transform(kItemProjection);
         return kItemProjection.accept(postTransformer);
     }
-    
+
     @Override
     public ASTNode transform(Token token) {
         ASTNode astNode = token.accept(preTransformer);
@@ -409,7 +409,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         variable = (Variable) super.transform(variable);
         return variable.accept(postTransformer);
     }
-    
+
     @Override
     public ASTNode transform(BuiltinMgu mgu) {
         ASTNode astNode = mgu.accept(preTransformer);

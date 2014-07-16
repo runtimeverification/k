@@ -10,9 +10,9 @@ import java.util.List;
 
 public class KExceptionManager {
     private final List<KException> exceptions = new ArrayList<KException>();
-    
+
     private GlobalOptions options;
-    
+
     public KExceptionManager(GlobalOptions options) {
         this.options = options;
     }
@@ -31,7 +31,7 @@ public class KExceptionManager {
             System.err.println(StringUtil.splitLines(e.toString()));
         }
     }
-    
+
     /**
      * Thrown to indicate that the K Exception manager has terminated the application due to an error.
      * @author dwightguth

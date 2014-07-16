@@ -10,7 +10,7 @@ import org.kframework.kompile.KompileOptions;
 public class AddOptionalTags extends CopyOnWriteTransformer {
 
     private KompileOptions options;
-    
+
     public AddOptionalTags(Context context) {
         super("AddOptionalTags", context);
         this.options = context.kompileOptions;

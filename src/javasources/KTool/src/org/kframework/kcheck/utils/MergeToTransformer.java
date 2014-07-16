@@ -72,5 +72,5 @@ public class MergeToTransformer extends CopyOnWriteTransformer {
 
         return super.visit(node, _);
     }
-    
+
 }

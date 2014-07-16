@@ -40,7 +40,7 @@ public class ProgramLoader {
 
     /**
      * Load program file to ASTNode.
-     * 
+     *
      * @param kappize
      *            If true, then apply KAppModifier to AST.
      */
@@ -77,14 +77,14 @@ public class ProgramLoader {
 
     /**
      * Print maudified program to standard output.
-     * 
+     *
      * Save it in kompiled cache under pgm.maude.
      */
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         if (!context.definedSorts.contains(startSymbol)) {
-            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "The start symbol must be declared in the definition. Found: " + startSymbol));
         }
 

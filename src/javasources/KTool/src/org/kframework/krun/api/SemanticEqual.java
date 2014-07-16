@@ -18,11 +18,11 @@ import org.kframework.kil.TermCons;
 
 /*
  * Class used to check for semantic equality
- * The need for semantic equality comes from the fact that when using 
- * debugger step-all command multiples time on same node each time the 
- * symbolic stuffs will have new value in results. 
- * Here, for now, we take in consideration just cases where symbolic is used 
- * to generate fresh values for IntBuiltin      
+ * The need for semantic equality comes from the fact that when using
+ * debugger step-all command multiples time on same node each time the
+ * symbolic stuffs will have new value in results.
+ * Here, for now, we take in consideration just cases where symbolic is used
+ * to generate fresh values for IntBuiltin
  */
 public class SemanticEqual {
 
@@ -149,7 +149,7 @@ public class SemanticEqual {
     }
 
     /*
-     * Checks if a collection is comutative 
+     * Checks if a collection is comutative
      * BAG,SET,MAP are comuatative
      */
     private static boolean isComutative(Collection c){
@@ -159,7 +159,7 @@ public class SemanticEqual {
             return false;
         }
     }
-    
+
     /*
      * Checks equality for Collection terms. Check if sorts are equal and if
      * content lists are equal
@@ -217,7 +217,7 @@ public class SemanticEqual {
         }
         return areMultisetsEqual(t1.getContents(), t2.getContents());
     }
-    
+
     /*
      * Check if both terms are null or not
      */
@@ -252,7 +252,7 @@ public class SemanticEqual {
         // for equality we should have removed all items
         return clone.isEmpty();
     }
-    
+
     private static boolean areSetsEqual(List<Term> l1, List<Term> l2) {
         if (!checkForNull(l1, l2)) {
             return false;

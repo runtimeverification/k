@@ -17,9 +17,9 @@ import java.util.List;
 /**
  * The uninterpreted version of a symbolic constraint. Used merely as a
  * container for equalities between terms.
- * 
+ *
  * @see org.kframework.backend.java.symbolic.SymbolicConstraint
- * 
+ *
  * @author AndreiS
  */
 public class UninterpretedConstraint extends JavaSymbolicObject {
@@ -103,7 +103,7 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
     /**
      * Returns the interpreted counterpart of this constraint.
-     * 
+     *
      * @param context
      *            the term context
      * @return the corresponding symbolic constraint
@@ -156,6 +156,6 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
     public UninterpretedConstraint deepCopy() {
         UninterpretedConstraint result = new UninterpretedConstraint();
         result.equalities.addAll(equalities);
-        return result;        
+        return result;
     }
 }

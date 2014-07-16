@@ -21,7 +21,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     public ResolveFresh(Context context) {
         super("Resolve fresh variables condition.", context);
     }
-    
+
     @Override
     public ASTNode visit(Definition node, Void _)  {
         isFresh = false;
@@ -72,7 +72,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
             bag.getContents().add((Term)bodyNode);
         }
         node.setBody(bag);
-        
+
         Cell fCell = new Cell();
         fCell.setLabel("freshCounter");
         fCell.setEllipses(Ellipses.NONE);
@@ -81,10 +81,10 @@ public class ResolveFresh extends CopyOnWriteTransformer {
         t.getContents().add(IntBuiltin.kAppOf(vars.size()));
         fCell.setContents(new Rewrite(freshVar, t, context));
         bag.getContents().add(fCell);
-        
+
         return node;
     }
-    
+
     @Override
     public ASTNode visit(TermCons node, Void _)  {
         if (MetaK.Constants.freshCons.equals(node.getCons())) {

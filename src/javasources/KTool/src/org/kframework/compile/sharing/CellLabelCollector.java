@@ -30,10 +30,10 @@ public class CellLabelCollector extends BasicVisitor {
         return super.visit(c, _);
     }
     @Override
-    public Void visit(ModuleItem m, Void _) {     
-        return null;   
+    public Void visit(ModuleItem m, Void _) {
+        return null;
     }
-    
+
     @Override
     public Void visit(Cell cell, Void _) {
         cellLabels.add(cell.getLabel());
@@ -42,5 +42,5 @@ public class CellLabelCollector extends BasicVisitor {
             cellLabels.add(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX + cell.getLabel());
         }
         return super.visit(cell, _);
-    }    
+    }
 }

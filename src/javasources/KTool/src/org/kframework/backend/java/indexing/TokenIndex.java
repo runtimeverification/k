@@ -12,7 +12,7 @@ public class TokenIndex implements Index {
     public TokenIndex(String sort) {
         this.sort = sort;
     }
-    
+
     public String sort() {
         return sort;
     }

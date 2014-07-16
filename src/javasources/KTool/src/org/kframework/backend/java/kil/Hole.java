@@ -46,7 +46,7 @@ public final class Hole extends Term implements MaximalSharing {
     protected int computeHash() {
         return System.identityHashCode(this);
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         return false;

@@ -14,7 +14,7 @@ public abstract class Token extends KLabel {
     /**
      * Returns a {@link Token} of the given sort with the given value. The {@link Token} object is an instance of {@link BoolBuiltin}, {@link IntBuiltin},
      * {@link StringBuiltin}, or {@link GenericToken}.
-     * 
+     *
      * @param sort
      * @param value
      * @return
@@ -34,7 +34,7 @@ public abstract class Token extends KLabel {
 
     /**
      * Returns a {@link KApp} representing a {@link Token} of the given sort with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param sort
      * @param value
      * @return
@@ -53,7 +53,7 @@ public abstract class Token extends KLabel {
 
     /**
      * Returns a {@link KApp} representing a {@link Token} with the sort and value specified by the given {@link Element} applied to an empty {@link KList}.
-     * 
+     *
      * @param element
      * @return
      */
@@ -81,14 +81,14 @@ public abstract class Token extends KLabel {
 
     /**
      * Returns a {@link String} representing the sort of the token.
-     * 
+     *
      * @return
      */
     public abstract String tokenSort();
 
     /**
      * Returns a {@link String} representing the (uninterpreted) value of the token.
-     * 
+     *
      * @return
      */
     public abstract String value();

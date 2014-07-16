@@ -9,13 +9,13 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
 public class XmlFormatter {
-    
+
     public static String format(Document document) {
         Transformer transformer;
         try {
             transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            
+
             //initialize StreamResult with File object to save to file
             StreamResult result = new StreamResult(new StringWriter());
             DOMSource source = new DOMSource(document);

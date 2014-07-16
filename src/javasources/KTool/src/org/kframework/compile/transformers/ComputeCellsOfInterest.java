@@ -26,39 +26,39 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
  * <p>
  * Therefore, this pass must be performed before {@link AddTopCellRules} but
  * after {@link AddKCell} & {@link AddStreamCells}.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
-    
+
     private boolean compiledForFastRewriting;
     private Set<String> cellsOfInterest = new HashSet<>();
     private Map<String, Term> readCell2LHS = new HashMap<>();
     private Map<String, Term> writeCell2RHS = new HashMap<>();
-    
+
     private int nestedCellCount;
     private boolean hasRewrite;
 
     public ComputeCellsOfInterest(Context context) {
         super("compute information for fast rewriting", context);
     }
-    
+
     @Override
     public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Rule rule, Void _)  {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)
@@ -66,7 +66,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
             rule.setCompiledForFastRewriting(false);
             return rule;
         }
-        
+
         compiledForFastRewriting = true;
         cellsOfInterest.clear();
         readCell2LHS.clear();
@@ -81,7 +81,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
             rule.setLhsOfReadCell(readCell2LHS);
             rule.setRhsOfWriteCell(writeCell2RHS);
         }
-        
+
         return rule;
     }
 
@@ -90,32 +90,32 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         if (!compiledForFastRewriting) {
             return cell;
         }
-        
+
         /* TODO(YilongL): cannot handle duplicate cell labels for now */
         String cellLabel = cell.getLabel();
         if (cellsOfInterest.contains(cellLabel)) {
             compiledForFastRewriting = false;
             return cell;
         }
-        
+
         /* top level cell mentioned in the rule */
         if (nestedCellCount == 0) {
             cellsOfInterest.add(cellLabel);
             readCell2LHS.put(cellLabel, null);
             hasRewrite = false;
         }
-        
+
         nestedCellCount++;
         cell = (Cell) super.visit(cell, _);
-        nestedCellCount--;     
-        
+        nestedCellCount--;
+
         if (nestedCellCount == 0 && hasRewrite) {
             writeCell2RHS.put(cellLabel, null);
         }
-        
-        return cell;        
+
+        return cell;
     }
-    
+
     @Override
     public ASTNode visit(Rewrite node, Void _)  {
         if (nestedCellCount == 0) {
@@ -128,7 +128,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
             compiledForFastRewriting = false;
             return node;
         }
-        
+
         hasRewrite = true;
         return node;
     }

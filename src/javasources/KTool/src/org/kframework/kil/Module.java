@@ -176,7 +176,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     public List<ModuleItem> getChildren(Enum<?> _) {
         return items;
     }
-    
+
     @Override
     public void setChildren(List<ModuleItem> children, Enum<?> _) {
         this.items = children;

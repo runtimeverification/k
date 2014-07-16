@@ -239,9 +239,9 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
         else{
             Object[] successors = vvd.getLayout().getGraph().getSuccessors(vertex).toArray();
-            if(++step == totalSteps){               
-                vvd.getVv().getPickedVertexState().pick(successors[0], true);   
-                return;         
+            if(++step == totalSteps){
+                vvd.getVv().getPickedVertexState().pick(successors[0], true);
+                return;
             }
             else{
                 selectActionStepResults((KRunState)successors[0], step, totalSteps);
@@ -298,14 +298,14 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
         else{
             Object[] successors = vvd.getLayout().getGraph().getSuccessors(vertex).toArray();
-            if(++step == totalSteps){       
-                for(int i = 0; i < successors.length; i++){     
-                    vvd.getVv().getPickedVertexState().pick(successors[i], true);   
+            if(++step == totalSteps){
+                for(int i = 0; i < successors.length; i++){
+                    vvd.getVv().getPickedVertexState().pick(successors[i], true);
                 }
-                return;         
+                return;
             }
             else{
-                for(int i = 0; i < successors.length; i++){     
+                for(int i = 0; i < successors.length; i++){
 
                     selectActionStepAllResults((KRunState)successors[0], step, totalSteps);
                 }

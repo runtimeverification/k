@@ -18,19 +18,19 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 /*
  * Add to each sort a labeled production for that sort.
- * 
+ *
  * E.g. transform
  * syntax Exp ::= Id
  *              | Exp "+" Exp into
- * syntax Exp ::= Id 
+ * syntax Exp ::= Id
  *                 | Exp "+" Exp
  *              | "LExp" Id ":" Exp
- *              
+ *
  * If multiple syntax declarations for the same sort appear, makes sure only one is changed.
  */
 public class AddSortLabels extends CopyOnWriteTransformer {
-    
-    /* 
+
+    /*
      * list of sorts already labeled, when encountered again ignore.
      */
     final protected List<String> labeledSorts;
@@ -39,7 +39,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
         super("AddSortLabels", context);
         this.labeledSorts = labeledSorts;
     }
-    
+
     @Override
     public ASTNode visit(Module module, Void _)  {
         if (module.isPredefined()) {
@@ -47,7 +47,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
         }
         return super.visit(module, _);
     }
-    
+
     @Override
     public ASTNode visit(Syntax syntax, Void _)  {
         if (labeledSorts.contains(syntax.getSort().getName())) {

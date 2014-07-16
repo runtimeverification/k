@@ -31,7 +31,7 @@ public class BackendTerm extends Term {
     public void setValue(String value) {
         this.value = value;
     }
-    
+
     @Override
     public BackendTerm shallowCopy() {
         return new BackendTerm(this);

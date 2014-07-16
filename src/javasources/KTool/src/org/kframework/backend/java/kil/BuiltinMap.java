@@ -30,9 +30,9 @@ import com.google.common.base.Preconditions;
 public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, Term>> {
 
     public static final BuiltinMap EMPTY_MAP = new BuiltinMap();
-    
+
     private final Map<Term, Term> entries;
-    
+
     private BuiltinMap() {
         super(null, Kind.KITEM);
         entries = Collections.emptyMap();
@@ -100,7 +100,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
         hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
         return hashCode;
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         boolean hasCell = false;
@@ -138,7 +138,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);
@@ -153,7 +153,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
-    
+
     /**
      * Private efficient constructor used by {@link BuiltinMap.Builder}.
      * @param entries
@@ -169,66 +169,66 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     public static class Builder {
-        
+
         private boolean done = false;
-        
+
         private Map<Term, Term> entries = new HashMap<>();
         private Variable frame = null;
 
         public void put(Term key, Term value) {
             entries.put(key, value);
         }
-        
+
         /**
          * Copies all key-value pairs of the given map into the BuiltinMap being
          * built.
-         * 
+         *
          * @param map
          */
         public void putAll(Map<Term, Term> map) {
             entries.putAll(map);
         }
-        
+
         public Term remove(Term key) {
             return entries.remove(key);
         }
-        
+
         public Map<Term, Term> getEntries() {
             return UnmodifiableMap.decorate(entries);
         }
-        
+
         /**
          * Sets the entries as the given {@code BuiltinMap} without copying the
          * contents. Once the entries are set, no more modification is allowed.
-         * 
+         *
          * @param map
          */
         public void setEntriesAs(BuiltinMap builtinMap) {
             // builtinMap.entries must be an UnmodifiableMap
             entries = builtinMap.entries;
         }
-        
+
         /**
          * Sets the frame of the BuiltinMap being built. Once the frame is set,
          * it cannot be changed.
-         * 
+         *
          * @param frame
          */
         public void setFrame(Variable frame) {
             this.frame = frame;
         }
-        
+
         /**
          * Concatenates the BuiltinMap being built with another term, which can only
          * be a {@code Variable} or {@code BuiltinMap}.
-         * 
+         *
          * @param term
          */
         public void concat(Term term) {
             if (term == null) {
                 return;
             }
-            
+
             if (term instanceof Variable) {
                 setFrame((Variable) term);
             } else if (term instanceof BuiltinMap) {
@@ -241,7 +241,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
                 assert false : "The concatenated term must be a Variable or BuiltinMap; found: " + term;
             }
         }
-        
+
         public BuiltinMap build() {
             Preconditions.checkArgument(!done, "Only one BuiltinMap can be built from a builder.");
             done = true;

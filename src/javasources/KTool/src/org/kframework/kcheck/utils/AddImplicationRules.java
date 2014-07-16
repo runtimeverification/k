@@ -29,47 +29,47 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Module node, Void _)  {
-    
+
         List<ModuleItem> items = node.getItems();
         node = node.shallowCopy();
         node.setItems(items);
-        
-        
+
+
         for (ASTNode rr : reachabilityRules) {
             if (rr instanceof Sentence) {
                 Sentence r = (Sentence) rr;
-                
+
                 ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(
                         context);
                 parser.visitNode(r);
 
-                
+
                 Term newPi = parser.getPi_prime().shallowCopy();
                 Term implies = AddCheckConstants.getFreshImplicationForRule(reachabilityRules.indexOf(rr), context);
                 SetCellContent app = new SetCellContent(context, implies, "k");
                 newPi = (Term) app.visitNode(newPi);
 
-                
+
                 Term newPiPrime = parser.getPi_prime().shallowCopy();
                 SetCellContent appPrime = new SetCellContent(context, KSequence.EMPTY, "k");
                 newPiPrime = (Term) appPrime.visitNode(newPiPrime);
-                
+
                 // insert patternless formulas into condition
                 Term phi = parser.getPhi().shallowCopy();
                 Term phiPrime = parser.getPhi_prime().shallowCopy();
-                Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime); 
-                
+                Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime);
+
                 Term condition = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, rrcond, BoolBuiltin.TRUE);
-                
+
                 Rule implicationRule = new Rule(newPi, newPiPrime, context);
                 implicationRule.setRequires(condition);
                 int correspondingIndex = reachabilityRules.indexOf(rr);
                 implicationRule.addAttribute(IMPLRULE_ATTR, correspondingIndex + "");
-                
+
                 items.add(implicationRule);
             }
         }
-        
+
         return node;
     }
 }

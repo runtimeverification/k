@@ -65,7 +65,7 @@ public class PatternMatcher extends AbstractMatcher {
     private boolean isStarNested;
 
     private final TermContext termContext;
-    
+
     /**
      * Checks if the subject term matches the pattern.
      *
@@ -107,7 +107,7 @@ public class PatternMatcher extends AbstractMatcher {
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(context);
-        
+
         boolean failed = true;
         if (rule.isFunction()) {
             /* match function rule */
@@ -123,7 +123,7 @@ public class PatternMatcher extends AbstractMatcher {
             /* match normal rewrite rule */
             failed = !matcher.patternMatch(subject, rule.leftHandSide());
         }
-        
+
         if (failed) {
             return Collections.emptyList();
         }
@@ -131,7 +131,7 @@ public class PatternMatcher extends AbstractMatcher {
         return evaluateConditions(rule,
                     getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions), context);
     }
-    
+
     public static Map<Variable, Term> nonAssocCommPatternMatch(Term subject, Term pattern, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(context);
         if (!matcher.patternMatch(subject, pattern)) {
@@ -145,7 +145,7 @@ public class PatternMatcher extends AbstractMatcher {
     /**
      * Evaluates the side-conditions of a rule against a list of possible
      * instantiations.
-     * 
+     *
      * @param rule
      * @param substitutions
      * @param context
@@ -164,7 +164,7 @@ public class PatternMatcher extends AbstractMatcher {
             }
 
             /* evaluate data structure lookups/choices and add bindings for them */
-            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {               
+            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
                 // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
                 Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
                         equality.leftHandSide() : equality.rightHandSide();
@@ -174,12 +174,12 @@ public class PatternMatcher extends AbstractMatcher {
                     "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
                 Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst);
-                
+
                 boolean resolved = false;
                 if (evalLookupOrChoice instanceof Bottom
                         || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
                     /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
-                    
+
                     // when the operation is pending, it is not really a valid match
                     // for example, matching ``<env>... X |-> V ...</env>''
                     // against ``<env> Rho </env>'' will result in a pending
@@ -204,14 +204,14 @@ public class PatternMatcher extends AbstractMatcher {
                         }
                     }
                 }
-                
+
                 if (!resolved) {
                     crntSubst = null;
                     break;
                 }
             }
 
-            
+
             /* evaluate side conditions */
             if (crntSubst != null) {
                 Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
@@ -242,7 +242,7 @@ public class PatternMatcher extends AbstractMatcher {
      * This method is more than 10x faster than simply calling
      * {@code Term#substituteAndEvaluate(Map, TermContext)} on
      * {@code lookupOrChoice}.
-     * 
+     *
      * @param lookupOrChoice
      * @param subst
      *            the substitution map
@@ -250,7 +250,7 @@ public class PatternMatcher extends AbstractMatcher {
      */
     private static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst) {
         Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
-        
+
         Term evalLookupOrChoice = null;
         if (lookupOrChoice instanceof DataStructureLookup) {
             DataStructureLookup lookup = (DataStructureLookup) lookupOrChoice;
@@ -271,10 +271,10 @@ public class PatternMatcher extends AbstractMatcher {
                 base = subst.get(choice.base());
             }
             base = base == null ? choice.base() : base;
-            
+
             evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(choice.type(), base).evaluateChoice();
         }
-        
+
         Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
         return evalLookupOrChoice;
     }
@@ -339,7 +339,7 @@ public class PatternMatcher extends AbstractMatcher {
             subst1 = subst2;
             subst2 = tmp;
         }
-        
+
         Map<Variable, Term> result = new HashMap<>(subst1);
         for (Map.Entry<Variable, Term> entry : subst2.entrySet()) {
             Variable variable = entry.getKey();
@@ -353,10 +353,10 @@ public class PatternMatcher extends AbstractMatcher {
         }
         return result;
     }
-    
+
     /**
      * Composes a list of substitutions.
-     * 
+     *
      * @param substs
      *            a list of substitutions
      * @return the composed substitution on success; otherwise, {@code null}
@@ -369,10 +369,10 @@ public class PatternMatcher extends AbstractMatcher {
 
         case 1:
             return substs[0];
-            
+
         case 2:
             return composeSubstitution(substs[0], substs[1]);
-            
+
         default:
             Map<Variable, Term> subst = substs[0];
             for (int idx = 1; idx < substs.length; idx++) {

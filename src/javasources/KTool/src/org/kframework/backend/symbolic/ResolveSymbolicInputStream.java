@@ -21,10 +21,10 @@ public class ResolveSymbolicInputStream extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Configuration node, Void _)  {
-        
+
         ResolveInputStreamCell risc = new ResolveInputStreamCell(context);
         Term content = (Term) risc.visitNode(node.getBody());
-        
+
         node.shallowCopy();
         node.setBody(content);
         return node;

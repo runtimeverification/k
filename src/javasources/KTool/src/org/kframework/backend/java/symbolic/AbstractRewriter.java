@@ -15,13 +15,13 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.krun.api.SearchType;
 
 public abstract class AbstractRewriter {
-    
+
     protected final TermContext termContext;
     protected final TransitionCompositeStrategy strategy;
     protected int step;
     protected final List<Term> results = new ArrayList<>();
     protected RuleIndex ruleIndex;
-    
+
     protected AbstractRewriter(Definition definition, TermContext termContext) {
         ruleIndex = definition.getIndex();
         this.termContext = termContext;
@@ -60,13 +60,13 @@ public abstract class AbstractRewriter {
         Profiler.stopTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
         return rules;
     }
-    
+
     protected final Term getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
     }
 
     protected abstract void computeRewriteStep(Term subject, int successorBound);
-    
+
     protected void computeRewriteStep(Term subject) {
         computeRewriteStep(subject, -1);
     }
@@ -74,7 +74,7 @@ public abstract class AbstractRewriter {
     /**
      * Constructs the new subject term by applying the resulting substitution
      * map of pattern matching to the right-hand side of the rewrite rule.
-     * 
+     *
      * @param rule
      *            the rewrite rule
      * @param substitution
@@ -115,5 +115,5 @@ public abstract class AbstractRewriter {
            int bound,
            int depth,
            SearchType searchType);
-    
+
 }

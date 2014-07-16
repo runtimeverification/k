@@ -6,9 +6,9 @@ import org.kframework.kil.loader.Context;
 
 /**
  * Check to see which branch of an ambiguity has less K insertions
- * 
+ *
  * @author RaduFmse
- * 
+ *
  */
 public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
@@ -41,7 +41,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
     /**
      * Get the score for two sorts
-     * 
+     *
      * @param declSort
      *            - the sort declared in the production.
      * @param termSort

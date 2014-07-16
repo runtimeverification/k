@@ -127,7 +127,7 @@ public abstract class JavaSymbolicObject extends ASTNode
 
     /**
      * Gets the cached set of variables in this {@code JavaSymbolicObject}.
-     * 
+     *
      * @return a set of variables in this {@code JavaSymbolicObject} if they
      *         have been computed; otherwise, {@code null}
      * @see JavaSymbolicObject#variableSet()

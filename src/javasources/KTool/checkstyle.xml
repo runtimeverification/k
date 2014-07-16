@@ -29,7 +29,8 @@
   </module>
   <module name="FileTabCharacter" />
   <module name="RegexpMultiline">
-    <property name="format" value="\r\n" />
+    <property name="format" value="(?s:((\r)|([ \t\x0B\f]$)).*)" />
+    <property name="message" value="File has non-Unix line endings or trailing whitespace" />
   </module>
 <!--<module name="NewlineAtEndOfFile" />-->
 </module>

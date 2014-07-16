@@ -14,30 +14,30 @@ import com.google.common.collect.Maps;
 /**
  * Represents a substitution map plus extra information used by
  * {@link KAbstractRewriteMachine}.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 class ExtendedSubstitution {
-    
+
     /**
      * Represents the substitution map obtained by matching a pattern against
      * (part of) the subject term.
      */
     private Map<Variable, Term> subst;
-    
+
     /**
      * Contains references to the cells whose contents are going to be modified
      * by the rewrite rule; the references are collected as the rewrite machine
      * builds the substitution map.
      */
     private List<Cell<?>> writeCells;
-    
+
     ExtendedSubstitution() {
         subst = Maps.newHashMap();
         writeCells = Lists.newArrayList();
     }
-    
+
     ExtendedSubstitution(Map<Variable, Term> subst, List<Cell<?>> writeCells) {
         this.writeCells = writeCells;
         this.setSubst(subst);

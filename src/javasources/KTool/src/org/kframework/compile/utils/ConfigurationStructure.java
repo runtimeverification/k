@@ -11,7 +11,7 @@ import java.util.Set;
  * link to its parent (if there exists), a {@line ConfigurationStructureMap}
  * mapping the name of its direct children to ConfigurationStructures, the
  * multiplicity of the cell, and the nesting level it can be found at.
- * 
+ *
  * @author Traian
  */
 public class ConfigurationStructure implements Serializable {

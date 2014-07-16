@@ -30,19 +30,19 @@ import java.util.Set;
 public class TokenSortCollector extends BasicVisitor {
 
     private final Set<String> tokenSorts = new HashSet<String>();
-    
+
     private final Set<String> nonTokenSorts = new HashSet<String>();
-    
+
     /**
      * Collects the names of all token sorts within a specified
      * {@code Definition}.
-     * 
+     *
      * @param definition
      *            the specified definition
      * @param context
      *            the context
      * @return a set representing the names of all token sorts
-     * 
+     *
      * @see TokenSortCollector
      */
     public static Set<String> collectTokenSorts(Definition definition, Context context) {
@@ -50,7 +50,7 @@ public class TokenSortCollector extends BasicVisitor {
         collector.visitNode(definition);
         return collector.tokenSorts;
     }
-    
+
     private KompileOptions kompileOptions;
 
     private TokenSortCollector(Context context) {
@@ -69,20 +69,20 @@ public class TokenSortCollector extends BasicVisitor {
         }
         return null;
     }
-    
+
     /**
      * Checks if a specified production is valid w.r.t. its sort: namely, a
      * lexical production should have a token sort and a non-lexical production
      * should have a non-token sort. Throws a K exception when one of the two
      * restrictions is violated. Currently, this check is only enabled in the
      * Java backend.
-     * 
+     *
      * @param production
      *            the specified production
      */
     private void checkIllegalProduction(Production production) {
         String sort = production.getSort();
-        
+
         if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
             if (nonTokenSorts.contains(sort)) {
                 String msg = "Cannot subsort a lexical production to a non-token sort:\nsyntax "
@@ -91,7 +91,7 @@ public class TokenSortCollector extends BasicVisitor {
                         KExceptionGroup.COMPILER, msg,
                         production.getFilename(), production.getLocation()));
             }
-            
+
             tokenSorts.add(sort);
         }
 
@@ -109,23 +109,23 @@ public class TokenSortCollector extends BasicVisitor {
                         KExceptionGroup.COMPILER, msg,
                         production.getFilename(), production.getLocation()));
             }
-            
+
             nonTokenSorts.add(sort);
         }
     }
 
     @Override
-    public Void visit(Rule node, Void _) { 
+    public Void visit(Rule node, Void _) {
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) { 
+    public Void visit(org.kframework.kil.Context node, Void _) {
         return null;
     }
 
     @Override
-    public Void visit(Configuration node, Void _) { 
+    public Void visit(Configuration node, Void _) {
         return null;
     }
 

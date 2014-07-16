@@ -8,24 +8,24 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import java.util.Set;
 
 public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
-    
-    
-    
+
+
+
     public ResolveSyntaxPredicates(org.kframework.kil.loader.Context context) {
         super("Resolve syntax predicates", context);
     }
-    
-    
+
+
     @Override
     public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Sentence node, Void _)  {
         boolean change = false;

@@ -27,14 +27,14 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 /**
  * Generates {@link Instruction}s of rewrite rules to be executed by the
  * {@link KAbstractRewriteMachine}.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer {
-    
+
     private enum Status { CONFIGURATION, RULE }
-    
+
     private Status status;
     private List<Instruction> schedule = new ArrayList<>();
     private Set<String> cellsToVisit = new HashSet<>();
@@ -44,12 +44,12 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
     public GenerateKRewriteMachineInstructions(Context context) {
         super("Generate K rewrite machine instructions", context);
     }
-    
+
     @Override
     public ASTNode visit(Module node, Void _)  {
         List<ModuleItem> moduleItems = node.getItems();
         List<ModuleItem> newModuleItems = new ArrayList<>();
-        
+
         Configuration cfg = null;
         for (ModuleItem item : moduleItems) {
             if (item instanceof Configuration) {
@@ -57,7 +57,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
                 break;
             }
         }
-        
+
         status = Status.CONFIGURATION;
         cfg = (Configuration) this.visitNode(cfg);
 
@@ -71,28 +71,28 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
                 newModuleItems.add(item);
             }
         }
-        
+
         node = node.shallowCopy();
         node.setItems(newModuleItems);
         return node;
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Rule rule, Void _)  {
         if (!rule.isCompiledForFastRewriting()) {
             return rule;
         }
-        
+
         /* only visit cells of interest and their ancestors */
         cellsToVisit.clear();
         for (String cellLabel : containingCells.keySet()) {
@@ -107,32 +107,32 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
 
         rule = rule.shallowCopy();
         rule.setInstructions(schedule);
-        
+
 //        System.out.println(rule);
 //        System.out.println(rule.getCellsOfInterest());
 //        System.out.println(rule.getLhsOfReadCell());
 //        System.out.println(rule.getRhsOfWriteCell());
 //        System.out.println(rule.getRewritingSchedule());
-        
+
         return rule;
     }
-    
+
     @Override
     public ASTNode visit(Cell cell, Void _)  {
         String cellLabel = cell.getLabel();
         if (status == Status.CONFIGURATION) {
             /* compute childrenCells */
-            
+
             // TODO(YilongL): perhaps move the following computation to {@link
             // InitializeConfigurationStructure}
             for (String ancestor : cellStack) {
                 containingCells.get(ancestor).add(cellLabel);
             }
-            
+
             assert !containingCells.containsKey(cellLabel);
             containingCells.put(cellLabel, new HashSet<String>());
             containingCells.get(cellLabel).add(cellLabel);
-            
+
             cellStack.push(cellLabel);
             cell = (Cell) super.visit(cell, _);
             cellStack.pop();
@@ -141,11 +141,11 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
             if (!cellsToVisit.contains(cellLabel)) {
                 return cell;
             }
-            
+
             if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
                 schedule.add(Instruction.CHOICE);
             }
-            
+
             schedule.add(Instruction.GOTO(cellLabel));
             cell = (Cell) super.visit(cell, _);
             schedule.add(Instruction.UP);

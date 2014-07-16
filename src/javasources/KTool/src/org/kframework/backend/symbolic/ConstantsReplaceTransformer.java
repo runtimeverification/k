@@ -25,10 +25,10 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
         super("Replace Constants", context);
         generatedSV = new HashMap<Variable, KApp>();
     }
-    
+
     @Override
     public ASTNode visit(KApp node, Void _)  {
-        
+
         if (node.getLabel() instanceof Token) {
 //            Token token = ((Token) node.getLabel());
             Variable newVar = Variable.getFreshVar(KSorts.K);
@@ -38,7 +38,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 
         return super.visit(node, _);
     }
-    
+
     public Map<Variable, KApp> getGeneratedSV() {
         return generatedSV;
     }

@@ -19,13 +19,13 @@ public class ReachabilityRuleKILParser extends BasicVisitor {
     }
 
     public Void visit(Sentence node, Void _) {
-        
+
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();
             pi = rew.getLeft();
             pi_prime = rew.getRight();
         }
-        
+
         phi = node.getRequires();
         phi_prime = node.getEnsures();
         return null;

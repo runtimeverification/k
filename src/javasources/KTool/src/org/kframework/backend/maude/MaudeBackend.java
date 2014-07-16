@@ -37,7 +37,7 @@ public class MaudeBackend extends BasicBackend {
         StringBuilder consTable = getLabelTable(definition);
         FileUtil.save(context.dotk.getAbsolutePath() + "/consTable.txt", consTable);
     }
-    
+
     private StringBuilder getLabelTable(Definition def) {
         StringBuilder b = new StringBuilder();
         /*
@@ -67,7 +67,7 @@ public class MaudeBackend extends BasicBackend {
                 b.append('P');
                 b.append(StringEscapeUtils.escapeJava(p.getKLabel()));
             }
-            b.append('\n');            
+            b.append('\n');
         }
         return b;
     }

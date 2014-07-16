@@ -11,11 +11,11 @@ import org.kframework.kil.loader.Context;
  *
  */
 public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> {
-    
+
     public BasicVisitor(Context context) {
         super(context);
     }
-    
+
     public BasicVisitor(String name, Context context) {
         super(name, context);
     }
@@ -29,7 +29,7 @@ public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> 
     public <T extends ASTNode> T processChildTerm(T child, Void _) {
         return child;
     }
-    
+
     @Override
     public boolean visitChildren() {
         return true;

@@ -70,7 +70,7 @@ public class TermEquality {
     /**
      * Returns the first or the second {@link Term} according to the value of
      * the {@link BoolToken}.
-     * 
+     *
      * @param boolToken
      *            the boolean token
      * @param t

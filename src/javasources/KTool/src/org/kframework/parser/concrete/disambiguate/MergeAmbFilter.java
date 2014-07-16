@@ -22,7 +22,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
      * Restructure a node
      * from: [A(x1, x2 ... xn), A(y1, y2 ... yn), A ..., B]
      * to  : [A(amb([x1, y1, ...]), amb([x2, y2, ...]), ... amb([xn, yn, ...])), B]
-     * 
+     *
      * if the children of every A are located in the same places (see isSimilar(...)).
      */
     @Override

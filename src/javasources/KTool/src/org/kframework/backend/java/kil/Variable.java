@@ -27,7 +27,7 @@ public class Variable extends Term implements Immutable {
     /**
      * Given a set of {@link Variable}s, returns a substitution that maps each
      * element inside to a fresh {@code Variable}.
-     * 
+     *
      * @param variableSet
      *            the set of {@code Variable}s
      * @return the substitution
@@ -42,7 +42,7 @@ public class Variable extends Term implements Immutable {
 
     /**
      * Returns a fresh {@code Variable} of a given sort.
-     * 
+     *
      * @param sort
      *            the given sort
      * @return the fresh variable
@@ -50,7 +50,7 @@ public class Variable extends Term implements Immutable {
     public static Variable getFreshVariable(String sort) {
         return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
     }
-    
+
     /* TODO(AndreiS): cache the variables */
     private final String name;
     private final String sort;
