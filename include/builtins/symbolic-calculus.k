@@ -28,7 +28,7 @@ module SYMBOLIC-CALCULUS
   This should be defined in a more generic way using ASTs.
 */
 
-  syntax K ::= K "[" K "/" K "]"
+  syntax KItem ::= K "[" K "/" K "]"
 
   rule (F1:K andBool F2:K) [ V:K / X:K ]
         =>
