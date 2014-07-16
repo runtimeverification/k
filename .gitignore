@@ -1,5 +1,6 @@
 .k
-*kompiled
+*-kompiled
+*-kompiled-symbolic
 *.kore
 *.pdf
 *.swp

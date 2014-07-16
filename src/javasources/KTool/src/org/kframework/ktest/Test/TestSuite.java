@@ -461,9 +461,11 @@ public class TestSuite {
     private void printResult(boolean condition) {
         if (condition)
             System.out.println("SUCCESS");
-        else
+        else {
+            //TODO(dwightguth): inject the terminal color
             System.out.println(ColorUtil.RgbToAnsi("red", colorSetting, Color.BLACK) + "FAIL" + ColorUtil
                     .ANSI_NORMAL);
+        }
     }
 
     private String makeRelative(String absolutePath) {
