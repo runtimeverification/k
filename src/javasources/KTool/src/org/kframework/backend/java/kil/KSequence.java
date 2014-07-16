@@ -8,7 +8,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.pcollections.ConsPStack;
 import org.pcollections.Empty;
@@ -146,7 +145,7 @@ public class KSequence extends KCollection {
             return sort;
         }
 
-        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : KSorts.KSEQUENCE;
+        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KSEQUENCE;
         return sort;
     }
 

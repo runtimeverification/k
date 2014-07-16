@@ -40,7 +40,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
@@ -511,21 +510,21 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         if (node.getSort().equals(org.kframework.kil.KSorts.K)) {
-            return new Variable(node.getName(), KSorts.KSEQUENCE);
+            return new Variable(node.getName(), Sort.KSEQUENCE);
         }
         if (node.getSort().equals(org.kframework.kil.KSorts.KLIST)) {
-            return new Variable(node.getName(), KSorts.KLIST);
+            return new Variable(node.getName(), Sort.KLIST);
         }
 
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
         if (dataStructureSort != null) {
             Sort sort = null;
             if (dataStructureSort.type().equals(org.kframework.kil.KSorts.LIST)) {
-                sort = KSorts.LIST;
+                sort = Sort.LIST;
             } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.MAP)) {
-                sort = KSorts.MAP;
+                sort = Sort.MAP;
             } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.SET)) {
-                sort = KSorts.SET;
+                sort = Sort.SET;
             } else {
                 assert false: "unexpected data structure " + dataStructureSort.type();
             }

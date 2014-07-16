@@ -14,7 +14,6 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.ImprovedArrayDeque;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
@@ -111,7 +110,7 @@ public class BuiltinList extends Collection {
 
     @Override
     public Sort sort() {
-        return KSorts.LIST;
+        return Sort.LIST;
     }
 
     @Override

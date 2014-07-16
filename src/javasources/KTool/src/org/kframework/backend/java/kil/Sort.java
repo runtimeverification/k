@@ -27,6 +27,7 @@ public final class Sort implements MaximalSharing, Serializable {
     public static final Sort KSEQUENCE      =   Sort.of("K");
     public static final Sort KLIST          =   Sort.of("KList");
     public static final Sort KLABEL         =   Sort.of("KLabel");
+    public static final Sort KRESULT        =   Sort.of("KResult");
 
     public static final Sort BAG            =   Sort.of("Bag");
     public static final Sort BAG_ITEM       =   Sort.of("BagItem");

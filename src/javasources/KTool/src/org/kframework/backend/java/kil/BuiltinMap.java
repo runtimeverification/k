@@ -11,7 +11,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
@@ -75,7 +74,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     @Override
     public Sort sort() {
         // TODO(AndreiS): track the original sort from the grammar
-        return KSorts.MAP;
+        return Sort.MAP;
     }
 
     @Override

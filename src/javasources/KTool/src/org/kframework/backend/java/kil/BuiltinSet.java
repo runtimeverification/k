@@ -7,7 +7,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
@@ -130,7 +129,7 @@ public class BuiltinSet extends Collection {
 
     @Override
     public Sort sort() {
-        return KSorts.SET;
+        return Sort.SET;
     }
 
     @Override
