@@ -67,8 +67,9 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
-        } else if (node.getSort().equals(KSorts.K)
-                && !node.containsAttribute(Constants.FUNCTION)) {
+        } else if (!node.containsAttribute(Constants.FUNCTION)
+                && (node.getSort().equals(KSorts.K) || 
+                    node.getSort().equals(KSorts.KLIST))) {
             String msg = "Extending sort K is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }
