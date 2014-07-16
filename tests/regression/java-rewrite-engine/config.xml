@@ -278,9 +278,9 @@
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
-<!--
+
   <include file="user_substitution/tests/config.xml" directory="user_substitution" />
--->
+
 
 <!-- end Java Rewrite Engine tests -->
 </tests>

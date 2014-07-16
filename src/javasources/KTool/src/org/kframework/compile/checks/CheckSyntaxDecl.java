@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -64,18 +62,14 @@ public class CheckSyntaxDecl extends BasicVisitor {
         }
 
         if (node.isSubsort()) {
-            String sort = ((Sort) node.getItems().get(0)).getName();
+            String sort = node.getSubsort().getName();
             if (Sort.isBasesort(sort) && !context.isSubsorted(node.getSort(), sort)) {
                 String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
-        }
-        
-        // TODO(YilongL & Radu): enforce this check for Maude as well; update definitions accordingly  
-        if (context.kompileOptions.backend.java()
-                && !node.getFilename().startsWith(KPaths.getKBase(false) + File.separator + "include") 
-                && node.getSort().equals(KSorts.K)) {
-            String msg = "Sort K is not user-extendable in the Java backend:\n\t" + node + "\n\tConsider extending KItem instead.";
+        } else if (node.getSort().equals(KSorts.K)
+                && !node.containsAttribute(Constants.FUNCTION)) {
+            String msg = "Extending sort K is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }
 
