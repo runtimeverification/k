@@ -466,7 +466,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
+  rule <k> print(V:Val, Es:Vals => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
   rule print(.Vals); => .  [structural]
 
