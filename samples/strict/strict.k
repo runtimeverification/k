@@ -51,7 +51,7 @@ module STRICT
   aloows to evaluate differently the variable names:
 */
   
-  syntax K ::= "rvalue" "(" K ")" [strict, klabel(rvalue)]
+  syntax KItem ::= "rvalue" "(" K ")" [strict, klabel(rvalue)]
 
 /*
   A variable name always is evaluated as an lvalue

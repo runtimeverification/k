@@ -360,7 +360,7 @@ module SEQ
                 </T>
 
  //@ The right-hand side of a specification is stored as a $\lambda$-expression:
-  syntax K ::= "lambda" "(" Ids ")" Exp
+  syntax KItem ::= "lambda" "(" Ids ")" Exp
 
 /*@ The result values are integers and stream expression for that at  least
   the head is evaluated to an integer:
@@ -524,13 +524,13 @@ module SEQ
   the same label (the label is a kind of "rendevous" synchronisarion). 
 */
 
-  syntax K ::= "storeHypo" "(" K ")"   // for storing hypotheses
-            |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
-                                              // statement
-            |  "checkHypo" "(" K ","  K "," HyposCellFragment ")"
-               // for checking hypotheses one by one 
+  syntax KItem ::= "storeHypo" "(" K ")"   // for storing hypotheses
+                |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
+                                                  // statement
+                |  "checkHypo" "(" K ","  K "," HyposCellFragment ")"
+                   // for checking hypotheses one by one 
 
-  syntax K ::= "break"  // to temporarily stop one of the two programs
+  syntax KItem ::= "break"  // to temporarily stop one of the two programs
 
 
 /*@
@@ -742,7 +742,7 @@ module SEQ
 //       [transition]
 
 
-  syntax K ::= "restore" "(" K ")"
+  syntax KItem ::= "restore" "(" K ")"
 
   rule [restore] :
        <goal>

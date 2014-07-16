@@ -97,7 +97,7 @@ module STREAM
     <out> [] </out> 
 
  //@ The right-hand side of a specification is stored as a $\lambda$-expression:
-  syntax K ::= "lambda" "(" Ids ")" Exp
+  syntax KItem ::= "lambda" "(" Ids ")" Exp
 
 /*@ The result values are integers and stream expression for that at  least
   the head is evaluated to an integer:
