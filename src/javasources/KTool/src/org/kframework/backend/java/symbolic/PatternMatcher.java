@@ -15,9 +15,12 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Profiler;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
+import org.strategoxt.stratego_sglr.sorts_1_0;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -217,7 +220,19 @@ public class PatternMatcher extends AbstractMatcher {
                     // TODO(YilongL): in the future, we may have to accumulate
                     // the substitution obtained from evaluating the side
                     // condition
+//                    sw.reset(); sw.start();
                     Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
+//                    sw.stop();
+//                    System.out.println(require + " : " + sw/* + "\t\t\t\t\t\t" + crntSubst*/);
+//                    if (require.toString().startsWith("isKResult")) {
+//                        Term term = ((KList) ((KItem) require).kList()).get(0);
+////                        sw2.reset(); 
+//                        sw2.start();
+//                        Term evalReq = context.definition().subsorts().isSubsortedEq(Sort.KRESULT, crntSubst.get(term).sort()) ? BoolToken.TRUE : BoolToken.FALSE;
+//                        sw2.stop();
+//                        System.out.println(require + " : " + sw2/* + "\t\t\t\t\t\t" + crntSubst*/);
+//                        assert evalReq.equals(evaluatedReq);
+//                    }
                     if (!evaluatedReq.equals(BoolToken.TRUE)) {
                         crntSubst = null;
                         break;
@@ -232,6 +247,9 @@ public class PatternMatcher extends AbstractMatcher {
         }
         return results;
     }
+    
+    private static final Stopwatch sw = new Stopwatch();
+    private static final Stopwatch sw2 = new Stopwatch();
 
     /**
      * Private helper method to substitute and evaluate a

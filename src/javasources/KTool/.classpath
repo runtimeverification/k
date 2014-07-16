@@ -5,7 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="lib/resources"/>
 	<classpathentry kind="lib" path="../../../lib/java/com.microsoft.z3.jar"/>
-	<classpathentry kind="lib" path="../../../lib/java/collections-generic-4.01.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/commons-collections4-4.0.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/commons-io-2.1.jar"/>
@@ -30,7 +29,3 @@
 	<classpathentry kind="lib" path="lib/mockito-all.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
-
-
-
-
