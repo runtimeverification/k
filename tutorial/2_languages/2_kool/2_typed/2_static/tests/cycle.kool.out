@@ -1,15 +1,9 @@
 Search results:
 
 Solution 1:
-<T>
-    <out>
-        ListItem ( #buffer ( "Class \"C1\" is in a cycle!\n" ) )
-    </out>
-</T>
+L:List -->
+ListItem ( #buffer ( "Class \"C1\" is in a cycle!\n" ) )
 
 Solution 2:
-<T>
-    <out>
-        ListItem ( #buffer ( "Class \"C2\" is in a cycle!\n" ) )
-    </out>
-</T>
+L:List -->
+ListItem ( #buffer ( "Class \"C2\" is in a cycle!\n" ) )

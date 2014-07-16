@@ -13,6 +13,7 @@
       </all-programs>
       <program name="cycle.kool">
         <krun-option name="--search" />
+        <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
       </program>
   </test>
 
