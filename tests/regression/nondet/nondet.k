@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module NONDET
-     syntax K ::= K "," K [strict, left, superheat]
+     syntax KItem ::= K "," K [strict, left, superheat]
                 | puts(String) | write(String)
      syntax KResult ::= "done"  
      

@@ -14,7 +14,7 @@ module TEST
 
   syntax RVal ::= Int
 
-  syntax K ::= rvalue(K) 
+  syntax KItem ::= rvalue(K) 
 
   syntax KResult ::= Id | RVal
 

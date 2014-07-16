@@ -7,7 +7,7 @@ module ISSUE
                   </thread>
 		</T>
 				
-  syntax K ::= "spawn"
+  syntax KItem ::= "spawn"
 
   rule <k> spawn => . ...</k>
 	   (. => 
