@@ -19,9 +19,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Check for various errors in syntax declarations. 1. You are not allowed to use empty terminals ("") in definitions. You need to have at least two sorts, or a non empty terminal.
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class CheckSyntaxDecl extends BasicVisitor {
 
@@ -120,7 +120,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
         }
-        
+
         if (eTerminals > 0 && (neTerminals == 0 || sorts < 2))
             if (!node.containsAttribute("onlyLabel") || !node.containsAttribute("klabel")) {
                 String msg = "Cannot declare empty terminals in the definition.\n";
@@ -135,7 +135,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
         // optimization to not visit the entire tree
         return null;
     }
-    
+
     private boolean isBinaryInfixProd(Production node) {
         if (node.getArity() != 2) {
             return false;

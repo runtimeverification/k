@@ -2,14 +2,14 @@
 require "builtins/builtins.k"
 
 module K-TECHNIQUE
-	// all basic K syntax is in the SDF grammar directly,
-	// but also needs to be defined in K - except for
-	// a few things added by compiler passes.
-	// Unfortunately, FlattenModules explicitly ignores
-	// includes of K-TECHNIQUE and some other core modules,
-	// so we have to declare things like isSet in less obvious places
+    // all basic K syntax is in the SDF grammar directly,
+    // but also needs to be defined in K - except for
+    // a few things added by compiler passes.
+    // Unfortunately, FlattenModules explicitly ignores
+    // includes of K-TECHNIQUE and some other core modules,
+    // so we have to declare things like isSet in less obvious places
 
-	syntax KItem
+    syntax KItem
 endmodule
 
 module K-LISTK-EXTRAS
@@ -25,27 +25,27 @@ module K-LISTK-EXTRAS
 endmodule
 
 module K-RESULT
-	imports K-TECHNIQUE
-	imports BOOL-HOOKS
+    imports K-TECHNIQUE
+    imports BOOL-HOOKS
 
-	syntax KItem ::= KResult
-	syntax KLabel ::= "isKResult"
+    syntax KItem ::= KResult
+    syntax KLabel ::= "isKResult"
 
-	//op .KList : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
+    //op .KList : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
 
 endmodule
 
 module K-WRAPPERS-LABELS
-	imports K-TECHNIQUE
+    imports K-TECHNIQUE
 
-	//syntax KLabel ::= "KLabel2KLabel" KLabel
-					//| "CellLabel2KLabel" CellLabel
-					//| "KList2KLabel" KList
-					//| "Bag2KLabel" Bag
-					//| "Set2KLabel" Set
-					//| "List2KLabel" List
-					//| "Map2KLabel" Map
-					//| "wrap-with"
+    //syntax KLabel ::= "KLabel2KLabel" KLabel
+                    //| "CellLabel2KLabel" CellLabel
+                    //| "KList2KLabel" KList
+                    //| "Bag2KLabel" Bag
+                    //| "Set2KLabel" Set
+                    //| "List2KLabel" List
+                    //| "Map2KLabel" Map
+                    //| "wrap-with"
 
 
 
@@ -60,15 +60,15 @@ module K-DESTRUCTORS
 endmodule
 
 module K-WRAPPERS
-	imports K-TECHNIQUE
+    imports K-TECHNIQUE
 // not used anymore
-//	syntax K ::= KLabel2K (KLabel)		[klabel('KLabel2K_)]
-//			   | Celllabel2K (CellLabel)[klabel('Celllabel2K_)]
-//			   | KList2K (KList)		[klabel('KList2K_)]
-//			   | Set2K (Set)			[klabel('Set2K_)]
-//			   | Bag2K (Bag)			[klabel('Bag2K_)]
-//			   | List2K (List)			[klabel('List2K_)]
-//			   | Map2K (Map)			[klabel('Map2K_)]
+//    syntax K ::= KLabel2K (KLabel)        [klabel('KLabel2K_)]
+//               | Celllabel2K (CellLabel)[klabel('Celllabel2K_)]
+//               | KList2K (KList)        [klabel('KList2K_)]
+//               | Set2K (Set)            [klabel('Set2K_)]
+//               | Bag2K (Bag)            [klabel('Bag2K_)]
+//               | List2K (List)            [klabel('List2K_)]
+//               | Map2K (Map)            [klabel('Map2K_)]
 endmodule
 
 module K-EVAL

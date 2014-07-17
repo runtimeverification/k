@@ -14,7 +14,7 @@ public class SortRulesNormalizer extends CopyOnWriteTransformer {
     public SortRulesNormalizer(Context context) {
         super("Sort rules deterministically", context);
     }
-    
+
     @Override
     public Module visit(Module module, Void _) {
         Collections.sort(module.getItems(), new Comparator<ModuleItem>() {
