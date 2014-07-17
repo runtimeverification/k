@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.UUID;
 
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
@@ -100,12 +101,7 @@ public class FileUtil {
 
     // generate an unique name for a folder with the name dirName
     public static String generateUniqueFolderName(String dirName) {
-        try {
-            return File.createTempFile(dirName, "").getName();
-        } catch (IOException e) {
-            org.kframework.utils.Error.report("Error while generating unique directory name:" + e.getMessage());
-        }
-        return null;
+        return dirName + UUID.randomUUID().toString();
     }
 
     /**

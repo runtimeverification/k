@@ -8,11 +8,11 @@ import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
 
 public final class KastOptions {
@@ -21,20 +21,20 @@ public final class KastOptions {
 
     public String stringToParse() {
         if (parameters != null && parameters.size() > 0 && expression != null) {
-            throw new ParameterException("It is an error to provide both a file and an expression to parse.");
+            GlobalSettings.kem.registerCriticalError("It is an error to provide both a file and an expression to parse.");
         }
         if (expression != null) {
             return expression;
         }
         if (parameters != null && parameters.size() > 1) {
-            throw new ParameterException("You can only parse one program at a time.");
+            GlobalSettings.kem.registerCriticalError("You can only parse one program at a time.");
         }
         if (parameters == null || parameters.size() != 1) {
-            throw new ParameterException("You have to provide a file in order to kast a program.");
+            GlobalSettings.kem.registerCriticalError("You have to provide a file in order to kast a program.");
         }
         File f = new File(parameters.get(0));
         if (!f.exists() || f.isDirectory()) {
-            throw new ParameterException("Could not find file: " + f.getAbsolutePath());
+            GlobalSettings.kem.registerCriticalError("Could not find file: " + f.getAbsolutePath());
         }
         return FileUtil.getFileContent(parameters.get(0));
     }
@@ -89,9 +89,6 @@ public final class KastOptions {
         }
         return sort;
     }
-
-    @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
-    public boolean helpExperimental = false;
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();

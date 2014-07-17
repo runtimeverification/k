@@ -20,6 +20,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
 
 
 /**
@@ -136,6 +137,7 @@ public class Definition extends JavaSymbolicObject {
         return context;
     }
 
+    @Inject
     public void setContext(Context context) {
         assert this.context == null : "can only set the context once";
         this.context = context;

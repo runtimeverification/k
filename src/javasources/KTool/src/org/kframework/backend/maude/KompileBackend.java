@@ -9,13 +9,16 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
+import com.google.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
 public class KompileBackend extends BasicBackend {
 
-    public KompileBackend(Stopwatch sw, Context context) {
+    @Inject
+    KompileBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 

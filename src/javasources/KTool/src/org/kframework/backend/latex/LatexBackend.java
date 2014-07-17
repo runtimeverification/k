@@ -12,6 +12,8 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -21,7 +23,8 @@ public class LatexBackend extends BasicBackend {
     private File latexStyleFile;
     private boolean makeDocument = false;
 
-    public LatexBackend(Stopwatch sw, Context context) {
+    @Inject
+    LatexBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 

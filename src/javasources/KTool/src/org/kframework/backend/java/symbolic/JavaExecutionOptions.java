@@ -1,7 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.krun.K;
+import org.kframework.main.Tool;
 
 import com.beust.jcommander.Parameter;
 
@@ -16,7 +16,7 @@ public final class JavaExecutionOptions {
     public boolean deterministicFunctions = false;
 
     public boolean concreteExecution() {
-        return K.tool() == K.Tool.KRUN && !generateTests;
+        return Tool.instance() == Tool.KRUN && !generateTests;
     }
 
     public boolean fastExecution(boolean search) {

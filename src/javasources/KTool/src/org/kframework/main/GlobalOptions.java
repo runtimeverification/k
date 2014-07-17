@@ -4,10 +4,7 @@ package org.kframework.main;
 import java.util.EnumSet;
 import java.util.Set;
 
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.Parameter;
@@ -48,18 +45,11 @@ public final class GlobalOptions {
         }
     }
 
-    /**
-     * Temporary bootstrapping method to ensure that all static objects still in existence which depend on this class are properly initialized.
-     *
-     * TODO(dwightguth): remove this method when adding a dependency injector
-     */
-    public void initialize() {
-        Stopwatch.instance().init(this);
-        GlobalSettings.kem = new KExceptionManager(this);
-    }
-
     @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
     public boolean help = false;
+
+    @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
+    public boolean helpExperimental = false;
 
     @Parameter(names="--version", description="Print version information")
     public boolean version = false;

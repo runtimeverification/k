@@ -3,7 +3,6 @@ package org.kframework.krun;
 
 import java.io.BufferedReader;
 import java.io.Console;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -25,63 +24,42 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-public class ExecutionContext {
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
+public class InitialConfigurationProvider implements Provider<Term> {
 
     private final Context context;
-    private final Term initialConfiguration;
     private final Stopwatch sw;
+    private final ConfigurationCreationOptions options;
+    private final Configuration cfg;
+    private final boolean io;
 
     //public final String kdir;
 
     //public final String krunDir, krunTempDir, maude_in, maude_out, maude_err, maude_output, processed_maude_output, krun_output;
 
-    public ExecutionContext(KRunOptions krunOptions, ConfigurationCreationOptions ccOptions, Stopwatch sw) {
-
-
+    @Inject
+    public InitialConfigurationProvider(
+            KRunOptions krunOptions,
+            ConfigurationCreationOptions ccOptions,
+            Stopwatch sw,
+            Context context,
+            Configuration cfg) {
+        this.context = context;
         this.sw = sw;
-
-        context = BinaryLoader.loadOrDie(Context.class, new File(ccOptions.definitionLoading.definition(),
-                        "context.bin").getAbsolutePath());
-
-        sw.printIntermediate("Loading serialized context");
-
-        //merge krun options into kompile options object
-        context.globalOptions = krunOptions.global;
-        context.kompileOptions.global = krunOptions.global;
-        context.krunOptions = krunOptions;
-        context.colorOptions = krunOptions.color;
-        context.ccOptions = ccOptions;
-        if (krunOptions.experimental.smt.smt != null) {
-            context.smtOptions = krunOptions.experimental.smt;
-        }
-        context.javaExecutionOptions = krunOptions.experimental.javaExecution;
-
-        context.dotk = new File(
-                ccOptions.definitionLoading.definition().getParent() + File.separator
-                        + ".k");
-        if (!context.dotk.exists()) {
-            context.dotk.mkdirs();
-        }
-        context.kompiled = ccOptions.definitionLoading.definition();
-
-        sw.printIntermediate("Initializing definition paths");
-
-        Configuration cfg = BinaryLoader.loadOrDie(Configuration.class, new File(context.kompiled, "configuration.bin").getAbsolutePath());
-
-        sw.printIntermediate("Reading configuration from binary");
-
-        initialConfiguration = makeConfiguration(ccOptions, cfg, krunOptions.io());
+        this.options = ccOptions;
+        this.cfg = cfg;
+        this.io = krunOptions.io();
     }
 
-    public Term makeConfiguration(ConfigurationCreationOptions options, Configuration cfg,
-                                         boolean io) {
+    public Term get() {
 
         if (options.term()) {
             sw.printIntermediate("Parse term");
@@ -151,7 +129,7 @@ public class ExecutionContext {
         return buffer + "\n";
     }
 
-    public Term plug(Map<String, Term> args, Configuration cfg) {
+    private Term plug(Map<String, Term> args, Configuration cfg) {
         ASTNode cfgCleanedNode = null;
         cfgCleanedNode = new ConfigurationCleaner(context).visitNode(cfg);
 
@@ -174,10 +152,6 @@ public class ExecutionContext {
         configuration = (Term) new Cell2DataStructure(context).visitNode(configuration);
         configuration = (Term) new CompileDataStructures(context).visitNode(configuration);
         return configuration;
-    }
-
-    public Term getInitialConfiguration() {
-        return initialConfiguration;
     }
 
     public Context getContext() {

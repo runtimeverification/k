@@ -62,25 +62,42 @@ import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.inject.Inject;
+
 public class DefinitionLoader {
-    public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) {
+
+    private final Stopwatch sw;
+    private final BinaryLoader loader;
+    private final KExceptionManager kem;
+
+    @Inject
+    public DefinitionLoader(
+            Stopwatch sw,
+            BinaryLoader loader,
+            KExceptionManager kem) {
+        this.sw = sw;
+        this.loader = loader;
+        this.kem = kem;
+    }
+
+    public Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) {
         Definition javaDef;
         File canoFile = mainFile.getAbsoluteFile();
 
         String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
         if ("bin".equals(extension)) {
-            javaDef = (Definition) BinaryLoader.loadOrDie(Definition.class, canoFile.toString());
+            javaDef = (Definition) loader.loadOrDie(Definition.class, canoFile.toString());
 
-            Stopwatch.instance().printIntermediate("Load definition from binary");
+            sw.printIntermediate("Load definition from binary");
 
             javaDef.preprocess(context);
 
-            Stopwatch.instance().printIntermediate("Preprocess");
+            sw.printIntermediate("Preprocess");
 
         } else {
             javaDef = parseDefinition(mainFile, lang, autoinclude, context);
@@ -95,7 +112,7 @@ public class DefinitionLoader {
      * @param mainModule
      * @return
      */
-    public static Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude, Context context) {
+    public Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude, Context context) {
         try {
             // for now just use this file as main argument
             // ------------------------------------- basic parsing
@@ -118,7 +135,7 @@ public class DefinitionLoader {
             if (!context.kompileOptions.backend.documentation()) {
                 if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
                     String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg, def.getMainFile(), "File system."));
+                    kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg, def.getMainFile(), "File system."));
                     def.setMainSyntaxModule(mainModule);
                 } else {
                     def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
@@ -126,10 +143,10 @@ public class DefinitionLoader {
 
                 if (!def.getModulesMap().containsKey(mainModule)) {
                     String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
+                    kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
                 }
             }
-            Stopwatch.instance().printIntermediate("Basic Parsing");
+            sw.printIntermediate("Basic Parsing");
 
             //This following line was commented out to make the latex backend
             //parse files importing from other files
@@ -139,13 +156,13 @@ public class DefinitionLoader {
 
             def.preprocess(context);
 
-            Stopwatch.instance().printIntermediate("Preprocess");
+            sw.printIntermediate("Preprocess");
 
             new CheckVisitorStep<Definition>(new CheckSyntaxDecl(context), context).check(def);
             new CheckVisitorStep<Definition>(new CheckListDecl(context), context).check(def);
             new CheckVisitorStep<Definition>(new CheckSortTopUniqueness(context), context).check(def);
 
-            Stopwatch.instance().printIntermediate("Checks");
+            sw.printIntermediate("Checks");
 
             // ------------------------------------- generate files
             ResourceExtractor.ExtractDefSDF(new File(context.dotk, "def"));
@@ -164,7 +181,7 @@ public class DefinitionLoader {
                 FileUtil.save(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgmBuilder);
                 String newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-                Stopwatch.instance().printIntermediate("File Gen Pgm");
+                sw.printIntermediate("File Gen Pgm");
 
                 if (!oldSdfPgm.equals(newSdfPgm) || !new File(context.kompiled, "Program.tbl").exists()) {
                     Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/pgm"), "Program");
@@ -172,12 +189,12 @@ public class DefinitionLoader {
                         FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.sdf"), context.kompiled);
                         FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.tbl"), context.kompiled);
                     } catch (IOException e) {
-                        GlobalSettings.kem.registerInternalError(
+                        kem.registerInternalError(
                                 "IO error detected writing program parser to file", e);
                         throw new AssertionError("unreachable");
                     }
 
-                    Stopwatch.instance().printIntermediate("Generate TBLPgm");
+                    sw.printIntermediate("Generate TBLPgm");
                 }
             }
 
@@ -194,7 +211,7 @@ public class DefinitionLoader {
             FileUtil.save(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
             String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
-            Stopwatch.instance().printIntermediate("File Gen Def");
+            sw.printIntermediate("File Gen Def");
 
             String cacheFile = context.kompiled.getAbsolutePath() + "/defx-cache.bin";
             if (!oldSdf.equals(newSdf) || !new File(context.kompiled, "Rule.tbl").exists()
@@ -210,7 +227,7 @@ public class DefinitionLoader {
                         try {
                             FileUtils.copyFile(new File(context.dotk, "ground/Concrete.tbl"), new File(context.kompiled, "Ground.tbl"));
                         } catch (IOException e) {
-                            GlobalSettings.kem.registerInternalError(
+                            kem.registerInternalError(
                                     "IO error detected writing ground parser to file", e);
                             throw new AssertionError("unreachable");
                         }
@@ -220,23 +237,23 @@ public class DefinitionLoader {
                         FileUtils.copyFileToDirectory(new File(context.dotk, "def/Integration.sdf"), context.kompiled);
                         FileUtils.copyFile(new File(context.dotk, "def/Concrete.tbl"), new File(context.kompiled, "Rule.tbl"));
                     } catch (IOException e) {
-                        GlobalSettings.kem.registerInternalError(
+                        kem.registerInternalError(
                                 "IO error detected writing rule parser to file", e);
                         throw new AssertionError("unreachable");
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                             "Thread was interrupted trying to run SDF2Table"));
                 }
 
 
-                Stopwatch.instance().printIntermediate("Generate TBLDef");
+                sw.printIntermediate("Generate TBLDef");
             }
 
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
 
-            Stopwatch.instance().printIntermediate("Importing Files");
+            sw.printIntermediate("Importing Files");
             // ------------------------------------- parse configs
             JavaClassesFactory.startConstruction(context);
             def = (Definition) new ParseConfigsFilter(context).visitNode(def);
@@ -246,7 +263,7 @@ public class DefinitionLoader {
             // sort List in streaming cells
             new CheckVisitorStep<Definition>(new CheckStreams(context), context).check(def);
 
-            Stopwatch.instance().printIntermediate("Parsing Configs");
+            sw.printIntermediate("Parsing Configs");
 
             // ----------------------------------- parse rules
             JavaClassesFactory.startConstruction(context);
@@ -254,7 +271,7 @@ public class DefinitionLoader {
             // load definition if possible
             try {
                 @SuppressWarnings("unchecked")
-                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.load(Map.class, cacheFile);
+                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) loader.load(Map.class, cacheFile);
                 cachedDef = cachedDefTemp;
             } catch (IOException | ClassNotFoundException e) {
                 // it means the cache is not valid, or it doesn't exist
@@ -273,7 +290,7 @@ public class DefinitionLoader {
                 te.printStackTrace();
             } finally {
                 // save definition
-                BinaryLoader.saveOrDie(cacheFile, clf.getKept());
+                loader.saveOrDie(cacheFile, clf.getKept());
             }
             JavaClassesFactory.endConstruction();
 
@@ -287,7 +304,7 @@ public class DefinitionLoader {
             }
             def = (Definition) new NormalizeASTTransformer(context).visitNode(def);
 
-            Stopwatch.instance().printIntermediate("Parsing Rules [" + (clf.getKept().size() - cachedSentences) + "/" + clf.getKept().size() + "]");
+            sw.printIntermediate("Parsing Rules [" + (clf.getKept().size() - cachedSentences) + "/" + clf.getKept().size() + "]");
 
             return def;
         } catch (ParseFailedException e) {

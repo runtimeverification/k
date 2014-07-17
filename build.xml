@@ -190,7 +190,10 @@
            </fileset>
          </classpath>
          <batchtest>
-           <fileset dir="${javasources}/KTool/test" includes="**/*.java" />
+           <fileset dir="${javasources}/KTool/test">
+             <include name="**/*.java" />
+             <exclude name="org/kframework/utils/BaseTestCase.java" />
+           </fileset>
          </batchtest>
          <jvmarg value="-ea" />
        </junit>

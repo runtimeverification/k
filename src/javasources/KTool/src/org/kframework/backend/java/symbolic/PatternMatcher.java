@@ -16,11 +16,7 @@ import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.TermEquality;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Profiler;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
-import org.strategoxt.stratego_sglr.sorts_1_0;
-
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;

@@ -23,7 +23,7 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
+import org.kframework.main.Tool;
 
 
 /**
@@ -243,7 +243,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 continue;
             }
 
-            if (K.tool() != K.Tool.KOMPILE) {
+            if (Tool.instance() != Tool.KOMPILE) {
                 /*
                  * YilongL: had to disable checkUnsat in kompilation because the
                  * KILtoZ3 transformer often crash the Java backend; besides,

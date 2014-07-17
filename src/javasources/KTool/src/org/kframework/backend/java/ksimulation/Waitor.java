@@ -7,18 +7,24 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
-import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
+import org.kframework.utils.inject.First;
+import org.kframework.utils.inject.Second;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 public class Waitor extends Thread{
 
-    private JavaSymbolicKRun impl;
-    private JavaSymbolicKRun spec;
+    private final JavaSymbolicKRun impl;
+    private final JavaSymbolicKRun spec;
+    private final Provider<org.kframework.kil.Term> implTerm;
+    private final Provider<org.kframework.kil.Term> specTerm;
     private Looper child;
     private Adjuster decider;
     static boolean result = false;
@@ -52,23 +58,34 @@ public class Waitor extends Thread{
         }
     }
 
-    public Waitor(Context implRules,Context specRules,org.kframework.kil.Term implTerm,org.kframework.kil.Term specTerm) throws KRunExecutionException{
+    @Inject
+    Waitor(
+            @First JavaSymbolicKRun impl,
+            @Second JavaSymbolicKRun spec,
+            @First Provider<org.kframework.kil.Term> implTerm,
+            @Second Provider<org.kframework.kil.Term> specTerm) throws KRunExecutionException{
 
-        this.impl = new JavaSymbolicKRun(implRules);
-        this.spec = new JavaSymbolicKRun(specRules);
+        this.impl = impl;
+        this.spec = spec;
+        this.implTerm = implTerm;
+        this.specTerm = specTerm;
+    }
+
+    public void init() {
+
         this.impl.initialSimulationRewriter();
         this.spec.initialSimulationRewriter();
-        decider = new Adjuster(impl,spec);
+        decider = new Adjuster(impl,this.spec);
         ConstrainedTerm [] pair = new ConstrainedTerm[2];
 
 
-        Term term = Term.of(implTerm, impl.getDefinition());
+        Term term = Term.of(implTerm.get(), impl.getDefinition());
         GlobalContext globalContext = new GlobalContext(impl.getDefinition(), new PortableFileSystem());
         TermContext termContext0 = TermContext.of(globalContext);
         ConstrainedTerm implConstraint = new ConstrainedTerm(term, termContext0);
         pair[0] = implConstraint;
 
-        term = Term.of(specTerm, spec.getDefinition());
+        term = Term.of(specTerm.get(), this.spec.getDefinition());
         TermContext termContext1 = TermContext.of(globalContext);
         ConstrainedTerm specConstraint = new ConstrainedTerm(term, termContext1);
         pair[1] = specConstraint;
@@ -78,7 +95,7 @@ public class Waitor extends Thread{
         ArrayList<ConstrainedTerm []> pairs = new ArrayList<ConstrainedTerm []>();
         pairs.add(pair);
 
-        child = new Looper(impl,spec,pairs,memo,decider,this);
+        child = new Looper(impl,this.spec,pairs,memo,decider,this);
     }
 
     public void run(){

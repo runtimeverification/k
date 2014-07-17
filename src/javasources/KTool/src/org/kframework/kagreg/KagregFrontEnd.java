@@ -14,29 +14,71 @@ import org.kframework.kil.ConfigurationNotUnique;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.loader.Context;
+import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.Tool;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
-import org.kframework.utils.Error;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.First;
+import org.kframework.utils.inject.Second;
+import org.kframework.utils.inject.CommonModule;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Module;
 
 /*
  * @author StefanC
  *
  * Front-end for the equivalance checker.
  */
-public class KagregFrontEnd {
+public class KagregFrontEnd extends FrontEnd {
 
-    public static void kagreg(String[] args) {
+    private final String firstDefinitionFileName, secondDefinitionFileName;
+    private final GlobalOptions globalOptions;
+    private final DefinitionLoader loader;
+    private final KExceptionManager kem;
+
+    @Inject
+    KagregFrontEnd(KExceptionManager kem,
+            @First String firstDefinitionFileName,
+            @Second String secondDefinitionFileName,
+            GlobalOptions globalOptions,
+            DefinitionLoader loader) {
+        super(kem, globalOptions, "Usage: kagreg <file1.k> <file2.k>", "");
+        this.firstDefinitionFileName = firstDefinitionFileName;
+        this.secondDefinitionFileName = secondDefinitionFileName;
+        this.globalOptions = globalOptions;
+        this.loader = loader;
+        this.kem = kem;
+    }
+
+    public static Module[] getModules(final String[] args) {
         if (args.length != 2) {
-            Error.report("There must be exactly two K definitions as arguments to kagreg.");
+            printBootError("There must be exactly two K definitions as arguments to kagreg.");
+            return null;
         }
-        String firstDefinitionFileName = args[0];
-        String secondDefinitionFileName = args[1];
+
+        final GlobalOptions globalOptions = new GlobalOptions();
+        globalOptions.verbose = true;
+
+        return new Module[] { new CommonModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(String.class).annotatedWith(First.class).toInstance(args[0]);
+                bind(String.class).annotatedWith(Second.class).toInstance(args[1]);
+                bind(GlobalOptions.class).toInstance(globalOptions);
+            }
+        }};
+    }
+
+    @Override
+    public boolean run() {
 
         File firstDefinitionFile = new File(firstDefinitionFileName);
         File secondDefinitionFile = new File(secondDefinitionFileName);
@@ -46,7 +88,7 @@ public class KagregFrontEnd {
             firstDefinitionFile = new File(firstDefinitionFileName + ".k");
             if (!firstDefinitionFile.exists()) {
                 String msg = "File: " + errorFile.getName() + "(.k) not found.";
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
+                kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
             }
         }
         if (!secondDefinitionFile.exists()) {
@@ -54,13 +96,9 @@ public class KagregFrontEnd {
             secondDefinitionFile = new File(secondDefinitionFileName + ".k");
             if (!secondDefinitionFile.exists()) {
                 String msg = "File: " + errorFile.getName() + "(.k) not found.";
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
+                kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
             }
         }
-
-        GlobalOptions globalOptions = new GlobalOptions();
-        globalOptions.verbose = true;
-        globalOptions.initialize();
 
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
@@ -70,10 +108,11 @@ public class KagregFrontEnd {
         String firstLang = FileUtil.getMainModule(firstDefinitionFile.getName());
         String secondLang = FileUtil.getMainModule(secondDefinitionFile.getName());
 
-        Context context1 = new Context(globalOptions);
+        Context context1 = new Context();
+        context1.globalOptions = globalOptions;
         context1.dotk = new File(firstDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context1.dotk.mkdirs();
-        Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true,
+        Definition firstDef = loader.loadDefinition(firstDefinitionFile, firstLang, true,
                 context1);
         firstDef = (Definition) new AddKCell(context1).visitNode(firstDef);
         firstDef = (Definition) new RenameCellsTransformer(new AppendRenameStrategy("1"), context1).visitNode(firstDef);
@@ -88,11 +127,12 @@ public class KagregFrontEnd {
 //        GlobalSettings.NOSMT = true;
 
         KParser.reset();
-        Context context2 = new Context(globalOptions);
+        Context context2 = new Context();
+        context2.globalOptions = globalOptions;
         assert context2 != null;
         context2.dotk = new File(secondDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context2.dotk.mkdirs();
-        Definition secondDef = DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true,
+        Definition secondDef = loader.loadDefinition(secondDefinitionFile, secondLang, true,
                 context2);
         secondDef = (Definition) new AddKCell(context2).visitNode(secondDef);
         secondDef = (Definition) new RenameCellsTransformer(new AppendRenameStrategy("2"), context2).visitNode(secondDef);
@@ -106,10 +146,10 @@ public class KagregFrontEnd {
             firstConf = firstDef.getSingletonConfiguration();
         } catch (ConfigurationNotUnique e) {
             System.err.println("Expecting a unique configuration in the first definition; found several.");
-            return;
+            return false;
         } catch (ConfigurationNotFound e) {
             System.err.println("The first definition must have a configuration; found none.");
-            return;
+            return false;
         }
 
         Configuration secondConf = null;
@@ -117,10 +157,10 @@ public class KagregFrontEnd {
             secondConf = secondDef.getSingletonConfiguration();
         } catch (ConfigurationNotUnique e) {
             System.err.println("Expecting a unique configuration in the second definition; found several.");
-            return;
+            return false;
         } catch (ConfigurationNotFound e) {
             System.err.println("The second definition must have a configuration; found none.");
-            return;
+            return false;
         }
 
         Indenter indenter = new Indenter();
@@ -205,7 +245,13 @@ public class KagregFrontEnd {
         try (Writer writer = new BufferedWriter(new FileWriter("result.k"))) {
             writer.write(indenter.toString());
         } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("Could not write to result.k", e);
+            kem.registerCriticalError("Could not write to result.k", e);
         }
+        return true;
+    }
+
+    @Override
+    public Tool tool() {
+        return Tool.OTHER;
     }
 }

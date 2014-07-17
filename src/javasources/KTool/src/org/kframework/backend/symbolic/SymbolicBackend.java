@@ -3,6 +3,7 @@ package org.kframework.backend.symbolic;
 
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
+import org.kframework.backend.FirstStep;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.unparser.UnparserFilter;
@@ -22,10 +23,11 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.main.FirstStep;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
+
+import com.google.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +43,8 @@ public class SymbolicBackend extends BasicBackend implements Backend {
     public static String SYMBOLIC = "symbolic-kompile";
     public static String NOTSYMBOLIC = "not-symbolic-kompile";
 
-    public SymbolicBackend(Stopwatch sw, Context context) {
+    @Inject
+    SymbolicBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 

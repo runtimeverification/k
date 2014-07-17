@@ -23,14 +23,13 @@ import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.krun.api.*;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
-import org.kframework.utils.BinaryLoader;
-
-import java.io.File;
 import java.util.*;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
 import org.kframework.utils.general.IndexingStatistics;
+
+import com.google.inject.Inject;
 
 /**
  *
@@ -45,14 +44,10 @@ public class JavaSymbolicKRun implements KRun {
     //Liyi Li: add a build-in SymbolicRewriter to fix the simulation rules
     private SymbolicRewriter simulationRewriter;
 
-    public JavaSymbolicKRun(Context context) {
-        /* context is unused for directory paths; the actual context is de-serialized */
-        /* load the definition from a binary file */
-        definition = BinaryLoader.loadOrDie(Definition.class,
-            new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString());
-
+    @Inject
+    JavaSymbolicKRun(Context context, Definition definition) {
+        this.definition = definition;
         this.context = context;
-        definition.setContext(context);
         transformer = new KILtoBackendJavaKILTransformer(this.context);
     }
 

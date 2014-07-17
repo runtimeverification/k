@@ -9,12 +9,15 @@ import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 
+import com.google.inject.Inject;
+
 import java.io.File;
 
 public class UnparserBackend extends BasicBackend {
     private boolean unflattenFirst; // unflatten syntax before unparsing
 
-    public UnparserBackend(Stopwatch sw, Context context) {
+    @Inject
+    UnparserBackend(Stopwatch sw, Context context) {
         super(sw, context);
         this.unflattenFirst = false;
     }

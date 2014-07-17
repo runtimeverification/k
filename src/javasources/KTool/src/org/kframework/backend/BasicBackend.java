@@ -15,8 +15,6 @@ import org.kframework.compile.utils.*;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.main.FirstStep;
-import org.kframework.main.LastStep;
 import org.kframework.utils.Stopwatch;
 
 /**
@@ -48,6 +46,11 @@ public abstract class BasicBackend implements Backend {
     @Override
     public boolean autoinclude() {
         return !options.experimental.noPrelude;
+    }
+
+    @Override
+    public org.kframework.kompile.KompileOptions.Backend getEnum() {
+        return options.backend;
     }
 
     public CompilerSteps<Definition> getCompilationSteps() {

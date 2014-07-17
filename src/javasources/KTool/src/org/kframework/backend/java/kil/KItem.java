@@ -21,7 +21,7 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
-import org.kframework.krun.K;
+import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -95,7 +95,7 @@ public final class KItem extends Term {
             /* at runtime, checks if the result has been cached */
             CacheTableColKey cacheTabColKey = null;
             CacheTableValue cacheTabVal = null;
-            boolean enableCache = (K.tool() != K.Tool.KOMPILE)
+            boolean enableCache = (Tool.instance() != Tool.KOMPILE)
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
@@ -134,7 +134,7 @@ public final class KItem extends Term {
         Set<Sort> sorts = Sets.newHashSet();
         Set<Sort> possibleSorts = Sets.newHashSet();
 
-        if (K.tool() != K.Tool.KOMPILE) {
+        if (Tool.instance() != Tool.KOMPILE) {
             /**
              * Sort checks in the Java engine are not implemented as
              * rewrite rules, so we need to precompute the sort of
@@ -328,7 +328,7 @@ public final class KItem extends Term {
                 }
 
                 Map<Variable, Term> solution = solutions.iterator().next();
-                if (K.tool() == K.Tool.KOMPILE || definition.context().javaExecutionOptions.concreteExecution()) {
+                if (Tool.instance() == Tool.KOMPILE || definition.context().javaExecutionOptions.concreteExecution()) {
                     assert solutions.size() <= 1 :
                          "[non-deterministic function definition]: more than one way to apply the rule\n"
                             + rule + "\nagainst the function\n" + this;

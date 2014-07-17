@@ -2,6 +2,8 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.BasicBackend;
+import org.kframework.backend.FirstStep;
+import org.kframework.backend.LastStep;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.pathIndex.PathIndex;
@@ -16,18 +18,16 @@ import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.*;
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectBracketsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.main.FirstStep;
-import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+
+import com.google.inject.Inject;
 
 import java.io.File;
 
@@ -41,8 +41,12 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
 
-    public JavaSymbolicBackend(Stopwatch sw, Context context) {
+    private final BinaryLoader loader;
+
+    @Inject
+    JavaSymbolicBackend(Stopwatch sw, Context context, BinaryLoader loader) {
         super(sw, context);
+        this.loader = loader;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         assert definition.getIndex() != null;
 
-        BinaryLoader.saveOrDie(new File(context.kompiled,
+        loader.saveOrDie(new File(context.kompiled,
                 JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
                 definition);
 

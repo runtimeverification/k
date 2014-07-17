@@ -12,12 +12,16 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.inject.Inject;
+
 import java.io.*;
 
 import static org.apache.commons.io.FileUtils.copyFile;
 
 public class PdfBackend extends BasicBackend {
-    public PdfBackend(Stopwatch sw, Context context) {
+
+    @Inject
+    PdfBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 

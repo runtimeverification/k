@@ -7,8 +7,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.krun.K;
-import org.kframework.krun.K.Tool;
+import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -79,7 +78,7 @@ public class BuiltinFunction {
                      * exclude hook from evaluation during compilation if the hook is dynamic
                      * in nature (is related to I/O or to meta properties).
                      * */
-                    if (K.tool() == Tool.KOMPILE && hookMetaModules.contains(hookPrefix)) {
+                    if (Tool.instance() == Tool.KOMPILE && hookMetaModules.contains(hookPrefix)) {
                         continue;
                     }
 
