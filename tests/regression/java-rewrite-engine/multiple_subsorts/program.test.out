@@ -1,1 +1,1 @@
-isKResult\((.*):Sort\) ~\> (.*):KResult ==K \1
+isKResult\((.*):Sort\) ~\> (?!(\1)).*:KResult ==K \1
