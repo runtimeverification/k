@@ -5,7 +5,9 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
     
@@ -29,7 +31,10 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Sentence node, Void _)  {
         boolean change = false;
-        Set<Variable> vars = node.getBody().variables();
+        List<Variable> vars = new ArrayList<>(node.getBody().variables());
+        // if we kept it as a set then the order of side conditions in maude would be dependent on 
+        // the iteration order of a set, which is JVM dependent. So we sort the list first.
+        Collections.sort(vars);
         KList ands = new KList();
         Term condition = node.getRequires();
         if (null != condition) {

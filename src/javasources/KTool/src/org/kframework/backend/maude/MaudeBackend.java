@@ -4,6 +4,7 @@ package org.kframework.backend.maude;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.compile.sharing.FreshVariableNormalizer;
+import org.kframework.compile.sharing.SortRulesNormalizer;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.UserList;
@@ -24,6 +25,7 @@ public class MaudeBackend extends BasicBackend {
     @Override
     public void run(Definition definition) throws IOException {
         definition = (Definition) new FreshVariableNormalizer(context).visitNode(definition);
+        definition = (Definition) new SortRulesNormalizer(context).visitNode(definition);
         MaudeFilter maudeFilter = new MaudeFilter(context);
         maudeFilter.visitNode(definition);
 
