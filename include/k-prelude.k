@@ -28,7 +28,7 @@ module K-RESULT
 	imports K-TECHNIQUE
 	imports BOOL-HOOKS
 
-	syntax K ::= KResult
+	syntax KItem ::= KResult
 	syntax KLabel ::= "isKResult"
 
 	//op .KList : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .

@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import java.util.HashMap;
 import java.util.List;
 
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
@@ -87,7 +88,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                         String msg = "Undefined sort " + s.getName();
                         GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                     }
-                if (s.getName().equals("KResult") && !(node.isSubsort() && node.getSort().equals("K"))) {
+                if (s.getName().equals(KSorts.KRESULT) && !(node.isSubsort() && node.getSort().equals(KSorts.KITEM))) {
                     String msg = "KResult is only allowed in the left hand side of syntax.";
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }
