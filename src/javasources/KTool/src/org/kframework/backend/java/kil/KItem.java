@@ -108,7 +108,7 @@ public final class KItem extends Term {
             }
             
             /* cache miss, compute sort information and cache it */
-            cacheTabVal = computeSort(kLabelConstant, termContext);
+            cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext);
             if (enableCache) {
                 SORT_CACHE_TABLE.put(definition, cacheTabColKey, cacheTabVal);
             }
@@ -126,8 +126,8 @@ public final class KItem extends Term {
         }
     }
     
-    private CacheTableValue computeSort(
-            KLabelConstant kLabelConstant, TermContext termContext) {
+    private CacheTableValue computeSort(KLabelConstant kLabelConstant,
+            KList kList, TermContext termContext) {
         Definition definition = termContext.definition();
         Subsorts subsorts = definition.subsorts();
 
@@ -160,10 +160,10 @@ public final class KItem extends Term {
             boolean mustMatch = true;
             boolean mayMatch = true;
             
-            if (((KList) kList).size() == production.getArity()) {
+            if (kList.size() == production.getArity()) {
                 /* check if the production can match this KItem */
                 int idx = 0;
-                for (Term term : (KList) kList) {
+                for (Term term : kList) {
                     if (!mayMatch) {
                         break;
                     }
