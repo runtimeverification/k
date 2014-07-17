@@ -274,7 +274,7 @@ public class UnparserFilter extends NonCachingVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(declaredColor, color, terminalColor);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color, terminalColor);
                 indenter.write(colorCode);
             }
         }

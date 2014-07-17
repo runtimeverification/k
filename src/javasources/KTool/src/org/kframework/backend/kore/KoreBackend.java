@@ -288,7 +288,7 @@ class KoreFilter extends BasicVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(declaredColor, color, Color.black);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color, Color.black);
                 indenter.write(colorCode);
             }
         }

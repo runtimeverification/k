@@ -118,7 +118,7 @@ public class TestSuite {
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
 
         //TODO(dwightguth): inject the terminal color
-        String colorCode = ColorUtil.RgbToAnsi(ret ? "green" : "red", colorSetting, Color.BLACK);
+        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.GREEN : Color.RED, colorSetting, Color.BLACK);
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
@@ -463,7 +463,7 @@ public class TestSuite {
             System.out.println("SUCCESS");
         else {
             //TODO(dwightguth): inject the terminal color
-            System.out.println(ColorUtil.RgbToAnsi("red", colorSetting, Color.BLACK) + "FAIL" + ColorUtil
+            System.out.println(ColorUtil.RgbToAnsi(Color.RED, colorSetting, Color.BLACK) + "FAIL" + ColorUtil
                     .ANSI_NORMAL);
         }
     }
