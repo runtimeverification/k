@@ -67,7 +67,7 @@ module LAMBDA
   rule <k> mu X . E => ?T:Type ...</k>  <tenv> TEnv </tenv>
        (. => <task> <k> E = ?T </k> <tenv> TEnv[X <- ?T] </tenv> </task>)
 
-  syntax K ::= Exp "=" Exp  [strict]
+  syntax KItem ::= Exp "=" Exp  [strict]
   rule <k> T:Type = T':Type => . ...</k>
        <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
   rule <tasks> <task> <k> T:Type => applyMgu(Theta,T) </k> ...</task> </tasks>
