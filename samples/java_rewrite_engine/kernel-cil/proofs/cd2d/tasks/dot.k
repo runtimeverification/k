@@ -17,7 +17,7 @@ module DOT-RULE
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>
-    requires DISTANCE(Ux) andBool DISTANCE(Uy) 
+    requires DISTANCE(Ux) andBool DISTANCE(Uy)
      andBool VELOCITY(Vx) andBool VELOCITY(Vy)
      ensures absFloat(V -Float dotR(Ux, Uy, Vx, Vy)) <=Float E_dot
 endmodule

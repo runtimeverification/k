@@ -10,14 +10,14 @@ module ISSUE
                 <mgu> updateMgu(.Mgu, x, "success") </mgu>
                 <out stream="stdout"> .List </out>
 
-  rule <k> a => . ...</k> 
+  rule <k> a => . ...</k>
        <list> L:List => applyMgu(Theta:K, L) </list>
        <set> S:Set => applyMgu(Theta:K, S) </set>
        <mgu> Theta:K </mgu>
 
-  rule <k> b => . ...</k> 
-       <list> ListItem("success") </list> 
-       <set> SetItem("success") </set> 
+  rule <k> b => . ...</k>
+       <list> ListItem("success") </list>
+       <set> SetItem("success") </set>
        <out>... .List => ListItem("success") </out>
 endmodule
 

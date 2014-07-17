@@ -11,5 +11,5 @@ module ISSUE
   rule <k> test1 => . ...</k>
        <out>... .List => ListItem(1) </out>
 
-  rule test2 => . 
+  rule test2 => .
 endmodule

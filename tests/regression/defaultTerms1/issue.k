@@ -6,11 +6,11 @@ module ISSUE
                         <holds> .Map </holds>
                   </thread>
 		</T>
-				
+
   syntax K ::= "spawn"
 
   rule <k> spawn => . ...</k>
-	   (. => 
+	   (. =>
             <thread>
               ...
               <k> .K </k>
@@ -18,7 +18,7 @@ module ISSUE
            )
 
   rule <k> spawn => . ...</k>
-	   (. => 
+	   (. =>
             <thread>
               <k> .K </k>
               ...
@@ -26,7 +26,7 @@ module ISSUE
            )
 
   rule <k> spawn => . ...</k>
-	   (. => 
+	   (. =>
             <thread>
               ...
               <k> .K </k>

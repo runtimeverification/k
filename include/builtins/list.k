@@ -11,7 +11,7 @@ module LIST
    duplicate elements. These behave more like lists in functional programming
    languages than arrays in imperative programming languages; there's no
    numerical indexing, but instead specific elements are refered to using the
-   Mylist,Mylist construct in combination with the MyListItem construct. It's 
+   Mylist,Mylist construct in combination with the MyListItem construct. It's
    worth noting that \K lists aren't exactly like lists in functional languages;
    they're associative, which means that it's easy to access elements at both
    ends of the lists and concatenate them. For example, L:Mylist,E accesses
@@ -22,7 +22,7 @@ module LIST
    List\{K,"Separator"\}, where "Separator" is any valid character or sequence of
    characters used to separate distinct elements.
    For example, after defining \\
-   syntax K ::= Elt\\ 
+   syntax K ::= Elt\\
    a user could then define
    syntax Elts ::= List\{Elt,","\} \\
    which would be a comma-separated list whose elements are all of sort Elt. A

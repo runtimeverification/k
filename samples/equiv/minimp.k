@@ -14,7 +14,7 @@ syntax Stmt ::= Id ":=" Exp [strict(2)]
               | "skip"
 	      | Stmt ";" Stmt [left]
 	      | "if" Exp "then" Stmt "else" Stmt [strict(1)]
-	      | "while" Exp "do" Stmt	    
+	      | "while" Exp "do" Stmt
 	      | "{" Stmt "}" [bracket]
 
 syntax Code ::= Exp | Stmt

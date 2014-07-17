@@ -10,7 +10,7 @@ module FOL
                > left:
 	         Fol "andFol" Fol [left, function]
 	       | Fol "orFol"  Fol [left, function]
-	       > left: 
+	       > left:
 	         "forall"  Set "." Fol [binder, function]
 	       | "exists"  Set "." Fol [binder, function]
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 /*@
 This is the symbolic semantics of IMP. It contains the normal semantics if IMP
-and the rules for symbolic execution, as described in the technical report 
+and the rules for symbolic execution, as described in the technical report
 available here: https://fmse.info.uaic.ro/publications/156/ .
 */
 module IMP-SYNTAX
@@ -27,7 +27,7 @@ module IMP-SYNTAX
   syntax Ids   ::= List{Id,","}
 
   //@ Programs are \K configurations.
-  syntax Stmt  ::= "#ps" "(" TCellFragment ")" 
+  syntax Stmt  ::= "#ps" "(" TCellFragment ")"
 
   //@ Assertions syntax
   syntax Stmt  ::= "assert" "(" BExp ")" ";"  [strict]
@@ -78,19 +78,19 @@ module IMP
 
 //@ IMP symbolic semantics
   rule <k> I1:Int / I2:Int => I1 divInt I2 ...</k>
-       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition> 
+       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition>
        when checkSat(Phi andBool (I2 =/=Int 0)) =/=K "unsat" [transition]
 
   rule <k> B1:Bool && B2:BExp => B2 ...</k>
-       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition> 
+       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition>
        when checkSat(Phi andBool B1) =/=K "unsat" [transition]
-  
+
   rule <k> B1:Bool && B2:BExp => false ...</k>
-       <condition> Phi:Bool => Phi andBool notBool B1 </condition> 
+       <condition> Phi:Bool => Phi andBool notBool B1 </condition>
        when checkSat(Phi andBool notBool B1) =/=K "unsat" [transition]
 
   rule <k> if (B:Bool) S else _ => S ...</k>
-       <condition> Phi:Bool => Phi andBool B </condition> 
+       <condition> Phi:Bool => Phi andBool B </condition>
        when checkSat(Phi andBool B) =/=K "unsat" [transition]
 
   rule <k> if (B:Bool) _ else S => S ...</k>
@@ -99,13 +99,13 @@ module IMP
 
 /*@ Assert semantics: remain stuck when the assertion doesn' hold. */
   rule <k> assert(B:Bool); => . ...</k>
-       <condition> Phi:Bool </condition> 
-       when checkSat(Phi andBool B) ==K "sat" 
+       <condition> Phi:Bool </condition>
+       when checkSat(Phi andBool B) ==K "sat"
 
 //@ Load PGM.
    rule (<k> #ps(B:Bag) </k>
         <state> _ </state>
-        <condition> _ </condition>) 
+        <condition> _ </condition>)
 	=> B [structural]
 
 endmodule

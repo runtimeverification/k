@@ -77,7 +77,7 @@ module K-IO
        (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
 
   rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List)
-       ListItem(#buffer(_)) 
+       ListItem(#buffer(_))
        _:List [stdout, stderr]
 
   rule #stdin => 0

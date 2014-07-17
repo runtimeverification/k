@@ -42,7 +42,7 @@ syntax ASTNode ::=
   String[sort, hidden] String[ownerModuleName, hidden] [Production]
 | "ProductionItem" [ProductionItem, abstract]
 
-enum ListType ::= "*"[List] | "+"[NeList]   
+enum ListType ::= "*"[List] | "+"[NeList]
 
 ----------
 

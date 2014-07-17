@@ -123,7 +123,7 @@ syn Term ::=
   // ListUpdate.java:public class ListUpdate extends Term {
   // MapUpdate.java:public class MapUpdate extends Term {
   // SetUpdate.java:public class SetUpdate extends Term {
-    
+
 /*******************************
 **** EXTRA CODE FOR CLASSES ****
 *******************************/

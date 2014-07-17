@@ -2,15 +2,15 @@
 require "builtins/set.k"
 module TEST
   imports SET
-  syntax Exp ::= Int | "spawn" 
-  syntax Stmt ::=  Exp ";" [strict] | Stmt Stmt 
+  syntax Exp ::= Int | "spawn"
+  syntax Stmt ::=  Exp ";" [strict] | Stmt Stmt
 
   syntax KResult ::= Int
-  
-  configuration <T> 
+
+  configuration <T>
 			<threads>
-				<thread multiplicity="*"> 
-					<k> $PGM:Stmt </k> 
+				<thread multiplicity="*">
+					<k> $PGM:Stmt </k>
 					<id> 0 </id>
 				</thread>
 			</threads>

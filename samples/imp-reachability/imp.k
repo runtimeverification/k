@@ -4,7 +4,7 @@
 This is the symbolic semantics of IMP enriched with reachability logic.
 
 This semantics receives as input programs generated from reachability formulas.
-Additionally, the semantics contains the circularities also generated from 
+Additionally, the semantics contains the circularities also generated from
 reachability formulas.
 */
 
@@ -43,7 +43,7 @@ module IMP-SYNTAX
 //  syntax Y ::= "symFreezeLabel"
   syntax priorities builtinWrapper > dummySymInt
 
-  
+
 endmodule
 
 module IMP
@@ -54,9 +54,9 @@ module IMP
 The configuration of IMP is enriched with cells <frozen> and <goal>.
 Cell <ruleConstraints> will store some labels which are meant to block
 the first application of the circularity rule.
-The cell <goal> contains the current goal. Whenever multiple rules can be 
+The cell <goal> contains the current goal. Whenever multiple rules can be
 applied to the same configuration, the current goal will be splitted into
-multiple goals. 
+multiple goals.
 */
   configuration <T color="yellow" multiplicity="?">
 //		 <goal multiplicity="*">
@@ -98,19 +98,19 @@ The initial semantics of IMP.
 
 //@ Symbolic semantics - the transformed rules
   rule <k> I1:Int / I2:Int => I1 /Int I2 ...</k>
-       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition> 
+       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition>
        when checkSat(Phi andBool (I2 =/=Int 0)) =/=K "unsat" [transition]
 
   rule <k> B1:Bool && B2:BExp => B2 ...</k>
-       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition> 
+       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition>
        when checkSat(Phi andBool B1) =/=K "unsat" [transition]
-  
+
   rule <k> B1:Bool && B2:Bool => false ...</k>
-       <condition> Phi:Bool => Phi andBool notBool B1 </condition> 
+       <condition> Phi:Bool => Phi andBool notBool B1 </condition>
        when checkSat(Phi andBool notBool B1) =/=K "unsat" [transition]
 
   rule <k> if (B:Bool) S else _ => S ...</k>
-       <condition> Phi:Bool => Phi andBool B </condition> 
+       <condition> Phi:Bool => Phi andBool B </condition>
        when checkSat(Phi andBool B) =/=K "unsat" [transition, computational]
 
   rule <k> if (B:Bool) _ else S => S ...</k>
@@ -150,10 +150,10 @@ For each reachability formula given as input we have two corresponding generated
          <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
          <condition> Psi:Bool </condition>
        </T>
-       => 
+       =>
        .)
        <success> _ => true </success>
-       when checkSat(Psi andBool 
+       when checkSat(Psi andBool
                      notBool ((X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y)))
             ==K "unsat"
        [transition]
@@ -178,7 +178,7 @@ For each reachability formula given as input we have two corresponding generated
          <condition> Psi:Bool </condition>
        </T>
        =>
-	.) 
+	.)
        <success> _ => true </success>
        when checkSat(Psi andBool
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y))
@@ -192,10 +192,10 @@ For each reachability formula given as input we have two corresponding generated
        <k> K </k>
        <state> a |-> !A':Int b |-> !B':Int x |-> X:Int y |-> Y:Int </state>
        <condition>
-         Psi andBool 
+         Psi andBool
          (X ==Int !A' *Int Y +Int !B' andBool !B' >=Int 0)
        </condition>)
-       when checkSat(Psi andBool 
+       when checkSat(Psi andBool
                              notBool (X ==Int A *Int Y +Int B andBool B >=Int 0 andBool Y <=Int B))
                     ==K "unsat"
        [transition]
@@ -206,9 +206,9 @@ For each reachability formula given as input we have two corresponding generated
          <condition> Psi:Bool </condition>
        </T>
        =>
-	.) 
+	.)
        <success> _ => true </success>
-       when checkSat(Psi andBool 
+       when checkSat(Psi andBool
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0))
             ==K "unsat"
        [transition]

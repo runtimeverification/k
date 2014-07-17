@@ -7,14 +7,14 @@ module MAP
 
   /*@\section{Description} The Map represents a generalized associative array;
    arbitrary keys can be paired with arbitrary values; the values can later
-   be referenced using the key. 
+   be referenced using the key.
   */
 
   /*@ Construct a new Map consisting of key-value pairs of multiple Maps (deep copy) (TODO: double-check this):*/
   syntax Map ::= Map Map        [left,function, hook(Map:__), klabel('_Map_)]
   /*@  Construct an empty Map: */
   syntax Map ::= ".Map"         [function, hook(Map:.Map)]
-  /*@ This construct is used to refer to key-value pairs within a map, with the 
+  /*@ This construct is used to refer to key-value pairs within a map, with the
    key on the left and the value on the right: */
   syntax Map ::= K "|->" K      [function, hook(Map:_|->_), latex({#1}\mapsto{#2})]
                // breaks klabel uniqueness
@@ -50,7 +50,7 @@ module MAP
   //rule M:Map[K1:K <- K2:K] => K1 |-> K2 M
   //when notBool(K1 in keys(M))
 
-  /*@ Update the first map by adding all key-value pairs in the second map. 
+  /*@ Update the first map by adding all key-value pairs in the second map.
    If a key in the first map exists also in the second map, its associated value
    will be overwritten by the value from the second map.*/
   // TODO: rename operator

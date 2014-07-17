@@ -24,7 +24,7 @@ expressions have side effects, and thus makes the evaluation strategies
 of the various language constructs have an influence on the set
 of possible program behaviors.
 \item [Input and output.]  IMP++ adds a \texttt{read()} expression
-construct which reads an integer number and evaluates to it, and 
+construct which reads an integer number and evaluates to it, and
 a variadic (i.e., it has an arbitrary number of arguments) statement
 construct \texttt{print(e1,e2,...,en)} which evaluates its arguments
 and then outputs their values.  Note that the \K tool allows to
@@ -57,7 +57,7 @@ generalized to be used anywhere as a statement, not only at the
 beginning of the program.  As expected, the scope of the declared
 variables is from their declaration point till the end of the most
 nested enclosing block.
-\end{description} 
+\end{description}
 
 \section{What You Will Learn Here}
 
@@ -229,7 +229,7 @@ Sum = 55
 Add numbers up to (<= 0 to quit)? 1000
 Sum = 500500
 Add numbers up to (<= 0 to quit)? 0
-bash$ 
+bash$
 \end{verbatim}
 The option \texttt{-\,\!-no-config} instructs \texttt{krun} to not
 display the resulting configuration after the program executes.  The
@@ -412,7 +412,7 @@ terminates the entire program, no matter how many concurrent threads it has,
 because there is nothing else to rewrite.  */
 
   rule <k> halt; ~> _ => . </k>
-  
+
 /*@ \subsubsection{Spawn thread}
 A spawned thread is passed its parent's environment at creation time.
 The \texttt{spawn} expression in the parent thread is immediately

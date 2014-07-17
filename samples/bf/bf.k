@@ -5,15 +5,15 @@ The brainfuck language uses a simple machine model consisting of the program and
 */
 
 module BF-SYNTAX
-  /*@ 
+  /*@
       The syntax of the language consists in eight commands: > < + - . , [ ]
-  */ 
+  */
   syntax Ignore ::= Token{~[\>\<\+\-\.\,\[\]\ \n\r\t]+}
                    [regex("[^\\>\\<\\+\\-\\.\\,\\[\\]\\ \n\r\t]+"), onlyLabel]
-  syntax Instruction  ::= ">" 
-  	 	      	| "<" 
-			| "+" 
-			| "-" 
+  syntax Instruction  ::= ">"
+  	 	      	| "<"
+			| "+"
+			| "-"
 			| "."
 			| "," [onlyLabel]
 			| "[" Instructions "]"
@@ -29,9 +29,9 @@ module BF
   imports BF-SYNTAX
 
   /*@
-     The configuration of the language contains the K cell for Brainfuck programs, an array cell containing the byte array, a cell ptr for the instruction pointer and I/O streams. 
+     The configuration of the language contains the K cell for Brainfuck programs, an array cell containing the byte array, a cell ptr for the instruction pointer and I/O streams.
   */
-  configuration <T> 
+  configuration <T>
   		    <k> $PGM:Instructions </k>
 		    <array> .Map </array>
 		    <ptr> 0 </ptr>
@@ -97,10 +97,10 @@ Brainfuck jumps ('[' and ']') are considered to be loops. Whenever the byte at t
   rule <k> [ Is:Instructions ] => .K ...</k>
        <ptr> P:Int </ptr>
        <array>... P |-> 0 ...</array>
-      
+
   rule I:Ignore => .K
 
   rule <ptr> I:Int </ptr>
        <array> M:Map (.Map => I |-> 0) </array> when notBool(I in keys(M)) andBool (I >=Int 0) [structural]
-  
+
 endmodule

@@ -20,7 +20,7 @@
 
   // syntax Pgm ::= "var" Ids ";" Stmt
   // syntax Ids ::= List{Id, ","}
-  // syntax Start ::= Pgm  
+  // syntax Start ::= Pgm
 
 module IMP-FL-SYNTAX
 
@@ -51,9 +51,9 @@ module IMP-FL-SYNTAX
 		  | "seq#ee"
 
 		  | "pgm#ee"
-		  
+
 		  | "emptyIds#"
-		  
+
 		  | "consIds#ee"
 
 	    | "skip#"
@@ -65,7 +65,7 @@ endmodule
 module IMP-FL
   imports IMP-FL-SYNTAX
 
-  configuration <T color="yellow"> 
+  configuration <T color="yellow">
    					<k color="green"> $PGM : K </k>
    					<env color="red"> .Map </env>
 		</T>
@@ -181,7 +181,7 @@ module IMP-FL
 // ACTUAL RULES
 
 //   rule [lookup] :  	<k> X:Id => I:Int ...</k>
-//   					<env>... X |-> I ...</env> 
+//   					<env>... X |-> I ...</env>
 
   rule <T>
           <k> X:Id ~> K:K </k>
@@ -190,7 +190,7 @@ module IMP-FL
        =>
        <T>
           <k> I ~> K </k>
-          <env> EL X |-> I ER </env> 
+          <env> EL X |-> I ER </env>
        </T>
 
 //   rule [assignment]: <k> X:Id := I:Int => . ...</k>
@@ -203,10 +203,10 @@ module IMP-FL
        =>
        <T>
           <k> K </k>
-          <env> EL X |-> I ER </env> 
+          <env> EL X |-> I ER </env>
        </T>
 
-//   rule [addition] : I1:Int + I2:Int => I1 +Int I2 
+//   rule [addition] : I1:Int + I2:Int => I1 +Int I2
 
   rule <k> plus#ee(I1:Int,,I2:Int) ~> K:K </k>
        =>
@@ -284,12 +284,12 @@ module IMP-FL
        =>
        <T>
           <k> Rest ~> K </k>
-          <env> V |-> 0 E </env> 
+          <env> V |-> 0 E </env>
        </T>
      when 'notBool(V in keys(E))
 
 //   rule [program-no-vars]: <k> var .Ids ; S => S ...</k> [structural]
 
   rule <k> emptyIds#(.KList) ~> K:K </k> => <k>  K:K </k>
-  
+
 endmodule

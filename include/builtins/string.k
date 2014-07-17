@@ -126,7 +126,7 @@ module STRING-HOOKS
   syntax KItem ::= "#parseToken" "(" String "," String ")"  [function, klabel(#parseToken), hook(#CONVERSION:string2token)]
   rule #parseToken("Int", S:String) => String2Int(S)
   rule #parseToken("Float", S:String) => String2Float(S)
-  rule #parseToken("String", S:String) => S 
+  rule #parseToken("String", S:String) => S
   rule #parseToken("Char", S:String) => String2Char(S)
 
   syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString), hook(#CONVERSION:token2string)]

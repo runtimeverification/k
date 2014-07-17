@@ -18,7 +18,7 @@ module TAU-RULE
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>
-    requires DISTANCE(Sx) andBool DISTANCE(Sy) 
+    requires DISTANCE(Sx) andBool DISTANCE(Sy)
      andBool VELOCITY(Vx) andBool VELOCITY(Vy)
      ensures absFloat(V -Float tauR(Sx, Sy, Vx, Vy, 0.0, 300.0)) <=Float E_tau
 endmodule

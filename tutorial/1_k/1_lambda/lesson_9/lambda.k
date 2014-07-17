@@ -8,7 +8,7 @@ several lines, are ignored, too.  */
 // generates documentation.
 
 // Use the "!" symbol right after // or /* if you want the comment to be
-// considered a header annotation, that is, one which goes into the header 
+// considered a header annotation, that is, one which goes into the header
 // of the generated Latex documentation, that is, before "\begin{document}"
 // (e.g., when your comment includes macros, or defines a title, etc.)
 
@@ -21,7 +21,7 @@ several lines, are ignored, too.  */
 
 /*@ \section{Abstract}
 This file defines a simple functional language in \K, called LAMBDA,
-using a substitution style.  The explicit objective here is to teach some 
+using a substitution style.  The explicit objective here is to teach some
 \K concepts and how they work in the K tool, and not to teach
 $\lambda$-calculus or to argue for one definitional style against another
 (e.g., some may prefer environment/closure-based definitions of such
@@ -64,7 +64,7 @@ require "modules/substitution.k"
 module LAMBDA
   imports SUBSTITUTION
 
-/*@ \section{Basic Call-by-value $\lambda$-Calculus} 
+/*@ \section{Basic Call-by-value $\lambda$-Calculus}
 
 We first define a conventional call-by-value $\lambda$-calculus, making sure
 that we declare the lambda abstraction construct to be a binder, the

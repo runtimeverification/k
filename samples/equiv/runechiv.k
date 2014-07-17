@@ -66,7 +66,7 @@ module RUNECHIV
 
     rule <k1> if false then _:K else S2:Stmt => S2 ...</k1>
 
-    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else 
+    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else
       skip ...</k1>
 
     syntax FExp ::= Id
@@ -151,16 +151,16 @@ module RUNECHIV
 
 	// rule
         //    <k2>
-	//          L2FExp YL:Id : X:K ~> (#freezer (Y:K f+ HOLE))(.KList) => 
+	//          L2FExp YL:Id : X:K ~> (#freezer (Y:K f+ HOLE))(.KList) =>
 	//          L2FExp YL : (Y f+ X)
         //    </k2>
 
 
 
-      rule 
+      rule
            <k2>
                 L2FExp Label:Id : (((fix F:Id (lambda X:Id . (
-                  lambda Y:Id . (fif (X f== 0) fthen Y felse 
+                  lambda Y:Id . (fif (X f== 0) fthen Y felse
 		   (let NIName:Id = X f- 1 in
 		    (let SEName:Id = Y f+ X in
 		  (L2FExp Label :
@@ -172,7 +172,7 @@ module RUNECHIV
                 L1Stmt Label:Id : skip ~> (while (IName:Id i< NName:Id) do (((SName:Id := (SName i+ IName))
                   ; (IName := (IName i+ 1))) ; (L1Stmt Label : skip))) => .K
            </k1>
-      	   <env1>... 
+      	   <env1>...
       	   	     IName |-> I:Int
 		     NName |-> N:Int
       	             SName |-> S:Int
@@ -188,7 +188,7 @@ module RUNECHIV
 //      	   when //(N1 ==Int N -Int 1) ==Bool true // andBool
       // 	   // SPE = (N + ... + NP - 1)
       // 	   // SPB = (1 + ... + I - 1)
-//                SPE ==Int ((N +Int NP -Int 1) *Int (IP -Int 1)) /Int 2 andBool 
+//                SPE ==Int ((N +Int NP -Int 1) *Int (IP -Int 1)) /Int 2 andBool
 //                (SPB *Int 2 ==Int (IP *Int (IP -Int 1))) [symbolic-kompile]
 
 endmodule
