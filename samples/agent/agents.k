@@ -71,7 +71,7 @@ module AGENTS
        <barrier>true</barrier> <waiting>W (.Set => SetItem(N))</waiting> 
     when notBool(N in W)
   rule [lifting-barrier] : <barrier>true=>false</barrier> <waiting>W</waiting> <world>W</world> 
-    when W =/=Set .Set
+    when W =/=K .Set
     [transition]
   rule [leave-barrier] : <me>N</me> <k>barrier => skip ...</k> <barrier>false</barrier>
        <waiting>... (SetItem(N) => .Set) ...</waiting>

@@ -11,12 +11,21 @@ module IMP-SYNTAX
   imports SYMBOLIC-ARRAY-SYNTAX
 
   syntax AExp  ::= Int | Id
+<<<<<<< HEAD
   	         | AExp "[" AExp "]"          [strict]
                  > left:
 		   AExp "*" AExp              [left, strict]
                  | AExp "/" AExp              [left, strict]
                  > left:
 		   AExp "+" AExp              [left, strict]
+=======
+                 | AExp "[" AExp "]"          [strict]
+                 > left:
+                   AExp "*" AExp              [left, strict]
+                 | AExp "/" AExp              [left, strict]
+                 > left:
+                   AExp "+" AExp              [left, strict]
+>>>>>>> unified-builtins2
                  | AExp "-" AExp              [left, strict]
                  > "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -32,19 +41,32 @@ module IMP-SYNTAX
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
+<<<<<<< HEAD
 		 > Stmt Stmt                  [left]
+=======
+                 > Stmt Stmt                  [left]
+>>>>>>> unified-builtins2
   syntax Pgm   ::= "int" AExps ";" Stmt
   syntax AExps ::= List{AExp,","}
   syntax Ids   ::= List{Id,","}
 
   syntax Stmt ::= "while " "(" BExp ")" "invariant" ":" Assert Block
   syntax Assert ::= BExp
+<<<<<<< HEAD
 		  | "not" Assert		[strict]
   	 	  | Assert "and" Assert		[left, strict]
 		  > Assert "or" Assert		[left, strict]
 		  > Assert "implies" Assert     [left, strict]
 		  | "forall" Ids "(" Assert ")" [strict(2)]
 		  | "exists" Ids "(" Assert ")" [strict(2)]
+=======
+          | "not" Assert                [strict]
+          | Assert "and" Assert         [left, strict]
+          > Assert "or" Assert          [left, strict]
+          > Assert "implies" Assert     [left, strict]
+          | "forall" Ids "(" Assert ")" [strict(2)]
+          | "exists" Ids "(" Assert ")" [strict(2)]
+>>>>>>> unified-builtins2
 
   syntax Pre   ::= "pre"  ":" Assert
   syntax Post  ::= "post" ":" Assert
@@ -52,8 +74,13 @@ module IMP-SYNTAX
 
   // Values   
   syntax Val ::= Int | Bool | Array
+<<<<<<< HEAD
   	       | "array" "(" Int "," Int ")" 
 	       | "loc" "(" AExp ")"
+=======
+           | "array" "(" Int "," Int ")" 
+           | "loc" "(" AExp ")"
+>>>>>>> unified-builtins2
   syntax AExp ::= Val
 
 endmodule
@@ -65,10 +92,17 @@ module IMP
   syntax KResult ::= Val
 
   configuration <T color="yellow">
+<<<<<<< HEAD
 		  <k color="green"> $PGM:Program </k>
 		  <env color="black"> .Map </env>
                   <store color="blue"> .Map </store>
 		  <condition color="red"> true </condition>
+=======
+          <k color="green"> $PGM:Program </k>
+          <env color="black"> .Map </env>
+          <store color="blue"> .Map </store>
+          <condition color="red"> true </condition>
+>>>>>>> unified-builtins2
                 </T>
 
 //@ IMP concrete semantics
@@ -102,7 +136,11 @@ module IMP
     [structural]
 
 // lookup
+<<<<<<< HEAD
   syntax KItem ::= "lookup" "(" Int ")"
+=======
+  syntax K ::= "lookup" "(" Int ")"
+>>>>>>> unified-builtins2
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 // Stmt
@@ -122,13 +160,21 @@ module IMP
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
   rule <k> int (X:Id,Xs:AExps => Xs); _:Pre _:Post _:Stmt </k> 
+<<<<<<< HEAD
        <env> Rho:Map (.Map => X |-> !L) </env>
+=======
+       <env> Rho:Map (.Map => X |-> !L:Int) </env>
+>>>>>>> unified-builtins2
        <store>... .Map => (!L |-> 0) </store>
        when notBool (X in keys(Rho))
 
   // symbolic arrays
   rule <k> int (X:Id [S:#Int] ,Xs:Ids => Xs); _:Pre _:Post St:Stmt </k>
+<<<<<<< HEAD
        <env> Rho:Map (.Map => X |-> !L) </env>
+=======
+       <env> Rho:Map (.Map => X |-> !L:Int) </env>
+>>>>>>> unified-builtins2
        <store>... (.Map => !L |-> array(!AL, S) !AL |-> #symArray(X) ) </store>
        when notBool (X in keys(Rho))
 
@@ -162,8 +208,13 @@ module IMP
        </k> 
 
 //@ Assume
+<<<<<<< HEAD
   syntax KItem ::= "assume" "(" K ")"
 	             | "assumeStrict" "(" K ")" [strict]
+=======
+  syntax K ::= "assume" "(" K ")"
+         | "assumeStrict" "(" K ")" [strict]
+>>>>>>> unified-builtins2
 
   rule assume(Psi:K) => assumeStrict(A2M(Psi))
   rule <k> assumeStrict(m2k(E:Map, Phi:K)) => . ...</k>
@@ -173,7 +224,7 @@ module IMP
 //@ Match
   syntax KItem ::= "match"  "(" K ")" [strict]
   rule <k> match(m2k(Ea:Map, Phia:K))
-	   => . // checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
+       => . // checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
        ...</k>
        <store> Ec:Map </store>
        <condition> Phic:Bool </condition>
@@ -181,7 +232,7 @@ module IMP
 
 // debug rule
   rule <k> match(m2k(Ea:Map, Phia:K))
-	   => SMTLibQuery(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
+       => SMTLibQuery(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
        ...</k>
        <store> Ec:Map </store>
        <condition> Phic:Bool </condition>
@@ -210,7 +261,7 @@ module IMP
 //@ Generate fresh map
   syntax KItem ::= "generateFresh" "(" Map ")"
   rule <k> generateFresh(L:Int |-> V:Int E:Map) => generateFresh(E) ...</k>
-       <store>... L |-> (V => !V') ...</store>
+       <store>... L |-> (V => !V':Int) ...</store>
   rule <k> generateFresh(.Map) => . ...</k>
   rule <k> generateFresh(L:Int |-> array(AL:Int, Size:Int) E:Map) => generateFresh(E) ...</k>
   rule <k> generateFresh(L:Int |-> A:Array E:Map) => generateFresh(E) ...</k>
@@ -249,7 +300,7 @@ module IMP
   rule mapLeftEq(X:Int |-> A:Array Rest:Map, X |-> A Rest2:Map) => mapLeftEq(Rest, Rest2)
   rule mapLeftEq(. , _) => true
   rule mapLeftEq(X:Int |-> _:Int _:Map, Right:Map) => false when notBool(X in keys(Right))
-  rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==Set .Set)
+  rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==K .Set)
 
 //@ Compiler issues
   // subsort issue? 
