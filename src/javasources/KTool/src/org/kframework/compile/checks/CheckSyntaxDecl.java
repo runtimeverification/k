@@ -70,7 +70,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
         } else if (!node.containsAttribute(Constants.FUNCTION)
                 && (node.getSort().equals(KSorts.K) || 
                     node.getSort().equals(KSorts.KLIST))) {
-            String msg = "Extending sort K is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
+            String msg = "Extending sort K or KList is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }
 
