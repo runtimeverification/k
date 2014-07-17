@@ -3,7 +3,7 @@ module ISSUE
   configuration <T>
                   <k> $PGM:K </k>
                   <out stream="stdout"> .List </out>
-		</T>
+        </T>
   syntax K ::= "test1" | "test2" | K ";" K [left]
 
   rule K1 ; K2 => K1 ~> K2 [macro]

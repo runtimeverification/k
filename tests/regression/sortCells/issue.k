@@ -6,7 +6,7 @@ module ISSUE
                      <test> .List </test>
                   </control>
                   <out stream="stdout"> .List </out>
-		</T>
+        </T>
   syntax K ::= "test"
 
   syntax K ::= control(ControlCellFragment)

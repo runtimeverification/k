@@ -113,14 +113,14 @@ module SMT-SYNTAX-HOOKS
 
   syntax SmtResponse ::= "sat"
                        | "unsat"
-		       | "unknown"
-		       | "model" "(" Map ")"
+               | "unknown"
+               | "model" "(" Map ")"
 
   syntax SmtResponse ::= "checkSat" "(" K ")" [function]
                        | "getModel" "(" K ")" [function]
 
   syntax Bool ::= SmtResponse "=/=" SmtResponse
-		| SmtResponse "==" SmtResponse
+        | SmtResponse "==" SmtResponse
 endmodule
 
 module SMT-HOOKS
@@ -150,9 +150,9 @@ module SMT-HOOKS
   // parse SEXPRESSIONS
 /*  rule parseSmtResponse(S:String) => getModelMap(parseSExpression("(" +String trim(replaceAll(S, "\n", " ")) +String ")"))
        when (trim(S) =/=String "sat\n") andBool
-       	    (trim(S) =/=String "unsat\n") andBool
-  	    (trim(S) =/=String "unknown\n") andBool
-	    (trim(S) =/=String "unsupported\n") [function, anywhere]
+               (trim(S) =/=String "unsat\n") andBool
+          (trim(S) =/=String "unknown\n") andBool
+        (trim(S) =/=String "unsupported\n") [function, anywhere]
 */
 
   // create model
@@ -163,7 +163,7 @@ module SMT-HOOKS
 
   // utils
   syntax String ::= "createSmtCommand" "(" Set "," String ")" [function]
-		  | "declareConstants" "(" Set ")" [function]
+          | "declareConstants" "(" Set ")" [function]
 
   rule createSmtCommand(S:Set, Assert:String) => declareConstants(S) +String " " +String " (assert " +String Assert +String ")"
   rule declareConstants(.Set) => " "
@@ -186,7 +186,7 @@ module S-EXP-PARSER
   syntax Token ::= "stoken" "(" String ")" [function]
   syntax String ::= "getBalanced" "(" String ")" [function]
   syntax Int ::= "getFirstBalancedClosedParen" "(" String "," Int ")" [function]
-  	       | "getFirstBalancedClosedParen" "(" String "," Int "," Int "," Int ")" [function]
+             | "getFirstBalancedClosedParen" "(" String "," Int "," Int "," Int ")" [function]
 
   rule parseSExpression(S:String) => scan(trim(replaceAll(replaceAll(S,"(", " ( "), ")", " ) ")))
 
@@ -204,14 +204,14 @@ module S-EXP-PARSER
 
   rule getFirstBalancedClosedParen(S:String, Position:Int, Open:Int, Closed:Int) =>
        getFirstBalancedClosedParen(S:String, findString(S, ")", Position) +Int 1,
-       					     countAllOccurences(substrString(S, 0, findString(S,")",Position +Int 1)), "("),
-					     countAllOccurences(substrString(S, 0, findString(S,")",Position +Int 1) +Int 1), ")"))
+                                countAllOccurences(substrString(S, 0, findString(S,")",Position +Int 1)), "("),
+                         countAllOccurences(substrString(S, 0, findString(S,")",Position +Int 1) +Int 1), ")"))
        when Position =/=Int 0 andBool Open =/=Int Closed  andBool Position <Int lengthString(S)
   rule getFirstBalancedClosedParen(S:String, 0) =>
        getFirstBalancedClosedParen(S:String, findString(S, ")", 0) +Int 1,
-       					     countAllOccurences(substrString(S, 0, findString(S,")",0) +Int 1), "("),
-					     countAllOccurences(substrString(S, 0, findString(S,")",0) +Int 1), ")"))
-	when countAllOccurences(substrString(S, 0, findString(S,")",0)), "(") >Int countAllOccurences(substrString(S, 0, findString(S,")",0)), ")")
+                                countAllOccurences(substrString(S, 0, findString(S,")",0) +Int 1), "("),
+                         countAllOccurences(substrString(S, 0, findString(S,")",0) +Int 1), ")"))
+    when countAllOccurences(substrString(S, 0, findString(S,")",0)), "(") >Int countAllOccurences(substrString(S, 0, findString(S,")",0)), ")")
   rule getFirstBalancedClosedParen(S:String, Position:Int, Count:Int, Count) => Position
 
   rule stoken(S:String) => . when trim(S) ==String ""

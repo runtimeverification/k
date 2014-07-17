@@ -3,7 +3,7 @@ require "int.k"
 
 module ARRAY-SYNTAX
   syntax Array ::= "store"       "(" Array "," Int "," K ")"  [smtlib(store)]
-  	       	 | "const-array" "(" Int "," K ")"
+                  | "const-array" "(" Int "," K ")"
 
   syntax K ::= "select" "(" Array "," Int ")"  [smtlib(select)]
 

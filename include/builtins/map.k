@@ -68,12 +68,12 @@ module MAP
 //  rule M:Map[.KList <- undef] => M
 
   /*@ Construct a Set consisting of all keys in the Map:*/
-	syntax Set ::= keys(Map)    [function, hook(Map:keys)]
+    syntax Set ::= keys(Map)    [function, hook(Map:keys)]
 //  rule keys(K:K |-> _ M:Map) => SetItem(K) keys(M)
 //  rule keys(.Map) => .Set
 
   /*@ Construct a List consisting of all values in the Map: */
-	syntax List ::= values(Map)    [function]
+    syntax List ::= values(Map)    [function]
 //  rule values(_ |-> K:K M:Map) => BagItem(K) values(M)
 //  rule values(.Map) => .Bag
 

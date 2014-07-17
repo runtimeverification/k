@@ -11,9 +11,9 @@ double dot(double u_x, double u_y, double v_x, double v_y){
 module DOT-RULE
   rule <threads>
            <thread>...
-	     <k> dot(Ux:Float, Uy:Float, Vx:Float, Vy:Float) => V:Float </k>
+         <k> dot(Ux:Float, Uy:Float, Vx:Float, Vy:Float) => V:Float </k>
              <env> GENV </env>
-	   ...</thread>
+       ...</thread>
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>

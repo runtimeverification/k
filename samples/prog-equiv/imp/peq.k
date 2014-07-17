@@ -33,27 +33,27 @@ module IMP-SYNTAX
 */
 
   syntax AExp ::= Int | Id
-  				| AExp "/" AExp [left, strict]
-  				| AExp "*" AExp [left, strict]
-  				> AExp "+" AExp [left, strict]
-  				| "(" AExp ")"  [bracket]
+                  | AExp "/" AExp [left, strict]
+                  | AExp "*" AExp [left, strict]
+                  > AExp "+" AExp [left, strict]
+                  | "(" AExp ")"  [bracket]
 
   syntax BExp ::= Bool
-  				| AExp "<=" AExp  [seqstrict]
-  				| "not" BExp      [strict]
-  				> BExp "and" BExp [left, strict(1)]
-  				| "(" BExp ")"    [bracket]
+                  | AExp "<=" AExp  [seqstrict]
+                  | "not" BExp      [strict]
+                  > BExp "and" BExp [left, strict(1)]
+                  | "(" BExp ")"    [bracket]
 
 
   syntax Stmt ::= "skip" // | Elt | Elt "::" Stmt | Id ":-" Stmt
-  				| Id ":=" AExp   [strict(2)]
-  				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
-  				| "while" BExp "do" Stmt
+                  | Id ":=" AExp   [strict(2)]
+                  | "if" BExp "then" Stmt "else" Stmt [strict(1)]
+                  | "while" BExp "do" Stmt
                                 | "for" Id "from" AExp "to" AExp "do" Stmt
                                   [strict(2)]
                                 | Id ":" Stmt
-  				> Stmt ";" Stmt   [left]
-  				| "(" Stmt ")"    [bracket]
+                  > Stmt ";" Stmt   [left]
+                  | "(" Stmt ")"    [bracket]
 
   syntax Elt ::= Id | Int   // extension for streams
   syntax Stmt ::=  Elt // trebuie sa fie aici, altfel prgramul cicleaza!!!
@@ -620,7 +620,7 @@ module PEQ
                       <cash-env> .Map </cash-env>
                     </goal>
                   </goals>
-//		  <output stream="stdout"> ListItem("Proving ...\n") </output>
+//          <output stream="stdout"> ListItem("Proving ...\n") </output>
                   <hypos>
                     <hypo multiplicity="*">
                       <patt1>
@@ -1145,27 +1145,27 @@ module PEQ
        <goal>
          <config>
            <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map,
-     	       		               	     <hypo>
-       					       <hcondition>
-					         F':Bool
-       					       </hcondition>
-       					       <patt1>
-         				         <hk1>
-          					   K1':K
-         					 </hk1>
-         					 <henv1>
-          					   Env1':Map
-          					 </henv1>
-       					       </patt1>
-       					       <patt2>
-         				         <hk2>
-           					   K2':K
-						 </hk2>
-         					 <henv2>
-         					   Env2':Map
-         					 </henv2>
-       					       </patt2>
-     					     </hypo>
+                                                <hypo>
+                                  <hcondition>
+                             F':Bool
+                                  </hcondition>
+                                  <patt1>
+                                  <hk1>
+                                 K1':K
+                              </hk1>
+                              <henv1>
+                                 Env1':Map
+                               </henv1>
+                                  </patt1>
+                                  <patt2>
+                                  <hk2>
+                                  K2':K
+                         </hk2>
+                              <henv2>
+                                Env2':Map
+                              </henv2>
+                                  </patt2>
+                              </hypo>
                                              Hypos':Bag
                       )
               =>
@@ -1197,27 +1197,27 @@ module PEQ
        <goal>
          <config>
            <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map,
-     	       		               	     <hypo>
-       					       <hcondition>
-					         F':Bool
-       					       </hcondition>
-       					       <patt1>
-         				         <hk1>
-          					   K1':K
-         					 </hk1>
-         					 <henv1>
-          					   Env1':Map
-          					 </henv1>
-       					       </patt1>
-       					       <patt2>
-         				         <hk2>
-           					   K2':K
-						 </hk2>
-         					 <henv2>
-         					   Env2':Map
-         					 </henv2>
-       					       </patt2>
-     					     </hypo>
+                                                <hypo>
+                                  <hcondition>
+                             F':Bool
+                                  </hcondition>
+                                  <patt1>
+                                  <hk1>
+                                 K1':K
+                              </hk1>
+                              <henv1>
+                                 Env1':Map
+                               </henv1>
+                                  </patt1>
+                                  <patt2>
+                                  <hk2>
+                                  K2':K
+                         </hk2>
+                              <henv2>
+                                Env2':Map
+                              </henv2>
+                                  </patt2>
+                              </hypo>
                                              Hypos':Bag
                       )
             =>
@@ -1248,29 +1248,29 @@ module PEQ
        <goal>
          <config>
            <k> checkHypo(K1, Env1, K2, Env2,
-     	       		               	     (<hypo>
-       					       <hcondition>
-					       F':Bool
-       					       </hcondition>
-       					       <patt1>
-         				         <hk1>
-          					   K1':K
-         					 </hk1>
-         					 <henv1>
-          					   Env1':Map
-          					 </henv1>
-       					       </patt1>
-       					       <patt2>
-         				         <hk2>
-           					   K2':K
-						 </hk2>
-         					 <henv2>
-         					   Env2':Map
-         					 </henv2>
-       					       </patt2>
-     					     </hypo>
-                        		     =>
-					     .
+                                                (<hypo>
+                                  <hcondition>
+                           F':Bool
+                                  </hcondition>
+                                  <patt1>
+                                  <hk1>
+                                 K1':K
+                              </hk1>
+                              <henv1>
+                                 Env1':Map
+                               </henv1>
+                                  </patt1>
+                                  <patt2>
+                                  <hk2>
+                                  K2':K
+                         </hk2>
+                              <henv2>
+                                Env2':Map
+                              </henv2>
+                                  </patt2>
+                              </hypo>
+                                     =>
+                         .
                                             )
                                            Hypos':Bag
                         )

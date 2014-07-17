@@ -11,13 +11,13 @@ module BF-SYNTAX
   syntax Ignore ::= Token{~[\>\<\+\-\.\,\[\]\ \n\r\t]+}
                    [regex("[^\\>\\<\\+\\-\\.\\,\\[\\]\\ \n\r\t]+"), onlyLabel]
   syntax Instruction  ::= ">"
-  	 	      	| "<"
-			| "+"
-			| "-"
-			| "."
-			| "," [onlyLabel]
-			| "[" Instructions "]"
-			| Ignore
+                     | "<"
+            | "+"
+            | "-"
+            | "."
+            | "," [onlyLabel]
+            | "[" Instructions "]"
+            | Ignore
 
   /*@
       A Brainfuck program consists in a list of commands. Brainfuck ignores all characters except the eight commands +-<>[],. so no special syntax for comments is needed. Unfortunately, because of K parsing issues, we assume that programs contain only the language instructions.
@@ -32,12 +32,12 @@ module BF
      The configuration of the language contains the K cell for Brainfuck programs, an array cell containing the byte array, a cell ptr for the instruction pointer and I/O streams.
   */
   configuration <T>
-  		    <k> $PGM:Instructions </k>
-		    <array> .Map </array>
-		    <ptr> 0 </ptr>
-		    <in stream="stdin"> .List </in>
-		    <out stream="stdout"> .List </out>
-		</T>
+              <k> $PGM:Instructions </k>
+            <array> .Map </array>
+            <ptr> 0 </ptr>
+            <in stream="stdin"> .List </in>
+            <out stream="stdout"> .List </out>
+        </T>
 
   /*@
     Unroll intructions into KList.

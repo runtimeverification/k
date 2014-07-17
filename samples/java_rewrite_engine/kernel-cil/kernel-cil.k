@@ -38,9 +38,9 @@ productions below are defined shortly. */
 
   syntax Decl ::= Type Exps ";"
                 | Type Id "(" TypedIds ")" Block
-		| "#include" String
-		| "#define" Id Exp
-		| "#define" Id "(" Ids ")" Exp [prefer]
+        | "#include" String
+        | "#define" Id Exp
+        | "#define" Id "(" Ids ")" Exp [prefer]
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes

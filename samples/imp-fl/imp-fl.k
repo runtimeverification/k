@@ -1,21 +1,21 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
   // syntax AExp ::= Int | Id
-  // 				| AExp "/" AExp [left, strict]
-  // 				> AExp "+" AExp [left, strict]
-  // 				| "(" AExp ")"  [bracket]
+  //                 | AExp "/" AExp [left, strict]
+  //                 > AExp "+" AExp [left, strict]
+  //                 | "(" AExp ")"  [bracket]
 
   // syntax BExp ::= Bool
-  // 				| AExp "<=" AExp  [seqstrict]
-  // 				| "not" BExp      [strict]
-  // 				> BExp "and" BExp [left, strict(1)]
-  // 				| "(" BExp ")"    [bracket]
+  //                 | AExp "<=" AExp  [seqstrict]
+  //                 | "not" BExp      [strict]
+  //                 > BExp "and" BExp [left, strict(1)]
+  //                 | "(" BExp ")"    [bracket]
 
   // syntax Stmt ::= "skip"
-  // 				| Id ":=" AExp   [strict(2)]
-  // 				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
-  // 				| "while" BExp "do" Stmt
-  // 				> Stmt ";" Stmt   [left]
-  // 				| "(" Stmt ")"    [bracket]
+  //                 | Id ":=" AExp   [strict(2)]
+  //                 | "if" BExp "then" Stmt "else" Stmt [strict(1)]
+  //                 | "while" BExp "do" Stmt
+  //                 > Stmt ";" Stmt   [left]
+  //                 | "(" Stmt ")"    [bracket]
 
 
   // syntax Pgm ::= "var" Ids ";" Stmt
@@ -25,38 +25,38 @@
 module IMP-FL-SYNTAX
 
   syntax KLabel ::= "div#ee"
-  	 	  | "div#He"
-  	 	  | "div#eH"
-  	 	  | "plus#ee"
-  	 	  | "plus#He"
-  	 	  | "plus#eH"
+             | "div#He"
+             | "div#eH"
+             | "plus#ee"
+             | "plus#He"
+             | "plus#eH"
 
-		  | "le#ee"
-		  | "le#He"
+          | "le#ee"
+          | "le#He"
 
-		  | "not#e"
-		  | "not#H"
+          | "not#e"
+          | "not#H"
 
-		  | "and#ee"
-		  | "and#He"
+          | "and#ee"
+          | "and#He"
 
-		  | "assign#ee"
-		  | "assign#eH"
+          | "assign#ee"
+          | "assign#eH"
 
-		  | "ite#eee"
-		  | "ite#Hee"
+          | "ite#eee"
+          | "ite#Hee"
 
-		  | "while#ee"
+          | "while#ee"
 
-		  | "seq#ee"
+          | "seq#ee"
 
-		  | "pgm#ee"
+          | "pgm#ee"
 
-		  | "emptyIds#"
+          | "emptyIds#"
 
-		  | "consIds#ee"
+          | "consIds#ee"
 
-	    | "skip#"
+        | "skip#"
 
   syntax KResult ::= Int | Bool
 
@@ -66,9 +66,9 @@ module IMP-FL
   imports IMP-FL-SYNTAX
 
   configuration <T color="yellow">
-   					<k color="green"> $PGM : K </k>
-   					<env color="red"> .Map </env>
-		</T>
+                       <k color="green"> $PGM : K </k>
+                       <env color="red"> .Map </env>
+        </T>
 
 // DIVISION
 
@@ -180,8 +180,8 @@ module IMP-FL
 
 // ACTUAL RULES
 
-//   rule [lookup] :  	<k> X:Id => I:Int ...</k>
-//   					<env>... X |-> I ...</env>
+//   rule [lookup] :      <k> X:Id => I:Int ...</k>
+//                       <env>... X |-> I ...</env>
 
   rule <T>
           <k> X:Id ~> K:K </k>
@@ -194,7 +194,7 @@ module IMP-FL
        </T>
 
 //   rule [assignment]: <k> X:Id := I:Int => . ...</k>
-//   					<env>... X |-> (_ => I) ...</env>
+//                       <env>... X |-> (_ => I) ...</env>
 
   rule <T>
           <k> assign#ee(X:Id,,I:Int) ~> K:K </k>
@@ -274,8 +274,8 @@ module IMP-FL
        <k> ite#eee(E,,seq#ee(S,,while#ee(E,,S)),,skip#(.KList)) ~> K </k>
 
   // rule [program-still-vars]:
-  // 	 	<k> var X:Id, Xs:Ids; S => var Xs; S ...</k>
-  // 	    <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
+  //          <k> var X:Id, Xs:Ids; S => var Xs; S ...</k>
+  //         <env> Rho:Map (. => X |-> 0) </env> when notBool(X in keys(Rho))
 
   rule <T>
           <k> consIds#ee(V:K,,Rest:K) ~> K:K </k>

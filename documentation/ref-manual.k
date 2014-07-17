@@ -486,13 +486,13 @@ Example: krun program.ext \verb^--debug-gui^
 
 This type of execution instantiates a new window containing:
 
-\tab{	1. a panel for graph visualization (see section \ref{sec:Graph_panel})}
+\tab{    1. a panel for graph visualization (see section \ref{sec:Graph_panel})}
 
-\tab{	2. a panel for displaying the configuration (see section \ref{sec:Configuration_panel})}
+\tab{    2. a panel for displaying the configuration (see section \ref{sec:Configuration_panel})}
 
-\tab{	3. a command area with buttons (see section \ref{sec:Command_area})}
+\tab{    3. a command area with buttons (see section \ref{sec:Command_area})}
 
-\tab{	4. a menu for save, load or export operations. (see section \ref{sec:Menu})}
+\tab{    4. a menu for save, load or export operations. (see section \ref{sec:Menu})}
 
 \paragraph{Graph_panel}
 \label{Graph_panel}
@@ -510,9 +510,9 @@ constantly aware of the current selection.
 Also available is the selection of multiple vertices. This can be accomplished in two
 ways:
 
-\tab{	1. by holding the "Shift" key while left clicking on the vertices of choice }
+\tab{    1. by holding the "Shift" key while left clicking on the vertices of choice }
 
-\tab{	2. by holding the left click and moving the cursor to cover the entire area where the
+\tab{    2. by holding the left click and moving the cursor to cover the entire area where the
 vertices to be selected are placed.}
 
 The results of selection are further discussed in

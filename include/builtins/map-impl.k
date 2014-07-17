@@ -46,12 +46,12 @@ module MAP-IMPL
 //  rule M:Map[.KList <- undef] => M
 
   /* set of map keys */
-//	syntax Set ::= keys(Map)    [function, hook(Map:keys)]
+//    syntax Set ::= keys(Map)    [function, hook(Map:keys)]
   rule keys(K:K |-> _ M:Map) => SetItem(K) keys(M)
   rule keys(.Map) => .Set
 
   /* bag of map values */
-//	syntax List ::= values(Map)    [function]
+//    syntax List ::= values(Map)    [function]
   rule values(_ |-> K:K M:Map) => ListItem(K) values(M)
   rule values(.Map) => .List
 

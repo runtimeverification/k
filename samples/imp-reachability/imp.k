@@ -13,7 +13,7 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
                  > left:
-		   AExp "+" AExp              [left, strict]
+           AExp "+" AExp              [left, strict]
                  | AExp "-" AExp              [left, strict]
                  > "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -59,14 +59,14 @@ applied to the same configuration, the current goal will be splitted into
 multiple goals.
 */
   configuration <T color="yellow" multiplicity="?">
-//		 <goal multiplicity="*">
-		  <k color="green"> #ps($PGM:Bag) </k>
+//         <goal multiplicity="*">
+          <k color="green"> #ps($PGM:Bag) </k>
                   <state color="blue"> .Map </state>
-		  <condition color="red"> true </condition>
-//		  <ruleConstraints> none </ruleConstraints>
-//		 </goal>
+          <condition color="red"> true </condition>
+//          <ruleConstraints> none </ruleConstraints>
+//         </goal>
                 </T>
-		<success> false </success>
+        <success> false </success>
 
 
 /*@
@@ -178,7 +178,7 @@ For each reachability formula given as input we have two corresponding generated
          <condition> Psi:Bool </condition>
        </T>
        =>
-	.)
+    .)
        <success> _ => true </success>
        when checkSat(Psi andBool
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y))
@@ -206,7 +206,7 @@ For each reachability formula given as input we have two corresponding generated
          <condition> Psi:Bool </condition>
        </T>
        =>
-	.)
+    .)
        <success> _ => true </success>
        when checkSat(Psi andBool
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0))
@@ -215,7 +215,7 @@ For each reachability formula given as input we have two corresponding generated
 
 //@ Utils
    rule (<k> #ps(B:Bag) </k>
-   	<state> _ </state>
-	<condition> _ </condition>) => B [structural]
+       <state> _ </state>
+    <condition> _ </condition>) => B [structural]
 
 endmodule

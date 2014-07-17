@@ -2,8 +2,8 @@
 module TEST
   syntax B ::= Int | B "*" B
    syntax A ::= B [klabel('a), strict]
-		| A "+" A [strict]
-		| print(A) [strict]
+        | A "+" A [strict]
+        | print(A) [strict]
 
   syntax KResult ::= Int
 

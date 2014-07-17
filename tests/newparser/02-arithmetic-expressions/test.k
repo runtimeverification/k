@@ -4,9 +4,9 @@ module TEST
   configuration
     <k> $PGM:Exp </k>
     <env>
-	       a |-> 1
-		   b |-> 2
-		   c |-> 3
+           a |-> 1
+           b |-> 2
+           c |-> 3
     </env>
 
   syntax Id ::= "a" | "b" | "c"

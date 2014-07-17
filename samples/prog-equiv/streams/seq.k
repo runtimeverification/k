@@ -606,24 +606,24 @@ module SEQ
        (<goal>
          <config>
            <k> checkHypo(SE1:K, SE2:K,
-       		               	     <hypo>
-       				       <patt1>
-         			         <hk1>
-          				   SE1':K
-         				 </hk1>
-         				 <hout1>
-          				   OUT1':SExp
-          				 </hout1>
-       				       </patt1>
-       				       <patt2>
-        			         <hk2>
-          				   SE2':K
-					 </hk2>
-         				 <hout2>
-         				   OUT2':SExp
-         				 </hout2>
-       				       </patt2>
-     				     </hypo>
+                                       <hypo>
+                              <patt1>
+                              <hk1>
+                             SE1':K
+                          </hk1>
+                          <hout1>
+                             OUT1':SExp
+                           </hout1>
+                              </patt1>
+                              <patt2>
+                             <hk2>
+                             SE2':K
+                     </hk2>
+                          <hout2>
+                            OUT2':SExp
+                          </hout2>
+                              </patt2>
+                          </hypo>
                                      Hypos':Bag
                       )
            ...</k>
@@ -653,24 +653,24 @@ module SEQ
        (<goal>
          <config>
            <k> checkHypo(SE1:K, SE2:K,
-       		               	     <hypo>
-       				       <patt1>
-         			         <hk1>
-          				   SE1':K
-         				 </hk1>
-         				 <hout1>
-          				   OUT1':SExp
-          				 </hout1>
-       				       </patt1>
-       				       <patt2>
-        			         <hk2>
-          				   SE2':K
-					 </hk2>
-         				 <hout2>
-         				   OUT2':SExp
-         				 </hout2>
-       				       </patt2>
-     				     </hypo>
+                                       <hypo>
+                              <patt1>
+                              <hk1>
+                             SE1':K
+                          </hk1>
+                          <hout1>
+                             OUT1':SExp
+                           </hout1>
+                              </patt1>
+                              <patt2>
+                             <hk2>
+                             SE2':K
+                     </hk2>
+                          <hout2>
+                            OUT2':SExp
+                          </hout2>
+                              </patt2>
+                          </hypo>
                                      Hypos':Bag
                       )
            ...</k>
@@ -695,24 +695,24 @@ module SEQ
        <goal>
          <config>
            <k> checkHypo(SE1:K, SE2:K,
-       		               	    (<hypo>
-       				       <patt1>
-         			         <hk1>
-          				   SE1':K
-         				 </hk1>
-         				 <hout1>
-          				   OUT1':SExp
-          				 </hout1>
-       				       </patt1>
-       				       <patt2>
-        			         <hk2>
-          				   SE2':K
-					 </hk2>
-         				 <hout2>
-         				   OUT2':SExp
-         				 </hout2>
-       				       </patt2>
-     				     </hypo>
+                                      (<hypo>
+                              <patt1>
+                              <hk1>
+                             SE1':K
+                          </hk1>
+                          <hout1>
+                             OUT1':SExp
+                           </hout1>
+                              </patt1>
+                              <patt2>
+                             <hk2>
+                             SE2':K
+                     </hk2>
+                          <hout2>
+                            OUT2':SExp
+                          </hout2>
+                              </patt2>
+                          </hypo>
                                      =>
                                      .)
                                     Hypos':Bag

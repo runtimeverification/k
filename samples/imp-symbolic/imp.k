@@ -22,7 +22,7 @@ module IMP-SYNTAX
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
-		 > Stmt Stmt                  [left]
+         > Stmt Stmt                  [left]
   syntax Pgm   ::= "int" Ids ";" Stmt
   syntax Ids   ::= List{Id,","}
 
@@ -50,9 +50,9 @@ module IMP
 
 /*@ IMP configuration is enriched with cell {\tt condition}. */
   configuration <T color="yellow">
-		  <k color="green"> #ps($PGM:Bag) </k>
+          <k color="green"> #ps($PGM:Bag) </k>
                   <state color="blue"> .Map </state>
-		  <condition color="red"> true </condition>
+          <condition color="red"> true </condition>
                 </T>
 
 /*@ The concrete semantics of IMP which remains unchanged for symbolic execution */
@@ -106,6 +106,6 @@ module IMP
    rule (<k> #ps(B:Bag) </k>
         <state> _ </state>
         <condition> _ </condition>)
-	=> B [structural]
+    => B [structural]
 
 endmodule

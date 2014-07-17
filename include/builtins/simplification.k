@@ -92,7 +92,7 @@ module DNF
 
   // apply distributivity: List x List and Element x List
   syntax KList ::= distrAnd(KList,KList) [function]
-  	         | distrAndBool(Bool, KList) [function]
+               | distrAndBool(Bool, KList) [function]
   rule distrAnd((B:Bool,,Rest:KList), KL:KList) => (distrAndBool(B, KL),,distrAnd(Rest, KL))
   rule distrAnd(.KList, _) => .KList
   rule distrAndBool(B:Bool, B':Bool,,KL:KList) => '#andBool(B,,B'),,distrAndBool(B, KL)
