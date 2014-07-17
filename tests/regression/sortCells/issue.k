@@ -6,7 +6,7 @@ module ISSUE
                      <test> .List </test>
                   </control>
                   <out stream="stdout"> .List </out>
-		</T>
+        </T>
   syntax KItem ::= "test"
 
   syntax KItem ::= control(ControlCellFragment)
