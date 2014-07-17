@@ -40,16 +40,16 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         this.context = context;
         configurationStructureMap = context.getConfigurationStructureMap();
     }
-
+    
     @Override
     public String getName() {
         return this.getClass().toString();
     }
-
+    
     /**
      * Private helper method that translates Java backend specific KIL term back
      * to generic KIL term.
-     *
+     * 
      * @param term
      *            the term to be translated
      * @return the translated term
@@ -105,14 +105,14 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
                 (org.kframework.kil.Term) kItem.kLabel().accept(this),
                 (org.kframework.kil.Term) kItem.kList().accept(this));
     }
-
+    
     @Override
     public ASTNode transform(KItemProjection kItemProj) {
         return new org.kframework.kil.KItemProjection(
-                kItemProj.kind().toString(),
+                kItemProj.kind().toString(), 
                 (org.kframework.kil.Term) kItemProj.term().accept(this));
     }
-
+    
     @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
         return org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);
@@ -164,10 +164,10 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         if (set.hasFrame()) {
             baseTerms.add((org.kframework.kil.Term) set.frame().accept(this));
         }
-        return new SetBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),
+        return new SetBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT), 
                 baseTerms, elements);
     }
-
+    
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
@@ -183,7 +183,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         for (Term entry : builtinList.elementsRight()) {
             elementsRight.add((org.kframework.kil.Term)entry.accept(this));
         }
-        return ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
+        return ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT), 
                 baseTerms, elementsLeft, elementsRight);
     }
 
@@ -220,7 +220,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 //        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
         return node;
     }
-
+    
     @Override
     public ASTNode transform(BuiltinMgu mgu) {
         // TODO(YilongL): properly translate the Mgu into KItem form using the toK function
@@ -264,7 +264,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ListLookup listLookup) {
-        throw new UnsupportedOperationException("Not implemented, yet");
+        return transformJavaBackendSpecificTerm(listLookup);
     }
 
     @Override
@@ -274,9 +274,9 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(MapLookup mapLookup) {
-        throw new UnsupportedOperationException("Not implemented, yet");
+        return transformJavaBackendSpecificTerm(mapLookup);
     }
-
+    
     @Override
     public ASTNode transform(MapUpdate mapUpdate) {
         return transformJavaBackendSpecificTerm(mapUpdate);
@@ -299,7 +299,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(SetLookup setLookup) {
-        throw new UnsupportedOperationException("Not implemented, yet");
+        return transformJavaBackendSpecificTerm(setLookup);
     }
 
     @Override

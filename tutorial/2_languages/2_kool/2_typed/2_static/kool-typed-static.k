@@ -377,7 +377,7 @@ typed SIMPLE, so we do not discuss them much here. */
 //  context ltype(HOLE:LValue)
 // but we currently cannot type the HOLE
   context ltype(HOLE) when isLValue(HOLE)
-
+  
 // OLD approach:
 //  syntax Exp ::= ltype(Exp)  [function]
 //  rule ltype(X:Id) => X
@@ -589,7 +589,7 @@ checks for cycles. */
             ...</classes> _ => .)
            <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
-       </T>  [structural]
+       </T>  [inheritance-cycle]
 
 
 /*@ \subsubsection{New}
