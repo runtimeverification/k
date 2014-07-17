@@ -82,8 +82,8 @@ public class KRunFrontEnd {
 
     /**
      * Execute krun in normal mode (i.e. not in debug mode).
-     * @param initialConfiguration
-     * @param context
+     * @param executionContext the object containing the initial configuration
+     * and definition context to use to execute.
      * @return true if the application completed normally; false otherwise
      */
     public static boolean normalExecution(ExecutionContext executionContext) {
