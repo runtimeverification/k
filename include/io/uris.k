@@ -18,7 +18,7 @@ module URIS
              | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc)]
              | "#write" "(" Int "," String ")" [function, hook(#IO:#write)]
 
-  syntax K ::= "#ioError" "(" String ")"
+  syntax KItem ::= "#ioError" "(" String ")"
  
   syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat)]
                  | "#lstat" "(" String ")" [function, hook(#IO:#lstat)]

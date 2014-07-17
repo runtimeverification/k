@@ -342,7 +342,7 @@ equality is required, only the maps and conditions are given as parameters.
   rule isInDom(I:K, (X replBy A:K ;; Rest:K)) => isInDom(I,  Rest)
        when I=/=K X
 
-  syntax K ::= valOf(K, K)
+  syntax KItem ::= valOf(K, K)
 
   rule valOf(I:K, I replBy A:K) => A
 
@@ -654,17 +654,17 @@ module PEQ
   the same label (the label is a kind of "rendevous" synchronisarion). 
 */
 
-  syntax K ::= "storeHypo" "(" K ")"   // for storing hypotheses
-            |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
-                                              // statement
+  syntax KItem ::= "storeHypo" "(" K ")"   // for storing hypotheses
+                |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
+                                                  // statement
 
-            |  "checkHypo" "(" K "," Map "," K "," Map "," HyposCellFragment ")"
-               // for checking hypotheses one by one 
+                |  "checkHypo" "(" K "," Map "," K "," Map "," HyposCellFragment ")"
+                   // for checking hypotheses one by one 
 
-            |  "checkCond" "(" K "," K ")"  // check the conditions of the
+                |  "checkCond" "(" K "," K ")"  // check the conditions of the
                                      // current formula and checked hypothesis
 
-  syntax K ::= "break"  // to temporarily stop one of the two programs
+  syntax KItem ::= "break"  // to temporarily stop one of the two programs
 
 /*@
   The semantics of the expressions remains unchanged, excepting the memory 
@@ -960,7 +960,7 @@ module PEQ
     "synonims" of the already stored ones due to the path formula 
   */
 
-  syntax K ::= "storeSyns" "(" K "," K "," Bool ")"
+  syntax KItem ::= "storeSyns" "(" K "," K "," Bool ")"
 
   rule storeSyns(F1:K andBool F2:K, B:K, V:Bool) 
        =>
@@ -1111,8 +1111,8 @@ module PEQ
 */
 
 
-  syntax K ::= computeSubst(Substitution)
-             | hypoInfo(Bool, Map, Map)
+  syntax KItem ::= computeSubst(Substitution)
+                 | hypoInfo(Bool, Map, Map)
 
   rule computeSubst(X:K replBy E:K)
        =>
@@ -1352,7 +1352,7 @@ module PEQ
 
 
   //@ Generates fresh symbolic values for the stored hypothesis
-  syntax K ::= "getFresh" "(" Map ")"
+  syntax KItem ::= "getFresh" "(" Map ")"
 
   rule [getFresh] :
        <config>
@@ -1374,7 +1374,7 @@ module PEQ
 
   rule getFresh(.Map) => .K
 
-  syntax K ::= "restore" "(" K "," Map ")"
+  syntax KItem ::= "restore" "(" K "," Map ")"
 
   rule [restore] :
        <goal>
@@ -1514,7 +1514,7 @@ module PEQ
 */
 
 
-  syntax K ::= "setInitVal" "(" InitVals ")"
+  syntax KItem ::= "setInitVal" "(" InitVals ")"
 
   rule setInitVal(.InitVals) => .
        [structural]
@@ -1527,7 +1527,7 @@ module PEQ
        <env>... . => #symbMap(M) ...</env>
        [structural]
 
-  syntax K ::= "setInitValObs" "(" Ids ")"
+  syntax KItem ::= "setInitValObs" "(" Ids ")"
 
   rule <k> setInitValObs(.Ids) => . ...</k>
        <k> setInitValObs(.Ids) => . ...</k>

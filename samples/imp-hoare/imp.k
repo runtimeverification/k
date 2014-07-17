@@ -39,12 +39,12 @@ module IMP-SYNTAX
 
   syntax Stmt ::= "while " "(" BExp ")" "invariant" ":" Assert Block
   syntax Assert ::= BExp
-          | "not" Assert                [strict]
-          | Assert "and" Assert         [left, strict]
-          > Assert "or" Assert          [left, strict]
-          > Assert "implies" Assert     [left, strict]
-          | "forall" Ids "(" Assert ")" [strict(2)]
-          | "exists" Ids "(" Assert ")" [strict(2)]
+                  | "not" Assert                [strict]
+                  | Assert "and" Assert         [left, strict]
+                  > Assert "or" Assert          [left, strict]
+                  > Assert "implies" Assert     [left, strict]
+                  | "forall" Ids "(" Assert ")" [strict(2)]
+                  | "exists" Ids "(" Assert ")" [strict(2)]
 
   syntax Pre   ::= "pre"  ":" Assert
   syntax Post  ::= "post" ":" Assert
@@ -52,8 +52,8 @@ module IMP-SYNTAX
 
   // Values   
   syntax Val ::= Int | Bool | Array
-           | "array" "(" Int "," Int ")" 
-           | "loc" "(" AExp ")"
+               | "array" "(" Int "," Int ")" 
+               | "loc" "(" AExp ")"
   syntax AExp ::= Val
 
 endmodule
@@ -65,10 +65,10 @@ module IMP
   syntax KResult ::= Val
 
   configuration <T color="yellow">
-          <k color="green"> $PGM:Program </k>
-          <env color="black"> .Map </env>
-          <store color="blue"> .Map </store>
-          <condition color="red"> true </condition>
+                  <k color="green"> $PGM:Program </k>
+                  <env color="black"> .Map </env>
+                  <store color="blue"> .Map </store>
+                  <condition color="red"> true </condition>
                 </T>
 
 //@ IMP concrete semantics
@@ -102,7 +102,7 @@ module IMP
     [structural]
 
 // lookup
-  syntax K ::= "lookup" "(" Int ")"
+  syntax KItem ::= "lookup" "(" Int ")"
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 // Stmt
@@ -162,8 +162,8 @@ module IMP
        </k> 
 
 //@ Assume
-  syntax K ::= "assume" "(" K ")"
-         | "assumeStrict" "(" K ")" [strict]
+  syntax KItem ::= "assume" "(" K ")"
+                 | "assumeStrict" "(" K ")" [strict]
 
   rule assume(Psi:K) => assumeStrict(A2M(Psi))
   rule <k> assumeStrict(m2k(E:Map, Phi:K)) => . ...</k>
@@ -171,7 +171,7 @@ module IMP
        <condition> _ => Phi </condition>
 
 //@ Match
-  syntax K ::= "match"  "(" K ")" [strict]
+  syntax KItem ::= "match"  "(" K ")" [strict]
   rule <k> match(m2k(Ea:Map, Phia:K))
        => . // checkSat(Phic andBool (notBool Phia) andBool mapLeftEq(Ea, Ec))
        ...</k>
@@ -199,7 +199,7 @@ module IMP
        [transition]
 
 //@ A2M
-  syntax K ::= "A2M" "(" K ")"
+  syntax KItem ::= "A2M" "(" K ")"
   rule <k> A2M(Psi)
            =>
            generateFresh(E) ~> evalAssert(Psi) ~> restore(E, Phi)
@@ -208,7 +208,7 @@ module IMP
        <condition> Phi:Bool </condition>
 
 //@ Generate fresh map
-  syntax K ::= "generateFresh" "(" Map ")"
+  syntax KItem ::= "generateFresh" "(" Map ")"
   rule <k> generateFresh(L:Int |-> V:Int E:Map) => generateFresh(E) ...</k>
        <store>... L |-> (V => !V':Int) ...</store>
   rule <k> generateFresh(.Map) => . ...</k>
@@ -216,7 +216,7 @@ module IMP
   rule <k> generateFresh(L:Int |-> A:Array E:Map) => generateFresh(E) ...</k>
 
 //@ Assert evaluation
-  syntax K ::= "evalAssert" "(" K ")" [strict]
+  syntax KItem ::= "evalAssert" "(" K ")" [strict]
   syntax KResult ::= "m2k" "(" Map "," K ")"
 
   rule <k> evalAssert(Phi:K) ~> restore(E':Map, Phi':K)
@@ -227,7 +227,7 @@ module IMP
        <condition> _ => Phi' </condition>
 
 //@ Restore
-  syntax K ::= "restore" "(" Map "," Bool ")"
+  syntax KItem ::= "restore" "(" Map "," Bool ")"
 
 //@ Assertions
   rule B1:Bool and B2:Bool => B1 andBool B2

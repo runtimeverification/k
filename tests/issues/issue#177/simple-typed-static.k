@@ -557,8 +557,8 @@ thrown from anywhere, including from functions which do not define
 any try-catch block (with the currently unchecked---also for
 simplicity---expectation that the caller functions would catch those
 exceptions). */
-	syntax K ::= "popx"
-	//syntax K ::= (Type, Id)
+	syntax KItem ::= "popx"
+	//syntax KItem ::= (Type, Id)
   rule <k> try {S1} catch((T:Type X:Id):Param) {S2} => S1 {T X; S2} popx ...</k> <xstack> . => ListItem(T) ... </xstack>
 	rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
 	rule <k> throw T1:Type; => stmt ...</k> <xstack> ... ListItem(T2:Type) ... </xstack> when T1 ==K T2

@@ -3,7 +3,7 @@ require "modules/unification.k"
 
 module ISSUE
   imports UNIFICATION
-  syntax K ::= "a" | "b"
+  syntax KItem ::= "a" | "b"
   syntax Variable ::= "x"
   configuration <k> a ~> b </k>
                 <list> ListItem(x) </list> <set> SetItem(x) </set>

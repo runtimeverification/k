@@ -205,7 +205,7 @@ module IMP
 
 // Block
   rule <k> {Ss} => Ss ~> env(Rho) ...</k> <env> Rho </env>  [structural]
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
   rule <k> _ ~> (env(_) => .) ~> env(_) ...</k>         [structural]
 // Stmt

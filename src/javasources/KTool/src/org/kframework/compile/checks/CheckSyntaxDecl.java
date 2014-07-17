@@ -62,12 +62,18 @@ public class CheckSyntaxDecl extends BasicVisitor {
         }
 
         if (node.isSubsort()) {
-            String sort = ((Sort) node.getItems().get(0)).getName();
+            String sort = node.getSubsort().getName();
             if (Sort.isBasesort(sort) && !context.isSubsorted(node.getSort(), sort)) {
-                String msg = "Extending  built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
+                String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
+        } else if (!node.containsAttribute(Constants.FUNCTION)
+                && (node.getSort().equals(KSorts.K) || 
+                    node.getSort().equals(KSorts.KLIST))) {
+            String msg = "Extending sort K or KList is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }
+
         if (node.containsAttribute("reject")) {
             if (node.getItems().size() != 1) {
                 String msg = "Only single Terminals can be rejected.";

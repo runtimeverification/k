@@ -1,7 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
 module ISSUE
-  syntax K ::= "a" | "b"
+  syntax KItem ::= "a" | "b"
   configuration <k> a ~> b </k> <set> SetItem(1) </set>
                 <out stream="stdout"> .List </out>
 

@@ -25,7 +25,7 @@ module UNIFICATION
     (e.g. _ in Prolog), they should declare some syntax like the following:
 syntax ThingThatCanBeUnified ::= "_" [onlyLabel, klabel($dontcare)]
 */
-  syntax K ::= "$dontcare" [klabel($dontcare), latex(\AnyVar[K])]
+  syntax KItem ::= "$dontcare" [klabel($dontcare), latex(\AnyVar[K])]
 
 // Traian: I would remove applySubst all together and only keep applyMgu
 //         Mgu gives a nicer, more intuitive user interface than Subst
@@ -204,7 +204,7 @@ constraint.
 
 // alpha conversion moved here by grigore
  syntax K ::= renameVariables(K)  [function, hook(MetaK:renameVariables)]
-            | applyAlpha(K)
+//            | applyAlpha(K)
 
 // rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
 // rule subst(Eqns:KList) ~> applyAlpha(K) => applySubst(subst(Eqns),K)

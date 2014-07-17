@@ -5,7 +5,7 @@ module ARRAY-SYNTAX
   syntax Array ::= "store"       "(" Array "," Int "," K ")"  [smtlib(store)]
   	       	 | "const-array" "(" Int "," K ")" 
 		 
-  syntax K ::= "select" "(" Array "," Int ")"  [smtlib(select)]
+  syntax KItem ::= "select" "(" Array "," Int ")"  [smtlib(select)]
 
   syntax Int ::= "size-of-array" "(" Array ")" [function, symbolic-function]
 endmodule

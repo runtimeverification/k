@@ -7,9 +7,9 @@ module ISSUE
                   </control>
                   <out stream="stdout"> .List </out>
 		</T>
-  syntax K ::= "test"
+  syntax KItem ::= "test"
 
-  syntax K ::= control(ControlCellFragment)
+  syntax KItem ::= control(ControlCellFragment)
 
   rule <control> C
         <k> test => control(C) ...</k>

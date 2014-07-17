@@ -67,7 +67,7 @@ module BINDER
   syntax Bool ::= isBound(KLabel, Int)  [klabel("isBound"), function]
   syntax Bool ::= isBounding(KLabel, Int) [klabel("isBounding"), function]
 
-  syntax K ::= #splitedBinder(KList, KList, Set)
+  syntax KItem ::= #splitedBinder(KList, KList, Set)
 
   syntax K ::= #boundVars(K)  [function]
   rule #boundVars(K:K) => #boundVars1(#binderSplit(K))
@@ -155,7 +155,7 @@ module SUBSTITUTION
   imports MAP
 
 // Seems unnecessary
-//  syntax K ::= #substitutionError(K,String)
+//  syntax KItem ::= #substitutionError(K,String)
 
 // "Public" interface
 
@@ -275,13 +275,13 @@ module SUBSTITUTION
 // Grigore: I added the operation below here, because I want it to be
 // generic.  I don't know how to generate globablly fresh variables
 // of desired type any other way ... sorry.  This is used in type inference
-  syntax K ::= freshVariables(Set,K)
+  syntax KItem ::= freshVariables(Set,K)
   rule freshVariables(.Set, T) => T
   rule freshVariables(SetItem(Tv) S:Set, T)
     => freshVariables(S, T[#freshSym(Tv)/Tv])
 
 /*
-  syntax K ::= freshVariables(Set,K)
+  syntax KItem ::= freshVariables(Set,K)
   rule freshVariables(.Set, T:K) => T
   rule freshVariables(SetItem(Tv:K) S:Set, T:K)
     => freshVariables(S, T[#changeLabel(!Tv',Tv)/Tv])
