@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 module ISSUE
   configuration <k> $PGM:K </k> <out stream="stdout"> .List </out>
   rule <k> X:Id => .K </k> 
