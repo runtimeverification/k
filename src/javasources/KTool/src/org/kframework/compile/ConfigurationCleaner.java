@@ -12,7 +12,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class ConfigurationCleaner extends CopyOnWriteTransformer {
-        
+
     public ConfigurationCleaner(Context context) {
         super("Configuration Cleaner", context);
         // TODO Auto-generated constructor stub

@@ -125,7 +125,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         // steps.add(new ResolveFresh());
         //steps.add(new FreshCondToFreshVar(context));
         //steps.add(new ResolveFreshVarMOS(context));
-        
+
         /* fast rewriting related stuff */
         steps.add(new ComputeCellsOfInterest(context));
 
@@ -165,7 +165,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         /* remove rules that are from k dist */
         steps.add(new RemovePreincludedRules(context));
-        
+
         steps.add(new AddLocalRewritesUnderCells(context));
         steps.add(new GenerateKRewriteMachineInstructions(context));
 

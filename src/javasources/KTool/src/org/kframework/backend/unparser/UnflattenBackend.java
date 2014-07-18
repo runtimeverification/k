@@ -21,7 +21,7 @@ public class UnflattenBackend extends BasicBackend {
         super(sw, context);
         this.backend = backend;
     }
-    
+
     @Override
     public Definition lastStep(Definition def) {
         return backend.lastStep(def);
@@ -31,7 +31,7 @@ public class UnflattenBackend extends BasicBackend {
     public Definition firstStep(Definition def) {
         return backend.firstStep(def);
     }
-    
+
     @Override
     public void run(Definition definition) throws IOException {
         /* first unflatten the syntax */
@@ -56,11 +56,11 @@ public class UnflattenBackend extends BasicBackend {
     public String getDefaultStep() {
         return backend.getDefaultStep();
     }
-    
+
     @Override
     public boolean autoinclude() {
         return backend.autoinclude();
-    }    
+    }
 
     @Override
     public CompilerSteps<Definition> getCompilationSteps() {

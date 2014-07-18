@@ -55,7 +55,7 @@ module SYMBOLIC-K
     "(" +String K2SMTLib(V) +String " " +String K2Sort(V) +String ")"
     +String Vars2SMTLib(S)
   rule Vars2SMTLib(.Set) => ""
-  
+
   syntax String ::= "Consts2SMTLib" "(" Set ")"
   [prefixlabel(Consts2SMTLib), function]
   rule
@@ -158,11 +158,11 @@ module SYMBOLIC-K
     => String2KLabel("#sym" +String Type)(.KList)
 
   syntax K ::= #freshSymSortN(String,Int) [function]
-  rule #freshSymSortN(Type:String,I:Int) 
+  rule #freshSymSortN(Type:String,I:Int)
     =>  String2KLabel("#sym" +String Type)(#distinctCounter(I))
 
   syntax K ::= #freshSymSort(String) [function]
-  rule #freshSymSort(Type:String) => #freshSymSortN(Type,0) 
+  rule #freshSymSort(Type:String) => #freshSymSortN(Type,0)
 
   syntax K ::= #freshSymN(K,Int) [function]
   rule #freshSymN(K:K,I:Int) => #freshSymSortN(K2Sort(K),I)

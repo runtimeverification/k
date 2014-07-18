@@ -8,9 +8,9 @@ double max(double a, double b){
 module MAX-RULE
   rule <threads>
            <thread>...
-	     <k> max(Vx:Float, Vy:Float) => V:Float </k>
+         <k> max(Vx:Float, Vy:Float) => V:Float </k>
              <env> GENV:Map </env>
-	   ...</thread>
+       ...</thread>
        </threads>
        <store>... STORE:Map ...</store>
        <genv> GENV:Map </genv>

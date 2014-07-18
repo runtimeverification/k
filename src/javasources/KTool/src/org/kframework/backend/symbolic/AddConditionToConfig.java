@@ -55,7 +55,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
             cell.setContents(pc);
             context.configVarSorts.put(pc.getName(), pc.getSort());
         }
-        else 
+        else
             cell.setContents(BoolBuiltin.TRUE);
         // append the path condition cell as subcell of generated top cell
         Term body = node.getBody();

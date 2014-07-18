@@ -16,15 +16,15 @@ public class Stopwatch {
     private GlobalOptions options;
 
     /**
-     * Must be called before attempting to call 
+     * Must be called before attempting to call
      * {@link #printIntermediate(String) printIntermediate} or {@link #printTotal(String) printTotal}.
-     * @param options a {@link GlobalOptions} instance instantiated with the correct value of the 
+     * @param options a {@link GlobalOptions} instance instantiated with the correct value of the
      * {@link GlobalOptions#verbose verbose} field.
      */
     public void init(GlobalOptions options) {
         this.options = options;
     }
-    
+
     public static Stopwatch instance() {
         if (sw == null) {
             sw = new Stopwatch();

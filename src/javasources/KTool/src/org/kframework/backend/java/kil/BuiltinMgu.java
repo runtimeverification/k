@@ -10,13 +10,13 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 public class BuiltinMgu extends Term {
-    
+
     public static String MGU_SORT = "Mgu";
-    
+
     public static String EMPTY_MGU = ".Mgu";
-  
+
     private final SymbolicConstraint constraint;
-    
+
     private BuiltinMgu(SymbolicConstraint constraint, TermContext context) {
         // YilongL: The kind of a BuiltinMgu should be Kind.KITEM rather than a
         // new created kind for two reasons: 1) an Mgu is a builtin which should
@@ -35,11 +35,11 @@ public class BuiltinMgu extends Term {
             TermContext context) {
         return new BuiltinMgu(constraint, context);
     }
-    
+
     public SymbolicConstraint constraint() {
         return constraint;
     }
-       
+
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
@@ -74,7 +74,7 @@ public class BuiltinMgu extends Term {
     public String sort() {
         return MGU_SORT;
     }
-    
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -93,12 +93,12 @@ public class BuiltinMgu extends Term {
     protected int computeHash() {
         return Utils.HASH_PRIME + constraint.hashCode();
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         return false;
     }
-    
+
     @Override
     public String toString() {
         return "Mgu(" + constraint.toString() + ")";

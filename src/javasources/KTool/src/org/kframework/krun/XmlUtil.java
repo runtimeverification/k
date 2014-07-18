@@ -97,7 +97,7 @@ public class XmlUtil {
         String op = node.getAttribute("op");
         String sort = node.getAttribute("sort");
         ArrayList<Element> list = XmlUtil.getChildElements(node);
-        
+
         if (sort.equals("#NzNat") && op.equals("sNat_")) {
             sb = new StringBuilder();
             sb.append(node.getAttribute("number"));
@@ -111,7 +111,7 @@ public class XmlUtil {
                 sb.append("(");
                 sb.append(op);
                 sb.append(")." + sort);
-                
+
                 return sb.toString();
             }
             //the node has more than 1 child
@@ -133,16 +133,16 @@ public class XmlUtil {
                 sb.append(")");
                 return sb.toString();
             }
-            
+
         }
-        
+
     }
-    
+
     public static Element getTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier) {
         Element result = null;
         NodeList list;
         Node nod;
-        
+
         list = doc.getElementsByTagName(tagName);
         if (list.getLength() == 0) {
             org.kframework.utils.Error.silentReport("The node with " +  tagName + "tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");

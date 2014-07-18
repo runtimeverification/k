@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * Combines a list of {@code LocalTransformer}s.
- * 
+ *
  * @author Traian
  */
 public class CombinedLocalTransformer extends LocalTransformer {
@@ -217,7 +217,7 @@ public class CombinedLocalTransformer extends LocalTransformer {
     public ASTNode transform(Variable node) {
         return transformAll(node);
     }
-    
+
     @Override
     public ASTNode transform(BuiltinMgu node) {
         return transformAll(node);

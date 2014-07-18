@@ -11,11 +11,11 @@ module TEST
   rule isEmptyList(.List) => true
 
   rule test1(I) => foo(ListItem(I),.List)
-  
+
   rule foo((L => .List), (.List => L)) when isEmptyList(L) =/=K true [structural]
-  
+
   rule foo(.List, L) => L
-  
+
   rule test2(I1, I2) => I1 inList ListItem(I2)
 
   rule K:K inList .List => false

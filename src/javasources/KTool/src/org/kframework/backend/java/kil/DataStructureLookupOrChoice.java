@@ -4,7 +4,7 @@ package org.kframework.backend.java.kil;
 
 public interface DataStructureLookupOrChoice {
     Term base();
-    
+
     class Util {
         public static DataStructureLookup of(DataStructureLookup.Type type, Term base, Term key, Kind kind) {
             switch (type) {
@@ -19,7 +19,7 @@ public interface DataStructureLookupOrChoice {
                 return null;
             }
         }
-        
+
         public static DataStructureChoice of(DataStructureChoice.Type type, Term base) {
             switch (type) {
             case MAP_KEY_CHOICE:
@@ -32,5 +32,5 @@ public interface DataStructureLookupOrChoice {
             }
         }
     }
-    
+
 }

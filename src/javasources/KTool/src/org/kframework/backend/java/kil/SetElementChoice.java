@@ -50,7 +50,7 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     public Term set() {
         return base();
     }
-    
+
     @Override
     public Term base() {
         return set;
@@ -70,7 +70,7 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     public String sort() {
         return kind.toString();
     }
-    
+
     @Override
     public Type type() {
         return Type.SET_ELEMENT_CHOICE;
@@ -80,7 +80,7 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     protected int computeHash() {
         return set.hashCode();
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         throw new UnsupportedOperationException();

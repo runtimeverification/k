@@ -26,7 +26,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 /*
  * @author StefanC
- * 
+ *
  * Front-end for the equivalance checker.
  */
 public class KagregFrontEnd {
@@ -57,11 +57,11 @@ public class KagregFrontEnd {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
             }
         }
-        
+
         GlobalOptions globalOptions = new GlobalOptions();
         globalOptions.verbose = true;
         globalOptions.initialize();
-        
+
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
 //        GlobalSettings.javaBackend = false;
@@ -69,7 +69,7 @@ public class KagregFrontEnd {
 
         String firstLang = FileUtil.getMainModule(firstDefinitionFile.getName());
         String secondLang = FileUtil.getMainModule(secondDefinitionFile.getName());
-        
+
         Context context1 = new Context(globalOptions);
         context1.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
         context1.dotk.mkdirs();
@@ -81,7 +81,7 @@ public class KagregFrontEnd {
         CollectImportsVisitor collectImportsVisitor1 = new CollectImportsVisitor(context1, false);
         collectImportsVisitor1.visitNode(firstDef);
         List<Import> imports1 = collectImportsVisitor1.getImports();
-        
+
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
 //        GlobalSettings.javaBackend = false;
@@ -111,7 +111,7 @@ public class KagregFrontEnd {
             System.err.println("The first definition must have a configuration; found none.");
             return;
         }
-        
+
         Configuration secondConf = null;
         try {
             secondConf = secondDef.getSingletonConfiguration();
@@ -124,7 +124,7 @@ public class KagregFrontEnd {
         }
 
         Indenter indenter = new Indenter();
-        
+
         indenter.write("module RESULT");
         indenter.endLine();
         indenter.indent(UnparserFilter.TAB);
@@ -152,12 +152,12 @@ public class KagregFrontEnd {
         unparserFirst.setIndenter(indenter);
         unparserFirst.setForEquivalence();
         unparserFirst.visitNode(firstDef);
-        
+
         UnparserFilter unparserSecond = new UnparserFilter(context2);
         unparserSecond.setIndenter(indenter);
         unparserSecond.setForEquivalence();
         unparserSecond.visitNode(secondDef);
-        
+
         indenter.write("configuration");
         indenter.endLine();
         indenter.indent(UnparserFilter.TAB);
@@ -192,7 +192,7 @@ public class KagregFrontEnd {
         indenter.write("</second>");
         indenter.endLine();
         indenter.unindent();
-        
+
         indenter.write("</aggregation>");
         indenter.endLine();
         indenter.unindent();

@@ -33,7 +33,7 @@ public class KLabelInjection extends KLabel implements Interfaces.MutableParent<
         //       || term.getSort().equals(KSorts.KLIST);
         this.term = term;
     }
-    
+
     @Override
     public String toString() {
         return "(# " + term + ")";

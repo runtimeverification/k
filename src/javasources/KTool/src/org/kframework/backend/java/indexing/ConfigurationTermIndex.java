@@ -11,9 +11,9 @@ import com.google.common.collect.ImmutableList;
  * Indexing information retrieved from a {@link Term} representing the entire
  * configuration to rewrite. In particular, it currently only retrieves indexing
  * information from {@code k} cells and {@code IO stream} cells.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class ConfigurationTermIndex {
     private final List<IndexingPair> kCellIndexingPairs;
@@ -21,7 +21,7 @@ public class ConfigurationTermIndex {
     private final List<IndexingPair> outstreamIndexingPairs;
     private final int maxInputBufLen;
     private final int maxOutputBufLen;
-    
+
     public ConfigurationTermIndex(List<IndexingPair> normalIndexingPairs,
             List<IndexingPair> instreamIndexingPairs,
             List<IndexingPair> outstreamIndexingPairs, int maxInputBufLen,
@@ -32,7 +32,7 @@ public class ConfigurationTermIndex {
         this.maxInputBufLen = maxInputBufLen;
         this.maxOutputBufLen = maxOutputBufLen;
     }
-    
+
     public List<IndexingPair> getKCellIndexingPairs() {
         return kCellIndexingPairs;
     }
@@ -48,7 +48,7 @@ public class ConfigurationTermIndex {
     public int maxInputBufLen() {
         return maxInputBufLen;
     }
-    
+
     public int maxOutputBufLen() {
         return maxOutputBufLen;
     }

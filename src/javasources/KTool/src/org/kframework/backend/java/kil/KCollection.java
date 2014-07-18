@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 
 /**
  * Represents either a {@link KList} or a {@link KSequence}.
- * 
+ *
  * @author AndreiS
  */
 @SuppressWarnings("serial")
@@ -28,7 +28,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     /**
      * Returns a view of the fragment of this {@code KCollection} that starts
      * from the specified {@code fromIndex}.
-     * 
+     *
      * @param fromIndex
      *            the start index of the fragment
      * @return a view of the specified fragment
@@ -51,7 +51,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     /**
      * Returns the size of the contents of this {@code KCollection}.
-     * 
+     *
      * @see {@link KCollection#contents}
      * @return the size of the contents
      */
@@ -59,7 +59,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public final int size() {
         return getContents().size();
     }
-    
+
     /**
      * {@code KCollection} is guaranteed to have only one frame; thus, they can
      * always be used in the left-hand side of a rule.
@@ -86,7 +86,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         hashCode = hashCode * Utils.HASH_PRIME + getContents().hashCode();
         return hashCode;
     }
-    
+
     @Override
     protected final boolean computeHasCell() {
         for (Term term : getContents()) {
@@ -133,7 +133,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      * To be more specific, a {@code KItem} can be promoted to a single-element
      * {@code KSequence} and, similarly, a {@code KSequence} can be promoted to
      * a single-element {@code KList}.
-     * 
+     *
      * @param term
      *            the given term to be promoted
      * @param kind
@@ -165,7 +165,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      * To be more specific, a single-element {@code KList} can be degraded to a
      * {@code KSequence} and, similarly, a single-element {@code KSequence} can
      * be degraded to a {@code KItem}.
-     * 
+     *
      * @param term
      *            the given term to be degraded
      * @return the resulting term after kind degradation

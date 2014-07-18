@@ -8,11 +8,11 @@ module FOL
   syntax Fol ::= Bool
                | "notFol" Fol [function]
                > left:
-	         Fol "andFol" Fol [left, function]
-	       | Fol "orFol"  Fol [left, function]
-	       > left: 
-	         "forall"  Set "." Fol [binder, function]
-	       | "exists"  Set "." Fol [binder, function]
+             Fol "andFol" Fol [left, function]
+           | Fol "orFol"  Fol [left, function]
+           > left:
+             "forall"  Set "." Fol [binder, function]
+           | "exists"  Set "." Fol [binder, function]
 
   syntax String ::= "checkSat" "(" Fol ")" [function]
   syntax String ::= "SMTLibQuery" "(" Fol ")" [function, klabel(SMTLibQuery)]

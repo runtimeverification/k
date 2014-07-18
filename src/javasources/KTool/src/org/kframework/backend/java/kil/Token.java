@@ -67,7 +67,7 @@ public abstract class Token extends Term implements Immutable {
     public Set<Variable> variableSet() {
         return Collections.emptySet();
     }
-   
+
     @Override
     protected final boolean computeHasCell() {
         return false;

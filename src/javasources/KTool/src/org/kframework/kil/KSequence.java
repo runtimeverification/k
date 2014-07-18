@@ -45,7 +45,7 @@ public class KSequence extends Collection {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public KSequence shallowCopy() {
         return new KSequence(this);

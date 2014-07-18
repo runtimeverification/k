@@ -15,7 +15,7 @@ public class Evaluator extends PrePostTransformer {
         super(context);
         this.getPostTransformer().addTransformer(new LocalEvaluator(constraint, context));
     }
-    
+
     public static Term evaluate(Term term, TermContext context) {
         return Evaluator.evaluate(term, null, context);
     }

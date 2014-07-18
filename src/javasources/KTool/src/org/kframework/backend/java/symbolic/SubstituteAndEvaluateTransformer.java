@@ -19,16 +19,16 @@ import org.kframework.kil.ASTNode;
  * Comparing to the implementation using {@link PrePostTransformer} and
  * {@link LocalTransformer}, this implementation derives
  * {@link CopyOnWriteTransformer} directly and, thus, is much more efficient.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
-    
+
     protected final Map<Variable, ? extends Term> substitution;
-    
+
     protected boolean copyOnShareSubstAndEval = false;
-    
+
     /*
      * YilongL: it turns out that not doing variableSet update along with
      * substituteAndEvaluate costs significant overhead; not sure why but I am
@@ -39,7 +39,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
         super(context);
         this.substitution = substitution;
     }
-    
+
     protected boolean proceed(JavaSymbolicObject object) {
         Set<Variable> set1 = object.variableSet();
         Set<Variable> set2 = substitution.keySet();
@@ -55,7 +55,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
         }
         return false;
     }
-    
+
     @Override
     public ASTNode transform(BitVector bitVector) {
         return bitVector;
@@ -125,14 +125,14 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(KItemProjection kItemProjection) {
-        return proceed(kItemProjection) ? 
+        return proceed(kItemProjection) ?
                 ((KItemProjection) super.transform(kItemProjection)).evaluateProjection() :
                 kItemProjection;
     }
 
     @Override
     public ASTNode transform(KItem kItem) {
-        return proceed(kItem) ? 
+        return proceed(kItem) ?
                 ((KItem) super.transform(
                         BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem, context)))
                 .evaluateFunction(copyOnShareSubstAndEval, context) : kItem;

@@ -3,9 +3,9 @@ package org.kframework.backend.java.symbolic;
 
 /**
  * An interface for the plugin of the pluggable KAST checker.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 interface KastStructureCheckerPlugin {
 
@@ -14,7 +14,7 @@ interface KastStructureCheckerPlugin {
      * called from
      * {@code PluggableKastStructureChecker#register(KastStructureCheckerPlugin)}
      * .
-     * 
+     *
      * @param checker
      *            the given checker
      */
@@ -24,7 +24,7 @@ interface KastStructureCheckerPlugin {
      * Resets the state of this plugin in order to check a new term.
      */
     void reset();
-    
+
     LocalVisitor getPreVisitor();
 
     LocalVisitor getPostVisitor();

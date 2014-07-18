@@ -38,7 +38,7 @@ public class CheckVariables extends BasicVisitor {
     public static final String UNBOUND_VARS = "hasUnboundVars";
 
     KompileOptions options;
-    
+
     public CheckVariables(Context context) {
         super(context);
         options = context.kompileOptions;
@@ -73,7 +73,7 @@ public class CheckVariables extends BasicVisitor {
                                 + " admit fresh variables.", getName(), node
                                 .getFilename(), node.getLocation()));
             }
-            
+
             if (current == right  && !inCondition) {
                  Integer i = fresh.get(node);
                  if (i == null) i = new Integer(1);

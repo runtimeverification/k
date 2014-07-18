@@ -62,7 +62,7 @@ public class KItemProjection extends Term {
     protected int computeHash() {
         return term.hashCode();
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         return term.hasCell();

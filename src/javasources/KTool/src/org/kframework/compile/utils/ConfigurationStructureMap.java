@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * A Map from cell names to {@link ConfigurationStructure} representing the cell
  * contents and attributes.
- * 
+ *
  * @author Traian
  */
 public class ConfigurationStructureMap implements
@@ -61,11 +61,11 @@ public class ConfigurationStructureMap implements
         }
         return cfgStr;
     }
-    
+
     /**
      * Returns the position of a cell declared under the {@code Cell} of this
      * {@code ConfigurationStructureMap}.
-     * 
+     *
      * @param cellLabel
      *            the cell label
      * @return if found, the position of the cell starting from 0; otherwise, -1

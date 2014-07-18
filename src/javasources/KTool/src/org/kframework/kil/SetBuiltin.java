@@ -27,18 +27,18 @@ public class SetBuiltin extends CollectionBuiltin {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public DataStructureBuiltin shallowCopy(Collection<Term> baseTerms) {
         return new SetBuiltin(sort(), baseTerms, elements());
     }
-    
+
     @Override
     public CollectionBuiltin shallowCopy(Collection<Term> baseTerms,
             Collection<Term> elements) {
         return new SetBuiltin(sort(), baseTerms, elements);
     }
-    
+
     @Override
     public Term toKApp(Context context) {
         List<Term> items = new ArrayList<>();

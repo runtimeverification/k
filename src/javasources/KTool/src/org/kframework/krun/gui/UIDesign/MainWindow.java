@@ -25,14 +25,14 @@ public class MainWindow extends JFrame {
     JTabbedPane tabbedPanel;
     JMenuBar menuBar;
     JMenu menu;
-    
+
     public final Object lock = new Object();
     private boolean error;
-    
+
     public static MainWindow instance() {
         return window;
     }
-    
+
     public boolean error() {
         return error;
     }

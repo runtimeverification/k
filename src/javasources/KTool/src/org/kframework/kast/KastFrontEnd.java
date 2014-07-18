@@ -32,7 +32,7 @@ import com.beust.jcommander.ParameterException;
 public class KastFrontEnd {
 
     /**
-     * 
+     *
      * @param args
      * @return true if the application terminated normally; false otherwise
      */
@@ -43,21 +43,21 @@ public class KastFrontEnd {
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kast");
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KastOptions.Experimental.class));
-            
+
             if (options.global.help) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
                 return true;
             }
-            
+
             if (options.helpExperimental) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
-                return true;    
+                return true;
             }
-            
+
             if (options.global.version) {
                 String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.print(msg);
@@ -67,12 +67,12 @@ public class KastFrontEnd {
             String stringToParse = options.stringToParse();
             String source = options.source();
 
-        
+
             org.kframework.kil.Definition javaDef = null;
             File compiledFile = options.definition();
             Context context;
             KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
-            
+
             File defXml;
             if (kompileOptions.backend == Backend.MAUDE) {
                 defXml = new File(compiledFile.getAbsolutePath() + "/defx-maude.bin");
@@ -82,15 +82,15 @@ public class KastFrontEnd {
                 throw new AssertionError("currently only two execution backends are supported: MAUDE and JAVA");
             }
             if (!defXml.exists()) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                         "Could not find the compiled definition.", null, defXml.getAbsolutePath()));
             }
-            
+
             //merge kast options into kompile options object
             kompileOptions.global = options.global;
             context = new Context(kompileOptions);
             context.kompiled = compiledFile;
-            
+
             javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
             javaDef = new FlattenModules(context).compile(javaDef, null);
             javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
@@ -103,7 +103,7 @@ public class KastFrontEnd {
                 ASTNode out = ProgramLoader.processPgm(stringToParse, source, javaDef, sort, context, options.parser);
                 StringBuilder kast;
                 if (options.experimental.pretty) {
-                    IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(), 
+                    IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),
                             options.experimental.auxTabSize, options.experimental.tabSize);
                     KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
                     kastFilter.visitNode(out);
@@ -114,7 +114,7 @@ public class KastFrontEnd {
                     kast = maudeFilter.getResult();
                     kast.append(K.lineSeparator);
                 }
-    
+
                 try {
                     Writer outWriter = new OutputStreamWriter(System.out);
                     try {
@@ -125,7 +125,7 @@ public class KastFrontEnd {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-    
+
                 Stopwatch.instance().printIntermediate("Maudify Program");
                 Stopwatch.instance().printTotal("Total");
                 return true;

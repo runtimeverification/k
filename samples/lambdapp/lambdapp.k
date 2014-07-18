@@ -3,19 +3,19 @@ require "../lambda/lambda.k"
 
 module LAMBDAPP-SYNTAX
   imports LAMBDA-SYNTAX
-  
-  syntax Exp ::= "let" Id "=" Exp "in" Exp  
-               | "letrec" Id "=" Exp "in" Exp  
+
+  syntax Exp ::= "let" Id "=" Exp "in" Exp
+               | "letrec" Id "=" Exp "in" Exp
                | "if" Exp "then" Exp "else" Exp
-               > "mu" Id "." Exp       [binder, latex(\mu{#1}.{#2})] 
+               > "mu" Id "." Exp       [binder, latex(\mu{#1}.{#2})]
   syntax Val ::= Int | Bool
 
   syntax Id ::= "+" | "*" | "/" | "<=" | "ite" | "callcc"
 
 //@ Desugaring conditional into ite with thunks. Assuming that ``\$thunk'' cannot be used in programs
   syntax Id ::= "$thunk"
-  rule if E:Exp then E1:Exp else E2:Exp 
-    => (ite E (lambda $thunk . E1) (lambda $thunk . E2)) $thunk  
+  rule if E:Exp then E1:Exp else E2:Exp
+    => (ite E (lambda $thunk . E1) (lambda $thunk . E2)) $thunk
    [macro]
 
 //@ Desugaring let constructs into more basic ones
@@ -28,7 +28,7 @@ module LAMBDAPP-SYNTAX
 endmodule
 
 module LAMBDAPP
-  imports LAMBDAPP-SYNTAX 
+  imports LAMBDAPP-SYNTAX
   imports LAMBDA
 
 //@Recursion
@@ -41,9 +41,9 @@ module LAMBDAPP
   rule <= I1:Int I2:Int => I1 <=Int I2
 
 //@Conditional
-  syntax Id ::= "t" | "e" 
+  syntax Id ::= "t" | "e"
   // this does not prevent the user from using t and e as Id in programs
-  rule ite true => lambda t . lambda e . t 
+  rule ite true => lambda t . lambda e . t
   rule ite false => lambda t . lambda e . e
 
 //@Call/CC
@@ -51,14 +51,14 @@ module LAMBDAPP
 
   rule <k> (callcc V:Val => V cc(K)) ~> K:K </k>
   rule <k> (cc(K) V:Val) ~> _ =>  V ~> K </k>
-  
+
 
 //@ Adding $\mall{white}{in}{}$ and $\mall{white}{out}{}$ cells for I/O
   configuration <k> $PGM:Exp </k>
                 <in stream="stdin"> .List </in>
                 <out stream="stdout"> .List </out>
 
-  rule <k> read => I ...</k> 
+  rule <k> read => I ...</k>
        <in> ListItem(I:Int) => . ...</in>
 
 
@@ -67,15 +67,15 @@ module LAMBDAPP
   rule [print] : <k> print I:Int => (lambda dummy . dummy) ...</k>
        <out>... (. => ListItem(I)) </out>
 
-/*@ 
- Since our evaluation strategy is topmost call-by-value, we need to add 
+/*@
+ Since our evaluation strategy is topmost call-by-value, we need to add
  the predicate below to specify that an id applied to a value is a value,
  thus allowing the evaluation of the second argument for arithmetic operators.
  However, we want exclude if-then-else from these ids because evaluating
  its branches might lead to non-termination in the presence of $\mu$.
  We also exclude print as it is side-effecting.
 */
-  rule isVal(X:Id V:Val) => true 
+  rule isVal(X:Id V:Val) => true
    when X =/=K print andBool X =/=K ite
    [anywhere]
 endmodule

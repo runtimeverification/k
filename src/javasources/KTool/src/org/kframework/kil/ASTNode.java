@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
  */
 public abstract class ASTNode implements Serializable {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
     /**
@@ -25,7 +25,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Initializes an ASTNode from XML describing the parse tree
-     * 
+     *
      * @param elem
      *            The XML element describing the ASTNode
      */
@@ -35,7 +35,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Retrieves the location from an XML element
-     * 
+     *
      * @param elem
      * @return the location stored in XML or Constants.GENERATED_LOCATION if no location found.
      */
@@ -48,7 +48,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Retrieves the file name from an XML element
-     * 
+     *
      * @param elem
      * @return the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
      */
@@ -61,7 +61,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Copy constructor
-     * 
+     *
      * @param astNode
      */
     public ASTNode(ASTNode astNode) {
@@ -77,7 +77,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Constructor with specified location and filename.
-     * 
+     *
      * @param loc
      * @param file
      */
@@ -93,7 +93,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Retrieves the location of the current ASTNode.
-     * 
+     *
      * @return recorded location or Constants.GENERATED_LOCATION if no recorded location found.
      */
     public String getLocation() {
@@ -102,7 +102,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Sets the location or removes it if appropriate.
-     * 
+     *
      * @param loc
      */
     public void setLocation(String loc) {
@@ -111,7 +111,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Retrieves the filename of the current ASTNode.
-     * 
+     *
      * @return recorded filename or Constants.GENERATED_FILENAME if no recorded location found.
      */
     public String getFilename() {
@@ -120,7 +120,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Sets the filename or removes it if appropriate.
-     * 
+     *
      * @param file
      */
     public void setFilename(String file) {
@@ -133,7 +133,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Appends an attribute to the list of attributes.
-     * 
+     *
      * @param key
      * @param val
      */
@@ -143,7 +143,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Appends an attribute to the list of attributes.
-     * 
+     *
      * @param attr
      */
     public void addAttribute(Attribute attr) {
@@ -185,7 +185,7 @@ public abstract class ASTNode implements Serializable {
     }
     /**
      * Retrieves the attribute by key from the list of attributes
-     * 
+     *
      * @param key
      * @param prefix  whether it should look for a key having {@key} as a prefix
      * @return a value for key in the list of attributes or the default value.
@@ -202,7 +202,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Updates the value of an attribute in the list of attributes.
-     * 
+     *
      * @param key
      * @param val
      */
@@ -229,7 +229,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Sets the attributes object associated to this ASTNode.
-     * 
+     *
      * @param attrs
      */
     public void setAttributes(Attributes attrs) {
@@ -238,7 +238,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Retrieves the syntax production descendants of this ASTNode by attribute key.
-     * 
+     *
      * @param key
      * @return Set<Production> object containing the production descendants
      */
@@ -250,6 +250,6 @@ public abstract class ASTNode implements Serializable {
      * @return a copy of the ASTNode containing the same fields.
      */
     public abstract ASTNode shallowCopy();
-    
+
     protected abstract <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E;
 }

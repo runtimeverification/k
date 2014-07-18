@@ -6,7 +6,7 @@ require "symbolic-k.k"
   Each binary operation _andBool_ , _orBool_, notBool_, and _impliesBool_
   is replaced by a corresponding label which can have a variable number of arguments:
   '#andBool, '#orBool, '#notBool (_impliesBool_ is translated using '#notBool and '#orBool).
-  Once the transformation is done then distributivity, negation, and De Morgan's laws are 
+  Once the transformation is done then distributivity, negation, and De Morgan's laws are
   applied until we reach DNF.
 */
 module DNF
@@ -17,7 +17,7 @@ module DNF
   syntax KLabel ::= "'#notBool"
   syntax KLabel ::= "'#orBool" [predicate]
 
-  // transforms a boolean term into the equivalent DNF one 
+  // transforms a boolean term into the equivalent DNF one
   syntax K ::= dnf(Bool) [function]
 
   // literals are DNF
@@ -28,13 +28,13 @@ module DNF
   rule '#andBool(_:KList,, ((B1:Bool impliesBool B2:Bool) =>  '#orBool('#notBool(B1),,B2)) ,, _:KList ) [anywhere,simplification]
   rule '#orBool(_:KList,, ((B1:Bool impliesBool B2:Bool) =>  '#orBool('#notBool(B1),,B2)) ,, _:KList ) [anywhere, simplification]
   rule '#notBool(((B1:Bool impliesBool B2:Bool) =>  '#orBool('#notBool(B1),,B2))) [anywhere, simplification]
-  
+
   // De Morgan for andBool
   rule dnf(notBool(B1:Bool andBool B2:Bool)) => '#orBool('#notBool(B1) ,, '#notBool(B2)) [anywhere, simplification]
   rule '#andBool(_:KList,, ((notBool(B1:Bool andBool B2:Bool)) => '#orBool('#notBool(B1) ,, '#notBool(B2))) ,, _:KList ) [anywhere, simplification]
   rule '#andBool(((notBool(B1:Bool andBool B2:Bool)) => '#orBool('#notBool(B1) ,, '#notBool(B2))) ,, _:KList ) [anywhere, simplification]
   rule '#orBool(_:KList,, ((notBool(B1:Bool andBool B2:Bool)) => '#orBool('#notBool(B1) ,, '#notBool(B2))) ,, _:KList ) [anywhere, simplification]
-  
+
   // De Morgan for orBool
   rule dnf(notBool(B1:Bool orBool B2:Bool)) => '#andBool('#notBool(B1) ,, '#notBool(B2)) [anywhere, simplification]
   rule '#andBool(_:KList,, ((notBool(B1:Bool orBool B2:Bool)) => '#andBool('#notBool(B1) ,, '#notBool(B2))) ,, _:KList ) [anywhere, simplification]
@@ -65,7 +65,7 @@ module DNF
   rule dnf(B1:Bool orBool B2:Bool) => '#orBool(B1,,B2) [anywhere, simplification]
   rule '#andBool(_:KList,, ((B1:Bool orBool B2:Bool) => '#orBool(B1,,B2)) ,, _:KList) [anywhere, simplification]
   rule '#orBool(_:KList,, ((B1:Bool orBool B2:Bool) => '#orBool(B1,,B2)) ,, _:KList) [anywhere, simplification]
-  
+
   // negations
   rule notBool('#andBool(KL:KList)) => '#orBool('#notBool(KL),,.KList) [anywhere, simplification]
   rule notBool('#orBool(KL:KList))  => '#andBool('#notBool(KL),,.KList) [anywhere, simplification]
@@ -86,13 +86,13 @@ module DNF
   rule isBool('#orBool(_:KList)) => true
 
 
-  // Distribute notBool 
+  // Distribute notBool
   rule '#notBool(B:Bool,,Rest:KList) => notBool(B),,'#notBool(Rest) [anywhere]
   rule '#notBool(.KList) => .KList [anywhere]
 
   // apply distributivity: List x List and Element x List
   syntax KList ::= distrAnd(KList,KList) [function]
-  	         | distrAndBool(Bool, KList) [function]
+               | distrAndBool(Bool, KList) [function]
   rule distrAnd((B:Bool,,Rest:KList), KL:KList) => (distrAndBool(B, KL),,distrAnd(Rest, KL))
   rule distrAnd(.KList, _) => .KList
   rule distrAndBool(B:Bool, B':Bool,,KL:KList) => '#andBool(B,,B'),,distrAndBool(B, KL)
@@ -125,8 +125,8 @@ module SIMPLIFICATION
 
   // Do not attach sorts to these variables other than K
   rule '#andBool(_,, B:Bool,, _ ,, (B => .KList) ,, _ ) [anywhere]
-  rule '#andBool(_,, B,, _ ,, B' ,, _ ) => false when B |- (notBool B') [anywhere]    
-  rule '#orBool(_,,B,, _ ) => true when B [anywhere]    
+  rule '#andBool(_,, B,, _ ,, B' ,, _ ) => false when B |- (notBool B') [anywhere]
+  rule '#orBool(_,,B,, _ ) => true when B [anywhere]
 
   // these rule make sense for symbolic boolean expressions
   rule B ==Bool true => B [simplification, anywhere]
@@ -140,9 +140,9 @@ module SIMPLIFICATION
   // andBool, orBool, notBool
   syntax Bool ::= unflat(K) [function]
 
-  rule unflat('#orBool(B,,Rest)) => unflat(B) orBool unflat('#orBool(Rest)) [anywhere] 
+  rule unflat('#orBool(B,,Rest)) => unflat(B) orBool unflat('#orBool(Rest)) [anywhere]
   rule unflat('#orBool(.KList)) => false [anywhere]
-  rule unflat('#andBool(B,,Rest)) => unflat(B) andBool unflat('#andBool(Rest)) [anywhere] 
+  rule unflat('#andBool(B,,Rest)) => unflat(B) andBool unflat('#andBool(Rest)) [anywhere]
   rule unflat('#andBool(.KList)) => true [anywhere]
   rule unflat('#notBool(B)) => notBool unflat(B) [anywhere]
   rule unflat(B:Bool) => B when isLiteral(B) [anywhere]
@@ -162,7 +162,7 @@ endmodule
 */
 module PROOF-BASIC
   imports BOOL-HOOKS
-  
+
   // deduction relation syntax
   syntax Bool ::= Bool "|-" Bool [function]
 
@@ -170,7 +170,7 @@ module PROOF-BASIC
   rule '#andBool(_,,B,,_) |- B => true
 
   // B /\ not B makes the conjunction false
-  rule '#andBool(B1,,B,,B2) => false 
+  rule '#andBool(B1,,B,,B2) => false
       when '#andBool(B1,,B2) |- (notBool B)
 
 endmodule
@@ -181,7 +181,7 @@ endmodule
 module GCD
   imports BOOL-HOOKS
   imports INT-HOOKS
-  imports PROOF-BASIC 
+  imports PROOF-BASIC
 
   // gcd function syntax
   syntax Int ::= "gcd" "(" Int "," Int ")" [function, smtlib(gcd)]

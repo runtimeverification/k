@@ -2,7 +2,7 @@
 require "builtins/list.k"
 
 module TEST
-  imports LIST 
+  imports LIST
   configuration <k> print(7) </k> <out stream="stdout"> .List </out>
   syntax KItem ::= print(Int)
   rule <k> print(I:Int) => .K ...</k> <out>... .List => ListItem(I) </out>

@@ -16,7 +16,7 @@ public class SearchResults {
     private List<SearchResult> solutions;
     private DirectedGraph<KRunState, Transition> graph;
     private boolean isDefaultPattern;
-    
+
     protected Context context;
 
     public SearchResults(List<SearchResult> solutions, DirectedGraph<KRunState, Transition> graph, boolean isDefaultPattern, Context context) {
@@ -37,7 +37,7 @@ public class SearchResults {
                 solutionStrings.add("\n" + unparser.getResult());
             } else {
                 boolean empty = true;
-                
+
                 StringBuilder varStringBuilder = new StringBuilder();
                 for (String variable : substitution.keySet()) {
                     UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
@@ -73,9 +73,9 @@ public class SearchResults {
     public List<SearchResult> getSolutions() {
         return solutions;
     }
-    
+
     public boolean isDefaultPattern(){
-        
+
         return this.isDefaultPattern;
     }
 }

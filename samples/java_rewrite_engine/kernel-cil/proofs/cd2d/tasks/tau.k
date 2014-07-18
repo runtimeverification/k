@@ -12,13 +12,13 @@ double tau_vv(double s_x, double s_y, double v_x, double v_y){
 module TAU-RULE
   rule <threads>
            <thread>...
-	     <k> tau_vv(Sx:Float, Sy:Float, Vx:Float, Vy:Float) => V:Float </k>
+         <k> tau_vv(Sx:Float, Sy:Float, Vx:Float, Vy:Float) => V:Float </k>
              <env> GENV </env>
-	   ...</thread>
+       ...</thread>
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>
-    requires DISTANCE(Sx) andBool DISTANCE(Sy) 
+    requires DISTANCE(Sx) andBool DISTANCE(Sy)
      andBool VELOCITY(Vx) andBool VELOCITY(Vy)
      ensures absFloat(V -Float tauR(Sx, Sy, Vx, Vy, 0.0, 300.0)) <=Float E_tau
 endmodule

@@ -64,7 +64,7 @@ public class Ambiguity extends Collection {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /*@
 This is the symbolic semantics of IMP enriched with arrays and Hoare logic.
-The semantics, gets as input an IMP program, annotated with pre and post 
+The semantics, gets as input an IMP program, annotated with pre and post
 conditions and invariants.
 */
 require "symbolic-array.k"
@@ -50,9 +50,9 @@ module IMP-SYNTAX
   syntax Post  ::= "post" ":" Assert
   syntax Program ::= "int" AExps ";" Pre Post Stmt
 
-  // Values   
+  // Values
   syntax Val ::= Int | Bool | Array
-               | "array" "(" Int "," Int ")" 
+               | "array" "(" Int "," Int ")"
                | "loc" "(" AExp ")"
   syntax AExp ::= Val
 
@@ -76,7 +76,7 @@ module IMP
   rule <k> X:Id => V ...</k> <env>... X |-> L ...</env> <store>... L:Int |-> V:Val </store>
   rule <k> array(L:Int, Size:Int)[I:Int] => lookup(L +Int I) ...</k>
        <store>... L |-> _:#Int ...</store>
- 
+
   rule <k> array(L:Int, Size:Int)[I:Int] => select(A, I) ...</k>
        <store>... L |-> A:Array ...</store>
 
@@ -97,7 +97,7 @@ module IMP
 // lvalue
   syntax AExp ::= "lvalue" "(" K ")"
 
-// Local variable                                                                                        
+// Local variable
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
     [structural]
 
@@ -111,9 +111,9 @@ module IMP
   context lvalue(HOLE[_])
 
   rule <k> loc(L:Int) = I:Int; => . ...</k> <store>... L |-> (_ => I) ...</store>
-  rule <k> loc(array(L:Int, Size:Int)[I:Int]) = V:Val; => . ...</k> 
+  rule <k> loc(array(L:Int, Size:Int)[I:Int]) = V:Val; => . ...</k>
        <store>... L |-> (A:Array => store(A, I, V)) ...</store>
-  rule <k> lvalue(array(L:Int, Size:Int)[I:Int]) => loc(L +Int I) ...</k> 
+  rule <k> lvalue(array(L:Int, Size:Int)[I:Int]) => loc(L +Int I) ...</k>
        <store>... L |-> _:Int ...</store>
 
   rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
@@ -121,7 +121,7 @@ module IMP
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
-  rule <k> int (X:Id,Xs:AExps => Xs); _:Pre _:Post _:Stmt </k> 
+  rule <k> int (X:Id,Xs:AExps => Xs); _:Pre _:Post _:Stmt </k>
        <env> Rho:Map (.Map => X |-> !L:Int) </env>
        <store>... .Map => (!L |-> 0) </store>
        when notBool (X in keys(Rho))
@@ -142,7 +142,7 @@ module IMP
   rule <T> <k> B1:Bool && B2:BExp => B2 ...</k>
        <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition> ...</T>
        when checkSat(Phi andBool B1) ==K "sat" [transition]
-  
+
   rule <T> <k> B1:Bool && B2:Bool => false ...</k>
        <condition> Phi:Bool => Phi andBool notBool B1 </condition> ...</T>
        when checkSat(Phi andBool notBool B1) ==K "sat" [transition]
@@ -159,7 +159,7 @@ module IMP
   rule <k> (pre: Psi:Assert ~> post: Psi':Assert ~> S:Stmt)
             =>
             assume(Psi) ~> S ~> match(A2M(Psi'))
-       </k> 
+       </k>
 
 //@ Assume
   syntax KItem ::= "assume" "(" K ")"
@@ -221,7 +221,7 @@ module IMP
 
   rule <k> evalAssert(Phi:K) ~> restore(E':Map, Phi':K)
            =>
-           m2k(E, Phi) 
+           m2k(E, Phi)
        ...</k>
        <store> E:Map => E' </store>
        <condition> _ => Phi' </condition>
@@ -242,7 +242,7 @@ module IMP
   rule toSet(X:Id, Is:Ids) => SetItem(#symInt(X)) toSet(Is)
 
 
-//@ Utils              
+//@ Utils
   syntax Bool ::= "mapLeftEq" "(" Map "," Map ")" [function]
   rule mapLeftEq(X:Int |-> V1:Int Rest:Map, X |-> V2 Rest2:Map) => V1 ==Int V2 andBool mapLeftEq(Rest, Rest2)
   rule mapLeftEq(X:Int |-> array(AL:Int, Sz:Int) Rest:Map, X |-> array(AL, Sz) Rest2:Map) => mapLeftEq(Rest, Rest2)
@@ -252,15 +252,15 @@ module IMP
   rule mapLeftEq(M:Map, .) => false when notBool(keys(M) ==K .Set)
 
 //@ Compiler issues
-  // subsort issue? 
+  // subsort issue?
   rule isSymbolicInt(select(A:Array, I:Int)) => true [anywhere]
   rule isInt(select(A:Array, I:Int)) => true [anywhere]
 // contexts limitation: array(I,S)[V] must be a KResult to cool lvalue(array(I,S)[V])
   rule lvalue(array(I:Int, S:Int)[V:Int]) => lvalue(loc(array(I:Int, S:Int)[V:Int]))
-  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays    
+  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
 
 // forall binders
   rule <k> X:Id => #symInt(X) ...</k>
        <env> Rho </env>
-       when notBool(X in keys(Rho)) 
+       when notBool(X in keys(Rho))
 endmodule

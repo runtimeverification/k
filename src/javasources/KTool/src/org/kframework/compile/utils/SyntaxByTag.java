@@ -19,13 +19,13 @@ public class SyntaxByTag extends BasicVisitor {
 
     @Override
     public Void visit(Configuration node, Void _) { return null; }
-    
+
     @Override
     public Void visit(org.kframework.kil.Context node, Void _) { return null; }
-    
+
     @Override
     public Void visit(Rule node, Void _) { return null; }
-    
+
     @Override
     public Void visit(Production node, Void _) {
         if (key.equals("") || node.containsAttribute(key, prefix))
@@ -56,5 +56,5 @@ public class SyntaxByTag extends BasicVisitor {
         visitor.visitNode(node);
         return visitor.getProductions();
     }
-    
+
 }

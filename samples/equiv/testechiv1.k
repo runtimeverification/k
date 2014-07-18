@@ -28,10 +28,10 @@ module TESTECHIV1
     rule <k1> 'L1Exp_:_(_:Id,, GeneratedFreshVar0:Exp) => GeneratedFreshVar0
        ...</k1>
 
-    rule <k1> 'L1Stmt_:_(_:Id,, GeneratedFreshVar1:Stmt) => 
+    rule <k1> 'L1Stmt_:_(_:Id,, GeneratedFreshVar1:Stmt) =>
       GeneratedFreshVar1 ...</k1>
 
-    rule <k1> 'L1Code_:_(_:Id,, GeneratedFreshVar2:Code) => 
+    rule <k1> 'L1Code_:_(_:Id,, GeneratedFreshVar2:Code) =>
       GeneratedFreshVar2 ...</k1>
 
     syntax KResult ::= Int
@@ -59,16 +59,16 @@ module TESTECHIV1
 
     rule <k1> if false then _:K else S2:Stmt => S2 ...</k1>
 
-    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else 
+    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else
       skip ...</k1>
 
     rule <k1> 'L1Exp_:_(_:Id,, GeneratedFreshVar3:Exp) => GeneratedFreshVar3
        ...</k1>
 
-    rule <k1> 'L1Stmt_:_(_:Id,, GeneratedFreshVar4:Stmt) => 
+    rule <k1> 'L1Stmt_:_(_:Id,, GeneratedFreshVar4:Stmt) =>
       GeneratedFreshVar4 ...</k1>
 
-    rule <k1> 'L1Code_:_(_:Id,, GeneratedFreshVar5:Code) => 
+    rule <k1> 'L1Code_:_(_:Id,, GeneratedFreshVar5:Code) =>
       GeneratedFreshVar5 ...</k1>
 
     syntax FExp ::= Id
@@ -89,7 +89,7 @@ module TESTECHIV1
                  | Bool
                  > "L2Val" Id ":" Val
 
-    rule <k2> 'L2FExp_:_(_:Id,, GeneratedFreshVar6:FExp) => 
+    rule <k2> 'L2FExp_:_(_:Id,, GeneratedFreshVar6:FExp) =>
       GeneratedFreshVar6 ...</k2>
 
     rule <k2> 'L2Val_:_(_:Id,, GeneratedFreshVar7:Val) => GeneratedFreshVar7
@@ -113,7 +113,7 @@ module TESTECHIV1
 
     rule <k2> fix X:Id E:FExp => E [ (fix X E) / X ] ...</k2>
 
-    rule <k2> 'L2FExp_:_(_:Id,, GeneratedFreshVar8:FExp) => 
+    rule <k2> 'L2FExp_:_(_:Id,, GeneratedFreshVar8:FExp) =>
       GeneratedFreshVar8 ...</k2>
 
     rule <k2> 'L2Val_:_(_:Id,, GeneratedFreshVar9:Val) => GeneratedFreshVar9

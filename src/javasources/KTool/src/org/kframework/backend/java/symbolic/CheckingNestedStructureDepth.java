@@ -14,19 +14,19 @@ import org.kframework.kil.Production;
 /**
  * Checks that the depth of certain nested structures should not exceed some
  * given limits.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin {
 
-    private final Map<String, Integer> nestedLevelOfSort = new HashMap<String, Integer>(); 
-    private final Map<String, Integer> maxNestedLevelOfSort = new HashMap<String, Integer>(); 
+    private final Map<String, Integer> nestedLevelOfSort = new HashMap<String, Integer>();
+    private final Map<String, Integer> maxNestedLevelOfSort = new HashMap<String, Integer>();
 
     private final LocalVisitor preVisitor = new IncNestedLevelOfSort();
     private final LocalVisitor postVisitor = new DecNestedLevelOfSort();
     private PluggableKastStructureChecker checker;
-    
+
     public CheckingNestedStructureDepth() {
         // TODO(YilongL): handle user-specified depth properly
         this.setMaxNestedLevelOf("AExp", 2);
@@ -38,15 +38,15 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
     public void registerTo(PluggableKastStructureChecker checker) {
         assert this.checker == null;
         this.checker = checker;
-    }        
-    
+    }
+
     @Override
     public void reset() {
         nestedLevelOfSort.clear();
         preVisitor.resetProceed();
         postVisitor.resetProceed();
     }
-    
+
     @Override
     public LocalVisitor getPreVisitor() {
         return preVisitor;
@@ -56,14 +56,14 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
     public LocalVisitor getPostVisitor() {
         return postVisitor;
     }
-    
+
     public void setMaxNestedLevelOf(String sort, int level) {
         maxNestedLevelOfSort.put(sort, level);
     }
-    
-    private static final Map<KLabelConstant, Set<String>> cachedSortsOfKLabel = 
+
+    private static final Map<KLabelConstant, Set<String>> cachedSortsOfKLabel =
             new HashMap<KLabelConstant, Set<String>>();
-    
+
     private Set<String> computeSortsOf(KLabelConstant kLabel) {
         Set<String> sorts = cachedSortsOfKLabel.get(kLabel);
         if (sorts == null) {
@@ -88,23 +88,23 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             if (!(kItem.kLabel() instanceof KLabelConstant)) {
                 return;
             }
-            
+
             KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
             for (String sort : computeSortsOf(kLabel)) {
                 check(sort);
-            }            
+            }
         }
-        
+
         @Override
         public void visit(Variable variable) {
             check(variable.sort());
         }
-        
+
         private void check(String sort) {
             if (nestedLevelOfSort.get(sort) == null) {
                 nestedLevelOfSort.put(sort, 0);
             }
-            
+
             int depth = nestedLevelOfSort.get(sort) + 1;
             Integer maxDepth = maxNestedLevelOfSort.get(sort);
             if ((maxDepth != null) && (depth > maxDepth)) {
@@ -116,7 +116,7 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             }
         }
     }
-    
+
     private class DecNestedLevelOfSort extends LocalVisitor {
         @Override
         public void visit(KItem kItem) {
@@ -124,16 +124,16 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             if (!(kItem.kLabel() instanceof KLabelConstant)) {
                 return;
             }
-            
-            KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();            
+
+            KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
             for (String sort : computeSortsOf(kLabel)) {
                 nestedLevelOfSort.put(sort, nestedLevelOfSort.get(sort) - 1);
-            }            
+            }
         }
-        
+
         @Override
         public void visit(Variable variable) {
             nestedLevelOfSort.put(variable.sort(), nestedLevelOfSort.get(variable.sort()) - 1);
-        }        
+        }
     }
 }

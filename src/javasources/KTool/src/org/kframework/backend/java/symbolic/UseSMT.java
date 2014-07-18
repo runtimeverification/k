@@ -40,28 +40,28 @@ public class UseSMT implements Serializable {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
             KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
             Solver solver = context.MkSolver();
-            
-            BoolExpr query = (BoolExpr) ((Z3Term) term.accept(transformer)).expression(); 
+
+            BoolExpr query = (BoolExpr) ((Z3Term) term.accept(transformer)).expression();
             solver.Assert(query);
-            
-            
+
+
             if(solver.Check() == Status.SATISFIABLE){
-                
+
                 Model model = solver.Model();
                 FuncDecl[] consts = model.ConstDecls();
-                
+
                 for(int i=0 ; i < consts.length; ++i){
-                    
+
                     Expr resultFrg = model.ConstInterp(consts[i]);
-                                        
+
                     Variable akey = new Variable(consts[i].Name().toString(), consts[i].Range().toString());
-                    
+
                     IntToken avalue = IntToken.of(Integer.parseInt(resultFrg.toString()));
-                    
+
                     resultBuilder.put((Term)akey, (Term)avalue);
                 }
-                
-                
+
+
             }
             context.Dispose();
         } catch (Z3Exception e) {

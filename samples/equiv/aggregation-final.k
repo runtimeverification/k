@@ -52,7 +52,7 @@ module RESULT
 
     rule <k1> if false then _:K else S2:Stmt => S2 ...</k1>
 
-    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else 
+    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else
       skip ...</k1>
 
     syntax FExp ::= Id
@@ -116,12 +116,12 @@ module RESULT
             </second>
         </aggregation>
 
-      rule 
+      rule
 <t1>
 <k1> LStmt Label:Id : skip ~> (while (IName:Id i< NName:Id) do (((SName:Id := (SName i+ IName))
                   ; (IName := (IName i+ 1))) ; (LStmt Label : skip))) => .K
            </k1>
-             <env1>... 
+             <env1>...
                       (IName |-> I:Int)
              (NName |-> N:Int)
                        (SName |-> S:Int)
@@ -129,7 +129,7 @@ module RESULT
              </t1>
 <k2>
                 LFExp Label:Id : (((fix F:Id (lambda X:Id .
-(lambda Y:Id . (fif (X f== 0) fthen Y felse 
+(lambda Y:Id . (fif (X f== 0) fthen Y felse
            (let NIName:Id be X f- 1 in
             (let SEName:Id be Y f+ X in
           (LFExp Label :

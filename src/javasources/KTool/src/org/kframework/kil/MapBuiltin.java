@@ -40,7 +40,7 @@ public class MapBuiltin extends DataStructureBuiltin {
     public Term shallowCopy() {
         return new MapBuiltin(dataStructureSort, baseTerms, elements);
     }
-    
+
     @Override
     public DataStructureBuiltin shallowCopy(java.util.Collection<Term> baseTerms) {
         return new MapBuiltin(dataStructureSort, baseTerms, elements);
@@ -72,14 +72,14 @@ public class MapBuiltin extends DataStructureBuiltin {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Term toKApp(Context context) {
         List<Term> items = new ArrayList<>();
         Map<Term, String> unparsed = new HashMap<>();
-        
+
         for (java.util.Map.Entry<Term, Term> entry : elements().entrySet()) {
-            Term item = KApp.of(sort().elementLabel(), 
+            Term item = KApp.of(sort().elementLabel(),
                     entry.getKey(), entry.getValue());
             items.add(item);
             UnparserFilterNew unparser = new UnparserFilterNew(context);

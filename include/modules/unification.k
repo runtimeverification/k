@@ -109,14 +109,14 @@ Note that ~> is not handled  and neither are binding operations.
   rule substitute(X:K,,K:K,,X) => K   [structural, anywhere]
   rule substitute(X:K,,K:K,,L:KLabel(Ks:KList))
     => L:KLabel(substitute(X,,K,,Ks))
-    when X =/=K L:KLabel(Ks) 
+    when X =/=K L:KLabel(Ks)
      andBool (isCollection(L(Ks)) =/=K true)
    [structural, anywhere]
 
   //TODO:  Consider implementing substitute for other collections, too
-  rule substitute(X:K,, K:K,, L:List,,Ks:KList) 
+  rule substitute(X:K,, K:K,, L:List,,Ks:KList)
     => substituteList(X, K, L),, substitute(X,, K,, Ks)
-  rule substitute(X:K,, K:K,, S:Set,,Ks:KList) 
+  rule substitute(X:K,, K:K,, S:Set,,Ks:KList)
     => substituteSet(X, K, S),, substitute(X,, K,, Ks)
 
   syntax Set ::= substituteSet(K,K,Set) [function]

@@ -4,7 +4,7 @@ module BOOL-EXP-SYNTAX
   syntax Exp ::= Bool
 endmodule
 
-module BOOL-EXP 
+module BOOL-EXP
   imports VAL
-  syntax Val ::= Bool 
+  syntax Val ::= Bool
 endmodule

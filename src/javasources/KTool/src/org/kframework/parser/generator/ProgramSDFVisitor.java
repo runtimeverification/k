@@ -28,9 +28,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect all the syntax declarations into containers according to their function.
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class ProgramSDFVisitor extends BasicVisitor {
 

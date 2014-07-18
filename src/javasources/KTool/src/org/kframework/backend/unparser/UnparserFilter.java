@@ -34,7 +34,7 @@ public class UnparserFilter extends NonCachingVisitor {
     public void setIndenter(Indenter indenter) {
         this.indenter = indenter;
     }
-    
+
     public UnparserFilter(org.kframework.kil.loader.Context context) {
         this(false, context);
     }
@@ -358,7 +358,7 @@ public class UnparserFilter extends NonCachingVisitor {
             assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
             indenter.write(((Token) label).value());
         } else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
-            
+
             String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";
 
             if (child instanceof KList) {

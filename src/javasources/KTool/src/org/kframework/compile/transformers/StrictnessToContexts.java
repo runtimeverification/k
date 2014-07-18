@@ -253,7 +253,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                         Term arg = termCons.getContents().get(-1 + Integer.parseInt(newStrictAttrs.get(j).getKey()));
                         if (kompileOptions.experimental.testGen) {
                             KApp kResultPred = KApp.of(KLabelConstant.KRESULT_PREDICATE, arg);
-                            sideCond = sideCond == null ? kResultPred : 
+                            sideCond = sideCond == null ? kResultPred :
                                 KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, sideCond, kResultPred);
                         } else {
                             arg.setSort(KSorts.KRESULT);

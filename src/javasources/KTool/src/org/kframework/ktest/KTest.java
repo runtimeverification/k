@@ -103,7 +103,7 @@ public class KTest {
     }
 
     /**
-     * 
+     *
      * @param args command line arguments
      * @return true if the application terminated normally; false otherwise
      */

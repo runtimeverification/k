@@ -7,14 +7,14 @@ module MAP
 
   /*@\section{Description} The Map represents a generalized associative array;
    arbitrary keys can be paired with arbitrary values; the values can later
-   be referenced using the key. 
+   be referenced using the key.
   */
 
   /*@ Construct a new Map consisting of key-value pairs of multiple Maps (deep copy) (TODO: double-check this):*/
   syntax Map ::= Map Map        [left,function, hook(Map:__), klabel('_Map_)]
   /*@  Construct an empty Map: */
   syntax Map ::= ".Map"         [function, hook(Map:.Map)]
-  /*@ This construct is used to refer to key-value pairs within a map, with the 
+  /*@ This construct is used to refer to key-value pairs within a map, with the
    key on the left and the value on the right: */
   syntax Map ::= K "|->" K      [function, hook(Map:_|->_), latex({#1}\mapsto{#2})]
                // breaks klabel uniqueness
@@ -50,7 +50,7 @@ module MAP
   //rule M:Map[K1:K <- K2:K] => K1 |-> K2 M
   //when notBool(K1 in keys(M))
 
-  /*@ Update the first map by adding all key-value pairs in the second map. 
+  /*@ Update the first map by adding all key-value pairs in the second map.
    If a key in the first map exists also in the second map, its associated value
    will be overwritten by the value from the second map.*/
   // TODO: rename operator
@@ -68,12 +68,12 @@ module MAP
 //  rule M:Map[.KList <- undef] => M
 
   /*@ Construct a Set consisting of all keys in the Map:*/
-	syntax Set ::= keys(Map)    [function, hook(Map:keys)]
+    syntax Set ::= keys(Map)    [function, hook(Map:keys)]
 //  rule keys(K:K |-> _ M:Map) => SetItem(K) keys(M)
 //  rule keys(.Map) => .Set
 
   /*@ Construct a List consisting of all values in the Map: */
-	syntax List ::= values(Map)    [function]
+    syntax List ::= values(Map)    [function]
 //  rule values(_ |-> K:K M:Map) => BagItem(K) values(M)
 //  rule values(.Map) => .Bag
 

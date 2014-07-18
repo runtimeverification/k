@@ -15,7 +15,7 @@ public class BinaryLoader {
                 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(fileName)))) {
             serializer.writeObject(o);
         } catch (IOException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "Could not write to " + fileName));
         }
     }
@@ -30,11 +30,11 @@ public class BinaryLoader {
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, 
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                     KException.KExceptionGroup.CRITICAL, "Kompiled definition is out of date with "
                     + "the latest version of the K tool. Please re-run kompile and try again."));
         } catch (IOException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "Could not read from " + fileName));
         }
         return null;

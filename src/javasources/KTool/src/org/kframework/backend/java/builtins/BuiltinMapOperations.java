@@ -22,15 +22,15 @@ public class BuiltinMapOperations {
 
     public static BuiltinSet keys(BuiltinMap term, TermContext context) {
         Preconditions.checkArgument(!term.hasFrame(), "argument " + term + " has frame");
-        
+
         Set<Term> elements = new HashSet<Term>(term.getEntries().keySet());
         return new BuiltinSet(elements);
     }
 
     public static BuiltinMap construct(BuiltinMap term1, BuiltinMap term2, TermContext context) {
-        Preconditions.checkArgument(!term1.hasFrame() || !term2.hasFrame(), 
+        Preconditions.checkArgument(!term1.hasFrame() || !term2.hasFrame(),
                 "both map arguments have frames, but the combined map cannot have two frames");
-        
+
         Variable frame = null;
         if (term1.hasFrame()) {
             frame = term1.frame();
@@ -47,7 +47,7 @@ public class BuiltinMapOperations {
 
     public static BuiltinMap update(BuiltinMap term, Term key, Term value, TermContext context) {
         Preconditions.checkArgument(!term.hasFrame(), "argument " + term + " has frame");
-        
+
         BuiltinMap.Builder builder = BuiltinMap.builder();
         builder.putAll(term.getEntries());
         builder.put(key, value);
