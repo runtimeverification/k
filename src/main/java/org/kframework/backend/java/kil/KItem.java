@@ -239,18 +239,18 @@ public final class KItem extends Term {
 
         if (kLabelConstant.isSortPredicate()
                 || !context.definition().functionRules().get(kLabelConstant).isEmpty()
-                || context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
+                || context.global().builtins.isBuiltinKLabel(kLabelConstant)) {
             evaluable = true;
         }
         return evaluable;
     }
 
     public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
-        return context.global.kItemOps.evaluateFunction(this, copyOnShareSubstAndEval, context);
+        return context.global().kItemOps.evaluateFunction(this, copyOnShareSubstAndEval, context);
     }
 
     public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
-        return context.global.kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
+        return context.global().kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
     }
 
     public static class KItemOperations {
@@ -311,10 +311,10 @@ public final class KItem extends Term {
 
             KList kList = (KList) kItem.kList;
 
-            if (context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
+            if (context.global().builtins.isBuiltinKLabel(kLabelConstant)) {
                 try {
                     Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                    Term result = context.global.builtins.invoke(context, kLabelConstant, arguments);
+                    Term result = context.global().builtins.invoke(context, kLabelConstant, arguments);
                     if (result != null) {
                         assert result.kind() == Kind.KITEM:
                             "unexpected kind " + result.kind() + " of term " + result + ";"

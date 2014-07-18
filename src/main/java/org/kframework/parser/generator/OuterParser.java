@@ -19,7 +19,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.inject.Inject;
@@ -88,7 +88,7 @@ public class OuterParser {
         File file = new File(parentFile.getCanonicalFile().getParent() + "/" + fileName);
         if (file.exists())
             return file;
-        file = new File(KPaths.getKBase(false) + "/include/" + fileName);
+        file = new File(JarInfo.getKBase(false) + "/include/" + fileName);
         if (file.exists())
             return file;
 
@@ -119,7 +119,7 @@ public class OuterParser {
                 }
             }
 
-            boolean predefined = file.getCanonicalPath().startsWith(KPaths.getKBase(false) + File.separator + "include");
+            boolean predefined = file.getCanonicalPath().startsWith(JarInfo.getKBase(false) + File.separator + "include");
             if (!predefined)
                 context.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
 

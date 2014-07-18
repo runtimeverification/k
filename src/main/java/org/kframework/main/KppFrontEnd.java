@@ -4,6 +4,7 @@ package org.kframework.main;
 import java.io.*;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.FirstArg;
 
 import com.google.inject.AbstractModule;
@@ -23,8 +24,9 @@ public class KppFrontEnd extends FrontEnd {
     KppFrontEnd(
             KExceptionManager kem,
             GlobalOptions globalOptions,
-            @FirstArg String fileName) {
-        super(kem, globalOptions, USAGE, "");
+            @FirstArg String fileName,
+            JarInfo jarInfo) {
+        super(kem, globalOptions, USAGE, "", jarInfo);
         this.fileName = fileName;
     }
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest;
 
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 public class ExecNames {
 
@@ -28,8 +28,8 @@ public class ExecNames {
     public static String getExecutable(String exe) {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
-            return KPaths.getKBase(false) + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
+            return JarInfo.getKBase(false) + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
         }
-        return KPaths.getKBase(false) + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
+        return JarInfo.getKBase(false) + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
     }
 }

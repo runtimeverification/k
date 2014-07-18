@@ -15,7 +15,7 @@ public class TermContext extends JavaSymbolicObject {
 
     private BigInteger counter = BigInteger.ZERO;
 
-    public final GlobalContext global;
+    private final GlobalContext global;
 
     private ConstrainedTerm.Data topConstrainedTermData;
 
@@ -52,6 +52,10 @@ public class TermContext extends JavaSymbolicObject {
 
     public FileSystem fileSystem() {
         return global.fs;
+    }
+
+    public GlobalContext global() {
+        return global;
     }
 
     public ConstrainedTerm.Data getConstrainedTermData() {

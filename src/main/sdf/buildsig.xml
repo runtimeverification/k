@@ -3,29 +3,7 @@
 <project basedir="." default="all.signature" name="K3 build signature files">
 
 	<!-- set the native directory depending on the os -->
-	<condition property="osNativesDir" value="linux">
-		<and>
-			<os family="unix" />
-			<not>
-				<os family="mac" />
-			</not>
-		</and>
-	</condition>
-	<condition property="osNativesDir" value="macosx">
-		<os family="mac" />
-	</condition>
-	<condition property="osNativesDir" value="cygwin">
-		<os family="windows" />
-	</condition>
-
-	<!-- compile and call the k.utils.AntPropertyHelper class to get some properties from artifacts.xml
-	representing version numbers from spoofax library -->
-
-	<!-- weird stuff to make it work:
-	- create the path for the AntPropertyHelper
-	- compile the AntPropertyHelper
-	-->
-	<property name="build.strategoxt.sdf" value="${basedir}/../../lib/native/${osNativesDir}/" />
+	<property name="build.strategoxt.sdf" value="${basedir}/bin/" />
 
 	<!-- call both targets -->
 	<target name="all.signature" depends="concrete.signature" />
@@ -43,6 +21,9 @@
 	<target name="concrete.signature.helper" unless="concrete.signature.available">
 		<!-- pack the definition into a single .def file -->
 		<mkdir dir="include" />
+                <chmod perm="a+x">
+                  <fileset dir="bin/" includes="*" />
+                </chmod>
                 <echo message="${org.kframework.dependencies:strategoxt:jar}" />
 		<java classname="run" fork="true" failonerror="true" classpath="${compile_classpath}">
 			<arg value="org.strategoxt.tools.main-pack-sdf" />

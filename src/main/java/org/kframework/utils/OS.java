@@ -6,19 +6,19 @@ import java.io.File;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.general.GlobalSettings;
 
 public enum OS {
-    OSX(true, "macosx"), UNIX(true, "linux"), UNKNOWN(false, null), WIN(false, "cygwin");
+    OSX(true), UNIX(true), UNKNOWN(false), WIN(false);
 
-    private OS(boolean isPosix, String libDir) {
+    private OS(boolean isPosix) {
         this.isPosix = isPosix;
-        this.libDir = KPaths.getKBase(false) + "/lib/native/" + libDir;
+        this.binDir = JarInfo.getKBase(false) + "/bin";
     }
 
     public final boolean isPosix;
-    private final String libDir;
+    private final String binDir;
 
     public static OS current() {
         String osString = System.getProperty("os.name").toLowerCase();
@@ -41,7 +41,7 @@ public enum OS {
         if (this == WIN) {
             executable = executable + ".exe";
         }
-        File f = new File(libDir, executable);
+        File f = new File(binDir, executable);
         if (isPosix) {
             f.setExecutable(true, false);
         }

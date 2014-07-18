@@ -1,9 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kframework.k</groupId>
   <artifactId>k</artifactId>
-  <version>3.0</version>
+  <version>3.5-SNAPSHOT</version>
   <name>K Framework Tool</name>
+
+  <scm>
+    <connection>scm:git:https://github.com/kframework/k.git</connection>
+  </scm>
 
   <repositories>
     <repository>
@@ -27,6 +33,10 @@
     <stratego.src.dir>${basedir}/target/generated-sources/sdf</stratego.src.dir>
     <stratego.package.dir>${stratego.src.dir}/org/kframework/parser/concrete/lib</stratego.package.dir>
     <config>tests/config.xml</config>
+    <ktestDir>${project.basedir}</ktestDir>
+    <base>unified-builtins2</base>
+    <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
@@ -66,11 +76,6 @@
       <version>4.0</version>
     </dependency>
     <dependency>
-      <groupId>uk.com.robust-it</groupId>
-      <artifactId>cloning</artifactId>
-      <version>1.9.0</version>
-    </dependency>
-    <dependency>
       <groupId>net.sf.jung</groupId>
       <artifactId>jung-visualization</artifactId>
       <version>2.0.1</version>
@@ -81,9 +86,9 @@
       <version>2.0.1</version>
     </dependency>
     <dependency>
-      <groupId>com.beust</groupId>
+      <groupId>org.kframework.dependencies</groupId>
       <artifactId>jcommander</artifactId>
-      <version>1.35</version>
+      <version>1.35-custom</version>
     </dependency>
     <dependency>
       <groupId>net.sf.jung</groupId>
@@ -93,7 +98,13 @@
     <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0</version>
+      <classifier>${native.classifier}</classifier>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -131,6 +142,11 @@
       <version>1.3.0</version>
     </dependency>
     <dependency>
+      <groupId>uk.com.robust-it</groupId>
+      <artifactId>cloning</artifactId>
+      <version>1.9.0</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
@@ -140,6 +156,7 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>1.9.5</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
@@ -147,14 +164,57 @@
       <version>1.0</version>
     </dependency>
     <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>strj</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>com.microsoft.z3</artifactId>
       <version>4.3.2.5a45711f22d9</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3java</artifactId>
+      <version>4.3.2.5a45711f22d9</version>
+      <type>${native.library.type}</type>
+      <classifier>${native.classifier}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3</artifactId>
+      <version>4.3.2.5a45711f22d9</version>
+      <type>${native.library.type}</type>
+      <classifier>${native.classifier}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
+      <artifactId>maude</artifactId>
+      <version>2.6</version>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
+      <artifactId>gappa</artifactId>
+      <version>1.0</version>
+      <type>${native.exe.type}</type>
+      <classifier>${native.os.classifier}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
+      <artifactId>sdf2table</artifactId>
+      <version>1.0</version>
+      <type>${native.exe.type}</type>
+      <classifier>${native.os.classifier}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
+      <artifactId>strj</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
+      <artifactId>implodePT</artifactId>
+      <version>1.0</version>
+      <type>${native.exe.type}</type>
+      <classifier>${native.os.classifier}</classifier>
+      <scope>provided</scope>
     </dependency>
 <!--
     <dependency>
@@ -170,6 +230,9 @@
       <resource>
         <directory>${sdf.resource.dir}</directory>
       </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
     </resources>
     <plugins>
       <plugin>
@@ -181,10 +244,47 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.5.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <version>1.0-alpha-8</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.7</version>
+        <dependencies>
+       </dependencies>
         <executions>
           <execution>
+            <id>init-changed-files</id>
+            <phase>validate</phase>
+            <configuration>
+              <target>
+                <exec executable="git" outputproperty="git.diff.out" failifexecutionfails="false">
+                  <arg value="diff" />
+                  <arg value="${base}" />
+                  <arg value="--name-only" />
+                </exec>
+                <condition property="git.diff.out" value="">
+                  <isset property="git.diff.out" />
+                </condition>
+                <filelist id="git.diff.filelist" dir="." files="${git.diff.out}" />
+                <pathconvert property="git.modified.files" pathsep="," refid="git.diff.filelist" dirsep="/">
+                  <map from="${basedir}/" to="" />
+                </pathconvert>
+              </target>
+              <exportAntProperties>true</exportAntProperties>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>generate-sdf</id>
             <phase>generate-sources</phase>
             <configuration>
               <target>
@@ -194,6 +294,36 @@
                 </copy>
                 <ant antfile="buildsig.xml" dir="target/sdf" />
                 <ant antfile="buildstr.xml" dir="target/sdf" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>exec-ktest</id>
+            <phase>integration-test</phase>
+            <configuration>
+              <target>
+                <exec dir="${ktestDir}" executable="${project.build.directory}/release/k/bin/ktest${native.script.extension}">
+                  <arg value="${config}" />
+                  <arg value="-v" />
+                  <arg value="--report" />
+                </exec>
+              </target>
+              <skip>${skipKTest}</skip>
+              <failOnError>false</failOnError>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>cleanup-ktest</id>
+            <phase>post-integration-test</phase>
+            <configuration>
+              <target>
+                <move file="${ktestDir}/junit-reports" tofile="target/ktest-reports" failonerror="false" />
               </target>
             </configuration>
             <goals>
@@ -213,7 +343,7 @@
               <goal>javacc</goal>
             </goals>
           </execution>
-       </executions>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -235,6 +365,41 @@
         </executions>
       </plugin>
       <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.17</version>
+	<configuration>
+          <workingDirectory>src/test/resources</workingDirectory>
+          <environmentVariables>
+            <LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}${path.separator}${project.build.directory}/dependency</LD_LIBRARY_PATH>
+            <DYLD_LIBRARY_PATH>${env.DYLD_LIBRARY_PATH}${path.separator}${project.build.directory}/dependency</DYLD_LIBRARY_PATH>
+            <PATH>${env.PATH}${path.separator}${project.build.directory}/dependency</PATH>
+          </environmentVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.17</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify-ktest</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <skipITs>${skipKTest}</skipITs>
+              <reportsDirectory>${project.build.directory}/ktest-reports</reportsDirectory>
+              <summaryFile>${project.build.directory}/ktest-reports/summary.xml</summaryFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.5</version>
         <configuration>
@@ -242,8 +407,13 @@
             <manifest>
               <mainClass>org.kframework.main.Main</mainClass>
               <addClasspath>true</addClasspath>
-              <classpathPrefix>dependency</classpathPrefix>
             </manifest>
+            <manifestEntries>
+              <Implementation-Revision>${buildNumber}</Implementation-Revision>
+              <Implementation-Branch>${scmBranch}</Implementation-Branch>
+              <Implementation-Date>${timestamp}</Implementation-Date>
+              <Implementation-Version>${project.version}</Implementation-Version>
+            </manifestEntries>
           </archive>
         </configuration>
       </plugin>
@@ -252,40 +422,316 @@
         <version>2.8</version>
         <executions>
           <execution>
-            <id>copy-dependencies</id>
-            <phase>package</phase>
+            <id>copy-build-dependencies</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>initialize</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.kframework.dependencies</groupId>
+                  <artifactId>sdf2table</artifactId>
+                  <version>1.0</version>
+                  <type>${native.exe.type}</type>
+                  <classifier>${native.os.classifier}</classifier>
+                  <destFileName>sdf2table${native.exe.extension}</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.kframework.dependencies</groupId>
+                  <artifactId>implodePT</artifactId>
+                  <version>1.0</version>
+                  <type>${native.exe.type}</type>
+                  <classifier>${native.os.classifier}</classifier>
+                  <destFileName>implodePT${native.exe.extension}</destFileName>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>target/sdf/bin</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-native-dependencies</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
+            <configuration>
+              <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <includeTypes>${native.library.type}</includeTypes>
+              <includeScope>runtime</includeScope>
+            </configuration>
           </execution>
         </executions>
-      </plugin>
+      </plugin><!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.3.1</version>
         <executions>
           <execution>
+            <phase>integration-test</phase>
             <goals>
               <goal>java</goal>
             </goals>
-            <phase>integration-test</phase>
             <configuration>
               <mainClass>org.kframework.main.Main</mainClass>
               <arguments>
                 <argument>-ktest</argument>
                 <argument>${config}</argument>
                 <argument>-v</argument>
-                <argument>--report</argument>
-                <argument>--programs</argument>
-                <argument>.</argument>
-                <argument>--results</argument>
-                <argument>.</argument>
+                <argument>-report</argument>
               </arguments>
             </configuration>
           </execution>
         </executions>
+      </plugin>-->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+          <shortRevisionLength>7</shortRevisionLength>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <formats>
+                <format>dir</format>
+              </formats>
+              <finalName>release</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/bin.xml</descriptor>
+          </descriptors>
+       </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.12.1</version>
+        <executions>
+          <execution>
+            <id>checkstyle-copyright</id>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${project.basedir}</sourceDirectory>
+              <includes>${git.modified.files}</includes>
+              <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
+              <failsOnError>true</failsOnError>
+              <consoleOutput>true</consoleOutput>
+              <excludes>**/com/davekoelle/**,src/main/sdf/syntax/Integration.sdf</excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>checkstyle-k</id>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${project.basedir}</sourceDirectory>
+              <includes>**/*.k</includes>
+              <configLocation>src/main/config/checkstyle-k.xml</configLocation>
+              <failsOnError>true</failsOnError>
+              <consoleOutput>true</consoleOutput>
+            </configuration>
+          </execution>
+          <execution>
+            <id>checkstyle-java</id>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>src</sourceDirectory>
+              <includes>**/*.java</includes>
+              <configLocation>src/main/config/checkstyle-java.xml</configLocation>
+              <suppressionsLocation>src/main/config/checkstyle-suppress.xml</suppressionsLocation>
+              <failsOnError>true</failsOnError>
+              <consoleOutput>true</consoleOutput>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <pushChanges>false</pushChanges>
+        </configuration>
       </plugin>
     </plugins>
   </build>
- </project>
+  <profiles>
+    <profile>
+      <id>linux</id>
+      <activation>
+        <os>
+          <family>Unix</family>
+          <name>!mac os x</name>
+        </os>
+      </activation>
+      <properties>
+        <native.library.type>so</native.library.type>
+        <native.library.prefix>lib</native.library.prefix>
+        <native.os.classifier>linux</native.os.classifier>
+        <native.classifier>linux${native.arch.classifier}</native.classifier>
+        <native.script.type>sh</native.script.type>
+        <native.exe.type>uexe</native.exe.type>
+        <native.exe.extension></native.exe.extension>
+        <native.script.extension></native.script.extension>
+        <native.path.variable>LD_LIBRARY_PATH</native.path.variable>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <native.library.type>dylib</native.library.type>
+        <native.library.prefix>lib</native.library.prefix>
+        <native.os.classifier>osx</native.os.classifier>
+        <native.classifier>osx</native.classifier>
+        <native.script.type>sh</native.script.type>
+        <native.exe.type>uexe</native.exe.type>
+        <native.exe.extension></native.exe.extension>
+        <native.script.extension></native.script.extension>
+        <native.path.variable>DYLD_LIBRARY_PATH</native.path.variable>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+        </os>
+      </activation>
+      <properties>
+        <native.library.type>dll</native.library.type>
+        <native.library.prefix></native.library.prefix>
+        <native.os.classifier>windows</native.os.classifier>
+        <native.classifier>windows${native.arch.classifier}</native.classifier>
+        <native.script.type>bat</native.script.type>
+        <native.exe.type>exe</native.exe.type>
+        <native.exe.extension>.exe</native.exe.extension>
+        <native.script.extension>.bat</native.script.extension>
+        <native.path.variable>PATH</native.path.variable>
+        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.kframework.dependencies</groupId>
+          <artifactId>cygwin1</artifactId>
+          <version>1.0</version>
+          <type>dll</type>
+        </dependency>
+      </dependencies>
+      <build>
+      <plugins>
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.8</version>
+          <executions>
+            <execution>
+              <id>copy-windows-dependencies</id>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <phase>initialize</phase>
+              <configuration>
+                <includeArtifactIds>cygwin1</includeArtifactIds>
+                <outputDirectory>target/sdf/bin</outputDirectory>
+                  <stripVersion>true</stripVersion>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>amd64</id>
+      <activation>
+        <os>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <native.arch.classifier>64</native.arch.classifier>
+      </properties>
+    </profile>
+    <profile>
+      <id>x64</id>
+      <activation>
+        <os>
+          <arch>x64</arch>
+        </os>
+      </activation>
+      <properties>
+        <native.arch.classifier>64</native.arch.classifier>
+      </properties>
+    </profile>
+    <profile>
+      <id>x86_64</id>
+      <activation>
+        <os>
+          <arch>x86_64</arch>
+        </os>
+      </activation>
+      <properties>
+        <native.arch.classifier>64</native.arch.classifier>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>x86</id>
+      <activation>
+        <os>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+        <native.arch.classifier>32</native.arch.classifier>
+      </properties>
+    </profile>
+    <profile>
+      <id>i386</id>
+      <activation>
+        <os>
+          <arch>i386</arch>
+        </os>
+      </activation>
+      <properties>
+        <native.arch.classifier>32</native.arch.classifier>
+      </properties>
+    </profile>
+  </profiles>
+</project>

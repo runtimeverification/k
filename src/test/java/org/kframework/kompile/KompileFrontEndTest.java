@@ -10,8 +10,7 @@ import org.junit.Test;
 import org.kframework.backend.Backend;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BaseTestCase;
-import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.Stopwatch;
+import org.kframework.utils.file.JarInfo;
 import org.mockito.Mock;
 
 public class KompileFrontEndTest extends BaseTestCase {
@@ -20,13 +19,10 @@ public class KompileFrontEndTest extends BaseTestCase {
     Backend backend;
 
     @Mock
-    BinaryLoader loader;
-
-    @Mock
     DefinitionLoader defLoader;
 
     @Mock
-    protected Stopwatch sw;
+    JarInfo jarInfo;
 
     KompileOptions options = new KompileOptions();
 
@@ -34,7 +30,7 @@ public class KompileFrontEndTest extends BaseTestCase {
     public void testHelp() throws IOException {
         when(backend.getCompilationSteps()).thenThrow(new AssertionError());
         options.global.help = true;
-        new KompileFrontEnd(context, options, "foo", "", backend, sw, kem, loader, defLoader).main();
+        new KompileFrontEnd(context, options, "foo", "", backend, sw, kem, loader, defLoader, jarInfo).main();
         assertEquals("foo", stdout.toString());
     }
 
@@ -43,7 +39,14 @@ public class KompileFrontEndTest extends BaseTestCase {
     public void testExperimentalHelp() throws IOException {
         when(backend.getCompilationSteps()).thenThrow(new AssertionError());
         options.global.helpExperimental = true;
-        new KompileFrontEnd(context, options, "", "foo", backend, sw, kem, loader, defLoader).main();
+        new KompileFrontEnd(context, options, "", "foo", backend, sw, kem, loader, defLoader, jarInfo).main();
         assertEquals("foo", stdout.toString());
+    }
+
+    @Test
+    public void testVersion() {
+        options.global.version = true;
+        new KompileFrontEnd(context, options, "", "foo", backend, sw, kem, loader, defLoader, jarInfo).main();
+        verify(jarInfo).printVersionMessage();
     }
 }

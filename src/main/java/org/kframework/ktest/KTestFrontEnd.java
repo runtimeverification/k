@@ -11,6 +11,7 @@ import org.kframework.ktest.Test.TestSuite;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
@@ -53,8 +54,9 @@ public class KTestFrontEnd extends FrontEnd {
             KExceptionManager kem,
             GlobalOptions globalOptions,
             @Usage String usage,
-            @ExperimentalUsage String experimentalUsage) {
-        super(kem, globalOptions, usage, experimentalUsage);
+            @ExperimentalUsage String experimentalUsage,
+            JarInfo jarInfo) {
+        super(kem, globalOptions, usage, experimentalUsage, jarInfo);
         this.options = options;
         this.kem = kem;
     }

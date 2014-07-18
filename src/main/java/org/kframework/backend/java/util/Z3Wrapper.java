@@ -6,8 +6,7 @@ import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
-import org.kframework.utils.OS;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,24 +17,6 @@ import java.io.IOException;
 public class Z3Wrapper {
 
     public static boolean initialized = false;
-    public static com.microsoft.z3.Context newContext() throws Z3Exception {
-        if (!initialized) {
-            String libz3 = "libz3";
-            switch (OS.current()) {
-                case WIN:
-                    libz3 += ".dll";
-                    break;
-                case UNIX:
-                    libz3 += ".so";
-                    break;
-                case OSX:
-                    libz3 += ".dylib";
-            }
-            System.load(KPaths.getJavaLibraryPath() + File.separator + libz3);
-            initialized = true;
-        }
-        return new com.microsoft.z3.Context();
-    }
 
     public static final Z3Wrapper Z3_WRAPPER = new Z3Wrapper();
     public static Z3Wrapper instance() {
@@ -47,7 +28,7 @@ public class Z3Wrapper {
     public Z3Wrapper() {
         String s = "";
         try {
-            s = new String(Files.toByteArray(new File(KPaths.getZ3PreludePath())));
+            s = new String(Files.toByteArray(new File(JarInfo.getZ3PreludePath())));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -57,7 +38,7 @@ public class Z3Wrapper {
     public boolean checkQuery(String query) {
         boolean result = false;
         try {
-            com.microsoft.z3.Context context = newContext();
+            com.microsoft.z3.Context context = new com.microsoft.z3.Context();
             Solver solver = context.mkSolver();
             solver.add(context.parseSMTLIB2String(SMT_PRELUDE + query, null, null, null, null));
             result = solver.check() == Status.UNSATISFIABLE;

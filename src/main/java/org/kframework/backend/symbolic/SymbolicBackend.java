@@ -5,6 +5,7 @@ import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.FirstStep;
 import org.kframework.backend.LastStep;
+import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.unparser.UnparserFilter;
@@ -26,7 +27,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 import com.google.inject.Inject;
 
@@ -51,14 +52,12 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 
     @Override
     public Definition firstStep(Definition javaDef) {
-        String fileSep = System.getProperty("file.separator");
-        String propPath = KPaths.getKBase(false) + fileSep + "lib" + fileSep + "maude" +
-                fileSep;
+        String propPath = "/hooks/";
         Properties specialMaudeHooks = new Properties();
         Properties maudeHooks = new Properties();
         try {
-            FileUtil.loadProperties(maudeHooks, propPath + "MaudeHooksMap.properties");
-            FileUtil.loadProperties(specialMaudeHooks, propPath + "SpecialMaudeHooks.properties");
+            FileUtil.loadProperties(maudeHooks, KompileBackend.class, "MaudeHooksMap.properties");
+            FileUtil.loadProperties(specialMaudeHooks, KompileBackend.class, "SpecialMaudeHooks.properties");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,10 +78,10 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 
         new MaudeBackend(sw, context).run(javaDef);
 
-        String load = "load \"" + KPaths.getKBase(true) + KPaths.MAUDE_LIB_DIR + "/k-prelude\"\n";
+        String load = "load \"" + JarInfo.getKBase(true) + JarInfo.MAUDE_LIB_DIR + "/k-prelude\"\n";
 
         // load libraries if any
-        String maudeLib = "".equals(options.experimental.lib) ? "" : "load " + KPaths.windowfyPath(new File(options.experimental.lib).getAbsolutePath()) + "\n";
+        String maudeLib = "".equals(options.experimental.lib) ? "" : "load " + JarInfo.windowfyPath(new File(options.experimental.lib).getAbsolutePath()) + "\n";
         load += maudeLib;
 
         final String mainModule = javaDef.getMainModule();

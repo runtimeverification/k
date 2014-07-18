@@ -22,6 +22,7 @@ import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.FirstArg;
 import org.kframework.utils.inject.SecondArg;
 import org.kframework.utils.inject.CommonModule;
@@ -47,8 +48,9 @@ public class KagregFrontEnd extends FrontEnd {
             @FirstArg String firstDefinitionFileName,
             @SecondArg String secondDefinitionFileName,
             GlobalOptions globalOptions,
-            DefinitionLoader loader) {
-        super(kem, globalOptions, "Usage: kagreg <file1.k> <file2.k>", "");
+            DefinitionLoader loader,
+            JarInfo jarInfo) {
+        super(kem, globalOptions, "Usage: kagreg <file1.k> <file2.k>", "", jarInfo);
         this.firstDefinitionFileName = firstDefinitionFileName;
         this.secondDefinitionFileName = secondDefinitionFileName;
         this.globalOptions = globalOptions;

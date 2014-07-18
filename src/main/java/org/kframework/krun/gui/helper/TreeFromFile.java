@@ -10,7 +10,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 public class TreeFromFile {
 
@@ -37,7 +37,7 @@ public class TreeFromFile {
 
     // returns path to the ref-manual.k
     public String buildPathToFile() {
-        return KPaths.getKBase(false) + System.getProperty("file.separator") + "documentation"
+        return JarInfo.getKBase(false) + System.getProperty("file.separator") + "documentation"
                 + System.getProperty("file.separator") + "ref-manual.k";
     }
 

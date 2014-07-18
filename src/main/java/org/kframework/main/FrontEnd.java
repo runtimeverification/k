@@ -4,8 +4,7 @@ package org.kframework.main;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 public abstract class FrontEnd {
 
@@ -14,16 +13,19 @@ public abstract class FrontEnd {
     private final KExceptionManager kem;
     private final GlobalOptions globalOptions;
     private final String usage, experimentalUsage;
+    private final JarInfo jarInfo;
 
     public FrontEnd(
             KExceptionManager kem,
             GlobalOptions globalOptions,
             String usage,
-            String experimentalUsage) {
+            String experimentalUsage,
+            JarInfo jarInfo) {
         this.kem = kem;
         this.globalOptions = globalOptions;
         this.usage = usage;
         this.experimentalUsage = experimentalUsage;
+        this.jarInfo = jarInfo;
     }
 
     public boolean main() {
@@ -34,8 +36,7 @@ public abstract class FrontEnd {
             } else if (globalOptions.helpExperimental) {
                 System.out.print(experimentalUsage);
             } else if (globalOptions.version) {
-                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-                System.out.print(msg);
+                jarInfo.printVersionMessage();
             } else {
                 succeeded = run();
                 kem.print();

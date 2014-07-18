@@ -20,7 +20,7 @@ import org.strategoxt.lang.Strategy;
  * @see InteropRegisterer  This class registers java_strategy_0_0 for use.
  */
 public class java_strategy_0_0 extends Strategy {
-  
+
   public static java_strategy_0_0 instance = new java_strategy_0_0();
 
   @Override

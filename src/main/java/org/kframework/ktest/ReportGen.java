@@ -3,6 +3,7 @@ package org.kframework.ktest;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -10,8 +11,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
@@ -23,6 +26,8 @@ import java.util.Map;
 public class ReportGen {
 
     private final Map<String, List<Report>> reports;
+    private int count = 0;
+    private int failures = 0;
 
     public ReportGen() {
         reports = new HashMap<>();
@@ -32,12 +37,15 @@ public class ReportGen {
                            String stderr, String errorMsg) {
         getReportLst(definition).add(
                 Report.reportFailure(name, timeDelta, stdout, stderr, errorMsg));
+        failures++;
+        count++;
     }
 
     public void addSuccess(String definition, String name, long timeDelta, String stdout,
                            String stderr) {
         getReportLst(definition).add(
                 Report.reportSuccess(name, timeDelta, stdout, stderr));
+        count++;
     }
 
     public void save() throws ParserConfigurationException, TransformerException, IOException {
@@ -52,20 +60,33 @@ public class ReportGen {
         for (Map.Entry<String, List<Report>> e : reports.entrySet()) {
             Element elem = genElem(doc, e.getKey(), e.getValue());
 
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty("indent", "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-            // initialize StreamResult with File object to save to file
-            StreamResult result = new StreamResult(new StringWriter());
-            DOMSource source = new DOMSource(elem);
-            transformer.transform(source, result);
-
             File targetFile = new File(junitFolder.getAbsolutePath(),
-                    FilenameUtils.getPath(e.getKey()).replaceAll(File.separator, "-")
+                    StringUtils.replace(FilenameUtils.getPath(e.getKey()), File.separator, "-")
                             + FilenameUtils.getBaseName(e.getKey()) + ".xml");
-            IOUtils.write(result.getWriter().toString(), new FileOutputStream(targetFile));
+            writeXmlFile(targetFile, elem);
         }
+
+        Element elem = genSummary(doc, reports);
+        File targetFile = new File(junitFolder.getAbsolutePath(),
+                "summary.xml");
+        writeXmlFile(targetFile, elem);
+
+    }
+
+    private void writeXmlFile(File targetFile, Element elem)
+            throws TransformerConfigurationException,
+            TransformerFactoryConfigurationError, TransformerException,
+            IOException, FileNotFoundException {
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty("indent", "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+        // initialize StreamResult with File object to save to file
+        StreamResult result = new StreamResult(new StringWriter());
+        DOMSource source = new DOMSource(elem);
+        transformer.transform(source, result);
+
+        IOUtils.write(result.getWriter().toString(), new FileOutputStream(targetFile));
     }
 
     /**
@@ -82,6 +103,36 @@ public class ReportGen {
             testSuiteElem.appendChild(r.genElement(doc));
 
         return testSuiteElem;
+    }
+
+    private Element genSummary(Document doc, Map<String, List<Report>> reports) {
+        Element summary = doc.createElement("failsafe-summary");
+        String result;
+        if (count == 0) {
+            result = "254"; //NO_TESTS
+        } else if (failures > 0) {
+            result = "255"; //FAILURE
+        } else {
+            result = "0"; //SUCCESS
+        }
+        summary.setAttribute("result", result);
+        summary.setAttribute("timeout", "false");
+        Element completed = doc.createElement("completed");
+        completed.setTextContent(Integer.toString(count));
+        Element errors = doc.createElement("errors");
+        errors.setTextContent("0");
+        Element failures = doc.createElement("failures");
+        failures.setTextContent(Integer.toString(this.failures));
+        Element skipped = doc.createElement("skipped");
+        skipped.setTextContent("0");
+        Element failureMessage = doc.createElement("failureMessage");
+        summary.appendChild(completed);
+        summary.appendChild(errors);
+        summary.appendChild(failures);
+        summary.appendChild(skipped);
+        summary.appendChild(failureMessage);
+
+        return summary;
     }
 
     private List<Report> getReportLst(String definition) {

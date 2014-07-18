@@ -8,7 +8,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 import java.io.File;
 import java.util.Set;
@@ -49,7 +49,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
             }
 
         if (node.getSource() instanceof FileSource && (!((FileSource)node.getSource()).getFile().getAbsolutePath().startsWith(
-                KPaths.getKBase(false) + File.separator + "include"))
+                JarInfo.getKBase(false) + File.separator + "include"))
                 ) {
 
             // this handles the case when the user wants to

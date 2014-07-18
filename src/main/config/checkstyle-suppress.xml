@@ -6,5 +6,6 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-  <suppress checks="IllegalThrows" files=".*[\\/]src[\\/]javasources[\\/]KTool[\\/]test[\\/]"/>
+  <suppress checks="IllegalThrows" files="src[\\/]test[\\/]"/>
+  <suppress checks="IllegalThrows" files="[\\/]src[\\/]main[\\/]sdf[\\/]editor[\\/]java"/>
 </suppressions>

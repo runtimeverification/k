@@ -7,7 +7,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 import com.google.inject.Inject;
 
@@ -23,7 +23,7 @@ public class HtmlBackend extends BasicBackend {
     @Override
     public void run(Definition definition) {
         String fileSep = System.getProperty("file.separator");
-        String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
+        String htmlIncludePath = JarInfo.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
         HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath, context);
         htmlFilter.visitNode(definition);
 

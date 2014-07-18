@@ -10,7 +10,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
 
 public class KCheckFrontEnd {
     public static String output;
@@ -31,8 +30,8 @@ public class KCheckFrontEnd {
             //org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
 
         //if (cmd.hasOption("version")) {
-            String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-            System.out.println(msg);
+        //    String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+        //    System.out.println(msg);
             //return true;
         //}
 

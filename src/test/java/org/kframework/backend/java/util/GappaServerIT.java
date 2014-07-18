@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * @author Traian
  */
-public class GappaServerTest {
+public class GappaServerIT {
     @Test
     public void testProve1() throws Exception {
         boolean result = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [0,1] }");

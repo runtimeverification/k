@@ -4,6 +4,7 @@ package org.kframework.utils.options;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.junit.Test;
 
@@ -12,10 +13,10 @@ import com.beust.jcommander.JCommander;
 public class DefinitionLoadingOptionsTest {
 
     @Test
-    public void testReadDefinition() {
+    public void testReadDefinition() throws IOException {
         DefinitionLoadingOptions options = new DefinitionLoadingOptions();
-        new JCommander(options, "--directory", "share/test-files");
-        assertEquals(new File("share/test-files/test-kompiled"), options.definition());
+        new JCommander(options, "--directory", ".");
+        assertEquals(new File("test-kompiled").getCanonicalPath(), options.definition().getCanonicalPath());
         assertTrue(options.definition().exists());
         assertTrue(options.definition().isDirectory());
     }

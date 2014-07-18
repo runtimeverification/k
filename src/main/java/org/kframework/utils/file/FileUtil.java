@@ -124,8 +124,11 @@ public class FileUtil {
     /**
      * Loads the properties from the given file into the given Properties object.
      */
-    public static void loadProperties(Properties properties, String fileName) throws IOException {
-        FileInputStream inStream = new FileInputStream(fileName);
+    public static void loadProperties(Properties properties, Class<?> cls, String resourcePath) throws IOException {
+        InputStream inStream = cls.getResourceAsStream(resourcePath);
+        if (inStream == null) {
+            throw new IOException("Could not find resource " + resourcePath);
+        }
         properties.load(inStream);
     }
 }

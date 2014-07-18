@@ -8,7 +8,7 @@ import org.kframework.kil.FileSource;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 /**
  *
@@ -26,27 +26,27 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
             return null;
         }
         String filename = ((FileSource)node.getSource()).getFile().getAbsolutePath();
-        if ((!filename.startsWith(KPaths.getKBase(false) + File.separator + "include")
+        if ((!filename.startsWith(JarInfo.getKBase(false) + File.separator + "include")
                 && !filename.startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME))
-                || (filename.equals(KPaths.getKBase(false)
+                || (filename.equals(JarInfo.getKBase(false)
                         + File.separator + "include" + File.separator + "builtins"
                         + File.separator + "id.k"))
-                || (filename.equals(KPaths.getKBase(false)
+                || (filename.equals(JarInfo.getKBase(false)
                         + File.separator + "include" + File.separator + "builtins"
                         + File.separator + "int.k"))
-                || (filename.equals(KPaths.getKBase(false)
+                || (filename.equals(JarInfo.getKBase(false)
                         + File.separator + "include" + File.separator + "builtins"
                         + File.separator + "mint.k"))
-                || (filename.equals(KPaths.getKBase(false)
+                || (filename.equals(JarInfo.getKBase(false)
                         + File.separator + "include" + File.separator + "io"
                         + File.separator + "io.k"))
-                || (filename.equals(KPaths.getKBase(false)
+                || (filename.equals(JarInfo.getKBase(false)
                                 + File.separator + "include" + File.separator + "builtins"
                                 + File.separator + "float.k"))
-                || (filename.equals(KPaths.getKBase(false)
+                || (filename.equals(JarInfo.getKBase(false)
                         + File.separator + "include" + File.separator + "modules"
                         + File.separator + "k-functional-visitor.k"))
-                || (filename.equals(KPaths.getKBase(false)
+                || (filename.equals(JarInfo.getKBase(false)
                         + File.separator + "include" + File.separator + "modules"
                         + File.separator + "verification_lemmas.k"))) {
             return node;

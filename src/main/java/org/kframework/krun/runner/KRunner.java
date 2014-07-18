@@ -2,9 +2,9 @@
 package org.kframework.krun.runner;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.file.JarInfo;
 import org.kframework.krun.ioserver.main.MainServer;
 import org.kframework.krun.tasks.MaudeTask;
-import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
@@ -123,8 +123,8 @@ public class KRunner {
             if (!_noServer) {
                 ioServer = startServer();
             }
-            _maudeFileName = KPaths.windowfyPath(_maudeFileName);
-            _maudeCommandFileName = KPaths.windowfyPath(_maudeCommandFileName);
+            _maudeFileName = JarInfo.windowfyPath(_maudeFileName);
+            _maudeCommandFileName = JarInfo.windowfyPath(_maudeCommandFileName);
             String commandTemplate = "load {0}\nmod KRUNNER is including {1} .\neq #TCPPORT = {2,number,#} .\nendm\nload {3}\n";
             _maudeFileName = maudeEscapePath(_maudeFileName);
             _maudeCommandFileName = maudeEscapePath(_maudeCommandFileName);

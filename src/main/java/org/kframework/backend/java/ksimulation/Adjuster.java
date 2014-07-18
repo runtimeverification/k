@@ -14,7 +14,6 @@ import org.kframework.backend.java.symbolic.KILtoZ3;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
 import org.kframework.backend.java.symbolic.SymbolicRewriter;
-import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.krun.KRunExecutionException;
@@ -99,7 +98,7 @@ public class Adjuster {
         allVars.addAll(specVars.values());
 
 
-        com.microsoft.z3.Context context = Z3Wrapper.newContext();
+        com.microsoft.z3.Context context = new com.microsoft.z3.Context();
         KILtoZ3 transformer = new KILtoZ3(allVars, context);
 
         Solver solver = context.mkSolver();

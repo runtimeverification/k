@@ -481,7 +481,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         public boolean isFalse() {
-            return context.global.equalityOps.isFalse(this);
+            return context.global().equalityOps.isFalse(this);
         }
 
         /**

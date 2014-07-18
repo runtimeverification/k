@@ -9,7 +9,6 @@ import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
-import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -43,7 +42,7 @@ public class ConfigFileParser {
         this.cmdArgs = cmdArgs;
 
         // validate xml file structure
-        Source schemaFile = new StreamSource(new File(getSchema()));
+        Source schemaFile = new StreamSource(getClass().getResourceAsStream("ktest.xsd"));
         Source xmlFile = new StreamSource(configFile);
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(schemaFile);
@@ -444,10 +443,6 @@ public class ConfigFileParser {
         if (n == null)
             return def;
         return n.getNodeValue();
-    }
-
-    private String getSchema() {
-        return concat(KPaths.getKBase(false), concat("lib", "ktest.xsd"));
     }
 
     private String concat(String s1, String s2) {

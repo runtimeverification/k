@@ -77,6 +77,10 @@ public class KExceptionManager {
         register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, phase, null, node.getLocation(), node.getSource());
     }
 
+    public void registerInternalError(String message) {
+        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, null, null, null);
+    }
+
     public void registerInternalError(String message, Throwable e) {
         register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }

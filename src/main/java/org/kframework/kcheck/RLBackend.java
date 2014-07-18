@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.FirstStep;
+import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.maude.krun.MaudeKRun;
@@ -87,7 +88,7 @@ import org.kframework.krun.api.SearchType;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.JarInfo;
 
 public abstract class RLBackend extends BasicBackend implements Backend {
 
@@ -122,14 +123,12 @@ public abstract class RLBackend extends BasicBackend implements Backend {
 
     @Override
     public Definition firstStep(Definition javaDef) {
-        String fileSep = System.getProperty("file.separator");
-        String propPath = KPaths.getKBase(false) + fileSep + "lib" + fileSep
-                + "maude" + fileSep;
+        String propPath = "/hooks/";
         Properties specialMaudeHooks = new Properties();
         Properties maudeHooks = new Properties();
         try {
-            FileUtil.loadProperties(maudeHooks, propPath + "MaudeHooksMap.properties");
-            FileUtil.loadProperties(specialMaudeHooks, propPath + "SpecialMaudeHooks.properties");
+            FileUtil.loadProperties(maudeHooks, KompileBackend.class, "MaudeHooksMap.properties");
+            FileUtil.loadProperties(specialMaudeHooks, KompileBackend.class, "SpecialMaudeHooks.properties");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -155,7 +154,7 @@ public abstract class RLBackend extends BasicBackend implements Backend {
          *******************************/
         new MaudeBackend(sw, context).run(javaDef);
 
-        String load = "load \"" + KPaths.getKBase(true) + KPaths.MAUDE_LIB_DIR
+        String load = "load \"" + JarInfo.getKBase(true) + JarInfo.MAUDE_LIB_DIR
                 + "/k-prelude\"\n";
 
         // load libraries if any

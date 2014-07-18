@@ -11,7 +11,6 @@ import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
 import org.kframework.utils.inject.Builtins;
 
 import java.io.IOException;
@@ -69,15 +68,12 @@ public class BuiltinFunction {
     public BuiltinFunction(Context context, @Builtins Map<Class<?>, Provider<Object>> builtinFunctionProviders, KExceptionManager kem, Tool tool) {
         this.builtinFunctionProviders = builtinFunctionProviders;
         /* initialize {@code table} */
-        String separator = System.getProperty("file.separator");
-        String path = KPaths.getKBase(false) + separator + "include" + separator + "java";
         Properties properties = new Properties();
 
-        String propertyFile = path + separator + hookPropertiesFileName;
         try {
-            FileUtil.loadProperties(properties, propertyFile);
+            FileUtil.loadProperties(properties, getClass(), hookPropertiesFileName);
         } catch (IOException e) {
-            kem.registerInternalError("Could not read from " + propertyFile, e);
+            kem.registerInternalError("Could not read from resource " + hookPropertiesFileName, e);
         }
 
         for (String label : context.klabels.keySet()) {
