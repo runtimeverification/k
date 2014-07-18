@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.Production;
 
@@ -20,8 +21,8 @@ import org.kframework.kil.Production;
  */
 public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin {
 
-    private final Map<String, Integer> nestedLevelOfSort = new HashMap<String, Integer>();
-    private final Map<String, Integer> maxNestedLevelOfSort = new HashMap<String, Integer>();
+    private final Map<Sort, Integer> nestedLevelOfSort = new HashMap<Sort, Integer>();
+    private final Map<Sort, Integer> maxNestedLevelOfSort = new HashMap<Sort, Integer>();
 
     private final LocalVisitor preVisitor = new IncNestedLevelOfSort();
     private final LocalVisitor postVisitor = new DecNestedLevelOfSort();
@@ -29,9 +30,9 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
 
     public CheckingNestedStructureDepth() {
         // TODO(YilongL): handle user-specified depth properly
-        this.setMaxNestedLevelOf("AExp", 2);
-        this.setMaxNestedLevelOf("BExp", 1);
-        this.setMaxNestedLevelOf("Block", 2);
+        this.setMaxNestedLevelOf(Sort.of("AExp"), 2);
+        this.setMaxNestedLevelOf(Sort.of("BExp"), 1);
+        this.setMaxNestedLevelOf(Sort.of("Block"), 2);
     }
 
     @Override
@@ -57,23 +58,22 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
         return postVisitor;
     }
 
-    public void setMaxNestedLevelOf(String sort, int level) {
+    public void setMaxNestedLevelOf(Sort sort, int level) {
         maxNestedLevelOfSort.put(sort, level);
     }
 
-    private static final Map<KLabelConstant, Set<String>> cachedSortsOfKLabel =
-            new HashMap<KLabelConstant, Set<String>>();
+    private static final Map<KLabelConstant, Set<Sort>> cachedSortsOfKLabel = new HashMap<>();
 
-    private Set<String> computeSortsOf(KLabelConstant kLabel) {
-        Set<String> sorts = cachedSortsOfKLabel.get(kLabel);
+    private Set<Sort> computeSortsOf(KLabelConstant kLabel) {
+        Set<Sort> sorts = cachedSortsOfKLabel.get(kLabel);
         if (sorts == null) {
-            Set<String> set = new HashSet<String>();
+            Set<Sort> set = new HashSet<>();
             // TODO(YilongL): there could be multiple productions generating a
             // same KLabelConstant, thus multiple sorts; need to find the
             // correct or the most concrete sort!
 //            assert kLabel.productions().size() == 1 : "TODO(YilongL): fix it";
             for (Production prod : kLabel.productions()) {
-                set.add(prod.getSort());
+                set.add(Sort.of(prod.getSort()));
             }
             cachedSortsOfKLabel.put(kLabel, set);
             sorts = set;
@@ -90,7 +90,7 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             }
 
             KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
-            for (String sort : computeSortsOf(kLabel)) {
+            for (Sort sort : computeSortsOf(kLabel)) {
                 check(sort);
             }
         }
@@ -100,7 +100,7 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             check(variable.sort());
         }
 
-        private void check(String sort) {
+        private void check(Sort sort) {
             if (nestedLevelOfSort.get(sort) == null) {
                 nestedLevelOfSort.put(sort, 0);
             }
@@ -126,7 +126,7 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             }
 
             KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
-            for (String sort : computeSortsOf(kLabel)) {
+            for (Sort sort : computeSortsOf(kLabel)) {
                 nestedLevelOfSort.put(sort, nestedLevelOfSort.get(sort) - 1);
             }
         }

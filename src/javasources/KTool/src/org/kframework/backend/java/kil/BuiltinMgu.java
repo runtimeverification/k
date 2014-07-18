@@ -11,9 +11,9 @@ import org.kframework.kil.ASTNode;
 
 public class BuiltinMgu extends Term {
 
-    public static String MGU_SORT = "Mgu";
+    public static final Sort SORT = Sort.MGU;
 
-    public static String EMPTY_MGU = ".Mgu";
+    public static final String EMPTY_MGU = ".Mgu";
 
     private final SymbolicConstraint constraint;
 
@@ -71,8 +71,8 @@ public class BuiltinMgu extends Term {
     }
 
     @Override
-    public String sort() {
-        return MGU_SORT;
+    public Sort sort() {
+        return SORT;
     }
 
     @Override

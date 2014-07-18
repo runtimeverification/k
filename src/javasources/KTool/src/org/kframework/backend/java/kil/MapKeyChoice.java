@@ -68,8 +68,8 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override

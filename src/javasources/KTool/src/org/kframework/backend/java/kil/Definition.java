@@ -1,10 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.Sets;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Subsorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
@@ -29,15 +29,15 @@ import com.google.common.collect.Multimap;
  */
 public class Definition extends JavaSymbolicObject {
 
-    public static final Set<String> TOKEN_SORTS = ImmutableSet.of(
-            "Bool",
-            "Int",
-            "Float",
-            "Char",
-            "String",
-            "List",
-            "Set",
-            "Map");
+    public static final Set<Sort> TOKEN_SORTS = ImmutableSet.of(
+            Sort.BOOL,
+            Sort.INT,
+            Sort.FLOAT,
+            Sort.CHAR,
+            Sort.STRING,
+            Sort.LIST,
+            Sort.SET,
+            Sort.MAP);
 
     private final List<Rule> rules;
     private final List<Rule> macros;
@@ -46,14 +46,26 @@ public class Definition extends JavaSymbolicObject {
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
     private final Context context;
+    private final Subsorts subsorts;
+    private final Set<Sort> tokenSorts;
+    private final Set<Sort> builtinSorts;
     private RuleIndex index;
 
     public Definition(Context context) {
         this.context = context;
-        rules = new ArrayList<Rule>();
-        macros = new ArrayList<Rule>();
-        kLabels = new HashSet<KLabelConstant>();
-        frozenKLabels = new HashSet<KLabelConstant>();
+        rules = new ArrayList<>();
+        macros = new ArrayList<>();
+        kLabels = new HashSet<>();
+        frozenKLabels = new HashSet<>();
+
+        subsorts = new Subsorts(context);
+        tokenSorts = Sort.of(context.getTokenSorts());
+
+        ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
+        // TODO(YilongL): this is confusing; give a better name to tokenSorts
+        builder.addAll(tokenSorts); // [Bool, Int, Float, Char, String, List, Set, Map]
+        builder.addAll(TOKEN_SORTS); // e.g., [#String, #Int, Id, #Float]
+        builtinSorts = builder.build();
     }
 
     public void addFrozenKLabel(KLabelConstant frozenKLabel) {
@@ -95,8 +107,29 @@ public class Definition extends JavaSymbolicObject {
         }
     }
 
-    public Set<String> builtinSorts() {
-        return Sets.union(tokenSorts(), Definition.TOKEN_SORTS);
+    /**
+     * TODO(YilongL): this name is really confusing; looks like it's only used
+     * in building index;
+     */
+    public Set<Sort> builtinSorts() {
+        return builtinSorts;
+    }
+
+    /**
+     * @see Context#getTokenSorts()
+     */
+    public Set<Sort> tokenSorts() {
+        // TODO(YilongL): delegate to context.getTokenSorts() once all String representation of sorts are eliminated
+        // return context.getTokenSorts();
+        return tokenSorts;
+    }
+
+    public Set<Sort> allSorts() {
+        return subsorts.allSorts();
+    }
+
+    public Subsorts subsorts() {
+        return subsorts;
     }
 
     public Context context() {
@@ -132,10 +165,6 @@ public class Definition extends JavaSymbolicObject {
         // TODO(AndreiS): fix this issue with modifiable collections
         //return Collections.unmodifiableList(rules);
         return rules;
-    }
-
-    public Set<String> tokenSorts() {
-        return context.getTokenSorts();
     }
 
     @Override

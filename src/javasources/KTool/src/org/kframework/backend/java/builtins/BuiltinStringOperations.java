@@ -4,6 +4,7 @@ package org.kframework.backend.java.builtins;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.FloatBuiltin;
 import org.kframework.backend.java.kil.Token;
@@ -156,7 +157,7 @@ public class BuiltinStringOperations {
     }
 
     public static Token string2token(StringToken sort, StringToken value, TermContext context) {
-        return Token.of(sort.stringValue(), value.stringValue());
+        return Token.of(Sort.of(sort.stringValue()), value.stringValue());
     }
 
     /**

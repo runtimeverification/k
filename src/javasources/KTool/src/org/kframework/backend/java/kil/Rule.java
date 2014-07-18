@@ -92,7 +92,7 @@ public class Rule extends JavaSymbolicObject {
      */
     private final ImmutableSet<Variable> unboundVars;
     private final boolean isSortPredicate;
-    private final String predSort;
+    private final Sort predSort;
     private final KItem sortPredArg;
 
     public Rule(
@@ -173,7 +173,7 @@ public class Rule extends JavaSymbolicObject {
 
         isSortPredicate = isFunction() && functionKLabel().isSortPredicate();
         if (isSortPredicate) {
-            predSort = functionKLabel().toString().substring(2);
+            predSort = functionKLabel().getPredicateSort();
 
             assert leftHandSide instanceof KItem
                     && rightHandSide.equals(BoolToken.TRUE)
@@ -293,7 +293,7 @@ public class Rule extends JavaSymbolicObject {
     /**
      * Gets the predicate sort if this rule is a sort predicate rule.
      */
-    public String predicateSort() {
+    public Sort predicateSort() {
         assert isSortPredicate;
 
         return predSort;

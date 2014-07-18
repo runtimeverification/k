@@ -29,20 +29,18 @@ public enum Kind {
     //MAP;
 
     /**
-     * Stores names of all the available {@code Kind}s.
+     * Stores sorts of all the available {@code Kind}s.
      */
-    private static final EnumHashBiMap<Kind, String> names = EnumHashBiMap.create(Kind.class);
+    private static final EnumHashBiMap<Kind, Sort> sorts = EnumHashBiMap.create(Kind.class);
 
     static {
-        names.put(BOTTOM, "Bottom");
-        //names.put(CELL, "Cell"); // <= TODO(YilongL): is the sort of Cell "BagItem" in generic KIL?
-        names.put(CELL, "BagItem");
-        names.put(CELL_COLLECTION, "Bag");
-        names.put(K, "K");
-        names.put(KITEM, "KItem");
-        names.put(KLABEL, "KLabel");
-        names.put(KLIST, "KList");
-        //names.put(MAP, "Map");
+        sorts.put(BOTTOM, Sort.BOTTOM);
+        sorts.put(CELL, Sort.BAG_ITEM);
+        sorts.put(CELL_COLLECTION, Sort.BAG);
+        sorts.put(K, Sort.KSEQUENCE);
+        sorts.put(KITEM, Sort.KITEM);
+        sorts.put(KLABEL, Sort.KLABEL);
+        sorts.put(KLIST, Sort.KLIST);
     }
 
     /**
@@ -50,8 +48,8 @@ public enum Kind {
      *            the sort
      * @return the kind of the given sort
      */
-    public static Kind of(String sort) {
-        Kind kind = names.inverse().get(sort);
+    public static Kind of(Sort sort) {
+        Kind kind = sorts.inverse().get(sort);
         if (kind != null) {
             return kind;
         } else {
@@ -78,9 +76,13 @@ public enum Kind {
         return this == Kind.CELL || this == Kind.CELL_COLLECTION;
     }
 
+    public Sort asSort() {
+        return sorts.get(this);
+    }
+
     @Override
     public String toString() {
-        return names.get(this);
+        return sorts.get(this).name();
     }
 
 }

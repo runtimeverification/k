@@ -583,6 +583,9 @@ public class Context implements Serializable {
         return sort;
     }
 
+    /**
+     * Returns the set of sorts that have lexical productions.
+     */
     public Set<String> getTokenSorts() {
         return Collections.unmodifiableSet(tokenSorts);
     }

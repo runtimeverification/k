@@ -138,8 +138,10 @@ public class SymbolicUnifier extends AbstractUnifier {
     public boolean unify(SymbolicConstraint.Equality equality) {
         try {
             isStarNested = false;
+            // YilongL: is it correct to simply clear the multiConstraints?
             data.multiConstraints.clear();
             unify(equality.leftHandSide(), equality.rightHandSide());
+            // YilongL: I think getting here only means syntactic unification doesn't fail; is this a latent bug?
             return true;
         } catch (UnificationFailure e) {
             return false;
@@ -576,7 +578,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                 } else if (otherCellMap.isEmpty()) {
                     fConstraint.add(new CellCollection(cellMap, frame, context), otherFrame);
                 } else {
-                    Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.toString());
+                    Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.asSort());
                     fConstraint.add(frame, new CellCollection(otherCellMap, variable, context));
                     fConstraint.add(new CellCollection(cellMap, variable, context), otherFrame);
                 }

@@ -19,6 +19,7 @@ import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Debug;
 import org.kframework.backend.java.util.GroupProductionsBySort;
+import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
@@ -286,8 +287,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                             if (!((KLabelConstant) ((KItem) mbPredicate).kLabel()).isSortPredicate())
                                 continue;
 
-                            // retrieve sort name of the predicate
-                            String sortName = ((KLabelConstant) ((KItem) mbPredicate).kLabel()).getPredicateSort();
+                            // retrieve the predicate sort
+                            Sort predSort = ((KLabelConstant) ((KItem) mbPredicate).kLabel()).getPredicateSort();
 
                             // retrieve the argument; which must be a variable
                             Variable arg = (Variable) ((KList) ((KItem) mbPredicate).kList()).get(0);
@@ -303,7 +304,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                             }
 
                             // compute difference of two sorts, e.g., AExp \ KResult
-                            for (Term term : computeSortDifference(arg.sort(), sortName)) {
+                            for (Term term : computeSortDifference(arg.sort(), predSort)) {
                                 UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
                                 uninterpretedCnstr.add(arg, term);
                                 uninterpretedCnstrs.add(uninterpretedCnstr);
@@ -324,7 +325,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                         // dissolve positive membership predicates
                         if (eq1.toString().startsWith("isKResult(")) {
                             KItem mbPredicate = (KItem) eq1.leftHandSide();
-                            String sortName = ((KLabelConstant) mbPredicate.kLabel()).getPredicateSort();
+                            Sort predSort = ((KLabelConstant) mbPredicate.kLabel()).getPredicateSort();
                             Variable arg = (Variable) ((KList) mbPredicate.kList()).get(0);
 
                             // construct common part of the new constraints
@@ -338,7 +339,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                             }
 
                             // compute intersection of two sorts, e.g., AExp /\ KResult
-                            for (Variable var : computeSortIntersection(arg.sort(), sortName)) {
+                            for (Variable var : computeSortIntersection(arg.sort(), predSort)) {
                                 UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
                                 uninterpretedCnstr.add(arg, var);
                                 uninterpretedCnstrs.add(uninterpretedCnstr);
@@ -440,56 +441,57 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return solutions;
     }
 
-    private Set<Variable> computeSortIntersection(String sort1, String sort2) {
+    private Set<Variable> computeSortIntersection(Sort sort1, Sort sort2) {
         // TODO(YilongL): call Context#getCommonSubsorts to simplify the code
-        Set<Variable> results = new HashSet<Variable>();
-        Context defContext = context.definition().context();
+        Set<Variable> results = new HashSet<>();
+        Subsorts subsorts = context.definition().subsorts();
 
-        Set<String> subsorts = new HashSet<String>();
-        for (String sort : defContext.getAllSorts()) {
-            if (defContext.isSubsortedEq(sort1, sort) && defContext.isSubsortedEq(sort2, sort)) {
-                subsorts.add(sort);
+        Set<Sort> intersect = new HashSet<>();
+        for (Sort sort : subsorts.allSorts()) {
+            if (subsorts.isSubsortedEq(sort1, sort) && subsorts.isSubsortedEq(sort2, sort)) {
+                intersect.add(sort);
             }
         }
 
-        Set<String> sortsToRemove = new HashSet<String>();
-        for (String s1 : subsorts)
-            for (String s2 : subsorts)
-                if (defContext.isSubsorted(s1, s2)) {
+        Set<Sort> sortsToRemove = new HashSet<>();
+        for (Sort s1 : intersect)
+            for (Sort s2 : intersect)
+                if (subsorts.isSubsorted(s1, s2)) {
                     sortsToRemove.add(s2);
                 }
-        subsorts.removeAll(sortsToRemove);
+        intersect.removeAll(sortsToRemove);
 
-        for (String sort : subsorts) {
+        for (Sort sort : intersect) {
             results.add(Variable.getFreshVariable(sort));
         }
         return results;
     }
 
-    private Set<Term> computeSortDifference(String sort1, String sort2) {
-        Set<Term> results = new HashSet<Term>();
-        Context defContext = context.definition().context();
+    private Set<Term> computeSortDifference(Sort sort1, Sort sort2) {
+        Set<Term> results = new HashSet<>();
+        Definition definition = context.definition();
+        Subsorts subsorts = definition.subsorts();
 
-        Set<String> whiteSorts = new HashSet<String>();
-        for (String sort : defContext.getAllSorts()) {
-            if (defContext.isSubsortedEq(sort1, sort)) {
+        Set<Sort> whiteSorts = new HashSet<>();
+        for (Sort sort : definition.allSorts()) {
+            if (subsorts.isSubsortedEq(sort1, sort)) {
                 whiteSorts.add(sort);
             }
         }
 
-        Set<String> blackSorts = new HashSet<String>();
-        for (String sort : whiteSorts) {
-            if (defContext.isSubsortedEq(sort1, sort) && defContext.isSubsortedEq(sort2, sort)) {
+        Set<Sort> blackSorts = new HashSet<>();
+        for (Sort sort : whiteSorts) {
+            if (subsorts.isSubsortedEq(sort1, sort) && subsorts.isSubsortedEq(sort2, sort)) {
                 blackSorts.add(sort);
             }
         }
         whiteSorts.removeAll(blackSorts);
 
-        Set<String> greySorts = new HashSet<String>();
-        for (String sort : whiteSorts) {
-            if (defContext.isSubsortedEq(sort1, sort)) {
-                for (String blackSort : blackSorts) {
-                    if (defContext.isSubsorted(sort, blackSort)) {
+        Set<Sort> greySorts = new HashSet<>();
+        for (Sort sort : whiteSorts) {
+            if (subsorts.isSubsortedEq(sort1, sort)) {
+                for (Sort blackSort : blackSorts) {
+                    if (subsorts.isSubsorted(sort, blackSort)) {
                         greySorts.add(sort);
                     }
                 }
@@ -497,23 +499,23 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
         whiteSorts.removeAll(greySorts);
 
-        Set<String> sortsToRemove = new HashSet<String>();
-        for (String s1 : whiteSorts)
-            for (String s2 : whiteSorts)
-                if (defContext.isSubsorted(s1, s2)) {
+        Set<Sort> sortsToRemove = new HashSet<>();
+        for (Sort s1 : whiteSorts)
+            for (Sort s2 : whiteSorts)
+                if (subsorts.isSubsorted(s1, s2)) {
                     sortsToRemove.add(s2);
                 }
         whiteSorts.removeAll(sortsToRemove);
 
-        for (String whiteSort : whiteSorts)
+        for (Sort whiteSort : whiteSorts)
             results.add(Variable.getFreshVariable(whiteSort));
-        for (String greySort : greySorts)
+        for (Sort greySort : greySorts)
             results.addAll(getProductionsAsTerms(greySort));
 
         return results;
     }
 
-    private List<KItem> getProductionsAsTerms(String sort) {
+    private List<KItem> getProductionsAsTerms(Sort sort) {
         Definition def = context.definition();
         GroupProductionsBySort gpbs = cachedGroupProductionsBySort.get(def);
         if (gpbs == null) {

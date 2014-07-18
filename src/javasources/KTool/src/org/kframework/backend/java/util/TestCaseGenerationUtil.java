@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -162,16 +163,16 @@ public class TestCaseGenerationUtil {
     public static int getNumOfFreeVars(ConstrainedTerm cnstrTerm, Context context) {
         Set<Variable> set = cnstrTerm.term().variableSet();
         for (Iterator<Variable> iter = set.iterator(); iter.hasNext();) {
-            if (context.isSubsortedEq("KResult", iter.next().sort())) {
+            if (context.isSubsortedEq("KResult", iter.next().sort().name())) {
                 iter.remove();
             }
         }
         return set.size();
     }
 
-    public static Term getSimplestTermOfSort(String sort, TermContext termContext) {
+    public static Term getSimplestTermOfSort(Sort sort, TermContext termContext) {
         // TODO(YilongL): This is cheating; fix it!
-        switch (sort) {
+        switch (sort.name()) {
         case "Block":
             return KItem.of(KLabelConstant.of("'{}", termContext.definition()), KList.EMPTY, termContext);
 

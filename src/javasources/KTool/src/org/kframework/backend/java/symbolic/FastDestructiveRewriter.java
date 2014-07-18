@@ -58,7 +58,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                 }
                 subject = result;
             } else {
-                computeRewriteStep(subject, 1);
+//                computeRewriteStep(subject, 1);
                 break;
             }
         }

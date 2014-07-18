@@ -29,8 +29,8 @@ public abstract class KLabel extends Term {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     /**

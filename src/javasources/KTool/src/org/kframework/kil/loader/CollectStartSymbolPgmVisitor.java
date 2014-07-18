@@ -1,15 +1,12 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.symbolic.AddConditionToConfig;
 import org.kframework.backend.symbolic.ResolveInputStreamCell;
-import org.kframework.kil.KSort;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the $PGM sort from the final configuration it encounters

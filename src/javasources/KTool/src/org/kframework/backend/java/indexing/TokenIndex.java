@@ -1,19 +1,21 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing;
 
+import org.kframework.backend.java.kil.Sort;
+
 
 /**
  * @author AndreiS
  */
 public class TokenIndex implements Index {
 
-    private final String sort;
+    private final Sort sort;
 
-    public TokenIndex(String sort) {
+    public TokenIndex(Sort sort) {
         this.sort = sort;
     }
 
-    public String sort() {
+    public Sort sort() {
         return sort;
     }
 

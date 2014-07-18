@@ -35,11 +35,11 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SetElementChoice;
 import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
@@ -156,7 +156,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                         ((FloatBuiltin) node.getLabel()).exponent());
             } else if (node.getLabel() instanceof GenericToken) {
                 return UninterpretedToken.of(
-                        ((GenericToken) node.getLabel()).tokenSort(),
+                        Sort.of(((GenericToken) node.getLabel()).tokenSort()),
                         ((GenericToken) node.getLabel()).value());
             } else {
                 assert false : "unsupported Token " + node.getLabel();
@@ -173,7 +173,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KItemProjection node, Void _)  {
-        return new KItemProjection(Kind.of(node.projectedKind()), (Term) this.visitNode(node.getTerm()));
+        return new KItemProjection(Kind.of(Sort.of(node.projectedKind())), (Term) this.visitNode(node.getTerm()));
     }
 
     @Override
@@ -506,25 +506,25 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(org.kframework.kil.Variable node, Void _)  {
         if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
-            return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
+            return new Variable(node.getName(), Kind.CELL_COLLECTION.asSort());
         }
 
         if (node.getSort().equals(org.kframework.kil.KSorts.K)) {
-            return new Variable(node.getName(), KSorts.KSEQUENCE);
+            return new Variable(node.getName(), Sort.KSEQUENCE);
         }
         if (node.getSort().equals(org.kframework.kil.KSorts.KLIST)) {
-            return new Variable(node.getName(), KSorts.KLIST);
+            return new Variable(node.getName(), Sort.KLIST);
         }
 
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
         if (dataStructureSort != null) {
-            String sort = null;
+            Sort sort = null;
             if (dataStructureSort.type().equals(org.kframework.kil.KSorts.LIST)) {
-                sort = KSorts.LIST;
+                sort = Sort.LIST;
             } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.MAP)) {
-                sort = KSorts.MAP;
+                sort = Sort.MAP;
             } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.SET)) {
-                sort = KSorts.SET;
+                sort = Sort.SET;
             } else {
                 assert false: "unexpected data structure " + dataStructureSort.type();
             }
@@ -539,7 +539,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        return new Variable(node.getName(), node.getSort());
+        return new Variable(node.getName(), Sort.of(node.getSort()));
     }
 
     @Override

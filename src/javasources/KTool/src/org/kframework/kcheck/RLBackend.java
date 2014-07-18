@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
-import org.kframework.backend.java.util.KSorts;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.maude.krun.MaudeKRun;
@@ -212,7 +212,7 @@ public class RLBackend extends BasicBackend implements Backend {
             pattern = DefinitionLoader.parsePattern(
                     null, //K.pattern,
                     "Command line pattern",
-                    KSorts.BAG,
+                    Sort.BAG.name(),
                     context);
             //defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern),

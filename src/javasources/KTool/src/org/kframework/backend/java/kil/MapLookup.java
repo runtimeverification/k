@@ -66,8 +66,8 @@ public class MapLookup extends Term implements DataStructureLookup {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override

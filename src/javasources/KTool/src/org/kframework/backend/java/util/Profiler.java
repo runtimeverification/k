@@ -14,7 +14,7 @@ import com.google.common.base.Stopwatch;
  */
 public class Profiler {
 
-    public static final boolean ENABLE_PROFILING_MODE = false;
+    public static final boolean ENABLE_PROFILING_MODE = true;
 
     public static final ReentrantStopwatch QUERY_RULE_INDEXING_TIMER            =   new ReentrantStopwatch("Query rule indexing");
     public static final ReentrantStopwatch REWRITE_WITH_KOMPILED_RULES_TIMER    =   new ReentrantStopwatch("Rewrite with kompiled rules");

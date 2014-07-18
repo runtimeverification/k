@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.MaximalSharing;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public final class IntToken extends Token implements MaximalSharing {
 
-    public static final String SORT_NAME = "Int";
+    public static final Sort SORT = Sort.INT;
 
     /* IntToken cache */
     private static final Map<BigInteger, IntToken> cache = new HashMap<BigInteger, IntToken>();
@@ -120,12 +121,9 @@ public final class IntToken extends Token implements MaximalSharing {
         return (byte)value.longValue();
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this IntToken.
-     */
     @Override
-    public String sort() {
-        return IntToken.SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**

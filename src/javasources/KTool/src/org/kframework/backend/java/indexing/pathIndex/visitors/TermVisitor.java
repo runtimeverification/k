@@ -141,7 +141,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         if (kSequence.size() > 0) {
             //TODO (OwolabiL): This is too messy. Restructure the conditionals
             if (kSequence.get(0) instanceof KItem) {
-                boolean isKResult = context.isSubsorted(K_RESULT, (kSequence.get(0)).sort());
+                boolean isKResult = context.isSubsorted(K_RESULT, (kSequence.get(0)).sort().name());
                 if (isKResult) {
                     pString = START_STRING + K_RESULT;
                     kSequence.get(1).accept(this);
@@ -169,7 +169,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         //check if we are just starting to create a pString for this term
         //TODO(OwolabiL): Use a better check than the nullity of pString
         if (pString == null) {
-            if (context.isSubsorted(K_RESULT, token.sort())) {
+            if (context.isSubsorted(K_RESULT, token.sort().name())) {
                 pString = START_STRING + K_RESULT;
                 //hack for kool-dynamic
                 if (token instanceof BoolToken){
@@ -187,7 +187,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 return;
             }
 
-            if (context.isSubsorted(K_RESULT, token.sort())) {
+            if (context.isSubsorted(K_RESULT, token.sort().name())) {
                 if (pString != null) {
                     ArrayList<Production> productions = (ArrayList<Production>) productions1;
                     if (productions.size() == 1) {
@@ -248,8 +248,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 inner = true;
                 currentLabel = kItem.kLabel().toString();
                 //needed for simple typed static
-                if (context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
-                    String kItemSort = kItem.sort();
+                if (context.isSubsortedEq(K_RESULT,kItem.sort().name()) && ((KList)kItem.kList()).size() == 0){
+                    String kItemSort = kItem.sort().name();
                     pStrings.add(START_STRING+kItemSort);
                 }
 
@@ -259,7 +259,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 //      <k>
                 //        (void) ~> discard ~> 'class(theMain) ~> HOLE ;
                 //        </k>
-                if (!context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
+                if (!context.isSubsortedEq(K_RESULT,kItem.sort().name()) && ((KList)kItem.kList()).size() == 0){
                     if (pString != null) {
                         pStrings.add(pString);
                     }
@@ -276,7 +276,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                     pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                             + EMPTY_LIST_LABEL);
                 } else {
-                    if (context.isListSort(kItem.sort())) {
+                    if (context.isListSort(kItem.sort().name())) {
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                                 + USER_LIST_REPLACEMENT);
                         // TODO(Owolabileg): Bad hack to be removed - trying this out for fun where
@@ -287,8 +287,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                         pStrings.addAll(visitor.getCandidates());
                     } else {
                         if (kListSize > 0 && ((KList) kItem.kList()).get(0) instanceof Token
-                                && !context.isSubsortedEq(K_RESULT,kItem.sort())) {
-                            String sort = ((Token) ((KList) kItem.kList()).get(0)).sort();
+                                && !context.isSubsortedEq(K_RESULT,kItem.sort().name())) {
+                            String sort = ((Token) ((KList) kItem.kList()).get(0)).sort().name();
                             if (context.isSubsorted(K_RESULT, sort)) {
                                 if (kItem.sort().equals(K_ITEM_SORT)) {
                                     pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR

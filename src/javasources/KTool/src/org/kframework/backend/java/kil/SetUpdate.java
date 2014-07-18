@@ -83,7 +83,7 @@ public class SetUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return set.sort();
     }
 

@@ -130,10 +130,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return kind;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this object.
-     */
-    public abstract String sort();
+    public abstract Sort sort();
 
     /**
      * @return {@code true} if this term has {@code Cell} inside; otherwise,

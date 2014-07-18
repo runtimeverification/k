@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.collections15.map.UnmodifiableMap;
+import org.apache.commons.collections4.map.UnmodifiableMap;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
@@ -43,7 +42,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     public Map<Term, Term> getEntries() {
-        return UnmodifiableMap.decorate(entries);
+        return UnmodifiableMap.unmodifiableMap(entries);
     }
 
     @Override
@@ -73,9 +72,9 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         // TODO(AndreiS): track the original sort from the grammar
-        return KSorts.MAP;
+        return Sort.MAP;
     }
 
     @Override
@@ -194,7 +193,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
         }
 
         public Map<Term, Term> getEntries() {
-            return UnmodifiableMap.decorate(entries);
+            return UnmodifiableMap.unmodifiableMap(entries);
         }
 
         /**
@@ -249,7 +248,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
             // to avoid actually copying the entries, because entries is not an
             // ImmutableMap yet; using Apache's decorate method because it would
             // avoid creating nesting wrappers
-            return new BuiltinMap((UnmodifiableMap<Term, Term>) UnmodifiableMap.decorate(entries), frame);
+            return new BuiltinMap((UnmodifiableMap<Term, Term>) UnmodifiableMap.unmodifiableMap(entries), frame);
         }
     }
 }

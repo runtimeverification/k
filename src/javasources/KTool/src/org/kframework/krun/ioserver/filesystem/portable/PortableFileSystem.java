@@ -1,8 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.ioserver.filesystem.portable;
 
-import org.apache.commons.collections15.BidiMap;
-import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.kframework.krun.api.io.File;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KException;

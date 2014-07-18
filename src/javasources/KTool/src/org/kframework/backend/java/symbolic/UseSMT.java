@@ -11,6 +11,7 @@ import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.Model;
 
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -50,11 +51,11 @@ public class UseSMT implements Serializable {
 
                     Expr resultFrg = model.ConstInterp(consts[i]);
 
-                    Variable akey = new Variable(consts[i].Name().toString(), consts[i].Range().toString());
+                    Variable akey = new Variable(consts[i].Name().toString(), Sort.of(consts[i].Range().toString()));
 
                     IntToken avalue = IntToken.of(Integer.parseInt(resultFrg.toString()));
 
-                    resultBuilder.put((Term)akey, (Term)avalue);
+                    resultBuilder.put(akey, avalue);
                 }
 
 

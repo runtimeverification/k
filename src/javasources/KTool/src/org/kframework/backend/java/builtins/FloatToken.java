@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.kil.MaximalSharing;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -18,7 +19,7 @@ import org.kframework.mpfr.BigFloat;
 
 public class FloatToken extends Token implements MaximalSharing {
 
-    public static final String SORT_NAME = "Float";
+    public static final Sort SORT = Sort.FLOAT;
 
     /* Token cache */
     private static final Map<Integer, Map<BigFloat, FloatToken>> cache = new HashMap<>();
@@ -77,8 +78,8 @@ public class FloatToken extends Token implements MaximalSharing {
      * Returns a {@code String} representation of the sort of this FlaotToken.
      */
     @Override
-    public String sort() {
-        return FloatToken.SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**

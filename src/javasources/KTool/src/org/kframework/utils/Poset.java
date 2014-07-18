@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import org.apache.commons.collections15.set.UnmodifiableSet;
+import org.apache.commons.collections4.set.UnmodifiableSet;
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.Table;
 
@@ -227,7 +227,7 @@ public class Poset implements Serializable {
         }
 
         /* make it immutable */
-        bounds = UnmodifiableSet.decorate(bounds);
+        bounds = UnmodifiableSet.unmodifiableSet(bounds);
 
         /* cache the result for the most common use case */
         if (subset.size() == 2) {

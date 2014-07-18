@@ -18,12 +18,12 @@ import org.kframework.kil.ASTNode;
  */
 public class MetaVariable extends Token {
 
-    public static final String SORT_NAME = "MetaVariable";
+    public static final Sort SORT = Sort.META_VARIABLE;
 
     private final String name;
-    private final String sort;
+    private final Sort sort;
 
-    public MetaVariable(String name, String sort) {
+    public MetaVariable(String name, Sort sort) {
         this.name = name;
         this.sort = sort;
     }
@@ -32,12 +32,9 @@ public class MetaVariable extends Token {
         this(variable.name(), variable.sort());
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this meta variable.
-     */
     @Override
-    public String sort() {
-        return SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**
@@ -65,7 +62,7 @@ public class MetaVariable extends Token {
     /**
      * Returns a {@code String} representation of the sort of this meta variable.
      */
-    public String variableSort() {
+    public Sort variableSort() {
         return sort;
     }
 

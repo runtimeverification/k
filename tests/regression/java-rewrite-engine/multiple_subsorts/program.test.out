@@ -1,3 +1,1 @@
-<k>
-    isKResult(_45:Sort) ~> _46:KResult ==K _45
-</k>
+isKResult\((.*):Sort\) ~\> (?!(\1)).*:KResult ==K \1

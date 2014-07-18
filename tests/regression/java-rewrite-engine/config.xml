@@ -68,7 +68,7 @@
       <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
-  
+
   <test
       definition="list/issue146/test.k"
       programs="list/issue146/programs"
@@ -300,8 +300,9 @@
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
-    <all-programs>
+    <all-programs regex="true">
       <krun-option name="--smt" value="none" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
     </all-programs>
   </test>
 

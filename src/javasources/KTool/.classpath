@@ -7,6 +7,7 @@
 	<classpathentry kind="lib" path="../../../lib/java/com.microsoft.z3.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/collections-generic-4.01.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="../../../lib/java/commons-collections4-4.0.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/diffutils-1.2.1.jar"/>

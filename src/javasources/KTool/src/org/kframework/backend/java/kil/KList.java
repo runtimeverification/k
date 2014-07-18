@@ -7,7 +7,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableList;
@@ -40,7 +39,7 @@ public class KList extends KCollection {
      */
     private ImmutableList<Term> contents;
 
-    private String sort;
+    private Sort sort;
 
     public KList(List<Term> items, Variable frame) {
         super(frame, Kind.KLIST);
@@ -94,12 +93,12 @@ public class KList extends KCollection {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         if (sort != null) {
             return sort;
         }
 
-        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : KSorts.KSEQUENCE;
+        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KSEQUENCE;
         return sort;
     }
 

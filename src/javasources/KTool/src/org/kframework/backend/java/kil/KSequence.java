@@ -8,7 +8,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.pcollections.ConsPStack;
 import org.pcollections.Empty;
@@ -44,7 +43,7 @@ public class KSequence extends KCollection {
      * {@code Serializable} interface.
      */
     private transient final PStack<Term> contents;
-    private String sort;
+    private Sort sort;
 
     /**
      * Concatenates a sequence of elements of sort K or KItem and a frame term.
@@ -141,12 +140,12 @@ public class KSequence extends KCollection {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         if (sort != null) {
             return sort;
         }
 
-        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : KSorts.KSEQUENCE;
+        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KSEQUENCE;
         return sort;
     }
 

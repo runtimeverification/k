@@ -86,8 +86,8 @@ public class Cell<T extends Term> extends Term {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override

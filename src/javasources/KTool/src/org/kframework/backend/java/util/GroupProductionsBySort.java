@@ -11,13 +11,13 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Sort;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -59,15 +59,15 @@ public class GroupProductionsBySort {
         prodsOfSort = sort2ProdsBuilder.build();
     }
 
-    public List<KItem> getProductionsAsTerms(String sort, TermContext context) {
+    public List<KItem> getProductionsAsTerms(Sort sort, TermContext context) {
         List<KItem> freshTerms = new ArrayList<KItem>();
         List<Production> prods = prodsOfSort.get(sort);
         if (prods != null) {
             for (Production prod : prods) {
                 List<Term> items = Lists.newArrayListWithCapacity(prod.getItems().size());
                 for (ProductionItem prodItem : prod.getItems())
-                    if (prodItem instanceof Sort)
-                        items.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
+                    if (prodItem instanceof org.kframework.kil.Sort)
+                        items.add(Variable.getFreshVariable(Sort.of(((org.kframework.kil.Sort) prodItem).getName())));
                 KItem kitem = KItem.of(klabelOfProd.get(prod), new KList(items), context);
                 freshTerms.add(kitem);
             }

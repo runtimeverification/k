@@ -1,8 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
-import org.apache.commons.collections15.BidiMap;
-import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;

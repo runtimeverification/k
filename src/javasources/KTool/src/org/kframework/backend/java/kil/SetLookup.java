@@ -60,8 +60,8 @@ public class SetLookup extends Term implements DataStructureLookup {
     }
 
     @Override
-    public String sort() {
-        return BoolToken.SORT_NAME;
+    public Sort sort() {
+        return BoolToken.SORT;
     }
 
     @Override
