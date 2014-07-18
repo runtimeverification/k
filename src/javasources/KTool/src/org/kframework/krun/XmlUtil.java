@@ -91,7 +91,7 @@ public class XmlUtil {
         String op = node.getAttribute("op");
         String sort = node.getAttribute("sort");
         ArrayList<Element> list = XmlUtil.getChildElements(node);
-        
+
         if (sort.equals("#NzNat") && op.equals("sNat_")) {
             sb = new StringBuilder();
             sb.append(node.getAttribute("number"));
@@ -105,7 +105,7 @@ public class XmlUtil {
                 sb.append("(");
                 sb.append(op);
                 sb.append(")." + sort);
-                
+
                 return sb.toString();
             }
             //the node has more than 1 child
@@ -127,8 +127,8 @@ public class XmlUtil {
                 sb.append(")");
                 return sb.toString();
             }
-            
+
         }
-        
+
     }
 }

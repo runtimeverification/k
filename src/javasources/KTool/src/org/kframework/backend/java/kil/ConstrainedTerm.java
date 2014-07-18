@@ -31,7 +31,7 @@ import org.kframework.krun.K;
  * @author AndreiS
  */
 public class ConstrainedTerm extends JavaSymbolicObject {
-    
+
     public static class Data {
         public final Term term;
         /**
@@ -82,11 +82,11 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 return false;
             return true;
         }
-        
-        
+
+
     }
 
-    private static final Map<Definition, GroupProductionsBySort> cachedGroupProductionsBySort = 
+    private static final Map<Definition, GroupProductionsBySort> cachedGroupProductionsBySort =
             new HashMap<Definition, GroupProductionsBySort>();
 
     private Data data;
@@ -96,7 +96,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     private final SymbolicConstraint lookups;
 
     private final SymbolicConstraint constraint;
-    
+
     public ConstrainedTerm(Data data, TermContext context) {
         this.data = data;
         this.context = context;
@@ -191,10 +191,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     public Term term() {
         return data.term;
     }
-    
+
     /**
      * Unifies this constrained term with another constrained term.
-     * 
+     *
      * @param constrainedTerm
      *            another constrained term
      * @return solutions to the unification problem
@@ -204,16 +204,16 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         if (numOfInvoc == Integer.MAX_VALUE) {
             Debug.setBreakPointHere();
         }
-        
+
         List<SymbolicConstraint> solutions = unifyImpl(constrainedTerm);
-        
+
         Debug.printUnifyResult(numOfInvoc, this, constrainedTerm, solutions);
         return solutions;
     }
-    
+
     /**
      * The actual implementation of the unify() method.
-     * 
+     *
      * @param constrainedTerm
      *            another constrained term
      * @return solutions to the unification problem
@@ -230,7 +230,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         if (unificationConstraint.isFalse()) {
             return Collections.emptyList();
         }
-        
+
         List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
             if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.lookups)) continue;
@@ -377,14 +377,14 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                                 for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
                                     templCnstr.add(entry.getKey(), entry.getValue());
                                 }
-                                
+
                                 for (Variable var : computeSortIntersection(lhs.sort(), rhs.sort())) {
                                     sortIntersectionVariables.add(var);
                                     UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
                                     uninterpretedCnstr.add(rhs, var);
                                     uninterpretedCnstrs.add(uninterpretedCnstr);
                                 }
-                                
+
                                 // get the interpreted version of the constraint
                                 for (UninterpretedConstraint uninterpretedCnstr : uninterpretedCnstrs) {
                                     SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
@@ -392,7 +392,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                                         tmpSolutions.add(newCnstr);
                                         orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
                                         orientedVarsOfCnstr.get(newCnstr).add(lhs);
-                                        orientedVarsOfCnstr.get(newCnstr).add(rhs);                                        
+                                        orientedVarsOfCnstr.get(newCnstr).add(rhs);
                                     }
                                 }
                                 changed = true;
@@ -451,7 +451,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 subsorts.add(sort);
             }
         }
-        
+
         Set<String> sortsToRemove = new HashSet<String>();
         for (String s1 : subsorts)
             for (String s2 : subsorts)
@@ -459,7 +459,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                     sortsToRemove.add(s2);
                 }
         subsorts.removeAll(sortsToRemove);
-        
+
         for (String sort : subsorts) {
             results.add(Variable.getFreshVariable(sort));
         }
@@ -512,7 +512,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         return results;
     }
-    
+
     private List<KItem> getProductionsAsTerms(String sort) {
         Definition def = context.definition();
         GroupProductionsBySort gpbs = cachedGroupProductionsBySort.get(def);
@@ -520,7 +520,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             gpbs = new GroupProductionsBySort(def);
             cachedGroupProductionsBySort.put(def, gpbs);
         }
-        
+
         return gpbs.getProductionsAsTerms(sort, context);
     }
 

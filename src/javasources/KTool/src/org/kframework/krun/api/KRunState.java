@@ -39,7 +39,7 @@ public class KRunState implements Serializable, Comparable<KRunState> {
     The raw term associated with this state, as suitable for further rewriting
     */
     private Term rawResult;
-    
+
     /**
      * A state ID corresponding to this state. The contract of a {@link KRun} object
      * demands that no two distinct states have the same ID. However, it does not
@@ -48,9 +48,9 @@ public class KRunState implements Serializable, Comparable<KRunState> {
      * and canonicalize the output of the KRun object.
      */
     private int stateId;
-    
+
     private static int nextState = 0;
-    
+
     protected Context context;
 
     public KRunState(Term rawResult, Context context) {
@@ -77,11 +77,11 @@ public class KRunState implements Serializable, Comparable<KRunState> {
                         }
                     };
                     variableCollector.visitNode(result);
-                    
+
                     /* add brackets */
                     AddBracketsFilter2 filter = new AddBracketsFilter2(context);
                     result = (Term) filter.visitNode(result);
-                    
+
                     /* initialize the substitution map of the filter using existing free variables */
                     Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
                     for (Variable var : existingFreeVariables) {
@@ -119,9 +119,9 @@ public class KRunState implements Serializable, Comparable<KRunState> {
     public String toString() {
         return toString(false);
     }
-    
+
     public String toString(boolean includeStateId) {
-        UnparserFilterNew printer = new UnparserFilterNew(true, context.krunOptions.color(), 
+        UnparserFilterNew printer = new UnparserFilterNew(true, context.krunOptions.color(),
                 context.krunOptions.output, false, context);
         printer.visitNode(getResult());
         if (includeStateId) {
@@ -145,7 +145,7 @@ public class KRunState implements Serializable, Comparable<KRunState> {
         return stateId;
     }
 
-    public void setStateId(Integer stateId) {    
+    public void setStateId(Integer stateId) {
         this.stateId = stateId;
     }
 
@@ -153,8 +153,8 @@ public class KRunState implements Serializable, Comparable<KRunState> {
     public boolean equals(Object o) {
         if (!(o instanceof KRunState)) return false;
         KRunState s = (KRunState)o;
-        /*jung uses intensively equals while drawing graphs 
-          use SemanticEquals since it caches results 
+        /*jung uses intensively equals while drawing graphs
+          use SemanticEquals since it caches results
         */
         return SemanticEqual.checkEquality(rawResult, s.rawResult);
     }

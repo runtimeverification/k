@@ -16,7 +16,7 @@ import org.kframework.krun.gui.Controller.RunKRunCommand;
 
 /**
  * Frame that displays the differences between two KrunStates
- * 
+ *
  * @author "DanielV"
  */
 public class DiffFrame extends javax.swing.JFrame {

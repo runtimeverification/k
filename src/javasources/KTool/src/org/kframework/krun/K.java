@@ -14,18 +14,18 @@ public class K {
     public static final String COMPATIBLE = "compatible";
 
     private K() {}
-    
+
     private static Tool tool;
-    
+
     public static enum Tool {
         KOMPILE, KRUN, KAST, KTEST, OTHER
     }
-    
+
     public static void setTool(Tool tool) {
         assert K.tool == null : "Can only call setTool once";
         K.tool = tool;
     }
-    
+
     public static Tool tool() {
         return tool;
     }

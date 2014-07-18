@@ -29,19 +29,19 @@ public class ColorUtil {
      * A cache to avoid computing the closest terminal color for a given color each time it is needed.
      */
     private static Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache;
-    
+
     public static Map<String, Color> colors() {
         colors = initColors();
         return Collections.unmodifiableMap(colors);
     }
-    
+
     private static void initColors(Color terminalColor) {
         colors = initColors();
         ansiColorsToTerminalCodes = initAnsiColors(terminalColor);
         eightBitColorsToTerminalCodes = initEightBitColors(terminalColor);
         colorToCodeConvertCache = initColorToCodeConvertCache();
     }
-   
+
     private static HashMap<Map<Color, String>, Map<Color, String>> initColorToCodeConvertCache() {
         HashMap<Map<Color, String>, Map<Color, String>> map = new HashMap<>();
         map.put(ansiColorsToTerminalCodes, new HashMap<Color, String>());

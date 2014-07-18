@@ -37,29 +37,29 @@ public final class KRunOptions {
 
     public enum OutputMode {
         PRETTY(true), SMART(true), COMPATIBLE(true), KORE(true), RAW(false), BINARY(false), NONE(false), NO_WRAP(true);
-        
+
         private boolean isPrettyPrinting;
-        
+
         private OutputMode(boolean isPrettyPrinting) {
             this.isPrettyPrinting = isPrettyPrinting;
         }
-        
+
         public boolean isPrettyPrinting() {
             return isPrettyPrinting;
         }
     }
-    
+
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
-    
+
     @ParametersDelegate
     public ConfigurationCreationOptions configurationCreation = new ConfigurationCreationOptions();
-    
+
     public static final class ConfigurationCreationOptions {
 
         @Parameter(description="<file>")
         private List<String> parameters;
-        
+
         public String pgm() {
             if (parameters == null || parameters.size() == 0) {
                 return null;
@@ -69,13 +69,13 @@ public final class KRunOptions {
             }
             return parameters.get(0);
         }
-        
+
         @ParametersDelegate
         public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
 
         @Parameter(names={"--parser"}, description="Command used to parse programs. Default is \"kast\"")
         private String parser;
-        
+
         public String parser(Context context) {
             if (parser == null) {
                 if (term()) {
@@ -91,16 +91,16 @@ public final class KRunOptions {
                 return parser;
             }
         }
-        
+
         @DynamicParameter(names={"--config-parser", "-p"}, description="Command used to parse " +
                 "configuration variables. Default is \"kast --parser ground -e\". See description of " +
                 "--parser. For example, -cpPGM=\"kast\" specifies that the configuration variable $PGM " +
                 "should be parsed with the command \"kast\".")
         private Map<String, String> configVarParsers = new HashMap<>();
-        
+
         @DynamicParameter(names={"--config-var", "-c"}, description="Specify values for variables in the configuration.")
         private Map<String, String> configVars = new HashMap<>();
-        
+
         public Map<String, Pair<String, String>> configVars(Context context) {
             Map<String, Pair<String, String>> result = new HashMap<>();
             for (Map.Entry<String, String> entry : configVars.entrySet()) {
@@ -118,10 +118,10 @@ public final class KRunOptions {
             }
             return result;
         }
-        
+
         @Parameter(names="--term", description="Input argument will be parsed with the specified parser and used as the sole input to krun.")
         private boolean term = false;
-        
+
         public boolean term() {
             if (term && configVars.size() > 0) {
                 throw new ParameterException("You cannot specify both the term and the configuration variables.");
@@ -132,11 +132,11 @@ public final class KRunOptions {
             return term;
         }
     }
-    
+
     @Parameter(names="--io", description="Use real IO when running the definition. Defaults to true.", arity=1,
             converter=OnOffConverter.class)
     private Boolean io;
-    
+
     public boolean io() {
         if (io != null && io == true && search()) {
             throw new ParameterException("You cannot specify both --io on and --search");
@@ -155,10 +155,10 @@ public final class KRunOptions {
         }
         return io;
     }
-    
+
     @Parameter(names="--color", description="Use colors in output. Default is on.")
     private ColorSetting color;
-    
+
     public ColorSetting color() {
         if (color == null) {
             if (experimental.outputFile != null) {
@@ -168,53 +168,53 @@ public final class KRunOptions {
         }
         return color;
     }
-    
+
     public static class ColorModeConverter extends BaseEnumConverter<ColorSetting> {
-        
+
         @Override
         public Class<ColorSetting> enumClass() {
             return ColorSetting.class;
         }
     }
-    
+
     @Parameter(names="--terminal-color", description="Background color of the terminal. Cells won't be colored in this color.")
     private String terminalColor = "black";
-    
+
     public Color terminalColor() {
         return ColorUtil.getColorByName(terminalColor);
     }
-    
-    @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class, 
+
+    @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
             description="How to display Maude results. <mode> is either [pretty|smart|compatible|kore|raw|binary|none].")
     public OutputMode output = OutputMode.PRETTY;
-    
+
     public static class OutputModeConverter extends BaseEnumConverter<OutputMode> {
-        
+
         @Override
         public Class<OutputMode> enumClass() {
             return OutputMode.class;
         }
     }
-    
+
     @Parameter(names="--search", description="In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search).")
     private boolean search = false;
-    
+
     @Parameter(names="--search-final", description="Same as --search but only return final states, even if --depth is provided.")
     private boolean searchFinal = false;
-    
+
     @Parameter(names="--search-all", description="Same as --search but return all matching states, even if --depth is not provided.")
     private boolean searchAll = false;
-    
+
     @Parameter(names="--search-one-step", description="Same as --search but search only one transition step.")
     private boolean searchOneStep = false;
-    
+
     @Parameter(names="--search-one-or-more-steps", description="Same as --search-all but exclude initial state, even if it matches.")
     private boolean searchOneOrMoreSteps = false;
-    
+
     public boolean search() {
         return search || searchFinal || searchAll || searchOneStep || searchOneOrMoreSteps;
     }
-    
+
     public SearchType searchType() {
         if (search) {
             if (searchFinal || searchAll || searchOneStep || searchOneOrMoreSteps) {
@@ -245,10 +245,10 @@ public final class KRunOptions {
             return null;
         }
     }
-    
+
     @Parameter(names="--pattern", description="Specify a term and/or side condition that the result of execution or search must match in order to succeed. Return the resulting matches as a list of substitutions. In conjunction with it you can specify other 2 options that are optional: bound (the number of desired solutions) and depth (the maximum depth of the search).")
     private String pattern;
-    
+
     public static final String DEFAULT_PATTERN = "<generatedTop> B:Bag </generatedTop> [anywhere]";
     public ASTNode pattern(Context context) throws ParseFailedException {
         if (pattern == null && !search()) {
@@ -277,66 +277,66 @@ public final class KRunOptions {
                 KSorts.BAG,
                 context);
     }
-    
+
     @Parameter(names="--bound", description="The number of desired solutions for search.")
     public Integer bound;
-    
+
     @Parameter(names="--depth", description="The maximum number of computational steps to execute or search the definition for.")
     public Integer depth;
-    
+
     @Parameter(names="--graph", description="Displays the search graph generated by the last search.")
     public boolean graph = false;
-    
+
     @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
     public boolean helpExperimental = false;
-    
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
-    
+
     public final class Experimental {
         @Parameter(names="--log-io", description="Make the IO server create logs.", arity=1, converter=OnOffConverter.class)
         public boolean logIO;
-        
+
         @Parameter(names="--simulation", description="Simulation property of two programs in two semantics.",
                 listConverter=StringListConverter.class)
         public List<String> simulation;
-        
+
         @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,
                 converter=OnOffConverter.class)
         public boolean statistics = false;
-        
+
         @Parameter(names="--debugger", description="Run an execution in debug mode.")
         private boolean debugger = false;
-        
+
         public boolean debugger() {
             if (debugger && search()) {
                 throw new ParameterException("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
             }
             return debugger;
         }
-        
+
         @Parameter(names="--debugger-gui", description="Run an execution in debug mode with graphical interface.")
         private boolean debuggerGui = false;
-        
+
         public boolean debuggerGui() {
             if (debuggerGui && search()) {
                 throw new ParameterException("Cannot specify --search with --debug-gui. In order to search inside the debugger, use the step-all command.");
             }
             return debuggerGui;
         }
-        
+
         @Parameter(names="--trace", description="Turn on maude trace.")
         public boolean trace = false;
-        
+
         @Parameter(names="--profile", description="Turn on maude profiler.")
         public boolean profile = false;
-        
+
         @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
         private String ltlmc;
-        
+
         @Parameter(names="--ltlmc-file", description="Specify the formula for model checking through a file.")
         private File ltlmcFile;
-        
+
         public String ltlmc() {
             if (ltlmc != null && ltlmcFile != null) {
                 throw new ParameterException("You may specify only one of --ltlmc and --ltlmc-file.");
@@ -352,10 +352,10 @@ public final class KRunOptions {
             }
             return FileUtil.getFileContent(ltlmcFile.getAbsolutePath());
         }
-        
+
         @Parameter(names="--prove", description="Prove a set of reachability rules.")
         private File prove;
-        
+
         public File prove() {
             if (prove == null) return null;
             if (!prove.exists() || prove.isDirectory()) {
@@ -363,13 +363,13 @@ public final class KRunOptions {
             }
             return prove;
         }
-        
+
         @ParametersDelegate
         public SMTOptions smt = new SMTOptions();
-        
+
         @ParametersDelegate
         public JavaExecutionOptions javaExecution = new JavaExecutionOptions();
-        
+
         @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
         public File outputFile;
     }

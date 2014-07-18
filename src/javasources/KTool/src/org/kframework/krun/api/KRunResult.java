@@ -7,7 +7,7 @@ public class KRunResult<T> {
     private String statistics;
     private String rawOutput;
     private T result;
-    
+
     private Context context;
 
     public KRunResult(T result, Context context) {

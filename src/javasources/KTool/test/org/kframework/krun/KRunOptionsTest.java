@@ -19,7 +19,7 @@ public class KRunOptionsTest {
         assertTrue(options.experimental.logIO);
         assertTrue(options.io());
     }
-    
+
     @Test
     public void testOff() {
         KRunOptions options = new KRunOptions();
@@ -28,12 +28,12 @@ public class KRunOptionsTest {
         assertFalse(options.experimental.logIO);
         assertFalse(options.io());
     }
-    
+
     @Test
     public void testSimulation() {
         KRunOptions options = new KRunOptions();
         new JCommander(options, "one", "--simulation", "--directory two three\\ four");
         assertEquals(Arrays.asList("--directory", "two", "three four"), options.experimental.simulation);
     }
-    
+
 }

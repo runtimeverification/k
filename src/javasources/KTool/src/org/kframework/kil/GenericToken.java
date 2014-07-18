@@ -19,7 +19,7 @@ public class GenericToken extends Token {
 
     /**
      * Returns a {@link GenericToken} of the given sort with the given value.
-     * 
+     *
      * @param sort
      *            different than #Bool, #Int, or #String
      * @param value
@@ -37,7 +37,7 @@ public class GenericToken extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link GenericToken} of the given sort with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param sort
      *            different than #Bool, #Int, or #String
      * @param value
@@ -69,7 +69,7 @@ public class GenericToken extends Token {
 
     /**
      * Returns a {@link String} representing the sort of the token.
-     * 
+     *
      * @return
      */
     @Override
@@ -79,7 +79,7 @@ public class GenericToken extends Token {
 
     /**
      * Returns a {@link String} representing the (uninterpreted) value of the token.
-     * 
+     *
      * @return
      */
     @Override

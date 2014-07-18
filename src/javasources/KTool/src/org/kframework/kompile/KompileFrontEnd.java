@@ -48,27 +48,27 @@ public class KompileFrontEnd {
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kompile");
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class));
-            
+
             if (options.global.help) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
                 return;
             }
-            
+
             if (options.helpExperimental) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
-                return;    
+                return;
             }
-            
+
             if (options.global.version) {
                 String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.print(msg);
                 return;
             }
-            
+
             kompile(options);
         } catch (ParameterException ex) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
@@ -79,13 +79,13 @@ public class KompileFrontEnd {
         org.kframework.utils.Error.checkIfOutputDirectory(options.directory);
 
         final Context context = new Context(options);
-        
+
         context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
         context.dotk.mkdirs();
-        
+
         // default for documentation backends is to store intermediate outputs in temp directory
         context.kompiled = context.dotk;
-        
+
         if (!options.global.debug) {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -107,7 +107,7 @@ public class KompileFrontEnd {
                 backend = new LatexBackend(Stopwatch.instance(), context);
                 break;
             case DOC:
-                backend = new LatexBackend(Stopwatch.instance(), context, true);                
+                backend = new LatexBackend(Stopwatch.instance(), context, true);
                 break;
             case HTML:
                 backend = new HtmlBackend(Stopwatch.instance(), context);
@@ -159,7 +159,7 @@ public class KompileFrontEnd {
         if (backend != null) {
             genericCompile(options, backend, options.experimental.step, context);
         }
-        
+
         BinaryLoader.save(new File(context.kompiled, "kompile-options.bin").getAbsolutePath(), options);
 
         verbose(context);
@@ -179,9 +179,9 @@ public class KompileFrontEnd {
         Stopwatch.instance().start();
         javaDef = DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 backend.autoinclude(), context);
-        
+
         new CountNodesVisitor(context).visitNode(javaDef);
-        
+
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
         if (step == null) {
@@ -197,7 +197,7 @@ public class KompileFrontEnd {
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
-        
+
     }
 
     private static void checkAnotherKompiled(File kompiled) {

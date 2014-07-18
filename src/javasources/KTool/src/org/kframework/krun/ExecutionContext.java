@@ -44,24 +44,24 @@ public class ExecutionContext {
     private final Definition definition;
     private final Term initialConfiguration;
     private final Stopwatch sw;
-        
+
     //public final String kdir;
-    
-    //public final String krunDir, krunTempDir, maude_in, maude_out, maude_err, maude_output, processed_maude_output, krun_output;    
+
+    //public final String krunDir, krunTempDir, maude_in, maude_out, maude_err, maude_output, processed_maude_output, krun_output;
 
     public ExecutionContext(KRunOptions krunOptions, ConfigurationCreationOptions ccOptions, Stopwatch sw) {
-        
-        
+
+
         this.sw = sw;
-        
+
         KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class,
                 new File(ccOptions.definitionLoading.definition(),
                         "kompile-options.bin").getAbsolutePath(), krunOptions.global.debug);
         //merge krun options into kompile options object
         kompileOptions.global = krunOptions.global;
-        
+
         sw.printIntermediate("Loading serialized kompile options");
-        
+
         context = new Context(krunOptions, ccOptions, kompileOptions);
 
         context.dotk = new File(
@@ -81,7 +81,7 @@ public class ExecutionContext {
         Configuration cfg = BinaryLoader.load(Configuration.class, new File(context.kompiled, "configuration.bin").getAbsolutePath(), context);
 
         sw.printIntermediate("Reading configuration from binary");
-        
+
         initialConfiguration = makeConfiguration(ccOptions, cfg, krunOptions.io());
     }
 
@@ -97,7 +97,7 @@ public class ExecutionContext {
             throw new AssertionError("currently only three execution backends are supported: MAUDE, SYMBOLIC, and JAVA");
         }
         if (!serializedDefinition.exists()) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "Could not find the compiled definition.", null, serializedDefinition.getAbsolutePath()));
         }
         Definition javaDef = BinaryLoader.load(Definition.class, serializedDefinition.getAbsolutePath(), context);
@@ -112,19 +112,19 @@ public class ExecutionContext {
         javaDef = (Definition) new AddTopCellConfig(context).visitNode(javaDef);
 
         sw.printIntermediate("Adding top cell to configuration");
-        
+
         ConfigurationStructureVisitor cfgStrVisitor =
                 new ConfigurationStructureVisitor(context);
         cfgStrVisitor.visitNode(javaDef);
         context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
-        
+
         sw.printIntermediate("Computing configuration abstraction");
 
         javaDef.preprocess(context);
-        
+
         return javaDef;
     }
-    
+
 
     public Term makeConfiguration(ConfigurationCreationOptions options, Configuration cfg,
                                          boolean io) {
@@ -136,13 +136,13 @@ public class ExecutionContext {
         }
 
         HashMap<String, Term> output = new HashMap<String, Term>();
-        for (Map.Entry<String, Pair<String, String>> entry 
+        for (Map.Entry<String, Pair<String, String>> entry
                 : options.configVars(context).entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
             if (!context.configVarSorts.containsKey(name)) {
-                GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.CRITICAL, 
+                GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.CRITICAL,
                         "User specified configuration variable " + name + " which does not exist."));
             }
             String startSymbol = context.configVarSorts.get(name);
@@ -171,7 +171,7 @@ public class ExecutionContext {
 
         return plug(output, cfg);
     }
-    
+
     private String getStdinBuffer() {
         String buffer = "";
 
@@ -188,7 +188,7 @@ public class ExecutionContext {
             if (context.globalOptions.debug) {
                 e.printStackTrace();
             }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                     "IO error detected reading from stdin"));
         }
         if (buffer == null) {
@@ -200,7 +200,7 @@ public class ExecutionContext {
     public Term plug(Map<String, Term> args, Configuration cfg) {
         ASTNode cfgCleanedNode = null;
         cfgCleanedNode = new ConfigurationCleaner(context).visitNode(cfg);
-        
+
         Term cfgCleaned;
         if (cfgCleanedNode == null) {
             cfgCleaned = Bag.EMPTY;
@@ -221,15 +221,15 @@ public class ExecutionContext {
         configuration = (Term) new CompileDataStructures(context).visitNode(configuration);
         return configuration;
     }
-    
+
     public Term getInitialConfiguration() {
         return initialConfiguration;
     }
-    
+
     public Context getContext() {
         return context;
     }
-    
+
     public Definition getDefinition() {
         return definition;
     }

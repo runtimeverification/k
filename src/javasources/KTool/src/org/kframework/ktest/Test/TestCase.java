@@ -139,13 +139,13 @@ public class TestCase {
         assert new File(definition.getObj()).isFile();
         return definition.getObj();
     }
-    
+
     public File getWorkingDir() {
         File f = new File(definition.getObj());
         assert f.isFile();
         return f.getParentFile();
     }
-    
+
     /**
      * @return command array to pass process builder
      */
@@ -318,7 +318,7 @@ public class TestCase {
                     if (!hasDirectory) {
                         args.add(new PgmArg("--directory", definitionFilePath));
                     }
-                    
+
                     ret.add(new KRunProgram(
                             pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,
                             getNewOutputFilePath(outputFileName), profile.isRegex()));

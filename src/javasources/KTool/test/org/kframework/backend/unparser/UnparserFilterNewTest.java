@@ -15,7 +15,7 @@ import org.mockito.Mockito;
 
 public class UnparserFilterNewTest {
     Context context;
-    
+
     @SuppressWarnings("unchecked")
     @Before
     public void setup() {
@@ -23,7 +23,7 @@ public class UnparserFilterNewTest {
         context.canonicalBracketForSort = Mockito.mock(Map.class);
         context.krunOptions = new KRunOptions();
     }
-    
+
     /**
      * Regression test for an ArrayOutOfBoundsException on labels with multiple trailing underscores,
      */
@@ -34,5 +34,5 @@ public class UnparserFilterNewTest {
         v.visit(t, null);
         v.getResult();
     }
-    
+
 }

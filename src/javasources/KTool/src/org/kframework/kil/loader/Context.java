@@ -75,7 +75,7 @@ public class Context implements Serializable {
     /**
      * Represents a map from all Klabels in string representation plus two
      * strings, "cons" and "prefixlabel", to sets of corresponding productions.
-     * 
+     *
      * TODO(YilongL): it doesn't contain getKLabel_ in key set?! instead the
      * production "getKLabel" K is in the values of both "cons" and "prefix".
      * why?
@@ -94,7 +94,7 @@ public class Context implements Serializable {
     public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
-    
+
     public Map<String, Production> canonicalBracketForSort = new HashMap<>();
     private Poset subsorts = new Poset();
     public java.util.Set<String> definedSorts = Sort.getBaseSorts();
@@ -142,7 +142,7 @@ public class Context implements Serializable {
      */
     private Set<String> tokenSorts;
 
-    
+
     public java.util.List<String> getKomputationCells() {
         return kompileOptions.experimental.kCells;
     }
@@ -174,12 +174,12 @@ public class Context implements Serializable {
     public KRunOptions krunOptions;
     public ConfigurationCreationOptions ccOptions;
     public transient JavaExecutionOptions javaExecutionOptions;
-    
+
     public Context(GlobalOptions globalOptions) {
         this.globalOptions = globalOptions;
         initSubsorts();
     }
-    
+
     public Context(KompileOptions kompileOptions) {
         this(kompileOptions.global);
         this.kompileOptions = kompileOptions;
@@ -187,7 +187,7 @@ public class Context implements Serializable {
         //TODO(dwightguth): replace this with a provider in Guice
         this.javaExecutionOptions = new JavaExecutionOptions();
     }
-    
+
     public Context(KRunOptions krunOptions, ConfigurationCreationOptions ccOptions, KompileOptions kompileOptions) {
         this(kompileOptions);
         this.krunOptions = krunOptions;
@@ -211,7 +211,7 @@ public class Context implements Serializable {
 //        s.add(cons);
         putLabel(p.getKLabel(), cons);
     }
-    
+
     private void putLabel(String label, String cons) {
         Set<String> s = labels.get(label);
         if (s == null) {
@@ -257,7 +257,7 @@ public class Context implements Serializable {
     public boolean isListSort(String sort) {
         return listConses.containsKey(sort);
     }
-    
+
     /**
      * Returns a unmodifiable view of all sorts.
      */
@@ -267,9 +267,9 @@ public class Context implements Serializable {
 
     /**
      * Takes a List sort and returns the sort of the elements of that List sort. e.g, for List{Exp, ","}, returns Exp.
-     * 
+     *
      * returns null if not a List sort
-     * 
+     *
      * we suppress cast warnings because we know that the sort must be UserList
      */
     @SuppressWarnings("cast")
@@ -281,7 +281,7 @@ public class Context implements Serializable {
 
     /**
      * Finds the LUB (Least Upper Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the LUB of the given set of sorts on success;
@@ -290,10 +290,10 @@ public class Context implements Serializable {
     public String getLUBSort(Set<String> sorts) {
         return subsorts.getLUB(sorts);
     }
-    
+
     /**
      * Finds the LUB (Least Upper Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the LUB of the given set of sorts on success;
@@ -305,7 +305,7 @@ public class Context implements Serializable {
 
     /**
      * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the GLB of the given set of sorts on success;
@@ -314,10 +314,10 @@ public class Context implements Serializable {
     public String getGLBSort(Set<String> sorts) {
         return subsorts.getGLB(sorts);
     }
-    
+
     /**
      * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the GLB of the given set of sorts on success;
@@ -326,11 +326,11 @@ public class Context implements Serializable {
     public String getGLBSort(String... sorts) {
         return subsorts.getGLB(Sets.newHashSet(sorts));
     }
-    
+
     /**
      * Checks if there is any well-defined common subsort of a given set of
      * sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return {@code true} if there is at least one well-defined common
@@ -338,7 +338,7 @@ public class Context implements Serializable {
      */
     public boolean hasCommonSubsort(String... sorts) {
         Set<String> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
-        
+
         if (maximalLowerBounds.isEmpty()) {
             return false;
         } else if (maximalLowerBounds.size() == 1) {
@@ -350,7 +350,7 @@ public class Context implements Serializable {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -381,7 +381,7 @@ public class Context implements Serializable {
 
     /**
      * Check to see if the two klabels are in the wrong order according to the priority filter.
-     * 
+     *
      * @param klabelParent
      * @param klabelChild
      * @return
@@ -470,7 +470,7 @@ public class Context implements Serializable {
 
     /**
      * Check to see if smallSort is subsorted to bigSort (strict)
-     * 
+     *
      * @param bigSort
      * @param smallSort
      * @return
@@ -481,7 +481,7 @@ public class Context implements Serializable {
 
     /**
      * Check to see if smallSort is subsorted or equal to bigSort
-     * 
+     *
      * @param bigSort
      * @param smallSort
      * @return
@@ -508,7 +508,7 @@ public class Context implements Serializable {
 
     /**
      * Returns a {@link List} of productions associated with the specified KLabel
-     * 
+     *
      * @param label
      *            string representation of the KLabel
      * @return list of productions associated with the label

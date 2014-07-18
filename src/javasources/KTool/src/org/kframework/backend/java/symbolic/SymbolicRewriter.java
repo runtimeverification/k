@@ -72,7 +72,7 @@ public class SymbolicRewriter {
         ruleIndex = definition.getIndex();
 
         this.strategy = new TransitionCompositeStrategy(definition.context().kompileOptions.transition);
-        
+
         /* initialize the K AST checker for test generation */
         if (definition.context().javaExecutionOptions.generateTests) {
             phase1PluggableKastChecker = new PluggableKastStructureChecker();
@@ -322,11 +322,11 @@ public class SymbolicRewriter {
     private void computeRewriteStep(ConstrainedTerm constrainedTerm) {
         computeRewriteStep(constrainedTerm, -1);
     }
-    
+
     /**
      * Prepares the pattern term used in unification by composing the left-hand
      * side of a specified rule and its side-conditions.
-     * 
+     *
      * @param rule
      *            the specified rule
      * @param termContext
@@ -354,7 +354,7 @@ public class SymbolicRewriter {
     /**
      * Constructs the new subject term by applying the resulting symbolic
      * constraint of unification to the right-hand side of the rewrite rule.
-     * 
+     *
      * @param rule
      *            the rewrite rule
      * @param constraint
@@ -651,7 +651,7 @@ public class SymbolicRewriter {
 
             for (ConstrainedTerm term : queue) {
                 computeRewriteStep(term);
-                
+
                 /* first eliminate terms that fail the K AST checker */
                 performKastStructureCheck(phase1PluggableKastChecker, initialTerm);
                 /* then eliminate terms that have too many free variables */
@@ -691,8 +691,8 @@ public class SymbolicRewriter {
                 }
             }
 
-            System.out.println("rule distribution stats: " + ruleDistStats);            
-            
+            System.out.println("rule distribution stats: " + ruleDistStats);
+
             /* debugging: test generation runs into a (local) dead end */
 //            if (nextQueue.isEmpty()) {
 //                System.err.printf("The state queue drains out...\n)");
@@ -701,7 +701,7 @@ public class SymbolicRewriter {
 //                    System.err.println(term);
 //                }
 //            }
-            
+
             /* swap the queues */
             List<ConstrainedTerm> temp;
             temp = queue;

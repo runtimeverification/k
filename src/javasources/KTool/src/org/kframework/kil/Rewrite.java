@@ -87,7 +87,7 @@ public class Rewrite extends Term {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Rewrite shallowCopy() {
         return new Rewrite(this);

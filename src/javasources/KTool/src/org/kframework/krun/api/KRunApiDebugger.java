@@ -37,12 +37,12 @@ public class KRunApiDebugger implements KRunDebugger {
 
     private static Rule defaultPattern;
     private static RuleCompilerSteps defaultPatternInfo;
-    
+
     protected final Context context;
 
     public KRunApiDebugger(KRun krun, Term cfg, Context context) throws KRunExecutionException {
         this.context = context;
-        try { 
+        try {
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
             ASTNode pattern = DefinitionLoader.parsePattern(
                     KRunOptions.DEFAULT_PATTERN,
@@ -115,7 +115,7 @@ public class KRunApiDebugger implements KRunDebugger {
         if (stateNum == null || states.containsKey(stateNum)) {
             currentState = stateNum;
         } else {
-            throw new IllegalArgumentException("Cannot set current state to state " + stateNum 
+            throw new IllegalArgumentException("Cannot set current state to state " + stateNum
                     + ": it does not exist in the graph.");
         }
     }
@@ -134,7 +134,7 @@ public class KRunApiDebugger implements KRunDebugger {
         }
         for (int i = 0; steps == null || i < steps; i++) {
             KRunState nextStep = krun.step(getState(currentState).getRawResult(), 1).getResult();
-            Entry<Integer, KRunState> prevValue = containsValue(nextStep);    
+            Entry<Integer, KRunState> prevValue = containsValue(nextStep);
             if (prevValue!=null) {
                 nextStep = prevValue.getValue();
 
@@ -205,7 +205,7 @@ public class KRunApiDebugger implements KRunDebugger {
             } else if (existingEdge == null) {
                 graph.addEdge(edge, first, second);
             }
-        }        
+        }
     }
 
     /* checks if state already exists(using Semantic equal)
@@ -236,7 +236,7 @@ public class KRunApiDebugger implements KRunDebugger {
         KRunState second = getState(state2);
         Transition edge = graph.findEdge(first, second);
         if (edge == null)
-            throw new IllegalArgumentException("Edge between states " 
+            throw new IllegalArgumentException("Edge between states "
                     + state1 + " and " + state2 + " does not exist in the current graph");
         return edge;
     }
@@ -253,7 +253,7 @@ public class KRunApiDebugger implements KRunDebugger {
         } else {
             rule = "rule ...";
         }
-        
+
         return rule + "\n" + printState(state1) + "\n=>\n" + printState(state2);
     }
 
@@ -268,7 +268,7 @@ public class KRunApiDebugger implements KRunDebugger {
         Term result;
         result = (Term) transformer.visitNode(configuration);
         if (!transformer.getSucceeded()) {
-            throw new IllegalStateException("Cannot perform command: Configuration does not " + 
+            throw new IllegalStateException("Cannot perform command: Configuration does not " +
                 "have an stdin buffer");
         }
         KRunState newState = new KRunState(result, context);
@@ -277,7 +277,7 @@ public class KRunApiDebugger implements KRunDebugger {
             KRunState canonicalNewState = canonicalizeState(newState);
             Transition edge = graph.findEdge(getState(currentState), canonicalNewState);
             if (edge == null) {
-                graph.addEdge(Transition.stdin(s, context), 
+                graph.addEdge(Transition.stdin(s, context),
                     getState(currentState), canonicalNewState);
             }
             currentState = canonicalNewState.getStateId();
@@ -285,7 +285,7 @@ public class KRunApiDebugger implements KRunDebugger {
         }
         putState(newState);
         graph.addVertex(newState);
-        graph.addEdge(Transition.stdin(s, context), 
+        graph.addEdge(Transition.stdin(s, context),
             getState(currentState), newState);
         currentState = newState.getStateId();
     }

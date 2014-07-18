@@ -8,7 +8,7 @@ import java.util.List;
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 
 public class KRunGraph extends DirectedOrderedSparseMultigraph<KRunState, Transition> {
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

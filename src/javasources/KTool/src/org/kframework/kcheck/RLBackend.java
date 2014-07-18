@@ -269,7 +269,7 @@ public class RLBackend extends BasicBackend implements Backend {
         }
 
 //        System.exit(1);
-        
+
         // prints programs when verbose
         //if (GlobalSettings.verbose) {
             for (int i = 0; i < programs.size(); i++)
@@ -292,11 +292,11 @@ public class RLBackend extends BasicBackend implements Backend {
     }
 
     private Term mergeLeftIntoRight(Term lpgm, Term icontext) {
-        
+
         Term context = icontext.shallowCopy();
         MergeToTransformer mtt = new MergeToTransformer(this.context, lpgm);
         context = (Term) mtt.visitNode(context);
-        
+
         return context;
     }
 

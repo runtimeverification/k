@@ -31,12 +31,12 @@ public class TestGenResults {
         int n = 1;
         StringBuilder sb = new StringBuilder();
         sb.append("Test generation results:");
-        
+
         for (TestGenResult testGenResult : getTestGenResults()) {
             // TODO(YilongL): how to set state id?
             sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
 
-            UnparserFilterNew t = new UnparserFilterNew(true, context.krunOptions.color(), 
+            UnparserFilterNew t = new UnparserFilterNew(true, context.krunOptions.color(),
                     context.krunOptions.output, false, context);
             Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
             t.visitNode(concretePgm);
@@ -46,7 +46,7 @@ public class TestGenResults {
             Map<String, Term> substitution = testGenResult.getSubstitution();
 
             if (isDefaultPattern()) {
-                UnparserFilterNew unparser = new UnparserFilterNew(true, context.krunOptions.color(), 
+                UnparserFilterNew unparser = new UnparserFilterNew(true, context.krunOptions.color(),
                         context.krunOptions.output, false, context);
                 unparser.visitNode(substitution.get("B:Bag"));
                 sb.append("\n" + unparser.getResult());
@@ -54,7 +54,7 @@ public class TestGenResults {
                 boolean empty = true;
 
                 for (String variable : substitution.keySet()) {
-                    UnparserFilterNew unparser = new UnparserFilterNew(true, context.krunOptions.color(), 
+                    UnparserFilterNew unparser = new UnparserFilterNew(true, context.krunOptions.color(),
                             context.krunOptions.output, false, context);
                     sb.append("\n" + variable + " -->");
                     unparser.visitNode(substitution.get(variable));
@@ -76,14 +76,14 @@ public class TestGenResults {
             strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
             strCnstr = strCnstr.replace("/\\ ", "/\\\n");
             sb.append(strCnstr);
-            
+
             n++;
         }
-        
+
         if (n == 1) {
             sb.append("\nNo test generation results");
         }
-        
+
         return sb.toString();
     }
 
@@ -94,9 +94,9 @@ public class TestGenResults {
     public List<TestGenResult> getTestGenResults() {
         return testGenResults;
     }
-    
+
     public boolean isDefaultPattern(){
-        
+
         return this.isDefaultPattern;
     }
 }

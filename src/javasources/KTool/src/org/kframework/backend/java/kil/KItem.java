@@ -50,7 +50,7 @@ import com.google.common.collect.Sets;
  */
 @SuppressWarnings("serial")
 public final class KItem extends Term {
-    
+
     private static final Map<KLabelConstant, KItem> LIST_TERMINATORS = Maps.newHashMap();
 
     private final Term kLabel;
@@ -76,7 +76,7 @@ public final class KItem extends Term {
             String separator = definition.context().listLabelSeparator.get(kLabelConstant.label());
             if (separator != null) {
                 KLabelConstant unitLabel = KLabelConstant.of(
-                        org.kframework.compile.utils.MetaK.getListUnitLabel(separator), 
+                        org.kframework.compile.utils.MetaK.getListUnitLabel(separator),
                         null);
                 KItem newListTerminator = new KItem(
                         unitLabel,
@@ -87,10 +87,10 @@ public final class KItem extends Term {
                 return newListTerminator;
             }
         }
-        
+
         return new KItem(kLabel, kList, termContext);
     }
-    
+
     private KItem(Term kLabel, Term kList, String sort, boolean isExactSort) {
         super(Kind.KITEM);
         this.kLabel = kLabel;
@@ -98,7 +98,7 @@ public final class KItem extends Term {
         this.sort = sort;
         this.isExactSort = isExactSort;
     }
-    
+
     private KItem(Term kLabel, Term kList, TermContext termContext) {
         super(Kind.KITEM);
         this.kLabel = kLabel;
@@ -106,12 +106,12 @@ public final class KItem extends Term {
 
         Definition definition = termContext.definition();
         Context context = definition.context();
-        
+
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             List<Production> productions = kLabelConstant.productions();
-            
+
             Set<String> sorts = Sets.newHashSet();
             Set<String> possibleSorts = Sets.newHashSet();
 
@@ -140,7 +140,7 @@ public final class KItem extends Term {
             for (Production production : productions) {
                 boolean mustMatch = true;
                 boolean mayMatch = true;
-                
+
                 if (((KList) kList).size() == production.getArity()) {
                     /* check if the production can match this KItem */
                     int idx = 0;
@@ -148,7 +148,7 @@ public final class KItem extends Term {
                         if (!mayMatch) {
                             break;
                         }
-    
+
                         /* extract the actual term in case it's injected in klabel */
                         if (term instanceof KItem){
                             KItem kItem = (KItem) term;
@@ -157,7 +157,7 @@ public final class KItem extends Term {
                             }
                         }
                         String childSort = term.sort();
-    
+
                         if (!context.isSubsortedEq(production.getChildSort(idx), childSort)) {
                             mustMatch = false;
                             /*
@@ -197,18 +197,18 @@ public final class KItem extends Term {
              */
             sort = sorts.size() == 1 ? sorts.iterator().next() : context.getGLBSort(sorts);
             if (sort == null) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                        KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " + 
-                                this.toString() + "\nPossible least sorts are: " + sorts)); 
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                        KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " +
+                                this.toString() + "\nPossible least sorts are: " + sorts));
             }
             /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
             isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
-        } else {    
+        } else {
             /* not a KLabelConstant or the kList contains a frame variable */
             if (kLabel instanceof KLabelInjection) {
                 assert kList.equals(KList.EMPTY);
             }
-            
+
             sort = kind.toString();
             isExactSort = false;
         }
@@ -239,15 +239,15 @@ public final class KItem extends Term {
 
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
-     * 
+     *
      * @param copyOnShareSubstAndEval
      *            specifies whether to use
      *            {@link CopyOnShareSubstAndEvalTransformer} when applying
      *            user-defined function rules
-     * 
+     *
      * @param context
      *            a term context
-     * 
+     *
      * @return the evaluated result on success, or this {@code KItem} otherwise
      */
     public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
@@ -340,10 +340,10 @@ public final class KItem extends Term {
                 }
                 if (copyOnShareSubstAndEval) {
                     rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                            solution, 
+                            solution,
                             rule.reusableVariables().elementSet(),
                             context);
-                } else { 
+                } else {
                     rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
                 }
 
@@ -370,7 +370,7 @@ public final class KItem extends Term {
                  * If the function definitions do not need to be deterministic, try them in order
                  * and apply the first one that matches.
                  */
-                if (!context.definition().context().javaExecutionOptions.deterministicFunctions 
+                if (!context.definition().context().javaExecutionOptions.deterministicFunctions
                         && result != null) {
                     return result;
                 }
@@ -453,7 +453,7 @@ public final class KItem extends Term {
         hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         return kLabel.hasCell() || kList.hasCell();

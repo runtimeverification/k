@@ -9,7 +9,7 @@ public class SMTOptions implements Serializable {
 
     @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|gappa|none].")
     public SMTSolver smt = SMTSolver.Z3;
-    
+
     public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> {
 
         @Override

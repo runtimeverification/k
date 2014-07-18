@@ -38,7 +38,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     private java.util.List<String> variableList = new java.util.LinkedList<String>();
     private java.util.Map<Production, Integer> priorities = null;
     private java.util.Stack<ASTNode> stack = new java.util.Stack<ASTNode>();
-    
+
     public void setForEquivalence() {
         forEquivalence = true;
     }
@@ -46,7 +46,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     public void setIndenter(Indenter indenter) {
         this.indenter = indenter;
     }
-    
+
     public UnparserFilterNew(org.kframework.kil.loader.Context context) {
         this(false, context);
     }
@@ -270,11 +270,11 @@ public class UnparserFilterNew extends NonCachingVisitor {
     }
 
     private class UnparserBagItemComparator implements Comparator<Term> {
-        
+
         private java.util.Map<Term, String> unparsedResults;
-        
+
         private AlphanumComparator comparator = new AlphanumComparator();
-        
+
         public UnparserBagItemComparator(java.util.Map<Term, String> unparsedResults) {
             this.unparsedResults = unparsedResults;
         }
@@ -286,7 +286,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                     || !(o1 instanceof Cell) && (o2 instanceof Cell)) {
                 return o1 instanceof Cell ? -1 : 1;
             }
-            
+
             // case 2: o1 and o2 are cells with different labels
             if (o1 instanceof Cell && o2 instanceof Cell
                     && (!((Cell) o1).getLabel().equals(((Cell) o2).getLabel()))) {
@@ -294,16 +294,16 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 ConfigurationStructureMap sons = context.getConfigurationStructureMap().get(crntCell.getLabel()).sons;
                 return sons.positionOf(((Cell) o1).getLabel()) < sons.positionOf(((Cell) o2).getLabel()) ? -1 : 1;
             }
-            
+
             // case 3: neither o1 nor o2 is a cell
             // case 4: o1 and o2 are cells with the same label
             String s1 = unparsedResults.get(o1);
             String s2 = unparsedResults.get(o2);
             return comparator.compare(s1, s2);
         }
-        
+
     };
-    
+
     @Override
     public Void visit(Cell cell, Void _) {
         prepare(cell);
@@ -337,7 +337,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        
+
         /* if the contents of this cell is a bag, sort them properly */
         Term contents = cell.getContents();
         if (contents instanceof Bag) {
@@ -348,13 +348,13 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 UnparserFilterNew unparser = new UnparserFilterNew(context);
                 unparser.visitNode(child);
                 unparsedChildren.put(child, unparser.getResult());
-            }  
+            }
             Collections.sort(sortedBag.getContents(), new UnparserBagItemComparator(unparsedChildren));
             this.visitNode(sortedBag);
         } else {
             this.visitNode(contents);
         }
-        
+
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();
@@ -426,26 +426,26 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (label instanceof Token) {
             assert child instanceof KList : "child of KApp with Token is not KList";
             assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
-            
+
             List<Terminal> temp = this.findRightSyntax(label.getSort());
             if(!temp.isEmpty()){
                 indenter.write(temp.get(0).getTerminal());
             }
-            
+
             indenter.write(((Token) label).value());
-            
+
             if(temp.size()>1){
-                
+
                 indenter.write(temp.get(1).getTerminal());
             }
         } else if ((outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
-            
+
             String rawLabel = null;
             List<Terminal> temp = this.findRightSyntax(label.getSort());
             if(!temp.isEmpty()){
                 if(temp.size()>1){
                     rawLabel = temp.get(0).getTerminal()
-                            +((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + 
+                            +((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") +
                             temp.get(1).getTerminal();
 
                 } else {
@@ -521,7 +521,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
      * have classes TermCons.
      * The way to deal with TermCons is that if the syntax of the given definition allowed,
      * we will put parentheses surrounding a TermCons term.
-     * We will also delete the final ListTerminator if the input mode is pretty printing. 
+     * We will also delete the final ListTerminator if the input mode is pretty printing.
      */
     @Override
     public Void visit(TermCons termCons, Void _) {
@@ -537,7 +537,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
             String separator = userList.getSeparator();
             java.util.List<Term> contents = termCons.getContents();
             this.visitNode(contents.get(0));
-            if (!(contents.get(1) instanceof ListTerminator) 
+            if (!(contents.get(1) instanceof ListTerminator)
                     || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))) {
                 indenter.write(separator + " ");
                 this.visitNode(contents.get(1));
@@ -563,7 +563,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         }
         inTerm--;
         if(temp.size()>1){
-            
+
             indenter.write(temp.get(1).getTerminal());
         }
         return null;
@@ -801,9 +801,9 @@ public class UnparserFilterNew extends NonCachingVisitor {
         }
         return null;
     }
-    
+
     private List<Terminal> findRightSyntax(String sort){
-        
+
         Production p = context.canonicalBracketForSort.get(sort);
         if (p == null) {
             return new ArrayList<Terminal>();
@@ -828,14 +828,14 @@ public class UnparserFilterNew extends NonCachingVisitor {
             return true;
         } else if(astNode instanceof TermCons){
             List<Terminal> isRightSyntax = findRightSyntax(((TermCons) astNode).getSort());
-            
+
             if(isRightSyntax.isEmpty()){
-                
+
                 return false;
             }
-            
+
             return true;
-            
+
         } else if ((astNode instanceof TermCons) && (upper instanceof TermCons)) {
             TermCons termConsNext = (TermCons) astNode;
             TermCons termCons = (TermCons) upper;

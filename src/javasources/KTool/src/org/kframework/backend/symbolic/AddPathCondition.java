@@ -39,8 +39,8 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
     @Override
     /**
-     * Construct the path condition by adding to the original 
-     * path condition (phi) the side condition (SC) of the rule. 
+     * Construct the path condition by adding to the original
+     * path condition (phi) the side condition (SC) of the rule.
      * If NOSMT is set, then the side condition of the rule
      * remains unchanged. Otherwise, we filter the condition
      * separating the predicates(P) from 'smtlib' translatable
@@ -55,7 +55,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
         if (node.getRequires() == null)
             return node;
-        
+
         //TODO: handle ensures
 
         Term condition = node.getRequires();
@@ -65,13 +65,13 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
         ConditionTransformer ct = new ConditionTransformer(context);
         condition = (Term) ct.visitNode(condition);
-        
+
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();
 
             // variable holding the formula
             Variable phi = Variable.getFreshVar("K");
-            
+
             // create lhs path condition cell
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
@@ -103,7 +103,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             if (right instanceof Cell) {
                 right = AddConditionToConfig.addSubcellToCell((Cell) right, rightCell);
             }
-            
+
             Attributes atts = node.getAttributes();
             Term cond = condition;
             if (context.smtOptions.smt != SMTSolver.NONE) {

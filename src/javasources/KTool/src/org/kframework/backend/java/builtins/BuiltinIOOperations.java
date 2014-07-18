@@ -117,7 +117,7 @@ public class BuiltinIOOperations {
         try {
             RunProcess rp = new RunProcess();
             org.kframework.kil.Term kast = rp.runParser(
-                    context(context).ccOptions.parser(context(context)), 
+                    context(context).ccOptions.parser(context(context)),
                     term1.stringValue(), true, term2.stringValue(), context(context));
             Term term = Term.of(kast, definition(context));
             term = term.evaluate(context);

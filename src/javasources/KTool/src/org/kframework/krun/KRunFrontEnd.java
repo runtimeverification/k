@@ -69,7 +69,7 @@ public class KRunFrontEnd {
     private static Stopwatch sw = Stopwatch.instance();
 
     private static KRun obtainKRun(Context context) {
-        if (context.kompileOptions.backend == Backend.MAUDE 
+        if (context.kompileOptions.backend == Backend.MAUDE
                 || context.kompileOptions.backend == Backend.SYMBOLIC) {
             return new MaudeKRun(context, sw);
         } else if (context.kompileOptions.backend == Backend.JAVA) {
@@ -89,7 +89,7 @@ public class KRunFrontEnd {
     public static boolean normalExecution(ExecutionContext executionContext) {
         Term initialConfiguration = executionContext.getInitialConfiguration();
         Context context = executionContext.getContext();
-        
+
         try {
             KRunOptions options = context.krunOptions;
             KRun krun = obtainKRun(context);
@@ -114,7 +114,7 @@ public class KRunFrontEnd {
                     sw.printIntermediate("Parsing search pattern");
                 }
                 if (options.search()) {
-                    
+
                     if(options.experimental.javaExecution.generateTests){
                         result = krun.generate(
                                 options.bound,
@@ -133,9 +133,9 @@ public class KRunFrontEnd {
 
                     sw.printTotal("Search total");
                 } else if (options.experimental.ltlmc() != null) {
-                    Term formula = new RunProcess().runParserOrDie("kast -e", 
+                    Term formula = new RunProcess().runParserOrDie("kast -e",
                             options.experimental.ltlmc(), false, "LtlFormula", context);
-                    
+
                     result = krun.modelCheck(
                                     formula,
                                     initialConfiguration);
@@ -175,15 +175,15 @@ public class KRunFrontEnd {
                 e.report();
             } catch (UnsupportedBackendOptionException e) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.CRITICAL, "Backend \"" 
-                                + context.kompileOptions.backend.name().toLowerCase() 
+                        KExceptionGroup.CRITICAL, "Backend \""
+                                + context.kompileOptions.backend.name().toLowerCase()
                                 + "\" does not support option " + e.getMessage()));
             }
 
             if (options.output.isPrettyPrinting()) {
-                
+
                 String output = result.toString();
-                
+
                 writeOutput(options, output);
                 // print search graph
                 if (options.search() && options.graph) {
@@ -224,12 +224,12 @@ public class KRunFrontEnd {
 
                     if (options.experimental.outputFile == null) {
                         BinaryLoader.save(System.out, res);
-                        
+
                     } else {
                         BinaryLoader.save(options.experimental.outputFile.getAbsolutePath(), res);
                     }
                 } else {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                             "Binary output mode is not supported by search and model checking"));
                 }
 
@@ -248,7 +248,7 @@ public class KRunFrontEnd {
             writeStringToFile(options.experimental.outputFile, output);
         }
     }
-    
+
     private static Object command(JCommander jc) {
         return jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
     }
@@ -275,7 +275,7 @@ public class KRunFrontEnd {
             if (context.globalOptions.debug) {
                 e.printStackTrace();
             }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                     "IO error detected interacting with console"));
             return false;
         }
@@ -307,7 +307,7 @@ public class KRunFrontEnd {
                 }
             } catch (UnsupportedBackendOptionException e) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                        "Backend \"" + context.kompileOptions.backend.name().toLowerCase() 
+                        "Backend \"" + context.kompileOptions.backend.name().toLowerCase()
                         + "\" does not support option " + e.getMessage()));
                 return false; //unreachable
             }
@@ -320,7 +320,7 @@ public class KRunFrontEnd {
                     if (context.globalOptions.debug) {
                         e.printStackTrace();
                     }
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                             "IO error detected interacting with console"));
                     return false;
                 }
@@ -332,7 +332,7 @@ public class KRunFrontEnd {
                 if (input.equals("")) {
                     continue;
                 }
-                
+
                 KRunDebuggerOptions options = new KRunDebuggerOptions();
                 JCommander jc = new JCommander(options);
                 jc.addCommand(options.help);
@@ -347,10 +347,10 @@ public class KRunFrontEnd {
                 jc.addCommand(options.save);
                 jc.addCommand(options.load);
                 jc.addCommand(options.read);
-                
+
                 try {
                     jc.parse(input.split("\\s+"));
-                
+
                     if (jc.getParsedCommand().equals("help")) {
                         if (options.help.command == null || options.help.command.size() == 0) {
                             jc.usage();
@@ -388,7 +388,7 @@ public class KRunFrontEnd {
                         BinaryLoader.save(options.save.file.getAbsolutePath(), debugger.getGraph(), context);
                         System.out.println("File successfully saved.");
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
-                        DirectedGraph<KRunState, Transition> savedGraph = 
+                        DirectedGraph<KRunState, Transition> savedGraph =
                                 BinaryLoader.load(DirectedGraph.class, options.load.file.getAbsolutePath(), context);
                         debugger = krun.debug(savedGraph);
                         debugger.setCurrentState(1);
@@ -414,7 +414,7 @@ public class KRunFrontEnd {
             return false;
         }
     }
-    
+
     private static boolean guiDebugExecution(ExecutionContext executionContext) {
         Term initialConfiguration = executionContext.getInitialConfiguration();
         Context context = executionContext.getContext();
@@ -453,50 +453,50 @@ public class KRunFrontEnd {
             JCommander jc = new JCommander(options, cmds);
             jc.setProgramName("krun");
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KRunOptions.Experimental.class, SMTOptions.class, JavaExecutionOptions.class));
-            
+
             if (options.experimental.debuggerGui()) {
                 System.setProperty("java.awt.headless", "false");
             }
-            
+
             if (options.global.help) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
                 return true;
             }
-            
+
             if (options.helpExperimental) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
                 return true;
             }
-            
+
             if (options.global.version) {
                 String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.print(msg);
                 return true;
             }
-    
+
             sw.printIntermediate("Deleting temporary krun directory");
-            
+
             ExecutionContext mainExecutionContext = new ExecutionContext(options, options.configurationCreation, sw);
-            
+
             // Parse the program arguments
-            
+
             if(options.experimental.simulation != null) {
                 ConfigurationCreationOptions simulationCCOptions = new ConfigurationCreationOptions();
-                new JCommander(simulationCCOptions, 
+                new JCommander(simulationCCOptions,
                         options.experimental.simulation.toArray(
                                 new String[options.experimental.simulation.size()]));
-                
+
                 ExecutionContext simulationExecutionContext = new ExecutionContext(options, simulationCCOptions, sw);
-                
+
                 Term leftInitTerm = mainExecutionContext.getInitialConfiguration();
                 Term rightInitTerm = simulationExecutionContext.getInitialConfiguration();
                 Context contextLeft = mainExecutionContext.getContext();
                 Context contextRight = mainExecutionContext.getContext();
-                
+
                 Waitor runSimulation;
                 try {
                     runSimulation = new Waitor(contextLeft, contextRight, leftInitTerm, rightInitTerm);
@@ -507,9 +507,9 @@ public class KRunFrontEnd {
                     new RunProcess().printError(e.getMessage());
                     return false;
                 }
-                
+
                 runSimulation.start();
-                
+
                 try {
                     runSimulation.join();
                 } catch (InterruptedException e) {
@@ -517,7 +517,7 @@ public class KRunFrontEnd {
                 }
                 return true;
             }
-    
+
             if (!options.experimental.debugger() && !options.experimental.debuggerGui()) {
                 normalExecution(mainExecutionContext);
             } else {

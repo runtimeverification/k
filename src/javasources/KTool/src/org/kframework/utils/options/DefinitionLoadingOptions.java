@@ -13,7 +13,7 @@ public class DefinitionLoadingOptions {
             "in the current directory. A definition may also be specified with the 'KRUN_COMPILED_DEF' " +
             "environment variable, in which case it is used if the option is not specified on the command line.")
     private File directory;
-    
+
     public File definition() {
         File directory = null;
         File[] dirs = directory().listFiles(new FilenameFilter() {
@@ -34,7 +34,7 @@ public class DefinitionLoadingOptions {
                 }
             }
         }
-        
+
         if (directory == null) {
             throw new ParameterException("Could not find a compiled definition. " +
                     "Use --directory to specify one.");
@@ -44,7 +44,7 @@ public class DefinitionLoadingOptions {
         }
         return directory;
     }
-    
+
     private File directory() {
         if (directory == null) {
             if (System.getenv("KRUN_COMPILED_DEF") != null) {

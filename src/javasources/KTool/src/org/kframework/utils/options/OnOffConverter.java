@@ -5,11 +5,11 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.converters.BaseConverter;
 
 public class OnOffConverter extends BaseConverter<Boolean> {
-    
+
     public OnOffConverter(String optionName) {
         super(optionName);
     }
-    
+
     @Override
     public Boolean convert(String arg0) {
         if (arg0.equals("on")) {

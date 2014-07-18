@@ -221,11 +221,11 @@ public class Proc<T> implements Runnable {
     public String getPgmErr() {
         return pgmErr;
     }
-    
+
     public File getWorkingDir() {
         return workingDir;
     }
-    
+
     public void setWorkingDir(File workingDir) {
         this.workingDir = workingDir;
     }
@@ -281,7 +281,7 @@ public class Proc<T> implements Runnable {
                     doGenerateOut = true;
                 }
             }
-            
+
             if (updateOut && outputFile != null) {
                 IOUtils.write(pgmOut, new FileOutputStream(new File(outputFile)));
                 System.out.println("Updating output file: " + outputFile);
@@ -315,7 +315,7 @@ public class Proc<T> implements Runnable {
                     // error outputs match
                     success = true;
                     if (verbose)
-                        System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);   
+                        System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
                 } catch (MatchFailure e) {
                     // error outputs don't match
                     System.out.format(

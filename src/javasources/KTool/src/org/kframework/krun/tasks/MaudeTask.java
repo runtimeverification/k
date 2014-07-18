@@ -17,9 +17,9 @@ public class MaudeTask extends Thread {
     private String _xmlOutFile;
     private Process _maudeProcess;
     public int returnValue;
-    
+
     public static String maudeExe = MaudeRun.initializeMaudeExecutable();
-    
+
     public MaudeTask(String command, String outputFile, String errorFile, String xmlOutFile) {
         _command = command;
         _outputFile = outputFile;

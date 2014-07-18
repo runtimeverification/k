@@ -110,7 +110,7 @@ public class RunProcess {
 
         if (startSymbol == null) {
             startSymbol = context.startSymbolPgm;
-        }        
+        }
         String content = value;
 
         switch (parser) {
@@ -173,13 +173,13 @@ public class RunProcess {
     // check if the execution of Maude process produced some errors
     public void printError(String content) {
         if (content.contains("GLIBC")) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
-                    "Error: A known bug in the current version of the Maude rewrite engine\n" 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    "Error: A known bug in the current version of the Maude rewrite engine\n"
                             + "prohibits running K with I/O on certain architectures.\n"
-                            + "If non I/O programs and definitions work but I/O ones fail, \n" 
+                            + "If non I/O programs and definitions work but I/O ones fail, \n"
                             + "please let us know and we'll try helping you fix it.\n"));
         } else {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     content));
         }
     }
