@@ -45,17 +45,17 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Rule node, Void _)  {
         boolean isStream = false;

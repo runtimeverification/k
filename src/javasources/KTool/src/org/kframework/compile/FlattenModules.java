@@ -16,7 +16,7 @@ import java.util.Set;
 
 
 public class FlattenModules  extends BasicCompilerStep<Definition> {
-    
+
     public FlattenModules(Context context) {
         super(context);
     }
@@ -68,16 +68,16 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
                                 mods.add(modules.get(name));
                                 included.add(name);
                             } else {
-                                GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
-                                        KExceptionGroup.COMPILER, 
-                                        "Module " + name + " undefined.", 
+                                GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
+                                        KExceptionGroup.COMPILER,
+                                        "Module " + name + " undefined.",
                                         getName(), i.getFilename(), i.getLocation()));
                             }
                             continue;
                         } else included.add(name);
                     }
                     if (i instanceof Configuration) {
-                        if (null == cfg) 
+                        if (null == cfg)
                             cfg = (Configuration)i;
                         continue;
                     }

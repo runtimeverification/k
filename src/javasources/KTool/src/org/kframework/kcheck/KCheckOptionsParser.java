@@ -31,14 +31,14 @@ public class KCheckOptionsParser {
             OptionGroup pgmG = new OptionGroup();
             Option pgm = new Option("p", "pgm", true, "program file used to build the initial configuration ");
             pgmG.addOption(pgm);
-            
+
             // help option
             OptionGroup verb = new OptionGroup();
             Option help = new Option("h", "help", false, "prints this message and exits");
             Option verbose = new Option("v", "verbose", false, "verbose mode");
             verb.addOption(help);
             verb.addOption(verbose);
-            
+
             OptionGroup simplify = new OptionGroup();
             Option sim = new Option("simplify", false, "simplify the path condition before sending it to SMT solver");
             simplify.addOption(sim);

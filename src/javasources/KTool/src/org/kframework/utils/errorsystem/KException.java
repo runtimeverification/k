@@ -42,7 +42,7 @@ public class KException {
         this.filename = filename;
         this.location = location;
     }
-    
+
     public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, String filename, String location) {
         this(type,label,message,filename,location);
         this.compilationPhase = compilationPhase;
@@ -58,25 +58,25 @@ public class KException {
 
     @Override
     public String toString() {
-        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message 
+        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
             + trace.toString() + traceTail()
             + (filename == null ? "" : "\n\tFile: " + filename)
             + (location == null ? "" : "\n\tLocation: " + location)
             + (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
-        
+
     }
 
     public String getMessage() {
         return message;
     }
-    
+
     private String traceTail() {
         if (identicalFrames > 1) {
             return " * " + identicalFrames;
         }
         return "";
     }
-    
+
     private int frames = 0;
     private int identicalFrames = 1;
     private String lastFrame;

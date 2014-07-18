@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module TEST
-  syntax Exp ::= Int | Id 
+  syntax Exp ::= Int | Id
                | "++" Exp [strict]
                > Exp "+" Exp [left]
 
@@ -14,7 +14,7 @@ module TEST
 
   syntax RVal ::= Int
 
-  syntax K ::= rvalue(K) 
+  syntax KItem ::= rvalue(K)
 
   syntax KResult ::= Id | RVal
 
@@ -27,5 +27,5 @@ module TEST
   rule <k> ++ X => X ...</k> <state>... X |-> (I:Int => I +Int 1) ...</state>
   rule <k> rvalue(X => I) ...</k> <state>... X |-> I:Int ...</state>
 
-  rule I1:Int + I2:Int => I1 +Int I2 
+  rule I1:Int + I2:Int => I1 +Int I2
 endmodule

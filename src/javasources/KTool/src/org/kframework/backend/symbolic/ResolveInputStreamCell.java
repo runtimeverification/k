@@ -11,7 +11,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 /**
- * Add variable $IN if the current cell is marked as being 
+ * Add variable $IN if the current cell is marked as being
  * connected to the input stream.
  * @author andreiarusoaie
  *
@@ -23,26 +23,26 @@ public class ResolveInputStreamCell extends CopyOnWriteTransformer {
     public ResolveInputStreamCell(Context context) {
         super("Resolve InputStream cell", context);
     }
-    
+
     @Override
     public ASTNode visit(Cell node, Void _)  {
-        
+
         Map<String, String> attributes = node.getCellAttributes();
         if (!attributes.containsKey("stream"))
             return super.visit(node, _);
-        
+
         if (node.getCellAttributes().get("stream").equals(Constants.STDIN) && notSet){
 
             Variable in = new Variable(IN, "List");
-            
+
             node.shallowCopy();
             node.setContents(in);
             notSet = true;
 
             context.configVarSorts.put(in.getName(), in.getSort());
         }
-        
-        
+
+
         return super.visit(node, _);
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
  * Contains {@link Production}s, grouped into a list {@link PriorityBlock}
  * according to precedence marked by {@code >} in the declaration.
  */
-public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort, Enum<?>>, 
+public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort, Enum<?>>,
         Interfaces.MutableList<PriorityBlock, Enum<?>> {
     /** The sort being declared. */
     Sort sort;

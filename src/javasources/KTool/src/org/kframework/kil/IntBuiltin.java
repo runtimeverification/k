@@ -41,7 +41,7 @@ public class IntBuiltin extends Token {
 
     /**
      * Returns a {@link IntBuiltin} representing the given {@link BigInteger} value.
-     * 
+     *
      * @param value
      * @return
      */
@@ -58,7 +58,7 @@ public class IntBuiltin extends Token {
 
     /**
      * Returns a {@link IntBuiltin} representing the given {@link long} value.
-     * 
+     *
      * @param value
      * @return
      */
@@ -68,7 +68,7 @@ public class IntBuiltin extends Token {
 
     /**
      * Returns a {@link IntBuiltin} representing a {@link BigInteger} with the given {@link String} representation.
-     * 
+     *
      * @param value
      * @return
      */
@@ -80,7 +80,7 @@ public class IntBuiltin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link IntBuiltin} with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -97,7 +97,7 @@ public class IntBuiltin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link IntBuiltin} with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -107,7 +107,7 @@ public class IntBuiltin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link IntBuiltin} with the given {@link String} representation applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */

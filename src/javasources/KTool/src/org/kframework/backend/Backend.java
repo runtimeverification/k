@@ -13,7 +13,7 @@ public interface Backend {
 
     /**
      * Applies the first compilation step of this backend to a given definition.
-     * 
+     *
      * @param def
      *            the given definition
      * @return the resulting definition after this compilation step
@@ -22,7 +22,7 @@ public interface Backend {
 
     /**
      * Applies the last compilation step of this backend to a given definition.
-     * 
+     *
      * @param def
      *            the given definition
      * @return the resulting definition after this compilation step
@@ -33,11 +33,11 @@ public interface Backend {
 
     /**
      * Gets all compilation steps of this backend.
-     * 
+     *
      * @return a compound compilation step consisting of all the compilation
      *         steps
      */
     public CompilerSteps<Definition> getCompilationSteps();
     // TODO(YilongL): why mixing the uses of "compilation step" and
-    // "compiler step"? what about a uniform name?    
+    // "compiler step"? what about a uniform name?
 }

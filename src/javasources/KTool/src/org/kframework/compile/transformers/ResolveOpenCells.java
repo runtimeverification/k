@@ -18,12 +18,12 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
     public ResolveOpenCells(org.kframework.kil.loader.Context context) {
         super("Resolve Open Cells", context);
     }
-    
+
     @Override
     public ASTNode visit(Cell node, Void _)  {
         node = (Cell) super.visit(node, _);
         Ellipses ellipses = node.getEllipses();
-        if (ellipses == Ellipses.NONE) 
+        if (ellipses == Ellipses.NONE)
             return node;
 
         node = node.shallowCopy();
@@ -64,11 +64,11 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
         } else {
             col = MetaK.createCollection(node.getContents(), kind);
             if (col == null) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                        KExceptionGroup.COMPILER, 
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                        KExceptionGroup.COMPILER,
                         "Expecting a collection item here but got " + node.getContents() + " which is of sort " + kind, getName(),
                         node.getFilename(), node.getLocation()));
-                                
+
             }
         }
         node.setContents(col);

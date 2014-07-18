@@ -16,10 +16,10 @@ require "fresh.k"
 //require "model-checker.k"
 
 module BUILTIN-SYNTAX-HOOKS
-  imports BOOL-SYNTAX-HOOKS 
-  imports INT-SYNTAX-HOOKS 
+  imports BOOL-SYNTAX-HOOKS
+  imports INT-SYNTAX-HOOKS
 //  imports ARRAY-SYNTAX
-  imports FLOAT-SYNTAX-HOOKS 
+  imports FLOAT-SYNTAX-HOOKS
   imports STRING-SYNTAX-HOOKS
   imports ID-SYNTAX-HOOKS
   //imports LTL-SYNTAX-HOOKS
@@ -27,11 +27,11 @@ module BUILTIN-SYNTAX-HOOKS
 endmodule
 
 module BUILTIN-HOOKS
-  imports BOOL-HOOKS 
+  imports BOOL-HOOKS
   imports INT-HOOKS
   imports ID-HOOKS
 //  imports ARRAY
-  imports FLOAT-HOOKS 
+  imports FLOAT-HOOKS
   imports STRING-HOOKS
   imports TCP-HOOKS
   imports K-EQUAL-HOOKS

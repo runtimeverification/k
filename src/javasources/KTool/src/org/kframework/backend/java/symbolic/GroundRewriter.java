@@ -23,7 +23,7 @@ import org.kframework.krun.api.SearchType;
 import com.google.common.base.Stopwatch;
 
 public class GroundRewriter extends AbstractRewriter {
-    
+
     private final Stopwatch stopwatch = new Stopwatch();
     private boolean transition;
 
@@ -36,7 +36,7 @@ public class GroundRewriter extends AbstractRewriter {
         stopwatch.start();
 
         subject = super.rewrite(subject, bound);
-        
+
         stopwatch.stop();
         System.err.println("[" + step + ", " + stopwatch + "]");
 
@@ -77,7 +77,7 @@ public class GroundRewriter extends AbstractRewriter {
             }
         }
     }
-    
+
     @Override
     protected Term constructNewSubjectTerm(Rule rule, Map<Variable, Term> substitution) {
         return rule.rightHandSide().substituteAndEvaluate(substitution, termContext);

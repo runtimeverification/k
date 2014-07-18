@@ -11,9 +11,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 /**
  * Remove meta-variables from the configuration.
- * 
+ *
  * @author radu
- * 
+ *
  */
 public class SentenceVariablesFilter extends ParseForestTransformer {
     private boolean config = false;

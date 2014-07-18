@@ -191,7 +191,7 @@ module WCET
 
   rule <k> store I:Int , I2:Int => time(store) ...</k>
        <mem> M:Map => M[I2 <- I] </mem>
-  /*@ \texttt{store} evaluates two arguments. The first expresses the location in memory to write 
+  /*@ \texttt{store} evaluates two arguments. The first expresses the location in memory to write
   to, and the second expresses the value to write there. Once evaluated, we update the \texttt{mem}
   cell with the value in memory.*/
 
@@ -207,7 +207,7 @@ module WCET
   syntax KItem ::= branch(Bool, Id)
   rule branch(true, X:Id) => jumpTo(X)
   rule branch(false, _) => .
-  /*@ Conditional jump evaluates a boolean condition. If the condition is true, we jump to the 
+  /*@ Conditional jump evaluates a boolean condition. If the condition is true, we jump to the
   target. If it is false, we fall through to the next instruction.*/
 
   rule halt ~> _ => time(halt)
@@ -263,7 +263,7 @@ module WCET
        <timers> L:List => .List </timers>
   /*@ The \texttt{wcet} cell stores the length of time the program has already been running for, in
   total. When time passes, two types of asynchronous events can occur. The first is a write on an
-  I/O line, provided in advance in the \texttt{input} cell. The second is the firing of a timer 
+  I/O line, provided in advance in the \texttt{input} cell. The second is the firing of a timer
   interrupt.*/
 
   syntax KItem ::= updateStatus(Int)

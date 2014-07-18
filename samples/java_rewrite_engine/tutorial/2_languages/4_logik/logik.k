@@ -17,7 +17,7 @@ Those are covered in the LOGIK++ extension under
 \texttt{examples/logik++}.
 
 Specifically, a LOGIK program consists of a sequence of {\em Horn clauses}
-of the form 
+of the form
 \begin{quote}
 \texttt{P :- P1, P2, ..., Pn .}
 \end{quote}
@@ -127,9 +127,9 @@ terms without variables).  Let us now consider the following query:
 \noindent
 There are obviously infinitely many ground solutions for the query
 above, e.g.,
-\texttt{Y = nil} and \texttt{Z = cons(a,nil)}, 
-\texttt{Y = cons(a,nil)} and \texttt{Z = cons(a,cons(a,nil))}, 
-\texttt{Y = cons(b,nil)} and \texttt{Z = cons(a,cons(b,nil))}, 
+\texttt{Y = nil} and \texttt{Z = cons(a,nil)},
+\texttt{Y = cons(a,nil)} and \texttt{Z = cons(a,cons(a,nil))},
+\texttt{Y = cons(b,nil)} and \texttt{Z = cons(a,cons(b,nil))},
 \texttt{Y = cons(c,cons(b,nil))} and \texttt{Z = cons(a,cons(c,cons(b,nil)))},
 etc.  However, all the ground solutions for the query above can be
 elegantly characterized by the property that \texttt{Z} is bound to a list
@@ -216,9 +216,9 @@ Horn clauses followed by a query: */
   syntax Query ::= "?-" Terms "."
   syntax Pgm ::= Query | Clause Pgm
 
-/*@ Variables and literals are defined as tokens following the conventions 
+/*@ Variables and literals are defined as tokens following the conventions
 used in Prolog (variables start with \_ or capital letter, while literals
-start with lower case letters): */  
+start with lower case letters): */
 
 
   syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel]
@@ -253,7 +253,7 @@ Before we launch the semantics, we first scan the given program and
 place each clause in its own cell, and then place the query in the
 \textsf{k} cell and initialize the mgu with the variables from the query.
 
-Note that we put a fresh instance of the clause to avoid interference with 
+Note that we put a fresh instance of the clause to avoid interference with
 the query variables.  By a ``fresh instance'' of a clause we mean one whose
 variables are renamed with fresh names; we need that in order to avoid
 undesired unification conflicts due to particular names chosen for
@@ -292,7 +292,7 @@ were declared optional).  This way, if we see an empty configuration
 when we search for all solutions, we know that some attempts failed
 (but we do not know which ones). */
 
-// this would be nice, but we need feedback from the external unifier 
+// this would be nice, but we need feedback from the external unifier
 // for this.
 //  rule <T>... <mgu> _:MguError </mgu> ...</T> => .
 
@@ -340,7 +340,7 @@ another clause can be chosen using the rule above):  */
        <fresh>  L:Term :- Ls:Terms. => . </fresh>
 
 /*@ Note that there is no problem if a clause is chosen whose
-conclusion literal does not unify with the first goal literal.  
+conclusion literal does not unify with the first goal literal.
 The search
 option of \texttt{krun} will systematically try all clauses, so no
 solution is missed.  Of course, the above is not the most efficient

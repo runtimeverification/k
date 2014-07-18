@@ -16,7 +16,7 @@ import org.kframework.kil.loader.Context;
 
 /**
  * Utility class for checking sort membership predicates.
- * 
+ *
  * @author AndreiS
  */
 public class SortMembership {
@@ -24,7 +24,7 @@ public class SortMembership {
     /**
      * Evaluates a sort membership predicate with respect to a given
      * {@link org.kframework.kil.loader.Context}.
-     * 
+     *
      * @param kItem
      *            the sort membership predicate
      * @param context

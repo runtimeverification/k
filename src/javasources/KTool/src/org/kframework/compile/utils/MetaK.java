@@ -131,17 +131,17 @@ public class MetaK {
             }
 
             @Override
-            public Void visit(org.kframework.kil.Context node, Void _) { 
+            public Void visit(org.kframework.kil.Context node, Void _) {
                 return null;
             }
 
             @Override
-            public Void visit(Rule node, Void _) { 
+            public Void visit(Rule node, Void _) {
                 return null;
             }
 
             @Override
-            public Void visit(Syntax node, Void _) { 
+            public Void visit(Syntax node, Void _) {
                 return null;
             }
         }.visitNode(node);
@@ -164,7 +164,7 @@ public class MetaK {
 
     /**
      * Checks if the specified sort has been defined in {@link KSort}.
-     * 
+     *
      * @param sort
      *            the specified sort
      * @return {@code true} if the specified sort has been defined in
@@ -332,7 +332,7 @@ public class MetaK {
     /**
      * Checks if the specified sort is a computation sort, that is, K, KItem, or
      * any sort other than those defined in {@link KSort}.
-     * 
+     *
      * @param sort
      *            the specified sort
      * @return {@code true} if the specified sort is K, KItem, or any sort other

@@ -20,16 +20,16 @@
   of the infinite data structure. For the case of streams, this is usually given
   by a finite number of elements lying at the beginning of  the stream.
   Therefore we consider that a stream expression is in a \emph{result} form
-  if is of the form $i\terminal{:} \mathit{SE}$, where the integer $i$ is 
+  if is of the form $i\terminal{:} \mathit{SE}$, where the integer $i$ is
   the first element of the stream. Beside the constructor
   $\_\!\terminal{:}\!\_$, two functions, often called destructors,
-  are essential in handling streams:  $\terminal{hd}(xs)$, which returns 
-  the first element of the stream, and 
+  are essential in handling streams:  $\terminal{hd}(xs)$, which returns
+  the first element of the stream, and
   $\terminal{tl(}\mathit{xs}\terminal{)}$, which returns the stream obtained
   after the first element is removed.
 */
 
-module STREAM 
+module STREAM
 
   //@ Boolean Expressions
 
@@ -51,7 +51,7 @@ module STREAM
   //@ Stream Expressions
 
 
-  syntax SExp ::= Id 
+  syntax SExp ::= Id
                 | "tl" "(" SExp ")" [strict, prefer]
 //                | "(" SExp ")" [brackets]
                 > Id "(" SExps ")" [strict(2)]
@@ -73,31 +73,31 @@ module STREAM
   syntax Ids ::= List{Id,","}
   syntax SSpecs ::= SSpec | SSpec SSpecs [right]
 
-/*@ A program is a sequence of specification followed by an 
+/*@ A program is a sequence of specification followed by an
   expression to be evaluated. If the expression is a stream one, then
   the evaluation is a infinite process and therefore the debugger should
   be used for such cases.
 */
-  syntax SPgm ::= SSpecs Exp 
+  syntax SPgm ::= SSpecs Exp
 
 
   //@ Configuration
 
 /*@
   Besides the cell k, there two additional cells.
-  The cell \tetxtsf{specs} stores the the definition of the corecursive functions. 
+  The cell \tetxtsf{specs} stores the the definition of the corecursive functions.
   The cel \textsf{out} is used to exhibit the partial evaluation of the streams:
   each time a result stream expression is at the top of the computation
-  (i.e., at the beginning of the k cell), the first element is moved to 
+  (i.e., at the beginning of the k cell), the first element is moved to
   the output cell. This cell is essential for the stream equivalence.
 */
-  configuration 
+  configuration
     <k> $PGM:SPgm </k>
     <sspecs> .Map </sspecs>
-    <out> [] </out> 
+    <out> [] </out>
 
  //@ The right-hand side of a specification is stored as a $\lambda$-expression:
-  syntax K ::= "lambda" "(" Ids ")" Exp
+  syntax KItem ::= "lambda" "(" Ids ")" Exp
 
 /*@ The result values are integers and stream expression for that at  least
   the head is evaluated to an integer:
@@ -137,7 +137,7 @@ module STREAM
 
   rule false & _:BExp => false
 
-  rule IE:IExp <| true |> _:IExp => IE 
+  rule IE:IExp <| true |> _:IExp => IE
 
   rule _:IExp <| false |> IE:IExp => IE
 
@@ -149,12 +149,12 @@ module STREAM
   //@ The evaluation of tail:
 
   rule tl(_:Int : SE:SExp) => SE [anywhere]
-  
+
   //@ When the head is completely evaluated is moved in the cell out:
   rule <k> I:Int => . </k>
        <out> SE:SExp => append(I, SE) </out>
 /*
-  // this rule exhibith the infinite evaluation process and it 
+  // this rule exhibith the infinite evaluation process and it
   // is useful for equivalence (see prog-equiv/streams/
   rule <k> I:Int : SE:SExp => SE </k>
        <out> OUT:SExp => append(I, OUT) </out>

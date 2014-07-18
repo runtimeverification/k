@@ -20,7 +20,7 @@ import java.util.Set;
 
 /**
  * Substitutes user-level variables with terms according to a given substitution map.
- * 
+ *
  * @author TraianSF
  */
 public class UserSubstitutionTransformer extends PrePostTransformer {
@@ -48,7 +48,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
         preTransformer.addTransformer(new BinderSubstitution(context));
         preTransformer.addTransformer(new LocalSubstitutionTransformer());
     }
-    
+
     /**
      * Local transformer that performs the actual substitution of variables.
      */

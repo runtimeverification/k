@@ -29,11 +29,11 @@ public class Indenter {
         }
         return size;
     }
-    
+
     public void setWidth(int newWidth) {
         indentationOptions.setWidth(newWidth);
     }
-    
+
     public int getWidth() {
         return indentationOptions.getWidth();
     }

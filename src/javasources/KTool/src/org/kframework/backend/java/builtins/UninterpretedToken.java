@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Represents an uninterpreted token which consists of the {@code String}
  * representation of a sort and a value.
- * 
+ *
  * @author AndreiS
  */
 public final class UninterpretedToken extends Token implements MaximalSharing {
@@ -70,7 +70,7 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
     public String value() {
         return value;
     }
-    
+
     @Override
     protected int computeHash() {
         int hashCode = 1;
@@ -89,7 +89,7 @@ public final class UninterpretedToken extends Token implements MaximalSharing {
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);

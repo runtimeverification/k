@@ -87,7 +87,7 @@ module MINIMP
     rule <k> I:Id := I1:Int => .K ...</k> <env>... I |-> ((_:K => I1)) ...
       </env>
 
-    rule <k> I:Id := I1:Int => .K ...</k> <env> Rho:Map ((.Map => I |-> I1)) 
+    rule <k> I:Id := I1:Int => .K ...</k> <env> Rho:Map ((.Map => I |-> I1))
       </env> when notBool (I in (keys (Rho)))
 
     rule S1:Stmt ; S2:Stmt => S1 ~> S2

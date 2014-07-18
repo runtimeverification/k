@@ -8,7 +8,7 @@ public enum IndexingAlgorithm {
      * Represents an index backed by {@link IndexingTable}
      */
     RULE_TABLE,
-    
+
     /**
      * Represents an index backed by {@link PathIndex}
      * @deprecated as of 04/16/2014 and will be replaced with a more general, faster algorithm in

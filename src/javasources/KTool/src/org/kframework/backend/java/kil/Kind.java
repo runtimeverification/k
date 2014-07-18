@@ -15,7 +15,7 @@ import com.google.common.collect.EnumHashBiMap;
  * {@link Term}s than sorts. To be more specific, 1) each sort has a most
  * precise corresponding kind, and 2) two sorts with disjoint kinds are disjoint
  * as well.
- * 
+ *
  * @author AndreiS
  */
 public enum Kind {
@@ -32,7 +32,7 @@ public enum Kind {
      * Stores names of all the available {@code Kind}s.
      */
     private static final EnumHashBiMap<Kind, String> names = EnumHashBiMap.create(Kind.class);
-    
+
     static {
         names.put(BOTTOM, "Bottom");
         //names.put(CELL, "Cell"); // <= TODO(YilongL): is the sort of Cell "BagItem" in generic KIL?

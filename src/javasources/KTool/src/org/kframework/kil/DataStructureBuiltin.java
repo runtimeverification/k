@@ -42,7 +42,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         ELEMENTS,
         ELEMENTS_RIGHT
     }
-    
+
     public static DataStructureBuiltin empty(DataStructureSort sort) {
         if (sort.type().equals(KSorts.BAG)
                 || sort.type().equals(KSorts.SET)) {
@@ -168,21 +168,21 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                 terms.addAll(innerBaseTerms);
             } else if (leftSentinel.elementsRight().isEmpty()) {
                 terms.addAll(innerBaseTerms);
-                ListBuiltin inner = ListBuiltin.of(sort, Collections.<Term>emptyList(), 
+                ListBuiltin inner = ListBuiltin.of(sort, Collections.<Term>emptyList(),
                         Collections.<Term>emptyList(), rightSentinel.elementsLeft());
                 terms.add(inner);
             } else if (rightSentinel.elementsLeft().isEmpty()) {
-                ListBuiltin inner = ListBuiltin.of(sort, Collections.<Term>emptyList(), 
+                ListBuiltin inner = ListBuiltin.of(sort, Collections.<Term>emptyList(),
                         leftSentinel.elementsRight(), Collections.<Term>emptyList());
                 terms.add(inner);
                 terms.addAll(innerBaseTerms);
             } else {
-                ListBuiltin inner = ListBuiltin.of(sort, innerBaseTerms, 
+                ListBuiltin inner = ListBuiltin.of(sort, innerBaseTerms,
                         leftSentinel.elementsRight(), rightSentinel.elementsLeft());
-                terms.add(inner);    
+                terms.add(inner);
             }
             terms.addAll(rightSentinel.baseTerms());
-            
+
             return ListBuiltin.of(sort, terms, elementsLeft, elementsRight);
         } else if (sort.type().equals(KSorts.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
@@ -210,14 +210,14 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
      * left-hand side of a rule. Set to {@code null} if this data structure can
      * not occur in the left-hand side or is a collection of elements or
      * entries; otherwise, it must be the only element in {@code baseTerms}.
-     * 
+     *
      * @see DataStructureBuiltin
      */
     protected final Variable viewBase;
     /**
      * {@code Collection} of {@link KApp} AST nodes (representing data structure
      * operations) and {@link Variable} AST nodes.
-     * 
+     *
      * @see DataStructureBuiltin
      */
     protected final Collection<Term> baseTerms;
@@ -279,7 +279,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     public Term shallowCopy() {
         throw new UnsupportedOperationException();
     }
-    
+
     public abstract DataStructureBuiltin shallowCopy(Collection<Term> baseTerms);
 
     @Override
@@ -304,7 +304,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         return sort.equals(dataStructureBuiltin.sort)
                && baseTerms.equals(dataStructureBuiltin.baseTerms);
     }
-    
+
     @Override
     public Collection<Term> getChildren(ListChildren type) {
         switch (type) {
@@ -314,20 +314,20 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
             throw new AssertionError("unexpected child type " + type.name());
         }
     }
-    
+
     public abstract Term toKApp(Context context);
-    
+
     public Term toKApp(List<Term> items) {
         if(items.isEmpty()){
             return KApp.of(sort().unitLabel());
         }
-        
+
         Term current = items.get(items.size() - 1);
-        
+
         for(int i = items.size() - 2; i >= 0; --i){
             current = KApp.of(sort().constructorLabel(), items.get(i), current);
         }
-        
+
         return current;
     }
 }

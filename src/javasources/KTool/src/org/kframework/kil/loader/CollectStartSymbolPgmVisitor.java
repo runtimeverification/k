@@ -13,9 +13,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the $PGM sort from the final configuration it encounters
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 

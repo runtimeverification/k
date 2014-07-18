@@ -321,7 +321,7 @@ public class XMLEditorKit extends StyledEditorKit {
 
     /**
      * The operation to perform when this action is triggered.
-     * 
+     *
      * @param e
      *          the action event
      */

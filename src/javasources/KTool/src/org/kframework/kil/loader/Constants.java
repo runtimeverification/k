@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * @author andrei.arusoaie
- * 
+ *
  */
 public class Constants {
 

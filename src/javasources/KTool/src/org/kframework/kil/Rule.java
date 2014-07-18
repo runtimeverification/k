@@ -26,7 +26,7 @@ public class Rule extends Sentence {
 
     private List<BuiltinLookup> lookups = Collections.emptyList();
     private Map<Variable, Integer> concreteDataStructureSize = Collections.emptyMap();
-    
+
     private boolean compiledForFastRewriting = false;
     // TODO(YilongL): maybe build a CellInfo class?
     private Set<String> cellsOfInterest;
@@ -43,7 +43,7 @@ public class Rule extends Sentence {
         super(node);
         lookups = node.lookups;
         concreteDataStructureSize = node.concreteDataStructureSize;
-        
+
         compiledForFastRewriting = node.compiledForFastRewriting;
         cellsOfInterest = node.cellsOfInterest;
         lhsOfReadCell = node.lhsOfReadCell;

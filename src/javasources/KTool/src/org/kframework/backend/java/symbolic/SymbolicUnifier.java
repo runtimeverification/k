@@ -53,13 +53,13 @@ public class SymbolicUnifier extends AbstractUnifier {
          * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
          */
         public Collection<Collection<SymbolicConstraint.Data>> multiConstraints;
-        
+
         //TODO: the fields should be final
-        
+
         public Data(Collection<Collection<SymbolicConstraint.Data>> multiConstraints) {
             this.multiConstraints = multiConstraints;
         }
-        
+
         public Data() {
             this(new ArrayList<java.util.Collection<SymbolicConstraint.Data>>());
         }
@@ -95,7 +95,7 @@ public class SymbolicUnifier extends AbstractUnifier {
      * TODO(YilongL)
      */
     private boolean isStarNested;
-    
+
     public final Data data;
 
     private final TermContext termContext;
@@ -116,7 +116,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         this.termContext = context;
         this.data = data;
     }
-    
+
     public Collection<Collection<SymbolicConstraint>> multiConstraints() {
         ArrayList<Collection<SymbolicConstraint>> multiConstraints = new ArrayList<>();
         for(Collection<SymbolicConstraint.Data> mcd: data.multiConstraints) {
@@ -124,13 +124,13 @@ public class SymbolicUnifier extends AbstractUnifier {
             for(SymbolicConstraint.Data scd: mcd)
                 mc.add(new SymbolicConstraint(scd, termContext));
             multiConstraints.add(mc);
-        }            
+        }
         return multiConstraints;
     }
 
     /**
      * Unifies the two sides of the given equality.
-     * 
+     *
      * @param equality
      *            the given equality
      * @return true if the unification succeeds; otherwise, false
@@ -171,7 +171,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             term = CellCollection.upKind(term, otherTerm.kind(), context);
             otherTerm = CellCollection.upKind(otherTerm, term.kind(), context);
         }
-        
+
         // TODO(YilongL): may need to replace the following assertion to the
         // method fail() in the future because it crashes the Java rewrite
         // engine instead of just failing the unification process
@@ -208,11 +208,11 @@ public class SymbolicUnifier extends AbstractUnifier {
     @Override
     public void unify(BuiltinList builtinList, Term term) {
         assert !(term instanceof Variable);
-        
+
         if (!(term instanceof BuiltinList)) {
             this.fail(builtinList, term);
         }
-        
+
         throw new UnsupportedOperationException(
                 "list matching is only supported when one of the lists is a variable.");
     }
@@ -220,7 +220,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     @Override
     public void unify(BuiltinMap builtinMap, Term term) {
         assert !(term instanceof Variable);
-        
+
         if (!(term instanceof BuiltinMap)) {
             this.fail(builtinMap, term);
         }
@@ -235,11 +235,11 @@ public class SymbolicUnifier extends AbstractUnifier {
     public void unify(MapUpdate mapUpdate, Term term) {
         // this method is only used during macro expansion of rewrite rules
         assert !(term instanceof Variable);
-        
+
         if (!(term instanceof MapUpdate)) {
             this.fail(mapUpdate, term);
         }
-        
+
         throw new UnsupportedOperationException(
                 "Currently, mapUpdate can only be matched with a variable.");
     }
@@ -254,20 +254,20 @@ public class SymbolicUnifier extends AbstractUnifier {
         throw new UnsupportedOperationException(
                 "set matching is only supported when one of the sets is a variable.");
     }
-    
+
     @Override
     public void unify(SetUpdate setUpdate, Term term) {
         // this method is only used during macro expansion of rewrite rules
         assert !(term instanceof Variable);
-        
+
         if (!(term instanceof SetUpdate)) {
             this.fail(setUpdate, term);
         }
-        
+
         throw new UnsupportedOperationException(
                 "Currently, setUpdate can only be matched with a variable.");
     }
-    
+
     @Override
     public void unify(BuiltinMgu builtinMgu, Term term) {
         assert !(term instanceof Variable);
@@ -286,7 +286,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     @Override
     public void unify(Cell cell, Term term) {
         assert !(term instanceof Variable);
-        
+
         if (!(term instanceof Cell)) {
             this.fail(cell, term);
         }
@@ -297,7 +297,7 @@ public class SymbolicUnifier extends AbstractUnifier {
              * AndreiS: commented out the check below as matching might fail due
              * to KItem < K < KList subsorting:
              * !cell.contentKind().equals(otherCell.contentKind())
-             */            
+             */
             fail(cell, otherCell);
         }
 
@@ -305,17 +305,17 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     /**
-     * 
+     *
      */
     @Override
     public void unify(CellCollection cellCollection, Term term) {
         assert !(term instanceof Variable);
-        
+
         if (!(term instanceof CellCollection)) {
             fail(cellCollection, term);
         }
         CellCollection otherCellCollection = (CellCollection) term;
-        
+
         if (cellCollection.hasStar() && !otherCellCollection.hasStar()) {
             /* swap the two specified cell collections in order to reduce to the case 1 below */
             unify(otherCellCollection, cellCollection);
@@ -333,7 +333,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         unifiableCellLabels.retainAll(otherCellCollection.labelSet());
 
         Context context = termContext.definition().context();
-        
+
         /*
          * CASE 1: cellCollection has no explicitly specified starred-cell;
          * therefore, no need to worry about AC-unification at all!
@@ -350,7 +350,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
                     cellMap, otherCellCollection, otherCellMap);
-            
+
             if (!addCellCollectionConstraint(
                     cellMap,
                     cellCollection.hasFrame() ? cellCollection.frame() : null,
@@ -358,12 +358,12 @@ public class SymbolicUnifier extends AbstractUnifier {
                     otherCellCollection.hasFrame() ? otherCellCollection.frame() : null)) {
                 fail(cellCollection, otherCellCollection);
             }
-        } 
+        }
         /* Case 2: both cell collections have explicitly specified starred-cells */
         else {
             assert !isStarNested : "nested cells with multiplicity='*' not supported";
             // TODO(AndreiS): fix this assertions
-        
+
             assert !(cellCollection.hasFrame() && otherCellCollection.hasFrame()) :
                 "Two cell collections both having starred cells in their explicit contents and frames: " +
                 "unable to handle this case at present since it greatly complicates the AC-unification";
@@ -393,7 +393,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     iter.remove();
                 }
             }
-            
+
             // YilongL: the assertion here must hold
             if (unifiableCellLabels.isEmpty()) {
                 fail(cellCollection, otherCellCollection);
@@ -460,7 +460,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (constraints.size() == 1) {
                 fConstraint.addAll(constraints.iterator().next());
             } else {
-                List<SymbolicConstraint.Data> constraintsData = new ArrayList<>(); 
+                List<SymbolicConstraint.Data> constraintsData = new ArrayList<>();
                 for(SymbolicConstraint c : constraints)
                     constraintsData.add(c.data);
                 data.multiConstraints.add(constraintsData);
@@ -564,9 +564,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             assert !otherCellMap.containsKey(cellLabel);
             assert cellMap.get(cellLabel).size() == 1;
         }
-        
+
         Context context = termContext.definition().context();
-        
+
         if (frame != null) {
             if (otherFrame != null) {
                 if (cellMap.isEmpty() && otherCellMap.isEmpty()) {
@@ -607,7 +607,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     @Override
     public void unify(KLabelConstant kLabelConstant, Term term) {
         assert !(term instanceof Variable);
-        
+
         if (!kLabelConstant.equals(term)) {
             fail(kLabelConstant, term);
         }
@@ -772,7 +772,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     private void matchKCollection(KCollection kCollection, KCollection otherKCollection) {
         assert kCollection.getClass().equals(otherKCollection.getClass());
-        
+
         int length = Math.min(kCollection.size(), otherKCollection.size());
         for(int index = 0; index < length; ++index) {
             unify(kCollection.get(index), otherKCollection.get(index));
@@ -798,7 +798,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
     }
-    
+
     @Override
     public void unify(MetaVariable metaVariable, Term term) {
         // TODO(YilongL): not sure about the assertion below
@@ -813,7 +813,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     public void unify(Variable variable, Term term) {
         unify((Term) variable, term);
     }
-    
+
     @Override
     public String getName() {
         return this.getClass().toString();

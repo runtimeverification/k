@@ -18,14 +18,14 @@ import com.google.common.collect.ImmutableList;
  * usual syntax of K, it can be defined as the following:
  * <p>
  * <blockquote>
- * 
+ *
  * <pre>
  * syntax KList ::= List{K}{","}
  * </pre>
- * 
+ *
  * </blockquote>
  * <p>
- * 
+ *
  * @author AndreiS
  */
 @SuppressWarnings("serial")
@@ -34,12 +34,12 @@ public class KList extends KCollection {
     private static final String SEPARATOR_NAME = ",, ";
     private static final String IDENTITY_NAME = "." + Kind.KLIST;
     public static final KList EMPTY = new KList((Variable) null);
-    
+
     /**
      * A list of {@code Term}s contained in this {@code KList}.
      */
     private ImmutableList<Term> contents;
-    
+
     private String sort;
 
     public KList(List<Term> items, Variable frame) {
@@ -53,9 +53,9 @@ public class KList extends KCollection {
                     "associative use of KList(" + items + ", " + frame + ")";
 
                 KList kList = (KList) term;
-    
+
                 assert !kList.hasFrame() : "associative use of KCollection";
-    
+
                 normalizedItemsBuilder.addAll(kList.contents);
             } else {
                 normalizedItemsBuilder.add(term);
@@ -72,7 +72,7 @@ public class KList extends KCollection {
         super(frame, Kind.KLIST);
         this.contents = ImmutableList.of();
     }
-    
+
     /**
      * Private constructor only used for building KList fragment.
      * @param contents
@@ -101,7 +101,7 @@ public class KList extends KCollection {
 
         sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : KSorts.KSEQUENCE;
         return sort;
-    }    
+    }
 
     @Override
     public String getSeparatorName() {

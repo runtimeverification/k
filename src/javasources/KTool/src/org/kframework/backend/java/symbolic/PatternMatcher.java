@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
+import org.kframework.backend.java.builtins.TermEquality;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.kil.loader.Context;
@@ -187,8 +188,9 @@ public class PatternMatcher extends AbstractMatcher {
                     if (nonLookupOrChoice instanceof Variable) {
                         Variable variable = (Variable) nonLookupOrChoice;
                         if (checkOrderedSortedCondition(variable, evalLookupOrChoice, context)) {
-                            resolved = true;
-                            crntSubst.put(variable, evalLookupOrChoice);
+                            Term term = crntSubst.put(variable, evalLookupOrChoice);
+                            resolved = term == null || BoolToken.TRUE.equals(
+                                    TermEquality.eq(term, evalLookupOrChoice, context));
                         }
                     } else {
                         // the non-lookup term is not a variable and thus requires further pattern matching

@@ -56,7 +56,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 TermCons termCons = (TermCons) child;
                 if (termCons.getProduction().isListDecl()) {
                     if (new AddEmptyLists(context).isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof ListTerminator) {
-                        
+
                         tcParent.getContents().set(i, termCons.getContents().get(0));
                     }
                 }
@@ -92,7 +92,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             if (child instanceof KList) {
                 contents = ((KList)child).getContents();
             }
-            if (conses != null) {    
+            if (conses != null) {
                 for (int i = 0; i < contents.size(); i++) {
                     contents.set(i, (Term) this.visitNode(contents.get(i)));
                 }
@@ -137,7 +137,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                     if (possibleTerms.size() == 1) {
                         return possibleTerms.get(0);
                     } else {
-                        
+
                         return new Ambiguity("K", possibleTerms);
                     }
                 }
@@ -182,19 +182,19 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
         return new Bag(contents);
     }
-    
+
     @Override
     public ASTNode visit(MapBuiltin map, Void _) {
         Term kapp = (Term) toKApp.visitNode(super.visit(map, _));
         return this.visitNode(kapp);
     }
-    
+
     @Override
     public ASTNode visit(ListBuiltin list, Void _) {
         Term kapp = (Term) toKApp.visitNode(super.visit(list, _));
         return this.visitNode(kapp);
     }
-    
+
     @Override
     public ASTNode visit(SetBuiltin set, Void _) {
         Term kapp = (Term) toKApp.visitNode(super.visit(set, _));

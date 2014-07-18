@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.Properties;
 /**
  * Compile a K definition symbolically, using both basic
- * and specific compilation steps. 
+ * and specific compilation steps.
  * @author andreiarusoaie
  *
  */
@@ -94,9 +94,9 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 
          UnparserFilter unparserFilter = new UnparserFilter(this.context);
          unparserFilter.visitNode(javaDef);
-        
+
 //        String unparsedText = unparserFilter.getResult();
-//        
+//
 //        System.out.println(unparsedText);
         //
         // XStream xstream = new XStream();
@@ -135,7 +135,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
         steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new TagUserRules(context)); // symbolic step
-        steps.add(new ReachabilityRuleToKRule(context)); // symbolic step 
+        steps.add(new ReachabilityRuleToKRule(context)); // symbolic step
         steps.add(new AddKCell(context));
         steps.add(new AddSymbolicK(context));
 

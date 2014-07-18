@@ -162,9 +162,8 @@ public class Context implements Serializable {
     private void initSubsorts() {
         subsorts.addElement(KSorts.KLABEL);
         subsorts.addRelation(KSorts.KLIST, KSorts.K);
-        subsorts.addRelation(KSorts.KLIST, KSorts.KRESULT);
-        subsorts.addRelation(KSorts.K, KSorts.KRESULT);
         subsorts.addRelation(KSorts.K, KSorts.KITEM);
+        subsorts.addRelation(KSorts.KITEM, KSorts.KRESULT);
         subsorts.addRelation(KSorts.BAG, KSorts.BAG_ITEM);
     }
 

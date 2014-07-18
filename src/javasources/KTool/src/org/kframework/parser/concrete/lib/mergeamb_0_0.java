@@ -9,31 +9,31 @@ import java.util.ArrayList;
 
 /**
  * Example Java strategy implementation.
- * 
+ *
  * This strategy can be used by editor services and can be called in Stratego modules by declaring it as an external strategy as follows:
- * 
+ *
  * <code>
  *  external mergeamb(|)
  * </code>
- * 
+ *
  * @see InteropRegisterer This class registers string_trim_last_one_0_0 for use.
  */
 public class mergeamb_0_0 extends Strategy {
 
     public static mergeamb_0_0 instance = new mergeamb_0_0();
 
-    
+
     /**
      * Restructure a node
      * from: [A(x1, x2 ... xn), A(y1, y2 ... yn), A ..., B]
      * to  : [A(amb([x1, y1, ...]), amb([x2, y2, ...]), ... amb([xn, yn, ...])), B]
-     * 
+     *
      * if the children of every A are located in the same places (see isSimilar(...)).
      */
     @Override
     public IStrategoTerm invoke(Context context, IStrategoTerm currentList) {
         context.push("mergeamb_0_0");
-        
+
         java.util.List<IStrategoTerm> children = new ArrayList<IStrategoTerm>();
         //IStrategoTerm currentList = amb.getSubterm(0);
         for (int i = 0; i < currentList.getSubtermCount(); i++)
@@ -72,7 +72,7 @@ public class mergeamb_0_0 extends Strategy {
                     IStrategoList ambl = context.getFactory().makeList(list2);
                     IStrategoAppl ambappl = context.getFactory().makeAppl(ambc, ambl);
                     ambappl = (IStrategoAppl)context.getFactory().annotateTerm(ambappl, head.getSubterm(i).getAnnotations());
-                    
+
                     termList.add(ambappl);
                 }
                 IStrategoConstructor newtermConstr = ((IStrategoAppl)head).getConstructor();
@@ -86,13 +86,13 @@ public class mergeamb_0_0 extends Strategy {
                 newchildren.add(similar.get(0));
             }
         }
-        
+
         IStrategoList ambl = context.getFactory().makeList(newchildren);
 
         context.popOnSuccess();
         return ambl;
     }
-    
+
     /**
      * Check if two terms are similar. Meaning they have the same constructor, and the children are located in the same places.
      * @param t1 - first term.
@@ -113,13 +113,13 @@ public class mergeamb_0_0 extends Strategy {
         if (t1.getTermType() == IStrategoTerm.INT)
             if (((IStrategoInt) t1).intValue() != ((IStrategoInt) t2).intValue())
                 return false;
-        
+
         for (int i = 0; i < t1.getSubtermCount(); i++) {
             IStrategoTerm ch1 = t1.getSubterm(i);
             IStrategoTerm ch2 = t2.getSubterm(i);
             IStrategoTerm loc1 = ch1.getAnnotations();
             IStrategoTerm loc2 = ch2.getAnnotations();
-            
+
             if (loc1 == null)
                 context.getIOAgent().printError("Error1: " + ch1);
             if (loc2 == null)

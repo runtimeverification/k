@@ -4,9 +4,9 @@ package org.kframework.backend.java.kil;
 
 /**
  * The interface for data structure update operations.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public interface DataStructureUpdate {
     Term evaluateUpdate();

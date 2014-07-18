@@ -6,11 +6,11 @@ package org.kframework.backend.java.kil;
  * are immutable; and there is at most one instance for each different maximally
  * shared terms. Therefore, equality check involving maximally shared term can
  * be done by identity check.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public interface MaximalSharing extends Immutable {
-    
-    // TODO(YilongL): maybe implement equals method here once we switch to Java 8 
+
+    // TODO(YilongL): maybe implement equals method here once we switch to Java 8
 }

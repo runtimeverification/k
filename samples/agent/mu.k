@@ -6,10 +6,10 @@ module MU-SYNTAX imports LAMBDA-SYNTAX
   syntax priorities app > mu
 endmodule
 
-module MU 
-  imports MU-SYNTAX 
+module MU
+  imports MU-SYNTAX
   imports LAMBDA
 
 //Fix point operator (through beta-substitution)
-  rule (mu X:Id . E:K) => E[(mu X . E) / X] 
+  rule (mu X:Id . E:K) => E[(mu X . E) / X]
 endmodule

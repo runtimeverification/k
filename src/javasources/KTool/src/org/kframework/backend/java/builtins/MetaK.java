@@ -21,14 +21,14 @@ import java.util.Set;
 
 /**
  * Table of {@code public static} methods for builtin meta K operations.
- * 
+ *
  * @author AndreiS
  */
 public class MetaK {
 
     /**
      * Checks if two given {@link Term}s can be unified.
-     * 
+     *
      * @param term1
      *            the first term
      * @param term2
@@ -53,7 +53,7 @@ public class MetaK {
 
     /**
      * Checks if the subject term matches the pattern.
-     * 
+     *
      * @param subject
      *            the subject term
      * @param pattern
@@ -67,12 +67,12 @@ public class MetaK {
         return PatternMatcher.matchable(subject, pattern, context) ? BoolToken.TRUE
                 : BoolToken.FALSE;
     }
-    
+
     /**
      * Renames {@link Variable}s of a given {@link Term} if they appear also in
      * a given {@link BuiltinSet} of {@link MetaVariable}s.
-     * 
-     * 
+     *
+     *
      * @param term
      *            the given term
      * @param builtinSet
@@ -102,7 +102,7 @@ public class MetaK {
 
     /**
      * Renames all {@link Variable}s inside a given {@link Term} to unique fresh names.
-     * 
+     *
      * @param term
      *            the given term
      * @param context
@@ -117,7 +117,7 @@ public class MetaK {
     /**
      * Returns all {@link Variable}s inside a given {@link Term} as a
      * {@link BuiltinSet} of {@link MetaVariable}s.
-     * 
+     *
      * @param term
      *            the given term
      * @param context
@@ -131,11 +131,11 @@ public class MetaK {
         }
         return new BuiltinSet(metaVariables);
     }
-    
+
     /**
      * Returns all {@link Variable}s inside a given {@link Term} as a
      * {@link BuiltinSet}.
-     * 
+     *
      * @param term
      *            the given term
      * @param context
@@ -159,7 +159,7 @@ public class MetaK {
 
     /**
      * Returns the K label of a specified {@link KItem}.
-     * 
+     *
      * @param kItem
      *            the specified {@code KItem}
      * @param context

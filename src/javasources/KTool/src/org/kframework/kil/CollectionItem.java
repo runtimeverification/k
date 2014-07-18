@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 public abstract class CollectionItem extends Term implements Interfaces.MutableParent<Term, CollectionItem.Children> {
 
     protected Term value;
-    
+
     public static enum Children {
         KEY, VALUE
     }
@@ -64,7 +64,7 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
     public int hashCode() {
         return sort.hashCode() * 19 + value.hashCode();
     }
-    
+
     @Override
     public Term getChild(Children type) {
         if (type == Children.VALUE) {
@@ -72,7 +72,7 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
         }
         throw new IllegalArgumentException("unexpected child type " + type.name());
     }
-    
+
     @Override
     public void setChild(Term child, Children type) {
         if (type == Children.VALUE) {

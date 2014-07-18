@@ -1,10 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module STRICT
 
-  syntax Exp ::= Val | Id 
+  syntax Exp ::= Val | Id
                | "(" Exp ")" [bracket]
-               > "*" Exp [strict, context(rvalue), result(Ref), indirect] 
-               | "&" Exp [strict, indirect] 
+               > "*" Exp [strict, context(rvalue), result(Ref), indirect]
+               | "&" Exp [strict, indirect]
                > "++" Exp [strict]
                > Exp "+" Exp [strict, context(rvalue), result(RVal), left, plus]
                > Exp "=" Exp [strict(2), context(rvalue), result(RVal), right, assign]
@@ -14,7 +14,7 @@ module STRICT
 
   syntax AVal ::= Int
   syntax Ref ::= "lx" | "ly" | "lz" | "lp" | "lq"  // just for examples
-  syntax RVal ::= Ref | AVal 
+  syntax RVal ::= Ref | AVal
   syntax Val ::= RVal | lval(Ref)
 
   syntax KResult ::= Val
@@ -42,7 +42,7 @@ module STRICT
 
   // the rule for &
 
-  rule & lval(L:Ref) => L 
+  rule & lval(L:Ref) => L
 
   rule * L:Ref => lval(L)
 
@@ -50,8 +50,8 @@ module STRICT
   Let us also consider the following contexts for strictnness attribute that
   aloows to evaluate differently the variable names:
 */
-  
-  syntax K ::= "rvalue" "(" K ")" [strict, klabel(rvalue)]
+
+  syntax KItem ::= "rvalue" "(" K ")" [strict, klabel(rvalue)]
 
 /*
   A variable name always is evaluated as an lvalue

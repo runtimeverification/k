@@ -17,13 +17,13 @@ import java.util.Set;
  * andreis: this is backend specific, should go to MaudeFilter or something...
  */
 public class ResolveBuiltins extends CopyOnWriteTransformer {
-    
+
     Set<String> builtinSorts = new HashSet<String>();
 
     public ResolveBuiltins(Context context) {
         super("Resolve Builtins", context);
     }
-    
+
     @Override
     public ASTNode visit(Module node, Void _)  {
         builtinSorts.clear();
@@ -58,19 +58,19 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
                     BoolBuiltin.TRUE, context));
             rule.addAttribute(Attribute.PREDICATE);
             items.add(rule);
-            
+
         }
         node.setItems(items);
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Sort node, Void _)  {
         if (MetaK.isBuiltinSort(node.getName()))
                 builtinSorts.add(node.getName());
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Configuration node, Void _)  {
         return node;

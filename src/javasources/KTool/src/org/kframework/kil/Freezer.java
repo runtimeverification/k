@@ -73,6 +73,6 @@ public class Freezer extends Term implements Interfaces.MutableParent<Term, Enum
 
     @Override
     public void setChild(Term child, Enum<?> type) {
-        this.term = child; 
+        this.term = child;
     }
 }

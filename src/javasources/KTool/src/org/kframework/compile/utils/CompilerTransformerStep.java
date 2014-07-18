@@ -10,7 +10,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 
 public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerStep<T> {
-    
+
     AbstractTransformer<RuntimeException> t;
 
     public CompilerTransformerStep(AbstractTransformer<RuntimeException> t, Context context) {

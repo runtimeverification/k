@@ -40,7 +40,7 @@ public class SDFHelper {
 
     /**
      * Search for all the productions that have either 'klabel(tag)' or the 'tag' attribute
-     * 
+     *
      * @param tag
      * @return
      */
@@ -90,9 +90,9 @@ public class SDFHelper {
 
     /**
      * Using this class to collect the prefixes amongst terminals
-     * 
+     *
      * @author RaduFmse
-     * 
+     *
      */
     private static class Ttuple {
         public String key;
