@@ -1,0 +1,13 @@
+Test(s) for Coq backend.
+
+This is not yet covered by into ktest.
+
+Directories contain input as .k files,
+along with the .v and .labeled_rules files that should
+be produced by running 'compile --backend coq' on the .k file.
+
+The rule output is sensitive to things like the numbers in generated
+variable names which may change quite often, robust automation would
+need to take that into account.
+(Perhaps a robustly Ltac-automated Coq proof of equivalence with
+a reference version).
