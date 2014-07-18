@@ -63,7 +63,7 @@ public class SetLookup extends Term implements DataStructureLookup {
     public Sort sort() {
         return BoolToken.SORT;
     }
-    
+
     @Override
     public Type type() {
         return Type.SET_LOOKUP;
@@ -76,7 +76,7 @@ public class SetLookup extends Term implements DataStructureLookup {
         hashCode = hashCode * Utils.HASH_PRIME + base.hashCode();
         return hashCode;
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         throw new UnsupportedOperationException();

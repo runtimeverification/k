@@ -42,9 +42,9 @@ public class GroupProductionsBySort {
             for (Production prod : klabel.productions()) {
                 // TODO(YilongL): This is not the right way to handle bracket
                 // productions; fix it!
-                if (prod.containsAttribute(Attribute.BRACKET.getKey())) 
+                if (prod.containsAttribute(Attribute.BRACKET.getKey()))
                     continue;
-                
+
                 String sort = prod.getSort();
                 if (!prodsBuilders.containsKey(sort)) {
                     ImmutableList.Builder<Production> b = ImmutableList.builder();

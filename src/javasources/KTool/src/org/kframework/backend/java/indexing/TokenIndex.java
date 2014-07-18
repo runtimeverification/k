@@ -14,7 +14,7 @@ public class TokenIndex implements Index {
     public TokenIndex(Sort sort) {
         this.sort = sort;
     }
-    
+
     public Sort sort() {
         return sort;
     }

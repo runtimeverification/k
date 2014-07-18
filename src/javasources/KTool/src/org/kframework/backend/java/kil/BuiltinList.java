@@ -92,10 +92,10 @@ public class BuiltinList extends Collection {
     public boolean isLHSView() {
         return true;
     }
-    
+
     /**
      * Checks if this {@code BuiltinList} is actually a list update operation.
-     * 
+     *
      * @return {@code true} if there is pending update operation on this
      *         {@code BuiltinList}; otherwise, {@code false}
      */
@@ -141,7 +141,7 @@ public class BuiltinList extends Collection {
         hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
         return hashCode;
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         boolean hasCell = false;
@@ -164,7 +164,7 @@ public class BuiltinList extends Collection {
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);

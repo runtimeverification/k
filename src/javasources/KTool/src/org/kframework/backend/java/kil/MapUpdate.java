@@ -106,7 +106,7 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
         return hashCode;
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         throw new UnsupportedOperationException();

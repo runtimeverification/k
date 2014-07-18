@@ -30,7 +30,7 @@ public class TestCaseGenerationUtil {
     /**
      * Selects a certain number of states randomly from the given list of
      * states.
-     * 
+     *
      * @param listOfStates
      *            a list of states
      * @param n
@@ -40,13 +40,13 @@ public class TestCaseGenerationUtil {
     public static List<ConstrainedTerm> getArbitraryStates(
             List<ConstrainedTerm> listOfStates, int n) {
         assert n >= 0;
-        
+
         List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
         ArrayList<Integer> numbersAvail = new ArrayList<Integer>();
 
         for (int i = 0; i < listOfStates.size(); i++)
             numbersAvail.add(i);
-        
+
         // fixed initial seed
         Random rnd = new Random(0);
         while ((n > 0) && (numbersAvail.size() > 0)) {
@@ -61,7 +61,7 @@ public class TestCaseGenerationUtil {
     /**
      * Selects a certain number of states randomly from the given list following
      * a round-robin fashion with respect to different categories.
-     * 
+     *
      * @param listOfStates
      *            a list of states
      * @param listOfRules
@@ -76,9 +76,9 @@ public class TestCaseGenerationUtil {
         if (listOfStates.isEmpty()) {
             return Collections.emptyList();
         }
-        
+
         n = Math.min(n, listOfStates.size());
-        
+
         List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
         boolean[] isRemoved = new boolean[listOfStates.size()];
         Map<String, Integer> cat2NumOfStates = new HashMap<String, Integer>();
@@ -87,17 +87,17 @@ public class TestCaseGenerationUtil {
 
         for (int i = 0; i < listOfStates.size(); i++) {
             isRemoved[i] = false;
-            
+
             String category = getValOfAttrTestGenCategory(listOfRules.get(i));
             if (cat2NumOfStates.get(category) == null) {
                 cat2NumOfStates.put(category, 0);
             }
             cat2NumOfStates.put(category, cat2NumOfStates.get(category) + 1);
-            
+
             indirectIdx.add(i);
         }
         Collections.shuffle(indirectIdx);
-        
+
         int avg = n / cat2NumOfStates.keySet().size();
         int left = n;
         for (String category : cat2NumOfStates.keySet()) {
@@ -113,7 +113,7 @@ public class TestCaseGenerationUtil {
                 }
             }
         }
-        
+
         for (int i = 0; i < listOfStates.size(); i++) {
             Integer idx = indirectIdx.get(i);
             String category = getValOfAttrTestGenCategory(listOfRules.get(idx));
@@ -124,24 +124,24 @@ public class TestCaseGenerationUtil {
                 n--;
             }
         }
-        
+
         for (String category: quotas.keySet()) {
             assert quotas.get(category) == 0;
         }
         assert n == 0;
-            
+
         return results;
-    }            
+    }
 
     public static List<ConstrainedTerm> getMostConcreteStates(
             List<ConstrainedTerm> listOfStates, int n, Context context) {
         List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
-        
+
         Map<ConstrainedTerm, Integer> numOfFreeVars = new HashMap<ConstrainedTerm, Integer>();
         for (ConstrainedTerm state : listOfStates) {
             numOfFreeVars.put(state, getNumOfFreeVars(state, context));
         }
-        
+
         for (int i = 0; i < n; i++) {
             ConstrainedTerm nextState = null;
             for (ConstrainedTerm state : listOfStates) {
@@ -151,12 +151,12 @@ public class TestCaseGenerationUtil {
                     nextState = state;
                 }
             }
-            
+
             if (nextState == null) break;
             results.add(nextState);
             numOfFreeVars.remove(nextState);
         }
-        
+
         return results;
     }
 
@@ -175,7 +175,7 @@ public class TestCaseGenerationUtil {
         switch (sort.name()) {
         case "Block":
             return KItem.of(KLabelConstant.of("'{}", termContext.definition()), KList.EMPTY, termContext);
-            
+
         case "BExp":
             return BoolToken.TRUE;
 
@@ -194,9 +194,9 @@ public class TestCaseGenerationUtil {
                 stats.put(category, 0);
             }
             stats.put(category, stats.get(category) + 1);
-        }               
+        }
     }
-    
+
     private static String getValOfAttrTestGenCategory(Rule rule) {
         String category = rule.getAttribute(ATTRIBUTE_TESTGEN_CATEGORY);
         if (category == null) {

@@ -34,7 +34,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
 
     protected final Kind kind;
     // protected final boolean normalized;
-    
+
     private Boolean hasCell = null;
 
     protected Term(Kind kind) {
@@ -78,7 +78,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         });
         return indexingPairs;
     }
-    
+
     public ConfigurationTermIndex getConfigurationTermIndex(final Definition definition) {
         final List<IndexingPair> kCellIndexingPairs = new ArrayList<>();
         final List<IndexingPair> instreamIndexingPairs = new ArrayList<>();
@@ -132,7 +132,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     public abstract Sort sort();
-    
+
     /**
      * @return {@code true} if this term has {@code Cell} inside; otherwise,
      *         {@code false}
@@ -143,7 +143,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         }
         return hasCell;
     }
-    
+
     /**
      * Checks if this term has {@code Cell} inside.
      */
@@ -221,12 +221,12 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         SubstituteAndEvaluateTransformer transformer = new SubstituteAndEvaluateTransformer(substitution, context);
         return (Term) this.accept(transformer);
     }
-    
+
     /**
      * Similar to {@link Term#substituteAndEvaluate(Map, TermContext)} except
      * that this method will copy the terms used for substitution whenever
      * necessary in order to avoid undesired sharing of mutable terms.
-     * 
+     *
      * @param substitution
      *            the substitution map; TODO(YilongL): this may become a
      *            multi-map in the future when the pattern matching algorithm
@@ -262,7 +262,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public final int compareTo(Term o) {
         return toString().compareTo(o.toString());
     }
-    
+
     /**
      * Computes and caches the hashCode if it has not been computed yet.
      * Otherwise, simply returns the cached value.
@@ -275,13 +275,13 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         }
         return hashCode;
     }
-    
+
     /**
      * (Re-)computes the hashCode of this {@code Term}.
      * @return the hash code
      */
     protected abstract int computeHash();
-    
+
     @Override
     public abstract boolean equals(Object object);
 }

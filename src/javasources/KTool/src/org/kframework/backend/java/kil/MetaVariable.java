@@ -65,7 +65,7 @@ public class MetaVariable extends Token {
     public Sort variableSort() {
         return sort;
     }
-    
+
     @Override
     protected int computeHash() {
         int hashCode = 1;

@@ -3,7 +3,7 @@ package org.kframework.backend.java.kil;
 
 /**
  * A variable which represents a concrete collection.
- * 
+ *
  * @author AndreiS
  */
 public class ConcreteCollectionVariable extends Variable {
@@ -31,7 +31,7 @@ public class ConcreteCollectionVariable extends Variable {
             if (term instanceof BuiltinList && ((BuiltinList) term).isUpdate()) {
                 return false;
             }
-            
+
             Collection collection = (Collection) term;
             if (collection.hasFrame()) {
                 return collection.size() <= concreteSize;

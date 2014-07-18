@@ -11,12 +11,12 @@ import com.google.common.collect.ImmutableSet;
 
 /**
  * Sort of a {@link Term}.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public final class Sort implements MaximalSharing, Serializable {
-    
+
     private static final PatriciaTrie<Sort> cache = new PatriciaTrie<>();
 
     /*
@@ -50,7 +50,7 @@ public final class Sort implements MaximalSharing, Serializable {
      * {@code String} representation of this {@code Sort}.
      */
     private final String name;
-    
+
     /**
      * Each sort is tagged with an unique ordinal, which is determined by the
      * order in which the sort is cached.
@@ -59,7 +59,7 @@ public final class Sort implements MaximalSharing, Serializable {
      * de-serialization should have no effect on it.
      */
     private final int ordinal;
-    
+
     /**
      * Gets the corresponding {@code Sort} from its {@code String}
      * representation.
@@ -67,7 +67,7 @@ public final class Sort implements MaximalSharing, Serializable {
      * This method shall <b>NOT</b> be used to initialize static {@code Sort}
      * data outside of this class because it will assign a wrong ordinal to that
      * {@code Sort}.
-     * 
+     *
      * @param name
      *            the name of the sort
      * @return the sort
@@ -80,7 +80,7 @@ public final class Sort implements MaximalSharing, Serializable {
         }
         return sort;
     }
-    
+
     public static Set<Sort> of(Collection<String> names) {
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         for (String name : names) {
@@ -88,35 +88,35 @@ public final class Sort implements MaximalSharing, Serializable {
         }
         return builder.build();
     }
-    
+
     private Sort(String name, int ordinal) {
         this.name = name;
         this.ordinal = ordinal;
     }
-    
+
     public String name() {
         return name;
     }
-    
+
     public int ordinal() {
         return ordinal;
     }
-    
+
     @Override
     public int hashCode() {
         return ordinal;
     }
-    
+
     @Override
     public boolean equals(Object object) {
         return this == object;
     }
-    
+
     @Override
     public String toString() {
         return name;
     }
-    
+
     /**
      * Returns the cached instance rather than the de-serialized instance if
      * there is a cached instance.

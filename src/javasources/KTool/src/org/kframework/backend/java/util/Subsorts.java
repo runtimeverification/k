@@ -13,16 +13,16 @@ import com.google.common.collect.Sets;
 
 /**
  * Subsort relation.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class Subsorts implements Serializable {
 
     private final Context context;
-    
+
     private final Set<Sort> sorts;
-    
+
     /**
      * {@code subsort[sort1][sort2] = true} iff {@code sort1} is bigger than
      * {@code sort2}.
@@ -31,7 +31,7 @@ public class Subsorts implements Serializable {
 
     public Subsorts(Context context) {
         this.context = context;
-        
+
         Set<String> names = context.getAllSorts();
         ImmutableSet.Builder<Sort> setBuilder = ImmutableSet.builder();
         int maxOrd = -1;
@@ -42,7 +42,7 @@ public class Subsorts implements Serializable {
             maxOrd = Math.max(maxOrd, sort.ordinal());
         }
         this.sorts = setBuilder.build();
-        
+
         this.subsort = new boolean[maxOrd + 1][maxOrd + 1];
         for (Sort sort1 : sorts) {
             for (Sort sort2 : sorts) {
@@ -91,7 +91,7 @@ public class Subsorts implements Serializable {
         if (lowerBounds.size() == 0) {
             return null;
         }
-        
+
         Sort candidate = null;
         for (Sort lowerBound2 : lowerBounds) {
             if (candidate == null) {
@@ -116,9 +116,9 @@ public class Subsorts implements Serializable {
         }
         return candidate;
     }
-    
+
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
         return context.hasCommonSubsort(sort1.name(), sort2.name());
     }
-    
+
 }

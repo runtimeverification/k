@@ -51,7 +51,7 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
     public Term map() {
         return base();
     }
-    
+
     @Override
     public Term base() {
         return map;
@@ -71,7 +71,7 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
     public Sort sort() {
         return kind.asSort();
     }
-    
+
     @Override
     public Type type() {
         return Type.MAP_KEY_CHOICE;

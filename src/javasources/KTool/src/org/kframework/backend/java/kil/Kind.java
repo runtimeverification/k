@@ -15,7 +15,7 @@ import com.google.common.collect.EnumHashBiMap;
  * {@link Term}s than sorts. To be more specific, 1) each sort has a most
  * precise corresponding kind, and 2) two sorts with disjoint kinds are disjoint
  * as well.
- * 
+ *
  * @author AndreiS
  */
 public enum Kind {
@@ -32,7 +32,7 @@ public enum Kind {
      * Stores sorts of all the available {@code Kind}s.
      */
     private static final EnumHashBiMap<Kind, Sort> sorts = EnumHashBiMap.create(Kind.class);
-    
+
     static {
         sorts.put(BOTTOM, Sort.BOTTOM);
         sorts.put(CELL, Sort.BAG_ITEM);
@@ -75,7 +75,7 @@ public enum Kind {
     public boolean isStructural() {
         return this == Kind.CELL || this == Kind.CELL_COLLECTION;
     }
-    
+
     public Sort asSort() {
         return sorts.get(this);
     }

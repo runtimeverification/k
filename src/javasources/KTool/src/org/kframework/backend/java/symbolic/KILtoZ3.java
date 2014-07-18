@@ -72,7 +72,7 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
             throw new UnsupportedOperationException();
         }
         KList kList = (KList) kItem.kList();
-        
+
         if (kList.hasFrame()) {
             throw new UnsupportedOperationException();
         }

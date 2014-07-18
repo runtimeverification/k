@@ -17,13 +17,13 @@ import com.google.common.collect.Maps;
  * bottom and anything else is false and makes the entire constraint false.
  *
  * @see org.kframework.backend.java.symbolic.SymbolicConstraint
- * 
+ *
  * @author TraianSF
  */
 public class Bottom extends Term implements MaximalSharing {
-    
-    private static final HashMap<Kind, Bottom> cache = Maps.newHashMap(); 
-    
+
+    private static final HashMap<Kind, Bottom> cache = Maps.newHashMap();
+
     public static Bottom of(Kind kind) {
         Bottom bottom = cache.get(kind);
         if (bottom == null) {
@@ -61,7 +61,7 @@ public class Bottom extends Term implements MaximalSharing {
     protected int computeHash() {
         return kind.hashCode();
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         return false;
@@ -71,9 +71,9 @@ public class Bottom extends Term implements MaximalSharing {
     public ASTNode accept(Transformer transformer) {
         return this;
     }
-    
+
     @Override
-    public void accept(Matcher matcher, Term pattern) { 
+    public void accept(Matcher matcher, Term pattern) {
         // TODO(YilongL): why not throw an exception here?
     }
 

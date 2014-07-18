@@ -80,7 +80,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     private boolean freshRules;
     private Definition definition = null;
-    
+
     /**
      * Maps variables representing concrete collections to their sizes. This
      * field is set at the beginning of
@@ -106,7 +106,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         Definition transformedDef = (Definition) this.visitNode(node);
         GlobalContext transformedDefGlobalContext = new GlobalContext(transformedDef, null);
-        
+
         Definition expandedDefinition = new MacroExpander(TermContext.of(transformedDefGlobalContext)).processDefinition();
         return evaluateDefinition(new GlobalContext(expandedDefinition, null));
     }
@@ -170,7 +170,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
         return KItem.of(kLabel, kList, TermContext.of(globalContext));
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.KItemProjection node, Void _)  {
         return new KItemProjection(Kind.of(Sort.of(node.projectedKind())), (Term) this.visitNode(node.getTerm()));
@@ -325,7 +325,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         return new CellCollection(cells, baseTerms, context);
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.ListBuiltin node, Void _)  {
         ArrayList<Term> elementsLeft = new ArrayList<Term>(node.elementsLeft().size());
@@ -545,7 +545,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(org.kframework.kil.Rule node, Void _)  {
         assert node.getBody() instanceof org.kframework.kil.Rewrite;
-        
+
         concreteCollectionSize = node.getConcreteDataStructureSize();
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
@@ -624,7 +624,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
 
         concreteCollectionSize = Collections.emptyMap();
-        
+
         java.util.Map<String, Term> lhsOfReadCell = null;
         java.util.Map<String, Term> rhsOfWriteCell = null;
         if (node.isCompiledForFastRewriting()) {
@@ -709,10 +709,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         this.globalContext = null;
         return definition;
     }
-    
+
     /**
      * Partially evaluate the right-hand side and the conditions for each rule.
-     * 
+     *
      * @param definition
      *            the definition used for evaluation
      * @return the partially evaluated definition
@@ -792,7 +792,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     equality.leftHandSide().evaluate(termContext),
                     equality.rightHandSide().evaluate(termContext));
         }
-        
+
         Map<String, Term> rhsOfWriteCell = null;
         if (rule.isCompiledForFastRewriting()) {
             rhsOfWriteCell = new HashMap<>();
@@ -800,7 +800,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rhsOfWriteCell.put(entry.getKey(), (Term) entry.getValue().evaluate(termContext));
             }
         }
-        
+
         Rule newRule = new Rule(
                 rule.label(),
                 rule.leftHandSide(),
@@ -816,7 +816,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rule.instructions(),
                 rule.getAttributes(),
                 globalContext.def);
-        return newRule.equals(rule) ? origRule : newRule;                
+        return newRule.equals(rule) ? origRule : newRule;
     }
 
     private static void flattenKSequence(

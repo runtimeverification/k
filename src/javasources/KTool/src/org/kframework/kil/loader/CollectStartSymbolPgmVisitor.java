@@ -10,9 +10,9 @@ import org.kframework.kil.visitors.BasicVisitor;
 
 /**
  * Collect the $PGM sort from the final configuration it encounters
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 

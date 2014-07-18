@@ -192,7 +192,7 @@ public class IndexingTable implements Serializable, RuleIndex{
                 }
             }
         }
-        
+
         for (IndexingPair pair : cfgTermIdx.getOutstreamIndexingPairs()) {
             if (outstreamRuleTable.get(pair.first) != null) {
                 for (Rule rule : outstreamRuleTable.get(pair.first)) {
@@ -202,7 +202,7 @@ public class IndexingTable implements Serializable, RuleIndex{
                 }
             }
         }
-        
+
         for (IndexingPair pair : cfgTermIdx.getKCellIndexingPairs()) {
             if (ruleTable.get(pair.first) != null) {
                 rules.addAll(ruleTable.get(pair.first));
@@ -213,8 +213,8 @@ public class IndexingTable implements Serializable, RuleIndex{
             if (coolingRuleTable.get(pair.second) != null) {
                 rules.addAll(coolingRuleTable.get(pair.second));
             }
-        }        
-        
+        }
+
         rules.addAll(unindexedRules);
         return new ArrayList<>(rules);
     }

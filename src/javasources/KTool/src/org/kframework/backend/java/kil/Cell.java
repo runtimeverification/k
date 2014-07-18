@@ -17,9 +17,9 @@ import org.kframework.kil.ASTNode;
  * <p>
  * In contrast to its generic KIL counterpart, the multiplicity information is
  * stored in the {@code CellCollection} that contains this cell.
- * 
+ *
  * @see org.kframework.kil.Cell
- * 
+ *
  * @author AndreiS
  */
 @SuppressWarnings("serial")
@@ -56,7 +56,7 @@ public class Cell<T extends Term> extends Term {
     public T getContent() {
         return content;
     }
-    
+
     /**
      * TODO(DwightG): Fix this with dependency injection
      * <p>
@@ -68,7 +68,7 @@ public class Cell<T extends Term> extends Term {
      * avoid modifying shared {@code Cell}s. Besides, this operation should be
      * used together with some mechanism to properly invalidates the cached
      * hashCode of all the affected {@code Term}s.
-     * 
+     *
      * @param content the new content
      */
     public void unsafeSetContent(T content) {
@@ -111,7 +111,7 @@ public class Cell<T extends Term> extends Term {
         hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
         return hashCode;
     }
-    
+
     @Override
     protected boolean computeHasCell() {
         return true;

@@ -110,7 +110,7 @@ public class BuiltinSet extends Collection {
     public int size() {
         return elements.size();
     }
-    
+
     /**
      * {@code BuiltinSet} is guaranteed to have only one frame; thus, they can
      * always be used in the left-hand side of a rule.
