@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * Substitutes variables with terms according to a given substitution map.
- * 
+ *
  * @author AndreiS
  */
 public class TermSubstitutionTransformer extends PrePostTransformer {

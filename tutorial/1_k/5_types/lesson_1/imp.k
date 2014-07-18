@@ -83,7 +83,7 @@ module IMP
 
   rule print(_:PrintableType,AEs => AEs);
   rule print(.AExps); => stmt
-  
+
   rule halt; => stmt
 
   rule join int; => stmt

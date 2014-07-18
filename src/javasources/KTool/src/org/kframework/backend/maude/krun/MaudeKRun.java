@@ -49,7 +49,7 @@ import java.util.Set;
 public class MaudeKRun implements KRun {
     protected Context context;
     protected Stopwatch sw;
-    
+
     public MaudeKRun(Context context, Stopwatch sw) {
         this.context = context;
         this.sw = sw;
@@ -62,7 +62,7 @@ public class MaudeKRun implements KRun {
             ioServer = (Boolean) value;
         }
     }
-    
+
     private void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
         FileUtil.save(K.maude_in, maudeCmd);
         File outFile = FileUtil.createFile(K.maude_out);
@@ -94,7 +94,7 @@ public class MaudeKRun implements KRun {
             if (context.globalOptions.debug) {
                 e.printStackTrace();
             }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                     "IO error detected when calling maude"));
         }
     }
@@ -213,7 +213,7 @@ public class MaudeKRun implements KRun {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + K.maude_output.replaceAll("/krun[0-9]*/", "/krun/")));
         }
     }
-    
+
     private static class InvalidMaudeXMLException extends Exception {}
 
     private static void assertXMLTerm(boolean assertion) throws InvalidMaudeXMLException {
@@ -229,11 +229,11 @@ public class MaudeKRun implements KRun {
         String sort = xml.getAttribute("sort");
         sort = sort.replaceAll("`([{}\\[\\](),])", "$1");
         List<Element> list = XmlUtil.getChildElements(xml);
-        
+
         DataStructureSort listSort = context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT);
         DataStructureSort mapSort = context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT);
         DataStructureSort setSort = context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT);
-        
+
         try {
             if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("<_>_</_>")) {
                 Cell cell = new Cell();
@@ -481,7 +481,7 @@ public class MaudeKRun implements KRun {
             if (context.globalOptions.debug) {
                 e.printStackTrace();
             }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                     "IO error detected reading maude output"));
             throw new AssertionError("unreachable");
         }
@@ -510,9 +510,9 @@ public class MaudeKRun implements KRun {
         nod = list.item(0);
         assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
         XmlUtil.serializeXML(nod, K.processed_maude_output);
-            
-        Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() { 
-            public DirectedGraph<KRunState, Transition> transform(GraphMetadata g) { 
+
+        Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() {
+            public DirectedGraph<KRunState, Transition> transform(GraphMetadata g) {
                 return new DirectedSparseGraph<KRunState, Transition>();
             }
         };
@@ -615,7 +615,7 @@ public class MaudeKRun implements KRun {
         list = doc.getElementsByTagName("result");
         nod = list.item(1);
         parseCounter(nod);
-        return results;        
+        return results;
     }
 
     public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
@@ -706,7 +706,7 @@ public class MaudeKRun implements KRun {
                 vertex = trans.state;
             }
             graph.addEdge(edge, vertex, loop.get(0).state);
-            
+
             return new KRunProofResult<DirectedGraph<KRunState, Transition>>(false, graph);
         }
     }
@@ -733,7 +733,7 @@ public class MaudeKRun implements KRun {
         } else if (sort.equals("#Transition") && op.equals("LTL`{_`,_`}")) {
             assertXML(child.size() == 2);
             Term t = parseXML(child.get(0), context);
-        
+
             List<Element> child2 = XmlUtil.getChildElements(child.get(1));
             sort = child.get(1).getAttribute("sort");
             op = child.get(1).getAttribute("op");

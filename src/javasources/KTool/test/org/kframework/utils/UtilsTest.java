@@ -30,7 +30,7 @@ public class UtilsTest {
         } catch (IllegalArgumentException e) {
         }
     }
-    
+
     @Test
     public void StringUtilEscapeShell() throws Exception {
         String[] cmd1 = new String[] {"foo", "bar \" baz"};

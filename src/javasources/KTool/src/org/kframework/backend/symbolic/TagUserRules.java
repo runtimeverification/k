@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableSet;
  * Tag all the rules which are not part of K "dist/include" files with
  * 'symbolic' attribute. All the rules tagged with symbolic will suffer the
  * symbolic execution transformation steps.
- * 
+ *
  * @author andreiarusoaie
  */
 public class TagUserRules extends CopyOnWriteTransformer {

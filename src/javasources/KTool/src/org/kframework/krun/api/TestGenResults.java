@@ -33,11 +33,11 @@ public class TestGenResults {
         int n = 1;
         StringBuilder sb = new StringBuilder();
         sb.append("Test generation results:");
-        
+
         for (TestGenResult testGenResult : testGenResults) {
             // TODO(YilongL): how to set state id?
             sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
-            
+
             UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
             Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
             t.visitNode(concretePgm);
@@ -75,14 +75,14 @@ public class TestGenResults {
             strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
             strCnstr = strCnstr.replace("/\\ ", "/\\\n");
             sb.append(strCnstr);
-            
+
             n++;
         }
-        
+
         if (n == 1) {
             sb.append("\nNo test generation results");
         }
-        
+
         return sb.toString();
     }
 
@@ -93,9 +93,9 @@ public class TestGenResults {
     public List<TestGenResult> getTestGenResults() {
         return testGenResults;
     }
-    
+
     public boolean isDefaultPattern(){
-        
+
         return this.isDefaultPattern;
     }
 }

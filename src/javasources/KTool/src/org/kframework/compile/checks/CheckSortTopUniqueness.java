@@ -11,9 +11,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Check for various errors in syntax declarations. 1. You are not allowed to use empty terminals ("") in definitions. You need to have at least two sorts, or a non empty terminal.
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class CheckSortTopUniqueness extends BasicVisitor {
     public CheckSortTopUniqueness(Context context) {

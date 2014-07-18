@@ -45,7 +45,7 @@ module MINT
                | umaxMInt(Int)    [function]
   rule sminMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
   rule smaxMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
-  rule uminMInt(_:Int) => 0 
+  rule uminMInt(_:Int) => 0
   rule umaxMInt(N:Int) => (1 <<Int N) -Int 1
 
   /*
@@ -75,9 +75,9 @@ module MINT
   syntax Bool ::= overflowMInt(List)    [function]
   rule overflowMInt(ListItem(_:MInt) ListItem(B:Bool)) => B
 
-  /* 
+  /*
    * Arithmetic and comparison operations
-   *   op   does not interprets th operands as either signed or unsigned 
+   *   op   does not interprets th operands as either signed or unsigned
    *   sop  interprets the operands as signed
    *   uop  interprets the operands as unsigned
    */
@@ -96,7 +96,7 @@ module MINT
    *            represented as a list of 2 elements (overflow happens when the
    *            first operand is the minimum value and the second operand is -1)
    * udiv/urem  operation interprets operands as unsigned; undefined if the
-   *            second argument is 0 
+   *            second argument is 0
    */
   syntax List ::= sdivMInt(MInt, MInt)    [function, hook(#MINT:sdiv)]
                 | sremMInt(MInt, MInt)    [function, hook(#MINT:srem)]
@@ -171,7 +171,7 @@ module MINT
 
 
   /* Implementation with K rules */
-  rule bitwidthMInt($mi(N:Int, _)) => N 
+  rule bitwidthMInt($mi(N:Int, _)) => N
 
   rule
     svalueMInt($mi(N:Int, I:Int))
@@ -313,7 +313,7 @@ module MINT
     (I1 modInt (1 <<Int N)) =/=Int (I2 modInt (1 <<Int N))
 
   /*
-   * Composition and decomposition 
+   * Composition and decomposition
    */
   rule
     concatenateMInt($mi(N1:Int, I1:Int), $mi(N2:Int, I2:Int))

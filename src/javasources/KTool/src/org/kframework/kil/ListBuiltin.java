@@ -30,22 +30,22 @@ public class ListBuiltin extends CollectionBuiltin {
     public List<Term> elementsRight() {
         return Collections.unmodifiableList(elementsRight);
     }
-    
+
     @Override
     public List<Term> elements() {
         return Collections.unmodifiableList((List<Term>) elements);
     }
-    
+
     @Override
     public List<Term> baseTerms() {
         return Collections.unmodifiableList((List<Term>) baseTerms);
     }
-    
+
     @Override
     public DataStructureBuiltin shallowCopy(Collection<Term> terms) {
         return ListBuiltin.of(sort(), (List<Term>)terms, elementsLeft(), elementsRight());
     }
-    
+
     @Override
     public CollectionBuiltin shallowCopy(Collection<Term> terms,
             Collection<Term> elements) {
@@ -58,13 +58,13 @@ public class ListBuiltin extends CollectionBuiltin {
         ArrayList<Term> base = new ArrayList<Term>();
         ArrayList<Term> right = new ArrayList<Term>();
         if (!terms.isEmpty()) {
-            if (terms.get(0) instanceof ListBuiltin 
+            if (terms.get(0) instanceof ListBuiltin
                     || terms.get(terms.size() - 1) instanceof ListBuiltin) {
-                ListBuiltin nestedListBuiltin = (ListBuiltin) DataStructureBuiltin.of(sort, 
+                ListBuiltin nestedListBuiltin = (ListBuiltin) DataStructureBuiltin.of(sort,
                         terms.toArray(new Term[terms.size()]));
                 left.addAll(nestedListBuiltin.elementsLeft());
                 base.addAll(nestedListBuiltin.baseTerms());
-                right.addAll(nestedListBuiltin.elementsRight());        
+                right.addAll(nestedListBuiltin.elementsRight());
             } else {
                 base.addAll(terms);
             }
@@ -86,7 +86,7 @@ public class ListBuiltin extends CollectionBuiltin {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
 
     @Override
     public Collection<Term> getChildren(DataStructureBuiltin.ListChildren type) {
@@ -97,7 +97,7 @@ public class ListBuiltin extends CollectionBuiltin {
                 return super.getChildren(type);
         }
     }
-    
+
     @Override
     public Term toKApp(Context context) {
         List<Term> items = new ArrayList<>();

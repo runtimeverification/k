@@ -203,12 +203,17 @@
     <property name="checkstyle.suppress.file" location="${javasources}/KTool/checkstyle-suppress.xml" />
 
     <target name="checkstyle">
-        <checkstyle config="${javasources}/KTool/checkstyle.xml">
+        <checkstyle config="${javasources}/KTool/checkstyle-java.xml">
             <fileset dir="${javasources}/KTool">
                 <include name="**/*.java"/>
                 <exclude name="src/org/kframework/parser/concrete/lib/**" />
                 <exclude name="src/org/kframework/utils/kastparser/*.java" />
                 <exclude name="src/org/kframework/parser/basic/*.java" />
+            </fileset>
+        </checkstyle>
+        <checkstyle config="${javasources}/KTool/checkstyle-k.xml">
+            <fileset dir=".">
+                <include name="**/*.k"/>
             </fileset>
         </checkstyle>
     </target>

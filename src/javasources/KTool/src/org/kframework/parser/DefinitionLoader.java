@@ -125,7 +125,7 @@ public class DefinitionLoader {
                 } else {
                     def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
                 }
-                
+
                 if (!def.getModulesMap().containsKey(mainModule)) {
                     String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
@@ -133,10 +133,10 @@ public class DefinitionLoader {
             }
             Stopwatch.instance().printIntermediate("Basic Parsing");
 
-            //This following line was commented out to make the latex backend 
+            //This following line was commented out to make the latex backend
             //parse files importing from other files
             def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
-            
+
             // HERE: add labels to sorts
 
             def.preprocess(context);
@@ -153,13 +153,13 @@ public class DefinitionLoader {
             try {
                 ResourceExtractor.ExtractDefSDF(new File(context.dotk, "def"));
                 ResourceExtractor.ExtractGroundSDF(new File(context.dotk, "ground"));
-    
+
                 ResourceExtractor.ExtractProgramSDF(new File(context.dotk, "pgm"));
             } catch (IOException e) {
                 if (context.globalOptions.debug) {
                     e.printStackTrace();
                 }
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                         "IO error detected writing to " + context.kompiled.getAbsolutePath()));
             }
             // ------------------------------------- generate parser TBL
@@ -185,11 +185,11 @@ public class DefinitionLoader {
                         if (context.globalOptions.debug) {
                             e.printStackTrace();
                         }
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                                 "IO error detected writing program parser to file"));
                         return null; //unreachable
                     }
-                    
+
                     Stopwatch.instance().printIntermediate("Generate TBLPgm");
                 }
             }
@@ -226,7 +226,7 @@ public class DefinitionLoader {
                             if (context.globalOptions.debug) {
                                 e.printStackTrace();
                             }
-                            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                                     "IO error detected writing ground parser to file"));
                             return null; //unreachable
                         }
@@ -239,20 +239,20 @@ public class DefinitionLoader {
                         if (context.globalOptions.debug) {
                             e.printStackTrace();
                         }
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                                 "IO error detected writing rule parser to file"));
                         return null; //unreachable
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                             "Thread was interrupted trying to run SDF2Table"));
                 }
-                
-                
+
+
                 Stopwatch.instance().printIntermediate("Generate TBLDef");
             }
-            
+
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
 
             Stopwatch.instance().printIntermediate("Importing Files");

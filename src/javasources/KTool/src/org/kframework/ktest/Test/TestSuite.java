@@ -49,7 +49,7 @@ public class TestSuite {
     private final boolean generateOut;
 
     private final ReportGen reportGen;
-    
+
     private final StringMatcher strComparator;
 
     // real times are times spend on a step, other times are total time spend by processess

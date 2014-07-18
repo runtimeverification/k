@@ -47,10 +47,10 @@ module LAMBDA
   rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
-  syntax K ::= Type "=" Type
+  syntax KItem ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
   rule <k> T:Type => applyMgu(Theta,T) </k>  <mgu> Theta:Mgu  => . </mgu>
 
-  syntax K ::= tenv(Map)
+  syntax KItem ::= tenv(Map)
   rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
 endmodule

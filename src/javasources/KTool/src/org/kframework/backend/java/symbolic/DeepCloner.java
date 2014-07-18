@@ -11,25 +11,25 @@ import com.rits.cloning.Cloner;
 
 /**
  * Deep cloning utility class.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class DeepCloner {
-    
+
     private static final Cloner cloner = new FastTermCloner();
-    
+
     static {
         cloner.dontCloneInstanceOf(Immutable.class);
     }
-            
+
     public static Term clone(Term term) {
         Profiler.startTimer(Profiler.DEEP_CLONE_TIMER);
         Term deepClone = cloner.deepClone(term);
         Profiler.stopTimer(Profiler.DEEP_CLONE_TIMER);
         return deepClone;
     }
-    
+
     /**
      * Besides {@link Immutable} terms, avoid cloning terms that are possibly
      * mutable but actually immutable at run-time. E.g., a {@code KItem} is

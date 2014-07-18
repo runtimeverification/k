@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 /*!
 \title{SIMPLE --- Typed --- Static}
-\author{Grigore Ro\c{s}u and 
+\author{Grigore Ro\c{s}u and
         Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
         (\texttt{\{grosu,tserban2\}@illinois.edu})}
 \organization{University of Illinois at Urbana-Champaign} */
@@ -184,7 +184,7 @@ such programs. */
 /*@ We still need lists of expressions, defined below, but note that we do
 not need lists of identifiers anymore.  They have been replaced by the lists
 of parameters. */
- 
+
  syntax Exps ::= List{Exp,","}          [strict]
 
 
@@ -209,7 +209,7 @@ type the actual construct. */
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
-                | "try" Block "catch" "(" Param ")" Block  
+                | "try" Block "catch" "(" Param ")" Block
                 | "throw" Exp ";"                          [strict]
                 | "join" Exp ";"                           [strict]
                 | "acquire" Exp ";"                        [strict]
@@ -303,7 +303,7 @@ holding various typing \textsf{task} cells, and a global type environment.
 Each task includes a \textsf{k} cell holding the code to type, a \textsf{tenv}
 cell holding the local type environment, and a \textsf{return} cell holding
 the return type of the currently checked function.  The latter is needed in
-order to check whether return statements return values of the expected type. 
+order to check whether return statements return values of the expected type.
 Initially, the program is placed in a \textsf{k} cell inside a
 \textsf{task} cell.  Since the cells with multiplicity ``?'' are not
 included in the initial configuration, the \textsf{task} cell holding
@@ -314,7 +314,7 @@ subcells. */
                   <tasks color="orange">
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
-											<xstack color="red"> .List </xstack>
+                                            <xstack color="red"> .List </xstack>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
                       <return multiplicity="?" color="black"> void </return>
                     </task>
@@ -557,11 +557,11 @@ thrown from anywhere, including from functions which do not define
 any try-catch block (with the currently unchecked---also for
 simplicity---expectation that the caller functions would catch those
 exceptions). */
-	syntax K ::= "popx"
-	//syntax K ::= (Type, Id)
+    syntax KItem ::= "popx"
+    //syntax KItem ::= (Type, Id)
   rule <k> try {S1} catch((T:Type X:Id):Param) {S2} => S1 {T X; S2} popx ...</k> <xstack> . => ListItem(T) ... </xstack>
-	rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
-	rule <k> throw T1:Type; => stmt ...</k> <xstack> ... ListItem(T2:Type) ... </xstack> when T1 ==K T2
+    rule <k> popx => . ...</k> <xstack> _:ListItem => . ...</xstack>
+    rule <k> throw T1:Type; => stmt ...</k> <xstack> ... ListItem(T2:Type) ... </xstack> when T1 ==K T2
   /*rule try block catch(int X:Id) {S} => {int X; S}  [structural]
   rule throw int; => stmt*/
 
@@ -599,12 +599,12 @@ list of variable declarations. */
   syntax LValue ::= Id
   rule isLValue(_:Exp[_:Exps]) => true
 
-  syntax Exp ::= ltype(Exp) 
+  syntax Exp ::= ltype(Exp)
 // We would like to say:
 //  context ltype(HOLE:LValue)
 // but we currently cannot type the HOLE
   context ltype(HOLE) when isLValue(HOLE)
-  
+
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 

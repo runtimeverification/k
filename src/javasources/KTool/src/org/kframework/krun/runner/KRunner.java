@@ -118,14 +118,14 @@ public class KRunner {
             String commandTemplate = "load {0}" + K.lineSeparator + "mod KRUNNER is including {1} ." + K.lineSeparator + "eq #TCPPORT = {2,number,#} ." + K.lineSeparator + "endm" + K.lineSeparator + "load {3}" + K.lineSeparator;
             /*_maudeFileName = _maudeFileName.replaceAll("(\\s)", "\\\1");
             _maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");*/
-            
+
             String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
             MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName);
-    
+
             maude.start();
             _logger.info("Maude started");
             _logger.info("Maude command:" + K.lineSeparator + command);
-    
+
             try {
                 maude.join();
             } catch (InterruptedException e) {

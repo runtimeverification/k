@@ -38,7 +38,7 @@ public class IndexingPair implements Serializable {
 
     public static IndexingPair getKCellIndexingPair(Cell cell, Definition definition) {
         assert cell.getLabel().equals("k");
-        
+
         Term term = cell.getContent();
         if (term instanceof KSequence) {
             KSequence kSequence = (KSequence) term;
@@ -66,11 +66,11 @@ public class IndexingPair implements Serializable {
             return new IndexingPair(getIndex(term, definition), BottomIndex.BOTTOM);
         }
     }
-    
+
     /**
      * Retrieves {@code IndexingPair} from an input stream pattern based on the
      * first and last elements.
-     * 
+     *
      * @param instream
      *            the input stream pattern
      * @param definition
@@ -80,7 +80,7 @@ public class IndexingPair implements Serializable {
     public static IndexingPair getInstreamIndexingPair(BuiltinList instream, Definition definition) {
         Index fstIndex;
         Index sndIndex;
-        
+
         if (instream.hasFrame()) {
             fstIndex = instream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(instream.get(0), definition);
             sndIndex = instream.elementsRight().isEmpty() ? TopIndex.TOP : getIndex(instream.get(-1), definition);
@@ -88,14 +88,14 @@ public class IndexingPair implements Serializable {
             fstIndex = instream.isEmpty() ? BottomIndex.BOTTOM : getIndex(instream.get(0), definition);
             sndIndex = instream.size() < 2 ? BottomIndex.BOTTOM : getIndex(instream.get(-1), definition);
         }
-        
+
         return new IndexingPair(fstIndex, sndIndex);
     }
-    
+
     /**
      * Retrieves {@code IndexingPair} from an output stream pattern based on the
      * first and second elements.
-     * 
+     *
      * @param outstream
      *            the output stream pattern
      * @param definition
@@ -105,7 +105,7 @@ public class IndexingPair implements Serializable {
     public static IndexingPair getOutstreamIndexingPair(BuiltinList outstream, Definition definition) {
         Index fstIndex;
         Index sndIndex;
-        
+
         if (outstream.hasFrame()) {
             fstIndex = outstream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(outstream.get(0), definition);
             sndIndex = outstream.elementsLeft().size() < 2 ? TopIndex.TOP : getIndex(outstream.get(1), definition);
@@ -113,7 +113,7 @@ public class IndexingPair implements Serializable {
             fstIndex = outstream.isEmpty() ? BottomIndex.BOTTOM : getIndex(outstream.get(0), definition);
             sndIndex = outstream.size() < 2 ? BottomIndex.BOTTOM : getIndex(outstream.get(1), definition);
         }
-        
+
         return new IndexingPair(fstIndex, sndIndex);
     }
 

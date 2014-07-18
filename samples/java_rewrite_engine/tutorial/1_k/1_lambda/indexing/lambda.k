@@ -12,7 +12,7 @@ module LAMBDA
   syntax KResult ::= Val
 
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]  [beta]
-  
+
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]
                | Exp "/" Exp          [strict]

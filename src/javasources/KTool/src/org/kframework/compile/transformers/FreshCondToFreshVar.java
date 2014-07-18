@@ -39,10 +39,10 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
         ASTNode bodyNode = freshSubstitution(vars).visitNode(node.getBody());
         assert(bodyNode instanceof Term);
         node.setBody((Term)bodyNode);
-        
+
         return node;
     }
-    
+
     @Override
     public ASTNode visit(TermCons node, Void _)  {
         if (MetaK.Constants.freshCons.equals(node.getCons())) {

@@ -192,11 +192,11 @@ public class AddInjections extends CopyOnWriteTransformer{
             return transformedNode;
         }
     }
-    
+
     /**
      * Private helper method that checks if an argument of a {@code TermCons}
      * with given sort needs to be injected to sort {@code KItem}.
-     * 
+     *
      * @param sort
      *            the declared sort of the argument
      * @return {@code true} if an injection is required; otherwise,
@@ -211,7 +211,7 @@ public class AddInjections extends CopyOnWriteTransformer{
      * Private helper method that checks if a function return value declared
      * with given sort needs a projection from sort {@code KItem} to its
      * declared sort.
-     * 
+     *
      * @param sort
      *            the declared sort of the function return value
      * @return {@code true} if a projection is required; otherwise,
@@ -222,5 +222,5 @@ public class AddInjections extends CopyOnWriteTransformer{
                 || sort.equals(KSorts.K) || sort.equals(KSorts.BAG)
                 || sort.equals(KSorts.BAG_ITEM);
     }
-    
+
 }

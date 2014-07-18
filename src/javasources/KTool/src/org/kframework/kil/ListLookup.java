@@ -64,7 +64,7 @@ public class ListLookup extends BuiltinLookup {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Term getChild(Children type) {
         if (type == Children.VALUE) {
@@ -72,7 +72,7 @@ public class ListLookup extends BuiltinLookup {
         }
         return super.getChild(type);
     }
-    
+
     @Override
     public BuiltinLookup shallowCopy(Variable base, Term key) {
         return new ListLookup(base, key, value, kind());

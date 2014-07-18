@@ -4,7 +4,7 @@ module INT-EXP-SYNTAX
   syntax Exp ::= Int
 endmodule
 
-module INT-EXP 
+module INT-EXP
   imports VAL
-  syntax Val ::= Int 
+  syntax Val ::= Int
 endmodule

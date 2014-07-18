@@ -100,11 +100,11 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
     /**
      * A new class (nested) that goes down one level (jumps over Ambiguity, Rewrite and Bracket) and checks to see if there is a Variable
-     * 
+     *
      * if found, sets a parameter to that variable with the expected sort gathered from the parent production
-     * 
+     *
      * @author Radu
-     * 
+     *
      */
     public class CollectVariablesVisitor2 extends LocalTransformer {
         String expectedSort = null;

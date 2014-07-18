@@ -11,6 +11,6 @@ module TEST
   rule bar(.K) => .KList
   rule k1 => 1 ~> 2 ~> 3
   rule k2 => 0
-  rule k3 => .K 
+  rule k3 => .K
 endmodule
 

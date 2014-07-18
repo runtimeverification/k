@@ -9,9 +9,9 @@
 module SQS-RULE
   rule <threads>
            <thread>...
-	     <k> sqs(X:Float, Y:Float) => V:Float </k>
+         <k> sqs(X:Float, Y:Float) => V:Float </k>
              <env> GENV </env>
-	   ...</thread>
+       ...</thread>
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>

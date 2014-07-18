@@ -19,7 +19,7 @@ module VARIABLE
   syntax Set ::= getVariables(K)  [function]  // public
   rule getVariables(K:K) => #getVars(K)
 
-  syntax Set ::= #getVars(K)  [function] 
+  syntax Set ::= #getVars(K)  [function]
   rule #getVars(K:K) => #getVars1(K, .Set)
 
   syntax Set ::= #getVars1(KList, Set)  [function]
@@ -35,7 +35,7 @@ module VARIABLE
   rule #getVars1((.KList => Key:K,,Value:K),,(Key |-> Value => .Map) _:Map,,_, _)
   rule #getVars1((.Map => .KList),,_, _)
   rule #getVars1((K1:KItem ~> K2:KItem ~> K:K => K1,,K2,,K),,_, _)
-  rule #getVars1((.K => .KList),,_, _) 
+  rule #getVars1((.K => .KList),,_, _)
 
 // Generates a "fresh" local variable of the type of K that does not appear
 // anywhere within the set Set
@@ -67,7 +67,7 @@ module BINDER
   syntax Bool ::= isBound(KLabel, Int)  [klabel("isBound"), function]
   syntax Bool ::= isBounding(KLabel, Int) [klabel("isBounding"), function]
 
-  syntax K ::= #splitedBinder(KList, KList, Set)
+  syntax KItem ::= #splitedBinder(KList, KList, Set)
 
   syntax K ::= #boundVars(K)  [function]
   rule #boundVars(K:K) => #boundVars1(#binderSplit(K))
@@ -155,7 +155,7 @@ module SUBSTITUTION
   imports MAP
 
 // Seems unnecessary
-//  syntax K ::= #substitutionError(K,String)
+//  syntax KItem ::= #substitutionError(K,String)
 
 // "Public" interface
 
@@ -165,7 +165,7 @@ module SUBSTITUTION
   rule K:K[Ks:KList / Vs:KList] => #substitute(K,#patternMatch(Vs,Ks))
   rule K:K[M:Map] => #substitute(K, M)
 
-//  rule _[_/V:K] 
+//  rule _[_/V:K]
 //    => #substitutionError(V, "is not a Variable; cannot #substitute")
 //    when isVariable(V) =/=K true
 
@@ -182,11 +182,11 @@ module SUBSTITUTION
   rule #substituteFV(Y:Variable, M:Map Y |-> V, _) => V
   rule #substituteFV(Y:Variable, M:Map, _) => Y
     when Y in keys(M) =/=K true
-  
+
   rule #substituteFV(K:K, M:Map, FV) => #substituteBinder(K, M, FV)
     when isBinder(K)
   rule #substituteFV(K:K, M:Map, FV) => #substituteList(K, M, FV)
-    when isVariable(K) =/=K true andBool isBinder(K) =/=K true andBool 
+    when isVariable(K) =/=K true andBool isBinder(K) =/=K true andBool
          isCollection(K) =/=K true
 
   rule #substituteFV(K:Set, M:Map, FV) => #substituteSet(K, M, FV, .Set)
@@ -203,8 +203,8 @@ module SUBSTITUTION
   rule #substituteList1(L:KLabel(.KList), _, _, Ks:KList) => L(Ks)
 // Grigore: new in order to deal with cc(.K)
   rule #substituteList1(.K, _, _, _) => .K
-  rule #substituteList1(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .KList) 
-    => #substituteKArrow(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .K) 
+  rule #substituteList1(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .KList)
+    => #substituteKArrow(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .K)
 
   syntax K ::= #substituteKArrow(K, Map, Set, K)  [function]
   rule #substituteKArrow(.K, M, FV, K) => K
@@ -248,7 +248,7 @@ module SUBSTITUTION
        #else #rebind2(L(Ks), I +Int 1, M, L(Ks',, K))
        #fi
   rule #rebind2(_:KLabel(.KList), _, _, K:K) => K
-    
+
 
   syntax Map ::= #freshSubst1(Set, Set, Map, K, K) [function]
   rule #freshSubst1(BVs:Set, AVs:Set, M:Map, X:K, Y:K)
@@ -266,7 +266,7 @@ module SUBSTITUTION
   rule #substitutePlainList(L:KLabel(Ks:KList), M:Map)
     => #substitutePlainList1(L:KLabel(Ks), M, .KList)
   rule #substitutePlainList(.K, _) => .K
-  
+
   rule #substitutePlainList1(_:KLabel((K:K => .KList),,_), M:Map, _,,
         (.KList => #substitutePlain(K,M)))
   rule #substitutePlainList1(L:KLabel(.KList), _, Ks:KList) => L(Ks)
@@ -275,13 +275,13 @@ module SUBSTITUTION
 // Grigore: I added the operation below here, because I want it to be
 // generic.  I don't know how to generate globablly fresh variables
 // of desired type any other way ... sorry.  This is used in type inference
-  syntax K ::= freshVariables(Set,K)
+  syntax KItem ::= freshVariables(Set,K)
   rule freshVariables(.Set, T) => T
   rule freshVariables(SetItem(Tv) S:Set, T)
     => freshVariables(S, T[#freshSym(Tv)/Tv])
 
 /*
-  syntax K ::= freshVariables(Set,K)
+  syntax KItem ::= freshVariables(Set,K)
   rule freshVariables(.Set, T:K) => T
   rule freshVariables(SetItem(Tv:K) S:Set, T:K)
     => freshVariables(S, T[#changeLabel(!Tv',Tv)/Tv])

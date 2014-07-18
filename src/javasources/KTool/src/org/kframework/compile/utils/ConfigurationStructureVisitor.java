@@ -36,7 +36,7 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
         this.visitNode(top);
         return null;
     }
-    
+
     @Override
     public Void visit(Cell node, Void _) {
         ConfigurationStructure cfg = new ConfigurationStructure();
@@ -60,7 +60,7 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
         config.put(cfg.id, cfg);
         return null;
     }
-    
+
     @Override
     public Void visit(org.kframework.kil.Context node, Void _) {
         return null;

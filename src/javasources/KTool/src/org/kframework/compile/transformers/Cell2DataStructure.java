@@ -46,9 +46,9 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     public static final String LIST_CELL_ATTRIBUTE_NAME = "list";
     public static final String MAP_CELL_ATTRIBUTE_NAME = "map";
     public static final String KEY_CELL_ATTRIBUTE_NAME = "key";
-    
+
     public static final String MAP_CELL_CELL_LABEL_PREFIX = "value-cell-label-prefix-";
-    
+
     private Set<String> cellMapLabels = Sets.newHashSet();
 
     public Cell2DataStructure(Context context) {
@@ -59,15 +59,15 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     public ASTNode visit(Configuration configuration, Void _) {
         return configuration;
     }
-    
+
     @Override
     public ASTNode visit(Rule rule, Void _) {
         if (!rule.isCompiledForFastRewriting()) {
             return super.visit(rule, _);
         }
-        
+
         cellMapLabels.clear();
-        
+
         rule = (Rule) super.visit(rule, _);
         /* compiling cell to cell map changes the cells of interest used for fast rewriting */
         if (!cellMapLabels.isEmpty()) {
@@ -75,22 +75,22 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             Map<String, Term> lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
             Map<String, Term> rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
             Set<String> cellMapLabelsToAdd = Sets.newHashSet();
-            
+
             Iterator<String> iter = cellsOfInterest.iterator();
             while (iter.hasNext()) {
                 String cellLabel = iter.next();
-                
+
                 Set<String> intersect = Sets.intersection(
                                 context.getConfigurationStructureMap().get(cellLabel).ancestorIds,
                                 cellMapLabels);
                 /* lift the cell of interest to the level of cell map */
                 if (!intersect.isEmpty()) {
                     iter.remove();
-                    
+
                     assert intersect.size() == 1;
                     String cellMapLabel = intersect.iterator().next();
                     cellMapLabelsToAdd.add(cellMapLabel);
-                    
+
                     /* update lhsOfReadCell & rhsOfWriteCell accordingly */
                     if (lhsOfReadCell.containsKey(cellLabel)) {
                         lhsOfReadCell.put(cellMapLabel, null);
@@ -103,13 +103,13 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
                 }
             }
             cellsOfInterest.addAll(cellMapLabelsToAdd);
-            
+
             rule = rule.shallowCopy();
             rule.setCellsOfInterest(cellsOfInterest);
             rule.setLhsOfReadCell(lhsOfReadCell);
             rule.setRhsOfWriteCell(rhsOfWriteCell);
         }
-        
+
         return rule;
     }
 
@@ -169,7 +169,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
             if (context.kompileOptions.backend.java()) {
-                elementsLeft.add(elementCell);                
+                elementsLeft.add(elementCell);
             } else {
                 elementsLeft.add(KApp.of(new KInjectedLabel(elementCell)));
             }
@@ -185,7 +185,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
             if (context.kompileOptions.backend.java()) {
-                elementsRight.add(elementCell);                
+                elementsRight.add(elementCell);
             } else {
                 elementsRight.add(KApp.of(new KInjectedLabel(elementCell)));
             }
@@ -238,7 +238,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
                 assert key != null : "there should be exactly one key cell";
                 entries.put(key, value);
                 if (context.kompileOptions.backend.java()) {
-                    entries.put(key, value);  
+                    entries.put(key, value);
                 } else {
                     entries.put(key, KApp.of(new KInjectedLabel(value)));
                 }

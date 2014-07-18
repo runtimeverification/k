@@ -6,9 +6,9 @@ import org.kframework.kil.loader.Context;
 
 /**
  * Check to see which branch of an ambiguity has less type errors
- * 
+ *
  * @author RaduFmse
- * 
+ *
  */
 public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
@@ -53,7 +53,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
     /**
      * Get the score for two sorts
-     * 
+     *
      * @param declSort
      *            - the sort declared in the production.
      * @param termSort

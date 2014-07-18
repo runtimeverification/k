@@ -44,18 +44,18 @@ public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
                 if (ltc.getProduction().getKLabel().equals(ML_AND_KLABEL)
                         && ltc.getProduction().getKLabel()
                                 .equals(ML_AND_KLABEL)) {
-                    
+
                     // process left
                     Term lcfg = ltc.getContents().get(0).shallowCopy();
                     Term lphi = ltc.getContents().get(1).shallowCopy();
-                    
+
                     // process right
                     Term rcfg = rtc.getContents().get(0).shallowCopy();
                     Term rphi = rtc.getContents().get(1).shallowCopy();
-                    
+
                     Sentence rule = new Sentence();
                     rule.setBody(new Rewrite(lcfg, rcfg, context));
-                    
+
                     if(ruleCond != null) {
                         rule.setRequires(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.of(RR_COND), lphi, rphi), ruleCond));
                     }

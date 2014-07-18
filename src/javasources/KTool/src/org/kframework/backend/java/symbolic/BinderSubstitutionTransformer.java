@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * Substitutes variables with terms according to a given substitution map using binders.
- * 
+ *
  * @author TraianSF
  */
 public class BinderSubstitutionTransformer extends SubstitutionTransformer {
@@ -37,7 +37,7 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
         }
 
     }
-    
+
     public static KItem binderSensitiveSubstitute(KItem kItem, TermContext context) {
         // TODO(AndreiS): fix binder when dealing with KLabel variables and non-concrete KLists
         if (kItem.kLabel() instanceof KLabel && kItem.kList() instanceof KList) {

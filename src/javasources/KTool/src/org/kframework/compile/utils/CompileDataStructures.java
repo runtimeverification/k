@@ -69,7 +69,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         } else {
             requires = null;
         }
-        
+
         //TODO: handle ensures, too.
 
         if (lhs == rewrite.getLeft()
@@ -117,12 +117,12 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         if (sort == null) {
             return super.visit(node, _);
         }
-        
+
         Term[] arguments = new Term[kList.getContents().size()];
         for (int i = 0; i < kList.getContents().size(); ++i) {
             arguments[i] = (Term) this.visitNode(kList.getContents().get(i));
         }
-        
+
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())
                 || sort.elementLabel().equals(kLabelConstant.getLabel())
                 || sort.unitLabel().equals(kLabelConstant.getLabel())
@@ -140,7 +140,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         location));
             }
         }
-        
+
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
             DataStructureBuiltin dataStructure = DataStructureBuiltin.of(sort, arguments);
             if (status == Status.LHS && !dataStructure.isLHSView()) {
@@ -174,7 +174,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             }
         } else if (sort.type().equals(KSorts.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
-            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update")) 
+            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update"))
                     && kList.getContents().size() >= 3 && kList.getContents().get(0) instanceof Variable) {
                 return new MapUpdate(
                         (Variable) kList.getContents().get(0),

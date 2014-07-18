@@ -109,7 +109,7 @@ public class RunProcess {
 
         if (startSymbol == null) {
             startSymbol = context.startSymbolPgm;
-        }        
+        }
         String content = value;
 
         switch (parser) {
@@ -149,7 +149,7 @@ public class RunProcess {
                 tokens.add(value);
                 Map<String, String> environment = new HashMap<>();
                 environment.put("KRUN_SORT", startSymbol);
-                environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
+                environment.put("KRUN_COMPILED_DEF", context.kompiled.getParentFile().getAbsolutePath());
                 if (isNotFile) {
                     environment.put("KRUN_IS_NOT_FILE", "true");
                 }

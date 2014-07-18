@@ -19,20 +19,20 @@ import java.util.List;
 import java.util.Map;
 
 public class ResolveDefaultTerms extends CopyOnWriteTransformer {
-    
+
     private Map<String, ConfigurationStructure> config;
 
     public ResolveDefaultTerms(Context context) {
         super("Resolve Default Terms", context);
         config = context.getConfigurationStructureMap();
     }
-    
+
     @Override
     public ASTNode visit(Rule node, Void _)  {
         if (MetaK.isAnywhere(node)) return node;
         return super.visit(node, _);
     }
-    
+
     @Override
     public ASTNode visit(Rewrite node, Void _)  {
         ASTNode right = new DefaultTermsResolver(context).visitNode(node.getRight());
@@ -57,14 +57,14 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
-    
-    
+
+
     public class DefaultTermsResolver extends CopyOnWriteTransformer {
-        
+
         public DefaultTermsResolver(Context context) {
             super("Default Terms Resolver", context);
         }
-        
+
         @Override
         public ASTNode visit(Cell node, Void _)  {
             Cell cell = (Cell) super.visit(node, _);
@@ -74,24 +74,24 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
             cell.setEllipses(Ellipses.NONE);
             ConfigurationStructure cellStr = config.get(cell.getId());
             if (cellStr.sons.isEmpty()) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                        KExceptionGroup.COMPILER, 
-                        "Cell " + node + " is a leaf in the configuration and it's not closed in the RHS.", 
-                        getName(), node.getFilename(), node.getLocation()));                                
-                
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                        KExceptionGroup.COMPILER,
+                        "Cell " + node + " is a leaf in the configuration and it's not closed in the RHS.",
+                        getName(), node.getFilename(), node.getLocation()));
+
                 return cell;
             }
             List<Cell> sons = MetaK.getTopCells(cell.getContents(), context);
             Map<String, ConfigurationStructure> potentialSons = new HashMap<String, ConfigurationStructure>(cellStr.sons);
-            
+
             for (Cell son : sons) {
                 ConfigurationStructure sonCfg = potentialSons.get(son.getId());
-                if (sonCfg != null && (sonCfg.multiplicity == Multiplicity.ONE || sonCfg.multiplicity == Multiplicity.SOME)) 
+                if (sonCfg != null && (sonCfg.multiplicity == Multiplicity.ONE || sonCfg.multiplicity == Multiplicity.SOME))
                         potentialSons.remove(son.getId());
             }
-            
+
             if (potentialSons.isEmpty()) return cell;
-            
+
             Bag bag;
             if (cell.getContents() instanceof Bag) {
                 bag = (Bag) cell.getContents().shallowCopy();
@@ -105,7 +105,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
                 if (sonCfg.multiplicity == Multiplicity.ONE || sonCfg.multiplicity == Multiplicity.SOME) {
                     Cell son = sonCfg.cell.shallowCopy();
                     son.setCellAttributes(new HashMap<String, String>());
-                    if (! sonCfg.sons.isEmpty()) { 
+                    if (! sonCfg.sons.isEmpty()) {
                         son.setContents(new Bag());
                         son.setEllipses(Ellipses.BOTH);
                         son = (Cell)visit(son, _);

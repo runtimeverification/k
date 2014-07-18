@@ -8,7 +8,7 @@ import javax.swing.text.StyleConstants;
 
 /**
  * Holds the color for each cell
- * 
+ *
  */
 public class ColorTagMap {
 

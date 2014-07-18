@@ -71,7 +71,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 //                StringBuiltin.kAppOf(sort),
 //                StringBuiltin.kAppOf(id));
 //    }
-    
+
     @Override
     public ASTNode visit(Module node, Void _)  {
         Module retNode = node.shallowCopy();

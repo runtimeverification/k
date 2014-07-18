@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2014 K Team. All Rights Reserved.
+// Copyright (c) 2010-2014 K Team. All Rights Reserved.
 
 /*!
 \setlength{\parindent}{1em}
@@ -44,7 +44,7 @@ argument, because we want to give it a short-circuit semantics. */
 
 /*@ An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
-to 0.  \K provides builtin support for generic syntactic lists: 
+to 0.  \K provides builtin support for generic syntactic lists:
 $\textit{List}\{\textit{Nonterminal},\textit{terminal}\}$ stands for
 \textit{terminal}-separated lists of \textit{Nonterminal} elements. */
 
@@ -59,7 +59,7 @@ semantics.  */
 module IMP
   imports IMP-SYNTAX
 /*@ \section{Semantics}
-This module defines the semantics of IMP\@.  
+This module defines the semantics of IMP\@.
 Before you start adding semantic rules to a \K definition, you need to
 define the basic semantic infrastructure consisting of definitions for
 {\em results} and the {\em configuration}.  */
@@ -133,7 +133,7 @@ which needs two rules. */
 The empty block \texttt{\{\}} is simply dissolved.  The $\kdot$ below is the
 unit of the computation list structure $K$, that is, the empty task.
 Similarly, the non-empty blocks are dissolved and replaced by their statement
-contents, thus effectively giving them a bracket semantics; we can afford to 
+contents, thus effectively giving them a bracket semantics; we can afford to
 do this only because we have no block-local variable declarations yet in IMP.
 Since we tagged the rules below as "structural", the \K tool structurally
 erases the block constructs from the computation structure, without
@@ -186,7 +186,7 @@ in a state initializing all its global variables to 0.  Since \K's
 syntactic lists are internally interpreted as cons-lists (i.e., lists
 constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list has at least one element and
-another when the list is empty.  In the first case we initialize the 
+another when the list is empty.  In the first case we initialize the
 variable to 0 in the state, but only when the variable is not already
 declared (all variables are global and distinct in IMP).  We prefer to
 make the second rule structural, thinking of dissolving the residual

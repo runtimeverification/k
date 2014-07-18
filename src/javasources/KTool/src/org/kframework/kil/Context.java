@@ -39,7 +39,7 @@ public class Context extends Sentence {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Context shallowCopy() {
         return new Context(this);

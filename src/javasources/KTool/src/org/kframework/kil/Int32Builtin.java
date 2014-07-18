@@ -40,7 +40,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link Int32Builtin} representing the given {@link Integer} value.
-     * 
+     *
      * @param value
      * @return
      */
@@ -56,7 +56,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link Int32Builtin} representing a {@link Integer} with the given {@link String} representation.
-     * 
+     *
      * @param value
      * @return
      */
@@ -68,7 +68,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link Int32Builtin} with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -84,7 +84,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link Int32Builtin} with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -94,7 +94,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link Int32Builtin} with the given {@link String} representation applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */

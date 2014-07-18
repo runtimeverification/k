@@ -264,7 +264,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ListLookup listLookup) {
-        throw new UnsupportedOperationException("Not implemented, yet");
+        return transformJavaBackendSpecificTerm(listLookup);
     }
 
     @Override
@@ -274,7 +274,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(MapLookup mapLookup) {
-        throw new UnsupportedOperationException("Not implemented, yet");
+        return transformJavaBackendSpecificTerm(mapLookup);
     }
     
     @Override
@@ -299,7 +299,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(SetLookup setLookup) {
-        throw new UnsupportedOperationException("Not implemented, yet");
+        return transformJavaBackendSpecificTerm(setLookup);
     }
 
     @Override

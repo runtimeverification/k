@@ -43,7 +43,7 @@ public class StringBuiltin extends Token {
 
     /**
      * Returns a {@link StringBuiltin} representing the given {@link String} value.
-     * 
+     *
      * @param value An un-escaped {@link String} value without the leading and trailing '"'.
      * @return
      */
@@ -59,7 +59,7 @@ public class StringBuiltin extends Token {
     /**
      * Returns a {@link KApp} representing a {@link StringBuiltin} with the given (un-escaped)
      * value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -106,7 +106,7 @@ public class StringBuiltin extends Token {
 
     /**
      * Returns a {@link String} representing the (interpreted) value of the string token.
-     * 
+     *
      * @return The un-escaped {@link String} value without the leading and trailing '"'.
      */
     public String stringValue() {
@@ -115,7 +115,7 @@ public class StringBuiltin extends Token {
 
     /**
      * Returns a {@link String} representing the sort name of a string token.
-     * 
+     *
      * @return
      */
     @Override
@@ -125,7 +125,7 @@ public class StringBuiltin extends Token {
 
     /**
      * Returns a {@link String} representing the (uninterpreted) value of the string token.
-     * 
+     *
      * @return The escaped {@link String} representation with the leading and trailing '"'.
      */
     @Override

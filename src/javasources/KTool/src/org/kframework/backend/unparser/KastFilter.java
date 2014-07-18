@@ -13,13 +13,13 @@ import org.kframework.utils.general.GlobalSettings;
 public class KastFilter extends BasicVisitor {
     protected Indenter result;
     private boolean nextline;
-    
+
     public KastFilter(org.kframework.kil.loader.Context context) {
         super(context);
         result = new Indenter();
         result.setWidth(Integer.MAX_VALUE);
     }
-    
+
     public KastFilter(IndentationOptions indentationOptions, boolean nextline, org.kframework.kil.loader.Context context) {
         super(context);
         result = new Indenter(indentationOptions);
@@ -61,7 +61,7 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {        
+    public Void visit(Sort sort, Void _) {
         throw new RuntimeException("don't know how to kast Sort");
     }
 
@@ -97,11 +97,11 @@ public class KastFilter extends BasicVisitor {
                     first = false;
                 }
                 if (term == null) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                            KExceptionGroup.INTERNAL, 
-                            "NULL Term encountered when KastFilter ran on collection " + listOfK.getContents() + ".", 
-                            listOfK.getFilename(), listOfK.getLocation()));                
-                }    
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                            KExceptionGroup.INTERNAL,
+                            "NULL Term encountered when KastFilter ran on collection " + listOfK.getContents() + ".",
+                            listOfK.getFilename(), listOfK.getLocation()));
+                }
                 this.visitNode(term);
             }
         }
@@ -150,7 +150,7 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Rule rule, Void _) {        
+    public Void visit(Rule rule, Void _) {
         throw new RuntimeException("don't know how to kast Rule");
     }
 
@@ -164,7 +164,7 @@ public class KastFilter extends BasicVisitor {
             result.write(token.value());
             if (token.tokenSort().equals("#Id")) {
                 result.write("\"");
-            } 
+            }
             result.write(token.toString());
         } else {
             this.visitNode(kapp.getLabel());
@@ -205,12 +205,12 @@ public class KastFilter extends BasicVisitor {
     public Void visit(TermCons termCons, Void _) {
         throw new RuntimeException("don't know how to kast TermCons");
     }
-    
+
     @Override
     public Void visit(Sentence sentence, Void _) {
         throw new RuntimeException("don't know how to kast Sentence");
     }
-    
+
     @Override
     public Void visit(Rewrite rewrite, Void _) {
         throw new RuntimeException("don't know how to kast Rewrite");
@@ -231,8 +231,8 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(Collection collection, Void _) {
         throw new RuntimeException("don't know how to kast Collection");
-    }    
-    
+    }
+
     @Override
     public Void visit(CollectionItem collectionItem, Void _) {
         throw new RuntimeException("don't know how to kast CollectionItem");
@@ -253,7 +253,7 @@ public class KastFilter extends BasicVisitor {
         Term term = kInjectedLabel.getTerm();
         if (MetaK.isKSort(term.getSort())) {
             result.write(KInjectedLabel.getInjectedSort(term.getSort()));
-            result.write("2KLabel_("); 
+            result.write("2KLabel_(");
         } else {
             result.write("#_(");
         }
@@ -296,7 +296,7 @@ public class KastFilter extends BasicVisitor {
     public Void visit(LiterateModuleComment literateModuleComment, Void _) {
         throw new RuntimeException("don't know how to kast LiterateModuleComment");
     }
-    
+
     @Override
     public Void visit(org.kframework.kil.Require require, Void _) {
         throw new RuntimeException("don't know how to kast Require");

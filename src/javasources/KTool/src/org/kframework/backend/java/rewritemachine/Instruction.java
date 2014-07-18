@@ -11,25 +11,25 @@ import com.google.common.collect.Maps;
 
 /**
  * Represents instructions of the {@link KAbstractRewriteMachine}.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public final class Instruction implements Serializable {
-    
+
     public enum Type {
         UP, CHOICE, GOTO
     }
-    
+
     public static Instruction UP = new Instruction(Type.UP, null);
     public static Instruction CHOICE = new Instruction(Type.CHOICE, null);
-    
+
     private static final Map<String, Instruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
-    
+
     private final Type type;
     private final String cellLabel;
     private final int hashCode;
-    
+
     public static Instruction GOTO(String cellLabel) {
         Instruction instr = cachedGOTOInstructions.get(cellLabel);
         if (instr == null) {
@@ -38,15 +38,15 @@ public final class Instruction implements Serializable {
         }
         return instr;
     }
-    
+
     private Instruction(Type type, String cellLabel) {
         this.type = type;
         this.cellLabel = cellLabel;
-        this.hashCode = type == Type.GOTO ? 
-                type.hashCode() * Utils.HASH_PRIME + cellLabel.hashCode() : 
+        this.hashCode = type == Type.GOTO ?
+                type.hashCode() * Utils.HASH_PRIME + cellLabel.hashCode() :
                 type.hashCode();
     }
-    
+
     public Type type() {
         return type;
     }
@@ -54,17 +54,17 @@ public final class Instruction implements Serializable {
     public String cellLabel() {
         return cellLabel;
     }
-    
+
     @Override
     public int hashCode() {
         return hashCode;
     }
-    
+
     @Override
     public boolean equals(Object object) {
         return this == object;
     }
-    
+
     /**
      * Returns the cached instance rather than the de-serialized instance if
      * there is a cached instance.

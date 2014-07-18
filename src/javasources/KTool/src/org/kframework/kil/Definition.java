@@ -66,8 +66,8 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
 
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
     }
-    
-    
+
+
 
     public void setItems(List<DefinitionItem> items) {
         this.items = items;
@@ -184,12 +184,12 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public List<DefinitionItem> getChildren(Enum<?> _) {
         return items;
     }
-    
+
     @Override
     public void setChildren(List<DefinitionItem> children, Enum<?> _) {
         this.items = children;

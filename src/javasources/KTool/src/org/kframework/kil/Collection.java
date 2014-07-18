@@ -99,12 +99,12 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
     public int hashCode() {
         return sort.hashCode() * 13 + contents.hashCode();
     }
-    
+
     @Override
     public List<Term> getChildren(Enum<?> _) {
         return contents;
     }
-    
+
     @Override
     public void setChildren(List<Term> children, Enum<?> _) {
         this.contents = children;

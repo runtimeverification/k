@@ -3,9 +3,9 @@ require "int.k"
 
 module ARRAY-SYNTAX
   syntax Array ::= "store"       "(" Array "," Int "," K ")"  [smtlib(store)]
-  	       	 | "const-array" "(" Int "," K ")" 
-		 
-  syntax K ::= "select" "(" Array "," Int ")"  [smtlib(select)]
+                  | "const-array" "(" Int "," K ")"
+
+  syntax KItem ::= "select" "(" Array "," Int ")"  [smtlib(select)]
 
   syntax Int ::= "size-of-array" "(" Array ")" [function, symbolic-function]
 endmodule
@@ -19,7 +19,7 @@ module ARRAY
   imports STRING-HOOKS
 
   // main array axioms
-  rule select(store(_:Array, I:Int, V:K), J:Int) => V 
+  rule select(store(_:Array, I:Int, V:K), J:Int) => V
        when I ==Int J [symbolic-kompile]
   rule select(store(A:Array, I:Int, _:K), J:Int) => select(A, J)
        when I =/=Int J [symbolic-kompile]
@@ -38,10 +38,10 @@ module ARRAY
   rule store(store(A:Array, I:Int, _:K), I, V:K)
        =>
        store(A, I, V)
-       [anywhere]   
+       [anywhere]
 
   // array size
-  rule size-of-array(store(A:Array, _:K, _:K)) => size-of-array(A) 
+  rule size-of-array(store(A:Array, _:K, _:K)) => size-of-array(A)
   rule size-of-array(const-array(Size:Int, _:K)) => Size
 
 endmodule

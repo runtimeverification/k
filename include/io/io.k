@@ -15,10 +15,6 @@ module K-IO
        (ListItem(I:Int) => .List)
        _:List [stdout, stderr]
   rule ListItem(#ostream(_))
-       ListItem(#buffer(Buffer:String => Buffer +String Char2String(C)))
-       (ListItem(C:Char) => .List)
-       _:List [stdout, stderr]
-  rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String S))
        (ListItem(S:String) => .List)
        _:List [stdout, stderr]
@@ -28,9 +24,6 @@ module K-IO
        _:List [stdout, stderr]
   rule ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
        (ListItem(I:Int) => .List)
-       _:List [stdout, stderr]
-  rule ListItem(#buffer(Buffer:String => Buffer +String Char2String(C)))
-       (ListItem(C:Char) => .List)
        _:List [stdout, stderr]
   rule ListItem(#buffer(Buffer:String => Buffer +String S))
        (ListItem(S:String) => .List)
@@ -77,7 +70,7 @@ module K-IO
        (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
 
   rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List)
-       ListItem(#buffer(_)) 
+       ListItem(#buffer(_))
        _:List [stdout, stderr]
 
   rule #stdin => 0

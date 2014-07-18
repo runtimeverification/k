@@ -9,12 +9,12 @@ import java.util.logging.Logger;
 
 public class CommandEnd extends Command {
     private ThreadPoolExecutor pool;
-     
-    public CommandEnd(String[] args, Socket socket, Logger logger, FileSystem fs) { 
-        super(args, socket, logger, fs); 
+
+    public CommandEnd(String[] args, Socket socket, Logger logger, FileSystem fs) {
+        super(args, socket, logger, fs);
     }
-     
-     public void setPool(ThreadPoolExecutor pool) { 
+
+     public void setPool(ThreadPoolExecutor pool) {
          this.pool = pool;
      }
 
