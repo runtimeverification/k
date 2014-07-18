@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+  <tests>
+  
+    <test
+        definition="issue.k"
+        programs="."
+        extension="issue"
+        results="." >
+        <kompile-option name="--transition" value="hello bye" />
+        <all-programs>
+          <krun-option name="--search" />
+          <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
+        </all-programs>
+    </test>
+  
+  </tests>
