@@ -5,13 +5,10 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
-import org.kframework.krun.K;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -19,7 +16,6 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.util.HashSet;
 import java.util.Set;
-
 
 /**
  * Visitor collecting the names of the sorts with lexical productions (i.e.,
@@ -60,7 +56,7 @@ public class TokenSortCollector extends BasicVisitor {
 
     @Override
     public Void visit(Production production, Void _) {
-        if (kompileOptions.backend.java() || K.backend.equals("java")) {
+        if (kompileOptions.backend.java()) {
             checkIllegalProduction(production);
         } else {
             if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {

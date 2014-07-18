@@ -11,7 +11,6 @@ import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.Model;
 
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -23,15 +22,12 @@ import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
-import org.kframework.kil.Context;
-import org.kframework.krun.K;
-
-
+import org.kframework.utils.options.SMTSolver;
 
 public class UseSMT implements Serializable {
 
     public static BuiltinMap checkSat(Term term, TermContext termContext) {
-        if (!K.smt.equals("z3")) {
+        if (termContext.definition().context().smtOptions.smt != SMTSolver.Z3) {
             return null;
         }
 

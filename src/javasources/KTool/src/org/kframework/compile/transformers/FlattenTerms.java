@@ -8,7 +8,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.krun.K;
 
 import java.util.*;
 
@@ -184,7 +183,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             }
 
             node = node.shallowCopy();
-            if (kompileOptions.backend.java() || K.backend.equals("java")) {
+            if (kompileOptions.backend.java()) {
                 /* the Java Rewrite Engine preserves sort information for variables */
             } else {
                 node.setSort(KSorts.KITEM);

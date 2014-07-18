@@ -1,5 +1,5 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
-package org.kframework.backend;
+package org.kframework.utils.options;
 
 /**
  * Enum storing information about which SMT solver is being used

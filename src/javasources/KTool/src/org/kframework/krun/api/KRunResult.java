@@ -1,15 +1,18 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
-import org.kframework.krun.K;
+import org.kframework.kil.loader.Context;
 
 public class KRunResult<T> {
     private String statistics;
     private String rawOutput;
     private T result;
 
-    public KRunResult(T result) {
+    private Context context;
+
+    public KRunResult(T result, Context context) {
         this.result = result;
+        this.context = context;
     }
 
     public String getStatistics() {
@@ -38,7 +41,7 @@ public class KRunResult<T> {
 
     @Override
     public String toString() {
-        if (!K.statistics) {
+        if (!context.krunOptions.experimental.statistics) {
             return result.toString();
         } else {
             return result.toString() + "\n" + statistics;

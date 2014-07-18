@@ -6,13 +6,11 @@ import java.io.*;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
-import org.kframework.compile.FlattenModules;
-import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
+import org.kframework.krun.ExecutionContext;
 import org.kframework.krun.K;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
@@ -68,39 +66,21 @@ public class KastFrontEnd {
             String source = options.source();
 
 
-            org.kframework.kil.Definition javaDef = null;
-            File compiledFile = options.definition();
+            File compiledFile = options.definitionLoading.definition();
             Context context;
-            KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
-
-            File defXml;
-            if (kompileOptions.backend == Backend.MAUDE) {
-                defXml = new File(compiledFile.getAbsolutePath() + "/defx-maude.bin");
-            } else if (kompileOptions.backend == Backend.JAVA) {
-                defXml = new File(compiledFile.getAbsolutePath() + "/defx-java.bin");
-            } else {
-                throw new AssertionError("currently only two execution backends are supported: MAUDE and JAVA");
-            }
-            if (!defXml.exists()) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                        "Could not find the compiled definition.", null, defXml.getAbsolutePath()));
-            }
+            KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath(), options.global.debug);
 
             //merge kast options into kompile options object
             kompileOptions.global = options.global;
             context = new Context(kompileOptions);
             context.kompiled = compiledFile;
 
-            javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
-            javaDef = new FlattenModules(context).compile(javaDef, null);
-            javaDef = (org.kframework.kil.Definition) new AddTopCellConfig(
-                    context).visitNode(javaDef);
-            javaDef.preprocess(context);
-
+            //need to call this in order to initialize the context object
+            ExecutionContext.getDefinition(Stopwatch.instance(), context);
             String sort = options.sort(context);
 
             try {
-                ASTNode out = ProgramLoader.processPgm(stringToParse, source, javaDef, sort, context, options.parser);
+                ASTNode out = ProgramLoader.processPgm(stringToParse, source, sort, context, options.parser);
                 StringBuilder kast;
                 if (options.experimental.pretty) {
                     IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),

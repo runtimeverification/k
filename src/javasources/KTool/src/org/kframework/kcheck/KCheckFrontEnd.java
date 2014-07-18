@@ -115,7 +115,7 @@ public class KCheckFrontEnd {
             context.dotk.mkdirs();
 
             genericCompile(lang, backend, null, context);
-            BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
+            BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd, context);
 
             verbose(cmd, context);
         }
@@ -153,7 +153,7 @@ public class KCheckFrontEnd {
         }
 
         BinaryLoader.save(
-                context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context));
+                context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context), context);
         try {
             backend.run(javaDef);
         } catch (IOException e) {

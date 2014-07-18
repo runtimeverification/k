@@ -613,7 +613,8 @@ public class PatternMatcher extends AbstractMatcher {
         CellCollection otherCellCollection = (CellCollection) pattern;
 
         if (cellCollection.hasFrame()) {
-            assert !K.do_concrete_exec : "the subject term should be ground in concrete execution";
+            assert !termContext.definition().context().javaExecutionOptions.concreteExecution() :
+                "the subject term should be ground in concrete execution";
             if (!otherCellCollection.hasFrame()) {
                 fail(cellCollection, otherCellCollection);
             }

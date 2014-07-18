@@ -13,7 +13,6 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.io.Serializable;
@@ -43,6 +42,7 @@ public class PathIndex implements RuleIndex, Serializable{
     private final Set<Integer> inputRuleIndices = new LinkedHashSet<>();
     private TermVisitor termVisitor;
     private boolean hasNOKCellRules;
+    private final boolean indexingStats;
 
     public enum RuleType {
         COOLING,
@@ -61,6 +61,7 @@ public class PathIndex implements RuleIndex, Serializable{
     @Deprecated
     public PathIndex(Definition definition) {
         this.definition = definition;
+        this.indexingStats = definition.context().javaExecutionOptions.indexingStats;
         this.indexedRules = new LinkedHashMap<>();
         termVisitor = new TermVisitor(definition.context());
         buildIndex();
@@ -189,7 +190,7 @@ public class PathIndex implements RuleIndex, Serializable{
     public List<Rule> getRules(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
-        if (K.get_indexing_stats) {
+        if (indexingStats) {
             IndexingStatistics.getPStringFromTermStopWatch.reset();
             IndexingStatistics.getPStringFromTermStopWatch.start();
             pStrings = getPStringsFromTerm(term);
@@ -208,7 +209,7 @@ public class PathIndex implements RuleIndex, Serializable{
         Set<Integer> matchingIndices = new LinkedHashSet<>();
         String subString;
 
-        if (K.get_indexing_stats) {
+        if (indexingStats) {
             IndexingStatistics.findMatchingIndicesStopWatch.reset();
             IndexingStatistics.findMatchingIndicesStopWatch.start();
         }
@@ -253,7 +254,7 @@ public class PathIndex implements RuleIndex, Serializable{
             }
         }
 
-        if (K.get_indexing_stats) {
+        if (indexingStats) {
             IndexingStatistics.findMatchingIndicesStopWatch.stop();
             IndexingStatistics.timesForFindingMatchingIndices.add(
                     IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));

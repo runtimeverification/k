@@ -1,11 +1,9 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -15,10 +13,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,54 +130,5 @@ public class XmlUtil {
 
         }
 
-    }
-
-    public static Element getTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier) {
-        Element result = null;
-        NodeList list;
-        Node nod;
-
-        list = doc.getElementsByTagName(tagName);
-        if (list.getLength() == 0) {
-            org.kframework.utils.Error.silentReport("The node with " +  tagName + "tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
-            return result;
-        }
-        for (int i = 0; i < list.getLength(); i++) {
-            nod = list.item(i);
-            if (nod == null) {
-                org.kframework.utils.Error.report("The node with " + tagName + " tag wasn't found");
-            } else if (nod.getNodeType() == Node.ELEMENT_NODE) {
-                Element elem = (Element) nod;
-                if (elem.getAttribute(attributeName).equals("NONE")) {
-                    continue;
-                }
-                String solIdentifier = elem.getAttribute(attributeName);
-                //we found the desired search solution
-                if (solIdentifier.equals(solutionIdentifier)) {
-                    // using XPath for direct access to the desired node
-                    XPathFactory factory = XPathFactory.newInstance();
-                    XPath xpath = factory.newXPath();
-                    String s = xpathExpression;
-                    Object result1;
-                    try {
-                        result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
-                        if (result1 != null) {
-                            NodeList nodes = (NodeList) result1;
-                            nod = nodes.item(0);
-                            result = (Element)nod;
-                            break;
-                        }
-                        else {
-                            String output = FileUtil.getFileContent(K.maude_out);
-                            org.kframework.utils.Error.report("Unable to parse Maude's search results:\n" + output);
-                        }
-
-                    } catch (XPathExpressionException e) {
-                        org.kframework.utils.Error.report("XPathExpressionException " + e.getMessage());
-                    }
-                }
-            }
-        }
-        return result;
     }
 }

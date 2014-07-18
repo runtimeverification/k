@@ -10,7 +10,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
+import org.kframework.krun.KRunOptions;
 import org.mockito.Mockito;
 
 public class UnparserFilterNewTest {
@@ -19,10 +19,9 @@ public class UnparserFilterNewTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() {
-        K.output_mode = K.PRETTY;
-
         context = Mockito.mock(Context.class);
         context.canonicalBracketForSort = Mockito.mock(Map.class);
+        context.krunOptions = new KRunOptions();
     }
 
     /**

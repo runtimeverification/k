@@ -67,14 +67,6 @@ public class KompileOptionsTest {
     }
 
     @Test
-    public void testTransitionCommaSeparator() {
-        parse("--transition", "foo, bar", "foo.k");
-        assertEquals(2, options.transition.size());
-        assertTrue(options.transition.contains("foo"));
-        assertTrue(options.transition.contains("bar"));
-    }
-
-    @Test
     public void testLowercaseEnum() {
         parse("--backend", "unflatten-java", "foo.k");
         assertEquals(Backend.UNFLATTEN_JAVA, options.backend);

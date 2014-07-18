@@ -46,6 +46,7 @@ import org.kframework.main.FirstStep;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -287,7 +288,7 @@ class KoreFilter extends BasicVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color, Color.black);
                 indenter.write(colorCode);
             }
         }

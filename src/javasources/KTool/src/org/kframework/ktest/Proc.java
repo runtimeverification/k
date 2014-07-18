@@ -249,7 +249,8 @@ public class Proc<T> implements Runnable {
      * @param returnCode return code of the process
      */
     private void handlePgmResult(int returnCode) throws IOException {
-        String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
+        //TODO(dwightguth): inject the terminal color
+        String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting, Color.BLACK);
         if (returnCode == 0) {
 
             boolean doGenerateOut = false;
