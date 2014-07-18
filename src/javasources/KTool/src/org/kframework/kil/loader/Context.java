@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
@@ -17,12 +18,15 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.KRunOptions;
+import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.options.SMTOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -166,6 +170,10 @@ public class Context implements Serializable {
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
+    public SMTOptions smtOptions;
+    public KRunOptions krunOptions;
+    public ConfigurationCreationOptions ccOptions;
+    public transient JavaExecutionOptions javaExecutionOptions;
 
     public Context(GlobalOptions globalOptions) {
         this.globalOptions = globalOptions;
@@ -175,6 +183,19 @@ public class Context implements Serializable {
     public Context(KompileOptions kompileOptions) {
         this(kompileOptions.global);
         this.kompileOptions = kompileOptions;
+        this.smtOptions = kompileOptions.experimental.smt;
+        //TODO(dwightguth): replace this with a provider in Guice
+        this.javaExecutionOptions = new JavaExecutionOptions();
+    }
+
+    public Context(KRunOptions krunOptions, ConfigurationCreationOptions ccOptions, KompileOptions kompileOptions) {
+        this(kompileOptions);
+        this.krunOptions = krunOptions;
+        this.ccOptions = ccOptions;
+        if (krunOptions.experimental.smt.smt != null) {
+            smtOptions = krunOptions.experimental.smt;
+        }
+        this.javaExecutionOptions = krunOptions.experimental.javaExecution;
     }
 
     public void putLabel(Production p, String cons) {

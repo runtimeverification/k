@@ -6,12 +6,12 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.backend.SMTSolver;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.options.BaseEnumConverter;
+import org.kframework.utils.options.SMTOptions;
+import org.kframework.utils.options.StringListConverter;
 
-import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
@@ -120,35 +120,20 @@ public final class KompileOptions implements Serializable {
         return syntaxModule;
     }
 
-    //TODO(dwightguth): replace this with variable arity when we have a more elegant ktest
-    public static class TagListConverter implements IStringConverter<Set<String>> {
-
-        @Override
-        public Set<String> convert(String val) {
-            String[] parts = val.split("[, ]+");
-            Set<String> result = new HashSet<String>();
-            for (String part : parts) {
-                result.add(part.trim());
-            }
-            return result;
-        }
-
-    }
-
     // Advanced options
-    @Parameter(names="--superheat", converter=TagListConverter.class, description="Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a comma-separated list of production tags.")
-    public Set<String> superheat = Collections.singleton("superheat");
+    @Parameter(names="--superheat", listConverter=StringListConverter.class, description="Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a comma-separated list of production tags.")
+    public List<String> superheat = Collections.singletonList("superheat");
 
-    @Parameter(names="--supercool", converter=TagListConverter.class, description="Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a comma-separated list of rule tags.")
-    public Set<String> supercool = Collections.singleton("supercool");
+    @Parameter(names="--supercool", listConverter=StringListConverter.class, description="Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a comma-separated list of rule tags.")
+    public List<String> supercool = Collections.singletonList("supercool");
 
-    @Parameter(names="--transition", converter=TagListConverter.class, description="<string> is a comma-separated list of tags designating rules to become transitions.")
-    public Set<String> transition = Collections.singleton(DEFAULT_TRANSITION);
+    @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to become transitions.")
+    public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 
     public static final String DEFAULT_TRANSITION = "transition";
 
     @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
-    public Boolean helpExperimental = false;
+    public boolean helpExperimental = false;
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
@@ -168,25 +153,17 @@ public final class KompileOptions implements Serializable {
         @Parameter(names="--k-cells", description="Cells which contain komputations.")
         public List<String> kCells = Arrays.asList("k");
 
-        @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|none]. (Default: z3). This only has an effect with '--backend symbolic'.")
-        public SMTSolver smt = SMTSolver.Z3;
-
-        public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> {
-
-            @Override
-            public Class<SMTSolver> enumClass() {
-                return SMTSolver.class;
-            }
-        }
+        @ParametersDelegate
+        public SMTOptions smt = new SMTOptions();
 
         @Parameter(names="--no-prelude", description="Do not include anything automatically.")
         public boolean noPrelude = false;
 
-        @Parameter(names="--symbolic-rules", converter=TagListConverter.class, description="Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public Set<String> symbolicRules = new HashSet<>();
+        @Parameter(names="--symbolic-rules", listConverter=StringListConverter.class, description="Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
+        public List<String> symbolicRules = Collections.emptyList();
 
-        @Parameter(names="--non-symbolic-rules", converter=TagListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public Set<String> nonSymbolicRules = new HashSet<>();
+        @Parameter(names="--non-symbolic-rules", listConverter=StringListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
+        public List<String> nonSymbolicRules = Collections.emptyList();
 
         @Parameter(names="--test-gen", description="Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.")
         public boolean testGen = false;
@@ -197,8 +174,8 @@ public final class KompileOptions implements Serializable {
         @Parameter(names="--loud", description="Prints 'Done' at the end if all is ok.")
         public boolean loud = false;
 
-        @Parameter(names="--documentation", converter=TagListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
-        public Set<String> documentation = Collections.singleton("documentation");
+        @Parameter(names="--documentation", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
+        public List<String> documentation = Collections.singletonList("documentation");
 
         @Parameter(names="--rule-index", converter=RuleIndexConveter.class, description="Choose a technique for indexing the rules. <rule-index> is one of [table|path]. (Default: table). This only has effect with '--backend java'.")
         public IndexingAlgorithm ruleIndex = IndexingAlgorithm.RULE_TABLE;

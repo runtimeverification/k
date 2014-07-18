@@ -79,17 +79,13 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.krun.Main;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.KRunResult;
-import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.main.FirstStep;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -195,9 +191,9 @@ public class RLBackend extends BasicBackend implements Backend {
         /****************************
          * initial setup of krun *
          *****************************/
-        K.compiled_def = context.dotk.getAbsolutePath();
-        K.main_module = mainModule;
-        K.init(context);
+        //K.compiled_def = context.dotk.getAbsolutePath();
+        //K.main_module = mainModule;
+        //K.init(context);
         // delete temporary krun directory
 //        deleteDirectory(new File(K.krunDir));
 //        Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -214,11 +210,11 @@ public class RLBackend extends BasicBackend implements Backend {
         ASTNode pattern;
         try {
             pattern = DefinitionLoader.parsePattern(
-                    K.pattern,
+                    null, //K.pattern,
                     "Command line pattern",
                     Sort.BAG.name(),
                     context);
-            defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
+            //defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern),
                     null);
             defaultPattern = (Rule) pattern;
@@ -229,7 +225,7 @@ public class RLBackend extends BasicBackend implements Backend {
         }
 
         // setup the runner
-        MaudeKRun mkr = new MaudeKRun(context, Stopwatch.instance());
+        MaudeKRun mkr = null;//new MaudeKRun(context, Stopwatch.instance());
         mkr.setBackendOption("io", false);
         /****************
          * end *
@@ -239,17 +235,17 @@ public class RLBackend extends BasicBackend implements Backend {
          * initial context *
          ********************/
         // setup initial context
-        K.kompiled_cfg = (org.kframework.kil.Configuration)
-            BinaryLoader.load(K.compiled_def + "/configuration.bin");
+        //K.kompiled_cfg = (org.kframework.kil.Configuration)
+        //    BinaryLoader.load(K.compiled_def + "/configuration.bin");
         if (PGM != null) {
             RunProcess rp = new RunProcess();
-            try {
-                KRunResult<KRunState> res = mkr.run(Main.makeConfiguration(
-                        program, null, rp, false, context));
-                icontext = res.getResult().getRawResult();//.getResult();
-            } catch (KRunExecutionException e1) {
-                e1.printStackTrace();
-            }
+            //try {
+                //KRunResult<KRunState> res = mkr.run(Main.makeConfiguration(
+                //        program, null, rp, false, context));
+                //icontext = res.getResult().getRawResult();//.getResult();
+            //} catch (KRunExecutionException e1) {
+            //    e1.printStackTrace();
+            //}
         }
         /****************
          * end *

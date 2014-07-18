@@ -74,7 +74,7 @@ public class DefinitionLoader {
 
         String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
         if ("bin".equals(extension)) {
-            javaDef = (Definition) BinaryLoader.load(canoFile.toString());
+            javaDef = (Definition) BinaryLoader.load(Definition.class, canoFile.toString(), context);
 
             Stopwatch.instance().printIntermediate("Load definition from binary");
 
@@ -273,7 +273,7 @@ public class DefinitionLoader {
             // load definition if possible
             try {
                 @SuppressWarnings("unchecked")
-                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.loadWithThrow(cacheFile);
+                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.load(Map.class, cacheFile);
                 cachedDef = cachedDefTemp;
             } catch (IOException | ClassNotFoundException e) {
                 // it means the cache is not valid, or it doesn't exist
@@ -292,7 +292,7 @@ public class DefinitionLoader {
                 te.printStackTrace();
             } finally {
                 // save definition
-                BinaryLoader.save(cacheFile, clf.getKept());
+                BinaryLoader.save(cacheFile, clf.getKept(), context.globalOptions.debug);
             }
             JavaClassesFactory.endConstruction();
 

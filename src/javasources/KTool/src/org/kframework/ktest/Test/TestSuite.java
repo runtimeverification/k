@@ -117,7 +117,8 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
 
-        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.green : Color.red, colorSetting);
+        //TODO(dwightguth): inject the terminal color
+        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.GREEN : Color.RED, colorSetting, Color.BLACK);
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
@@ -460,9 +461,11 @@ public class TestSuite {
     private void printResult(boolean condition) {
         if (condition)
             System.out.println("SUCCESS");
-        else
-            System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL" + ColorUtil
+        else {
+            //TODO(dwightguth): inject the terminal color
+            System.out.println(ColorUtil.RgbToAnsi(Color.RED, colorSetting, Color.BLACK) + "FAIL" + ColorUtil
                     .ANSI_NORMAL);
+        }
     }
 
     private String makeRelative(String absolutePath) {

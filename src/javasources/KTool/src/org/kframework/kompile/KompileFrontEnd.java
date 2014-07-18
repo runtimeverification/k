@@ -76,7 +76,6 @@ public class KompileFrontEnd {
     }
 
     private static void kompile(KompileOptions options) throws IOException {
-        K.do_kompilation = true;
         org.kframework.utils.Error.checkIfOutputDirectory(options.directory);
 
         final Context context = new Context(options);

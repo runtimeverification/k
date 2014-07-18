@@ -16,7 +16,6 @@ import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.loader.Constants;
-import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Java Rewrite Engine internal representation ({@link org.kframework.backend.java.kil.Term}).
      */
     public static Term of(org.kframework.kil.Term kilTerm, Definition definition) {
-        if (K.get_indexing_stats){
+        if (definition.context().javaExecutionOptions.indexingStats){
             IndexingStatistics.kilTransformationStopWatch.start();
         }
 
@@ -54,7 +53,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
                 = new KILtoBackendJavaKILTransformer(definition.context());
         Term term = transformer.transformTerm(kilTerm, definition);
 
-        if (K.get_indexing_stats){
+        if (definition.context().javaExecutionOptions.indexingStats){
             IndexingStatistics.kilTransformationStopWatch.stop();
         }
         return term;

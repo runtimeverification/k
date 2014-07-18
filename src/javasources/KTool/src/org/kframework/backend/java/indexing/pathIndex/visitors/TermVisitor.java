@@ -18,7 +18,6 @@ import org.kframework.backend.java.kil.BuiltinMap;
 
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.io.Serializable;
@@ -52,6 +51,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     public static final String NO_K_CELL_PSTRING = "@.NO_K_CELL";
     private final Set<String> pStrings;
     private final Context context;
+    private final boolean indexingStats;
 
     private String pString;
     private int currentPosition = 0;
@@ -69,6 +69,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     public TermVisitor(Context context) {
         pStrings = new LinkedHashSet<>();
         this.context = context;
+        this.indexingStats = context.javaExecutionOptions.indexingStats;
     }
 
     public TermVisitor(Context context, boolean hasNOKCellRules) {
@@ -79,7 +80,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     @Override
     public void visit(Term node) {
         int BASE_IO_CELL_SIZE = 2;
-        if (K.get_indexing_stats) {
+        if (indexingStats) {
             IndexingStatistics.getPStringStopwatch.reset();
             IndexingStatistics.getPStringStopwatch.start();
         }
@@ -93,7 +94,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             pStrings.add(NO_K_CELL_PSTRING);
         }
 
-        if (K.get_indexing_stats) {
+        if (indexingStats) {
             IndexingStatistics.getPStringStopwatch.stop();
             IndexingStatistics.getPStringTimes.add(
                     IndexingStatistics.getPStringStopwatch.elapsed(TimeUnit.MICROSECONDS));
@@ -127,7 +128,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             }
         }
 
-        if (K.get_indexing_stats) {
+        if (indexingStats) {
             IndexingStatistics.traverseCellsStopwatch.stop();
             IndexingStatistics.traverseCellsTimes.add(
                     IndexingStatistics.traverseCellsStopwatch.elapsed(TimeUnit.MICROSECONDS));

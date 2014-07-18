@@ -5,47 +5,36 @@ import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.krun.Main;
-import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class RunKRunCommand {
 
-    protected Term KAST;
-    protected String lang;
+    protected Term initialConfiguration;
     protected Context context;
     protected KRun krun;
     protected KRunDebugger debugger;
-    protected RunProcess rp;
 
-    public RunKRunCommand(Term kast, String lang, KRun krun, Context context) throws KRunExecutionException {
+    public RunKRunCommand(Term initialConfiguration, KRun krun, Context context) throws KRunExecutionException {
         super();
         this.context = context;
-        this.KAST = kast;
-        this.lang = lang;
-        rp = new RunProcess();
+        this.initialConfiguration = initialConfiguration;
         this.krun = krun;
-        Term cfg;
-        cfg = Main.makeConfiguration(KAST, null, rp, K.term, context);
-        debugger = krun.debug(cfg);
+        debugger = krun.debug(initialConfiguration);
     }
 
-    public RunKRunCommand(KRunState state, String lang, KRun krun, Context context) {
+    public RunKRunCommand(KRunState state, KRun krun, Context context) {
         super();
         this.context = context;
-        this.KAST = state.getRawResult();
-        this.lang = lang;
-        rp = new RunProcess();
+        this.initialConfiguration = state.getRawResult();
         this.krun = krun;
-        DirectedGraph<KRunState, Transition> dg = new DirectedSparseGraph<KRunState, Transition>();
+        DirectedGraph<KRunState, Transition> dg = new KRunGraph();
         dg.addVertex(state);
         debugger = krun.debug(dg);
     }
@@ -73,11 +62,6 @@ public class RunKRunCommand {
     public DirectedGraph<KRunState, Transition> getCurrentGraph() {
         return debugger.getGraph();
     }
-
-    public String getLang() {
-        return lang;
-    }
-
     public KRun getKrun() {
         return krun;
     }

@@ -310,7 +310,7 @@ public class TestCase {
                     ProgramProfile profile = getPgmOptions(pgmFilePath);
                     boolean hasDirectory = false;
                     for (PgmArg arg : profile.getArgs()) {
-                        if (arg.arg.equals("--directory")) {
+                        if (arg.arg.equals("--directory") || arg.arg.equals("-d")) {
                             hasDirectory = true;
                         }
                         args.add(arg);

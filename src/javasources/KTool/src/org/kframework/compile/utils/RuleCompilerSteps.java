@@ -20,7 +20,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
         return vars;
     }
 
-    public RuleCompilerSteps(Definition def, Context context) {
+    public RuleCompilerSteps(Context context) {
         super(context);
         this.add(new AddKCell(context));
         this.add(new AddTopCellRules(context));
@@ -28,9 +28,6 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
         this.add(new ResolveSyntaxPredicates(context));
         this.add(new ResolveListOfK(context));
         this.add(new FlattenTerms(context));
-        ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor(context);
-        cfgStrVisitor.visitNode(def);
-        context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
         final ResolveContextAbstraction resolveContextAbstraction =
                 new ResolveContextAbstraction(context);
         this.add(resolveContextAbstraction);
