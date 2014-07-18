@@ -149,7 +149,7 @@ public class RLBackend extends BasicBackend implements Backend {
     }
 
     @Override
-    public void run(Definition javaDef) throws IOException {
+    public void run(Definition javaDef) {
 
         /******************************
          * initial setup of definition *

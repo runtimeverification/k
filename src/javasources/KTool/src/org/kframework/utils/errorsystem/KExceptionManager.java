@@ -1,9 +1,11 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.errorsystem;
 
+import org.kframework.kil.ASTNode;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,45 @@ public class KExceptionManager {
         this.options = options;
     }
 
+    private void printStackTrace(Throwable e) {
+        if (e != null) {
+            if (options.debug) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void registerCriticalError(String message, Throwable e) {
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, e, null);
+    }
+
+    public void registerInternalError(String message, Throwable e) {
+        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e, null);
+    }
+
+    public void registerCriticalWarning(String message, Throwable e) {
+        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, null);
+    }
+
+    public void registerCriticalWarning(String message, Throwable e, ASTNode node) {
+        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, node);
+    }
+
+    private void register(ExceptionType type, KExceptionGroup group, String message, Throwable e, ASTNode node) {
+        printStackTrace(e);
+        if (node != null) {
+            registerInternal(new KException(type, group, message, node.getFilename(), node.getLocation()));
+        } else {
+            registerInternal(new KException(type, group, message));
+        }
+    }
+
+    @Deprecated
     public void register(KException exception) {
+        registerInternal(exception);
+    }
+
+    private void registerInternal(KException exception) {
         exceptions.add(exception);
         if (exception.type == ExceptionType.ERROR)
             throw new KEMException(exception);

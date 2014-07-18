@@ -9,6 +9,7 @@ import joptsimple.OptionSpec;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 import org.kframework.krun.ioserver.main.MainServer;
 import org.kframework.krun.tasks.MaudeTask;
 
@@ -38,7 +39,7 @@ public class KRunner {
     private boolean _noServer;
     protected Context context;
 
-    public KRunner(String[] args, Context context, File xmlOutFile) throws IOException {
+    public KRunner(String[] args, Context context, File xmlOutFile) {
         this.context = context;
         this._xmlOutFileName = xmlOutFile.getAbsolutePath();
         // boolean append = true;
@@ -84,12 +85,16 @@ public class KRunner {
         _logger.info("Maude and command files exist.");
     }
 
-    private void startLogger() throws IOException {
+    private void startLogger() {
         _logger = java.util.logging.Logger.getLogger("KRunner");
         if (_createLogs) {
-            FileHandler fh = new FileHandler("krunner.log", _append);
-            fh.setFormatter(new SimpleFormatter());
-            _logger.addHandler(fh);
+            try {
+                FileHandler fh = new FileHandler("krunner.log", _append);
+                fh.setFormatter(new SimpleFormatter());
+                _logger.addHandler(fh);
+            } catch (IOException e) {
+                GlobalSettings.kem.registerInternalError("Could not open krunner.log", e);
+            }
         }
         _logger.setUseParentHandlers(false);
     }
@@ -141,7 +146,7 @@ public class KRunner {
         }
     }
 
-    public static int main(String[] args, Context context, File xmlOutFile) throws IOException {
+    public static int main(String[] args, Context context, File xmlOutFile) {
         KRunner runner = new KRunner(args, context, xmlOutFile);
         return runner.run();
     }

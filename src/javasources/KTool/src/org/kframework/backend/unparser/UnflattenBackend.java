@@ -12,7 +12,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
-import java.io.IOException;
 
 public class UnflattenBackend extends BasicBackend {
     private Backend backend;
@@ -33,7 +32,7 @@ public class UnflattenBackend extends BasicBackend {
     }
 
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         /* first unflatten the syntax */
         ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
         definition = (Definition) concretizeSyntax.visitNode(definition);

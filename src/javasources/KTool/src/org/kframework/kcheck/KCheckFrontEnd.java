@@ -1,11 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kcheck;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
@@ -14,7 +10,6 @@ import org.kframework.kcheck.gui.KCheckMainWindow;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
-import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
@@ -154,14 +149,6 @@ public class KCheckFrontEnd {
 
         BinaryLoader.save(
                 context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context), context);
-        try {
-            backend.run(javaDef);
-        } catch (IOException e) {
-            if (context.globalOptions.debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                    "IO error executing backend"));
-        }
+        backend.run(javaDef);
     }
 }

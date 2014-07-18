@@ -31,7 +31,7 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class KagregFrontEnd {
 
-    public static void kagreg(String[] args) throws IOException {
+    public static void kagreg(String[] args) {
         if (args.length != 2) {
             Error.report("There must be exactly two K definitions as arguments to kagreg.");
         }
@@ -71,7 +71,7 @@ public class KagregFrontEnd {
         String secondLang = FileUtil.getMainModule(secondDefinitionFile.getName());
 
         Context context1 = new Context(globalOptions);
-        context1.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+        context1.dotk = new File(firstDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context1.dotk.mkdirs();
         Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true,
                 context1);
@@ -90,7 +90,7 @@ public class KagregFrontEnd {
         KParser.reset();
         Context context2 = new Context(globalOptions);
         assert context2 != null;
-        context2.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+        context2.dotk = new File(secondDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context2.dotk.mkdirs();
         Definition secondDef = DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true,
                 context2);
@@ -204,6 +204,8 @@ public class KagregFrontEnd {
 
         try (Writer writer = new BufferedWriter(new FileWriter("result.k"))) {
             writer.write(indenter.toString());
+        } catch (IOException e) {
+            GlobalSettings.kem.registerCriticalError("Could not write to result.k", e);
         }
     }
 }

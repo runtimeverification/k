@@ -71,7 +71,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
     }
 
     @Override
-    public void run(Definition javaDef) throws IOException {
+    public void run(Definition javaDef) {
 
         new MaudeBackend(sw, context).run(javaDef);
 

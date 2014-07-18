@@ -45,6 +45,7 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.main.FirstStep;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -60,7 +61,7 @@ public class KoreBackend extends BasicBackend {
   }
 
   @Override
-  public void run(Definition toKore) throws IOException {
+  public void run(Definition toKore) {
 
       try {
         toKore = this.getCompilationSteps().compile(toKore, this.getDefaultStep());
@@ -74,10 +75,15 @@ public class KoreBackend extends BasicBackend {
 
           if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
 
+              String filename = ((toKore.getItems().get(i)).getFilename().substring(0,
+                      (toKore.getItems().get(i)).getFilename().length()-2))+".kore";
+              try {
               fileTable.put((toKore.getItems().get(i)).getFilename(),
-                      new PrintWriter(((toKore.getItems().get(i)).getFilename().substring(0,
-                              (toKore.getItems().get(i)).getFilename().length()-2))+".kore"));
+                      new PrintWriter(filename));
+              } catch (IOException e) {
+                  GlobalSettings.kem.registerCriticalError("Could not write to " + filename, e);
               }
+          }
       }
 
       for(int i = 0; i < toKore.getItems().size(); ++i){

@@ -30,7 +30,6 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 
 import java.io.File;
-import java.io.IOException;
 
 
 /**
@@ -81,7 +80,7 @@ public class JavaSymbolicBackend extends BasicBackend {
     }
 
     @Override
-    public void run(Definition def) throws IOException { }
+    public void run(Definition def) { }
 
     @Override
     public String getDefaultStep() {
