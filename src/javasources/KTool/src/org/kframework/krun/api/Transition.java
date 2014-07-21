@@ -120,7 +120,7 @@ public class Transition implements Serializable{
     public String toString() {
         if (type == TransitionType.RULE) {
             Attributes a = rule.getAttributes();
-            UnparserFilter unparser = new UnparserFilter(true, context.krunOptions.color(), context.krunOptions.output, context);
+            UnparserFilter unparser = new UnparserFilter(true, context.colorOptions.color(context.krunOptions.experimental.outputFile != null), context.krunOptions.output, context);
             unparser.visitNode(a);
             return "\nRule tagged " + unparser.getResult() + " ";
         } else if (type == TransitionType.LABEL) {

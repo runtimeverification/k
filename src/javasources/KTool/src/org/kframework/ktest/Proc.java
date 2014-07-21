@@ -69,6 +69,7 @@ public class Proc<T> implements Runnable {
 
     private final boolean verbose;
     private final ColorSetting colorSetting;
+    private final Color terminalColor;
 
     private final boolean updateOut;
     private final boolean generateOut;
@@ -107,7 +108,7 @@ public class Proc<T> implements Runnable {
     public Proc(T obj, String[] args, String procInput, Annotated<String, String> expectedOut,
                 Annotated<String, String> expectedErr, String logStr,
                 StringMatcher strComparator, int timeout, boolean verbose,
-                ColorSetting colorSetting,
+                ColorSetting colorSetting, Color terminalColor,
                 boolean updateOut, boolean generateOut,
                 String outputFile, String newOutputFile) {
         this.obj = obj;
@@ -120,6 +121,7 @@ public class Proc<T> implements Runnable {
         this.timeout = timeout;
         this.verbose = verbose;
         this.colorSetting = colorSetting;
+        this.terminalColor = terminalColor;
         this.updateOut = updateOut;
         this.generateOut = generateOut;
         this.outputFile = outputFile;
@@ -127,10 +129,10 @@ public class Proc<T> implements Runnable {
     }
 
     public Proc(T obj, String[] args, String logStr, StringMatcher strComparator, int timeout,
-                boolean verbose, ColorSetting colorSetting,
+                boolean verbose, ColorSetting colorSetting, Color terminalColor,
                 boolean updateOut, boolean generateOut) {
         this(obj, args, "", null, null, logStr, strComparator, timeout, verbose, colorSetting,
-            updateOut, generateOut, null, null);
+            terminalColor, updateOut, generateOut, null, null);
     }
 
     @Override
@@ -249,8 +251,7 @@ public class Proc<T> implements Runnable {
      * @param returnCode return code of the process
      */
     private void handlePgmResult(int returnCode) throws IOException {
-        //TODO(dwightguth): inject the terminal color
-        String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting, Color.BLACK);
+        String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting, terminalColor);
         if (returnCode == 0) {
 
             boolean doGenerateOut = false;

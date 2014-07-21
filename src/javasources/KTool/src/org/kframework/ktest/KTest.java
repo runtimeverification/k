@@ -1,26 +1,26 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest;
 
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.kframework.ktest.CmdArgs.CmdArg;
-import org.kframework.ktest.CmdArgs.CmdArgParser;
-import org.kframework.ktest.CmdArgs.Constants;
+import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.CmdArgs.InvalidArgumentException;
 import org.kframework.ktest.Config.ConfigFileParser;
 import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.ktest.Test.TestSuite;
-import org.kframework.main.GlobalOptions;
-import org.kframework.utils.OptionComparator;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.options.SortedParameterDescriptions;
 import org.xml.sax.SAXException;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -31,38 +31,28 @@ import java.util.*;
 
 public class KTest {
 
-    private final CmdArgParser argParser;
+    private final KTestOptions options;
 
-    public boolean debug() {
-        return argParser.cmdOpts.hasOption(Constants.DEBUG);
+    public KTest(KTestOptions options) {
+        this.options = options;
     }
 
-    private KTest(String[] args) throws ParseException {
-        argParser = new CmdArgParser(args);
-    }
-
-    public int run() throws InvalidArgumentException, IOException, SAXException,
+    public boolean run() throws InvalidArgumentException, IOException, SAXException,
             ParserConfigurationException, InterruptedException, InvalidConfigError,
             TransformerException {
-        if (argParser.cmdOpts.hasOption(Constants.HELP_OPTION))
-            printHelpMsg();
-        else if (argParser.cmdOpts.hasOption(Constants.VERSION_OPTION))
-            printVersion();
-        else {
-            CmdArg cmdArgs = CmdArg.validateArgs(argParser.cmdOpts);
-            GlobalOptions globalOptions = new GlobalOptions();
-            globalOptions.verbose = cmdArgs.isVerbose();
-            globalOptions.initialize();
-            TestSuite testSuite = makeTestSuite(cmdArgs.getTargetFile(), cmdArgs);
-            if (cmdArgs.getDry())
-                testSuite.dryRun();
-            else
-                return (testSuite.run() ? 0 : 1);
+
+
+        options.validateArgs();
+        TestSuite testSuite = makeTestSuite(options.getTargetFile(), options);
+        if (options.getDry()) {
+            testSuite.dryRun();
+            return true;
+        } else {
+            return testSuite.run();
         }
-        return 0;
     }
 
-    private TestSuite makeTestSuite(String targetFile, CmdArg cmdArgs) throws SAXException,
+    private TestSuite makeTestSuite(String targetFile, KTestOptions cmdArgs) throws SAXException,
             TransformerException, ParserConfigurationException, IOException, InvalidConfigError {
         TestSuite ret;
         switch (FilenameUtils.getExtension(targetFile)) {
@@ -85,59 +75,38 @@ public class KTest {
         return ret;
     }
 
-    private void printHelpMsg() {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.setWidth(79);
-
-        final String usage = "ktest <file> [options]";
-        final String header = "<file> is either a K definition (single job mode) or an XML " +
-                "configuration (batch mode).";
-        final String footer = "";
-
-        org.kframework.utils.Error.helpMsg(usage, header, footer, argParser.getOptions(),
-                new OptionComparator(argParser.getOptionList()));
-    }
-
-    private void printVersion() {
-        System.out.println(FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE));
-    }
-
     /**
      *
      * @param args command line arguments
      * @return true if the application terminated normally; false otherwise
      */
     public static boolean main(String[] args) {
-        new GlobalOptions().initialize(); // required for kem
-        KTest ktest = null;
+        KTestOptions options = new KTestOptions();
+        options.getGlobal().initialize();
         try {
-            ktest = new KTest(args);
-        } catch (ParseException e) {
-            // command line argument parsing has failed, but we can still check for --debug argument
-            if (ArrayUtils.contains(args, "--" + Constants.DEBUG)) {
-                e.printStackTrace();
+            JCommander jc = new JCommander(options, args);
+            jc.setProgramName("ktest");
+            jc.setParameterDescriptionComparator(new SortedParameterDescriptions());
+
+            if (options.getGlobal().help) {
+                StringBuilder sb = new StringBuilder();
+                jc.usage(sb);
+                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
+                return true;
             }
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
-        }
 
-        assert(ktest != null);
+            if (options.getGlobal().version) {
+                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+                System.out.print(msg);
+                return true;
+            }
+            KTest ktest = new KTest(options);
 
-        try {
-            return ktest.run() == 0;
+            return ktest.run();
         } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
-                TransformerException | InvalidArgumentException e) {
-            if (ktest.debug()) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL, e.getMessage()));
+                TransformerException | InvalidArgumentException | ParameterException e) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, e.getMessage()));
         } catch (InvalidConfigError e) {
-            if (ktest.debug()) {
-                e.printStackTrace();
-            }
             LocationData location = e.getLocation();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,

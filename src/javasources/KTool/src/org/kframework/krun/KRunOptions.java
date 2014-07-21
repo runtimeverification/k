@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,6 @@ import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.api.SearchType;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.utils.ColorUtil;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
@@ -156,33 +154,8 @@ public final class KRunOptions {
         return io;
     }
 
-    @Parameter(names="--color", description="Use colors in output. Default is on.")
-    private ColorSetting color;
-
-    public ColorSetting color() {
-        if (color == null) {
-            if (experimental.outputFile != null) {
-                return ColorSetting.OFF;
-            }
-            return ColorSetting.ON;
-        }
-        return color;
-    }
-
-    public static class ColorModeConverter extends BaseEnumConverter<ColorSetting> {
-
-        @Override
-        public Class<ColorSetting> enumClass() {
-            return ColorSetting.class;
-        }
-    }
-
-    @Parameter(names="--terminal-color", description="Background color of the terminal. Cells won't be colored in this color.")
-    private String terminalColor = "black";
-
-    public Color terminalColor() {
-        return ColorUtil.getColorByName(terminalColor);
-    }
+    @ParametersDelegate
+    public ColorOptions color = new ColorOptions();
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
             description="How to display Maude results. <mode> is either [pretty|smart|compatible|kore|raw|binary|none].")

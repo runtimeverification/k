@@ -64,8 +64,8 @@ public class UnparserFilter extends NonCachingVisitor {
         this.annotateLocation = annotateLocation;
         this.outputMode = outputMode;
         //TODO(dwightguth): clean up pretty printing so we don't need this ugly hack
-        if (context.krunOptions != null) {
-            terminalColor = context.krunOptions.terminalColor();
+        if (context.colorOptions != null) {
+            terminalColor = context.colorOptions.terminalColor();
         }
     }
 
