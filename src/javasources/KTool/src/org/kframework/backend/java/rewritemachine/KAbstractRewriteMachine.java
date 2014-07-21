@@ -234,7 +234,15 @@ public class KAbstractRewriteMachine {
     }
 
     private Collection<Cell> getSubCellsByLabel(Cell<?> cell, String label) {
-        return ((CellCollection) cell.getContent()).cellMap().get(label);
+        Object content = cell.getContent();
+        if (content instanceof CellCollection) {
+            return ((CellCollection) content).cellMap().get(label);
+        } else if (content instanceof Cell) {
+            return Collections.singleton((Cell) content);
+        } else {
+            assert false;
+            return null;
+        }
     }
 
     /**

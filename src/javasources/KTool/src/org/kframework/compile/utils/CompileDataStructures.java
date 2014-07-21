@@ -126,9 +126,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(KApp node, Void _)  {
+        node = (KApp) super.visit(node, _);
         if (!(node.getLabel() instanceof KLabelConstant)) {
             /* only consider KLabel constants */
-            return super.visit(node, _);
+            return node;
         }
         KLabelConstant kLabelConstant = (KLabelConstant) node.getLabel();
 
