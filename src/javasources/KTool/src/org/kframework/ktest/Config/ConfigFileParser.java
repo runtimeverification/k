@@ -3,13 +3,13 @@ package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest.Annotated;
-import org.kframework.ktest.CmdArgs.CmdArg;
-import org.kframework.ktest.KTest;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
+import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
+import org.kframework.utils.file.KPaths;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -431,13 +431,7 @@ public class ConfigFileParser {
     }
 
     private String getSchema() {
-        return concat(getKHome(), concat("lib", "ktest.xsd"));
-    }
-
-    private String getKHome() {
-        return new File(KTest.class.getProtectionDomain().getCodeSource()
-                .getLocation().getPath()).getParentFile().getParentFile()
-                .getParentFile().getPath();
+        return concat(KPaths.getKBase(false), concat("lib", "ktest.xsd"));
     }
 
     private String concat(String s1, String s2) {
