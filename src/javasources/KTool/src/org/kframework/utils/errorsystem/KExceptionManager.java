@@ -46,9 +46,9 @@ public class KExceptionManager {
     private void register(ExceptionType type, KExceptionGroup group, String message, Throwable e, ASTNode node) {
         printStackTrace(e);
         if (node != null) {
-            registerInternal(new KException(type, group, message, node.getFilename(), node.getLocation()));
+            registerInternal(new KException(type, group, message, node.getFilename(), node.getLocation(), e));
         } else {
-            registerInternal(new KException(type, group, message));
+            registerInternal(new KException(type, group, message, e));
         }
     }
 
@@ -59,8 +59,9 @@ public class KExceptionManager {
 
     private void registerInternal(KException exception) {
         exceptions.add(exception);
-        if (exception.type == ExceptionType.ERROR)
+        if (exception.type == ExceptionType.ERROR) {
             throw new KEMException(exception);
+        }
     }
 
     public void print() {
@@ -79,7 +80,7 @@ public class KExceptionManager {
     public static class KEMException extends RuntimeException {
         public final KException exception;
         private KEMException(KException e) {
-            super();
+            super(e.getException());
             this.exception = e;
         }
     }
