@@ -383,9 +383,9 @@ public class ColorUtil {
             case OFF:
                 return "";
             case ON:
-                return getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes, terminalColor);
+                return getClosestTerminalCode(rgb, ansiColorsToTerminalCodes, terminalColor);
             case EXTENDED:
-                return getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes, terminalColor);
+                return getClosestTerminalCode(rgb, eightBitColorsToTerminalCodes, terminalColor);
             default:
                 throw new UnsupportedOperationException("colorSettung: " + colorSetting);
         }
