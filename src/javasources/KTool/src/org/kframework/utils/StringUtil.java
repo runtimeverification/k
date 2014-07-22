@@ -11,59 +11,8 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterDescription;
 
 public class StringUtil {
-    public static String unescape(String str) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
-            if (str.charAt(i) == '\\') {
-                if (str.charAt(i + 1) == '\\')
-                    sb.append('\\');
-                else if (str.charAt(i + 1) == 'n')
-                    sb.append('\n');
-                else if (str.charAt(i + 1) == 'r')
-                    sb.append('\r');
-                else if (str.charAt(i + 1) == 't')
-                    sb.append('\t');
-                else if (str.charAt(i + 1) == 'f')
-                    sb.append('\f');
-                else if (str.charAt(i + 1) == '"')
-                    sb.append('"');
-                i++;
-            } else
-                sb.append(str.charAt(i));
-        }
-
-        return sb.toString();
-    }
-
     public static String makeProper(String str) {
         return Character.toUpperCase(str.charAt(0)) + str.substring(1);
-    }
-
-    public static String escape(String value) {
-        final int length = value.length();
-        StringBuilder result = new StringBuilder();
-        for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
-            codepoint = value.codePointAt(offset);
-            if (codepoint == '"') {
-                result.append("\\\"");
-            } else if (codepoint == '\\') {
-                result.append("\\\\");
-            } else if (codepoint == '\n') {
-                result.append("\\n");
-            } else if (codepoint == '\t') {
-                result.append("\\t");
-            } else if (codepoint == '\r') {
-                result.append("\\r");
-            } else if (codepoint == '\f') {
-                result.append("\\f");
-            } else if (codepoint >= 32 && codepoint < 127) {
-                result.append((char)codepoint);
-            } else if (codepoint <= 0xff) {
-                result.append("\\");
-                result.append(String.format("%03o", codepoint));
-            }
-        }
-        return result.toString();
     }
 
     public static void throwIfSurrogatePair(int codePoint) {

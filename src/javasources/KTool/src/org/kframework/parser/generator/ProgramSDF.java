@@ -91,7 +91,7 @@ public class ProgramSDF {
         for (Production p : psdfv.outsides) {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
-                sdf.append("    {" + StringUtil.escapeSortName(si.getSort()) + " \"" + StringUtil.escape(si.getSeparator()) + "\"}" + si.getListType() + " -> " + StringUtil.escapeSortName(p.getSort()));
+                sdf.append("    {" + StringUtil.escapeSortName(si.getSort()) + " " + StringUtil.enquoteString(si.getSeparator()) + "}" + si.getListType() + " -> " + StringUtil.escapeSortName(p.getSort()));
                 sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
             } else {
                 sdf.append("    ");
@@ -100,7 +100,7 @@ public class ProgramSDF {
                     ProductionItem itm = items.get(i);
                     if (itm instanceof Terminal) {
                         Terminal t = (Terminal) itm;
-                        sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
+                        sdf.append(StringUtil.enquoteString(t.getTerminal()) + " ");
                     } else if (itm instanceof Sort) {
                         Sort srt = (Sort) itm;
                         // if we are on the first or last place and this sort is not a list, just print the sort
@@ -169,7 +169,7 @@ public class ProgramSDF {
 
         for (String t : ctv.terminals) {
             if (t.matches("[a-zA-Z\\_][a-zA-Z0-9\\_]*")) {
-                sdf.append("    \"" + StringUtil.escape(t) + "\" -> IdDz {reject}\n");
+                sdf.append("    " + StringUtil.enquoteString(t) + " -> IdDz {reject}\n");
             }
         }
 
@@ -195,13 +195,13 @@ public class ProgramSDF {
                 for (String t : ctv.terminals) {
                     Matcher m = pat.matcher(t);
                     if (m.matches())
-                        sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                        sdf.append("    " + StringUtil.enquoteString(t) + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
                 }
             } else {
                 // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
                 // add rejects for all possible combinations
                 for (String t : ctv.terminals) {
-                    sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                    sdf.append("    " + StringUtil.enquoteString(t) + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
                 }
             }
         }
@@ -217,7 +217,7 @@ public class ProgramSDF {
         sdf.append("context-free restrictions\n");
         for (Restrictions r : psdfv.restrictions) {
             if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
-                sdf.append("    \"" + StringUtil.escape(r.getTerminal().getTerminal()) + "\" -/- " + r.getPattern() + "\n");
+                sdf.append("    " + StringUtil.enquoteString(r.getTerminal().getTerminal()) + " -/- " + r.getPattern() + "\n");
             else
                 sdf.append("    " + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
         }
