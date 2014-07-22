@@ -135,19 +135,19 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
         if (!(node.getChild() instanceof KList)) {
             /* only consider KList constants */
-            return super.visit(node, _);
+            return node;
         }
         KList kList = (KList) node.getChild();
 
         List<Production> productions = context.productionsOf(kLabelConstant.getLabel());
         if (productions.isEmpty()) {
-            return super.visit(node, _);
+            return node;
         }
         Production production = productions.iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
-            return super.visit(node, _);
+            return node;
         }
 
         Term[] arguments = new Term[kList.getContents().size()];
@@ -202,7 +202,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         getName(),
                         filename,
                         location));
-                return super.visit(node, _);
+                return node;
             }
         } else if (sort.type().equals(KSorts.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
@@ -215,10 +215,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                                 kList.getContents().get(1),
                                 kList.getContents().get(2)));
             }
-            return super.visit(node, _);
+            return node;
         } else {
             /* custom function */
-            return super.visit(node, _);
+            return node;
         }
     }
 

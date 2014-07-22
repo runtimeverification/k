@@ -238,9 +238,11 @@ public class KAbstractRewriteMachine {
         if (content instanceof CellCollection) {
             return ((CellCollection) content).cellMap().get(label);
         } else if (content instanceof Cell) {
-            return Collections.singleton((Cell) content);
+            return cell.getLabel().equals(label) ?
+                    Collections.singletonList((Cell) content) :
+                    Collections.<Cell>emptyList();
         } else {
-            assert false;
+            assert false : "Wrong instruction!";
             return null;
         }
     }
