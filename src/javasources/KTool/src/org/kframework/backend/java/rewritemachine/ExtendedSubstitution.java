@@ -58,4 +58,9 @@ class ExtendedSubstitution {
     void addWriteCell(Cell<?> cell) {
         writeCells.add(cell);
     }
+
+    @Override
+    public String toString() {
+        return "extSubst(" + subst + ", " + writeCells + ")";
+    }
 }

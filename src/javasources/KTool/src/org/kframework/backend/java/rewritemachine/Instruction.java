@@ -65,6 +65,11 @@ public final class Instruction implements Serializable {
         return this == object;
     }
 
+    @Override
+    public String toString() {
+        return cellLabel == null ? type.toString() : type.toString() + "(" + cellLabel + ")";
+    }
+
     /**
      * Returns the cached instance rather than the de-serialized instance if
      * there is a cached instance.
