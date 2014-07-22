@@ -126,7 +126,7 @@ public class DefinitionSDF {
         for (Production p : psdfv.outsides) {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
-                sdf.append("    " + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> "
+                sdf.append("    " + StringUtil.escapeSortName(si.getSort()) + " \"" + StringUtil.escape(si.getSeparator()) + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> "
                         + StringUtil.escapeSortName(p.getSort()));
                 sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
                 sdf.append("    \"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort()));
