@@ -95,51 +95,43 @@ public class MaudeKRun implements KRun {
         FileUtil.save(inFile.getAbsolutePath(), maudeCmd);
 
         int returnValue;
-        try {
-            if (context.krunOptions.experimental.logIO) {
-                KRunner.main(new String[]{"--maudeFile",
-                        context.kompiled.getAbsolutePath()
-                            + K.fileSeparator + "main.maude", "--moduleName",
-                        context.kompileOptions.mainModule(), "--commandFile",
-                        inFile.getAbsolutePath(), "--outputFile",
-                        outFile.getCanonicalPath(), "--errorFile",
-                        errFile.getCanonicalPath(), "--createLogs"},
-                        context, xmlOutFile);
-            }
-            if (!ioServer) {
-                returnValue = KRunner.main(new String[]{"--maudeFile",
-                        context.kompiled.getAbsolutePath()
+        if (context.krunOptions.experimental.logIO) {
+            KRunner.main(new String[]{"--maudeFile",
+                    context.kompiled.getAbsolutePath()
                         + K.fileSeparator + "main.maude", "--moduleName",
                     context.kompileOptions.mainModule(), "--commandFile",
                     inFile.getAbsolutePath(), "--outputFile",
-                    outFile.getCanonicalPath(), "--errorFile",
-                    errFile.getCanonicalPath(), "--noServer"},
+                    outFile.getAbsolutePath(), "--errorFile",
+                    errFile.getAbsolutePath(), "--createLogs"},
                     context, xmlOutFile);
-            } else {
-                returnValue = KRunner.main(new String[]{"--maudeFile",
-                        context.kompiled.getAbsolutePath()
-                        + K.fileSeparator + "main.maude", "--moduleName",
-                    context.kompileOptions.mainModule(), "--commandFile",
-                    inFile.getAbsolutePath(), "--outputFile",
-                    outFile.getCanonicalPath(), "--errorFile",
-                    errFile.getCanonicalPath()},
-                    context, xmlOutFile);
+        }
+        if (!ioServer) {
+            returnValue = KRunner.main(new String[]{"--maudeFile",
+                    context.kompiled.getAbsolutePath()
+                    + K.fileSeparator + "main.maude", "--moduleName",
+                context.kompileOptions.mainModule(), "--commandFile",
+                inFile.getAbsolutePath(), "--outputFile",
+                outFile.getAbsolutePath(), "--errorFile",
+                errFile.getAbsolutePath(), "--noServer"},
+                context, xmlOutFile);
+        } else {
+            returnValue = KRunner.main(new String[]{"--maudeFile",
+                    context.kompiled.getAbsolutePath()
+                    + K.fileSeparator + "main.maude", "--moduleName",
+                context.kompileOptions.mainModule(), "--commandFile",
+                inFile.getAbsolutePath(), "--outputFile",
+                outFile.getAbsolutePath(), "--errorFile",
+                errFile.getAbsolutePath()},
+                context, xmlOutFile);
+        }
+        if (errFile.exists()) {
+            String content = FileUtil.getFileContent(errFile.getAbsolutePath());
+            if (content.length() > 0) {
+                throw new KRunExecutionException(content);
             }
-            if (errFile.exists()) {
-                String content = FileUtil.getFileContent(errFile.getAbsolutePath());
-                if (content.length() > 0) {
-                    throw new KRunExecutionException(content);
-                }
-            }
-            if (returnValue != 0) {
-                org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
-            }
-        } catch (IOException e) {
-            if (context.globalOptions.debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                    "IO error detected when calling maude"));
+        }
+        if (returnValue != 0) {
+            org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
         }
     }
 
@@ -512,28 +504,19 @@ public class MaudeKRun implements KRun {
         }
         cmd.append(getCounter());
         executeKRun(cmd);
-        try {
-            SearchResults results;
-            final List<SearchResult> solutions = parseSearchResults
-                    (pattern, compilationInfo);
-            final boolean matches = patternString.trim().matches("=>[!*1+] " +
-                    "<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
-            DirectedGraph<KRunState, Transition> graph = (showGraph) ? parseSearchGraph() : null;
-            results = new SearchResults(solutions, graph, matches, context);
-            KRunResult<SearchResults> result = new KRunResult<SearchResults>(results, context);
-            result.setRawOutput(FileUtil.getFileContent(outFile.getAbsolutePath()));
-            return result;
-        } catch (IOException e) {
-            if (context.globalOptions.debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                    "IO error detected reading maude output"));
-            throw new AssertionError("unreachable");
-        }
+        SearchResults results;
+        final List<SearchResult> solutions = parseSearchResults
+                (pattern, compilationInfo);
+        final boolean matches = patternString.trim().matches("=>[!*1+] " +
+                "<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
+        DirectedGraph<KRunState, Transition> graph = (showGraph) ? parseSearchGraph() : null;
+        results = new SearchResults(solutions, graph, matches, context);
+        KRunResult<SearchResults> result = new KRunResult<SearchResults>(results, context);
+        result.setRawOutput(FileUtil.getFileContent(outFile.getAbsolutePath()));
+        return result;
     }
 
-    private DirectedGraph<KRunState, Transition> parseSearchGraph() throws IOException {
+    private DirectedGraph<KRunState, Transition> parseSearchGraph() {
         try (
             Scanner scanner = new Scanner(new File(xmlOutFile.getAbsolutePath()));
             Writer writer = new OutputStreamWriter(new BufferedOutputStream(
@@ -546,6 +529,9 @@ public class MaudeKRun implements KRun {
                 text = text.replaceAll("</data>", "]]></data>");
                 writer.write(text, 0, text.length());
             }
+        } catch (IOException e) {
+            GlobalSettings.kem.registerInternalError("Could not read from " + xmlOutFile
+                    + " and write to " + processedXmlOutFile, e);
         }
 
         Document doc = XmlUtil.readXMLFromFile(processedXmlOutFile.getAbsolutePath());
@@ -615,11 +601,13 @@ public class MaudeKRun implements KRun {
             GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
                 = new GraphMLReader2<>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
                 edgeTransformer, hyperEdgeTransformer);
-            try {
-                return graphmlParser.readGraph();
-            } catch (GraphIOException e) {
-                throw new IOException(e);
-            }
+            return graphmlParser.readGraph();
+        } catch (GraphIOException e) {
+            GlobalSettings.kem.registerInternalError("Failed to parse graphml from maude", e);
+            throw new AssertionError("unreachable");
+        } catch (IOException e) {
+            GlobalSettings.kem.registerInternalError("Failed to read from " + processedXmlOutFile, e);
+            throw new AssertionError("unreachable");
         }
     }
 

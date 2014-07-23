@@ -36,7 +36,7 @@ public class Main {
      *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
      * @throws IOException when loadDefinition fails
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Stopwatch.instance();
         setJavaLibraryPath();
         AnsiConsole.systemInstall();

@@ -58,13 +58,18 @@ public class PdfBackend extends BasicBackend {
     }
 
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         LatexBackend latexBackend = new LatexBackend(sw, context);
         latexBackend.compile(definition);
         File latexFile = latexBackend.getLatexFile();
         File pdfFile = generatePdf(latexFile);
         if (pdfFile.exists()) {
-            copyFile(pdfFile, new File(options.directory, FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
+            File output = new File(options.directory, FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf");
+            try {
+                copyFile(pdfFile, output);
+            } catch (IOException e) {
+                GlobalSettings.kem.registerCriticalError("Could not write to " + output.getAbsolutePath(), e);
+            }
         }
     }
 

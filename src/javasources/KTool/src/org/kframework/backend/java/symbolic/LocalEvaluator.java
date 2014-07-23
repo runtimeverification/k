@@ -51,11 +51,7 @@ public class LocalEvaluator extends LocalTransformer {
     //        }
             return evaluatedTerm;
         } catch (StackOverflowError e) {
-            if (context.definition().context().globalOptions.debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                    TRACE_MSG));
+            GlobalSettings.kem.registerCriticalError(TRACE_MSG, e);
             throw e; //unreachable
         } catch (KEMException e) {
             e.exception.addTraceFrame(kItem.kLabel().toString());

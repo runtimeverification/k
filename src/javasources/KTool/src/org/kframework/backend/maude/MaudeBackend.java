@@ -13,7 +13,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringBuilderUtil;
 import org.kframework.utils.file.FileUtil;
 
-import java.io.IOException;
 import java.util.Map;
 
 public class MaudeBackend extends BasicBackend {
@@ -23,7 +22,7 @@ public class MaudeBackend extends BasicBackend {
     }
 
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         definition = (Definition) new FreshVariableNormalizer(context).visitNode(definition);
         definition = (Definition) new SortRulesNormalizer(context).visitNode(definition);
         MaudeFilter maudeFilter = new MaudeFilter(context);

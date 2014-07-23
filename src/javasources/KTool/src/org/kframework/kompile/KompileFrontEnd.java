@@ -41,7 +41,7 @@ import com.beust.jcommander.ParameterException;
 
 public class KompileFrontEnd {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         KompileOptions options = new KompileOptions();
         options.global.initialize();
         try {
@@ -75,7 +75,7 @@ public class KompileFrontEnd {
         }
     }
 
-    private static void kompile(KompileOptions options) throws IOException {
+    private static void kompile(KompileOptions options) {
         org.kframework.utils.Error.checkIfOutputDirectory(options.directory);
 
         final Context context = new Context(options);
@@ -114,8 +114,6 @@ public class KompileFrontEnd {
                 break;
             case KORE:
                 backend = new KoreBackend(Stopwatch.instance(), context);
-                backend.run(DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
-                        backend.autoinclude(), context));
                 return;
             case MAUDE:
                 backend = new KompileBackend(Stopwatch.instance(), context);
@@ -160,7 +158,7 @@ public class KompileFrontEnd {
             genericCompile(options, backend, options.experimental.step, context);
         }
 
-        BinaryLoader.save(new File(context.kompiled, "kompile-options.bin").getAbsolutePath(), options);
+        BinaryLoader.save(new File(context.kompiled, "kompile-options.bin").getAbsolutePath(), options, context);
 
         verbose(context);
     }
@@ -174,7 +172,7 @@ public class KompileFrontEnd {
 
 
     private static void genericCompile(KompileOptions options, Backend backend, String step,
-                                       Context context) throws IOException {
+                                       Context context) {
         org.kframework.kil.Definition javaDef;
         Stopwatch.instance().start();
         javaDef = DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
@@ -194,7 +192,7 @@ public class KompileFrontEnd {
         }
 
         BinaryLoader.save(context.kompiled.getAbsolutePath() + "/configuration.bin",
-                MetaK.getConfiguration(javaDef, context));
+                MetaK.getConfiguration(javaDef, context), context);
 
         backend.run(javaDef);
 
