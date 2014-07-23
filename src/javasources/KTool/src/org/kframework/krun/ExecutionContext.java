@@ -55,6 +55,12 @@ public class ExecutionContext {
         //merge krun options into kompile options object
         context.kompileOptions.global = krunOptions.global;
         context.krunOptions = krunOptions;
+        context.ccOptions = ccOptions;
+        if (krunOptions.experimental.smt.smt != null) {
+            context.smtOptions = krunOptions.experimental.smt;
+        }
+        context.javaExecutionOptions = krunOptions.experimental.javaExecution;
+
         context.dotk = new File(
                 ccOptions.definitionLoading.definition().getParent() + File.separator
                         + ".k");
