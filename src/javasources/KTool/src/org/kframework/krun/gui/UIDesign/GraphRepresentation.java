@@ -691,7 +691,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     }
 
     private KRunState loadConf(File f) {
-        return BinaryLoader.load(KRunState.class, f.getAbsolutePath(), definitionHelper.globalOptions.debug);
+        return BinaryLoader.loadOrDie(KRunState.class, f.getAbsolutePath());
     }
 
     public void loadConf() {

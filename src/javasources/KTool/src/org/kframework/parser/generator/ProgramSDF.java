@@ -68,7 +68,7 @@ public class ProgramSDF {
 
         // save the new parser info
         new File(context.kompiled, "pgm").mkdirs();
-        BinaryLoader.save(context.kompiled.getPath()+ "/pgm/newParser.bin", ks2gsf.getGrammar(), context);
+        BinaryLoader.saveOrDie(context.kompiled.getPath()+ "/pgm/newParser.bin", ks2gsf.getGrammar());
 
         StringBuilder sdf = new StringBuilder();
         sdf.append("module Program\n\n");

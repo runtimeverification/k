@@ -9,8 +9,6 @@ import org.kframework.backend.unparser.KastFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.ExecutionContext;
 import org.kframework.krun.K;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
@@ -67,16 +65,10 @@ public class KastFrontEnd {
 
 
             File compiledFile = options.definitionLoading.definition();
-            Context context;
-            KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath(), options.global.debug);
-
-            //merge kast options into kompile options object
-            kompileOptions.global = options.global;
-            context = new Context(kompileOptions);
+            Context context = BinaryLoader.loadOrDie(Context.class, new File(compiledFile, "context.bin").getAbsolutePath());
+            context.kompileOptions.global = options.global;
             context.kompiled = compiledFile;
 
-            //need to call this in order to initialize the context object
-            ExecutionContext.getDefinition(Stopwatch.instance(), context);
             String sort = options.sort(context);
 
             try {

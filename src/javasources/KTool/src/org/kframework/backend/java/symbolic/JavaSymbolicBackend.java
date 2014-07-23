@@ -41,20 +41,6 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
 
-    private class DefinitionSerializer extends CopyOnWriteTransformer {
-
-        public DefinitionSerializer(Context context) {
-            super("Serialize Compiled Definition to XML", context);
-        }
-        @Override
-        public ASTNode visit(Definition node, Void _)  {
-            BinaryLoader.save(new File(context.kompiled, "defx-java.bin").toString(), node, context);
-
-            return node;
-        }
-
-    }
-
     public JavaSymbolicBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
@@ -72,9 +58,9 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         assert definition.getIndex() != null;
 
-        BinaryLoader.save(new File(context.kompiled,
+        BinaryLoader.saveOrDie(new File(context.kompiled,
                 JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
-                definition, context);
+                definition);
 
         return javaDef;
     }
@@ -107,7 +93,6 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new CheckVisitorStep<Definition>(new CollectConsesVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectSubsortsVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectBracketsVisitor(context), context));
-        steps.add(new DefinitionSerializer(context));
 
         steps.add(new StrictnessToContexts(context));
         steps.add(new FreezeUserFreezers(context));

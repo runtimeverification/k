@@ -74,7 +74,7 @@ public class DefinitionLoader {
 
         String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
         if ("bin".equals(extension)) {
-            javaDef = (Definition) BinaryLoader.load(Definition.class, canoFile.toString(), context);
+            javaDef = (Definition) BinaryLoader.loadOrDie(Definition.class, canoFile.toString());
 
             Stopwatch.instance().printIntermediate("Load definition from binary");
 
@@ -84,8 +84,6 @@ public class DefinitionLoader {
 
         } else {
             javaDef = parseDefinition(mainFile, lang, autoinclude, context);
-
-            BinaryLoader.save(context.kompiled.getAbsolutePath() + "/defx-" + context.kompileOptions.backend.name().toLowerCase() + ".bin", javaDef, context);
         }
         return javaDef;
     }
@@ -275,7 +273,7 @@ public class DefinitionLoader {
                 te.printStackTrace();
             } finally {
                 // save definition
-                BinaryLoader.save(cacheFile, clf.getKept(), context.globalOptions.debug);
+                BinaryLoader.saveOrDie(cacheFile, clf.getKept());
             }
             JavaClassesFactory.endConstruction();
 
