@@ -53,6 +53,7 @@ public class ExecutionContext {
         sw.printIntermediate("Loading serialized context");
 
         //merge krun options into kompile options object
+        context.globalOptions = krunOptions.global;
         context.kompileOptions.global = krunOptions.global;
         context.krunOptions = krunOptions;
         context.ccOptions = ccOptions;

@@ -67,6 +67,7 @@ public class KastFrontEnd {
             File compiledFile = options.definitionLoading.definition();
             Context context = BinaryLoader.loadOrDie(Context.class, new File(compiledFile, "context.bin").getAbsolutePath());
             context.kompileOptions.global = options.global;
+            context.globalOptions = options.global;
             context.kompiled = compiledFile;
 
             String sort = options.sort(context);

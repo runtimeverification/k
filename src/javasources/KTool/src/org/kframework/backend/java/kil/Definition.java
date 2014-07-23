@@ -45,7 +45,7 @@ public class Definition extends JavaSymbolicObject {
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
-    private final Context context;
+    private transient Context context;
     private final Subsorts subsorts;
     private final Set<Sort> tokenSorts;
     private final Set<Sort> builtinSorts;
@@ -134,6 +134,11 @@ public class Definition extends JavaSymbolicObject {
 
     public Context context() {
         return context;
+    }
+
+    public void setContext(Context context) {
+        assert this.context == null : "can only set the context once";
+        this.context = context;
     }
 
     public Multimap<KLabelConstant, Rule> functionRules() {
