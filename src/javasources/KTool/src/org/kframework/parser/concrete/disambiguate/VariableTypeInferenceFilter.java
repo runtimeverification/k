@@ -2,12 +2,15 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
@@ -71,18 +74,19 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
             CollectExpectedVariablesVisitor vars2 = new CollectExpectedVariablesVisitor(context);
             vars2.visitNode(r);
 
-            Set<VarHashMap> solutions = new HashSet<VarHashMap>();
+            Set<Multimap<String, String>> solutions = new HashSet<>();
             String fails = null;
             Set<String> failsAmb = null;
             String failsAmbName = null;
-            for (VarHashMap variant : vars2.vars) {
+            for (Multimap<String, String> variant : vars2.vars) {
                 // take each solution and do GLB on every variable
-                VarHashMap solution = new VarHashMap();
-                for (Map.Entry<String, Set<String>> entry : variant.entrySet()) {
+                Multimap<String, String> solution = HashMultimap.create();
+                for (String key : variant.keySet()) {
+                    Collection<String> values = variant.get(key);
                     Set<String> mins = new HashSet<String>();
                     for (String sort : context.definedSorts) { // for every declared sort
                         boolean min = true;
-                        for (String var : entry.getValue()) {
+                        for (String var : values) {
                             if (!context.isSubsortedEq(var, sort)) {
                                 min = false;
                                 break;
@@ -92,7 +96,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                             mins.add(sort);
                     }
                     if (mins.size() == 0) {
-                        fails = entry.getKey();
+                        fails = key;
                         solution.clear();
                         break;
                     } else if (mins.size() > 1) {
@@ -108,15 +112,15 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         }
 
                         if (maxSorts.size() == 1)
-                            solution.put(entry.getKey(), maxSorts);
+                            solution.putAll(key, maxSorts);
                         else {
                             failsAmb = maxSorts;
-                            failsAmbName = entry.getKey();
+                            failsAmbName = key;
                             solution.clear();
                             break;
                         }
                     } else {
-                        solution.put(entry.getKey(), mins);
+                        solution.putAll(key, mins);
                     }
                 }
                 // I found a solution that fits everywhere, then store it for disambiguation
@@ -139,12 +143,13 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
 
                     }
                 } else if (solutions.size() == 1) {
-                    for (Map.Entry<String, Set<String>> entry : solutions.iterator().next().entrySet()) {
-                        Variable var = new Variable(entry.getKey(), null);
+                    Multimap<String, String> sol1 = solutions.iterator().next();
+                    for (String key : sol1.keySet()) {
+                        Variable var = new Variable(key, null);
                         var.setUserTyped(false);
-                        var.setExpectedSort(entry.getValue().iterator().next());
+                        var.setExpectedSort(sol1.get(key).iterator().next());
                         var.setSyntactic(false);
-                        varDeclMap.put(entry.getKey(), var);
+                        varDeclMap.put(key, var);
                     }
                     try {
                         r = (Sentence) new VariableTypeFilter(varDeclMap, true, context).visitNode(r);
@@ -165,12 +170,12 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                             continue;
 
                         // divide into locations
-                        Map<String, java.util.Set<Variable>> varLoc = new HashMap<String, java.util.Set<Variable>>();
+                        Map<String, java.util.Set<Variable>> varLoc = new HashMap<>();
                         for (Variable var : varList) {
                             if (varLoc.containsKey(var.getLocation()))
                                 varLoc.get(var.getLocation()).add(var);
                             else {
-                                java.util.Set<Variable> varss = new HashSet<Variable>();
+                                java.util.Set<Variable> varss = new HashSet<>();
                                 varss.add(var);
                                 varLoc.put(var.getLocation(), varss);
                             }
@@ -209,20 +214,16 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         }
                     }
                 } else {
-                    Map<String, Set<String>> collect = new HashMap<String, Set<String>>();
-                    for (VarHashMap sol : solutions) {
-                        for (Map.Entry<String, Set<String>> s : sol.entrySet())
-                            if (collect.containsKey(s.getKey())) {
-                                collect.get(s.getKey()).addAll(s.getValue());
-                            } else {
-                                collect.put(s.getKey(), new HashSet<String>(s.getValue()));
-                            }
+                    Multimap<String, String> collect = HashMultimap.create();
+                    for (Multimap<String, String> sol : solutions) {
+                        collect.putAll(sol);
                     }
-                    for (Map.Entry<String, Set<String>> s : collect.entrySet()) {
-                        if (s.getValue().size() > 1) {
-                            String msg = "Could not infer a unique sort for variable '" + s.getKey() + "'.";
+                    for (String key : collect.keySet()) {
+                        Collection<String> values = collect.get(key);
+                        if (values.size() > 1) {
+                            String msg = "Could not infer a unique sort for variable '" + key + "'.";
                             msg += " Possible sorts: ";
-                            for (String vv1 : s.getValue())
+                            for (String vv1 : values)
                                 msg += vv1 + ", ";
                             msg = msg.substring(0, msg.length() - 2);
                             throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));

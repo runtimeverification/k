@@ -466,7 +466,12 @@ interestingly, the semantics of return stays unchanged. */
 
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
-  rule <k> print(V:Val, Es:Vals => Es); ...</k> <out>... .List => ListItem(V) </out>
+/* TODO(Grigore) Evaluating the elements one by one makes the code
+non-deterministic, as the engine might choose to print the first argument
+before evaluating the others. Asking for the entire list to be evaluated first
+ensure only one path of execution.
+*/
+  rule <k> print(V:Val, Vs:Vals => Vs); ...</k> <out>... .List => ListItem(V) </out>
     [print]
   rule print(.Vals); => .  [structural]
 

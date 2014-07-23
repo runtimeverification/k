@@ -92,8 +92,8 @@ public class CellTypesFilter extends ParseForestTransformer {
         @Override
         public ASTNode visit(Term trm, Void _) throws ParseFailedException {
             // accept only terms that have sort <= to the cell type, or terms of sort K
-            if (!context.isSubsortedEq(expectedSort, trm.getSort()) &&
-                !(trm.getSort().equals(KSorts.K) && context.isSubsortedEq(KSorts.K, expectedSort))) {
+            if (!(context.isSubsortedEq(expectedSort, trm.getSort()) ||
+                  (trm.getSort().equals(KSorts.K) && context.isSubsortedEq(KSorts.K, expectedSort)))) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
                 throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));

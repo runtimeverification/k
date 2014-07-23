@@ -64,29 +64,10 @@ public class PreferDotsFilter extends ParseForestTransformer {
     private void processRW(Rewrite node) throws ParseFailedException {
         // if the left hand side is a function, check to see if the right hand side has the same sort
         if (node.getLeft() instanceof TermCons && ((TermCons) node.getLeft()).getProduction().containsAttribute("function")) {
-            node.setRight(preferWeak(node.getLeft().getSort(), node.getRight()), context);
+            Term right = (Term) new TypeSystemFilter2(node.getLeft().getSort(), context).visitNode(node.getRight());
+            node.setRight(right, context);
             node.setSort(node.getLeft().getSort());
         }
-    }
-
-    private Term preferWeak(String expectedSort, Term t) throws ParseFailedException {
-        t = (Term) new TypeSystemFilter2(expectedSort, context).visitNode(t);
-        if (t instanceof Ambiguity) {
-            Ambiguity node = (Ambiguity) t;
-            ArrayList<Term> eqSort = new ArrayList<>();
-
-            for (Term trm : node.getContents()) {
-                if (context.isSubsortedEq(expectedSort, trm.getSort()))
-                    eqSort.add(trm);
-            }
-            if (eqSort.size() == 0)
-                return t;
-            else if (eqSort.size() == 1)
-                return eqSort.get(0);
-            node.setContents(eqSort);
-            return node;
-        }
-        return t;
     }
 
     @Override
@@ -121,20 +102,14 @@ public class PreferDotsFilter extends ParseForestTransformer {
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         // choose only the allowed subsorts for a TermCons
-        if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
+        if (!tc.getProduction().isListDecl()) {
             UserList ulist = (UserList) tc.getProduction().getItems().get(0);
             tc.getContents().set(0, (Term) preferStrict(ulist.getSort(), tc.getContents().get(0)));
             tc.getContents().set(1, (Term) preferStrict(tc.getProduction().getSort(), tc.getContents().get(1)));
         } else {
             int j = 0;
-            Production prd = tc.getProduction();
-            for (int i = 0; i < prd.getItems().size(); i++) {
-                if (prd.getItems().get(i) instanceof Sort) {
-                    Sort sort = (Sort) prd.getItems().get(i);
-                    Term child = (Term) tc.getContents().get(j);
-                    tc.getContents().set(j, (Term) new TypeSystemFilter2(sort.getName(), context).visitNode(child));
-                    j++;
-                }
+            for (int i = 0; i < tc.getContents().size(); i++) {
+                tc.getContents().set(i, (Term) new TypeSystemFilter2(tc.getProduction().getChildSort(i), context).visitNode(tc.getContents().get(i)));
             }
         }
 
