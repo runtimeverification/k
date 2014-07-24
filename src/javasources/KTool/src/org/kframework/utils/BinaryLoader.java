@@ -3,39 +3,35 @@ package org.kframework.utils;
 
 import java.io.*;
 
-import org.kframework.kil.loader.Context;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class BinaryLoader {
 
     public static void save(String fileName, Object o) throws IOException {
-        save(new FileOutputStream(fileName), o, fileName);
+        save(new FileOutputStream(fileName), o);
     }
 
-    public static void save(String fileName, Object o, Context context) {
-        save(fileName, o, context.globalOptions.debug);
-    }
-
-    public static void save(String fileName, Object o, boolean debug) {
+    public static void saveOrDie(String fileName, Object o) {
         try {
-            save(fileName, o);
+            saveOrDie(new FileOutputStream(fileName), o, fileName);
         } catch (IOException e) {
-            if (debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                    "Could not write to " + fileName));
+            GlobalSettings.kem.registerCriticalError("Could not write to " + fileName, e);
         }
     }
 
-    public static void save(OutputStream out, Object o) throws IOException {
-        save(out, o, "output stream");
+    private static void saveOrDie(OutputStream out, Object o, String fileName) {
+        try {
+            save(out, o);
+        } catch (IOException e) {
+            GlobalSettings.kem.registerCriticalError("Could not write to " + fileName, e);
+        }
     }
 
-    private static void save(OutputStream out, Object o, String name) throws IOException {
+    public static void saveOrDie(OutputStream out, Object o) {
+        saveOrDie(out, o, "output stream");
+    }
+
+    public static void save(OutputStream out, Object o) throws IOException {
         try(ObjectOutputStream serializer
                 = new ObjectOutputStream(new BufferedOutputStream(out))) {
             serializer.writeObject(o);
@@ -46,28 +42,16 @@ public class BinaryLoader {
         return cls.cast(load(fileName));
     }
 
-    public static <T> T load(Class<T> cls, String fileName, Context context) {
-        return load(cls, fileName, context.globalOptions.debug);
-    }
-
-    public static <T> T load(Class<T> cls, String fileName, boolean debug) {
+    public static <T> T loadOrDie(Class<T> cls, String fileName) {
         try {
             return load(cls, fileName);
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
-            if (debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.CRITICAL, "Kompiled definition is out of date with "
-                    + "the latest version of the K tool. Please re-run kompile and try again."));
+            GlobalSettings.kem.registerCriticalError("Kompiled definition is out of date with "
+                    + "the latest version of the K tool. Please re-run kompile and try again.", e);
         } catch (IOException e) {
-            if (debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                    "Could not read from " + fileName));
+            GlobalSettings.kem.registerCriticalError("Could not read from " + fileName, e);
         }
         return null;
     }

@@ -111,12 +111,12 @@ public class ProgramLoader {
                 }
                 out = ((Rule) out).getBody();
             } else if (whatParser == ParserType.BINARY) {
-                out = BinaryLoader.load(Term.class, filename, context);
+                out = BinaryLoader.loadOrDie(Term.class, filename);
             } else if (whatParser == ParserType.NEWPROGRAM) {
                 // load the new parser
                 // TODO(Radu): after the parser is in a good enough shape, replace the program parser
                 // TODO(Radu): (the default one) with this branch of the 'if'
-                Grammar grammar = (Grammar) BinaryLoader.load(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin", context);
+                Grammar grammar = (Grammar) BinaryLoader.loadOrDie(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
 
                 Parser parser = new Parser(content);
                 out = parser.parse(grammar.get(startSymbol), 0);

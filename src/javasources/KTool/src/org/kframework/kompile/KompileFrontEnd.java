@@ -23,7 +23,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
-import org.kframework.krun.K;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -158,7 +157,7 @@ public class KompileFrontEnd {
             genericCompile(options, backend, options.experimental.step, context);
         }
 
-        BinaryLoader.save(new File(context.kompiled, "kompile-options.bin").getAbsolutePath(), options, context);
+        BinaryLoader.saveOrDie(new File(context.kompiled, "context.bin").getAbsolutePath(), context);
 
         verbose(context);
     }
@@ -191,8 +190,8 @@ public class KompileFrontEnd {
             javaDef = (Definition) e.getResult();
         }
 
-        BinaryLoader.save(context.kompiled.getAbsolutePath() + "/configuration.bin",
-                MetaK.getConfiguration(javaDef, context), context);
+        BinaryLoader.saveOrDie(context.kompiled.getAbsolutePath() + "/configuration.bin",
+                MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
 

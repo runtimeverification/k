@@ -48,18 +48,11 @@ public class JavaSymbolicKRun implements KRun {
     public JavaSymbolicKRun(Context context) {
         /* context is unused for directory paths; the actual context is de-serialized */
         /* load the definition from a binary file */
-        definition = BinaryLoader.load(Definition.class,
-            new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString(), context);
+        definition = BinaryLoader.loadOrDie(Definition.class,
+            new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString());
 
-        this.context = definition.context();
-        //TODO(dwightguth): remove the need for all this copying by making krun
-        //load the context, not the definition
-        this.context.kompiled = context.kompiled;
-        this.context.globalOptions = context.globalOptions;
-        this.context.javaExecutionOptions = context.javaExecutionOptions;
-        this.context.smtOptions = context.smtOptions;
-        this.context.ccOptions = context.ccOptions;
-        this.context.krunOptions = context.krunOptions;
+        this.context = context;
+        definition.setContext(context);
         transformer = new KILtoBackendJavaKILTransformer(this.context);
     }
 
