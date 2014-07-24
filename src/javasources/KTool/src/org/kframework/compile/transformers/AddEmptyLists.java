@@ -87,14 +87,14 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         Sort2 elementSort = element.getSort();
 
         /* TODO: properly infer sort of KApp */
-        if (elementSort.equals(KSorts.KITEM) && element instanceof KApp) {
+        if (elementSort.equals(Sort2.KITEM) && element instanceof KApp) {
             /* infer sort for builtins and tokens */
             if (((KApp) element).getLabel() instanceof Token) {
                 elementSort = ((Token) ((KApp) element).getLabel()).tokenSort();
             }
         }
 
-        return !elementSort.equals(KSorts.KITEM)
+        return !elementSort.equals(Sort2.KITEM)
                && context.isSubsortedEq(listSort.getName(), elementSort.getName());
     }
 

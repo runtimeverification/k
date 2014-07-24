@@ -4,6 +4,7 @@ package org.kframework.kil.loader;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
@@ -34,7 +35,7 @@ public class AddConsesVisitor extends BasicVisitor {
         } else if (p.getItems().size() == 1
                     && p.getItems().get(0) instanceof Terminal
                     && (p.getSort().getName().startsWith("#")
-                || p.getSort().equals(KSorts.KLABEL))) {
+                || p.getSort().equals(Sort2.KLABEL))) {
             // don't add any cons, if it is a constant
             // a constant is a single terminal for a builtin sort
             String cons = p.getAttribute("cons");

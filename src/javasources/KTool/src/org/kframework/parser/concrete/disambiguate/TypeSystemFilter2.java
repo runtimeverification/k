@@ -27,8 +27,8 @@ public class TypeSystemFilter2 extends LocalTransformer {
 
     @Override
     public ASTNode visit(Term trm, Void _) throws ParseFailedException {
-        if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
-                && !trm.getSort().equals(KSorts.KRESULT)) {
+        if (!trm.getSort().equals(Sort2.K) && !trm.getSort().equals(Sort2.KITEM)
+                && !trm.getSort().equals(Sort2.KRESULT)) {
             if (!context.isSubsortedEq(maxSort, trm.getSort())) {
                 KException kex = new KException(
                         ExceptionType.ERROR,

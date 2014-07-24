@@ -84,7 +84,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
         setLabel((Term) JavaClassesFactory.getTerm(body));
         Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
-        if (!(term.getSort().equals(KSorts.KLIST) || term instanceof Ambiguity)) {
+        if (!(term.getSort().equals(Sort2.KLIST) || term instanceof Ambiguity)) {
             setChild(new KList(Collections.<Term> singletonList(term)));
         } else {
             setChild(term);

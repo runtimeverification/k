@@ -185,7 +185,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production : context.listConses.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
-            if (userList.getSort().equals(CompleteSortLatice.BOTTOM_SORT_NAME)) {
+            if (userList.getSort().equals(Sort2.of(CompleteSortLatice.BOTTOM_SORT_NAME))) {
                 continue;
             }
 

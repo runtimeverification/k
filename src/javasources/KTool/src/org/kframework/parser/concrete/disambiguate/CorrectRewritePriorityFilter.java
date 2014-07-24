@@ -12,6 +12,7 @@ import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -49,9 +50,9 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
         Term krw = null;
         for (Term t : amb.getContents()) {
             if (t instanceof Rewrite) {
-                if (t.getSort().equals(KSorts.KLIST))
+                if (t.getSort().equals(Sort2.KLIST))
                     klist = true;
-                if (t.getSort().equals(KSorts.K))
+                if (t.getSort().equals(Sort2.K))
                     krw = t;
                 children.add(t);
             }

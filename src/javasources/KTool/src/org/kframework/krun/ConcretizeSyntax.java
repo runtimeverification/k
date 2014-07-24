@@ -167,7 +167,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             Term accept = (Term) this.visitNode(child);
             if (accept instanceof ListTerminator) {
                 ListTerminator empty = (ListTerminator) accept;
-                if (!empty.getSort().equals("Bag")) {
+                if (!empty.getSort().equals(Sort2.BAG)) {
                     contents.add(accept);
                 }
             } else {

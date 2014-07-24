@@ -15,6 +15,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -117,7 +118,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                 } else if (prd.isLexical()) {
                     lexical.add(prd);
                 } else if (prd.isSubsort()) {
-                    if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
+                    if (!prd.getSort().equals(Sort2.KRESULT)) { // avoid KResult because it breaks subsortings in SDF
                         p.getProductions().add(prd);
                         subsorts.add(new Subsort(prd.getSort().getName(), ((Sort) prd.getItems().get(0)).getName()));
                         // add the small sort to the user sorts to add it to the variable declarations

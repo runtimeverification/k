@@ -25,7 +25,7 @@ public class Hole extends Term {
     private Hole(Sort2 sort) {
         super(sort);
 
-        assert sort.equals(KSorts.KITEM);
+        assert sort.equals(Sort2.KITEM);
     }
 
     public String toString() {

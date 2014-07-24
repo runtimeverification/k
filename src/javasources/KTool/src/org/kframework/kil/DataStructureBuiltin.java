@@ -228,7 +228,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         this.baseTerms = baseTerms;
         if (baseTerms.size() == 1) {
             Term term = baseTerms.iterator().next();
-            if (term instanceof Variable && term.getSort().equals(sort.name())) {
+            if (term instanceof Variable && term.getSort().equals(sort.sort())) {
                 viewBase = (Variable) term;
             } else {
                 viewBase = null;

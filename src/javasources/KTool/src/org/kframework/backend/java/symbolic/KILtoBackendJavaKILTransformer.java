@@ -221,7 +221,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
-                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.KSorts.K)) {
+                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.Sort2.K)) {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
@@ -241,7 +241,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
-                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.KSorts.KLIST)) {
+                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.Sort2.KLIST)) {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
@@ -316,7 +316,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 Cell<?> cell = (Cell<?>) this.visitNode(term);
                 cells.put(cell.getLabel(), cell);
             } else if (term instanceof org.kframework.kil.Variable
-                    && (term.getSort().equals(org.kframework.kil.KSorts.BAG))) {
+                    && (term.getSort().equals(org.kframework.kil.Sort2.BAG))) {
                 baseTerms.add((Variable) this.visitNode(term));
             } else {
                 throw new RuntimeException();
@@ -505,14 +505,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Variable node, Void _)  {
-        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
+        if (node.getSort().equals(org.kframework.kil.Sort2.BAG)) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.asSort());
         }
 
-        if (node.getSort().equals(org.kframework.kil.KSorts.K)) {
+        if (node.getSort().equals(org.kframework.kil.Sort2.K)) {
             return new Variable(node.getName(), Sort.KSEQUENCE);
         }
-        if (node.getSort().equals(org.kframework.kil.KSorts.KLIST)) {
+        if (node.getSort().equals(org.kframework.kil.Sort2.KLIST)) {
             return new Variable(node.getName(), Sort.KLIST);
         }
 

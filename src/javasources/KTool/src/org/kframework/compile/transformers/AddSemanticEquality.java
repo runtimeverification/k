@@ -53,7 +53,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
              * operators tagged with "equality" must have the signature
              * Sort -> Sort -> Bool
              */
-            if (prod.getSort().equals(Sort.BOOL))
+            if (prod.getSort().equals(Sort2.of(Sort.BOOL)))
                 if (prod.getArity() == 2)
                     if (prod.getChildSort(0).equals(prod.getChildSort(1)))
                         if (!equalities.containsKey(prod.getChildSort(0)))

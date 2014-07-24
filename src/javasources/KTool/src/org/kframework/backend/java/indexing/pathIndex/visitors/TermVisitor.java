@@ -15,8 +15,8 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.BuiltinMap;
-
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.general.IndexingStatistics;
 
@@ -303,7 +303,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                                         (ArrayList<Production>) context.productionsOf(currentLabel);
                                 Production p = productions.get(0);
                                 String test = pString + SEPARATOR + (currentPosition) + SEPARATOR;
-                                if (p.getChildSort(currentPosition - 1).equals(K_STRING)) {
+                                if (p.getChildSort(currentPosition - 1).equals(Sort2.K)) {
                                     //TODO(OwolabiL): This needs to be investigated further and
                                     // handled properly. This is not a good way to handle this case.
                                     pStrings.add(test + kItem.kLabel() + SEPARATOR + "1.Exp");
@@ -318,7 +318,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                             ArrayList<Production> productions =
                                     (ArrayList<Production>) context.productionsOf(currentLabel);
                             Production p = productions.get(0);
-                            if (p.getChildSort(currentPosition - 1).equals(K_STRING)) {
+                            if (p.getChildSort(currentPosition - 1).equals(Sort2.K)) {
                                 pStrings.add(test + kItem.kLabel() + SEPARATOR + (currentPosition) +
                                         SEPARATOR + kItem.sort());
                             } else {

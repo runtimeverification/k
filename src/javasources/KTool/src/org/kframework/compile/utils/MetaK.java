@@ -281,7 +281,7 @@ public class MetaK {
         }
         if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
-            if (prod.getSort().equals(KSorts.KLABEL)) {
+            if (prod.getSort().equals(Sort2.KLABEL)) {
                 return KLabelConstant.of(terminal, context);
             } else if (prod.getSort().equals(BoolBuiltin.SORT)) {
                 return BoolBuiltin.kAppOf(terminal);

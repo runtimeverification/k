@@ -68,12 +68,12 @@ public class AddInjections extends CopyOnWriteTransformer{
         assert node.getPriorityBlocks().size() == 1;
         assert node.getPriorityBlocks().get(0).getProductions().size() == 1;
 
-        String sort = node.getSort().getName();
+        Sort2 sort = Sort2.of(node.getSort().getName());
         Production production = node.getPriorityBlocks().get(0).getProductions().get(0);
         production = (Production) visit(production, _);
 
-        if ((sort.equals(KSorts.KLABEL) && production.containsAttribute(Attribute.FUNCTION_KEY))
-                || sort.equals(KSorts.K) || sort.equals(KSorts.KLIST)) {
+        if ((sort.equals(Sort2.KLABEL) && production.containsAttribute(Attribute.FUNCTION_KEY))
+                || sort.equals(Sort2.K) || sort.equals(Sort2.KLIST)) {
             production = production.shallowCopy();
             production.setSort(Sort2.KITEM);
         }
@@ -185,7 +185,7 @@ public class AddInjections extends CopyOnWriteTransformer{
         if (needProjectionTo(sort)) {
             transformedNode.setSort(Sort2.KITEM);
             // TODO (AndreiS): remove special case
-            if (node.getProduction().getLabel().equals("#if_#then_#else_#fi") && !sort.equals(KSorts.KLIST)) {
+            if (node.getProduction().getLabel().equals("#if_#then_#else_#fi") && !sort.equals(Sort2.KLIST)) {
                 return transformedNode;
             }
             return new KItemProjection(sort, transformedNode);

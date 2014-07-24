@@ -161,7 +161,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         @Override
         public ASTNode visit(Variable node, Void _)  {
             if (node.isFreshConstant()) return node;
-            if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
+            if (node.getSort().equals(Sort2.KITEM) || node.getSort().equals(Sort2.K)) {
                 return node;
             }
             if (MetaK.isKSort(node.getSort())) {

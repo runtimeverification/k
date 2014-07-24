@@ -35,7 +35,7 @@ public class ListTerminator extends Term {
 
     @Override
     public String toString() {
-        if (separator != null && sort.equals(KSorts.K)) {
+        if (separator != null && sort.equals(Sort2.K)) {
             return ".List{\"" + separator + "\"}";
         } else {
         return "." + sort;
