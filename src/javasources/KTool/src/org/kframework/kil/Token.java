@@ -58,7 +58,7 @@ public abstract class Token extends KLabel {
      * @return
      */
     public static KApp kAppOf(Element element) {
-        String sort = element.getAttribute(Constants.SORT_sort_ATTR);
+        Sort2 sort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
         if (sort.equals(BoolBuiltin.SORT)) {
             return KApp.of(new BoolBuiltin(element));
         } else if (sort.equals(IntBuiltin.SORT)) {

@@ -597,7 +597,7 @@ public class Context implements Serializable {
     }
 
     public DataStructureSort dataStructureSortOf(Sort2 sort) {
-        return dataStructureListSortOf(sort.getName());
+        return dataStructureSortOf(sort.getName());
     }
 
     @Deprecated
