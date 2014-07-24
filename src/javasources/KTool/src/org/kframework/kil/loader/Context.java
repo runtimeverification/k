@@ -637,7 +637,7 @@ public class Context implements Serializable {
                         production.getLocation()));
             }
 
-            if (freshFunctionNames.containsKey(production.getSort())) {
+            if (freshFunctionNames.containsKey(production.getSort().getName())) {
                 GlobalSettings.kem.register(new KException(
                         ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,

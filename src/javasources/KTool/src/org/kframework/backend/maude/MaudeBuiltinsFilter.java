@@ -77,7 +77,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         left += ")";
         result.append(left);
         result.append(" = _`(_`)(");
-        if (context.getDataStructureSorts().containsKey(node.getSort())) {
+        if (context.getDataStructureSorts().containsKey(node.getSort().getName())) {
             result.append(context.dataStructureSortOf(node.getSort()).type() + "2KLabel_(");
         } else {
             result.append("#_(");

@@ -436,9 +436,9 @@ public class MaudeFilter extends BackendFilter {
             variable.setSort(Sort2.KITEM);
         }
          if (MetaK.isBuiltinSort(variable.getSort().getName())
-                || context.getDataStructureSorts().containsKey(variable.getSort())) {
+                || context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
             result.append("_`(_`)(");
-            if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+            if (context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
                   String sort = context.dataStructureSortOf(variable.getSort().getName()).type();
                   sort = sort.equals(KSorts.K) ? KSorts.KLIST : sort;
                 result.append(sort + "2KLabel_(");
@@ -453,14 +453,14 @@ public class MaudeFilter extends BackendFilter {
             result.append(variable.getName());
         }
         result.append(":");
-        if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+        if (context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
             result.append(context.dataStructureSortOf(variable.getSort().getName()).type());
         } else {
             result.append(variable.getSort());
         }
 
         if (MetaK.isBuiltinSort(variable.getSort().getName())
-                || context.getDataStructureSorts().containsKey(variable.getSort())) {
+                || context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
             result.append(")");
             result.append(", ");
             result.append(".KList");

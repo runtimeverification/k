@@ -43,7 +43,7 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      */
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-        if (context.getTokenSorts().contains(tc.getSort())) {
+        if (context.getTokenSorts().contains(tc.getSort().getName())) {
             Production p = tc.getProduction();
             if (p.getItems().size() == 1 && p.getItems().get(0) instanceof Terminal) {
                 Terminal t = (Terminal) p.getItems().get(0);

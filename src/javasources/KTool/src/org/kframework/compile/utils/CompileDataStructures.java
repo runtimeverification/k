@@ -12,6 +12,7 @@ import org.kframework.kil.MapUpdate;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -158,7 +159,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())
                 || sort.elementLabel().equals(kLabelConstant.getLabel())
                 || sort.unitLabel().equals(kLabelConstant.getLabel())
-                || sort.type().equals(KSorts.MAP)) {
+                || sort.sort().equals(Sort2.MAP)) {
             // TODO(AndreiS): the lines below should work once KLabelConstant are properly created
             if (productions.size() > 1) {
                 GlobalSettings.kem.register(new KException(
@@ -204,7 +205,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         location));
                 return node;
             }
-        } else if (sort.type().equals(KSorts.MAP)) {
+        } else if (sort.sort().equals(Sort2.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
             if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update"))
                     && kList.getContents().size() >= 3 && kList.getContents().get(0) instanceof Variable) {

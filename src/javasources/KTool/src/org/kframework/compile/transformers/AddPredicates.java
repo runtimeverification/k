@@ -87,7 +87,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                 return null;
             }
 
-            if (context.getDataStructureSorts().containsKey(node.getSort())) {
+            if (context.getDataStructureSorts().containsKey(node.getSort().getName())) {
                 /* predicate definition for builtin collection sorts is deferred to each backend */
                 return null;
             }
