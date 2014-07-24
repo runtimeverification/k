@@ -135,12 +135,12 @@ public class KastFilter extends BasicVisitor {
 
     @Override
     public Void visit(ListTerminator empty, Void _) {
-        String sort = empty.getSort();
-        if (MaudeHelper.basicSorts.contains(sort)) {
+        Sort2 sort = empty.getSort();
+        if (MaudeHelper.basicSorts.contains(sort.getName())) {
             result.write(".");
-            result.write(sort);
+            result.write(sort.getName());
         } else {
-            Production prd = context.listConses.get(sort);
+            Production prd = context.listConses.get(sort.getName());
             UserList ul = (UserList) prd.getItems().get(0);
             result.write(".List`{\"");
             result.write(ul.getSeparator());
@@ -251,8 +251,8 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort())) {
-            result.write(KInjectedLabel.getInjectedSort(term.getSort()));
+        if (MetaK.isKSort(term.getSort().getName())) {
+            result.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             result.write("2KLabel_(");
         } else {
             result.write("#_(");

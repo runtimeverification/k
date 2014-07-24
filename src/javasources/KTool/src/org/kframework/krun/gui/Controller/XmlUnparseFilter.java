@@ -327,7 +327,7 @@ public class XmlUnparseFilter extends BasicVisitor {
             buffer.append("!");
         buffer.append(StringEscapeUtils.escapeXml(variable.getName()));
         if (!variableList.contains(variable.getName())) {
-            buffer.append(":" + StringEscapeUtils.escapeXml(variable.getSort()));
+            buffer.append(":" + StringEscapeUtils.escapeXml(variable.getSort().getName()));
             variableList.add(variable.getName());
         }
         return postpare();
@@ -472,7 +472,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         }
         if (contents.size() == 0) {
             buffer.append("."
-                    + StringEscapeUtils.escapeXml(collection.getSort()));
+                    + StringEscapeUtils.escapeXml(collection.getSort().getName()));
         }
         return postpare();
     }
@@ -523,9 +523,9 @@ public class XmlUnparseFilter extends BasicVisitor {
 
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort())) {
+        if (MetaK.isKSort(term.getSort().getName())) {
             buffer.append(StringEscapeUtils.escapeXml(KInjectedLabel
-                    .getInjectedSort(term.getSort())));
+                    .getInjectedSort(term.getSort()).getName()));
             buffer.append("2KLabel ");
         } else {
             buffer.append("# ");
@@ -651,7 +651,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         if (c.isSyntactic()) {
             buffer.append(":");
         }
-        buffer.append(StringEscapeUtils.escapeXml(c.getSort()));
+        buffer.append(StringEscapeUtils.escapeXml(c.getSort().getName()));
         return postpare();
     }
 

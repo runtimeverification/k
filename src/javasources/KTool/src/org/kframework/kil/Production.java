@@ -18,7 +18,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
      * steps.
      */
     protected List<ProductionItem> items;
-    protected String sort;
+    protected Sort2 sort;
     protected String ownerModuleName;
     private Multimap<Integer, Integer> binderMap;
 
@@ -86,11 +86,11 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
 
     public boolean isConstant() {
         // TODO(Radu): properly determine if a production is a constant or not, just like below
-        return isTerminal() && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
+        return isTerminal() && (sort.getName().startsWith("#") || sort.equals(KSorts.KLABEL));
     }
 
     public boolean isConstant(org.kframework.kil.loader.Context context) {
-        return isTerminal() && (sort.startsWith("#") ||
+        return isTerminal() && (sort.getName().startsWith("#") ||
                                 sort.equals(KSorts.KLABEL) ||
                                 context.getTokenSorts().contains(this.getSort()));
     }
@@ -116,7 +116,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return items.size() == 1 && items.get(0) instanceof Terminal;
     }
 
-    public String getBracketSort() {
+    public Sort2 getBracketSort() {
         assert isBracket();
         return getChildSort(0);
     }
@@ -131,14 +131,14 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public Production(Sort sort, java.util.List<ProductionItem> items) {
         super();
         this.items = items;
-        this.sort = sort.getName();
+        this.sort = Sort2.of(sort.getName());
         attributes = new Attributes();
     }
 
     public Production(Sort sort, java.util.List<ProductionItem> items, String ownerModule) {
         super();
         this.items = items;
-        this.sort = sort.getName();
+        this.sort = Sort2.of(sort.getName());
         attributes = new Attributes();
         this.ownerModuleName = ownerModule;
     }
@@ -215,15 +215,15 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return visitor.complete(this, visitor.visit(this, p));
     }
 
-    public String getSort() {
+    public Sort2 getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Sort2 sort) {
         this.sort = sort;
     }
 
-    public String getChildSort(int idx) {
+    public Sort2 getChildSort(int idx) {
         int arity = -1;
         if (items.get(0) instanceof UserList) {
             if (idx == 0) {
@@ -236,7 +236,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
             if (!(i instanceof Terminal))
                 arity++;
             if (arity == idx) {
-                return ((Sort) i).getName();
+                return Sort2.of(((Sort) i).getName());
             }
         }
         return null;

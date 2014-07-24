@@ -7,6 +7,7 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
 import org.kframework.parser.concrete2.Grammar.EntryState;
@@ -579,7 +580,7 @@ public class Parser {
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
                             KList newKList = new KList(context);
-                            newKList.add(new Ambiguity(KSorts.K, new ArrayList<Term>(matches)));
+                            newKList.add(new Ambiguity(Sort2.K, new ArrayList<Term>(matches)));
                             result.add(newKList);
                         }
                     }
@@ -664,11 +665,11 @@ public class Parser {
             this.workListStep(stateReturn);
         }
 
-        Ambiguity result = new Ambiguity(KSorts.K, new ArrayList<Term>());
+        Ambiguity result = new Ambiguity(Sort2.K, new ArrayList<Term>());
         for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
                 result.getContents().add(new KList(new Ambiguity(
-                    KSorts.K, stateReturn.function.applyToNull())));
+                    Sort2.K, stateReturn.function.applyToNull())));
             }
         }
 

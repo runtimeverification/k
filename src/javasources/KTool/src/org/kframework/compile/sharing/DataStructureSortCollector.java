@@ -4,6 +4,7 @@ package org.kframework.compile.sharing;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -69,7 +70,7 @@ public class DataStructureSortCollector extends BasicVisitor {
 
     @Override
     public Void visit(Production node, Void _) {
-        String sort = node.getSort();
+        Sort2 sort = node.getSort();
 
         String hookAttribute = node.getAttribute(Attribute.HOOK_KEY);
         if (hookAttribute == null) {
@@ -90,50 +91,50 @@ public class DataStructureSortCollector extends BasicVisitor {
             return null;
         }
 
-        if (!operatorLabels.containsKey(sort)) {
-            operatorLabels.put(sort, new HashMap<String, String>());
+        if (!operatorLabels.containsKey(sort.getName())) {
+            operatorLabels.put(sort.getName(), new HashMap<String, String>());
         }
 
         Map<DataStructureSort.Label, String> labels
                 = DataStructureSort.LABELS.get(type);
         if (operator.equals(labels.get(DataStructureSort.Label.CONSTRUCTOR))) {
-            if (constructorLabels.containsKey(sort)) {
+            if (constructorLabels.containsKey(sort.getName())) {
                 /* TODO: print error message */
                 return null;
             }
 
-            constructorLabels.put(sort, node.getKLabel());
+            constructorLabels.put(sort.getName(), node.getKLabel());
         } else if (operator.equals(labels.get(DataStructureSort.Label.ELEMENT))) {
-            if (elementLabels.containsKey(sort)) {
+            if (elementLabels.containsKey(sort.getName())) {
                 /* TODO: print error message */
                 return null;
             }
 
-            elementLabels.put(sort, node.getKLabel());
+            elementLabels.put(sort.getName(), node.getKLabel());
         } else if (operator.equals(labels.get(DataStructureSort.Label.UNIT))) {
-            if (unitLabels.containsKey(sort)) {
+            if (unitLabels.containsKey(sort.getName())) {
                 /* TODO: print error message */
                 return null;
             }
 
-            unitLabels.put(sort, node.getKLabel());
+            unitLabels.put(sort.getName(), node.getKLabel());
         } else {
             /* domain specific function */
-            operatorLabels.get(sort).put(operator, node.getKLabel());
+            operatorLabels.get(sort.getName()).put(operator, node.getKLabel());
         }
 
         /*
          * The type (list, map, set) of a data structure is determined by its constructor, element,
          * and unit
          */
-        if (!operatorLabels.get(sort).containsKey(operator)) {
-            if (types.containsKey(sort)) {
-                if (!types.get(sort).equals(type)) {
+        if (!operatorLabels.get(sort.getName()).containsKey(operator)) {
+            if (types.containsKey(sort.getName())) {
+                if (!types.get(sort.getName()).equals(type)) {
                     /* TODO: print error message */
                     return null;
                 }
             } else {
-                types.put(sort, type);
+                types.put(sort.getName(), type);
             }
         }
         return null;

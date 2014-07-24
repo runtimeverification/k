@@ -19,20 +19,20 @@ public class Variable extends Term {
     private final boolean freshConstant;
     private boolean syntactic = false;
     /** Used by the type inferencer  */
-    private String expectedSort = null;
+    private Sort2 expectedSort = null;
     private static final String GENERATED_FRESH_VAR = "GeneratedFreshVar";
 
-    public String getExpectedSort() {
+    public Sort2 getExpectedSort() {
         return expectedSort;
     }
 
-    public void setExpectedSort(String expectedSort) {
+    public void setExpectedSort(Sort2 expectedSort) {
         this.expectedSort = expectedSort;
     }
 
     public Variable(Element element) {
         super(element);
-        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+        this.sort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
         this.name = element.getAttribute(Constants.NAME_name_ATTR);
         this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
         if (this.name.startsWith("?")) {
@@ -49,7 +49,7 @@ public class Variable extends Term {
         }
     }
 
-    public Variable(String name, String sort, boolean freshVariable, boolean freshConstant) {
+    public Variable(String name, Sort2 sort, boolean freshVariable, boolean freshConstant) {
         super(sort);
         this.name = name;
         this.freshVariable = freshVariable;
@@ -57,7 +57,7 @@ public class Variable extends Term {
         this.userTyped = true;
     }
 
-    public Variable(String name, String sort) {
+    public Variable(String name, Sort2 sort) {
         this(name, sort, false, false);
     }
 
@@ -71,7 +71,7 @@ public class Variable extends Term {
         expectedSort = variable.expectedSort;
     }
 
-    public static Variable getFreshVar(String sort) {
+    public static Variable getFreshVar(Sort2 sort) {
         return new Variable(GENERATED_FRESH_VAR + nextVariableIndex++, sort);
     }
 

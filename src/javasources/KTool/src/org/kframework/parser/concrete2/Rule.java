@@ -12,6 +12,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 
@@ -72,8 +73,8 @@ public abstract class Rule implements Serializable {
      */
     public static class WrapLabelRule extends KListRule {
         private final Production label;
-        private final String sort;
-        public WrapLabelRule(Production label, String sort) {
+        private final Sort2 sort;
+        public WrapLabelRule(Production label, Sort2 sort) {
             assert label != null; assert sort != null;
             this.label = label; this.sort = sort;
         }

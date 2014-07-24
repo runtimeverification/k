@@ -45,7 +45,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                     int index = 0;
                     //TODO(OwolabiL): what if there is more than 1 KItem?
                     for (int i = 0; i < termCons.arity(); i++) {
-                        if (termCons.getContents().get(i).getSort().equals("KItem")){
+                        if (termCons.getContents().get(i).getSort().equals(Sort2.KITEM)){
                             index = i;
                             break;
                         }
@@ -57,10 +57,10 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                 }
 
             } else{
-                v = Variable.getFreshVar(KSorts.KITEM);
+                v = Variable.getFreshVar(Sort2.KITEM);
             }
         } else {
-            v = Variable.getFreshVar(KSorts.K);
+            v = Variable.getFreshVar(Sort2.K);
         }
         final List<Term> list = new ArrayList<Term>();
         CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("splitter", context) {

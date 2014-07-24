@@ -3,7 +3,6 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
-
 import org.w3c.dom.Element;
 
 /**
@@ -13,13 +12,13 @@ public class ListTerminator extends Term {
 
     private final String separator; // Used only by toString()
 
-    public ListTerminator(String sort, String separator) {
+    public ListTerminator(Sort2 sort, String separator) {
         super(sort);
         this.separator = separator;
     }
 
     public ListTerminator(String separator) {
-        super(KSorts.K);
+        super(Sort2.K);
         this.separator = separator;
     }
 
@@ -30,10 +29,11 @@ public class ListTerminator extends Term {
 
     public ListTerminator(Element element, String separator) {
         super(element);
-        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
-                this.separator = separator;
+        this.sort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
+        this.separator = separator;
     }
 
+    @Override
     public String toString() {
         if (separator != null && sort.equals(KSorts.K)) {
             return ".List{\"" + separator + "\"}";

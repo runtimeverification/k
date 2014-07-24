@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.collections4.set.UnmodifiableSet;
+import org.kframework.kil.KSorts;
+
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.Table;
 
@@ -365,12 +367,12 @@ public class Poset implements Serializable {
     public static void main(String[] args) {
         System.out.println("msg");
         Poset p = new Poset();
-        p.addRelation("K", "Exps");
+        p.addRelation(KSorts.K, "Exps");
         p.addRelation("Exps", "Vals");
         p.addRelation("Exps", "Ids");
         p.transitiveClosure();
         Set<String> input = new HashSet<String>();
-        input.add("K");
+        input.add(KSorts.K);
         input.add("Exps");
         input.add("Vals");
         input.add("Ids");

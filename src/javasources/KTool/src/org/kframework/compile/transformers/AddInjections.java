@@ -13,6 +13,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -74,7 +75,7 @@ public class AddInjections extends CopyOnWriteTransformer{
         if ((sort.equals(KSorts.KLABEL) && production.containsAttribute(Attribute.FUNCTION_KEY))
                 || sort.equals(KSorts.K) || sort.equals(KSorts.KLIST)) {
             production = production.shallowCopy();
-            production.setSort(KSorts.KITEM);
+            production.setSort(Sort2.KITEM);
         }
 
         Syntax returnNode;
@@ -90,7 +91,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
             if (!production.getSort().equals(sort)) {
                 returnNode.setSort(returnNode.getSort().shallowCopy());
-                returnNode.getSort().setName(production.getSort());
+                returnNode.getSort().setName(production.getSort().getName());
             }
         } else {
             returnNode = node;
@@ -180,9 +181,9 @@ public class AddInjections extends CopyOnWriteTransformer{
             transformedNode = node;
         }
 
-        String sort = node.getProduction().getSort();
+        Sort2 sort = node.getProduction().getSort();
         if (needProjectionTo(sort)) {
-            transformedNode.setSort(KSorts.KITEM);
+            transformedNode.setSort(Sort2.KITEM);
             // TODO (AndreiS): remove special case
             if (node.getProduction().getLabel().equals("#if_#then_#else_#fi") && !sort.equals(KSorts.KLIST)) {
                 return transformedNode;
@@ -202,9 +203,9 @@ public class AddInjections extends CopyOnWriteTransformer{
      * @return {@code true} if an injection is required; otherwise,
      *         {@code false}
      */
-    private boolean needInjectionFrom(String sort) {
-        return sort.equals(KSorts.KLABEL) || sort.equals(KSorts.KLIST)
-                || sort.equals(KSorts.BAG) || sort.equals(KSorts.BAG_ITEM);
+    private boolean needInjectionFrom(Sort2 sort) {
+        return sort.equals(Sort2.KLABEL) || sort.equals(Sort2.KLIST)
+                || sort.equals(Sort2.BAG) || sort.equals(Sort2.BAG_ITEM);
     }
 
     /**
@@ -217,10 +218,10 @@ public class AddInjections extends CopyOnWriteTransformer{
      * @return {@code true} if a projection is required; otherwise,
      *         {@code false}
      */
-    private boolean needProjectionTo(String sort) {
-        return sort.equals(KSorts.KLABEL) || sort.equals(KSorts.KLIST)
-                || sort.equals(KSorts.K) || sort.equals(KSorts.BAG)
-                || sort.equals(KSorts.BAG_ITEM);
+    private boolean needProjectionTo(Sort2 sort) {
+        return sort.equals(Sort2.KLABEL) || sort.equals(Sort2.KLIST)
+                || sort.equals(Sort2.K) || sort.equals(Sort2.BAG)
+                || sort.equals(Sort2.BAG_ITEM);
     }
 
 }

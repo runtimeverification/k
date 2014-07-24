@@ -39,7 +39,7 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
 
             java.util.List<Term> termList = new ArrayList<Term>();
             termList.add(rhs);
-            TermCons termCons = new TermCons(KSorts.KLABEL, String2KLabelCons, termList, context);
+            TermCons termCons = new TermCons(Sort2.KLABEL, String2KLabelCons, termList, context);
             rule = new Rule(termCons, KLabelConstant.of(klbl, context), context);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);

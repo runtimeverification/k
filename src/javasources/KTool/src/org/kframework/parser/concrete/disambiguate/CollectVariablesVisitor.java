@@ -12,6 +12,7 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
@@ -41,7 +42,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         if (c.getEllipses() == Ellipses.NONE)
             if (context.cellSorts.containsKey(c.getLabel())) {
                 try {
-                    c.setContents((Term) new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel())).visitNode(c.getContents()));
+                    c.setContents((Term) new CollectVariablesVisitor2(context, Sort2.of(context.cellSorts.get(c.getLabel()))).visitNode(c.getContents()));
                 } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
@@ -58,7 +59,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
             if (node.getProduction().getItems().get(i) instanceof Sort) {
                 Term t = node.getContents().get(j);
                 try {
-                    new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()).visitNode(t);
+                    new CollectVariablesVisitor2(context, Sort2.of(((Sort) node.getProduction().getItems().get(i)).getName())).visitNode(t);
                 } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
@@ -107,9 +108,9 @@ public class CollectVariablesVisitor extends BasicVisitor {
      *
      */
     public class CollectVariablesVisitor2 extends LocalTransformer {
-        String expectedSort = null;
+        Sort2 expectedSort = null;
 
-        public CollectVariablesVisitor2(Context context, String expectedSort) {
+        public CollectVariablesVisitor2(Context context, Sort2 expectedSort) {
             super("org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor2", context);
             this.expectedSort = expectedSort;
         }

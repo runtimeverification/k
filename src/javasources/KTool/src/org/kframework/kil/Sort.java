@@ -15,14 +15,14 @@ public class Sort extends ProductionItem {
     private String name;
     private static Set<String> baseSorts = new HashSet<String>();
     static {
-        baseSorts.add("K");
-        baseSorts.add("KResult");
+        baseSorts.add(KSorts.K);
+        baseSorts.add(KSorts.KRESULT);
         baseSorts.add(KSorts.KITEM);
         baseSorts.add(KSorts.KLIST);
-        baseSorts.add("Bag");
-        baseSorts.add("BagItem");
+        baseSorts.add(KSorts.BAG);
+        baseSorts.add(KSorts.BAG_ITEM);
         baseSorts.add(KSorts.KLABEL);
-        baseSorts.add("CellLabel");
+        baseSorts.add(KSorts.CELL_LABEL);
     }
 
     public Sort(String name) {

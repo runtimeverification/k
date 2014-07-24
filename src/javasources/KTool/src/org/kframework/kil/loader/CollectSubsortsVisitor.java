@@ -6,6 +6,7 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.UserList;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -33,17 +34,17 @@ public class CollectSubsortsVisitor extends BasicVisitor {
     }
 
     public Void visit(Production prd, Void _) {
-        if (!Sort.isBasesort(prd.getSort()))
-            context.addSubsort(KSorts.KITEM, prd.getSort());
+        if (!Sort.isBasesort(prd.getSort().getName()))
+            context.addSubsort(Sort2.KITEM, prd.getSort());
         if (prd.isSubsort()) {
             if (!prd.containsAttribute("onlyLabel")
                     && !prd.containsAttribute("notInRules")) {
                 Sort srt = (Sort) prd.getItems().get(0);
-                context.addSubsort(prd.getSort(), srt.toString());
+                context.addSubsort(prd.getSort().getName(), srt.toString());
             }
         } else if (prd.isListDecl()) {
             UserList srt = (UserList) prd.getItems().get(0);
-            context.listConses.put(prd.getSort(), prd);
+            context.listConses.put(prd.getSort().getName(), prd);
             context.putListLabel(prd);
             context.addSubsort(prd.getSort(), srt.getSort());
         } else {

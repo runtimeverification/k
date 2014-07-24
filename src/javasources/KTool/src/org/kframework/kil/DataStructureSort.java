@@ -121,8 +121,13 @@ public class DataStructureSort implements Serializable {
         return operatorLabels;
     }
 
+    @Deprecated
     public String type() {
         return type;
+    }
+
+    public Sort2 sort() {
+        return Sort2.of(type());
     }
 
     public String unitLabel() {

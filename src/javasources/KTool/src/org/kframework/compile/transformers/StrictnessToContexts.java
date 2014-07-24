@@ -235,10 +235,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                          * generation)
                          */
                         if (kompileOptions.experimental.testGen) {
-                            termCons.getContents().get(j).setSort(KSorts.KITEM);
+                            termCons.getContents().get(j).setSort(Sort2.KITEM);
                         }
                     } else {
-                        termCons.getContents().get(j).setSort(KSorts.K);
+                        termCons.getContents().get(j).setSort(Sort2.K);
                     }
                 }
 
@@ -256,7 +256,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                             sideCond = sideCond == null ? kResultPred :
                                 KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, sideCond, kResultPred);
                         } else {
-                            arg.setSort(KSorts.KRESULT);
+                            arg.setSort(Sort2.KRESULT);
                         }
                     }
                 }
@@ -332,12 +332,12 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     private void kLabelStrictness(Production prod, boolean isSeq) {
         List<Term> contents = new ArrayList<>(3);
         //first argument is a variable of sort KList
-        Variable variable = Variable.getFreshVar(KSorts.KLIST);
+        Variable variable = Variable.getFreshVar(Sort2.KLIST);
         contents.add(variable);
         //second is a HOLE
         contents.add(getHoleTerm(null, prod));
         //third argument is a variable of sort KList
-        contents.add(Variable.getFreshVar(KSorts.KLIST));
+        contents.add(Variable.getFreshVar(Sort2.KLIST));
         KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
         //make a context from the TermCons
         org.kframework.kil.Context ctx = new org.kframework.kil.Context();

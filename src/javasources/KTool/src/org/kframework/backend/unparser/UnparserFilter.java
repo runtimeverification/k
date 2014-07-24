@@ -540,7 +540,7 @@ public class UnparserFilter extends NonCachingVisitor {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
         if (MetaK.isKSort(term.getSort())) {
-            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
+            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             indenter.write("2KLabel ");
         } else {
             indenter.write("# ");
@@ -656,7 +656,7 @@ public class UnparserFilter extends NonCachingVisitor {
         if (c.isSyntactic()) {
             indenter.write(":");
         }
-        indenter.write(c.getSort());
+        indenter.write(c.getSort().getName());
         return postpare();
     }
 

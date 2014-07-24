@@ -111,7 +111,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
             // filter the productions according to their form
             for (Production prd : prt.getProductions()) {
-                startSorts.add(prd.getSort());
+                startSorts.add(prd.getSort().getName());
 
                 if (prd.containsAttribute("notInPrograms")) {
                     // if a production has this attribute, don't add it to the list
@@ -122,12 +122,12 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     startSorts.add(((Sort) prd.getItems().get(0)).getName());
                 } else if (prd.isConstant()) {
                     constants.add(prd);
-                    constantSorts.add(prd.getSort());
+                    constantSorts.add(prd.getSort().getName());
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
                     outsides.add(prd);
                 } else if (prd.getItems().get(0) instanceof UserList) {
                     outsides.add(prd);
-                    listSorts.add(prd.getSort());
+                    listSorts.add(prd.getSort().getName());
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -174,7 +174,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
+                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
                         sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
                     }
                     sdf.append("} > ");

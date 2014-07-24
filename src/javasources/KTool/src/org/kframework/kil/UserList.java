@@ -8,23 +8,27 @@ import org.kframework.utils.StringUtil;
  * A production item for a cons-list with separator, like List{UserSort,";"}. Must be the only item in a {@link Production}.
  */
 public class UserList extends ProductionItem {
-    protected String sort;
+    protected Sort2 sort;
     protected String separator;
     protected String listType;
 
     public static final String ZERO_OR_MORE = "*";
     public static final String ONE_OR_MORE = "+";
 
-    public UserList(String sort, String separator) {
+    public UserList(Sort2 sort, String separator) {
         this.sort = sort;
         this.separator = separator.trim();
         this.listType = ZERO_OR_MORE;
     }
 
-    public UserList(String sort, String separator, String listType) {
+    public UserList(Sort2 sort, String separator, String listType) {
         this.sort = sort;
         this.separator = separator.trim();
         this.listType = listType;
+    }
+
+    public UserList(String sort, String separator, String listType) {
+        this(Sort2.of(sort), separator, listType);
     }
 
     public UserList(UserList userList) {
@@ -46,11 +50,11 @@ public class UserList extends ProductionItem {
         return "'.List{\"" + StringUtil.escape(separator) + "\"}";
     }
 
-    public String getSort() {
+    public Sort2 getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Sort2 sort) {
         this.sort = sort;
     }
 

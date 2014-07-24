@@ -119,19 +119,19 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                 } else if (prd.isSubsort()) {
                     if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
                         p.getProductions().add(prd);
-                        subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
+                        subsorts.add(new Subsort(prd.getSort().getName(), ((Sort) prd.getItems().get(0)).getName()));
                         // add the small sort to the user sorts to add it to the variable declarations
                         userSorts.add((Sort) prd.getItems().get(0));
                     }
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().size() == 1 && prd.isConstant()) {
                     constants.add(prd);
-                    constantSorts.add(prd.getSort());
+                    constantSorts.add(prd.getSort().getName());
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
                     outsides.add(prd);
                 } else if (prd.isListDecl()) {
                     outsides.add(prd);
                     listProds.add(prd);
-                    subsorts.add(new Subsort(prd.getSort(), ((UserList) prd.getItems().get(0)).getSort()));
+                    subsorts.add(new Subsort(prd.getSort().getName(), ((UserList) prd.getItems().get(0)).getSort().getName()));
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -188,7 +188,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
+                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
                         sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
                     }
                     sdf.append("} > ");

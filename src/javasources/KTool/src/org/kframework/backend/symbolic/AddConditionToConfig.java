@@ -16,6 +16,7 @@ import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.Terminal;
@@ -51,9 +52,9 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
         if (PC) {
-            Variable pc = new Variable(PC_VAR, "Bool");
+            Variable pc = new Variable(PC_VAR, Sort2.of("Bool"));
             cell.setContents(pc);
-            context.configVarSorts.put(pc.getName(), pc.getSort());
+            context.configVarSorts.put(pc.getName(), pc.getSort().getName());
         }
         else
             cell.setContents(BoolBuiltin.TRUE);

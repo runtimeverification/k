@@ -20,11 +20,11 @@ public abstract class Token extends KLabel {
      * @return
      */
     public static Token of(String sort, String value) {
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
+        if (sort.equals(BoolBuiltin.SORT)) {
             return BoolBuiltin.of(value);
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
+        } else if (sort.equals(IntBuiltin.SORT)) {
             return IntBuiltin.of(value);
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
+        } else if (sort.equals(StringBuiltin.SORT)) {
             /* TODO(andreis): unescape string */
             return StringBuiltin.of(value);
         } else {
@@ -40,11 +40,11 @@ public abstract class Token extends KLabel {
      * @return
      */
     public static KApp kAppOf(String sort, String value) {
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
+        if (sort.equals(BoolBuiltin.SORT)) {
             return BoolBuiltin.kAppOf(value);
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
+        } else if (sort.equals(IntBuiltin.SORT)) {
             return IntBuiltin.kAppOf(value);
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
+        } else if (sort.equals(StringBuiltin.SORT)) {
             return StringBuiltin.kAppOf(StringUtil.unquoteString(value));
         } else {
             return GenericToken.kAppOf(sort, value);
@@ -59,13 +59,13 @@ public abstract class Token extends KLabel {
      */
     public static KApp kAppOf(Element element) {
         String sort = element.getAttribute(Constants.SORT_sort_ATTR);
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
+        if (sort.equals(BoolBuiltin.SORT)) {
             return KApp.of(new BoolBuiltin(element));
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
+        } else if (sort.equals(IntBuiltin.SORT)) {
             return KApp.of(new IntBuiltin(element));
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
+        } else if (sort.equals(StringBuiltin.SORT)) {
             return KApp.of(new StringBuiltin(element));
-        } else if (sort.equals(FloatBuiltin.SORT_NAME)) {
+        } else if (sort.equals(FloatBuiltin.SORT)) {
             return KApp.of(new FloatBuiltin(element));
         } else {
             return KApp.of(new GenericToken(element));
@@ -79,12 +79,7 @@ public abstract class Token extends KLabel {
         super(element);
     }
 
-    /**
-     * Returns a {@link String} representing the sort of the token.
-     *
-     * @return
-     */
-    public abstract String tokenSort();
+    public abstract Sort2 tokenSort();
 
     /**
      * Returns a {@link String} representing the (uninterpreted) value of the token.

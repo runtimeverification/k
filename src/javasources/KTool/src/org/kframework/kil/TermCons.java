@@ -25,7 +25,7 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
 
     public TermCons(Element element, Context context) {
         super(element);
-        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+        this.sort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
         this.cons = element.getAttribute(Constants.CONS_cons_ATTR);
         this.production = context.conses.get(cons);
         assert this.production != null;
@@ -36,7 +36,7 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
             contents.add((Term) JavaClassesFactory.getTerm(e));
     }
 
-    public TermCons(String sort, String cons, org.kframework.kil.loader.Context context) {
+    public TermCons(Sort2 sort, String cons, org.kframework.kil.loader.Context context) {
         this(sort, cons, new ArrayList<Term>(), context);
     }
 
@@ -48,14 +48,14 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         assert this.production != null;
     }
 
-    public TermCons(String psort, String listCons, List<Term> genContents, Context context) {
+    public TermCons(Sort2 psort, String listCons, List<Term> genContents, Context context) {
         super(psort);
         cons = listCons;
         contents = genContents;
         production = context.conses.get(cons);
     }
 
-    public TermCons(String psort, List<Term> contents, Production production) {
+    public TermCons(Sort2 psort, List<Term> contents, Production production) {
         super(psort);
         cons = null;
         this.contents = contents;
@@ -92,11 +92,13 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
         return str;
     }
 
-    public String getSort() {
+    @Override
+    public Sort2 getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    @Override
+    public void setSort(Sort2 sort) {
         this.sort = sort;
     }
 

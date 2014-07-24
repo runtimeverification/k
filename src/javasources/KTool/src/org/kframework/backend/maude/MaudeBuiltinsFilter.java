@@ -8,6 +8,7 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
@@ -101,9 +102,9 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         if (context.getDataStructureSorts().containsKey(node.getName())
                 || node.getName().equals(KSorts.K)
                 || node.getName().equals(KSorts.KITEM)) {
-            var = Variable.getFreshVar(node.getName());
+            var = Variable.getFreshVar(Sort2.of(node.getName()));
         } else {
-            var = Variable.getFreshVar("#" + node.getName());
+            var = Variable.getFreshVar(Sort2.of("#" + node.getName()));
         }
 
         MaudeFilter filter = new MaudeFilter(context);
@@ -111,7 +112,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         left += filter.getResult();
 
         if (context.getDataStructureSorts().containsKey(node.getName())) {
-            var.setSort(context.dataStructureSortOf(node.getName()).type());
+            var.setSort(Sort2.of(context.dataStructureSortOf(node.getName()).type()));
         }
         right += var.toString();
         return null;

@@ -31,7 +31,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
              */
             if (kompileOptions.backend == KompileOptions.Backend.MAUDE) {
                 if (context.variableTokenSorts.contains(node.tokenSort())) {
-                    String sort = "K";
+                    String sort = KSorts.K;
                     String name = node.value();
                     int index = node.value().lastIndexOf(":");
                     if (index > 0) {
@@ -42,7 +42,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
                     if (MetaK.isDataSort("#" + sort)) {
                         return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(sort)), Token.kAppOf("#Id", name));
                     } else {
-                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor("K")), Token.kAppOf("#Id", node.value()));
+                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(KSorts.K)), Token.kAppOf("#Id", node.value()));
                     }
                 }
             }

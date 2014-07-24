@@ -20,7 +20,7 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = content;
     }
 
-    public String getSort() {
+    public Sort2 getSort() {
         if (content instanceof Ambiguity)
             return super.getSort();
         return content.getSort();
@@ -36,7 +36,7 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = t;
     }
 
-    public Bracket(String location, String filename, String sort) {
+    public Bracket(String location, String filename, Sort2 sort) {
         super(location, filename, sort);
     }
 
@@ -50,7 +50,7 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
-    public Bracket(String sort) {
+    public Bracket(Sort2 sort) {
         super(sort);
     }
 

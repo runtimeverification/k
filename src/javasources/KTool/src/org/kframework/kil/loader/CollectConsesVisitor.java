@@ -21,7 +21,7 @@ public class CollectConsesVisitor extends BasicVisitor {
             context.putLabel(node, cons);
         }
         if (node.isListDecl()) {
-            context.listConses.put(node.getSort(), node);
+            context.listConses.put(node.getSort().getName(), node);
             context.putListLabel(node);
         }
         for (Attribute a : node.getAttributes().getContents()) {

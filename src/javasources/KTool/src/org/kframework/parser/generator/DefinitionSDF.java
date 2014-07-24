@@ -41,10 +41,10 @@ public class DefinitionSDF {
         for (Production p1 : psdfv.listProds)
             for (Production p2 : psdfv.listProds)
                 if (p1 != p2) {
-                    String srt1 = ((UserList) p1.getItems().get(0)).getSort();
-                    String srt2 = ((UserList) p2.getItems().get(0)).getSort();
+                    String srt1 = ((UserList) p1.getItems().get(0)).getSort().getName();
+                    String srt2 = ((UserList) p2.getItems().get(0)).getSort().getName();
                     if (psdfv.subsorts.contains(new Subsort(srt1, srt2)))
-                        psdfv.subsorts.add(new Subsort(p1.getSort(), p2.getSort()));
+                        psdfv.subsorts.add(new Subsort(p1.getSort().getName(), p2.getSort().getName()));
                 }
 
         sdf.append(psdfv.sdf);
@@ -126,11 +126,11 @@ public class DefinitionSDF {
         for (Production p : psdfv.outsides) {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
-                sdf.append("    " + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> "
-                        + StringUtil.escapeSortName(p.getSort()));
+                sdf.append("    " + StringUtil.escapeSortName(si.getSort().getName()) + " \"" + si.getSeparator() + "\" " + StringUtil.escapeSortName(p.getSort().getName()) + " -> "
+                        + StringUtil.escapeSortName(p.getSort().getName()));
                 sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
-                sdf.append("    \"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort()));
-                sdf.append(" {cons(\"" + StringUtil.escapeSortName(p.getSort()) + "1Empty\")}\n");
+                sdf.append("    \"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort().getName()));
+                sdf.append(" {cons(\"" + StringUtil.escapeSortName(p.getSort().getName()) + "1Empty\")}\n");
             } else if (p.containsAttribute("bracket")) {
                 // don't add bracket attributes added by the user
             } else {
@@ -163,7 +163,7 @@ public class DefinitionSDF {
                         }
                     }
                 }
-                sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
+                sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
                 sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
             }
         }
@@ -220,7 +220,7 @@ public class DefinitionSDF {
 
         sdf.append("lexical syntax\n");
         for (Production p : psdfv.constants) {
-            sdf.append("    " + p.getItems().get(0) + " -> Dz" + StringUtil.escapeSortName(p.getSort()) + "\n");
+            sdf.append("    " + p.getItems().get(0) + " -> Dz" + StringUtil.escapeSortName(p.getSort().getName()) + "\n");
         }
 
         sdf.append("\n\n%% sort predicates\n");
@@ -259,10 +259,10 @@ public class DefinitionSDF {
         java.util.Set<String> lexerSorts = new HashSet<String>();
         for (Production p : psdfv.lexical) {
             Lexical l = (Lexical) p.getItems().get(0);
-            lexerSorts.add(p.getSort());
-            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz\n");
+            lexerSorts.add(p.getSort().getName());
+            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz\n");
             if (l.getFollow() != null && !l.getFollow().equals("")) {
-                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
+                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort().getName()), null, l.getFollow()));
             }
 
             // reject all terminals that match the regular expression of the lexical production
@@ -271,13 +271,13 @@ public class DefinitionSDF {
                 for (String t : terminals.terminals) {
                     Matcher m = pat.matcher(t);
                     if (m.matches())
-                        sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                        sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
                 }
             } else {
                 // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
                 // add rejects for all possible combinations
                 for (String t : terminals.terminals) {
-                    sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                    sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
                 }
             }
         }

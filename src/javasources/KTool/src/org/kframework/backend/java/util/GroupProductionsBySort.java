@@ -45,12 +45,12 @@ public class GroupProductionsBySort {
                 if (prod.containsAttribute(Attribute.BRACKET.getKey()))
                     continue;
 
-                String sort = prod.getSort();
-                if (!prodsBuilders.containsKey(sort)) {
+                String sortName = prod.getSort().getName();
+                if (!prodsBuilders.containsKey(sortName)) {
                     ImmutableList.Builder<Production> b = ImmutableList.builder();
-                    prodsBuilders.put(sort, b);
+                    prodsBuilders.put(sortName, b);
                 }
-                prodsBuilders.get(sort).add(prod);
+                prodsBuilders.get(sortName).add(prod);
                 klabelOfProd.put(prod, klabel);
             }
         for (Entry<String, ImmutableList.Builder<Production>> entry : prodsBuilders.entrySet()) {

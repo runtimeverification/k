@@ -119,7 +119,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     }
 
     public void addConstant(KLabelConstant kLabelConstant) {
-        this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
+        this.addProduction(kLabelConstant.getSort().getName(), new Terminal(kLabelConstant.getLabel()));
     }
 
     public void addProduction(String sort, ProductionItem prodItem) {

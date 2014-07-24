@@ -121,8 +121,8 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return KApp.of(new KInjectedLabel(emp));
             }
             // if this is a list sort
-            if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
-                Production listProd = context.listConses.get(emp.getSort());
+            if (!MaudeHelper.basicSorts.contains(emp.getSort().getName())) {
+                Production listProd = context.listConses.get(emp.getSort().getName());
                 String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
                 return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), context), KList.EMPTY);
                 // Constant cst = new Constant(l, f, KSorts.KLABEL, "'." + emp.getSort() + "");
@@ -168,10 +168,10 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return KApp.of(new KInjectedLabel(node));
             }
 
-            if (node.getSort().equals(BoolBuiltin.SORT_NAME)
-                    || node.getSort().equals(IntBuiltin.SORT_NAME)
-                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
-                    || node.getSort().equals(StringBuiltin.SORT_NAME)) {
+            if (node.getSort().equals(BoolBuiltin.SORT)
+                    || node.getSort().equals(IntBuiltin.SORT)
+                    || node.getSort().equals(FloatBuiltin.SORT)
+                    || node.getSort().equals(StringBuiltin.SORT)) {
                 return node;
             }
 
@@ -186,7 +186,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             if (kompileOptions.backend.java()) {
                 /* the Java Rewrite Engine preserves sort information for variables */
             } else {
-                node.setSort(KSorts.KITEM);
+                node.setSort(Sort2.KITEM);
             }
             return node;
         }

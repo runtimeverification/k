@@ -223,7 +223,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     protected final Collection<Term> baseTerms;
 
     protected DataStructureBuiltin(DataStructureSort sort, Collection<Term> baseTerms) {
-        super(sort.name());
+        super(Sort2.of(sort.name()));
         this.dataStructureSort = sort;
         this.baseTerms = baseTerms;
         if (baseTerms.size() == 1) {

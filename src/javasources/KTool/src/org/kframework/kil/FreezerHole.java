@@ -12,7 +12,7 @@ public class FreezerHole extends Term {
     private int index;
 
     public FreezerHole(int index) {
-        super("K");
+        super(Sort2.K);
         this.index = index;
     }
 

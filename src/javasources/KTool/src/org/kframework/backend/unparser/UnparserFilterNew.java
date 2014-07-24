@@ -647,7 +647,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
         if (MetaK.isKSort(term.getSort())) {
-            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
+            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             indenter.write("2KLabel ");
         } else {
             indenter.write("# ");
@@ -763,7 +763,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (c.isSyntactic()) {
             indenter.write(":");
         }
-        indenter.write(c.getSort());
+        indenter.write(c.getSort().getName());
         return postpare();
     }
 
@@ -802,9 +802,9 @@ public class UnparserFilterNew extends NonCachingVisitor {
         return null;
     }
 
-    private List<Terminal> findRightSyntax(String sort){
+    private List<Terminal> findRightSyntax(Sort2 sort){
 
-        Production p = context.canonicalBracketForSort.get(sort);
+        Production p = context.canonicalBracketForSort.get(sort.getName());
         if (p == null) {
             return new ArrayList<Terminal>();
         } else {

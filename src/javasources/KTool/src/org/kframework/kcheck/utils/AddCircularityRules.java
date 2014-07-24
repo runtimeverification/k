@@ -15,6 +15,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
@@ -50,7 +51,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
                 parser.visitNode(r);
 
                 Term newPi = parser.getPi().shallowCopy();
-                Variable K = Variable.getFreshVar("K");
+                Variable K = Variable.getFreshVar(Sort2.K);
 
                 // extract the content of the K cell (PGM) from LHS of
                 // the reachability rule and replace it by PGM ~> K

@@ -5,6 +5,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
@@ -31,8 +32,8 @@ public class TypeSystemFilter extends ParseForestTransformer {
             for (int i = 0; i < prd.getItems().size(); i++) {
                 if (prd.getItems().get(i) instanceof Sort) {
                     Sort sort = (Sort) prd.getItems().get(i);
-                    Term child = (Term) tc.getContents().get(j);
-                    tc.getContents().set(j, (Term) new TypeSystemFilter2(sort.getName(), context).visitNode(child));
+                    Term child = tc.getContents().get(j);
+                    tc.getContents().set(j, (Term) new TypeSystemFilter2(Sort2.of(sort.getName()), context).visitNode(child));
                     j++;
                 }
             }

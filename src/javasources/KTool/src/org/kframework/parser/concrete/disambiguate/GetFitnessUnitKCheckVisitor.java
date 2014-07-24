@@ -30,8 +30,8 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
             for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof Sort) {
                     Sort sort = (Sort) tc.getProduction().getItems().get(i);
-                    Term child = (Term) tc.getContents().get(j);
-                    score += getFitnessUnit2(sort.getName(), child);
+                    Term child = tc.getContents().get(j);
+                    score += getFitnessUnit2(Sort2.of(sort.getName()), child);
                     j++;
                 }
             }
@@ -48,7 +48,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
      *            - the sort found in the term.
      * @return
      */
-    private int getFitnessUnit2(String declSort, Term childTerm) {
+    private int getFitnessUnit2(Sort2 declSort, Term childTerm) {
         if (childTerm instanceof Rewrite) {
             Rewrite rw = (Rewrite) childTerm;
             return getFitnessUnit2(declSort, rw.getLeft()) + getFitnessUnit2(declSort, rw.getRight());
@@ -63,14 +63,14 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
         return getFitnessUnit3(declSort, childTerm.getSort());
     }
 
-    private int getFitnessUnit3(String declSort, String termSort) {
-        if (termSort.equals(""))
+    private int getFitnessUnit3(Sort2 declSort, Sort2 termSort) {
+        if (termSort.getName().equals(""))
             return 0; // if it is amb it won't have a sort
         int score;
         if (context.isSubsortedEq(declSort, termSort))
             score = 0;
         // isSubsortEq(|"K", expect) ; <?"K"> place ; !-1
-        else if (context.isSubsortedEq("K", declSort) && termSort.equals("K"))
+        else if (context.isSubsortedEq(Sort2.K, declSort) && termSort.equals(Sort2.K))
             score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
         else {
             score = -1;

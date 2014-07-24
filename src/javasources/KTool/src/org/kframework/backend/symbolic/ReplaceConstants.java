@@ -58,7 +58,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
                 Token token = (Token) (entry.getValue().getLabel());
                 terms.add(KApp.of(
                         KLabelConstant.of(AddPredicates.predicate(
-                                token.tokenSort().replaceFirst("#", "")), context),
+                                token.tokenSort().getName().replaceFirst("#", "")), context),
                         entry.getKey()));
             }
 

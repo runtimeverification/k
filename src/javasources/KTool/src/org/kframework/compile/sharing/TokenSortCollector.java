@@ -60,7 +60,7 @@ public class TokenSortCollector extends BasicVisitor {
             checkIllegalProduction(production);
         } else {
             if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
-                tokenSorts.add(production.getSort());
+                tokenSorts.add(production.getSort().getName());
             }
         }
         return null;
@@ -77,7 +77,7 @@ public class TokenSortCollector extends BasicVisitor {
      *            the specified production
      */
     private void checkIllegalProduction(Production production) {
-        String sort = production.getSort();
+        String sort = production.getSort().getName();
 
         if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
             if (nonTokenSorts.contains(sort)) {

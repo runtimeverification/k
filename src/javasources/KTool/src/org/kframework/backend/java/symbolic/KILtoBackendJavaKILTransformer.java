@@ -156,7 +156,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                         ((FloatBuiltin) node.getLabel()).exponent());
             } else if (node.getLabel() instanceof GenericToken) {
                 return UninterpretedToken.of(
-                        Sort.of(((GenericToken) node.getLabel()).tokenSort()),
+                        Sort.of(((GenericToken) node.getLabel()).tokenSort().getName()),
                         ((GenericToken) node.getLabel()).value());
             } else {
                 assert false : "unsupported Token " + node.getLabel();
@@ -173,7 +173,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KItemProjection node, Void _)  {
-        return new KItemProjection(Kind.of(Sort.of(node.projectedKind())), (Term) this.visitNode(node.getTerm()));
+        return new KItemProjection(Kind.of(Sort.of(node.projectedKind().getName())), (Term) this.visitNode(node.getTerm()));
     }
 
     @Override
@@ -304,7 +304,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Bag node, Void _) {
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
         org.kframework.kil.Bag.flatten(contents,
-                ((org.kframework.kil.Bag) node).getContents());
+                node.getContents());
 
         Multimap<String, Cell> cells = ArrayListMultimap.create();
         List<Variable> baseTerms = Lists.newArrayList();
@@ -539,7 +539,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        return new Variable(node.getName(), Sort.of(node.getSort()));
+        return new Variable(node.getName(), Sort.of(node.getSort().getName()));
     }
 
     @Override
@@ -797,7 +797,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (rule.isCompiledForFastRewriting()) {
             rhsOfWriteCell = new HashMap<>();
             for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
-                rhsOfWriteCell.put(entry.getKey(), (Term) entry.getValue().evaluate(termContext));
+                rhsOfWriteCell.put(entry.getKey(), entry.getValue().evaluate(termContext));
             }
         }
 

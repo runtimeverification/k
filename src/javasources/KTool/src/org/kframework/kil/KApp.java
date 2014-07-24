@@ -58,7 +58,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     public KApp(String location, String filename, Term label, Term child) {
-        super(location, filename, KSorts.KITEM);
+        super(location, filename, Sort2.KITEM);
         setLabel(label);
         setChild(child);
     }
@@ -70,7 +70,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     public KApp(Term label, Term child) {
-        super(KSorts.KITEM);
+        super(Sort2.KITEM);
         setLabel(label);
         setChild(child);
     }

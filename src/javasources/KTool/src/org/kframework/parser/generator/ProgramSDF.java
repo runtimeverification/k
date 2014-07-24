@@ -91,7 +91,7 @@ public class ProgramSDF {
         for (Production p : psdfv.outsides) {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
-                sdf.append("    {" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\"}" + si.getListType() + " -> " + StringUtil.escapeSortName(p.getSort()));
+                sdf.append("    {" + StringUtil.escapeSortName(si.getSort().getName()) + " \"" + si.getSeparator() + "\"}" + si.getListType() + " -> " + StringUtil.escapeSortName(p.getSort().getName()));
                 sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
             } else {
                 sdf.append("    ");
@@ -116,7 +116,7 @@ public class ProgramSDF {
                         }
                     }
                 }
-                sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
+                sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
                 sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
             }
         }
@@ -162,7 +162,7 @@ public class ProgramSDF {
 
         sdf.append("lexical syntax\n");
         for (Production prd : psdfv.constants) {
-            sdf.append("    " + prd.getItems().get(0) + " -> Dz" + StringUtil.escapeSortName(prd.getSort()) + "\n");
+            sdf.append("    " + prd.getItems().get(0) + " -> Dz" + StringUtil.escapeSortName(prd.getSort().getName()) + "\n");
         }
 
         sdf.append("\n\n");
@@ -183,10 +183,10 @@ public class ProgramSDF {
         java.util.Set<String> lexerSorts = new HashSet<String>();
         for (Production p : psdfv.lexical) {
             Lexical l = (Lexical) p.getItems().get(0);
-            lexerSorts.add(p.getSort());
-            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz\n");
+            lexerSorts.add(p.getSort().getName());
+            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz\n");
             if (l.getFollow() != null && !l.getFollow().equals("")) {
-                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
+                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort().getName()), null, l.getFollow()));
             }
 
             // reject all terminals that match the regular expression of the lexical production
@@ -195,13 +195,13 @@ public class ProgramSDF {
                 for (String t : ctv.terminals) {
                     Matcher m = pat.matcher(t);
                     if (m.matches())
-                        sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                        sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
                 }
             } else {
                 // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
                 // add rejects for all possible combinations
                 for (String t : ctv.terminals) {
-                    sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                    sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
                 }
             }
         }

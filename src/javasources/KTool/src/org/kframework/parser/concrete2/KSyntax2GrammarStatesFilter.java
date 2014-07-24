@@ -53,7 +53,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     public Void visit(Production prd, Void _) {
         if (prd.containsAttribute("notInPrograms") || prd.containsAttribute("reject"))
             return null;
-        NonTerminal nt = grammar.get(prd.getSort());
+        NonTerminal nt = grammar.get(prd.getSort().getName());
         assert nt != null : "Could not find in the grammar the required sort: " + prd.getSort();
         NextableState previous = nt.entryState;
         // all types of production follow pretty much the same pattern
@@ -62,7 +62,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         if (prd.isListDecl()) {
             if (true) { // circular DFA/associative lists (faster)
                 UserList ul = prd.getListDecl();
-                String ntName = prd.getSort();
+                String ntName = prd.getSort().getName();
                 /**
                  * It may be more efficient to make it this way.
                  *
@@ -73,7 +73,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                  *           ^------------------+
                  */
                 RuleState labelState = new RuleState(ntName + "-L", nt, new WrapLabelRule(prd, prd.getSort()));
-                NonTerminalState IdState = new NonTerminalState(ntName + "-S", nt, grammar.get(ul.getSort()), false);
+                NonTerminalState IdState = new NonTerminalState(ntName + "-S", nt, grammar.get(ul.getSort().getName()), false);
                 PrimitiveState separatorState = new RegExState(ntName + "-T", nt, Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.KITEM);
                 RuleState deleteToken = new RuleState(ntName + "-D", nt, new DeleteRule(1, true));
 
@@ -134,11 +134,11 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     locRule.next.add(IdsTerminatorNt.exitState);
                 }
                 // NeIds
-                String ntName = prd.getSort();
+                String ntName = prd.getSort().getName();
                 NonTerminal NeIdsNt = new NonTerminal("Ne-" + ntName);
                 {
                     NonTerminalState IdState = new NonTerminalState(ntName + "-S", NeIdsNt,
-                            grammar.get(ul.getSort()), false);
+                            grammar.get(ul.getSort().getName()), false);
                     PrimitiveState separatorState = new RegExState(ntName + "-T", NeIdsNt,
                             Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.KITEM);
                     RuleState deleteToken = new RuleState(ntName + "-D", NeIdsNt,
@@ -203,8 +203,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     rejects.add(((Terminal) preject.getItems().get(0)).getTerminal());
                 }
             }
-            PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
-                nt, Pattern.compile(pattern), prd.getSort(), rejects);
+            PrimitiveState pstate = new RegExState(prd.getSort().getName() + "-T",
+                nt, Pattern.compile(pattern), prd.getSort().getName(), rejects);
             previous.next.add(pstate);
             previous = pstate;
         } else if (prd.isConstant(context)) { // TODO(Radu): properly determine if a production is a constant or not
@@ -212,8 +212,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             // just like the above case, but match an exact string instead of a regex
             Terminal terminal = prd.getConstant();
             PrimitiveState pstate = new RegExState(
-                prd.getSort() + "-T", nt,
-                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort());
+                prd.getSort().getName() + "-T", nt,
+                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort().getName());
             previous.next.add(pstate);
             previous = pstate;
         } else {

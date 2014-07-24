@@ -11,6 +11,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.ListTerminator;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
@@ -27,11 +28,11 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 
         if (amb.getContents().get(0) instanceof TermCons) {
             TermCons t1 = (TermCons)amb.getContents().get(0);
-            if (MetaK.isComputationSort(t1.getSort())) {
+            if (MetaK.isComputationSort(t1.getSort().getName())) {
                 if (t1.getProduction().isListDecl()) {
                     Term t2 = t1.getContents().get(1);
                     UserList ul = (UserList)t1.getProduction().getItems().get(0);
-                    if (context.isSubsortedEq(ul.getSort(), t2.getSort())) {
+                    if (context.isSubsortedEq(ul.getSort().getName(), t2.getSort().getName())) {
                         t1.getContents().set(1, addEmpty(t2, t1.getSort()));
                     }
                     if (t2 instanceof ListTerminator) {
@@ -44,15 +45,15 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
             }
         } else if (amb.getContents().get(0) instanceof ListTerminator) {
             ListTerminator t1 = (ListTerminator)amb.getContents().get(0);
-            if (MetaK.isComputationSort(t1.getSort())) {
-                return new ListTerminator(((UserList) context.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
+            if (MetaK.isComputationSort(t1.getSort().getName())) {
+                return new ListTerminator(((UserList) context.listConses.get(t1.getSort().getName()).getItems().get(0)).getSeparator());
             }
         }
         return amb;
     }
 
-    private Term addEmpty(Term node, String sort) {
-        TermCons tc = new TermCons(sort, context.listConses.get(sort).getCons(), context);
+    private Term addEmpty(Term node, Sort2 sort) {
+        TermCons tc = new TermCons(sort, context.listConses.get(sort.getName()).getCons(), context);
         List<Term> contents = new ArrayList<Term>();
         contents.add(node);
         contents.add(new ListTerminator(sort, null));

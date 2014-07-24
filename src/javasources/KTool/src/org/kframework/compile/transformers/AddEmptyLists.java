@@ -8,6 +8,7 @@ import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
@@ -63,9 +64,9 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
                 if (!(pi instanceof Sort))
                     continue;
 
-                String srt = ((Sort) pi).getName();
-                if (context.isListSort(srt)) {
-                    Term t = (Term) tc.getContents().get(i);
+                Sort2 srt = Sort2.of(((Sort) pi).getName());
+                if (context.isListSort(srt.getName())) {
+                    Term t = tc.getContents().get(i);
                     // if the term should be a list, append the empty element
                     if (isAddEmptyList(srt, t.getSort())) {
                         if (!isUserListElement(srt, t, context)) {
@@ -82,8 +83,8 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         return super.visit(tc, _);
     }
 
-    private boolean isUserListElement(String listSort, Term element, Context context) {
-        String elementSort = element.getSort();
+    private boolean isUserListElement(Sort2 listSort, Term element, Context context) {
+        Sort2 elementSort = element.getSort();
 
         /* TODO: properly infer sort of KApp */
         if (elementSort.equals(KSorts.KITEM) && element instanceof KApp) {
@@ -94,19 +95,20 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         }
 
         return !elementSort.equals(KSorts.KITEM)
-               && context.isSubsortedEq(listSort, elementSort);
+               && context.isSubsortedEq(listSort.getName(), elementSort.getName());
     }
 
-    public boolean isAddEmptyList(String expectedSort, String termSort) {
-        if (!context.isListSort(expectedSort))
+    public boolean isAddEmptyList(Sort2 expectedSort, Sort2 termSort) {
+        if (!context.isListSort(expectedSort.getName()))
             return false;
-        if (context.isSubsortedEq(expectedSort, termSort) && context.isListSort(termSort))
+        if (context.isSubsortedEq(expectedSort.getName(), termSort.getName())
+                && context.isListSort(termSort.getName()))
             return false;
         return true;
     }
 
-    private Term addEmpty(Term node, String sort) {
-        TermCons tc = new TermCons(sort, getListCons(sort), context);
+    private Term addEmpty(Term node, Sort2 sort) {
+        TermCons tc = new TermCons(sort, getListCons(sort.getName()), context);
         List<Term> genContents = new ArrayList<Term>();
         genContents.add(node);
         genContents.add(new ListTerminator(sort, null));

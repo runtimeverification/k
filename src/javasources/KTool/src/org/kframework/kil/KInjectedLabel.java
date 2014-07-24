@@ -11,7 +11,7 @@ public class KInjectedLabel extends Term implements Interfaces.MutableParent<Ter
     protected Term term;
 
     public KInjectedLabel(String location, String filename) {
-        super(location, filename, KSorts.KLABEL);
+        super(location, filename, Sort2.KLABEL);
     }
 
     public KInjectedLabel(KInjectedLabel l) {
@@ -20,7 +20,7 @@ public class KInjectedLabel extends Term implements Interfaces.MutableParent<Ter
     }
 
     public KInjectedLabel(Term t) {
-        super(KSorts.KLABEL);
+        super(Sort2.KLABEL);
         term = t;
     }
 
@@ -32,19 +32,20 @@ public class KInjectedLabel extends Term implements Interfaces.MutableParent<Ter
         this.term = term;
     }
 
+    @Override
     public String toString() {
         return "# " + term;
     }
 
-    public static String getInjectedSort(String sort) {
-        if (sort.equals("BagItem"))
-            return "Bag";
-        if (sort.equals("SetItem"))
-            return "Set";
-        if (sort.equals("MapItem"))
-            return "Map";
-        if (sort.equals("ListItem"))
-            return "List";
+    public static Sort2 getInjectedSort(Sort2 sort) {
+        if (sort.equals(Sort2.BAG_ITEM))
+            return Sort2.BAG;
+        if (sort.equals(Sort2.SET_ITEM))
+            return Sort2.SET;
+        if (sort.equals(Sort2.MAP_ITEM))
+            return Sort2.MAP;
+        if (sort.equals(Sort2.LIST_ITEM))
+            return Sort2.LIST;
         return sort;
     }
 

@@ -48,10 +48,10 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
                 vars.add(new VarHashMap());
             for (VarHashMap vars2 : vars)
                 if (vars2.containsKey(var.getName())) {
-                    vars2.get(var.getName()).add(var.getExpectedSort());
+                    vars2.get(var.getName()).add(var.getExpectedSort().getName());
                 } else {
                     java.util.Set<String> varss = new HashSet<String>();
-                    varss.add(var.getExpectedSort());
+                    varss.add(var.getExpectedSort().getName());
                     vars2.put(var.getName(), varss);
                 }
         }

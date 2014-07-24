@@ -12,6 +12,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -142,7 +143,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     for (Map.Entry<String, Set<String>> entry : solutions.iterator().next().entrySet()) {
                         Variable var = new Variable(entry.getKey(), null);
                         var.setUserTyped(false);
-                        var.setExpectedSort(entry.getValue().iterator().next());
+                        var.setExpectedSort(Sort2.of(entry.getValue().iterator().next()));
                         var.setSyntactic(false);
                         varDeclMap.put(entry.getKey(), var);
                     }

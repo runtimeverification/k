@@ -73,7 +73,7 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             // correct or the most concrete sort!
 //            assert kLabel.productions().size() == 1 : "TODO(YilongL): fix it";
             for (Production prod : kLabel.productions()) {
-                set.add(Sort.of(prod.getSort()));
+                set.add(Sort.of(prod.getSort().getName()));
             }
             cachedSortsOfKLabel.put(kLabel, set);
             sorts = set;

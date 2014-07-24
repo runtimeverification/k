@@ -50,10 +50,10 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
     @Override
     public Void visit(Variable node, Void _) {
         if (node.getName().equals("$PGM")) {
-            context.startSymbolPgm = node.getSort();
+            context.startSymbolPgm = node.getSort().getName();
         }
         assert node.getName().startsWith("$") : "Configuration variables must start with $ symbol.";
-        context.configVarSorts.put(node.getName().substring(1), node.getSort());
+        context.configVarSorts.put(node.getName().substring(1), node.getSort().getName());
         return null;
     }
 }

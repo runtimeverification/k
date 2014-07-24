@@ -11,6 +11,7 @@ import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
@@ -103,8 +104,8 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
                 if (!context.isSubsortedEq(bigSort, smallSort))
                     return false;
             } else if (big.getItems().get(i) instanceof UserList) {
-                String bigSort = ((UserList) big.getItems().get(i)).getSort();
-                String smallSort = ((UserList) small.getItems().get(i)).getSort();
+                Sort2 bigSort = ((UserList) big.getItems().get(i)).getSort();
+                Sort2 smallSort = ((UserList) small.getItems().get(i)).getSort();
                 if (!context.isSubsortedEq(bigSort, smallSort))
                     return false;
             } else

@@ -25,7 +25,7 @@ public class GenericToken extends Token {
      * @param value
      * @return
      */
-    public static GenericToken of(String sort, String value) {
+    public static GenericToken of(Sort2 sort, String value) {
         GenericToken genericToken = new GenericToken(sort, value);
         GenericToken cachedGenericToken = tokenCache.get(genericToken);
         if (cachedGenericToken == null) {
@@ -43,7 +43,7 @@ public class GenericToken extends Token {
      * @param value
      * @return
      */
-    public static KApp kAppOf(String sort, String value) {
+    public static KApp kAppOf(Sort2 sort, String value) {
         GenericToken genericToken = new GenericToken(sort, value);
         KApp kApp = kAppCache.get(genericToken);
         if (kApp == null) {
@@ -53,27 +53,22 @@ public class GenericToken extends Token {
         return kApp;
     }
 
-    private final String tokenSort;
+    private final Sort2 tokenSort;
     private final String value;
 
-    private GenericToken(String sort, String value) {
+    private GenericToken(Sort2 sort, String value) {
         this.tokenSort = sort;
         this.value = value;
     }
 
     protected GenericToken(Element element) {
         super(element);
-        this.tokenSort = element.getAttribute(Constants.SORT_sort_ATTR);
+        this.tokenSort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
         this.value = element.getAttribute(Constants.VALUE_value_ATTR);
     }
 
-    /**
-     * Returns a {@link String} representing the sort of the token.
-     *
-     * @return
-     */
     @Override
-    public String tokenSort() {
+    public Sort2 tokenSort() {
         return tokenSort;
     }
 

@@ -11,18 +11,18 @@ import org.w3c.dom.Element;
  */
 public class Hole extends Term {
 
-    public static final Hole KITEM_HOLE = new Hole(KSorts.KITEM);
+    public static final Hole KITEM_HOLE = new Hole(Sort2.KITEM);
 
     private Hole(Element element) {
         super(element);
-        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+        this.sort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
     }
 
     private Hole(Hole hole) {
         super(hole);
     }
 
-    private Hole(String sort) {
+    private Hole(Sort2 sort) {
         super(sort);
 
         assert sort.equals(KSorts.KITEM);

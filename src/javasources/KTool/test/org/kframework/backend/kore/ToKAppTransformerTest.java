@@ -16,6 +16,7 @@ import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Production;
 import org.kframework.kil.SetBuiltin;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.mockito.Mock;
@@ -108,19 +109,19 @@ public class ToKAppTransformerTest {
         ListBuiltin listElement = (ListBuiltin) DataStructureBuiltin.element(listSort, KSequence.EMPTY);
         SetBuiltin setElement = (SetBuiltin) DataStructureBuiltin.element(setSort, KSequence.EMPTY);
 
-        MapBuiltin map = (MapBuiltin) DataStructureBuiltin.of(mapSort, mapElement, new Variable("M", "Map"));
-        ListBuiltin list = (ListBuiltin) DataStructureBuiltin.of(listSort, listElement, new Variable("L", "List"));
-        SetBuiltin set = (SetBuiltin) DataStructureBuiltin.of(setSort, setElement, new Variable("S", "Set"));
+        MapBuiltin map = (MapBuiltin) DataStructureBuiltin.of(mapSort, mapElement, new Variable("M", Sort2.MAP));
+        ListBuiltin list = (ListBuiltin) DataStructureBuiltin.of(listSort, listElement, new Variable("L", Sort2.LIST));
+        SetBuiltin set = (SetBuiltin) DataStructureBuiltin.of(setSort, setElement, new Variable("S", Sort2.SET));
 
         KApp mapKApp = (KApp) transformer.visitNode(map);
         KApp listKApp = (KApp) transformer.visitNode(list);
         KApp setKApp = (KApp) transformer.visitNode(set);
 
         assertEquals(KApp.of("'_Map_", KApp.of("'_|->_", KSequence.EMPTY, KSequence.EMPTY),
-                new Variable("M", "Map")), mapKApp);
+                new Variable("M", Sort2.MAP)), mapKApp);
         assertEquals(KApp.of("'_List_", KApp.of("'ListItem", KSequence.EMPTY),
-                new Variable("L", "List")), listKApp);
+                new Variable("L", Sort2.LIST)), listKApp);
         assertEquals(KApp.of("'_Set_", KApp.of("'SetItem", KSequence.EMPTY),
-                new Variable("S", "Set")), setKApp);
+                new Variable("S", Sort2.SET)), setKApp);
     }
 }

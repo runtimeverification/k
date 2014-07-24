@@ -15,6 +15,7 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
@@ -230,7 +231,7 @@ public class Context implements Serializable {
         listLabelSeparator.put(label, separator);
         if (s == null)
             listLabels.put(label, s = new HashSet<String>());
-        s.add(p.getSort());
+        s.add(p.getSort().getName());
     }
 
     public void putAssoc(String cons, Collection<Production> prods) {
@@ -244,15 +245,15 @@ public class Context implements Serializable {
     public void addCellDecl(Cell c) {
         cells.put(c.getLabel(), c);
 
-        String kind = subsorts.getMaxim(c.getContents().getSort());
+        String kind = subsorts.getMaxim(c.getContents().getSort().getName());
         if (kind.equals(KSorts.KLIST)) {
-            kind = "K";
+            kind = KSorts.K;
         }
         cellKinds.put(c.getLabel(), kind);
 
         String sort = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
         if (sort == null) {
-            sort = c.getContents().getSort();
+            sort = c.getContents().getSort().getName();
         }
         cellSorts.put(c.getLabel(), sort);
     }
@@ -276,10 +277,10 @@ public class Context implements Serializable {
      * we suppress cast warnings because we know that the sort must be UserList
      */
     @SuppressWarnings("cast")
-    public String getListElementSort(String sort) {
-        if (!isListSort(sort))
+    public Sort2 getListElementSort(Sort2 sort) {
+        if (!isListSort(sort.getName()))
             return null;
-        return ((UserList) listConses.get(sort).getItems().get(0)).getSort();
+        return ((UserList) listConses.get(sort.getName()).getItems().get(0)).getSort();
     }
 
     /**
@@ -349,7 +350,7 @@ public class Context implements Serializable {
             /* checks if the only common subsort is undefined */
             if (sort.equals(CompleteSortLatice.BOTTOM_SORT_NAME)
                     || isListSort(sort)
-                    && getListElementSort(sort).equals(CompleteSortLatice.BOTTOM_SORT_NAME)) {
+                    && getListElementSort(Sort2.of(sort)).getName().equals(CompleteSortLatice.BOTTOM_SORT_NAME)) {
                 return false;
             }
         }
@@ -439,9 +440,14 @@ public class Context implements Serializable {
         return fileRequirements.isInRelation(required, local);
     }
 
+    @Deprecated
     public void addSubsort(String bigSort, String smallSort) {
         // add the new subsorting
         subsorts.addRelation(bigSort, smallSort);
+    }
+
+    public void addSubsort(Sort2 bigSort, Sort2 smallSort) {
+        addSubsort(bigSort.getName(), smallSort.getName());
     }
 
     /**
@@ -461,10 +467,10 @@ public class Context implements Serializable {
         // detect if lists are subsorted (Vals Ids < Exps)
         for (Map.Entry<String, Production> ls1 : listConses.entrySet()) {
             for (Map.Entry<String, Production> ls2 : listConses.entrySet()) {
-                String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort();
-                String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort();
+                String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort().getName();
+                String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort().getName();
                 if (isSubsorted(sort1, sort2)) {
-                    subsorts.addRelation(ls1.getValue().getSort(), ls2.getValue().getSort());
+                    subsorts.addRelation(ls1.getValue().getSort().getName(), ls2.getValue().getSort().getName());
                 }
             }
         }
@@ -478,8 +484,13 @@ public class Context implements Serializable {
      * @param smallSort
      * @return
      */
+    @Deprecated
     public boolean isSubsorted(String bigSort, String smallSort) {
         return subsorts.isInRelation(bigSort, smallSort);
+    }
+
+    public boolean isSubsorted(Sort2 bigSort, Sort2 smallSort) {
+        return subsorts.isInRelation(bigSort.getName(), smallSort.getName());
     }
 
     /**
@@ -489,11 +500,17 @@ public class Context implements Serializable {
      * @param smallSort
      * @return
      */
+    @Deprecated
     public boolean isSubsortedEq(String bigSort, String smallSort) {
         if (bigSort.equals(smallSort))
             return true;
         return subsorts.isInRelation(bigSort, smallSort);
     }
+
+    public boolean isSubsortedEq(Sort2 bigSort, Sort2 smallSort) {
+        return isSubsortedEq(bigSort.getName(), smallSort.getName());
+    }
+
 
     public boolean isTagGenerated(String key) {
         return generatedTags.contains(key);
@@ -520,7 +537,7 @@ public class Context implements Serializable {
     public List<Production> productionsOf(String label) {
         Set<String> conses = labels.get(label);
         if (conses == null) {
-            return (List<Production>) Collections.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         }
 
         ArrayList<Production> productions = new ArrayList<Production>();
@@ -534,7 +551,7 @@ public class Context implements Serializable {
     }
 
     public Term kWrapper(Term t) {
-        if (isSubsortedEq("K", t.getSort()))
+        if (isSubsortedEq(KSorts.K, t.getSort().getName()))
             return t;
         return KApp.of(new KInjectedLabel(t));
     }
@@ -572,18 +589,28 @@ public class Context implements Serializable {
         this.dataStructureSorts = new HashMap<String, DataStructureSort>(dataStructureSorts);
     }
 
+    @Deprecated
     public DataStructureSort dataStructureSortOf(String sortName) {
         assert initialized : "Context is not initialized yet";
 
         return dataStructureSorts.get(sortName);
     }
 
+    public DataStructureSort dataStructureSortOf(Sort2 sort) {
+        return dataStructureListSortOf(sort.getName());
+    }
+
+    @Deprecated
     public DataStructureSort dataStructureListSortOf(String sortName) {
         assert initialized : "Context is not initialized yet";
         DataStructureSort sort = dataStructureSorts.get(sortName);
         if (sort == null) return null;
         if (!sort.type().equals(KSorts.LIST)) return null;
         return sort;
+    }
+
+    public DataStructureSort dataStructureListSortOf(Sort2 sort) {
+        return dataStructureListSortOf(sort.getName());
     }
 
     /**
@@ -619,7 +646,7 @@ public class Context implements Serializable {
                         production.getLocation()));
             }
 
-            freshFunctionNames.put(production.getSort(), production.getKLabel());
+            freshFunctionNames.put(production.getSort().getName(), production.getKLabel());
         }
     }
 

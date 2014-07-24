@@ -21,11 +21,13 @@ public class Ambiguity extends Collection {
         super(node);
     }
 
-    public Ambiguity(String sort, java.util.List<Term> col) {
+    public Ambiguity(Sort2 sort, java.util.List<Term> col) {
         super(sort, col);
     }
 
-    public Ambiguity(String sort, java.util.Collection<? extends Term> col) { this(sort, new ArrayList<>(col)); }
+    public Ambiguity(Sort2 sort, java.util.Collection<? extends Term> col) {
+        this(sort, new ArrayList<>(col));
+    }
 
     @Override
     public String toString() {

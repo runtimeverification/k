@@ -28,10 +28,10 @@ public class MaudeHelper {
 
         basicSorts.add(KSorts.CELL_LABEL);
 
-        basicSorts.add(BoolBuiltin.SORT_NAME);
-        basicSorts.add(IntBuiltin.SORT_NAME);
-        basicSorts.add(StringBuiltin.SORT_NAME);
-        basicSorts.add(FloatBuiltin.SORT_NAME);
+        basicSorts.add(BoolBuiltin.SORT.getName());
+        basicSorts.add(IntBuiltin.SORT.getName());
+        basicSorts.add(StringBuiltin.SORT.getName());
+        basicSorts.add(FloatBuiltin.SORT.getName());
 
         basicSorts.add(KSorts.BAG);
         basicSorts.add(KSorts.BAG_ITEM);
@@ -52,10 +52,10 @@ public class MaudeHelper {
 
     public static Set<String> constantSorts = new HashSet<String>();
     static {
-        constantSorts.add(BoolBuiltin.SORT_NAME);
-        constantSorts.add(IntBuiltin.SORT_NAME);
-        constantSorts.add(StringBuiltin.SORT_NAME);
-        constantSorts.add(FloatBuiltin.SORT_NAME);
+        constantSorts.add(BoolBuiltin.SORT.getName());
+        constantSorts.add(IntBuiltin.SORT.getName());
+        constantSorts.add(StringBuiltin.SORT.getName());
+        constantSorts.add(FloatBuiltin.SORT.getName());
 
         constantSorts.add(KSorts.KLABEL);
 

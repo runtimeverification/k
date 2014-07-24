@@ -33,7 +33,7 @@ public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
                     if (token instanceof GenericToken) {
                         GenericToken gToken = (GenericToken) token;
                         if (gToken.tokenSort().equals("#Id")) {
-                            Variable v = new Variable(gToken.value(), sort);
+                            Variable v = new Variable(gToken.value(), Sort2.of(sort));
                             return v;
                         }
                     }

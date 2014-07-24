@@ -2,6 +2,7 @@
 package org.kframework.compile.transformers;
 
 import com.google.common.collect.Sets;
+
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BuiltinLookup;
@@ -17,6 +18,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.SetLookup;
 import org.kframework.kil.SetUpdate;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -296,7 +298,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 return node.viewBase();
             }
 
-            Variable variable = Variable.getFreshVar(node.sort().name());
+            Variable variable = Variable.getFreshVar(Sort2.of(node.sort().name()));
             if (node.hasViewBase()) {
                 /* TODO(AndreiS): check the uniqueness of list variables in the LHS */
                 assert !reverseMap.containsKey(node.viewBase());
@@ -388,7 +390,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                     return node.viewBase();
             }
 
-            Variable variable = Variable.getFreshVar(node.sort().name());
+            Variable variable = Variable.getFreshVar(Sort2.of(node.sort().name()));
             if (node.hasViewBase()) {
                 /* TODO(AndreiS): check the uniqueness of map variables in the LHS */
                 assert !reverseMap.containsKey(node.viewBase());
@@ -461,7 +463,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 return node.viewBase();
             }
 
-            Variable variable = Variable.getFreshVar(node.sort().name());
+            Variable variable = Variable.getFreshVar(Sort2.of(node.sort().name()));
             if (node.hasViewBase()) {
                 /* TODO(AndreiS): check the uniqueness of map variables in the LHS */
                 assert !reverseMap.containsKey(node.viewBase());

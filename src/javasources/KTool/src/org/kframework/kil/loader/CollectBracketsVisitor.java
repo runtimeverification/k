@@ -13,7 +13,7 @@ public class CollectBracketsVisitor extends BasicVisitor {
     @Override
     public Void visit(Production node, Void _) {
         if (node.isBracket()) {
-            context.canonicalBracketForSort.put(node.getSort(), node);
+            context.canonicalBracketForSort.put(node.getSort().getName(), node);
         }
         return null;
     }

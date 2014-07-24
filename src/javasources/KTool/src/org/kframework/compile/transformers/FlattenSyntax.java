@@ -76,7 +76,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
         node.setItems(pis);
         attrs.set("arity", arity);
         node.setAttributes(attrs);
-        node.setSort(KSorts.KLABEL);
+        node.setSort(Sort2.KLABEL);
         return node;
     }
 
@@ -84,6 +84,6 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     public ASTNode visit(Sort node, Void _)  {
         if (!MetaK.isComputationSort(node.getName()))
             return node;
-        return new Sort("K");
+        return new Sort(KSorts.K);
     }
 }

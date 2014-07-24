@@ -20,8 +20,6 @@ import org.kframework.utils.general.GlobalSettings;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.*;
-import java.util.Map;
-import java.util.Set;
 
 public class MaudeFilter extends BackendFilter {
     private boolean firstAttribute;
@@ -91,10 +89,10 @@ public class MaudeFilter extends BackendFilter {
 
           // TODO(AndreiS): move this in a more approprite place
           for (String sort : context.getTokenSorts()) {
-            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
+            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT
               + "), .KList)";
             String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
-            String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
+            String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT + ")" + ", .KList)";
             result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
                           + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
             result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
@@ -361,7 +359,7 @@ public class MaudeFilter extends BackendFilter {
                 if (!cellStr.id.equals("k")) {
                     placeHolders="_";
                     format = "ni ";
-                    sorts = KSort.getKSort(cell.getContents().getSort()).mainSort()
+                    sorts = KSort.getKSort(cell.getContents().getSort().getName()).mainSort()
                             .toString();
                     declareCell(id,placeHolders, sorts, cellSort, format);
                 }
@@ -435,14 +433,14 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(Variable variable, Void _) {
         if (variable.isFreshConstant()) {
             variable = variable.shallowCopy();
-            variable.setSort(KSorts.KITEM);
+            variable.setSort(Sort2.KITEM);
         }
-         if (MetaK.isBuiltinSort(variable.getSort())
+         if (MetaK.isBuiltinSort(variable.getSort().getName())
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
             if (context.getDataStructureSorts().containsKey(variable.getSort())) {
-                  String sort = context.dataStructureSortOf(variable.getSort()).type();
-                  sort = sort.equals("K") ? "KList" : sort;
+                  String sort = context.dataStructureSortOf(variable.getSort().getName()).type();
+                  sort = sort.equals(KSorts.K) ? KSorts.KLIST : sort;
                 result.append(sort + "2KLabel_(");
             } else {
                 result.append("#_(");
@@ -456,12 +454,12 @@ public class MaudeFilter extends BackendFilter {
         }
         result.append(":");
         if (context.getDataStructureSorts().containsKey(variable.getSort())) {
-            result.append(context.dataStructureSortOf(variable.getSort()).type());
+            result.append(context.dataStructureSortOf(variable.getSort().getName()).type());
         } else {
             result.append(variable.getSort());
         }
 
-        if (MetaK.isBuiltinSort(variable.getSort())
+        if (MetaK.isBuiltinSort(variable.getSort().getName())
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append(")");
             result.append(", ");
@@ -473,12 +471,12 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(ListTerminator empty, Void _) {
-        String sort = empty.getSort();
-        if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellFragment(sort)) {
+        Sort2 sort = empty.getSort();
+        if (MaudeHelper.basicSorts.contains(sort.getName()) || MetaK.isCellFragment(sort.getName())) {
             result.append(".");
             result.append(sort);
         } else {
-            Production prd = context.listConses.get(sort);
+            Production prd = context.listConses.get(sort.getName());
             UserList ul = (UserList) prd.getItems().get(0);
             result.append(".List`{\"");
             result.append(ul.getSeparator());
@@ -547,7 +545,7 @@ public class MaudeFilter extends BackendFilter {
                     }
                     addAnd = true;
                     Variable kVariable = variable.shallowCopy();
-                    kVariable.setSort(KSorts.KITEM);
+                    kVariable.setSort(Sort2.KITEM);
                     this.visitNode(kVariable);
                     result.append(" := fresh(\"").append(variable.getSort()).append("\")");
                 }
@@ -724,7 +722,7 @@ public class MaudeFilter extends BackendFilter {
         } else if (collection.getContents().size() == 1) {
             this.visitNode(collection.getContents().get(0));
         } else {
-            String constructor = getMaudeConstructor(collection.getSort());
+            String constructor = getMaudeConstructor(collection.getSort().getName());
             result.append(constructor);
             result.append("(");
 
@@ -907,12 +905,12 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
-        String sort = term.getSort().equals("K") ? "KList" : term.getSort();
-        if (MetaK.isKSort(sort)) {
+        Sort2 sort = term.getSort().equals(Sort2.K) ? Sort2.KLIST : term.getSort();
+        if (MetaK.isKSort(sort.getName())) {
             //result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
             result.append(KInjectedLabel.getInjectedSort(sort));
             result.append("2KLabel_(");
-        } else if (MetaK.isCellSort(sort)){
+        } else if (MetaK.isCellSort(sort.getName())){
             result.append(sort + "2KLabel_(");
 
         } else {
@@ -959,7 +957,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Bag bag, Void _) {
         if (bag.getContents().isEmpty()) {
-            this.visitNode(new ListTerminator(KSorts.BAG, null));
+            this.visitNode(new ListTerminator(Sort2.BAG, null));
             return null;
         }
         for (Term item: bag.getContents()) {

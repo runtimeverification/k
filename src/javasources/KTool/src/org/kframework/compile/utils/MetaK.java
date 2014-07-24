@@ -31,6 +31,7 @@ import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -153,10 +154,10 @@ public class MetaK {
     }
 
     public static Term defaultTerm(Term v, org.kframework.kil.loader.Context context) {
-        String sort = v.getSort();
-        KSort ksort = KSort.getKSort(sort).mainSort();
+        Sort2 sort = v.getSort();
+        KSort ksort = KSort.getKSort(sort.getName()).mainSort();
         if (ksort.isDefaultable())
-            return new ListTerminator(ksort.toString(), null);
+            return new ListTerminator(Sort2.of(ksort.toString()), null);
         GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
                 .getLocation()));
         return KSequence.EMPTY;
@@ -170,6 +171,7 @@ public class MetaK {
      * @return {@code true} if the specified sort has been defined in
      *         {@code KSort}; otherwise, false
      */
+    @Deprecated
     public static boolean isKSort(String sort) {
         try {
             KSort.valueOf(sort);
@@ -180,6 +182,10 @@ public class MetaK {
             return false;
         }
         return true;
+    }
+
+    public static boolean isKSort(Sort2 sort) {
+        return isKSort(sort.getName());
     }
 
     public static boolean isAnywhere(Rule r) {
@@ -267,7 +273,7 @@ public class MetaK {
 
     public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
         if (prod.isSubsort()) {
-            final Variable freshVar = Variable.getFreshVar(prod.getItems().get(0).toString());
+            final Variable freshVar = Variable.getFreshVar(Sort2.of(prod.getItems().get(0).toString()));
             if (prod.containsAttribute("klabel")) {
                 return KApp.of(KLabelConstant.of(prod.getKLabel(), context), freshVar);
             }
@@ -277,11 +283,11 @@ public class MetaK {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(KSorts.KLABEL)) {
                 return KLabelConstant.of(terminal, context);
-            } else if (prod.getSort().equals(BoolBuiltin.SORT_NAME)) {
+            } else if (prod.getSort().equals(BoolBuiltin.SORT)) {
                 return BoolBuiltin.kAppOf(terminal);
-            } else if (prod.getSort().equals(IntBuiltin.SORT_NAME)) {
+            } else if (prod.getSort().equals(IntBuiltin.SORT)) {
                 return IntBuiltin.kAppOf(terminal);
-            } else if (prod.getSort().equals(StringBuiltin.SORT_NAME)) {
+            } else if (prod.getSort().equals(StringBuiltin.SORT)) {
                 return StringBuiltin.kAppOf(terminal);
             } else {
                 return GenericToken.kAppOf(prod.getSort(), terminal);
@@ -289,8 +295,8 @@ public class MetaK {
         }
         if (prod.isLexical()) {
             return KApp.of(KLabelConstant.of("#token", context),
-                           StringBuiltin.kAppOf(prod.getSort()),
-                           Variable.getFreshVar("String"));
+                           StringBuiltin.kAppOf(prod.getSort().getName()),
+                           Variable.getFreshVar(Sort2.of("String")));
         }
         TermCons t = new TermCons(prod.getSort(), prod.getCons(), context);
         if (prod.isListDecl()) {
@@ -300,7 +306,7 @@ public class MetaK {
         }
         for (ProductionItem item : prod.getItems()) {
             if (item instanceof Sort) {
-                t.getContents().add(Variable.getFreshVar(((Sort) item).getName()));
+                t.getContents().add(Variable.getFreshVar(Sort2.of(((Sort) item).getName())));
             }
         }
         return t;
@@ -312,10 +318,10 @@ public class MetaK {
 
     public static boolean isBuiltinSort(String sort) {
         /* TODO: replace with a proper table of builtins */
-        return sort.equals(BoolBuiltin.SORT_NAME)
-               || sort.equals(IntBuiltin.SORT_NAME)
-               || sort.equals(StringBuiltin.SORT_NAME)
-               || sort.equals(FloatBuiltin.SORT_NAME)
+        return sort.equals(BoolBuiltin.SORT)
+               || sort.equals(IntBuiltin.SORT)
+               || sort.equals(StringBuiltin.SORT)
+               || sort.equals(FloatBuiltin.SORT)
                /* LTL builtin sorts */
 //               || sort.equals("#LtlFormula")
                || sort.equals("#Prop")
@@ -324,9 +330,9 @@ public class MetaK {
     }
 
     public static boolean isDataSort(String sort) {
-        return sort.equals(BoolBuiltin.SORT_NAME)
-                || sort.equals(IntBuiltin.SORT_NAME)
-                || sort.equals(StringBuiltin.SORT_NAME);
+        return sort.equals(BoolBuiltin.SORT)
+                || sort.equals(IntBuiltin.SORT)
+                || sort.equals(StringBuiltin.SORT);
     }
 
     /**
@@ -338,8 +344,13 @@ public class MetaK {
      * @return {@code true} if the specified sort is K, KItem, or any sort other
      *         than those defined in {@code KSort}; otherwise, {@code false}
      */
+    @Deprecated
     public static boolean isComputationSort(String sort) {
         return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
+    }
+
+    public static boolean isComputationSort(Sort2 sort) {
+        return isComputationSort(sort.getName());
     }
 
     public static String getListUnitLabel(String sep) {

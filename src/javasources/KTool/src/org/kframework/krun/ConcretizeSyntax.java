@@ -82,7 +82,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             }
             Term injected = ((KInjectedLabel)label).getTerm();
 //            if (injected instanceof Token) {
-                return (Term) this.visitNode(injected);
+                return this.visitNode(injected);
 //            }
         } else if (label instanceof KLabelConstant) {
             String klabel = ((KLabelConstant) label).getLabel();
@@ -106,7 +106,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                     for (int i = 0; i < contents.size(); i++) {
                         if (contents.get(i) instanceof KApp && ((KApp)contents.get(i)).getLabel() instanceof KInjectedLabel) {
                             KInjectedLabel l = (KInjectedLabel)((KApp)contents.get(i)).getLabel();
-                            if (context.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort())) {
+                            if (context.isSubsortedEq(p.getChildSort(i).getName(), l.getTerm().getSort().getName())) {
                                 newContents.set(i, l.getTerm());
                             }
                         } else {
@@ -121,7 +121,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 if (possibleTerms.size() == 1) {
                     return possibleTerms.get(0);
                 } else {
-                    return new Ambiguity("K", possibleTerms);
+                    return new Ambiguity(Sort2.K, possibleTerms);
                 }
             } else if (child.equals(KList.EMPTY)) {
                 //could be a list terminator, which don't have conses
@@ -129,7 +129,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 possibleTerms = new ArrayList<Term>();
                 if (sorts != null) {
                     for (String sort : sorts) {
-                            possibleTerms.add(new ListTerminator(sort, null));
+                            possibleTerms.add(new ListTerminator(Sort2.of(sort), null));
                     }
                     if (possibleTerms.size() == 0) {
                         return super.visit(kapp, null);
@@ -138,7 +138,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                         return possibleTerms.get(0);
                     } else {
 
-                        return new Ambiguity("K", possibleTerms);
+                        return new Ambiguity(Sort2.K, possibleTerms);
                     }
                 }
             }
@@ -175,7 +175,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             }
         }
         if (contents.size() == 0) {
-            return new ListTerminator("Bag", null);
+            return new ListTerminator(Sort2.BAG, null);
         }
         if (contents.size() == 1) {
             return contents.get(0);

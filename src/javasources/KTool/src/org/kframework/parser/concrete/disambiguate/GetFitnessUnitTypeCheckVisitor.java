@@ -32,8 +32,8 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
             for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof Sort) {
                     Sort sort = (Sort) tc.getProduction().getItems().get(i);
-                    Term child = (Term) tc.getContents().get(j);
-                    score += getFitnessUnit2(sort.getName(), child);
+                    Term child = tc.getContents().get(j);
+                    score += getFitnessUnit2(Sort2.of(sort.getName()), child);
                     j++;
                 }
             }
@@ -60,7 +60,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
      *            - the sort found in the term.
      * @return
      */
-    private int getFitnessUnit2(String declSort, Term childTerm) {
+    private int getFitnessUnit2(Sort2 declSort, Term childTerm) {
         if (childTerm instanceof Rewrite) {
             Rewrite rw = (Rewrite) childTerm;
             return getFitnessUnit2(declSort, rw.getLeft()) + getFitnessUnit2(declSort, rw.getRight());
@@ -75,12 +75,12 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
         return getFitnessUnit3(declSort, childTerm.getSort());
     }
 
-    private int getFitnessUnit3(String declSort, String termSort) {
+    private int getFitnessUnit3(Sort2 declSort, Sort2 termSort) {
         int score;
         if (context.isSubsortedEq(declSort, termSort))
             score = 0;
         // isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0
-        else if (context.isSubsortedEq("K", termSort) && (declSort.equals("K") || termSort.equals("K")))
+        else if (context.isSubsortedEq(Sort2.K, termSort) && (declSort.equals(Sort2.K) || termSort.equals(Sort2.K)))
             score = 0; // do nothing when you have a K
         else {
             score = -1;

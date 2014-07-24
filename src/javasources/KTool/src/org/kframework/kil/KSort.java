@@ -4,12 +4,17 @@ package org.kframework.kil;
 public enum KSort {
     K, Bag, BagItem, KItem, KList, CellLabel, KLabel, ;
 
+    @Deprecated
     public static KSort getKSort(String sort) {
         try {
             return KSort.valueOf(sort);
         } catch (IllegalArgumentException e) {
             return K;
         }
+    }
+
+    public static KSort getKSort(Sort2 sort) {
+        return getKSort(sort.getName());
     }
 
     public KSort mainSort() {

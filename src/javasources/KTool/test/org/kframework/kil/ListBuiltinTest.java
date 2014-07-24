@@ -31,20 +31,20 @@ public class ListBuiltinTest {
         ListBuiltin right2 = ListBuiltin.of(listSort, Collections.<Term>emptyList(),
                 Arrays.<Term>asList(KApp.of("five")),
                 Collections.<Term>emptyList());
-        ListBuiltin outer = ListBuiltin.of(listSort, Arrays.asList(left, new Variable("one", "List"), right),
+        ListBuiltin outer = ListBuiltin.of(listSort, Arrays.asList(left, new Variable("one", Sort2.LIST), right),
                 Collections.<Term>emptyList(),
                 Arrays.<Term>asList(KApp.of("five")));
         assertEquals(Arrays.asList(KApp.of("zero")), outer.elementsLeft());
         assertEquals(Arrays.asList(KApp.of("two"), KApp.of("three"), KApp.of("four"),
                 KApp.of("five")), outer.elementsRight());
-        assertEquals(new Variable("one", "List"), outer.viewBase());
+        assertEquals(new Variable("one", Sort2.LIST), outer.viewBase());
 
         ListBuiltin outer2 = (ListBuiltin)DataStructureBuiltin.of(listSort,
-                left, new Variable("one", "List"), right, right2);
+                left, new Variable("one", Sort2.LIST), right, right2);
         assertEquals(Arrays.asList(KApp.of("zero")), outer2.elementsLeft());
         assertEquals(Arrays.asList(KApp.of("two"), KApp.of("three"), KApp.of("four"),
                 KApp.of("five")), outer2.elementsRight());
-        assertEquals(new Variable("one", "List"), outer2.viewBase());
+        assertEquals(new Variable("one", Sort2.LIST), outer2.viewBase());
     }
 
     @Test
@@ -58,22 +58,22 @@ public class ListBuiltinTest {
 
     @Test
     public void testBaseTermWithElements() {
-        ListBuiltin inner = ListBuiltin.of(listSort, Arrays.<Term>asList(new Variable("v", "List")),
+        ListBuiltin inner = ListBuiltin.of(listSort, Arrays.<Term>asList(new Variable("v", Sort2.LIST)),
                 Arrays.<Term>asList(KApp.of("k")), Collections.<Term>emptyList());
         ListBuiltin outer = (ListBuiltin)DataStructureBuiltin.of(listSort, inner, inner);
         assertEquals(Arrays.<Term>asList(KApp.of("k")), outer.elementsLeft());
         assertEquals(Collections.<Term>emptyList(), outer.elementsRight());
-        assertEquals(Arrays.<Term>asList(new Variable("v", "List"),
-                ListBuiltin.element(listSort, KApp.of("k")), new Variable("v", "List")), outer.baseTerms());
+        assertEquals(Arrays.<Term>asList(new Variable("v", Sort2.LIST),
+                ListBuiltin.element(listSort, KApp.of("k")), new Variable("v", Sort2.LIST)), outer.baseTerms());
     }
 
     @Test
     public void testMultipleVariables() {
-        ListBuiltin inner = ListBuiltin.of(listSort, Arrays.<Term>asList(new Variable("L", "List")),
+        ListBuiltin inner = ListBuiltin.of(listSort, Arrays.<Term>asList(new Variable("L", Sort2.LIST)),
                 Arrays.<Term>asList(KApp.of("k")), Arrays.<Term>asList(KApp.of("k")));
-        ListBuiltin outer = (ListBuiltin) DataStructureBuiltin.of(listSort, inner, new Variable("L", "List"));
+        ListBuiltin outer = (ListBuiltin) DataStructureBuiltin.of(listSort, inner, new Variable("L", Sort2.LIST));
         assertEquals(Arrays.<Term>asList(KApp.of("k")), outer.elementsLeft());
-        assertEquals(Arrays.asList(new Variable("L", "List"), DataStructureBuiltin.element(listSort, KApp.of("k")), new Variable("L", "List")), outer.baseTerms());
+        assertEquals(Arrays.asList(new Variable("L", Sort2.LIST), DataStructureBuiltin.element(listSort, KApp.of("k")), new Variable("L", Sort2.LIST)), outer.baseTerms());
         assertEquals(Collections.<Term>emptyList(), outer.elementsRight());
     }
 }

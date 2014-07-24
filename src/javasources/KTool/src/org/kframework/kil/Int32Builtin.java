@@ -13,7 +13,7 @@ import org.w3c.dom.Element;
  */
 public class Int32Builtin extends Token {
 
-    public static final String SORT_NAME = "#Int32";
+    public static final Sort2 SORT = Sort2.of("#Int32");
 
     /* Token cache */
     private static Map<Integer, Int32Builtin> tokenCache = new HashMap<Integer, Int32Builtin>();
@@ -126,8 +126,8 @@ public class Int32Builtin extends Token {
      * Returns a {@link String} representing the sort name of a int token.
      */
     @Override
-    public String tokenSort() {
-        return Int32Builtin.SORT_NAME;
+    public Sort2 tokenSort() {
+        return Int32Builtin.SORT;
     }
 
     /**

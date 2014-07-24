@@ -31,7 +31,7 @@ public class MakeFreshVariables extends CopyOnWriteTransformer {
 //                        + ", " + node.isFreshVariable() + ")");
                 //return new AddSymbolicK(context).freshSymSortN(v.getSort(),
                 //        RLBackend.idx);
-                return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), Token.kAppOf("#Id", v.getName()));
+                return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort().getName())), Token.kAppOf("#Id", v.getName()));
             }
         }
         return super.visit(node, _);

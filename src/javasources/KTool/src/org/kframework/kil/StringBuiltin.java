@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
  */
 public class StringBuiltin extends Token {
 
-    public static final String SORT_NAME = "#String";
+    public static final Sort2 SORT = Sort2.of("#String");
 
     /* Token cache */
     private static Map<String, StringBuiltin> tokenCache = new HashMap<String, StringBuiltin>();
@@ -119,8 +119,8 @@ public class StringBuiltin extends Token {
      * @return
      */
     @Override
-    public String tokenSort() {
-        return StringBuiltin.SORT_NAME;
+    public Sort2 tokenSort() {
+        return StringBuiltin.SORT;
     }
 
     /**
