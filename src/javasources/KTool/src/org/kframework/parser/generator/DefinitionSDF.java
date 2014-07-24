@@ -126,7 +126,7 @@ public class DefinitionSDF {
         for (Production p : psdfv.outsides) {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
-                sdf.append("    " + StringUtil.escapeSortName(si.getSort()) + " " + StringUtil.enquoteString(si.getSeparator()) + " " + StringUtil.escapeSortName(p.getSort()) + " -> "
+                sdf.append("    " + StringUtil.escapeSortName(si.getSort()) + " \"" + StringUtil.escape(si.getSeparator()) + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> "
                         + StringUtil.escapeSortName(p.getSort()));
                 sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
                 sdf.append("    \"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort()));
@@ -147,7 +147,7 @@ public class DefinitionSDF {
                         else if (t.getTerminal().equals("!"))
                             sdf.append("ExclamationMarkDz ");
                         else
-                            sdf.append(StringUtil.enquoteString(t.getTerminal()) + " ");
+                            sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
                     } else if (itm instanceof Sort) {
                         Sort srt = (Sort) itm;
                         // if we are on the first or last place and this sort is not a list, just print the sort
@@ -271,13 +271,13 @@ public class DefinitionSDF {
                 for (String t : terminals.terminals) {
                     Matcher m = pat.matcher(t);
                     if (m.matches())
-                        sdf.append("    " + StringUtil.enquoteString(t) + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                        sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
                 }
             } else {
                 // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
                 // add rejects for all possible combinations
                 for (String t : terminals.terminals) {
-                    sdf.append("    " + StringUtil.enquoteString(t) + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
+                    sdf.append("    \"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(p.getSort()) + "Dz {reject}\n");
                 }
             }
         }
@@ -293,7 +293,7 @@ public class DefinitionSDF {
         sdf.append("context-free restrictions\n");
         for (Restrictions r : psdfv.restrictions) {
             if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
-                sdf.append("    " + StringUtil.enquoteString(r.getTerminal().getTerminal()) + " -/- " + r.getPattern() + "\n");
+                sdf.append("    \"" + StringUtil.escape(r.getTerminal().getTerminal()) + "\" -/- " + r.getPattern() + "\n");
             else
                 sdf.append("    " + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
         }
