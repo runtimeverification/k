@@ -102,7 +102,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
             if (pi instanceof UserList) {
                 sorts++;
                 UserList s = (UserList) pi;
-                if (!s.getSort().getName().startsWith("#") && !context.definedSorts.contains(s.getSort())) {
+                if (!s.getSort().getName().startsWith("#") && !context.definedSorts.contains(s.getSort().getName())) {
                     String msg = "Undefined sort " + s.getSort();
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }

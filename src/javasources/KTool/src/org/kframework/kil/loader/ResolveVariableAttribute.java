@@ -30,7 +30,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             for each backend.
              */
             if (kompileOptions.backend == KompileOptions.Backend.MAUDE) {
-                if (context.variableTokenSorts.contains(node.tokenSort())) {
+                if (context.variableTokenSorts.contains(node.tokenSort().getName())) {
                     String sort = KSorts.K;
                     String name = node.value();
                     int index = node.value().lastIndexOf(":");
@@ -47,7 +47,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
                 }
             }
 
-            if (context.variableTokenSorts.contains(node.tokenSort()))
+            if (context.variableTokenSorts.contains(node.tokenSort().getName()))
                 return new org.kframework.kil.Variable(node.value(), node.tokenSort());
         }
         return super.visit(kapp, _);    //To change body of overridden methods use File | Settings | File Templates.
