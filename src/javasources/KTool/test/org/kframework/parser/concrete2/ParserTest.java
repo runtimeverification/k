@@ -78,7 +78,7 @@ public class ParserTest {
         Parser parser = new Parser("asdfAAA1");
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(Token.kAppOf(KSorts.K, "asdfAAA1")))));
+        Term expected = amb(klist(amb(klist(Token.kAppOf(Sort2.K, "asdfAAA1")))));
         Assert.assertEquals("Single Token check: ", expected, result);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -104,7 +104,7 @@ public class ParserTest {
         Parser parser = new Parser("asdfAAA1 adfsf");
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "asdfAAA1 "), Token.kAppOf(KSorts.K, "adfsf"))))));
+        Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(Sort2.K, "asdfAAA1 "), Token.kAppOf(Sort2.K, "adfsf"))))));
         Assert.assertEquals("Single Token check: ", expected, result);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -138,19 +138,19 @@ public class ParserTest {
 
         {
             Term result = new Parser("abc").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(KSorts.K, "abc"))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(Sort2.K, "abc"))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser("ABC").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s3", Token.kAppOf(KSorts.K, "ABC"), Token.kAppOf(KSorts.K, ""))))));
+            Term expected = amb(klist(amb(klist(kapp("s3", Token.kAppOf(Sort2.K, "ABC"), Token.kAppOf(Sort2.K, ""))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser("123").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(KSorts.K, "123"))), klist(kapp("s3", Token.kAppOf(KSorts.K, "12"), Token.kAppOf(KSorts.K, "3"))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(Sort2.K, "123"))), klist(kapp("s3", Token.kAppOf(Sort2.K, "12"), Token.kAppOf(Sort2.K, "3"))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -178,7 +178,7 @@ public class ParserTest {
 
         {
             Term result = new Parser("abc").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "a"), Token.kAppOf(KSorts.K, "b"), Token.kAppOf(KSorts.K, "c"))))));
+            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(Sort2.K, "a"), Token.kAppOf(Sort2.K, "b"), Token.kAppOf(Sort2.K, "c"))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
@@ -249,12 +249,12 @@ public class ParserTest {
             Term result = new Parser("xxyy").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xAy",
-                    Token.kAppOf(KSorts.K, "x"),
+                    Token.kAppOf(Sort2.K, "x"),
                     amb(klist(kapp("xAy",
-                        Token.kAppOf(KSorts.K, "x"),
+                        Token.kAppOf(Sort2.K, "x"),
                         amb(klist(kapp("epsilon"))),
-                        Token.kAppOf(KSorts.K, "y")))),
-                    Token.kAppOf(KSorts.K, "y"))))));
+                        Token.kAppOf(Sort2.K, "y")))),
+                    Token.kAppOf(Sort2.K, "y"))))));
             Assert.assertEquals("x^ny^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -296,8 +296,8 @@ public class ParserTest {
                 amb(klist(amb(klist(kapp("Ay",
                     amb(klist(kapp("Ay",
                         amb(klist(kapp("epsilon"))),
-                        Token.kAppOf(KSorts.K, "y")))),
-                    Token.kAppOf(KSorts.K, "y"))))));
+                        Token.kAppOf(Sort2.K, "y")))),
+                    Token.kAppOf(Sort2.K, "y"))))));
             Assert.assertEquals("y^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -338,9 +338,9 @@ public class ParserTest {
             Term result = new Parser("xx").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xA",
-                        Token.kAppOf(KSorts.K, "x"),
+                        Token.kAppOf(Sort2.K, "x"),
                         amb(klist(kapp("xA",
-                                Token.kAppOf(KSorts.K, "x"),
+                                Token.kAppOf(Sort2.K, "x"),
                                 amb(klist(kapp("epsilon")))))))))));
             Assert.assertEquals("x^n check: ", expected, result);
         }
@@ -380,16 +380,16 @@ public class ParserTest {
 
         {
             Term result = new Parser("x").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x"))))));
+            Term expected = amb(klist(amb(klist(kapp("x", Token.kAppOf(Sort2.K, "x"))))));
             Assert.assertEquals("Single char check: ", expected, result);
         }
 
         {
             Term result = new Parser("xx").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x")))), amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x")))))))));
+            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", Token.kAppOf(Sort2.K, "x")))), amb(klist(kapp("x", Token.kAppOf(Sort2.K, "x")))))))));
             Assert.assertEquals("AA check: ", expected, result);
         }
-        Term X = kapp("x", Token.kAppOf(KSorts.K, "x"));
+        Term X = kapp("x", Token.kAppOf(Sort2.K, "x"));
         {
             Term result = new Parser("xxx").parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))), amb(klist(X)))),
@@ -425,7 +425,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x"))));
+        Term expected = amb(klist(kapp("x", Token.kAppOf(Sort2.K, "x"))));
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -467,7 +467,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x", Token.kAppOf(KSorts.K, ""))));
+        Term expected = amb(klist(kapp("x", Token.kAppOf(Sort2.K, ""))));
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -764,8 +764,8 @@ public class ParserTest {
         Term result2 = (Term) new TreeCleanerVisitor(null).visitNode(result);
         //System.out.println(result2);
 
-        Term one = Token.kAppOf("Int", "1");
-        Term mone = Token.kAppOf("Int", "-1");
+        Term one = Token.kAppOf(Sort2.INT, "1");
+        Term mone = Token.kAppOf(Sort2.INT, "-1");
         Term mexp = new TermCons(Sort2.of("Exp"), Arrays.asList(one), p1);
         Term expected = new TermCons(Sort2.of("Exps"), Arrays.<Term>asList(amb(mone, mexp)), p2);
 
@@ -776,7 +776,7 @@ public class ParserTest {
     }
 
     public static KApp token(String x) {
-        return Token.kAppOf(KSorts.K, x);
+        return Token.kAppOf(Sort2.K, x);
     }
 
     public static Production prod(String sort, ProductionItem... pi) {

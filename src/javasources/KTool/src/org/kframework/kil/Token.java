@@ -19,7 +19,7 @@ public abstract class Token extends KLabel {
      * @param value
      * @return
      */
-    public static Token of(String sort, String value) {
+    public static Token of(Sort2 sort, String value) {
         if (sort.equals(BoolBuiltin.SORT)) {
             return BoolBuiltin.of(value);
         } else if (sort.equals(IntBuiltin.SORT)) {
@@ -39,7 +39,7 @@ public abstract class Token extends KLabel {
      * @param value
      * @return
      */
-    public static KApp kAppOf(String sort, String value) {
+    public static KApp kAppOf(Sort2 sort, String value) {
         if (sort.equals(BoolBuiltin.SORT)) {
             return BoolBuiltin.kAppOf(value);
         } else if (sort.equals(IntBuiltin.SORT)) {

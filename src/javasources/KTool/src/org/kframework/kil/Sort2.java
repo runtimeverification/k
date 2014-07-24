@@ -20,6 +20,10 @@ public class Sort2 {
     public static final Sort2 SET = Sort2.of("Set");
     public static final Sort2 SET_ITEM = Sort2.of("SetItem");
 
+    public static final Sort2 ID = Sort2.of("Id");
+    public static final Sort2 SHARP_ID = Sort2.of("#Id");
+    public static final Sort2 INT = Sort2.of("Int");
+
 
     private String name;
 

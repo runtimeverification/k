@@ -540,7 +540,7 @@ public class Parser {
          * @return 'true' iff the mappings in this function changed.
          */
         boolean addToken(Function that, String string, String sort) {
-            final KApp token = Token.kAppOf(sort, string);
+            final KApp token = Token.kAppOf(Sort2.of(sort), string);
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
                     Set<KList> result = new HashSet<>();

@@ -346,7 +346,7 @@ public class MaudeKRun implements KRun {
                 assertXMLTerm(list.size() == 2);
                 StringBuiltin sortString = (StringBuiltin) parseXML(list.get(0), context);
                 StringBuiltin valueString = (StringBuiltin) parseXML(list.get(1), context);
-                return GenericToken.of(sortString.stringValue(), valueString.stringValue());
+                return GenericToken.of(Sort2.of(sortString.stringValue()), valueString.stringValue());
             } else if (sort.equals("#FiniteFloat")) {
                 assertXMLTerm(list.size() == 0);
                 return FloatBuiltin.of(Double.parseDouble(op));

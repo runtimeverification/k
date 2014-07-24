@@ -210,7 +210,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Token token) {
-        return org.kframework.kil.Token.kAppOf(token.sort().name(), token.value());
+        return org.kframework.kil.Token.kAppOf(Sort2.of(token.sort().name()), token.value());
     }
 
     @Override
