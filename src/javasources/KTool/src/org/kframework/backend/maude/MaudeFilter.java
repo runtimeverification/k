@@ -147,7 +147,7 @@ public class MaudeFilter extends BackendFilter {
                         msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
                     }
-                    if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
+                    if (!MaudeHelper.constantSorts.contains(syn.getSort().toString()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
                         result.append("op ");
                         result.append(StringUtil.escapeMaude(operation));
                         result.append(" : -> ");
