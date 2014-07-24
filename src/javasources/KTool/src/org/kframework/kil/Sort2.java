@@ -1,7 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-public class Sort2 {
+import java.io.Serializable;
+
+public class Sort2 implements Serializable {
 
     public static final Sort2 K = Sort2.of("K");
     public static final Sort2 KITEM = Sort2.of("KItem");
