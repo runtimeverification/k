@@ -1,11 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.runner;
 
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.utils.file.KPaths;
@@ -22,7 +17,6 @@ import java.util.logging.SimpleFormatter;
 
 public class KRunner {
     // private String _maudeCommand = "maude";
-    private OptionParser _parser = new OptionParser();
     private Logger _logger;
 
     private File _maudeFile;
@@ -39,40 +33,45 @@ public class KRunner {
     private boolean _noServer;
     protected Context context;
 
-    public KRunner(String[] args, Context context, File xmlOutFile) {
+    public KRunner(
+            File maudeFile,
+            File outputFile,
+            File errorFile,
+            File maudeCommandFile,
+            File xmlOutFile,
+            String maudeModuleName,
+            boolean createLogs,
+            boolean noServer,
+            Context context) {
+        this(maudeFile, 0, false, outputFile, errorFile, maudeCommandFile, xmlOutFile,
+                maudeModuleName, createLogs, noServer, context);
+    }
+
+    public KRunner(
+            File maudeFile,
+            int port,
+            boolean append,
+            File outputFile,
+            File errorFile,
+            File maudeCommandFile,
+            File xmlOutFile,
+            String maudeModuleName,
+            boolean createLogs,
+            boolean noServer,
+            Context context) {
         this.context = context;
+        this._maudeFile = maudeFile;
+        this._maudeFileName = _maudeFile.getAbsolutePath();
+        this._maudeCommandFile = maudeCommandFile;
+        this._maudeCommandFileName = _maudeCommandFile.getAbsolutePath();
         this._xmlOutFileName = xmlOutFile.getAbsolutePath();
-        // boolean append = true;
-        // parser.accepts("suppressio");
-
-        OptionSpec<File> maudeFile = _parser.accepts("maudeFile", "Maude file to run").withRequiredArg().required().ofType(File.class);
-        OptionSpec<Integer> port = _parser.accepts("port", "Port to use for IO server").withRequiredArg().ofType(Integer.class).defaultsTo(0);
-        OptionSpec<Boolean> append = _parser.accepts("appendLogs", "Whether or not messages should be appended to log files").withRequiredArg().ofType(Boolean.class).defaultsTo(false);
-        OptionSpec<File> outputFile = _parser.accepts("outputFile", "File to save resulting term").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/stdout"));
-        OptionSpec<File> errorFile = _parser.accepts("errorFile", "File to save any Maude errors").withRequiredArg().ofType(File.class).defaultsTo(new File("/dev/stdout"));
-        OptionSpec<File> maudeCommandFile = _parser.accepts("commandFile", "File containing maude command").withRequiredArg().required().ofType(File.class);
-        OptionSpec<String> maudeModuleName = _parser.accepts("moduleName", "Final module name").withRequiredArg().required().ofType(String.class);
-        OptionSpec<Void> createLogs = _parser.accepts("createLogs", "Create runtime log files");
-        OptionSpec<Void> noServer = _parser.accepts("noServer", "Don't start the IO server");
-
-        OptionSet options;
-        try {
-            options = _parser.parse(args);
-            _maudeFile = options.valueOf(maudeFile);
-            _maudeFileName = _maudeFile.getAbsolutePath();
-            _maudeCommandFile = options.valueOf(maudeCommandFile);
-            _maudeCommandFileName = _maudeCommandFile.getAbsolutePath();
-            _port = options.valueOf(port);
-            _append = options.valueOf(append);
-            _outputFileName = options.valueOf(outputFile).getAbsolutePath();
-            _errorFileName = options.valueOf(errorFile).getAbsolutePath();
-            _maudeModule = options.valueOf(maudeModuleName);
-            _createLogs = options.has(createLogs);
-            _noServer = options.has(noServer);
-        } catch (OptionException e) {
-            System.out.println(e.getMessage() + K.lineSeparator);
-            throw new AssertionError("Something is really wrong with the Maude KRunner", e);
-        }
+        this._port = port;
+        this._append = append;
+        this._outputFileName = outputFile.getAbsolutePath();
+        this._errorFileName = errorFile.getAbsolutePath();
+        this._maudeModule = maudeModuleName;
+        this._createLogs = createLogs;
+        this._noServer = noServer;
 
         startLogger();
 
@@ -144,10 +143,5 @@ public class KRunner {
                 ioServer.interrupt();
             }
         }
-    }
-
-    public static int main(String[] args, Context context, File xmlOutFile) {
-        KRunner runner = new KRunner(args, context, xmlOutFile);
-        return runner.run();
     }
 }

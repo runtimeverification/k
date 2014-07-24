@@ -95,35 +95,11 @@ public class MaudeKRun implements KRun {
         FileUtil.save(inFile.getAbsolutePath(), maudeCmd);
 
         int returnValue;
-        if (context.krunOptions.experimental.logIO) {
-            KRunner.main(new String[]{"--maudeFile",
-                    context.kompiled.getAbsolutePath()
-                        + K.fileSeparator + "main.maude", "--moduleName",
-                    context.kompileOptions.mainModule(), "--commandFile",
-                    inFile.getAbsolutePath(), "--outputFile",
-                    outFile.getAbsolutePath(), "--errorFile",
-                    errFile.getAbsolutePath(), "--createLogs"},
-                    context, xmlOutFile);
-        }
-        if (!ioServer) {
-            returnValue = KRunner.main(new String[]{"--maudeFile",
-                    context.kompiled.getAbsolutePath()
-                    + K.fileSeparator + "main.maude", "--moduleName",
-                context.kompileOptions.mainModule(), "--commandFile",
-                inFile.getAbsolutePath(), "--outputFile",
-                outFile.getAbsolutePath(), "--errorFile",
-                errFile.getAbsolutePath(), "--noServer"},
-                context, xmlOutFile);
-        } else {
-            returnValue = KRunner.main(new String[]{"--maudeFile",
-                    context.kompiled.getAbsolutePath()
-                    + K.fileSeparator + "main.maude", "--moduleName",
-                context.kompileOptions.mainModule(), "--commandFile",
-                inFile.getAbsolutePath(), "--outputFile",
-                outFile.getAbsolutePath(), "--errorFile",
-                errFile.getAbsolutePath()},
-                context, xmlOutFile);
-        }
+        KRunner runner = new KRunner(new File(context.kompiled, "main.maude"),
+                    outFile, errFile, inFile, xmlOutFile,
+                    context.kompileOptions.mainModule(),
+                    context.krunOptions.experimental.logIO, !ioServer, context);
+        returnValue = runner.run();
         if (errFile.exists()) {
             String content = FileUtil.getFileContent(errFile.getAbsolutePath());
             if (content.length() > 0) {
