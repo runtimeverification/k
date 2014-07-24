@@ -11,9 +11,20 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterDescription;
 
 public class StringUtil {
-    public static String unescape(String str) {
+    /**
+     * Unescape the textual representation of a string specific tu SDF.
+     * It removes the double quote at the beginning and end, and transforms special sequence
+     * of characters like "\n" into the newline character.
+     */
+    public static String unescapeSDF(String str) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
+        if (str.charAt(0) != '"') {
+            throw new IllegalArgumentException("Expected to find double quote at the beginning of string: " + str);
+        }
+        if (str.charAt(str.length() - 1) != '"') {
+            throw new IllegalArgumentException("Expected to find double quote at the end of string: " + str);
+        }
+        for (int i = 1; i < str.length() - 1; i++) {
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '\\')
                     sb.append('\\');
@@ -39,9 +50,16 @@ public class StringUtil {
         return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 
-    public static String escape(String value) {
+    /**
+     * Takes the internal representation of a string, and creates the textual representation
+     * that is ready to be printed.
+     * It adds double quote at the beginning and end, and transforms special characters into
+     * the textual representation (ex: newline becomes "\n").
+     */
+    public static String escapeSDF(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
+        result.append("\"");
         for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
             codepoint = value.codePointAt(offset);
             if (codepoint == '"') {
@@ -63,6 +81,7 @@ public class StringUtil {
                 result.append(String.format("%03o", codepoint));
             }
         }
+        result.append("\"");
         return result.toString();
     }
 
