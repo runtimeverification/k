@@ -158,11 +158,11 @@ Term klabel() :
 {
 	<TOKENLABEL> <LPAREN> <STRING>
 	{
-		value = StringUtil.unescape(token.image);
+		value = StringUtil.unescapeSDF(token.image);
 	}
 	<COMMA> <STRING>
 	{
-		sort = StringUtil.unescape(token.image);
+		sort = StringUtil.unescapeSDF(token.image);
 	}
 	<RPAREN> <LPAREN>
 	{
