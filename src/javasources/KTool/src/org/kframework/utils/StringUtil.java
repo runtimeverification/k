@@ -16,7 +16,7 @@ public class StringUtil {
      * It removes the double quote at the beginning and end, and transforms special sequence
      * of characters like "\n" into the newline character.
      */
-    public static String unescapeSDF(String str) {
+    public static String unquoteSDF(String str) {
         StringBuilder sb = new StringBuilder();
         if (str.charAt(0) != '"') {
             throw new IllegalArgumentException("Expected to find double quote at the beginning of string: " + str);
@@ -56,7 +56,7 @@ public class StringUtil {
      * It adds double quote at the beginning and end, and transforms special characters into
      * the textual representation (ex: newline becomes "\n").
      */
-    public static String escapeSDF(String value) {
+    public static String enquoteSDF(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
         result.append("\"");
@@ -470,7 +470,7 @@ public class StringUtil {
 
     /**
      * split string to lines in a way that no lines will exceed 80 columns
-     * NOTE: strings splitted only at whitespace character ' ', if string contains no ' ', it's returned as is
+     * NOTE: strings split only at whitespace character ' ', if string contains no ' ', it's returned as is
      * @param str string to split
      * @return new string with newlines added
      */

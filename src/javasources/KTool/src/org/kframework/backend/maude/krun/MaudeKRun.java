@@ -368,7 +368,7 @@ public class MaudeKRun implements KRun {
             } else if (sort.equals("#Char") || sort.equals("#String")) {
                 assertXMLTerm(list.size() == 0);
                 assertXMLTerm(op.startsWith("\"") && op.endsWith("\""));
-                return StringBuiltin.of(StringUtil.unescapeSDF(op));
+                return StringBuiltin.of(StringUtil.unquoteString(op));
             } else if (op.equals("#token") && sort.equals(KSorts.KLABEL)) {
                 // #token(String, String)
                 assertXMLTerm(list.size() == 2);

@@ -73,7 +73,7 @@ public class SDFHelper {
         String sdf = "lexical restrictions\n";
         sdf += "    %% follow restrictions\n";
         for (Ttuple tt : mytuples) {
-            sdf += "    " + StringUtil.escapeSDF(tt.value) + " -/- ";
+            sdf += "    " + StringUtil.enquoteSDF(tt.value) + " -/- ";
             String ending = tt.key.substring(tt.value.length());
             for (int i = 0; i < ending.length(); i++) {
                 String ch = "" + ending.charAt(i);

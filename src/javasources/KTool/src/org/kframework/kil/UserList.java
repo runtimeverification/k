@@ -37,13 +37,13 @@ public class UserList extends ProductionItem {
     @Override
     public String toString() {
         if (listType.equals(ZERO_OR_MORE))
-            return "List{" + sort + "," + StringUtil.escapeSDF(separator) + "} ";
+            return "List{" + sort + "," + StringUtil.enquoteSDF(separator) + "} ";
         else
-            return "NeList{" + sort + "," + StringUtil.escapeSDF(separator) + "} ";
+            return "NeList{" + sort + "," + StringUtil.enquoteSDF(separator) + "} ";
     }
 
     public String getTerminatorKLabel() {
-        return "'.List{" + StringUtil.escapeSDF(separator) + "}";
+        return "'.List{" + StringUtil.enquoteSDF(separator) + "}";
     }
 
     public String getSort() {
