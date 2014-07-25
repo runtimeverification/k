@@ -10,9 +10,6 @@ import org.kframework.ktest.Config.LocationData;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.ktest.Test.TestSuite;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
@@ -105,13 +102,10 @@ public class KTest {
             return ktest.run();
         } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
                 TransformerException | InvalidArgumentException | ParameterException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, e.getMessage()));
+            GlobalSettings.kem.registerCriticalError(e.getMessage(), e);
         } catch (InvalidConfigError e) {
             LocationData location = e.getLocation();
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
-                            e.getMessage(), location.getSystemId(), location.getPosStr()));
+            GlobalSettings.kem.registerCriticalError(e.getMessage(), e, location);
         }
         return false;
     }

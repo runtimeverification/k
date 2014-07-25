@@ -2,6 +2,7 @@
 package org.kframework.utils.errorsystem;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.ktest.Config.LocationData;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -31,6 +32,11 @@ public class KExceptionManager {
         register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, e, null);
     }
 
+    public void registerCriticalError(String message, Throwable e, LocationData location) {
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, location.getSystemId(),
+                location.getPosStr(), e);
+    }
+
     public void registerInternalError(String message, Throwable e) {
         register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e, null);
     }
@@ -43,13 +49,19 @@ public class KExceptionManager {
         register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, node);
     }
 
-    private void register(ExceptionType type, KExceptionGroup group, String message, Throwable e, ASTNode node) {
-        printStackTrace(e);
-        if (node != null) {
-            registerInternal(new KException(type, group, message, node.getFilename(), node.getLocation(), e));
+    private void register(ExceptionType type, KExceptionGroup group, String message, Throwable e,
+            ASTNode node) {
+        if (node == null) {
+            register(type, group, message, null, null, e);
         } else {
-            registerInternal(new KException(type, group, message, e));
+            register(type, group, message, node.getFilename(), node.getLocation(), e);
         }
+    }
+
+    private void register(ExceptionType type, KExceptionGroup group, String message,
+            String filename, String location, Throwable e) {
+        printStackTrace(e);
+        registerInternal(new KException(type, group, message, filename, location, e));
     }
 
     @Deprecated
