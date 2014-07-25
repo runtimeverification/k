@@ -8,24 +8,24 @@ public class UtilsTest {
 
     @Test
     public void StringUtilUnquote() throws Exception {
-        Assert.assertTrue(StringUtil.unquoteString("\"\\n\"").equals("\n"));
-        Assert.assertTrue(StringUtil.unquoteString("\"\\r\"").equals("\r"));
-        Assert.assertTrue(StringUtil.unquoteString("\"\\f\"").equals("\f"));
-        Assert.assertTrue(StringUtil.unquoteString("\"\\t\"").equals("\t"));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\n\"").equals("\n"));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\r\"").equals("\r"));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\f\"").equals("\f"));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\t\"").equals("\t"));
 
-        Assert.assertTrue(StringUtil.unquoteString("\"\\x20\"").equals(" "));
-        Assert.assertTrue(StringUtil.unquoteString("\"\\u0020\"").equals(" "));
-        Assert.assertTrue(StringUtil.unquoteString("\"\\U00000020\"").equals(" "));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\x20\"").equals(" "));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\u0020\"").equals(" "));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\U00000020\"").equals(" "));
 
-        Assert.assertTrue(StringUtil.unquoteString("\"\\U00000020\"").equals(" "));
+        Assert.assertTrue(StringUtil.unquoteKString("\"\\U00000020\"").equals(" "));
 
         try {
-            StringUtil.unquoteString("\"\\U00110000\"");
+            StringUtil.unquoteKString("\"\\U00110000\"");
             throw new AssertionError();
         } catch (IllegalArgumentException e) {
         }
         try {
-            StringUtil.unquoteString("\"\\U0000d801\"");
+            StringUtil.unquoteKString("\"\\U0000d801\"");
             throw new AssertionError();
         } catch (IllegalArgumentException e) {
         }

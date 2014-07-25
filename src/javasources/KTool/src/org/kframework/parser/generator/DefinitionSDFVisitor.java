@@ -170,9 +170,9 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                                     else if (t.getTerminal().equals("!"))
                                         sdf.append("ExclamationMarkDz ");
                                     else
-                                        sdf.append(StringUtil.enquoteSDF(t.getTerminal()) + " ");
+                                        sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
                                 } else
-                                    sdf.append(StringUtil.enquoteSDF(t.getTerminal()) + " ");
+                                    sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
                             } else if (itm instanceof Sort) {
                                 Sort srt = (Sort) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort

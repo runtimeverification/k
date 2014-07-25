@@ -16,7 +16,7 @@ public class StringUtil {
      * It removes the double quote at the beginning and end, and transforms special sequence
      * of characters like "\n" into the newline character.
      */
-    public static String unquoteSDF(String str) {
+    public static String unquoteCString(String str) {
         StringBuilder sb = new StringBuilder();
         if (str.charAt(0) != '"') {
             throw new IllegalArgumentException("Expected to find double quote at the beginning of string: " + str);
@@ -25,6 +25,8 @@ public class StringUtil {
             throw new IllegalArgumentException("Expected to find double quote at the end of string: " + str);
         }
         for (int i = 1; i < str.length() - 1; i++) {
+            if (str.charAt(i) > 0xFF)
+                throw new IllegalArgumentException("Unicode characters not supported here:" + str);
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '\\')
                     sb.append('\\');
@@ -56,13 +58,15 @@ public class StringUtil {
      * It adds double quote at the beginning and end, and transforms special characters into
      * the textual representation (ex: newline becomes "\n").
      */
-    public static String enquoteSDF(String value) {
+    public static String enquoteCString(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
         result.append("\"");
         for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
             codepoint = value.codePointAt(offset);
-            if (codepoint == '"') {
+            if (codepoint > 0xFF) {
+                throw new IllegalArgumentException("Unicode characters not supported here:" + value);
+            } else if (codepoint == '"') {
                 result.append("\\\"");
             } else if (codepoint == '\\') {
                 result.append("\\\\");
@@ -130,11 +134,15 @@ public class StringUtil {
     }
 
     /**
-     * Removes the first and last double-quote characters and unescapes special characters.
-     * @param str double-quoted string
+     * Removes the first and last double-quote characters and unescapes special characters
+     * that start with backslash: newline, carriage return, line feed, tab and backslash.
+     * Characters between 127 and 255 are stored as \xFF
+     * Characters between 256 and 65535 are stored as \uFFFFFF
+     * Characters above 65536 are stored as \UFFFFFFFFFFFF
+     * @param str Python like double-quoted string
      * @return unescaped and unquoted string
      */
-    public static String unquoteString(String str) {
+    public static String unquoteKString(String str) {
         StringBuilder sb = new StringBuilder();
         if (str.charAt(0) != '"') {
             throw new IllegalArgumentException("Expected to find double quote at the beginning of string: " + str);
@@ -187,11 +195,15 @@ public class StringUtil {
     }
 
     /**
-     * Adds double-quote at the beginning and end of the string and escapes special characters.
+     * Adds double-quote at the beginning and end of the string and escapes special characters
+     * with backslash: newline, carriage return, line feed, tab and backslash.
+     * Characters between 127 and 255 are stored as \xFF
+     * Characters between 256 and 65535 are stored as \uFFFFFF
+     * Characters above 65536 are stored as \UFFFFFFFFFFFF
      * @param value any string
-     * @return C like textual representation of the string
+     * @return Python like textual representation of the string
      */
-    public static String enquoteString(String value) {
+    public static String enquoteKString(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
         result.append("\"");

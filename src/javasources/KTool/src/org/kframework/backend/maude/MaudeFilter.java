@@ -707,7 +707,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(StringBuiltin token, Void _) {
-        result.append("#_(" + StringUtil.enquoteString(token.stringValue()) + ")");
+        result.append("#_(" + StringUtil.enquoteCString(token.stringValue()) + ")");
         return null;
     }
 
