@@ -487,7 +487,7 @@ String String() : {}
   <STRING>
   {
     String s = image();
-    return StringUtil.unescapeSDF(s);
+    return StringUtil.unquoteSDF(s);
   }
 }
 
