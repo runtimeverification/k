@@ -39,7 +39,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
                         name = node.value().substring(0, index);
                     }
 
-                    if (MetaK.isDataSort(Sort2.of("#" + sort))) {
+                    if (Sort2.of("#" + sort).isDataSort()) {
                         return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(sort)), Token.kAppOf(Sort2.SHARP_ID, name));
                     } else {
                         return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(KSorts.K)), Token.kAppOf(Sort2.SHARP_ID, node.value()));

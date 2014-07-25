@@ -435,7 +435,7 @@ public class MaudeFilter extends BackendFilter {
             variable = variable.shallowCopy();
             variable.setSort(Sort2.KITEM);
         }
-         if (MetaK.isBuiltinSort(variable.getSort())
+         if (variable.getSort().isBuiltinSort()
                 || context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
             result.append("_`(_`)(");
             if (context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
@@ -459,7 +459,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(variable.getSort());
         }
 
-        if (MetaK.isBuiltinSort(variable.getSort())
+        if (variable.getSort().isBuiltinSort()
                 || context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
             result.append(")");
             result.append(", ");

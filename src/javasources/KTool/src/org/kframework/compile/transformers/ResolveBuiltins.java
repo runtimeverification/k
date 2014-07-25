@@ -66,7 +66,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Sort node, Void _)  {
-        if (MetaK.isBuiltinSort(Sort2.of(node.getName())))
+        if (Sort2.of(node.getName()).isBuiltinSort())
                 builtinSorts.add(node.getName());
         return node;
     }

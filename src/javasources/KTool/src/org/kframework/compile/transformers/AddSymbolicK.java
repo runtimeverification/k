@@ -25,7 +25,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 
     public static final boolean allowKSymbolic(String sortName) {
         Sort2 sort = Sort2.of(sortName);
-        return sort.isComputationSort() && !MetaK.isBuiltinSort(sort);
+        return sort.isComputationSort() && !sort.isBuiltinSort();
     }
 
     public static final String symbolicConstructor(String sort) {

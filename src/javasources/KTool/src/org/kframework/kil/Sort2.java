@@ -4,8 +4,6 @@ package org.kframework.kil;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.kframework.compile.utils.MetaK;
-
 import com.google.common.collect.ImmutableSet;
 
 public class Sort2 implements Serializable {
@@ -86,6 +84,25 @@ public class Sort2 implements Serializable {
 
     public boolean isComputationSort() {
         return equals(K) || equals(KITEM) || !isKSort();
+    }
+
+    public boolean isBuiltinSort() {
+        /* TODO: replace with a proper table of builtins */
+        return equals(BoolBuiltin.SORT)
+               || equals(IntBuiltin.SORT)
+               || equals(StringBuiltin.SORT)
+               || equals(FloatBuiltin.SORT)
+               /* LTL builtin sorts */
+//               || sort.equals("#LtlFormula")
+               || equals(Sort2.of("#Prop"))
+               || equals(Sort2.of("#ModelCheckerState"))
+               || equals(Sort2.of("#ModelCheckResult"));
+    }
+
+    public boolean isDataSort() {
+        return equals(BoolBuiltin.SORT)
+                || equals(IntBuiltin.SORT)
+                || equals(StringBuiltin.SORT);
     }
 
     /**

@@ -15,7 +15,6 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
-import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.Hole;
 import org.kframework.kil.IntBuiltin;
@@ -23,7 +22,6 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
@@ -288,25 +286,6 @@ public class MetaK {
 
     public static boolean isAnonVar(Variable node) {
         return node.getName().startsWith(Constants.anyVarSymbol);
-    }
-
-    public static boolean isBuiltinSort(Sort2 sort) {
-        /* TODO: replace with a proper table of builtins */
-        return sort.equals(BoolBuiltin.SORT)
-               || sort.equals(IntBuiltin.SORT)
-               || sort.equals(StringBuiltin.SORT)
-               || sort.equals(FloatBuiltin.SORT)
-               /* LTL builtin sorts */
-//               || sort.equals("#LtlFormula")
-               || sort.equals(Sort2.of("#Prop"))
-               || sort.equals(Sort2.of("#ModelCheckerState"))
-               || sort.equals(Sort2.of("#ModelCheckResult"));
-    }
-
-    public static boolean isDataSort(Sort2 sort) {
-        return sort.equals(BoolBuiltin.SORT)
-                || sort.equals(IntBuiltin.SORT)
-                || sort.equals(StringBuiltin.SORT);
     }
 
     public static String getListUnitLabel(String sep) {

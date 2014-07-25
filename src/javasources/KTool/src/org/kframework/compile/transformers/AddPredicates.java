@@ -219,7 +219,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule = new Rule(lhs, rhs, context);
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
-                } else if (MetaK.isBuiltinSort(Sort2.of(sort))) {
+                } else if (Sort2.of(sort).isBuiltinSort()) {
                     Variable var = Variable.getFreshVar(Sort2.of(sort));
                     Term lhs = KApp.of(BuiltinPredicate, var);
                     Rule rule = new Rule(lhs, BoolBuiltin.TRUE, context);
