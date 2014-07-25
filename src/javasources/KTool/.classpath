@@ -13,7 +13,6 @@
 	<classpathentry kind="lib" path="../../../lib/java/guava-14.0.1.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/jansi-1.11.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/jline-1.0.jar"/>
-	<classpathentry kind="lib" path="../../../lib/java/jopt-simple-3.3.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/jung-algorithms-2.0.1.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/jung-api-2.0.1.jar"/>
 	<classpathentry kind="lib" path="../../../lib/java/jung-graph-impl-2.0.1.jar"/>
