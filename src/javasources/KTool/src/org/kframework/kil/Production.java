@@ -31,7 +31,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
 
         Production funProd = new Production(new Sort(funSort), prodItems);
         funProd.addAttribute(new Attribute("prefixlabel", funName));
-        if (MetaK.isComputationSort(funSort)) {
+        if (Sort2.of(funSort).isComputationSort()) {
             funProd.addAttribute(new Attribute("klabel", funName));
             String consAttr = funSort + "1" + funName + "Syn";
             funProd.addAttribute(new Attribute("cons", consAttr));

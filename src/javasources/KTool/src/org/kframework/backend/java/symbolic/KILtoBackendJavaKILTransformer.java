@@ -49,6 +49,7 @@ import org.kframework.kil.GenericToken;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.loader.Context;
@@ -567,28 +568,21 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
             Kind kind;
-            switch (lookup.kind()) {
-                case KItem:
-                    kind = Kind.KITEM;
-                    break;
-                case K:
-                    kind = Kind.K;
-                    break;
-                case KList:
-                    kind = Kind.KLIST;
-                    break;
-                case KLabel:
-                    kind = Kind.KLABEL;
-                    break;
-                case BagItem:
-                    kind = Kind.CELL;
-                    break;
-                case Bag:
-                    kind = Kind.CELL_COLLECTION;
-                    break;
-                default:
-                    assert false: "unexpected lookup kind";
-                    kind = null;
+            if (lookup.kind().equals(Sort2.KITEM)) {
+                kind = Kind.KITEM;
+            } else if (lookup.kind().equals(Sort2.K)) {
+                kind = Kind.K;
+            } else if (lookup.kind().equals(Sort2.KLIST)) {
+                kind = Kind.KLIST;
+            } else if (lookup.kind().equals(Sort2.KLABEL)) {
+                kind = Kind.KLABEL;
+            } else if (lookup.kind().equals(Sort2.BAG_ITEM)) {
+                kind = Kind.CELL;
+            } else if (lookup.kind().equals(Sort2.BAG)) {
+                kind = Kind.CELL_COLLECTION;
+            } else {
+                assert false: "unexpected lookup kind";
+                kind = null;
             }
 
             if (lookup instanceof org.kframework.kil.SetLookup) {

@@ -56,7 +56,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
             return node;
         }
 
-        KSort kind = KSort.getKSort(node.getContents().getSort()).mainSort();
+        Sort2 kind = node.getContents().getSort().getKSort().mainSort();
         Collection col;
         if (node.getContents() instanceof Collection) {
             col = (Collection) node.getContents().shallowCopy();
@@ -73,7 +73,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
         }
         node.setContents(col);
 
-        if (ellipses == Ellipses.BOTH && kind != KSort.K) {
+        if (ellipses == Ellipses.BOTH && !kind.equals(Sort2.K)) {
             ellipses = Ellipses.RIGHT;
         }
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {

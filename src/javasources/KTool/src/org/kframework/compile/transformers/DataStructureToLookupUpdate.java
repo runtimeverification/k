@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BuiltinLookup;
-import org.kframework.kil.KSort;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListLookup;
 import org.kframework.kil.ListUpdate;
@@ -62,7 +61,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private class ExtendedListLookup extends ListLookup implements VariableCache {
         private Set<Variable> variables;
 
-        ExtendedListLookup(Variable list, int key, Term value, KSort kind) {
+        ExtendedListLookup(Variable list, int key, Term value, Sort2 kind) {
             super(list, key, value, kind);
             variables = new HashSet<>();
             variables.add(list);
@@ -77,7 +76,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private class ExtendedMapLookup extends MapLookup implements VariableCache {
         private Set<Variable> variables;
 
-        ExtendedMapLookup(Variable map, Term key, Term value, KSort kind) {
+        ExtendedMapLookup(Variable map, Term key, Term value, Sort2 kind) {
             super(map, key, value, kind, false);
             variables = new HashSet<>();
             variables.add(map);
@@ -318,7 +317,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         variable,
                         key,
                         term,
-                        KSort.getKSort(term.getSort())));
+                        term.getSort().getKSort()));
                 key++;
             }
 
@@ -328,7 +327,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         variable,
                         key,
                         term,
-                        KSort.getKSort(term.getSort())));
+                        term.getSort().getKSort()));
                 key++;
             }
 
@@ -407,7 +406,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         variable,
                         entry.getKey(),
                         entry.getValue(),
-                        KSort.getKSort(entry.getValue().getSort())));
+                        entry.getValue().getSort().getKSort()));
             }
 
             return variable;

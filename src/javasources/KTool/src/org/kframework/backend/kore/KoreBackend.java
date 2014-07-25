@@ -449,7 +449,7 @@ class KoreFilter extends BasicVisitor {
         @Override
         public Void visit(KInjectedLabel kInjectedLabel, Void _) {
             Term term = kInjectedLabel.getTerm();
-            if (MetaK.isKSort(term.getSort())) {
+            if (term.getSort().isKSort()) {
                 indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
                 indenter.write("2KLabel ");
             } else {

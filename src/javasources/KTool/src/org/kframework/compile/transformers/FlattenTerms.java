@@ -35,14 +35,14 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Variable node, Void _)  {
-        if (MetaK.isComputationSort(node.getSort()) && !node.isFreshConstant())
+        if (node.getSort().isComputationSort() && !node.isFreshConstant())
             return kTrans.visitNode(node);
         return node;
     }
 
     @Override
     public ASTNode visit(ListTerminator node, Void _)  {
-        if (MetaK.isComputationSort(node.getSort()))
+        if (node.getSort().isComputationSort())
             return kTrans.visitNode(node);
         return node;
     }
@@ -53,7 +53,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
      */
     @Override
     public ASTNode visit(TermCons tc, Void _)  {
-        if (MetaK.isComputationSort(tc.getSort()))
+        if (tc.getSort().isComputationSort())
             return kTrans.visitNode(tc);
         return super.visit(tc, _);
     }
@@ -85,7 +85,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(TermCons tc, Void _)  {
-            if (!MetaK.isComputationSort(tc.getSort())) {
+            if (!tc.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel((Term) trans.visitNode(tc)));
             }
 
@@ -117,7 +117,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         public ASTNode visit(ListTerminator emp, Void _) {
             String l = emp.getLocation();
             String f = emp.getFilename();
-            if (!MetaK.isComputationSort(emp.getSort())) {
+            if (!emp.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel(emp));
             }
             // if this is a list sort
@@ -164,7 +164,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             if (node.getSort().equals(Sort2.KITEM) || node.getSort().equals(Sort2.K)) {
                 return node;
             }
-            if (MetaK.isKSort(node.getSort())) {
+            if (node.getSort().isKSort()) {
                 return KApp.of(new KInjectedLabel(node));
             }
 

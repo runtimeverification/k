@@ -359,7 +359,7 @@ public class MaudeFilter extends BackendFilter {
                 if (!cellStr.id.equals("k")) {
                     placeHolders="_";
                     format = "ni ";
-                    sorts = KSort.getKSort(cell.getContents().getSort().getName()).mainSort()
+                    sorts = cell.getContents().getSort().getKSort().mainSort()
                             .toString();
                     declareCell(id,placeHolders, sorts, cellSort, format);
                 }
@@ -906,7 +906,7 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
         Sort2 sort = term.getSort().equals(Sort2.K) ? Sort2.KLIST : term.getSort();
-        if (MetaK.isKSort(sort.getName())) {
+        if (sort.isKSort()) {
             //result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
             result.append(KInjectedLabel.getInjectedSort(sort));
             result.append("2KLabel_(");
@@ -1061,14 +1061,14 @@ public class MaudeFilter extends BackendFilter {
         return null;
     }
 
-    private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
+    private static java.util.Map<Sort2, String> maudeCollectionConstructors = new HashMap<>();
     static {
-        maudeCollectionConstructors.put(KSort.Bag, "__");
-        maudeCollectionConstructors.put(KSort.K, "_~>_");
-        maudeCollectionConstructors.put(KSort.KList, "_`,`,_");
+        maudeCollectionConstructors.put(Sort2.BAG, "__");
+        maudeCollectionConstructors.put(Sort2.K, "_~>_");
+        maudeCollectionConstructors.put(Sort2.KLIST, "_`,`,_");
     }
 
-    public static String getMaudeConstructor(String sort) {
-        return maudeCollectionConstructors.get(KSort.getKSort(sort));
+    public static String getMaudeConstructor(String sortName) {
+        return maudeCollectionConstructors.get(Sort2.of(sortName).getKSort());
     }
 }

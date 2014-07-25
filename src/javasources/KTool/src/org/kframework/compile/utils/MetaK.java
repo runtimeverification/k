@@ -23,7 +23,6 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSort;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
@@ -155,37 +154,12 @@ public class MetaK {
 
     public static Term defaultTerm(Term v, org.kframework.kil.loader.Context context) {
         Sort2 sort = v.getSort();
-        KSort ksort = KSort.getKSort(sort.getName()).mainSort();
+        Sort2 ksort = sort.getKSort().mainSort();
         if (ksort.isDefaultable())
             return new ListTerminator(Sort2.of(ksort.toString()), null);
         GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
                 .getLocation()));
         return KSequence.EMPTY;
-    }
-
-    /**
-     * Checks if the specified sort has been defined in {@link KSort}.
-     *
-     * @param sort
-     *            the specified sort
-     * @return {@code true} if the specified sort has been defined in
-     *         {@code KSort}; otherwise, false
-     */
-    @Deprecated
-    public static boolean isKSort(String sort) {
-        try {
-            KSort.valueOf(sort);
-        } catch (IllegalArgumentException e) {
-            // TODO(YilongL): I think we can return false for sure, since we
-            // have KList defined in KSort
-//            return sort.equals(KSorts.KLIST);
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean isKSort(Sort2 sort) {
-        return isKSort(sort.getName());
     }
 
     public static boolean isAnywhere(Rule r) {
@@ -335,24 +309,6 @@ public class MetaK {
                 || sort.equals(StringBuiltin.SORT);
     }
 
-    /**
-     * Checks if the specified sort is a computation sort, that is, K, KItem, or
-     * any sort other than those defined in {@link KSort}.
-     *
-     * @param sort
-     *            the specified sort
-     * @return {@code true} if the specified sort is K, KItem, or any sort other
-     *         than those defined in {@code KSort}; otherwise, {@code false}
-     */
-    @Deprecated
-    public static boolean isComputationSort(String sort) {
-        return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
-    }
-
-    public static boolean isComputationSort(Sort2 sort) {
-        return isComputationSort(sort.getName());
-    }
-
     public static String getListUnitLabel(String sep) {
         return  "'.List{\"" + sep + "\"}";
     }
@@ -381,16 +337,15 @@ public class MetaK {
         return cells;
     }
 
-    public static Collection createCollection(Term contents, KSort sort) {
+    public static Collection createCollection(Term contents, Sort2 sort) {
         List<Term> col = new ArrayList<Term>();
         col.add(contents);
-        switch (sort) {
-            case Bag:
-                return new Bag(col);
-            case K:
-                return new KSequence(col);
-            default:
-                return null;
+        if (sort.equals(Sort2.BAG)) {
+            return new Bag(col);
+        } else if (sort.equals(Sort2.K)) {
+            return new KSequence(col);
+        } else {
+            return null;
         }
     }
 

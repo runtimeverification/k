@@ -82,7 +82,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort,
             return lbls;
         for (PriorityBlock pb : priorityBlocks) {
             for (Production prod : pb.getProductions()) {
-                if (MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(Sort2.KLABEL) && prod.isConstant())
+                if (prod.getSort().isComputationSort() || prod.getSort().equals(Sort2.KLABEL) && prod.isConstant())
                     lbls.add(prod.getKLabel());
             }
         }

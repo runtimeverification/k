@@ -523,7 +523,7 @@ public class XmlUnparseFilter extends BasicVisitor {
 
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort().getName())) {
+        if (term.getSort().isKSort()) {
             buffer.append(StringEscapeUtils.escapeXml(KInjectedLabel
                     .getInjectedSort(term.getSort()).getName()));
             buffer.append("2KLabel ");

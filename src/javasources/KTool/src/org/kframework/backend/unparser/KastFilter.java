@@ -251,7 +251,7 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort().getName())) {
+        if (term.getSort().isKSort()) {
             result.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             result.write("2KLabel_(");
         } else {

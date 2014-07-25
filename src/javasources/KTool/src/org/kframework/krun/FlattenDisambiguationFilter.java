@@ -28,7 +28,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 
         if (amb.getContents().get(0) instanceof TermCons) {
             TermCons t1 = (TermCons)amb.getContents().get(0);
-            if (MetaK.isComputationSort(t1.getSort().getName())) {
+            if (t1.getSort().isComputationSort()) {
                 if (t1.getProduction().isListDecl()) {
                     Term t2 = t1.getContents().get(1);
                     UserList ul = (UserList)t1.getProduction().getItems().get(0);
@@ -45,7 +45,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
             }
         } else if (amb.getContents().get(0) instanceof ListTerminator) {
             ListTerminator t1 = (ListTerminator)amb.getContents().get(0);
-            if (MetaK.isComputationSort(t1.getSort().getName())) {
+            if (t1.getSort().isComputationSort()) {
                 return new ListTerminator(((UserList) context.listConses.get(t1.getSort().getName()).getItems().get(0)).getSeparator());
             }
         }

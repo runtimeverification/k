@@ -53,7 +53,7 @@ public class Sort extends ProductionItem {
 
     public String getName() {
         if (MetaK.isCellSort(name))
-            return KSort.Bag.name();
+            return Sort2.BAG.getName();
         return name;
     }
 

@@ -46,7 +46,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Syntax node, Void _)  {
-        if (!MetaK.isComputationSort(node.getSort().getName())) {
+        if (!Sort2.of(node.getSort().getName()).isComputationSort()) {
             isComputation = false;
             return super.visit(node, _);
         }
@@ -82,7 +82,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Sort node, Void _)  {
-        if (!MetaK.isComputationSort(node.getName()))
+        if (!Sort2.of(node.getName()).isComputationSort())
             return node;
         return new Sort(KSorts.K);
     }

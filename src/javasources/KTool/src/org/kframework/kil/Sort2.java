@@ -2,6 +2,11 @@
 package org.kframework.kil;
 
 import java.io.Serializable;
+import java.util.Set;
+
+import org.kframework.compile.utils.MetaK;
+
+import com.google.common.collect.ImmutableSet;
 
 public class Sort2 implements Serializable {
 
@@ -61,6 +66,44 @@ public class Sort2 implements Serializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    private static Set<Sort2> KSorts = ImmutableSet.of(K, BAG, BAG_ITEM, KITEM,
+            KLIST, CELL_LABEL, KLABEL);
+
+    public boolean isKSort() {
+        return KSorts.contains(this);
+    }
+
+    /**
+     * TODO(???)
+     * @param sort
+     * @return
+     */
+    public Sort2 getKSort() {
+        return KSorts.contains(this) ? this : K;
+    }
+
+    public boolean isComputationSort() {
+        return equals(K) || equals(KITEM) || !isKSort();
+    }
+
+    /**
+     * TODO(???)
+     * @return
+     */
+    public Sort2 mainSort() {
+        if (equals(BAG) || equals(BAG_ITEM)) {
+            return BAG;
+        } else if (equals(KITEM)) {
+            return K;
+        } else {
+            return this;
+        }
+    }
+
+    public boolean isDefaultable() {
+        return equals(K) || equals(BAG);
     }
 
 }

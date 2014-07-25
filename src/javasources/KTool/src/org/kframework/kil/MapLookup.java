@@ -17,7 +17,7 @@ public class MapLookup extends BuiltinLookup {
     /** {@link Term} representation of the value */
     private final Term value;
 
-    public MapLookup(Variable base, Term key, Term value, KSort kind, boolean choice) {
+    public MapLookup(Variable base, Term key, Term value, Sort2 kind, boolean choice) {
         super(base, key, kind, choice);
         this.value = value;
     }

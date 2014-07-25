@@ -15,6 +15,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
@@ -226,7 +227,7 @@ public class DefinitionSDF {
         sdf.append("\n\n%% sort predicates\n");
         // print is<Sort> predicates (actually KLabel)
         for (Sort sort : psdfv.userSorts) {
-            if (!MetaK.isKSort(sort.getName())) {
+            if (!Sort2.of(sort.getName()).isKSort()) {
                 sdf.append("    \"" + AddPredicates.syntaxPredicate(sort.getName()) + "\"      -> DzKLabel\n");
             }
             if (AddSymbolicK.allowKSymbolic(sort.getName())) {

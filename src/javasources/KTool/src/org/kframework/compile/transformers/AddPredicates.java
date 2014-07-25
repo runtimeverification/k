@@ -70,7 +70,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (context.isListSort(sort.getName()))
                 lists.add(sort);
 
-            if (MetaK.isKSort(sort.getName()))
+            if (sort.isKSort())
                 return null;
             else
                 return super.visit(node, _);
@@ -152,7 +152,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     }
 
     public static final String syntaxPredicate(String sort) {
-        assert !MetaK.isKSort(sort):
+        assert !Sort2.of(sort).isKSort():
                 "invalid syntactic predicate " + predicate(sort) + " for sort " + sort;
 
         return predicate(sort);
@@ -177,7 +177,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
         retNode.addConstant(KSymbolicPredicate);
 
         for (String sort : node.getAllSorts()) {
-            if (!MetaK.isKSort(sort)) {
+            if (!Sort2.of(sort).isKSort()) {
                 String pred = AddPredicates.syntaxPredicate(sort);
                 // declare isSort predicate as KLabel
                 retNode.addConstant(KSorts.KLABEL, pred);
@@ -259,7 +259,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     public static Rule getIsVariableRule(Term symTerm, Context context) {
         Term lhs;
         Rule rule;
-        if (!MetaK.isComputationSort(symTerm.getSort().getName())) {
+        if (!symTerm.getSort().isComputationSort()) {
             symTerm = KApp.of(new KInjectedLabel(symTerm));
         }
 

@@ -15,7 +15,7 @@ import org.kframework.kil.visitors.Visitor;
 public class SetLookup extends BuiltinLookup {
 
     public SetLookup(Variable base, Term key, boolean choice) {
-        super(base, key, KSort.KItem, choice);
+        super(base, key, Sort2.KITEM, choice);
     }
 
     @Override

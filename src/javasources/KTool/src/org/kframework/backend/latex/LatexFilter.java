@@ -390,7 +390,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(KSequence k, Void _) {
-        if (k.getContents().isEmpty()) printEmpty(KSort.K.name());
+        if (k.getContents().isEmpty()) printEmpty(Sort2.K.getName());
         else printList(k.getContents(), "\\kra");
         return null;
 

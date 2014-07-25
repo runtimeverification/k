@@ -53,7 +53,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                    || !prod.containsAttribute("strict", true) && prod.containsAttribute("seqstrict", true);
             Boolean isSeq = prod.containsAttribute("seqstrict", true);
 
-            if (!(MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(Sort2.KLABEL))) {
+            if (!(prod.getSort().isComputationSort() || prod.getSort().equals(Sort2.KLABEL))) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,
                         "only productions of sort K, sort KLabel or of syntactic sorts can have "

@@ -348,7 +348,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         } else if (outer instanceof KInjectedLabel) {
             KInjectedLabel lbl = (KInjectedLabel)outer;
             Sort2 sort = lbl.getTerm().getSort();
-            if (MetaK.isKSort(sort.getName())) {
+            if (sort.isKSort()) {
                 sort = KInjectedLabel.getInjectedSort(sort);
                 if (!context.isSubsortedEq(sort.getName(), inner.getSort().getName())) {
                     return true;
