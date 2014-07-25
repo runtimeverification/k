@@ -13,11 +13,8 @@ public class ColorOptions {
     @Parameter(names="--color", description="Use colors in output. Default is on.")
     private ColorSetting color;
 
-    public ColorSetting color(boolean redirectStdout) {
+    public ColorSetting color() {
         if (color == null) {
-            if (redirectStdout) {
-                return ColorSetting.OFF;
-            }
             return ColorSetting.ON;
         }
         return color;

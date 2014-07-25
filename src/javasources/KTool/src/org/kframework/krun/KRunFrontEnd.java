@@ -17,6 +17,7 @@ import jline.FileNameCompletor;
 import jline.MultiCompletor;
 import jline.SimpleCompletor;
 
+import org.fusesource.jansi.AnsiString;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
@@ -245,6 +246,7 @@ public class KRunFrontEnd {
         if (options.experimental.outputFile == null) {
             System.out.println(output);
         } else {
+            output = new AnsiString(output).getPlain().toString();
             writeStringToFile(options.experimental.outputFile, output);
         }
     }

@@ -259,7 +259,7 @@ public class KTestOptions {
     }
 
     public ColorSetting getColorSetting() {
-        return color.color(false);
+        return color.color();
     }
 
     public Color getTerminalColor() {

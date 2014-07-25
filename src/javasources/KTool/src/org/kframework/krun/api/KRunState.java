@@ -121,7 +121,7 @@ public class KRunState implements Serializable, Comparable<KRunState> {
     }
 
     public String toString(boolean includeStateId) {
-        UnparserFilterNew printer = new UnparserFilterNew(true,context.colorOptions.color(context.krunOptions.experimental.outputFile != null),
+        UnparserFilterNew printer = new UnparserFilterNew(true,context.colorOptions.color(),
                 context.krunOptions.output, false, context);
         printer.visitNode(getResult());
         if (includeStateId) {
