@@ -370,7 +370,7 @@ public class StringUtil {
     private static int number = 0;
 
     /**
-     * Generate incremental numbers that dosn't contain the number 1
+     * Generate incremental numbers that doesn't contain the number 1
      *
      * @return an integer that doesn't contain the number 1
      */
@@ -393,12 +393,24 @@ public class StringUtil {
         return number++;
     }
 
+    /**
+     * Takes a string as input and creates a continuous token for the maude lexer.
+     * Adds a backquote character to the following characters: ( ) [ ] { } , `
+     * @param tag Input string.
+     * @return A string that would be parsed as a continuous token by maude.
+     */
     public static String escapeMaude(String tag) {
         // TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
         tag = tag.replaceAll("(?<!`)`", "BKQT");
         return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
     }
 
+    /**
+     * Removes the escaping backqotes required by the maude lexer.
+     * Removes backquote from in front of teh following characters: ( ) [ ] { } , `
+     * @param str A maude specific string representation of a token.
+     * @return String representation of the token without the backquote escaping.
+     */
     public static String unescapeMaude(String str) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
@@ -468,7 +480,7 @@ public class StringUtil {
 
     /**
      * split string to lines in a way that no lines will exceed `col` columns
-     * NOTE: strings splitted only at whitespace character ' ', if string contains no ' ', it's returned as is
+     * NOTE: strings split only at whitespace character ' ', if string contains no ' ', it's returned as is
      * @param str string to split
      * @param col rightmost column
      * @return new string with newlines added
