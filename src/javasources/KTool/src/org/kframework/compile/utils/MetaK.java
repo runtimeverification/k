@@ -316,7 +316,7 @@ public class MetaK {
         return node.getName().startsWith(Constants.anyVarSymbol);
     }
 
-    public static boolean isBuiltinSort(String sort) {
+    public static boolean isBuiltinSort(Sort2 sort) {
         /* TODO: replace with a proper table of builtins */
         return sort.equals(BoolBuiltin.SORT)
                || sort.equals(IntBuiltin.SORT)
@@ -324,12 +324,12 @@ public class MetaK {
                || sort.equals(FloatBuiltin.SORT)
                /* LTL builtin sorts */
 //               || sort.equals("#LtlFormula")
-               || sort.equals("#Prop")
-               || sort.equals("#ModelCheckerState")
-               || sort.equals("#ModelCheckResult");
+               || sort.equals(Sort2.of("#Prop"))
+               || sort.equals(Sort2.of("#ModelCheckerState"))
+               || sort.equals(Sort2.of("#ModelCheckResult"));
     }
 
-    public static boolean isDataSort(String sort) {
+    public static boolean isDataSort(Sort2 sort) {
         return sort.equals(BoolBuiltin.SORT)
                 || sort.equals(IntBuiltin.SORT)
                 || sort.equals(StringBuiltin.SORT);
