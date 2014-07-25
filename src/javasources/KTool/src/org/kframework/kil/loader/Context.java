@@ -18,6 +18,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.ColorOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.GlobalOptions;
@@ -173,6 +174,7 @@ public class Context implements Serializable {
     public SMTOptions smtOptions;
     public KRunOptions krunOptions;
     public ConfigurationCreationOptions ccOptions;
+    public ColorOptions colorOptions;
     public transient JavaExecutionOptions javaExecutionOptions;
 
     public Context(GlobalOptions globalOptions) {
@@ -192,6 +194,7 @@ public class Context implements Serializable {
         this(kompileOptions);
         this.krunOptions = krunOptions;
         this.ccOptions = ccOptions;
+        this.colorOptions = krunOptions.color;
         if (krunOptions.experimental.smt.smt != null) {
             smtOptions = krunOptions.experimental.smt;
         }

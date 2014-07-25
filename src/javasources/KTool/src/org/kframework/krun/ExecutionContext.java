@@ -56,6 +56,7 @@ public class ExecutionContext {
         context.globalOptions = krunOptions.global;
         context.kompileOptions.global = krunOptions.global;
         context.krunOptions = krunOptions;
+        context.colorOptions = krunOptions.color;
         context.ccOptions = ccOptions;
         if (krunOptions.experimental.smt.smt != null) {
             context.smtOptions = krunOptions.experimental.smt;

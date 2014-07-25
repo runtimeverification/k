@@ -74,8 +74,8 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (outputMode == OutputMode.NO_WRAP) {
             indenter.setWidth(-1);
         }
-        if (context.krunOptions != null) {
-            terminalColor = context.krunOptions.terminalColor();
+        if (context.colorOptions != null) {
+            terminalColor = context.colorOptions.terminalColor();
         }
     }
 

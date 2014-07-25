@@ -3,9 +3,10 @@ package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest.Annotated;
+import org.kframework.ktest.CmdArgs.KTestOptions;
+import org.kframework.ktest.KTest;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
-import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
@@ -35,9 +36,9 @@ import java.util.*;
 public class ConfigFileParser {
 
     private final Document doc;
-    private final CmdArg cmdArgs;
+    private final KTestOptions cmdArgs;
 
-    public ConfigFileParser(File configFile, CmdArg cmdArgs) throws IOException, SAXException,
+    public ConfigFileParser(File configFile, KTestOptions cmdArgs) throws IOException, SAXException,
             ParserConfigurationException, TransformerException {
         this.cmdArgs = cmdArgs;
 
@@ -154,7 +155,7 @@ public class ConfigFileParser {
         String results = concat(cmdArgs.getResults(),
                 getAttributeWDefault(includeAttrs, "results", FilenameUtils.getFullPath(file)));
 
-        CmdArg cmdArgs1 = new CmdArg(cmdArgs)
+        KTestOptions cmdArgs1 = new KTestOptions(cmdArgs)
                 .setDirectory(directory)
                 .setPrograms(programs)
                 .setResults(results)

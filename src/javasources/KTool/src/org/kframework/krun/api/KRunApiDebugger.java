@@ -226,7 +226,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
     public String printState(int stateNum) {
         KRunState state = getState(stateNum);
-        UnparserFilter unparser = new UnparserFilter(true, context.krunOptions.color(), context.krunOptions.output, context);
+        UnparserFilter unparser = new UnparserFilter(true, context.colorOptions.color(), context.krunOptions.output, context);
         unparser.visitNode(state.getResult());
         return state.toString(true) + ":\n" + unparser.getResult();
     }
@@ -245,7 +245,7 @@ public class KRunApiDebugger implements KRunDebugger {
         Transition edge = getEdge(state1, state2);
         String rule;
         if (edge.getType() == TransitionType.RULE) {
-            UnparserFilter unparser = new UnparserFilter(true, context.krunOptions.color(), context.krunOptions.output, context);
+            UnparserFilter unparser = new UnparserFilter(true, context.colorOptions.color(), context.krunOptions.output, context);
             unparser.visitNode(edge.getRule());
             rule = unparser.getResult();
         } else if (edge.getType() == TransitionType.LABEL) {
