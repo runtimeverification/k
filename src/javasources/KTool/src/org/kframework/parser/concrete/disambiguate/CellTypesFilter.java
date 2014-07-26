@@ -40,7 +40,7 @@ public class CellTypesFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
-        Sort2 sort = Sort2.of(context.cellKinds.get(cell.getLabel()));
+        Sort2 sort = context.cellKinds.get(cell.getLabel());
 
         if (sort == null) {
             if (cell.getLabel().equals("k"))

@@ -520,11 +520,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
         if (dataStructureSort != null) {
             Sort sort = null;
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.LIST)) {
+            if (dataStructureSort.type().equals(Sort2.LIST)) {
                 sort = Sort.LIST;
-            } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.MAP)) {
+            } else if (dataStructureSort.type().equals(Sort2.MAP)) {
                 sort = Sort.MAP;
-            } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.SET)) {
+            } else if (dataStructureSort.type().equals(Sort2.SET)) {
                 sort = Sort.SET;
             } else {
                 assert false: "unexpected data structure " + dataStructureSort.type();

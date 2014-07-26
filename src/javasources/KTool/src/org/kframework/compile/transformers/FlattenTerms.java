@@ -175,7 +175,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return node;
             }
 
-            if (context.getDataStructureSorts().containsKey(node.getSort().getName())) {
+            if (context.getDataStructureSorts().containsKey(node.getSort())) {
                 //node = node.shallowCopy();
                 //node.setSort(context.dataStructureSorts.get(node.getSort()).type());
                 //return KApp.of(new KInjectedLabel(node));

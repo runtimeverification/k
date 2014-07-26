@@ -13,17 +13,6 @@ public class Sort extends ProductionItem {
     public static final String BOOL = "Bool";
 
     private String name;
-    private static Set<String> baseSorts = new HashSet<String>();
-    static {
-        baseSorts.add(KSorts.K);
-        baseSorts.add(KSorts.KRESULT);
-        baseSorts.add(KSorts.KITEM);
-        baseSorts.add(KSorts.KLIST);
-        baseSorts.add(KSorts.BAG);
-        baseSorts.add(KSorts.BAG_ITEM);
-        baseSorts.add(KSorts.KLABEL);
-        baseSorts.add(KSorts.CELL_LABEL);
-    }
 
     public Sort(String name) {
         super();
@@ -35,14 +24,12 @@ public class Sort extends ProductionItem {
         this.name = sort.getName();
     }
 
+    @Deprecated
     public static boolean isBasesort(String sort) {
-        return baseSorts.contains(sort);
+        return Sort2.of(sort).isBaseSort();
     }
 
-    public static Set<String> getBaseSorts() {
-        return new HashSet<String>(baseSorts);
-    }
-
+    @Deprecated
     public boolean isBaseSort() {
         return Sort.isBasesort(getName());
     }

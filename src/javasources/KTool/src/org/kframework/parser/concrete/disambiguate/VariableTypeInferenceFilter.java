@@ -81,16 +81,16 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                 VarHashMap solution = new VarHashMap();
                 for (Map.Entry<String, Set<String>> entry : variant.entrySet()) {
                     Set<String> mins = new HashSet<String>();
-                    for (String sort : context.definedSorts) { // for every declared sort
+                    for (Sort2 sort : context.definedSorts) { // for every declared sort
                         boolean min = true;
                         for (String var : entry.getValue()) {
-                            if (!context.isSubsortedEq(var, sort)) {
+                            if (!context.isSubsortedEq(Sort2.of(var), sort)) {
                                 min = false;
                                 break;
                             }
                         }
                         if (min)
-                            mins.add(sort);
+                            mins.add(sort.getName());
                     }
                     if (mins.size() == 0) {
                         fails = entry.getKey();

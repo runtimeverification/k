@@ -26,8 +26,8 @@ public class UpdateReferencesVisitor extends BasicVisitor {
      */
     @Override
     public Void visit(Syntax syn, Void _) {
-        context.definedSorts.add(syn.getSort().getName());
         prodSort = Sort2.of(syn.getSort().getName());
+        context.definedSorts.add(prodSort);
         return super.visit(syn, _);
     }
 

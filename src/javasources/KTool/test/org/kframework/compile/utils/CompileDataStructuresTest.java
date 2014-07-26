@@ -43,7 +43,7 @@ public class CompileDataStructuresTest {
     @Before
     public void setUp() {
         compileDataStructures = new CompileDataStructures(context);
-        mapSort = new DataStructureSort("Map", "Map", "'_Map_", "'_|->_", "'.Map", Collections.singletonMap("update", "'_[_<-_]"));
+        mapSort = new DataStructureSort("Map", Sort2.MAP, "'_Map_", "'_|->_", "'.Map", Collections.singletonMap("update", "'_[_<-_]"));
     }
 
     /**

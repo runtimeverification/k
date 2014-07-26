@@ -89,31 +89,31 @@ public class Context implements Serializable {
      */
     public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
-    public Map<String, String> cellKinds = new HashMap<String, String>();
-    public Map<String, String> cellSorts = new HashMap<String, String>();
+    public Map<String, Sort2> cellKinds = new HashMap<>();
+    public Map<String, Sort2> cellSorts = new HashMap<>();
     public Map<Sort2, Production> listConses = new HashMap<>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
     public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
 
-    public Map<String, Production> canonicalBracketForSort = new HashMap<>();
+    public Map<Sort2, Production> canonicalBracketForSort = new HashMap<>();
     private Poset subsorts = new Poset();
-    public java.util.Set<String> definedSorts = Sort.getBaseSorts();
+    public java.util.Set<Sort2> definedSorts = Sort2.getBaseSorts();
     private Poset priorities = new Poset();
     private Poset assocLeft = new Poset();
     private Poset assocRight = new Poset();
     private Poset modules = new Poset();
     private Poset fileRequirements = new Poset();
     public String startSymbolPgm = "K";
-    public Map<String, String> configVarSorts = new HashMap<String, String>();
+    public Map<String, Sort2> configVarSorts = new HashMap<>();
     public File dotk = null;
     public File kompiled = null;
     public boolean initialized = false;
     protected java.util.List<String> komputationCells = null;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
-    public Set<String> variableTokenSorts = new HashSet<>();
-    public HashMap<String, String> freshFunctionNames = new HashMap<>();
+    public Set<Sort2> variableTokenSorts = new HashSet<>();
+    public HashMap<Sort2, String> freshFunctionNames = new HashMap<>();
 
     public int numModules, numSentences, numProductions, numCells;
 
@@ -137,10 +137,10 @@ public class Context implements Serializable {
     /**
      * {@link Map} of sort names into {@link DataStructureSort} instances.
      */
-    private Map<String, DataStructureSort> dataStructureSorts;
+    private Map<Sort2, DataStructureSort> dataStructureSorts;
 
     /**
-     * {@link Set} of the names of the sorts with lexical productions.
+     * {@link Set} of sorts with lexical productions.
      */
     private Set<String> tokenSorts;
 
@@ -245,16 +245,14 @@ public class Context implements Serializable {
     public void addCellDecl(Cell c) {
         cells.put(c.getLabel(), c);
 
-        String kind = subsorts.getMaxim(c.getContents().getSort().getName());
-        if (kind.equals(KSorts.KLIST)) {
-            kind = KSorts.K;
+        Sort2 kind = Sort2.of(subsorts.getMaxim(c.getContents().getSort().getName()));
+        if (kind.equals(Sort2.KLIST)) {
+            kind = Sort2.K;
         }
         cellKinds.put(c.getLabel(), kind);
 
-        String sort = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
-        if (sort == null) {
-            sort = c.getContents().getSort().getName();
-        }
+        String sortName = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
+        Sort2 sort = sortName == null ? c.getContents().getSort() : Sort2.of(sortName);
         cellSorts.put(c.getLabel(), sort);
     }
 
@@ -579,38 +577,28 @@ public class Context implements Serializable {
         return sort.substring(0, 1).toUpperCase() + sort.substring(1);
     }
 
-    public Map<String, DataStructureSort> getDataStructureSorts() {
+    public Map<Sort2, DataStructureSort> getDataStructureSorts() {
         return Collections.unmodifiableMap(dataStructureSorts);
     }
 
-    public void setDataStructureSorts(Map<String, DataStructureSort> dataStructureSorts) {
+    public void setDataStructureSorts(Map<Sort2, DataStructureSort> dataStructureSorts) {
         assert !initialized;
 
-        this.dataStructureSorts = new HashMap<String, DataStructureSort>(dataStructureSorts);
-    }
-
-    @Deprecated
-    public DataStructureSort dataStructureSortOf(String sortName) {
-        assert initialized : "Context is not initialized yet";
-
-        return dataStructureSorts.get(sortName);
+        this.dataStructureSorts = new HashMap<Sort2, DataStructureSort>(dataStructureSorts);
     }
 
     public DataStructureSort dataStructureSortOf(Sort2 sort) {
-        return dataStructureSortOf(sort.getName());
-    }
-
-    @Deprecated
-    public DataStructureSort dataStructureListSortOf(String sortName) {
         assert initialized : "Context is not initialized yet";
-        DataStructureSort sort = dataStructureSorts.get(sortName);
-        if (sort == null) return null;
-        if (!sort.type().equals(KSorts.LIST)) return null;
-        return sort;
+
+        return dataStructureSorts.get(sort);
     }
 
     public DataStructureSort dataStructureListSortOf(Sort2 sort) {
-        return dataStructureListSortOf(sort.getName());
+        assert initialized : "Context is not initialized yet";
+        DataStructureSort dataStructSort = dataStructureSorts.get(sort);
+        if (dataStructSort == null) return null;
+        if (!dataStructSort.type().equals(Sort2.LIST)) return null;
+        return dataStructSort;
     }
 
     /**
@@ -637,7 +625,7 @@ public class Context implements Serializable {
                         production.getLocation()));
             }
 
-            if (freshFunctionNames.containsKey(production.getSort().getName())) {
+            if (freshFunctionNames.containsKey(production.getSort())) {
                 GlobalSettings.kem.register(new KException(
                         ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,
@@ -646,7 +634,7 @@ public class Context implements Serializable {
                         production.getLocation()));
             }
 
-            freshFunctionNames.put(production.getSort().getName(), production.getKLabel());
+            freshFunctionNames.put(production.getSort(), production.getKLabel());
         }
     }
 

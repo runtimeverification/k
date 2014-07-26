@@ -54,7 +54,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         if (PC) {
             Variable pc = new Variable(PC_VAR, Sort2.of("Bool"));
             cell.setContents(pc);
-            context.configVarSorts.put(pc.getName(), pc.getSort().getName());
+            context.configVarSorts.put(pc.getName(), pc.getSort());
         }
         else
             cell.setContents(BoolBuiltin.TRUE);

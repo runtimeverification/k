@@ -312,7 +312,7 @@ public class JavaSymbolicKRun implements KRun {
         stateMap.put(org.kframework.kil.GenericToken.kAppOf(Sort2.ID, "$1"), org.kframework.kil.IntBuiltin.kAppOf("1"));
         ((org.kframework.kil.Cell) o)
                 .setContents(new org.kframework.kil.MapBuiltin(context
-                        .dataStructureSortOf("Map"),
+                        .dataStructureSortOf(Sort2.MAP),
                         Collections.<org.kframework.kil.Term>emptyList(),
                         stateMap));
 

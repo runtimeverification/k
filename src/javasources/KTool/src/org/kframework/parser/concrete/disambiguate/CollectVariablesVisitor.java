@@ -42,7 +42,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
         if (c.getEllipses() == Ellipses.NONE)
             if (context.cellSorts.containsKey(c.getLabel())) {
                 try {
-                    c.setContents((Term) new CollectVariablesVisitor2(context, Sort2.of(context.cellSorts.get(c.getLabel()))).visitNode(c.getContents()));
+                    c.setContents((Term) new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel())).visitNode(c.getContents()));
                 } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }

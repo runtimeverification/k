@@ -2,10 +2,12 @@
 package org.kframework.kil;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.kframework.compile.transformers.CompleteSortLatice;
 
+import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.ImmutableSet;
 
 public class Sort2 implements Serializable {
@@ -30,6 +32,7 @@ public class Sort2 implements Serializable {
     public static final Sort2 ID = Sort2.of("Id");
     public static final Sort2 SHARP_ID = Sort2.of("#Id");
     public static final Sort2 INT = Sort2.of("Int");
+    public static final Sort2 BOOL = Sort2.of("Bool");
 
     public static final Sort2 BOTTOM = Sort2.of(CompleteSortLatice.BOTTOM_SORT_NAME);
 
@@ -69,11 +72,22 @@ public class Sort2 implements Serializable {
         return name;
     }
 
-    private static Set<Sort2> KSorts = ImmutableSet.of(K, BAG, BAG_ITEM, KITEM,
+    private static Set<Sort2> K_SORTS = ImmutableSet.of(K, BAG, BAG_ITEM, KITEM,
             KLIST, CELL_LABEL, KLABEL);
 
+    private static Set<Sort2> BASE_SORTS = ImmutableSet.of(K, KRESULT, KITEM,
+            KLIST, BAG, BAG_ITEM, KLABEL, CELL_LABEL);
+
     public boolean isKSort() {
-        return KSorts.contains(this);
+        return K_SORTS.contains(this);
+    }
+
+    public boolean isBaseSort() {
+        return BASE_SORTS.contains(this);
+    }
+
+    public static Set<Sort2> getBaseSorts() {
+        return new HashSet<Sort2>(BASE_SORTS);
     }
 
     /**
@@ -82,7 +96,7 @@ public class Sort2 implements Serializable {
      * @return
      */
     public Sort2 getKSort() {
-        return KSorts.contains(this) ? this : K;
+        return K_SORTS.contains(this) ? this : K;
     }
 
     public boolean isComputationSort() {
@@ -125,5 +139,7 @@ public class Sort2 implements Serializable {
     public boolean isDefaultable() {
         return equals(K) || equals(BAG);
     }
+
+
 
 }

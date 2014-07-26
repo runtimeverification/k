@@ -87,7 +87,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                 return null;
             }
 
-            if (context.getDataStructureSorts().containsKey(node.getSort().getName())) {
+            if (context.getDataStructureSorts().containsKey(node.getSort())) {
                 /* predicate definition for builtin collection sorts is deferred to each backend */
                 return null;
             }
@@ -242,8 +242,8 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         /* add collection membership predicates */
-        for (String sort : context.getDataStructureSorts().keySet()) {
-            retNode.addConstant(KSorts.KLABEL, AddPredicates.predicate(sort));
+        for (Sort2 sort : context.getDataStructureSorts().keySet()) {
+            retNode.addConstant(KSorts.KLABEL, AddPredicates.predicate(sort.getName()));
         }
 
         PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", context);

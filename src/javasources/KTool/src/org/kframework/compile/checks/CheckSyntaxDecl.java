@@ -63,8 +63,8 @@ public class CheckSyntaxDecl extends BasicVisitor {
         }
 
         if (node.isSubsort()) {
-            String sort = node.getSubsort().getName();
-            if (Sort.isBasesort(sort) && !context.isSubsorted(node.getSort().getName(), sort)) {
+            Sort2 sort = Sort2.of(node.getSubsort().getName());
+            if (sort.isBaseSort() && !context.isSubsorted(node.getSort(), sort)) {
                 String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
@@ -91,7 +91,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 sorts++;
                 Sort s = (Sort) pi;
                 if (!(s.getName().endsWith("CellSort") || s.getName().endsWith("CellFragment")))
-                    if (!context.definedSorts.contains(s.getName())) {
+                    if (!context.definedSorts.contains(Sort2.of(s.getName()))) {
                         String msg = "Undefined sort " + s.getName();
                         GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                     }
@@ -103,7 +103,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
             if (pi instanceof UserList) {
                 sorts++;
                 UserList s = (UserList) pi;
-                if (!s.getSort().getName().startsWith("#") && !context.definedSorts.contains(s.getSort().getName())) {
+                if (!s.getSort().getName().startsWith("#") && !context.definedSorts.contains(s.getSort())) {
                     String msg = "Undefined sort " + s.getSort();
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }

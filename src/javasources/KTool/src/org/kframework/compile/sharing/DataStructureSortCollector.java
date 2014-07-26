@@ -23,20 +23,20 @@ import com.google.common.collect.ImmutableMap;
 public class DataStructureSortCollector extends BasicVisitor {
     /* TODO(AndreiS): merge with the rest of the builtins */
 
-    private Map<String, String> types = new HashMap<String, String>();
-    private Map<String, String> constructorLabels = new HashMap<String, String>();
-    private Map<String, String> elementLabels = new HashMap<String, String>();
-    private Map<String, String> unitLabels = new HashMap<String, String>();
-    private Map<String, Map<String, String>> operatorLabels = new HashMap<String, Map<String, String>>();
+    private Map<Sort2, Sort2> types = new HashMap<>();
+    private Map<Sort2, String> constructorLabels = new HashMap<>();
+    private Map<Sort2, String> elementLabels = new HashMap<>();
+    private Map<Sort2, String> unitLabels = new HashMap<>();
+    private Map<Sort2, Map<String, String>> operatorLabels = new HashMap<>();
 
     public DataStructureSortCollector(Context context) {
         super(context);
     }
 
-    public Map<String, DataStructureSort> getSorts() {
-        ImmutableMap.Builder<String, DataStructureSort> builder = ImmutableMap.builder();
-        for (Map.Entry<String, String> entry : types.entrySet()) {
-            String sort = entry.getKey();
+    public Map<Sort2, DataStructureSort> getSorts() {
+        ImmutableMap.Builder<Sort2, DataStructureSort> builder = ImmutableMap.builder();
+        for (Map.Entry<Sort2, Sort2> entry : types.entrySet()) {
+            Sort2 sort = entry.getKey();
 
             if (!types.containsKey(sort)) {
                 /* TODO: print error message */
@@ -56,7 +56,7 @@ public class DataStructureSortCollector extends BasicVisitor {
             }
 
             DataStructureSort dataStructureSort = new DataStructureSort(
-                    sort,
+                    sort.getName(),
                     types.get(sort),
                     constructorLabels.get(sort),
                     elementLabels.get(sort),
@@ -84,57 +84,57 @@ public class DataStructureSortCollector extends BasicVisitor {
             return null;
         }
 
-        String type = strings[0];
+        Sort2 type = Sort2.of(strings[0]);
         String operator = strings[1];
         if (!DataStructureSort.TYPES.contains(type)) {
             /* not a builtin collection */
             return null;
         }
 
-        if (!operatorLabels.containsKey(sort.getName())) {
-            operatorLabels.put(sort.getName(), new HashMap<String, String>());
+        if (!operatorLabels.containsKey(sort)) {
+            operatorLabels.put(sort, new HashMap<String, String>());
         }
 
         Map<DataStructureSort.Label, String> labels
                 = DataStructureSort.LABELS.get(type);
         if (operator.equals(labels.get(DataStructureSort.Label.CONSTRUCTOR))) {
-            if (constructorLabels.containsKey(sort.getName())) {
+            if (constructorLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return null;
             }
 
-            constructorLabels.put(sort.getName(), node.getKLabel());
+            constructorLabels.put(sort, node.getKLabel());
         } else if (operator.equals(labels.get(DataStructureSort.Label.ELEMENT))) {
-            if (elementLabels.containsKey(sort.getName())) {
+            if (elementLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return null;
             }
 
-            elementLabels.put(sort.getName(), node.getKLabel());
+            elementLabels.put(sort, node.getKLabel());
         } else if (operator.equals(labels.get(DataStructureSort.Label.UNIT))) {
-            if (unitLabels.containsKey(sort.getName())) {
+            if (unitLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return null;
             }
 
-            unitLabels.put(sort.getName(), node.getKLabel());
+            unitLabels.put(sort, node.getKLabel());
         } else {
             /* domain specific function */
-            operatorLabels.get(sort.getName()).put(operator, node.getKLabel());
+            operatorLabels.get(sort).put(operator, node.getKLabel());
         }
 
         /*
          * The type (list, map, set) of a data structure is determined by its constructor, element,
          * and unit
          */
-        if (!operatorLabels.get(sort.getName()).containsKey(operator)) {
-            if (types.containsKey(sort.getName())) {
-                if (!types.get(sort.getName()).equals(type)) {
+        if (!operatorLabels.get(sort).containsKey(operator)) {
+            if (types.containsKey(sort)) {
+                if (!types.get(sort).equals(type)) {
                     /* TODO: print error message */
                     return null;
                 }
             } else {
-                types.put(sort.getName(), type);
+                types.put(sort, type);
             }
         }
         return null;

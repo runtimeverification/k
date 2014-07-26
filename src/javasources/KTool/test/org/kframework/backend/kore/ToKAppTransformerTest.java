@@ -39,13 +39,13 @@ public class ToKAppTransformerTest {
     @Before
     public void setUp() {
         transformer = new ToKAppTransformer(context);
-        mapSort = new DataStructureSort("Map", "Map", "'_Map_", "'_|->_", "'.Map", Maps.<String, String>newHashMap());
-        listSort = new DataStructureSort("List", "List", "'_List_", "'ListItem", "'.List", Maps.<String, String>newHashMap());
-        setSort = new DataStructureSort("Set", "Set", "'_Set_", "'SetItem", "'.Set", Maps.<String, String>newHashMap());
-        when(context.dataStructureSortOf("Map")).thenReturn(mapSort);
-        when(context.dataStructureSortOf("List")).thenReturn(listSort);
-        when(context.dataStructureSortOf("Set")).thenReturn(setSort);
-        context.canonicalBracketForSort = Maps.<String, Production>newHashMap();
+        mapSort = new DataStructureSort("Map", Sort2.MAP, "'_Map_", "'_|->_", "'.Map", Maps.<String, String>newHashMap());
+        listSort = new DataStructureSort("List", Sort2.LIST, "'_List_", "'ListItem", "'.List", Maps.<String, String>newHashMap());
+        setSort = new DataStructureSort("Set", Sort2.SET, "'_Set_", "'SetItem", "'.Set", Maps.<String, String>newHashMap());
+        when(context.dataStructureSortOf(Sort2.MAP)).thenReturn(mapSort);
+        when(context.dataStructureSortOf(Sort2.LIST)).thenReturn(listSort);
+        when(context.dataStructureSortOf(Sort2.SET)).thenReturn(setSort);
+        context.canonicalBracketForSort = Maps.newHashMap();
     }
 
     @Test

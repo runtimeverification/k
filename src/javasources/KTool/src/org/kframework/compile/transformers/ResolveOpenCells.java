@@ -34,7 +34,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
                 = context.dataStructureSortOf(context.cellSorts.get(node.getLabel()));
         if (dataStructureSort != null) {
             /* data structure sort */
-            if (ellipses == Ellipses.BOTH && !dataStructureSort.type().equals(KSorts.LIST)) {
+            if (ellipses == Ellipses.BOTH && !dataStructureSort.type().equals(Sort2.LIST)) {
                 ellipses = Ellipses.RIGHT;
             }
 

@@ -20,7 +20,7 @@ public class CollectVariableTokens extends BasicVisitor {
     @Override
     public Void visit(Production node, Void _) {
         if  (node.containsAttribute("variable"))
-            context.variableTokenSorts.add(node.getSort().getName());
+            context.variableTokenSorts.add(node.getSort());
         return null;
     }
 }

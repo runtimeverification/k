@@ -804,7 +804,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
 
     private List<Terminal> findRightSyntax(Sort2 sort){
 
-        Production p = context.canonicalBracketForSort.get(sort.getName());
+        Production p = context.canonicalBracketForSort.get(sort);
         if (p == null) {
             return new ArrayList<Terminal>();
         } else {

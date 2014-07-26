@@ -73,7 +73,7 @@ public class MaudeFilter extends BackendFilter {
           result.append(" is\n");
 
         result.append(" op fresh : #String -> KItem . \n");
-        for (Map.Entry<String, String> entry : context.freshFunctionNames.entrySet()) {
+        for (Map.Entry<Sort2, String> entry : context.freshFunctionNames.entrySet()) {
             result.append(" eq fresh(\"").append(entry.getKey()).append("\") = ");
             result.append(StringUtil.escapeMaude(entry.getValue()));
             result.append("('#counter(.KList)) .\n");
@@ -101,8 +101,8 @@ public class MaudeFilter extends BackendFilter {
                           + " .\n");
           }
 
-          for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
-            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
+          for (Map.Entry<Sort2, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
+            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey().getName()) + ", "
               + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
               + entry.getValue().type() + "), .KList))";
             result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
@@ -436,11 +436,11 @@ public class MaudeFilter extends BackendFilter {
             variable.setSort(Sort2.KITEM);
         }
          if (variable.getSort().isBuiltinSort()
-                || context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
+                || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
-            if (context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
-                  String sort = context.dataStructureSortOf(variable.getSort().getName()).type();
-                  sort = sort.equals(KSorts.K) ? KSorts.KLIST : sort;
+            if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+                  Sort2 sort = context.dataStructureSortOf(variable.getSort()).type();
+                  sort = sort.equals(Sort2.K) ? Sort2.KLIST : sort;
                 result.append(sort + "2KLabel_(");
             } else {
                 result.append("#_(");
@@ -453,14 +453,14 @@ public class MaudeFilter extends BackendFilter {
             result.append(variable.getName());
         }
         result.append(":");
-        if (context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
-            result.append(context.dataStructureSortOf(variable.getSort().getName()).type());
+        if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+            result.append(context.dataStructureSortOf(variable.getSort()).type());
         } else {
             result.append(variable.getSort());
         }
 
         if (variable.getSort().isBuiltinSort()
-                || context.getDataStructureSorts().containsKey(variable.getSort().getName())) {
+                || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append(")");
             result.append(", ");
             result.append(".KList");
@@ -673,7 +673,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(GenericToken token, Void _) {
-        if (maudeBuiltinTokenSorts.contains(token.tokenSort())) {
+        if (maudeBuiltinTokenSorts.contains(token.tokenSort().getName())) {
             result.append("#_(" + token.value() + ")");
         } else {
             result.append(token);
@@ -842,7 +842,7 @@ public class MaudeFilter extends BackendFilter {
             if (term instanceof Variable) {
                 visitDataStructureVariable(
                         ((Variable)term).getName(),
-                        listBuiltin.sort().type());
+                        listBuiltin.sort().type().getName());
             } else {
                 result.append("K2" + listBuiltin.sort().type());
                 result.append("(");

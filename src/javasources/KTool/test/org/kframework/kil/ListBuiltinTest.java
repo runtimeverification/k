@@ -17,7 +17,7 @@ public class ListBuiltinTest {
     @Before
     public void setUp() {
         listSort = new DataStructureSort(
-                "List", "List", "'_List_", "'ListItem", "'.List", new HashMap<String, String>());
+                "List", Sort2.LIST, "'_List_", "'ListItem", "'.List", new HashMap<String, String>());
     }
 
     @Test
