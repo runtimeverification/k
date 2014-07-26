@@ -98,13 +98,13 @@ public class Context implements Serializable {
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
 
     public Map<Sort2, Production> canonicalBracketForSort = new HashMap<>();
-    private Poset subsorts = new Poset();
+    private Poset<String> subsorts = Poset.create();
     public java.util.Set<Sort2> definedSorts = Sort2.getBaseSorts();
-    private Poset priorities = new Poset();
-    private Poset assocLeft = new Poset();
-    private Poset assocRight = new Poset();
-    private Poset modules = new Poset();
-    private Poset fileRequirements = new Poset();
+    private Poset<String> priorities = Poset.create();
+    private Poset<String> assocLeft = Poset.create();
+    private Poset<String> assocRight = Poset.create();
+    private Poset<String> modules = Poset.create();
+    private Poset<String> fileRequirements = Poset.create();
     public String startSymbolPgm = "K";
     public Map<String, Sort2> configVarSorts = new HashMap<>();
     public File dotk = null;
