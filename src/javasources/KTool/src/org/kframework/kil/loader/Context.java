@@ -91,7 +91,7 @@ public class Context implements Serializable {
     public Map<String, Cell> cells = new HashMap<String, Cell>();
     public Map<String, String> cellKinds = new HashMap<String, String>();
     public Map<String, String> cellSorts = new HashMap<String, String>();
-    public Map<String, Production> listConses = new HashMap<String, Production>();
+    public Map<Sort2, Production> listConses = new HashMap<>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
     public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
@@ -258,7 +258,7 @@ public class Context implements Serializable {
         cellSorts.put(c.getLabel(), sort);
     }
 
-    public boolean isListSort(String sort) {
+    public boolean isListSort(Sort2 sort) {
         return listConses.containsKey(sort);
     }
 
@@ -278,9 +278,9 @@ public class Context implements Serializable {
      */
     @SuppressWarnings("cast")
     public Sort2 getListElementSort(Sort2 sort) {
-        if (!isListSort(sort.getName()))
+        if (!isListSort(sort))
             return null;
-        return ((UserList) listConses.get(sort.getName()).getItems().get(0)).getSort();
+        return ((UserList) listConses.get(sort).getItems().get(0)).getSort();
     }
 
     /**
@@ -346,11 +346,11 @@ public class Context implements Serializable {
         if (maximalLowerBounds.isEmpty()) {
             return false;
         } else if (maximalLowerBounds.size() == 1) {
-            String sort = maximalLowerBounds.iterator().next();
+            Sort2 sort = Sort2.of(maximalLowerBounds.iterator().next());
             /* checks if the only common subsort is undefined */
-            if (sort.equals(CompleteSortLatice.BOTTOM_SORT_NAME)
+            if (sort.equals(Sort2.BOTTOM)
                     || isListSort(sort)
-                    && getListElementSort(Sort2.of(sort)).getName().equals(CompleteSortLatice.BOTTOM_SORT_NAME)) {
+                    && getListElementSort(sort).equals(Sort2.BOTTOM)) {
                 return false;
             }
         }
@@ -465,12 +465,12 @@ public class Context implements Serializable {
         }
         subsorts.transitiveClosure();
         // detect if lists are subsorted (Vals Ids < Exps)
-        for (Map.Entry<String, Production> ls1 : listConses.entrySet()) {
-            for (Map.Entry<String, Production> ls2 : listConses.entrySet()) {
-                String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort().getName();
-                String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort().getName();
+        for (Production prod1 : listConses.values()) {
+            for (Production prod2 : listConses.values()) {
+                Sort2 sort1 = ((UserList) prod1.getItems().get(0)).getSort();
+                Sort2 sort2 = ((UserList) prod2.getItems().get(0)).getSort();
                 if (isSubsorted(sort1, sort2)) {
-                    subsorts.addRelation(ls1.getValue().getSort().getName(), ls2.getValue().getSort().getName());
+                    subsorts.addRelation(prod1.getSort().getName(), prod2.getSort().getName());
                 }
             }
         }

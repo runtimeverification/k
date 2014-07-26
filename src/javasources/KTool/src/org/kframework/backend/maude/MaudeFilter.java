@@ -476,7 +476,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(".");
             result.append(sort);
         } else {
-            Production prd = context.listConses.get(sort.getName());
+            Production prd = context.listConses.get(sort);
             UserList ul = (UserList) prd.getItems().get(0);
             result.append(".List`{\"");
             result.append(ul.getSeparator());

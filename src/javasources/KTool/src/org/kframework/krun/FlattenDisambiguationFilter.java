@@ -46,14 +46,14 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
         } else if (amb.getContents().get(0) instanceof ListTerminator) {
             ListTerminator t1 = (ListTerminator)amb.getContents().get(0);
             if (t1.getSort().isComputationSort()) {
-                return new ListTerminator(((UserList) context.listConses.get(t1.getSort().getName()).getItems().get(0)).getSeparator());
+                return new ListTerminator(((UserList) context.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
             }
         }
         return amb;
     }
 
     private Term addEmpty(Term node, Sort2 sort) {
-        TermCons tc = new TermCons(sort, context.listConses.get(sort.getName()).getCons(), context);
+        TermCons tc = new TermCons(sort, context.listConses.get(sort).getCons(), context);
         List<Term> contents = new ArrayList<Term>();
         contents.add(node);
         contents.add(new ListTerminator(sort, null));

@@ -44,7 +44,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
             }
         } else if (prd.isListDecl()) {
             UserList srt = (UserList) prd.getItems().get(0);
-            context.listConses.put(prd.getSort().getName(), prd);
+            context.listConses.put(prd.getSort(), prd);
             context.putListLabel(prd);
             context.addSubsort(prd.getSort(), srt.getSort());
         } else {

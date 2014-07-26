@@ -276,7 +276,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                     pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                             + EMPTY_LIST_LABEL);
                 } else {
-                    if (context.isListSort(kItem.sort().name())) {
+                    if (context.isListSort(Sort2.of(kItem.sort().name()))) {
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                                 + USER_LIST_REPLACEMENT);
                         // TODO(Owolabileg): Bad hack to be removed - trying this out for fun where

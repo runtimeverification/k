@@ -140,7 +140,7 @@ public class KastFilter extends BasicVisitor {
             result.write(".");
             result.write(sort.getName());
         } else {
-            Production prd = context.listConses.get(sort.getName());
+            Production prd = context.listConses.get(sort);
             UserList ul = (UserList) prd.getItems().get(0);
             result.write(".List`{\"");
             result.write(ul.getSeparator());

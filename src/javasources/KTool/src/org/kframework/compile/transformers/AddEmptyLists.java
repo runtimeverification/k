@@ -64,16 +64,16 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
                 if (!(pi instanceof Sort))
                     continue;
 
-                Sort2 srt = Sort2.of(((Sort) pi).getName());
-                if (context.isListSort(srt.getName())) {
+                Sort2 sort = Sort2.of(((Sort) pi).getName());
+                if (context.isListSort(sort)) {
                     Term t = tc.getContents().get(i);
                     // if the term should be a list, append the empty element
-                    if (isAddEmptyList(srt, t.getSort())) {
-                        if (!isUserListElement(srt, t, context)) {
-                            String msg = "Found sort '" + t.getSort() + "' where list sort '" + srt + "' was expected. Moving on.";
+                    if (isAddEmptyList(sort, t.getSort())) {
+                        if (!isUserListElement(sort, t, context)) {
+                            String msg = "Found sort '" + t.getSort() + "' where list sort '" + sort + "' was expected. Moving on.";
                             GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
                         } else
-                            tc.getContents().set(i, addEmpty(t, srt));
+                            tc.getContents().set(i, addEmpty(t, sort));
                     }
                 }
                 i++;
@@ -95,20 +95,20 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         }
 
         return !elementSort.equals(Sort2.KITEM)
-               && context.isSubsortedEq(listSort.getName(), elementSort.getName());
+               && context.isSubsortedEq(listSort, elementSort);
     }
 
     public boolean isAddEmptyList(Sort2 expectedSort, Sort2 termSort) {
-        if (!context.isListSort(expectedSort.getName()))
+        if (!context.isListSort(expectedSort))
             return false;
-        if (context.isSubsortedEq(expectedSort.getName(), termSort.getName())
-                && context.isListSort(termSort.getName()))
+        if (context.isSubsortedEq(expectedSort, termSort)
+                && context.isListSort(termSort))
             return false;
         return true;
     }
 
     private Term addEmpty(Term node, Sort2 sort) {
-        TermCons tc = new TermCons(sort, getListCons(sort.getName()), context);
+        TermCons tc = new TermCons(sort, getListCons(sort), context);
         List<Term> genContents = new ArrayList<Term>();
         genContents.add(node);
         genContents.add(new ListTerminator(sort, null));
@@ -117,7 +117,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         return tc;
     }
 
-    private String getListCons(String psort) {
+    private String getListCons(Sort2 psort) {
         Production p = context.listConses.get(psort);
         return p.getAttribute(Constants.CONS_cons_ATTR);
     }

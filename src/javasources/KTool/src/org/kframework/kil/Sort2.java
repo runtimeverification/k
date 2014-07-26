@@ -4,6 +4,8 @@ package org.kframework.kil;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.kframework.compile.transformers.CompleteSortLatice;
+
 import com.google.common.collect.ImmutableSet;
 
 public class Sort2 implements Serializable {
@@ -29,6 +31,7 @@ public class Sort2 implements Serializable {
     public static final Sort2 SHARP_ID = Sort2.of("#Id");
     public static final Sort2 INT = Sort2.of("Int");
 
+    public static final Sort2 BOTTOM = Sort2.of(CompleteSortLatice.BOTTOM_SORT_NAME);
 
     private String name;
 

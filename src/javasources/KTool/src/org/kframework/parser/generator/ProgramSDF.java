@@ -17,6 +17,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
@@ -58,7 +59,7 @@ public class ProgramSDF {
         // this will allow the parser to accept any sort as input if the definition doesn't contain
         // a configuration, or the $PGM variable has sort K
         for (String sort : psdfv.startSorts) {
-            if (!Sort.isBasesort(sort) && !context.isListSort(sort)) {
+            if (!Sort.isBasesort(sort) && !context.isListSort(Sort2.of(sort))) {
                 List<ProductionItem> pi = new ArrayList<>();
                 pi.add(new Sort(sort));
                 Production prod = new Production(new Sort(KSorts.K), pi);
@@ -140,7 +141,7 @@ public class ProgramSDF {
         sdf.append("\n%% start symbols subsorts\n");
         sdf.append("    KItem        -> K\n");
         for (String s : psdfv.startSorts) {
-            if (!Sort.isBasesort(s) && !context.isListSort(s))
+            if (!Sort.isBasesort(s) && !context.isListSort(Sort2.of(s)))
                 sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
         }
 
@@ -152,7 +153,7 @@ public class ProgramSDF {
             sdf.append("    DzFloat    -> UnitDz\n");
             sdf.append("    DzString-> UnitDz\n");
             for (String s : psdfv.startSorts) {
-                if (!Sort.isBasesort(s) && !context.isListSort(s))
+                if (!Sort.isBasesort(s) && !context.isListSort(Sort2.of(s)))
                     if (AddSymbolicK.allowKSymbolic(s)) {
                         sdf.append("    \"" + AddSymbolicK.symbolicConstructor(s) + "\"    \"(\" UnitDz \")\"    -> ");
                         sdf.append(StringUtil.escapeSortName(s) + "    {cons(\"" + StringUtil.escapeSortName(s) + "1Symb\")}\n");
