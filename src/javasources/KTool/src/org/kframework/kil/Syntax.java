@@ -90,9 +90,9 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort,
     }
 
     @Override
-    public List<String> getAllSorts() {
-        List<String> sorts = new ArrayList<String>();
-        sorts.add(sort.toString());
+    public List<Sort2> getAllSorts() {
+        List<Sort2> sorts = new ArrayList<>();
+        sorts.add(sort.getSort2());
         return sorts;
     }
 

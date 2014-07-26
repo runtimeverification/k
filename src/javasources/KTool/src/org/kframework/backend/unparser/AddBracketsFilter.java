@@ -117,7 +117,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             Production p = tc.getProduction();
             if (p.isListDecl()) {
                 UserList userList = (UserList) p.getItems().get(0);
-                if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort().getName(), tc.getContents().get(0).getSort().getName())) {
+                if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
                     return true;
                 }
             }
@@ -136,7 +136,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             Production p = tc.getProduction();
             if (p.isListDecl()) {
                 UserList userList = (UserList) p.getItems().get(0);
-                if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort().getName(), tc.getContents().get(0).getSort().getName())) {
+                if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
                     return Associativity.NONE;
                 } else {
                     return Associativity.RIGHT;
@@ -228,7 +228,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             Production p = tc.getProduction();
             if (p.isListDecl()) {
                 UserList userList = (UserList) p.getItems().get(0);
-                if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort().getName(), tc.getContents().get(0).getSort().getName())) {
+                if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
                     return EnumSet.allOf(Fixity.class);
                 }
             }
@@ -336,7 +336,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         if (outer instanceof TermCons) {
             TermCons tcOuter = (TermCons) outer;
             for (int i = 0; i < tcOuter.getContents().size(); i++) {
-                if (context.isSubsortedEq(tcOuter.getProduction().getChildSort(i).getName(), inner.getSort().getName())) {
+                if (context.isSubsortedEq(tcOuter.getProduction().getChildSort(i), inner.getSort())) {
                     return inner instanceof TermCons && context.isPriorityWrong(tcOuter.getProduction().getKLabel(), ((TermCons)inner).getProduction().getKLabel());
                 }
             }
@@ -350,7 +350,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             Sort2 sort = lbl.getTerm().getSort();
             if (sort.isKSort()) {
                 sort = KInjectedLabel.getInjectedSort(sort);
-                if (!context.isSubsortedEq(sort.getName(), inner.getSort().getName())) {
+                if (!context.isSubsortedEq(sort, inner.getSort())) {
                     return true;
                 }
             }

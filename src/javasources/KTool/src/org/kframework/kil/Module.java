@@ -71,22 +71,20 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return mkl;
     }
 
-    public java.util.Set<String> getAllSorts() {
-        java.util.Set<String> sorts = new HashSet<String>();
+    public java.util.Set<Sort2> getAllSorts() {
+        java.util.Set<Sort2> sorts = new HashSet<>();
 
         for (ModuleItem mi : items) {
-            List<String> list = mi.getAllSorts();
+            List<Sort2> list = mi.getAllSorts();
             if (list != null)
                 sorts.addAll(list);
         }
 
-        // Andrei S: bad, bad practice ...
-        // ... but it is 11:55pm and I do not see another way to get them
-        sorts.add("#Bool");
-        sorts.add("#Int");
-        sorts.add("#Float");
-        sorts.add("#String");
-        sorts.add("#Id");
+        sorts.add(Sort2.SHARP_BOOL);
+        sorts.add(Sort2.SHARP_INT);
+        sorts.add(Sort2.SHARP_FLOAT);
+        sorts.add(Sort2.SHARP_STRING);
+        sorts.add(Sort2.SHARP_ID);
 
         return sorts;
     }
@@ -109,8 +107,8 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return new Module(this);
     }
 
-    public void addSubsort(String sort, String subsort, Context context) {
-        this.addProduction(sort, new Sort(subsort));
+    public void addSubsort(Sort2 sort, Sort2 subsort, Context context) {
+        this.addProduction(sort.getName(), new Sort(subsort.getName()));
         context.addSubsort(sort, subsort);
     }
 

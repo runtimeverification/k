@@ -102,7 +102,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         for (String vv1 : mins) {
                             boolean maxSort = true;
                             for (String vv2 : mins)
-                                if (context.isSubsorted(vv2, vv1))
+                                if (context.isSubsorted(Sort2.of(vv2), Sort2.of(vv1)))
                                     maxSort = false;
                             if (maxSort)
                                 maxSorts.add(vv1);

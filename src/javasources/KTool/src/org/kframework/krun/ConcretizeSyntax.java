@@ -106,7 +106,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                     for (int i = 0; i < contents.size(); i++) {
                         if (contents.get(i) instanceof KApp && ((KApp)contents.get(i)).getLabel() instanceof KInjectedLabel) {
                             KInjectedLabel l = (KInjectedLabel)((KApp)contents.get(i)).getLabel();
-                            if (context.isSubsortedEq(p.getChildSort(i).getName(), l.getTerm().getSort().getName())) {
+                            if (context.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort())) {
                                 newContents.set(i, l.getTerm());
                             }
                         } else {

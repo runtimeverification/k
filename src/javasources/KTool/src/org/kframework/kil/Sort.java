@@ -48,6 +48,11 @@ public class Sort extends ProductionItem {
         return name;
     }
 
+    @Deprecated
+    public Sort2 getSort2() {
+        return Sort2.of(name);
+    }
+
     @Override
     public String toString() {
         return getName();

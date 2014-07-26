@@ -78,10 +78,10 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-        for (String sort : node.getAllSorts()) {
-            if (allowKSymbolic(sort)) {
+        for (Sort2 sort : node.getAllSorts()) {
+            if (allowKSymbolic(sort.getName())) {
                 //retNode.addProduction(sort, getSymbolicProduction(sort));
-                retNode.addConstant(KSorts.KLABEL, symbolicConstructor(sort));
+                retNode.addConstant(KSorts.KLABEL, symbolicConstructor(sort.getName()));
             }
         }
 

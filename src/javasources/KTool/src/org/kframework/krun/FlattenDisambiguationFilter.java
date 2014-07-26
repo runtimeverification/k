@@ -32,7 +32,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
                 if (t1.getProduction().isListDecl()) {
                     Term t2 = t1.getContents().get(1);
                     UserList ul = (UserList)t1.getProduction().getItems().get(0);
-                    if (context.isSubsortedEq(ul.getSort().getName(), t2.getSort().getName())) {
+                    if (context.isSubsortedEq(ul.getSort(), t2.getSort())) {
                         t1.getContents().set(1, addEmpty(t2, t1.getSort()));
                     }
                     if (t2 instanceof ListTerminator) {

@@ -20,6 +20,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.loader.Context;
 
 public class TestCaseGenerationUtil {
@@ -163,7 +164,7 @@ public class TestCaseGenerationUtil {
     public static int getNumOfFreeVars(ConstrainedTerm cnstrTerm, Context context) {
         Set<Variable> set = cnstrTerm.term().variableSet();
         for (Iterator<Variable> iter = set.iterator(); iter.hasNext();) {
-            if (context.isSubsortedEq("KResult", iter.next().sort().name())) {
+            if (context.isSubsortedEq(Sort2.KRESULT, Sort2.of(iter.next().sort().name()))) {
                 iter.remove();
             }
         }

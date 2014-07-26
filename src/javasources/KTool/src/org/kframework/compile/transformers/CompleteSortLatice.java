@@ -89,8 +89,8 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             change = false;
 
         sort1_loop:
-            for (String sort1 : node.getAllSorts()) {
-                Collection<Production> productions = node.getProductionsOf(sort1);
+            for (Sort2 sort1 : node.getAllSorts()) {
+                Collection<Production> productions = node.getProductionsOf(sort1.getName());
                 if (productions.isEmpty()) {
                     continue;
                 }
@@ -102,15 +102,15 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 }
 
             sort2_loop:
-                for (String sort2 : node.getAllSorts()) {
+                for (Sort2 sort2 : node.getAllSorts()) {
                     // TODO(AndreiS): deal with equivalent sorts
                     if (context.isSubsortedEq(sort2, sort1) || context.isSubsortedEq(sort1, sort2)
-                            || context.isListSort(Sort2.of(sort2))) {
+                            || context.isListSort(sort2)) {
                         continue;
                     }
 
                     for (Production production : productions) {
-                        if (!context.isSubsorted(Sort2.of(sort2), production.getChildSort(0))) {
+                        if (!context.isSubsorted(sort2, production.getChildSort(0))) {
                             continue sort2_loop;
                         }
                     }
@@ -132,22 +132,22 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production1 : context.listConses.values()) {
             UserList userList1 = (UserList) production1.getItems().get(0);
 
-            Set<String> subsorts = new HashSet<String>();
+            Set<Sort2> subsorts = new HashSet<>();
             for (Production production2 : context.listConses.values()) {
                 UserList userList2 = (UserList) production2.getItems().get(0);
 
                 if (userList1.getSeparator().equals(userList2.getSeparator())) {
                     if (context.isSubsorted(userList1.getSort(), userList2.getSort())) {
-                        subsorts.add(userList2.getSort().getName());
+                        subsorts.add(userList2.getSort());
                     }
                 }
             }
 
-            for (String sort : node.getAllSorts()) {
-                if (!subsorts.contains(sort) && context.isSubsorted(userList1.getSort(), Sort2.of(sort))) {
+            for (Sort2 sort : node.getAllSorts()) {
+                if (!subsorts.contains(sort) && context.isSubsorted(userList1.getSort(), sort)) {
                     transformedNode.addProduction(
-                            CompleteSortLatice.getUserListName(sort, userList1.getSeparator()),
-                            new UserList(Sort2.of(sort), userList1.getSeparator()));
+                            CompleteSortLatice.getUserListName(sort.getName(), userList1.getSeparator()),
+                            new UserList(sort, userList1.getSeparator()));
                 }
             }
         }
@@ -170,8 +170,8 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 if (userList1.getSeparator().equals(userList2.getSeparator())) {
                     if (context.isSubsorted(userList1.getSort(), userList2.getSort())) {
                         transformedNode.addSubsort(
-                                production1.getSort().getName(),
-                                production2.getSort().getName(),
+                                production1.getSort(),
+                                production2.getSort(),
                                 context);
                     }
                 }
@@ -190,10 +190,10 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             }
 
             transformedNode.addSubsort(
-                    production.getSort().getName(),
-                    CompleteSortLatice.getUserListName(
+                    production.getSort(),
+                    Sort2.of(CompleteSortLatice.getUserListName(
                             CompleteSortLatice.BOTTOM_SORT_NAME,
-                            userList.getSeparator()),
+                            userList.getSeparator())),
                     context);
         }
 
@@ -205,7 +205,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             UserList userList = (UserList) production.getItems().get(0);
 
             if (context.isSubsorted(Sort2.KRESULT, userList.getSort())) {
-                transformedNode.addSubsort(Sort2.KRESULT.getName(), production.getSort().getName(), context);
+                transformedNode.addSubsort(Sort2.KRESULT, production.getSort(), context);
             }
         }
 

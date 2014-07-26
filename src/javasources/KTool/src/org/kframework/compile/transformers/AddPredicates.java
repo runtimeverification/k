@@ -176,14 +176,14 @@ public class AddPredicates extends CopyOnWriteTransformer {
         // declare isSymbolicK predicate as KLabel
         retNode.addConstant(KSymbolicPredicate);
 
-        for (String sort : node.getAllSorts()) {
-            if (!Sort2.of(sort).isKSort()) {
-                String pred = AddPredicates.syntaxPredicate(sort);
+        for (Sort2 sort : node.getAllSorts()) {
+            if (!sort.isKSort()) {
+                String pred = AddPredicates.syntaxPredicate(sort.getName());
                 // declare isSort predicate as KLabel
                 retNode.addConstant(KSorts.KLABEL, pred);
 
-                if (AddSymbolicK.allowKSymbolic(sort)) {
-                    String symPred = AddPredicates.symbolicPredicate(sort);
+                if (AddSymbolicK.allowKSymbolic(sort.getName())) {
+                    String symPred = AddPredicates.symbolicPredicate(sort.getName());
                     // declare isSymbolicSort predicate as KLabel
                     retNode.addConstant(KSorts.KLABEL, symPred);
 
@@ -198,7 +198,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
-                    String symCtor = AddSymbolicK.symbolicConstructor(sort);
+                    String symCtor = AddSymbolicK.symbolicConstructor(sort.getName());
                     var = Variable.getFreshVar(Sort2.KLIST);
                     Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
 
@@ -215,12 +215,12 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     // define K2Sort function for symbolic sort constructor
                     // symSort
                     lhs = KApp.of(K2Sort, symTerm);
-                    rhs = StringBuiltin.kAppOf(sort);
+                    rhs = StringBuiltin.kAppOf(sort.getName());
                     rule = new Rule(lhs, rhs, context);
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
-                } else if (Sort2.of(sort).isBuiltinSort()) {
-                    Variable var = Variable.getFreshVar(Sort2.of(sort));
+                } else if (sort.isBuiltinSort()) {
+                    Variable var = Variable.getFreshVar(sort);
                     Term lhs = KApp.of(BuiltinPredicate, var);
                     Rule rule = new Rule(lhs, BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
@@ -235,7 +235,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.getCellAttributes().getContents().add(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                      */
-                } else if (context.getTokenSorts().contains(sort)) {
+                } else if (context.getTokenSorts().contains(sort.getName())) {
                     /* defer membership predicate for lexical token to each backend */
                 }
             }

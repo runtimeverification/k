@@ -31,6 +31,10 @@ public class Sort2 implements Serializable {
 
     public static final Sort2 ID = Sort2.of("Id");
     public static final Sort2 SHARP_ID = Sort2.of("#Id");
+    public static final Sort2 SHARP_BOOL = Sort2.of("#Bool");
+    public static final Sort2 SHARP_INT = Sort2.of("#Int");
+    public static final Sort2 SHARP_FLOAT = Sort2.of("#Float");
+    public static final Sort2 SHARP_STRING = Sort2.of("#String");
     public static final Sort2 INT = Sort2.of("Int");
     public static final Sort2 BOOL = Sort2.of("Bool");
 

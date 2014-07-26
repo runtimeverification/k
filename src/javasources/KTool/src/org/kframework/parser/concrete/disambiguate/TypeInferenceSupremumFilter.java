@@ -99,8 +99,8 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
                 !(big.getItems().get(i) instanceof Lexical && small.getItems().get(i) instanceof Lexical)) {
                 return false;
             } else if (big.getItems().get(i) instanceof Sort) {
-                String bigSort = ((Sort) big.getItems().get(i)).getName();
-                String smallSort = ((Sort) small.getItems().get(i)).getName();
+                Sort2 bigSort = ((Sort) big.getItems().get(i)).getSort2();
+                Sort2 smallSort = ((Sort) small.getItems().get(i)).getSort2();
                 if (!context.isSubsortedEq(bigSort, smallSort))
                     return false;
             } else if (big.getItems().get(i) instanceof UserList) {

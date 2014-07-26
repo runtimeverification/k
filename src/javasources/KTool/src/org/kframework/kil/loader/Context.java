@@ -98,7 +98,7 @@ public class Context implements Serializable {
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
 
     public Map<Sort2, Production> canonicalBracketForSort = new HashMap<>();
-    private Poset<String> subsorts = Poset.create();
+    private Poset<Sort2> subsorts = Poset.create();
     public java.util.Set<Sort2> definedSorts = Sort2.getBaseSorts();
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
@@ -162,11 +162,11 @@ public class Context implements Serializable {
     }
 
     private void initSubsorts() {
-        subsorts.addElement(KSorts.KLABEL);
-        subsorts.addRelation(KSorts.KLIST, KSorts.K);
-        subsorts.addRelation(KSorts.K, KSorts.KITEM);
-        subsorts.addRelation(KSorts.KITEM, KSorts.KRESULT);
-        subsorts.addRelation(KSorts.BAG, KSorts.BAG_ITEM);
+        subsorts.addElement(Sort2.KLABEL);
+        subsorts.addRelation(Sort2.KLIST, Sort2.K);
+        subsorts.addRelation(Sort2.K, Sort2.KITEM);
+        subsorts.addRelation(Sort2.KITEM, Sort2.KRESULT);
+        subsorts.addRelation(Sort2.BAG, Sort2.BAG_ITEM);
     }
 
     // TODO(dwightguth): remove these fields and replace with injected dependencies
@@ -245,7 +245,7 @@ public class Context implements Serializable {
     public void addCellDecl(Cell c) {
         cells.put(c.getLabel(), c);
 
-        Sort2 kind = Sort2.of(subsorts.getMaxim(c.getContents().getSort().getName()));
+        Sort2 kind = subsorts.getMaxim(c.getContents().getSort());
         if (kind.equals(Sort2.KLIST)) {
             kind = Sort2.K;
         }
@@ -263,7 +263,7 @@ public class Context implements Serializable {
     /**
      * Returns a unmodifiable view of all sorts.
      */
-    public Set<String> getAllSorts() {
+    public Set<Sort2> getAllSorts() {
         return Collections.unmodifiableSet(subsorts.getElements());
     }
 
@@ -289,7 +289,7 @@ public class Context implements Serializable {
      * @return the sort which is the LUB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getLUBSort(Set<String> sorts) {
+    public Sort2 getLUBSort(Set<Sort2> sorts) {
         return subsorts.getLUB(sorts);
     }
 
@@ -301,7 +301,7 @@ public class Context implements Serializable {
      * @return the sort which is the LUB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getLUBSort(String... sorts) {
+    public Sort2 getLUBSort(Sort2... sorts) {
         return subsorts.getLUB(Sets.newHashSet(sorts));
     }
 
@@ -313,7 +313,7 @@ public class Context implements Serializable {
      * @return the sort which is the GLB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getGLBSort(Set<String> sorts) {
+    public Sort2 getGLBSort(Set<Sort2> sorts) {
         return subsorts.getGLB(sorts);
     }
 
@@ -325,7 +325,7 @@ public class Context implements Serializable {
      * @return the sort which is the GLB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getGLBSort(String... sorts) {
+    public Sort2 getGLBSort(Sort2... sorts) {
         return subsorts.getGLB(Sets.newHashSet(sorts));
     }
 
@@ -338,13 +338,13 @@ public class Context implements Serializable {
      * @return {@code true} if there is at least one well-defined common
      *         subsort; otherwise, {@code false}
      */
-    public boolean hasCommonSubsort(String... sorts) {
-        Set<String> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
+    public boolean hasCommonSubsort(Sort2... sorts) {
+        Set<Sort2> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
 
         if (maximalLowerBounds.isEmpty()) {
             return false;
         } else if (maximalLowerBounds.size() == 1) {
-            Sort2 sort = Sort2.of(maximalLowerBounds.iterator().next());
+            Sort2 sort = maximalLowerBounds.iterator().next();
             /* checks if the only common subsort is undefined */
             if (sort.equals(Sort2.BOTTOM)
                     || isListSort(sort)
@@ -438,14 +438,8 @@ public class Context implements Serializable {
         return fileRequirements.isInRelation(required, local);
     }
 
-    @Deprecated
-    public void addSubsort(String bigSort, String smallSort) {
-        // add the new subsorting
-        subsorts.addRelation(bigSort, smallSort);
-    }
-
     public void addSubsort(Sort2 bigSort, Sort2 smallSort) {
-        addSubsort(bigSort.getName(), smallSort.getName());
+        subsorts.addRelation(bigSort, smallSort);
     }
 
     /**
@@ -453,10 +447,10 @@ public class Context implements Serializable {
      * becomes a partial order set.
      */
     public void computeSubsortTransitiveClosure() {
-        List<String> circuit = subsorts.checkForCycles();
+        List<Sort2> circuit = subsorts.checkForCycles();
         if (circuit != null) {
             String msg = "Circularity detected in subsorts: ";
-            for (String sort : circuit)
+            for (Sort2 sort : circuit)
                 msg += sort + " < ";
             msg += circuit.get(0);
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "Definition files", "File system."));
@@ -468,7 +462,7 @@ public class Context implements Serializable {
                 Sort2 sort1 = ((UserList) prod1.getItems().get(0)).getSort();
                 Sort2 sort2 = ((UserList) prod2.getItems().get(0)).getSort();
                 if (isSubsorted(sort1, sort2)) {
-                    subsorts.addRelation(prod1.getSort().getName(), prod2.getSort().getName());
+                    subsorts.addRelation(prod1.getSort(), prod2.getSort());
                 }
             }
         }
@@ -482,13 +476,8 @@ public class Context implements Serializable {
      * @param smallSort
      * @return
      */
-    @Deprecated
-    public boolean isSubsorted(String bigSort, String smallSort) {
-        return subsorts.isInRelation(bigSort, smallSort);
-    }
-
     public boolean isSubsorted(Sort2 bigSort, Sort2 smallSort) {
-        return subsorts.isInRelation(bigSort.getName(), smallSort.getName());
+        return subsorts.isInRelation(bigSort, smallSort);
     }
 
     /**
@@ -498,17 +487,11 @@ public class Context implements Serializable {
      * @param smallSort
      * @return
      */
-    @Deprecated
-    public boolean isSubsortedEq(String bigSort, String smallSort) {
+    public boolean isSubsortedEq(Sort2 bigSort, Sort2 smallSort) {
         if (bigSort.equals(smallSort))
             return true;
         return subsorts.isInRelation(bigSort, smallSort);
     }
-
-    public boolean isSubsortedEq(Sort2 bigSort, Sort2 smallSort) {
-        return isSubsortedEq(bigSort.getName(), smallSort.getName());
-    }
-
 
     public boolean isTagGenerated(String key) {
         return generatedTags.contains(key);
@@ -549,7 +532,7 @@ public class Context implements Serializable {
     }
 
     public Term kWrapper(Term t) {
-        if (isSubsortedEq(KSorts.K, t.getSort().getName()))
+        if (isSubsortedEq(Sort2.K, t.getSort()))
             return t;
         return KApp.of(new KInjectedLabel(t));
     }
