@@ -66,7 +66,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Sort node, Void _)  {
-        if (Sort2.of(node.getName()).isBuiltinSort())
+        if (node.getSort2().isBuiltinSort())
                 builtinSorts.add(node.getSort2());
         return node;
     }

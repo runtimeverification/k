@@ -131,14 +131,14 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public Production(Sort sort, java.util.List<ProductionItem> items) {
         super();
         this.items = items;
-        this.sort = Sort2.of(sort.getName());
+        this.sort = sort.getSort2();
         attributes = new Attributes();
     }
 
     public Production(Sort sort, java.util.List<ProductionItem> items, String ownerModule) {
         super();
         this.items = items;
-        this.sort = Sort2.of(sort.getName());
+        this.sort = sort.getSort2();
         attributes = new Attributes();
         this.ownerModuleName = ownerModule;
     }
@@ -236,7 +236,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
             if (!(i instanceof Terminal))
                 arity++;
             if (arity == idx) {
-                return Sort2.of(((Sort) i).getName());
+                return ((Sort) i).getSort2();
             }
         }
         return null;

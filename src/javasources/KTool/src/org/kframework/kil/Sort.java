@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Visitor;
 
 /** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
@@ -19,40 +18,18 @@ public class Sort extends ProductionItem {
         this.sort2 = sort.sort2;
     }
 
-    @Deprecated
-    public static boolean isBasesort(String sort) {
-        return Sort2.of(sort).isBaseSort();
-    }
-
-    @Deprecated
-    public boolean isBaseSort() {
-        return sort2.isBaseSort();
+    public String getName() {
+        return getSort2().getName();
     }
 
     public void setSort2(Sort2 sort2) {
         this.sort2 = sort2;
     }
 
-//    public void setName(String sort) {
-//        this.name = sort;
-//    }
-//
-    public String getName() {
-        if (sort2.isCellSort())
-            return Sort2.BAG.getName();
-        return sort2.getName();
-    }
-//
-//    public String getRealName() {
-//        return name;
-//    }
-
-    @Deprecated
     public Sort2 getSort2() {
         return sort2.isCellSort() ? Sort2.BAG : sort2;
     }
 
-    @Deprecated
     public Sort2 getRealSort2() {
         return sort2;
     }

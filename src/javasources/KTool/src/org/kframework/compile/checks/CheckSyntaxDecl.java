@@ -63,7 +63,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
         }
 
         if (node.isSubsort()) {
-            Sort2 sort = Sort2.of(node.getSubsort().getName());
+            Sort2 sort = node.getSubsort().getSort2();
             if (sort.isBaseSort() && !context.isSubsorted(node.getSort(), sort)) {
                 String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
@@ -90,12 +90,13 @@ public class CheckSyntaxDecl extends BasicVisitor {
             if (pi instanceof Sort) {
                 sorts++;
                 Sort s = (Sort) pi;
-                if (!(s.getName().endsWith("CellSort") || s.getName().endsWith("CellFragment")))
-                    if (!context.definedSorts.contains(Sort2.of(s.getName()))) {
-                        String msg = "Undefined sort " + s.getName();
+                if (!s.getSort2().isCellSort()) {
+                    if (!context.definedSorts.contains(s.getSort2())) {
+                        String msg = "Undefined sort " + s;
                         GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                     }
-                if (s.getName().equals(KSorts.KRESULT) && !(node.isSubsort() && node.getSort().equals(Sort2.KITEM))) {
+                }
+                if (s.getSort2().equals(Sort2.KRESULT) && !(node.isSubsort() && node.getSort().equals(Sort2.KITEM))) {
                     String msg = "KResult is only allowed in the left hand side of syntax.";
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }

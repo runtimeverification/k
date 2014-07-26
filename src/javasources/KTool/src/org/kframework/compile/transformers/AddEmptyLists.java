@@ -64,7 +64,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
                 if (!(pi instanceof Sort))
                     continue;
 
-                Sort2 sort = Sort2.of(((Sort) pi).getName());
+                Sort2 sort = ((Sort) pi).getSort2();
                 if (context.isListSort(sort)) {
                     Term t = tc.getContents().get(i);
                     // if the term should be a list, append the empty element

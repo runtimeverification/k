@@ -34,9 +34,9 @@ public class AddSortLabels extends CopyOnWriteTransformer {
     /*
      * list of sorts already labeled, when encountered again ignore.
      */
-    final protected List<String> labeledSorts;
+    final protected List<Sort2> labeledSorts;
 
-    public AddSortLabels(Context context, List<String> labeledSorts) {
+    public AddSortLabels(Context context, List<Sort2> labeledSorts) {
         super("AddSortLabels", context);
         this.labeledSorts = labeledSorts;
     }
@@ -51,10 +51,10 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Syntax syntax, Void _)  {
-        if (labeledSorts.contains(syntax.getSort().getName())) {
+        if (labeledSorts.contains(syntax.getSort().getSort2())) {
             return syntax;
         }
-        labeledSorts.add(syntax.getSort().getName());
+        labeledSorts.add(syntax.getSort().getSort2());
         List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
         productionItems.add(new Terminal("L" + syntax.getSort()));
         productionItems.add(new Sort(Sort2.ID));

@@ -33,7 +33,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
                 if (tc.getProduction().getItems().get(i) instanceof Sort) {
                     Sort sort = (Sort) tc.getProduction().getItems().get(i);
                     Term child = tc.getContents().get(j);
-                    score += getFitnessUnit2(Sort2.of(sort.getName()), child);
+                    score += getFitnessUnit2(sort.getSort2(), child);
                     j++;
                 }
             }

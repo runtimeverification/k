@@ -269,7 +269,7 @@ public class MetaK {
         }
         for (ProductionItem item : prod.getItems()) {
             if (item instanceof Sort) {
-                t.getContents().add(Variable.getFreshVar(Sort2.of(((Sort) item).getName())));
+                t.getContents().add(Variable.getFreshVar(((Sort) item).getSort2()));
             }
         }
         return t;

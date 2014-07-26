@@ -68,7 +68,7 @@ public class AddInjections extends CopyOnWriteTransformer{
         assert node.getPriorityBlocks().size() == 1;
         assert node.getPriorityBlocks().get(0).getProductions().size() == 1;
 
-        Sort2 sort = Sort2.of(node.getSort().getName());
+        Sort2 sort = node.getSort().getSort2();
         Production production = node.getPriorityBlocks().get(0).getProductions().get(0);
         production = (Production) visit(production, _);
 
@@ -106,7 +106,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     public Sort visit(Sort node, Void _) {
         assert state == TransformationState.TRANSFORM_PRODUCTIONS;
 
-        if (node.getName().equals(KSorts.KLABEL) || node.getName().equals(KSorts.KLIST)) {
+        if (node.getSort2().equals(Sort2.KLABEL) || node.getSort2().equals(Sort2.KLIST)) {
             Sort returnNode = node.shallowCopy();
             returnNode.setSort2(Sort2.KITEM);
             return returnNode;

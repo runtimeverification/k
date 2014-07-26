@@ -81,7 +81,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
 
         sort1_loop:
             for (Sort2 sort1 : node.getAllSorts()) {
-                Collection<Production> productions = node.getProductionsOf(sort1.getName());
+                Collection<Production> productions = node.getProductionsOf(sort1);
                 if (productions.isEmpty()) {
                     continue;
                 }

@@ -142,7 +142,8 @@ public class ProgramSDF {
         sdf.append("\n%% start symbols subsorts\n");
         sdf.append("    KItem        -> K\n");
         for (String s : psdfv.startSorts) {
-            if (!Sort.isBasesort(s) && !context.isListSort(Sort2.of(s)))
+            Sort2 sort = Sort2.of(s);
+            if (!sort.isBaseSort() && !context.isListSort(sort))
                 sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
         }
 
@@ -154,7 +155,8 @@ public class ProgramSDF {
             sdf.append("    DzFloat    -> UnitDz\n");
             sdf.append("    DzString-> UnitDz\n");
             for (String s : psdfv.startSorts) {
-                if (!Sort.isBasesort(s) && !context.isListSort(Sort2.of(s)))
+                Sort2 sort = Sort2.of(s);
+                if (!sort.isBaseSort() && !context.isListSort(sort))
                     if (AddSymbolicK.allowKSymbolic(s)) {
                         sdf.append("    \"" + AddSymbolicK.symbolicConstructor(s) + "\"    \"(\" UnitDz \")\"    -> ");
                         sdf.append(StringUtil.escapeSortName(s) + "    {cons(\"" + StringUtil.escapeSortName(s) + "1Symb\")}\n");

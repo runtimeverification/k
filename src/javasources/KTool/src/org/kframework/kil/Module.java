@@ -153,14 +153,14 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     /**
      * Returns a {@code Collection} of {@link Production} instances associated with the given sort.
      */
-    public Collection<Production> getProductionsOf(String sort) {
+    public Collection<Production> getProductionsOf(Sort2 sort) {
         Collection<Production> productions = new ArrayList<Production>();
         for (ModuleItem item : items) {
             if (!(item instanceof Syntax)) {
                 continue;
             }
             Syntax syntax = (Syntax) item;
-            if (!syntax.getSort().getName().equals(sort)) {
+            if (!syntax.getSort().getSort2().equals(sort)) {
                 continue;
             }
             for (PriorityBlock priorityBlock : syntax.getPriorityBlocks()) {

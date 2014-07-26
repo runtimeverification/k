@@ -99,10 +99,10 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         }
 
         Variable var;
-        if (context.getDataStructureSorts().containsKey(Sort2.of(node.getName()))
-                || node.getName().equals(KSorts.K)
-                || node.getName().equals(KSorts.KITEM)) {
-            var = Variable.getFreshVar(Sort2.of(node.getName()));
+        if (context.getDataStructureSorts().containsKey(node.getSort2())
+                || node.getSort2().equals(Sort2.K)
+                || node.getSort2().equals(Sort2.KITEM)) {
+            var = Variable.getFreshVar(node.getSort2());
         } else {
             var = Variable.getFreshVar(Sort2.of("#" + node.getName()));
         }
@@ -111,8 +111,8 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         filter.visit(var, null);
         left += filter.getResult();
 
-        if (context.getDataStructureSorts().containsKey(Sort2.of(node.getName()))) {
-            var.setSort(context.dataStructureSortOf(Sort2.of(node.getName())).type());
+        if (context.getDataStructureSorts().containsKey(node.getSort2())) {
+            var.setSort(context.dataStructureSortOf(node.getSort2()).type());
         }
         right += var.toString();
         return null;

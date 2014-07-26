@@ -59,7 +59,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
             if (node.getProduction().getItems().get(i) instanceof Sort) {
                 Term t = node.getContents().get(j);
                 try {
-                    new CollectVariablesVisitor2(context, Sort2.of(((Sort) node.getProduction().getItems().get(i)).getName())).visitNode(t);
+                    new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getSort2()).visitNode(t);
                 } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }

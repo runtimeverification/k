@@ -13,6 +13,7 @@ import org.kframework.kil.ConfigurationNotFound;
 import org.kframework.kil.ConfigurationNotUnique;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
@@ -140,8 +141,8 @@ public class KagregFrontEnd {
         }
         indenter.endLine();
 
-        List<String> labeledSorts = new ArrayList<String>();
-        labeledSorts.add("KResult"); // temporary bug fix for https://code.google.com/p/k-framework/issues/detail?id=541
+        List<Sort2> labeledSorts = new ArrayList<>();
+        labeledSorts.add(Sort2.KRESULT); // temporary bug fix for https://code.google.com/p/k-framework/issues/detail?id=541
         AddSortLabels addSortLabels1 = new AddSortLabels(context1, labeledSorts);
         firstDef = (Definition) addSortLabels1.visitNode(firstDef);
 

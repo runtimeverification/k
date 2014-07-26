@@ -65,7 +65,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
         @Override
         public Void visit(Syntax node, Void _) {
-            Sort2 sort = Sort2.of(node.getSort().getName());
+            Sort2 sort = node.getSort().getSort2();
 
             if (context.isListSort(sort))
                 lists.add(sort);

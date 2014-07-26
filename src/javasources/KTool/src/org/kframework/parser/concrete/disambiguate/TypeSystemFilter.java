@@ -33,7 +33,7 @@ public class TypeSystemFilter extends ParseForestTransformer {
                 if (prd.getItems().get(i) instanceof Sort) {
                     Sort sort = (Sort) prd.getItems().get(i);
                     Term child = tc.getContents().get(j);
-                    tc.getContents().set(j, (Term) new TypeSystemFilter2(Sort2.of(sort.getName()), context).visitNode(child));
+                    tc.getContents().set(j, (Term) new TypeSystemFilter2(sort.getSort2(), context).visitNode(child));
                     j++;
                 }
             }
