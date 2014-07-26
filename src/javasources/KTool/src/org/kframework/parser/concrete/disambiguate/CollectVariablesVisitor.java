@@ -59,7 +59,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
             if (node.getProduction().getItems().get(i) instanceof NonTerminal) {
                 Term t = node.getContents().get(j);
                 try {
-                    new CollectVariablesVisitor2(context, ((NonTerminal) node.getProduction().getItems().get(i)).getSort2()).visitNode(t);
+                    new CollectVariablesVisitor2(context, ((NonTerminal) node.getProduction().getItems().get(i)).getSort()).visitNode(t);
                 } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }

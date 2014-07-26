@@ -31,7 +31,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
                 if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
                     NonTerminal sort = (NonTerminal) tc.getProduction().getItems().get(i);
                     Term child = tc.getContents().get(j);
-                    score += getFitnessUnit2(sort.getSort2(), child);
+                    score += getFitnessUnit2(sort.getSort(), child);
                     j++;
                 }
             }

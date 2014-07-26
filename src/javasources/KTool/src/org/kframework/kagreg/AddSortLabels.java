@@ -51,10 +51,10 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Syntax syntax, Void _)  {
-        if (labeledSorts.contains(syntax.getSort().getSort2())) {
+        if (labeledSorts.contains(syntax.getSort().getSort())) {
             return syntax;
         }
-        labeledSorts.add(syntax.getSort().getSort2());
+        labeledSorts.add(syntax.getSort().getSort());
         List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
         productionItems.add(new Terminal("L" + syntax.getSort()));
         productionItems.add(new NonTerminal(Sort.ID));

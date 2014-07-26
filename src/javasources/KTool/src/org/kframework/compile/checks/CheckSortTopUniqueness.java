@@ -25,23 +25,23 @@ public class CheckSortTopUniqueness extends BasicVisitor {
     public Void visit(Syntax node, Void _) {
         String msg = "Multiple top sorts found for " + node.getSort() + ": ";
         int count = 0;
-        if (context.isSubsorted(Sort.KLIST, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.KLIST, node.getSort().getSort())) {
             msg += KSorts.KLIST + ", ";
             count++;
         }
-        if (context.isSubsorted(Sort.LIST, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.LIST, node.getSort().getSort())) {
             msg += "List, ";
             count++;
         }
-        if (context.isSubsorted(Sort.BAG, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.BAG, node.getSort().getSort())) {
             msg += "Bag, ";
             count++;
         }
-        if (context.isSubsorted(Sort.MAP, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.MAP, node.getSort().getSort())) {
             msg += "Map, ";
             count++;
         }
-        if (context.isSubsorted(Sort.SET, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.SET, node.getSort().getSort())) {
             msg += "Set, ";
             count++;
         }

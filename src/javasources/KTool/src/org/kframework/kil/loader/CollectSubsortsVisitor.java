@@ -25,7 +25,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 
     public Void visit(Syntax syn, Void _) {
         if (syn.getPriorityBlocks().size() == 0) {
-            Sort sort = syn.getSort().getSort2();
+            Sort sort = syn.getSort().getSort();
             if (!sort.equals(Sort.KITEM)) {
                 context.addSubsort(Sort.KITEM, sort);
             }
@@ -39,7 +39,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
         if (prd.isSubsort()) {
             if (!prd.containsAttribute("onlyLabel")
                     && !prd.containsAttribute("notInRules")) {
-                Sort sort = ((NonTerminal) prd.getItems().get(0)).getSort2();
+                Sort sort = ((NonTerminal) prd.getItems().get(0)).getSort();
                 context.addSubsort(prd.getSort(), sort);
             }
         } else if (prd.isListDecl()) {
@@ -50,7 +50,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
         } else {
             for (ProductionItem pi : prd.getItems()) {
                 if (pi instanceof NonTerminal) {
-                    Sort s = ((NonTerminal) pi).getSort2();
+                    Sort s = ((NonTerminal) pi).getSort();
                     if (!s.isBaseSort())
                         context.addSubsort(Sort.KITEM, s);
                 }

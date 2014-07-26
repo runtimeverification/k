@@ -6,37 +6,37 @@ import org.kframework.kil.visitors.Visitor;
 /** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
 public class NonTerminal extends ProductionItem {
 
-    private Sort sort2;
+    private Sort sort;
 
-    public NonTerminal(Sort sort2) {
+    public NonTerminal(Sort sort) {
         super();
-        this.sort2 = sort2;
+        this.sort = sort;
     }
 
-    public NonTerminal(NonTerminal sort) {
-        super(sort);
-        this.sort2 = sort.sort2;
+    public NonTerminal(NonTerminal nonTerminal) {
+        super(nonTerminal);
+        this.sort = nonTerminal.sort;
     }
 
     public String getName() {
-        return getSort2().getName();
+        return getSort().getName();
     }
 
-    public void setSort2(Sort sort2) {
-        this.sort2 = sort2;
+    public void setSort(Sort sort) {
+        this.sort = sort;
     }
 
-    public Sort getSort2() {
-        return sort2.isCellSort() ? Sort.BAG : sort2;
+    public Sort getSort() {
+        return sort.isCellSort() ? Sort.BAG : sort;
     }
 
-    public Sort getRealSort2() {
-        return sort2;
+    public Sort getRealSort() {
+        return sort;
     }
 
     @Override
     public String toString() {
-        return sort2.getName();
+        return sort.getName();
     }
 
     @Override
@@ -53,16 +53,16 @@ public class NonTerminal extends ProductionItem {
         if (!(obj instanceof NonTerminal))
             return false;
 
-        NonTerminal srt = (NonTerminal) obj;
+        NonTerminal nt = (NonTerminal) obj;
 
-        if (!sort2.equals(srt.sort2))
+        if (!sort.equals(nt.sort))
             return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return sort2.hashCode();
+        return sort.hashCode();
     }
 
     @Override

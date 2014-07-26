@@ -160,7 +160,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
                 continue;
             }
             Syntax syntax = (Syntax) item;
-            if (!syntax.getSort().getSort2().equals(sort)) {
+            if (!syntax.getSort().getSort().equals(sort)) {
                 continue;
             }
             for (PriorityBlock priorityBlock : syntax.getPriorityBlocks()) {

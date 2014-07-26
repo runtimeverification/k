@@ -269,7 +269,7 @@ public class MetaK {
         }
         for (ProductionItem item : prod.getItems()) {
             if (item instanceof NonTerminal) {
-                t.getContents().add(Variable.getFreshVar(((NonTerminal) item).getSort2()));
+                t.getContents().add(Variable.getFreshVar(((NonTerminal) item).getSort()));
             }
         }
         return t;

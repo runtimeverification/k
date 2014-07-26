@@ -46,7 +46,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Syntax node, Void _)  {
-        if (!node.getSort().getSort2().isComputationSort()) {
+        if (!node.getSort().getSort().isComputationSort()) {
             isComputation = false;
             return super.visit(node, _);
         }
@@ -82,7 +82,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(NonTerminal node, Void _)  {
-        if (!node.getSort2().isComputationSort())
+        if (!node.getSort().isComputationSort())
             return node;
         return new NonTerminal(Sort.K);
     }

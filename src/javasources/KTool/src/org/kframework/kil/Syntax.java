@@ -92,7 +92,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
     @Override
     public List<Sort> getAllSorts() {
         List<Sort> sorts = new ArrayList<>();
-        sorts.add(sort.getSort2());
+        sorts.add(sort.getSort());
         return sorts;
     }
 
