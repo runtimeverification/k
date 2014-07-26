@@ -169,6 +169,7 @@ import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -498,7 +499,7 @@ Sort SimpleSortID() : { String loc = startLoc(); String str; }
   ("{"  { str = str + specialAndImage(); }
    UpperId() { str = str + specialAndImage(); }
    "}"  { str = str + specialAndImage(); })?
-  { return markLoc(loc, new Sort(str)); }
+  { return markLoc(loc, new Sort(Sort2.of(str))); }
 }
 
 /** Parses and returns a Sort */
@@ -506,7 +507,7 @@ Sort SortID() : { Sort sort; }
 {
   sort = SimpleSortID() { return sort; }
   | ("List" | "NeList" | "Lexer" | "Token")
-    { return tokenLoc(new Sort(image())); }
+    { return tokenLoc(new Sort(Sort2.of(image()))); }
 }
 
 ///////
@@ -801,7 +802,7 @@ void Sentence(Module module) :
     | Attributes(syn)
     | "-/-" Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
-          new Sort(syn.getSort().getRealName()), null, sb.toString()))); return; } )?
+          new Sort(syn.getSort().getRealSort2()), null, sb.toString()))); return; } )?
     { module.appendModuleItem(markLoc(loc, syn)); }
   
   | ("priority" | "priorities")
@@ -856,7 +857,7 @@ void Production(List<Production> prods) :
   )*
   ")"              { items.add(tokenLoc(new Terminal(image()))); }
 | (ProductionItem(items))+
-) { Production prod = new Production(new Sort(""), items); }
+) { Production prod = new Production(new Sort(Sort2.of("")), items); }
   (Attributes(prod))?
   { if (klabel != null && prod.getAttribute("klabel") == null) {
       prod.addAttribute("klabel", "'"+klabel);
@@ -874,11 +875,11 @@ void ProductionItem(List<ProductionItem> items) :
 | "List"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
     { items.add(markLoc(loc, new UserList(str, sep, "*"))); return; })?
-  { items.add(tokenLoc(new Sort(image()))); }
+  { items.add(tokenLoc(new Sort(Sort2.of(image())))); }
 | "NeList"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
     { items.add(markLoc(loc, new UserList(str, sep, "+"))); return; })?
-  { items.add(tokenLoc(new Sort(image()))); }
+  { items.add(tokenLoc(new Sort(Sort2.of(image())))); }
 | ("Lexer" | "Token" { isToken = true; })
   ( "{" { SwitchTo(REGEX_STATE); }
     str = RegEx(follow)
@@ -888,5 +889,5 @@ void ProductionItem(List<ProductionItem> items) :
             isToken && follow.length() != 0 ?
                follow.toString() : null)));
           return; })?
-  { items.add(tokenLoc(new Sort(image()))); }
+  { items.add(tokenLoc(new Sort(Sort2.of(image())))); }
 }

@@ -472,7 +472,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(ListTerminator empty, Void _) {
         Sort2 sort = empty.getSort();
-        if (MaudeHelper.basicSorts.contains(sort.getName()) || MetaK.isCellFragment(sort.getName())) {
+        if (MaudeHelper.basicSorts.contains(sort.getName()) || sort.isCellFragment()) {
             result.append(".");
             result.append(sort);
         } else {
@@ -910,7 +910,7 @@ public class MaudeFilter extends BackendFilter {
             //result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
             result.append(KInjectedLabel.getInjectedSort(sort));
             result.append("2KLabel_(");
-        } else if (MetaK.isCellSort(sort.getName())){
+        } else if (sort.isCellSort()){
             result.append(sort + "2KLabel_(");
 
         } else {

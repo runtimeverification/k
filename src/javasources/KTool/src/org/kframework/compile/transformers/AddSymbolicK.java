@@ -38,10 +38,10 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         return sort.startsWith(SymbolicConstructorPrefix);
     }
 
-    public final Production getSymbolicProduction(String sort) {
-        assert allowSymbolic(sort);
+    public final Production getSymbolicProduction(String sortName) {
+        assert allowSymbolic(sortName);
 
-        return Production.makeFunction(sort, symbolicConstructor(sort), KSorts.K, context);
+        return Production.makeFunction(Sort2.of(sortName), symbolicConstructor(sortName), Sort2.K, context);
     }
 
     public final Term makeSymbolicTerm(Sort2 sort, Term term) {
@@ -81,7 +81,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         for (Sort2 sort : node.getAllSorts()) {
             if (allowKSymbolic(sort.getName())) {
                 //retNode.addProduction(sort, getSymbolicProduction(sort));
-                retNode.addConstant(KSorts.KLABEL, symbolicConstructor(sort.getName()));
+                retNode.addConstant(Sort2.KLABEL, symbolicConstructor(sort.getName()));
             }
         }
 

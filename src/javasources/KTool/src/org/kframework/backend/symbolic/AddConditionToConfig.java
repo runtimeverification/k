@@ -172,11 +172,11 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         PriorityBlock topPriorityBlock = new PriorityBlock();
         List<ProductionItem> topTerminals = new ArrayList<ProductionItem>();
         topTerminals.add(new Terminal(MetaK.Constants.pathCondition));
-        Production topProduction = new Production(new Sort("CellLabel"),
+        Production topProduction = new Production(new Sort(Sort2.CELL_LABEL),
                 topTerminals);
         topPriorityBlock.getProductions().add(topProduction);
         topCellBlocks.add(topPriorityBlock);
-        Syntax topCellDecl = new Syntax(new Sort("CellLabel"), topCellBlocks);
+        Syntax topCellDecl = new Syntax(new Sort(Sort2.CELL_LABEL), topCellBlocks);
         node.getItems().add(topCellDecl);
         return node;
     }

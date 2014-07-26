@@ -10,6 +10,7 @@ import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -30,7 +31,7 @@ public class AddCheckConstants extends CopyOnWriteTransformer {
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         for (int i = 0; i < n; i++) {
-            retNode.addConstant(KSorts.KLABEL, getName(i));
+            retNode.addConstant(Sort2.KLABEL, getName(i));
         }
 
         if (retNode.getItems().size() != node.getItems().size())

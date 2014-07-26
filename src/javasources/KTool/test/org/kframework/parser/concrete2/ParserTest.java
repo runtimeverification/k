@@ -44,6 +44,8 @@ public class ParserTest {
 
     }*/
 
+    private static final Sort2 EXP_SORT = Sort2.of("Exp");
+
     @Test
     public void testEmptyGrammar() throws Exception {
         Grammar grammar = new Grammar();
@@ -717,7 +719,7 @@ public class ParserTest {
         NonTerminal expNt = new NonTerminal("Exp");
 
         NonTerminalState expInt = new NonTerminalState("Int-nts(Exp)", expNt, intNt, false);
-        Production p22 = prod("Exp", new Sort("Int"));
+        Production p22 = prod(EXP_SORT, new Sort(Sort2.INT));
         RuleState rs2 = new RuleState("Exp-wrapInt", expNt, new WrapLabelRule(p22, Sort2.of("Int")));
         expNt.entryState.next.add(expInt);
         expInt.next.add(rs2);
@@ -726,7 +728,7 @@ public class ParserTest {
         PrimitiveState minus = new RegExState("Minus-State", expNt, Pattern.compile("-", Pattern.LITERAL), KSorts.K);
         RuleState deleteToken = new RuleState("Minus-Delete", expNt, new DeleteRule(1, true));
         NonTerminalState expExp = new NonTerminalState("Exp-nts(Exp)", expNt, expNt, false);
-        Production p1 = prod("Exp", new Terminal("-"), new Sort("Exp"));
+        Production p1 = prod(EXP_SORT, new Terminal("-"), new Sort(EXP_SORT));
         p1.putAttribute("klabel", "'-_");
         RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1, Sort2.of("Int")));
         expNt.entryState.next.add(minus);
@@ -743,7 +745,7 @@ public class ParserTest {
          */
         NonTerminal expsNt = new NonTerminal("Exps");
         NonTerminalState expExps = new NonTerminalState("Exp-nts(Exps)", expsNt, expNt, false);
-        Production p2 = prod("Exps", new UserList(Sort2.of("Exp"), ","));
+        Production p2 = prod(Sort2.of("Exps"), new UserList(EXP_SORT, ","));
         PrimitiveState separator = new RegExState("Sep-State", expsNt, Pattern.compile(",", Pattern.LITERAL), KSorts.K);
         RuleState deleteToken2 = new RuleState("Separator-Delete", expsNt, new DeleteRule(1, true));
         p2.putAttribute("klabel", "'_,_");
@@ -766,7 +768,7 @@ public class ParserTest {
 
         Term one = Token.kAppOf(Sort2.INT, "1");
         Term mone = Token.kAppOf(Sort2.INT, "-1");
-        Term mexp = new TermCons(Sort2.of("Exp"), Arrays.asList(one), p1);
+        Term mexp = new TermCons(EXP_SORT, Arrays.asList(one), p1);
         Term expected = new TermCons(Sort2.of("Exps"), Arrays.<Term>asList(amb(mone, mexp)), p2);
 
         Assert.assertEquals("The error: ", expected.toString(), result2.toString());
@@ -779,7 +781,7 @@ public class ParserTest {
         return Token.kAppOf(Sort2.K, x);
     }
 
-    public static Production prod(String sort, ProductionItem... pi) {
+    public static Production prod(Sort2 sort, ProductionItem... pi) {
         return new Production(new Sort(sort), Arrays.<ProductionItem>asList(pi));
     }
 
@@ -792,6 +794,6 @@ public class ParserTest {
     }
 
     public static Production label(String x) {
-        return prod(KSorts.K, new UserList(Sort2.K, x));
+        return prod(Sort2.K, new UserList(Sort2.K, x));
     }
 }

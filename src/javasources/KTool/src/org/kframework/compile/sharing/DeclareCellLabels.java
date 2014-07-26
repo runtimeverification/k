@@ -4,6 +4,7 @@ package org.kframework.compile.sharing;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.kil.Module;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
 
@@ -29,7 +30,7 @@ public class DeclareCellLabels extends BasicCompilerStep<Definition> {
         labels.visitNode(module);
 
         for (String cellLabel : labels.cellLabels) {
-            module.addProduction("CellLabel", new Terminal(cellLabel));
+            module.addProduction(Sort2.CELL_LABEL, new Terminal(cellLabel));
         }
 
         return def;

@@ -180,12 +180,12 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (!sort.isKSort()) {
                 String pred = AddPredicates.syntaxPredicate(sort.getName());
                 // declare isSort predicate as KLabel
-                retNode.addConstant(KSorts.KLABEL, pred);
+                retNode.addConstant(Sort2.KLABEL, pred);
 
                 if (AddSymbolicK.allowKSymbolic(sort.getName())) {
                     String symPred = AddPredicates.symbolicPredicate(sort.getName());
                     // declare isSymbolicSort predicate as KLabel
-                    retNode.addConstant(KSorts.KLABEL, symPred);
+                    retNode.addConstant(Sort2.KLABEL, symPred);
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
                     Variable var = Variable.getFreshVar(Sort2.K);
@@ -243,7 +243,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
         /* add collection membership predicates */
         for (Sort2 sort : context.getDataStructureSorts().keySet()) {
-            retNode.addConstant(KSorts.KLABEL, AddPredicates.predicate(sort.getName()));
+            retNode.addConstant(Sort2.KLABEL, AddPredicates.predicate(sort.getName()));
         }
 
         PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", context);

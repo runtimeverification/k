@@ -39,7 +39,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             return node;
 
         for (String sep : listSeparators) {
-            node.addConstant(KSorts.KLABEL, MetaK.getListUnitLabel(sep));
+            node.addConstant(Sort2.KLABEL, MetaK.getListUnitLabel(sep));
         }
         return node;
     }
@@ -52,7 +52,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
         }
         isComputation = true;
         node = (Syntax) super.visit(node, _);
-        node.setSort(new Sort(KSorts.KLABEL));
+        node.setSort(new Sort(Sort2.KLABEL));
         return node;
     }
 
@@ -84,6 +84,6 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
     public ASTNode visit(Sort node, Void _)  {
         if (!Sort2.of(node.getName()).isComputationSort())
             return node;
-        return new Sort(KSorts.K);
+        return new Sort(Sort2.K);
     }
 }

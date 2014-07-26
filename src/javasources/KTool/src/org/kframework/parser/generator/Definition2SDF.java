@@ -239,7 +239,7 @@ public class Definition2SDF {
             lexerSorts.add(p.getSort().getName());
             sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz\n");
             if (l.getFollow() != null && !l.getFollow().equals("")) {
-                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort().getName()), null, l.getFollow()));
+                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
             }
 
             // reject all terminals that match the regular expression of the lexical production

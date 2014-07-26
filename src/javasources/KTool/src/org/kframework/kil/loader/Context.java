@@ -541,10 +541,10 @@ public class Context implements Serializable {
 
     private String getCellSort2(String sort) {
         sort = sort.substring(0, 1).toLowerCase() + sort.substring(1);
-        if (sort.endsWith(MetaK.cellSort)) {
-            return sort.substring(0, sort.length() - MetaK.cellSort.length());
+        if (sort.endsWith(Sort2.CELL_SORT_NAME)) {
+            return sort.substring(0, sort.length() - Sort2.CELL_SORT_NAME.length());
         } else {
-            return sort.substring(0, sort.length() - MetaK.cellFragment.length()) + "-fragment";
+            return sort.substring(0, sort.length() - Sort2.CELL_FRAGMENT_NAME.length()) + "-fragment";
         }
     }
 

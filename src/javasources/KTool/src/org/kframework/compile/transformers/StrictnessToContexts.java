@@ -75,7 +75,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                     continue;
                 } else {
                     Attributes attributes = prod.getAttributes();
-                    prod = new Production(new Sort(KSorts.KLABEL),
+                    prod = new Production(new Sort(Sort2.KLABEL),
                             Collections.<ProductionItem>singletonList(new Terminal(prod.getKLabel())));
                     prod.setAttributes(attributes);
                     kLabelStrictness(prod, isSeq);

@@ -45,9 +45,6 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class MetaK {
 
-    public static final String cellSort = "CellSort";
-    public static final String cellFragment = "CellFragment";
-
     public static Term incrementCondition(Term condition, Term kresultCnd) {
         if (condition == null) {
             return kresultCnd;
@@ -55,23 +52,17 @@ public class MetaK {
         return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
     }
 
-    public static boolean isCellSort(String bigSort) {
-        return (bigSort.endsWith(cellSort)
-                ||bigSort.endsWith(cellFragment));
-    }
-
-    public static boolean isCellFragment(String bigSort) {
-        return (bigSort.endsWith(cellFragment));
-    }
-
+    @Deprecated
     public static String cellSort(String cellName) {
-        return StringUtil.makeProper(cellName) + cellSort;
+        return StringUtil.makeProper(cellName) + Sort2.CELL_SORT_NAME;
     }
 
+    @Deprecated
     public static String cellFragment(String cellName) {
-        return StringUtil.makeProper(cellName) + cellFragment;
+        return StringUtil.makeProper(cellName) + Sort2.CELL_FRAGMENT_NAME;
     }
 
+    @Deprecated
     public static String cellUnit(String cellName) {
         return "." + cellFragment(cellName);
     }

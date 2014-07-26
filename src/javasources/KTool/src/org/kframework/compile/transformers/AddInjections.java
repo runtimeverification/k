@@ -91,7 +91,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
             if (!production.getSort().equals(sort)) {
                 returnNode.setSort(returnNode.getSort().shallowCopy());
-                returnNode.getSort().setName(production.getSort().getName());
+                returnNode.getSort().setSort2(production.getSort());
             }
         } else {
             returnNode = node;
@@ -108,7 +108,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
         if (node.getName().equals(KSorts.KLABEL) || node.getName().equals(KSorts.KLIST)) {
             Sort returnNode = node.shallowCopy();
-            returnNode.setName(KSorts.KITEM);
+            returnNode.setSort2(Sort2.KITEM);
             return returnNode;
         } else {
             return node;

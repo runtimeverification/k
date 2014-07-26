@@ -108,25 +108,25 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     }
 
     public void addSubsort(Sort2 sort, Sort2 subsort, Context context) {
-        this.addProduction(sort.getName(), new Sort(subsort.getName()));
+        this.addProduction(sort, new Sort(subsort));
         context.addSubsort(sort, subsort);
     }
 
-    public void addConstant(String ctSort, String ctName) {
+    public void addConstant(Sort2 ctSort, String ctName) {
         this.addProduction(ctSort, new Terminal(ctName));
     }
 
     public void addConstant(KLabelConstant kLabelConstant) {
-        this.addProduction(kLabelConstant.getSort().getName(), new Terminal(kLabelConstant.getLabel()));
+        this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
     }
 
-    public void addProduction(String sort, ProductionItem prodItem) {
+    public void addProduction(Sort2 sort, ProductionItem prodItem) {
         List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
         prodItems.add(prodItem);
         this.addProduction(sort, new Production(new Sort(sort), prodItems));
     }
 
-    public void addProduction(String sort, Production prod) {
+    public void addProduction(Sort2 sort, Production prod) {
         List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
         PriorityBlock pb = new PriorityBlock();
         pbs.add(pb);

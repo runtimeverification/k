@@ -142,7 +142,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(UserList ul, Void _) {
         result.append("List\\{");
-        this.visitNode(new Sort(ul.getSort().getName()));
+        this.visitNode(new Sort(ul.getSort()));
         result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
         terminalBefore = false;
         return null;

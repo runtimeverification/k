@@ -58,11 +58,12 @@ public class ProgramSDF {
         // automatically add a production of the type K ::= <start-sort>
         // this will allow the parser to accept any sort as input if the definition doesn't contain
         // a configuration, or the $PGM variable has sort K
-        for (String sort : psdfv.startSorts) {
-            if (!Sort.isBasesort(sort) && !context.isListSort(Sort2.of(sort))) {
+        for (String sortName : psdfv.startSorts) {
+            Sort2 sort = Sort2.of(sortName);
+            if (!sort.isBaseSort() && !context.isListSort(sort)) {
                 List<ProductionItem> pi = new ArrayList<>();
                 pi.add(new Sort(sort));
-                Production prod = new Production(new Sort(KSorts.K), pi);
+                Production prod = new Production(new Sort(Sort2.K), pi);
                 ks2gsf.visitNode(prod);
             }
         }
@@ -187,7 +188,7 @@ public class ProgramSDF {
             lexerSorts.add(p.getSort().getName());
             sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz\n");
             if (l.getFollow() != null && !l.getFollow().equals("")) {
-                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort().getName()), null, l.getFollow()));
+                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
             }
 
             // reject all terminals that match the regular expression of the lexical production

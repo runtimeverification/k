@@ -10,6 +10,7 @@ import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.AddConsesVisitor;
@@ -56,7 +57,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
         labeledSorts.add(syntax.getSort().getName());
         List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
         productionItems.add(new Terminal("L" + syntax.getSort()));
-        productionItems.add(new Sort("Id"));
+        productionItems.add(new Sort(Sort2.ID));
         productionItems.add(new Terminal(":"));
         productionItems.add(syntax.getSort());
         Production production = new Production(syntax.getSort(), productionItems);

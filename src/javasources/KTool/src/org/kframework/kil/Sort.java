@@ -1,27 +1,22 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Visitor;
 
 /** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
 public class Sort extends ProductionItem {
 
-    public static final String BOOL = "Bool";
+    private Sort2 sort2;
 
-    private String name;
-
-    public Sort(String name) {
+    public Sort(Sort2 sort2) {
         super();
-        this.name = name;
+        this.sort2 = sort2;
     }
 
     public Sort(Sort sort) {
         super(sort);
-        this.name = sort.getName();
+        this.sort2 = sort.sort2;
     }
 
     @Deprecated
@@ -31,31 +26,40 @@ public class Sort extends ProductionItem {
 
     @Deprecated
     public boolean isBaseSort() {
-        return Sort.isBasesort(getName());
+        return sort2.isBaseSort();
     }
 
-    public void setName(String sort) {
-        this.name = sort;
+    public void setSort2(Sort2 sort2) {
+        this.sort2 = sort2;
     }
 
+//    public void setName(String sort) {
+//        this.name = sort;
+//    }
+//
     public String getName() {
-        if (MetaK.isCellSort(name))
+        if (sort2.isCellSort())
             return Sort2.BAG.getName();
-        return name;
+        return sort2.getName();
     }
-
-    public String getRealName() {
-        return name;
-    }
+//
+//    public String getRealName() {
+//        return name;
+//    }
 
     @Deprecated
     public Sort2 getSort2() {
-        return Sort2.of(name);
+        return sort2.isCellSort() ? Sort2.BAG : sort2;
+    }
+
+    @Deprecated
+    public Sort2 getRealSort2() {
+        return sort2;
     }
 
     @Override
     public String toString() {
-        return getName();
+        return sort2.getName();
     }
 
     @Override
@@ -74,14 +78,14 @@ public class Sort extends ProductionItem {
 
         Sort srt = (Sort) obj;
 
-        if (!getName().equals(srt.getName()))
+        if (!sort2.equals(srt.sort2))
             return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return this.getName().hashCode();
+        return sort2.hashCode();
     }
 
     @Override

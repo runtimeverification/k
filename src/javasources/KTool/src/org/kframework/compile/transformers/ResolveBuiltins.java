@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class ResolveBuiltins extends CopyOnWriteTransformer {
 
-    Set<String> builtinSorts = new HashSet<String>();
+    private Set<Sort2> builtinSorts = new HashSet<>();
 
     public ResolveBuiltins(Context context) {
         super("Resolve Builtins", context);
@@ -34,27 +34,27 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
         List<PriorityBlock> priorities = new ArrayList<PriorityBlock>();
         PriorityBlock block = new PriorityBlock();
         priorities.add(block );
-        Syntax syn = new Syntax(new Sort(KSorts.KLABEL), priorities);
+        Syntax syn = new Syntax(new Sort(Sort2.KLABEL), priorities);
         items.add(syn);
-        for (String sort : builtinSorts) {
+        for (Sort2 sort : builtinSorts) {
             List<ProductionItem> pItems = new ArrayList<ProductionItem>();
-            Production p = new Production(new Sort(KSorts.KLABEL), pItems );
+            Production p = new Production(new Sort(Sort2.KLABEL), pItems );
             pItems.add(new Terminal("#"));
             pItems.add(new Sort(sort));
-            p.putAttribute("KLabelWrapper", sort);
+            p.putAttribute("KLabelWrapper", sort.getName());
             p.putAttribute("cons", "KLabel1" + sort + "Wrapper");
             p.putAttribute("prefixlabel", "#_");
             context.conses.put("KLabel1" + sort + "Wrapper", p);
             context.putLabel(p, "KLabel1" + sort+ "Wrapper");
             block.getProductions().add(p);
             pItems = new ArrayList<ProductionItem>();
-            p = new Production(new Sort(KSorts.KLABEL), pItems );
+            p = new Production(new Sort(Sort2.KLABEL), pItems );
             pItems.add(new Terminal("is" + sort));
             block.getProductions().add(p);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(
-                    KApp.of(KLabelConstant.of(AddPredicates.predicate(sort), context),
-                            new Variable(sort, Sort2.of(sort))),
+                    KApp.of(KLabelConstant.of(AddPredicates.predicate(sort.getName()), context),
+                            new Variable(sort.getName(), sort)),
                     BoolBuiltin.TRUE, context));
             rule.addAttribute(Attribute.PREDICATE);
             items.add(rule);
@@ -67,7 +67,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Sort node, Void _)  {
         if (Sort2.of(node.getName()).isBuiltinSort())
-                builtinSorts.add(node.getName());
+                builtinSorts.add(node.getSort2());
         return node;
     }
 

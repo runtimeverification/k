@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.kframework.compile.transformers.CompleteSortLatice;
 
-import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.ImmutableSet;
 
 public class Sort2 implements Serializable {
@@ -38,7 +37,7 @@ public class Sort2 implements Serializable {
     public static final Sort2 INT = Sort2.of("Int");
     public static final Sort2 BOOL = Sort2.of("Bool");
 
-    public static final Sort2 BOTTOM = Sort2.of(CompleteSortLatice.BOTTOM_SORT_NAME);
+    public static final Sort2 BOTTOM = Sort2.of("#Bot");
 
     private String name;
 
@@ -124,6 +123,22 @@ public class Sort2 implements Serializable {
         return equals(BoolBuiltin.SORT)
                 || equals(IntBuiltin.SORT)
                 || equals(StringBuiltin.SORT);
+    }
+
+    public static final String CELL_SORT_NAME = "CellSort";
+    public static final String CELL_FRAGMENT_NAME = "CellFragment";
+    public static final String LIST_OF_BOTTOM_PREFIX = "#ListOf";
+
+    public boolean isCellSort() {
+        return name.endsWith(CELL_SORT_NAME) || name.endsWith(CELL_FRAGMENT_NAME);
+    }
+
+    public boolean isCellFragment() {
+        return name.endsWith(CELL_FRAGMENT_NAME);
+    }
+
+    public Sort2 getUserListSort(String separator) {
+        return Sort2.of(LIST_OF_BOTTOM_PREFIX + name + "{\"" + separator + "\"}");
     }
 
     /**

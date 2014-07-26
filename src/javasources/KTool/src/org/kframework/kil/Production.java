@@ -22,7 +22,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     protected String ownerModuleName;
     private Multimap<Integer, Integer> binderMap;
 
-    public static Production makeFunction(String funSort, String funName, String argSort, org.kframework.kil.loader.Context context) {
+    public static Production makeFunction(Sort2 funSort, String funName, Sort2 argSort, org.kframework.kil.loader.Context context) {
         List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
         prodItems.add(new Terminal(funName));
         prodItems.add(new Terminal("("));
@@ -31,7 +31,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
 
         Production funProd = new Production(new Sort(funSort), prodItems);
         funProd.addAttribute(new Attribute("prefixlabel", funName));
-        if (Sort2.of(funSort).isComputationSort()) {
+        if (funSort.isComputationSort()) {
             funProd.addAttribute(new Attribute("klabel", funName));
             String consAttr = funSort + "1" + funName + "Syn";
             funProd.addAttribute(new Attribute("cons", consAttr));
