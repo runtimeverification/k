@@ -40,6 +40,19 @@ public class StringUtil {
                     sb.append('\f');
                 else if (str.charAt(i + 1) == '"')
                     sb.append('"');
+                else if (str.charAt(i + 1) >= '0' && str.charAt(i + 1) <= '9') {
+                    // found an octal value
+                    int a2 = str.charAt(i + 1) - '0';
+                    int a1 = str.charAt(i + 2) - '0';
+                    if (a1 < 0 || a1 > 9)
+                        throw new IllegalArgumentException("Malformed octal value in string:" + str);
+                    int a0 = str.charAt(i + 3) - '0';
+                    if (a0 < 0 || a0 > 9)
+                        throw new IllegalArgumentException("Malformed octal value in string:" + str);
+                    int decimal = a2 * 8 * 8 + a1 * 8 + a0;
+                    sb.append((char) decimal);
+                    i++; i++;
+                }
                 i++;
             } else
                 sb.append(str.charAt(i));
