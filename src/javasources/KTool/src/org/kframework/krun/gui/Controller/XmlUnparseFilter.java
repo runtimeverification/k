@@ -39,7 +39,7 @@ import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermComment;
@@ -174,7 +174,7 @@ public class XmlUnparseFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
 
         prepare(sort);
         buffer.append(StringEscapeUtils.escapeXml(sort.getName()));

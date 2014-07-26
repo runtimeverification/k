@@ -13,8 +13,8 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -53,7 +53,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
              * operators tagged with "equality" must have the signature
              * Sort -> Sort -> Bool
              */
-            if (prod.getSort().equals(Sort2.BOOL))
+            if (prod.getSort().equals(Sort.BOOL))
                 if (prod.getArity() == 2)
                     if (prod.getChildSort(0).equals(prod.getChildSort(1)))
                         if (!equalities.containsKey(prod.getChildSort(0)))
@@ -94,10 +94,10 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
 
         /* defer =K to =Sort for sorts with equality */
         for(Map.Entry<String, String> item : equalities.entrySet()) {
-            Sort2 sort = Sort2.of(item.getKey());
+            Sort sort = Sort.of(item.getKey());
             KLabelConstant sortEq = KLabelConstant.of(item.getValue(), context);
             if (sort.isComputationSort()) {
-                retNode.addSubsort(Sort2.of(EQUALITY_SORT), sort, context);
+                retNode.addSubsort(Sort.of(EQUALITY_SORT), sort, context);
 
                 KList kList = new KList();
                 kList.add(Variable.getFreshVar(sort));
@@ -117,9 +117,9 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                     && !prod.containsAttribute(Attribute.BRACKET.getKey())
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
                     && !prod.containsAttribute(Attribute.PREDICATE.getKey())
-                    && (!prod.getSort().isKSort() || prod.getSort().equals(Sort2.K))) {
-                Variable KListVar1 = Variable.getFreshVar(Sort2.KLIST);
-                Variable KListVar2 = Variable.getFreshVar(Sort2.KLIST);
+                    && (!prod.getSort().isKSort() || prod.getSort().equals(Sort.K))) {
+                Variable KListVar1 = Variable.getFreshVar(Sort.KLIST);
+                Variable KListVar2 = Variable.getFreshVar(Sort.KLIST);
 
                 KList lhsList = new KList();
                 lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel(), context), KListVar1));
@@ -139,7 +139,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
 
         /* defer =K to ==K for lexical tokens */
         for (String sortName : context.getTokenSorts()) {
-            Sort2 sort = Sort2.of(sortName);
+            Sort sort = Sort.of(sortName);
             KList kList = new KList();
             kList.add(Variable.getFreshVar(sort));
             kList.add(Variable.getFreshVar(sort));

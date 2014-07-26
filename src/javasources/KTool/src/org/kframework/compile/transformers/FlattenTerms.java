@@ -161,7 +161,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         @Override
         public ASTNode visit(Variable node, Void _)  {
             if (node.isFreshConstant()) return node;
-            if (node.getSort().equals(Sort2.KITEM) || node.getSort().equals(Sort2.K)) {
+            if (node.getSort().equals(Sort.KITEM) || node.getSort().equals(Sort.K)) {
                 return node;
             }
             if (node.getSort().isKSort()) {
@@ -186,7 +186,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             if (kompileOptions.backend.java()) {
                 /* the Java Rewrite Engine preserves sort information for variables */
             } else {
-                node.setSort(Sort2.KITEM);
+                node.setSort(Sort.KITEM);
             }
             return node;
         }

@@ -44,16 +44,16 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     }
 
     public static DataStructureBuiltin empty(DataStructureSort sort) {
-        if (sort.type().equals(Sort2.BAG)
-                || sort.type().equals(Sort2.SET)) {
+        if (sort.type().equals(Sort.BAG)
+                || sort.type().equals(Sort.SET)) {
             return new SetBuiltin(sort,
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList());
-        } else if (sort.type().equals(Sort2.LIST)) {
+        } else if (sort.type().equals(Sort.LIST)) {
             return ListBuiltin.of(sort,
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList(), Collections.<Term>emptyList());
-        } else if (sort.type().equals(Sort2.MAP)) {
+        } else if (sort.type().equals(Sort.MAP)) {
             return new MapBuiltin(
                     sort,
                     Collections.<Term>emptyList(),
@@ -65,14 +65,14 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     }
 
     public static DataStructureBuiltin element(DataStructureSort sort, Term ... argument) {
-        if (sort.type().equals(Sort2.BAG)
-                || sort.type().equals(Sort2.LIST)
-                || sort.type().equals(Sort2.SET)) {
+        if (sort.type().equals(Sort.BAG)
+                || sort.type().equals(Sort.LIST)
+                || sort.type().equals(Sort.SET)) {
             assert argument.length == 1:
                     "unexpected number of collection item arguments; expected 1, found "
                     + argument.length;
 
-            if (sort.type().equals(Sort2.LIST)) {
+            if (sort.type().equals(Sort.LIST)) {
                 ListBuiltin l = ListBuiltin.of(
                         sort,
                         Collections.<Term>emptyList(),
@@ -84,7 +84,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                         Collections.<Term>emptyList(),
                         Collections.singletonList(argument[0]));
             }
-        } else if (sort.type().equals(Sort2.MAP)) {
+        } else if (sort.type().equals(Sort.MAP)) {
             assert argument.length == 2:
                    "unexpected number of map item arguments; expected 2, found " + argument.length;
 
@@ -109,8 +109,8 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         }
         */
 
-        if (sort.type().equals(Sort2.BAG)
-                || sort.type().equals(Sort2.SET)) {
+        if (sort.type().equals(Sort.BAG)
+                || sort.type().equals(Sort.SET)) {
             Collection<Term> elements = new ArrayList<Term>();
             Collection<Term> terms = new ArrayList<Term>();
             for (Term term : argument) {
@@ -124,7 +124,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
             }
 
             return new SetBuiltin(sort, terms, elements);
-        } else if (sort.type().equals(Sort2.LIST)) {
+        } else if (sort.type().equals(Sort.LIST)) {
             List<Term> elementsLeft = new ArrayList<>();
             List<Term> elementsRight = new ArrayList<>();
             List<Term> terms = new ArrayList<>();
@@ -184,7 +184,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
             terms.addAll(rightSentinel.baseTerms());
 
             return ListBuiltin.of(sort, terms, elementsLeft, elementsRight);
-        } else if (sort.type().equals(Sort2.MAP)) {
+        } else if (sort.type().equals(Sort.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
             Collection<Term> terms = new ArrayList<Term>();
             for (Term term : argument) {
@@ -223,7 +223,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     protected final Collection<Term> baseTerms;
 
     protected DataStructureBuiltin(DataStructureSort sort, Collection<Term> baseTerms) {
-        super(Sort2.of(sort.name()));
+        super(Sort.of(sort.name()));
         this.dataStructureSort = sort;
         this.baseTerms = baseTerms;
         if (baseTerms.size() == 1) {

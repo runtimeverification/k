@@ -53,7 +53,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                    || !prod.containsAttribute("strict", true) && prod.containsAttribute("seqstrict", true);
             Boolean isSeq = prod.containsAttribute("seqstrict", true);
 
-            if (!(prod.getSort().isComputationSort() || prod.getSort().equals(Sort2.KLABEL))) {
+            if (!(prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL))) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,
                         "only productions of sort K, sort KLabel or of syntactic sorts can have "
@@ -75,7 +75,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                     continue;
                 } else {
                     Attributes attributes = prod.getAttributes();
-                    prod = new Production(new Sort(Sort2.KLABEL),
+                    prod = new Production(new NonTerminal(Sort.KLABEL),
                             Collections.<ProductionItem>singletonList(new Terminal(prod.getKLabel())));
                     prod.setAttributes(attributes);
                     kLabelStrictness(prod, isSeq);
@@ -83,7 +83,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 }
             }
 
-            if (prod.isConstant() && !prod.getSort().equals(Sort2.KLABEL)) {
+            if (prod.isConstant() && !prod.getSort().equals(Sort.KLABEL)) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,
                         "Production is a constant and cannot be strict.",
@@ -126,7 +126,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 attribute = ALL;
             }
 
-            if (prod.getSort().equals(Sort2.KLABEL)) {
+            if (prod.getSort().equals(Sort.KLABEL)) {
                 assert attribute.equals(ALL) && strictCell.equals(DEFAULT_STRICTNESS_CELL) :
                         "Customized strictness for K labels not currently implemented";
                 kLabelStrictness(prod, isSeq);
@@ -235,10 +235,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                          * generation)
                          */
                         if (kompileOptions.experimental.testGen) {
-                            termCons.getContents().get(j).setSort(Sort2.KITEM);
+                            termCons.getContents().get(j).setSort(Sort.KITEM);
                         }
                     } else {
-                        termCons.getContents().get(j).setSort(Sort2.K);
+                        termCons.getContents().get(j).setSort(Sort.K);
                     }
                 }
 
@@ -256,7 +256,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                             sideCond = sideCond == null ? kResultPred :
                                 KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, sideCond, kResultPred);
                         } else {
-                            arg.setSort(Sort2.KRESULT);
+                            arg.setSort(Sort.KRESULT);
                         }
                     }
                 }
@@ -332,12 +332,12 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     private void kLabelStrictness(Production prod, boolean isSeq) {
         List<Term> contents = new ArrayList<>(3);
         //first argument is a variable of sort KList
-        Variable variable = Variable.getFreshVar(Sort2.KLIST);
+        Variable variable = Variable.getFreshVar(Sort.KLIST);
         contents.add(variable);
         //second is a HOLE
         contents.add(getHoleTerm(null, prod));
         //third argument is a variable of sort KList
-        contents.add(Variable.getFreshVar(Sort2.KLIST));
+        contents.add(Variable.getFreshVar(Sort.KLIST));
         KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
         //make a context from the TermCons
         org.kframework.kil.Context ctx = new org.kframework.kil.Context();

@@ -3,7 +3,7 @@ package org.kframework.compile.checks;
 
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -25,23 +25,23 @@ public class CheckSortTopUniqueness extends BasicVisitor {
     public Void visit(Syntax node, Void _) {
         String msg = "Multiple top sorts found for " + node.getSort() + ": ";
         int count = 0;
-        if (context.isSubsorted(Sort2.KLIST, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.KLIST, node.getSort().getSort2())) {
             msg += KSorts.KLIST + ", ";
             count++;
         }
-        if (context.isSubsorted(Sort2.LIST, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.LIST, node.getSort().getSort2())) {
             msg += "List, ";
             count++;
         }
-        if (context.isSubsorted(Sort2.BAG, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.BAG, node.getSort().getSort2())) {
             msg += "Bag, ";
             count++;
         }
-        if (context.isSubsorted(Sort2.MAP, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.MAP, node.getSort().getSort2())) {
             msg += "Map, ";
             count++;
         }
-        if (context.isSubsorted(Sort2.SET, node.getSort().getSort2())) {
+        if (context.isSubsorted(Sort.SET, node.getSort().getSort2())) {
             msg += "Set, ";
             count++;
         }

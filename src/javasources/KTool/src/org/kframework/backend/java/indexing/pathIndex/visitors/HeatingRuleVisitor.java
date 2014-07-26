@@ -3,7 +3,7 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 
 import java.util.*;
@@ -65,7 +65,7 @@ public class HeatingRuleVisitor extends RuleVisitor {
 
     @Override
     public void visit(Variable variable) {
-        Sort2 sort;
+        Sort sort;
         ArrayList<Production> productions =
                 (ArrayList<Production>) context.productionsOf(currentLabel);
         if (productions.size() == 1) {

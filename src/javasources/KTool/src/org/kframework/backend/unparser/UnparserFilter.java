@@ -162,7 +162,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         prepare(sort);
         indenter.write(sort.getName());
         super.visit(sort, _);

@@ -7,8 +7,8 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
@@ -58,16 +58,16 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
 
         /* Add bottom sort #Bot */
         transformedNode.addProduction(
-                Sort2.BOTTOM,
+                Sort.SHARP_BOT,
                 new Production(
-                        new Sort(Sort2.BOTTOM),
+                        new NonTerminal(Sort.SHARP_BOT),
                         Collections.<ProductionItem>emptyList()));
 
         /* Add list of bottom for each syntactic list separator (i.e. List{#Bot, separator}) */
         for (String separator : separators) {
             transformedNode.addProduction(
-                    Sort2.BOTTOM.getUserListSort(separator),
-                    new UserList(Sort2.BOTTOM, separator));
+                    Sort.SHARP_BOT.getUserListSort(separator),
+                    new UserList(Sort.SHARP_BOT, separator));
         }
 
         /*
@@ -80,7 +80,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             change = false;
 
         sort1_loop:
-            for (Sort2 sort1 : node.getAllSorts()) {
+            for (Sort sort1 : node.getAllSorts()) {
                 Collection<Production> productions = node.getProductionsOf(sort1);
                 if (productions.isEmpty()) {
                     continue;
@@ -93,7 +93,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 }
 
             sort2_loop:
-                for (Sort2 sort2 : node.getAllSorts()) {
+                for (Sort sort2 : node.getAllSorts()) {
                     // TODO(AndreiS): deal with equivalent sorts
                     if (context.isSubsortedEq(sort2, sort1) || context.isSubsortedEq(sort1, sort2)
                             || context.isListSort(sort2)) {
@@ -123,7 +123,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production1 : context.listConses.values()) {
             UserList userList1 = (UserList) production1.getItems().get(0);
 
-            Set<Sort2> subsorts = new HashSet<>();
+            Set<Sort> subsorts = new HashSet<>();
             for (Production production2 : context.listConses.values()) {
                 UserList userList2 = (UserList) production2.getItems().get(0);
 
@@ -134,7 +134,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 }
             }
 
-            for (Sort2 sort : node.getAllSorts()) {
+            for (Sort sort : node.getAllSorts()) {
                 if (!subsorts.contains(sort) && context.isSubsorted(userList1.getSort(), sort)) {
                     transformedNode.addProduction(
                             sort.getUserListSort(userList1.getSeparator()),
@@ -176,13 +176,13 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production : context.listConses.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
-            if (userList.getSort().equals(Sort2.BOTTOM)) {
+            if (userList.getSort().equals(Sort.SHARP_BOT)) {
                 continue;
             }
 
             transformedNode.addSubsort(
                     production.getSort(),
-                    Sort2.BOTTOM.getUserListSort(userList.getSeparator()),
+                    Sort.SHARP_BOT.getUserListSort(userList.getSeparator()),
                     context);
         }
 
@@ -193,8 +193,8 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production : context.listConses.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
-            if (context.isSubsorted(Sort2.KRESULT, userList.getSort())) {
-                transformedNode.addSubsort(Sort2.KRESULT, production.getSort(), context);
+            if (context.isSubsorted(Sort.KRESULT, userList.getSort())) {
+                transformedNode.addSubsort(Sort.KRESULT, production.getSort(), context);
             }
         }
 

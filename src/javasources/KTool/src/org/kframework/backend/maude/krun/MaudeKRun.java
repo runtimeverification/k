@@ -346,7 +346,7 @@ public class MaudeKRun implements KRun {
                 assertXMLTerm(list.size() == 2);
                 StringBuiltin sortString = (StringBuiltin) parseXML(list.get(0), context);
                 StringBuiltin valueString = (StringBuiltin) parseXML(list.get(1), context);
-                return GenericToken.of(Sort2.of(sortString.stringValue()), valueString.stringValue());
+                return GenericToken.of(Sort.of(sortString.stringValue()), valueString.stringValue());
             } else if (sort.equals("#FiniteFloat")) {
                 assertXMLTerm(list.size() == 0);
                 return FloatBuiltin.of(Double.parseDouble(op));
@@ -406,16 +406,16 @@ public class MaudeKRun implements KRun {
                     contents.add(parseXML(elem, context));
                 }
                 for (String cons : validConses) {
-                    possibleTerms.add(new TermCons(Sort2.of(sort), cons, contents, context));
+                    possibleTerms.add(new TermCons(Sort.of(sort), cons, contents, context));
                 }
                 if (possibleTerms.size() == 1) {
                     return possibleTerms.get(0);
                 } else {
-                    return new Ambiguity(Sort2.of(sort), possibleTerms);
+                    return new Ambiguity(Sort.of(sort), possibleTerms);
                 }
             }
         } catch (InvalidMaudeXMLException e) {
-            return new BackendTerm(Sort2.of(sort), flattenXML(xml));
+            return new BackendTerm(Sort.of(sort), flattenXML(xml));
         }
     }
 

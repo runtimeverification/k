@@ -4,7 +4,7 @@ package org.kframework.kil.loader;
 import org.kframework.backend.symbolic.AddConditionToConfig;
 import org.kframework.backend.symbolic.ResolveInputStreamCell;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -28,8 +28,8 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
                 be able to send symbolic inputs to their programs ($IN) and set the initial
                 path condition ($PC).
              */
-            context.configVarSorts.put(AddConditionToConfig.PC_VAR.substring(1), Sort2.BOOL);
-            context.configVarSorts.put(ResolveInputStreamCell.IN.substring(1), Sort2.LIST);
+            context.configVarSorts.put(AddConditionToConfig.PC_VAR.substring(1), Sort.BOOL);
+            context.configVarSorts.put(ResolveInputStreamCell.IN.substring(1), Sort.LIST);
         }
     }
 

@@ -17,7 +17,7 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
         this.value = i.value;
     }
 
-    public CollectionItem(String location, String filename, Sort2 sort) {
+    public CollectionItem(String location, String filename, Sort sort) {
         super(location, filename, sort);
     }
 
@@ -25,7 +25,7 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
         super(element);
     }
 
-    public CollectionItem(Sort2 sort) {
+    public CollectionItem(Sort sort) {
         super(sort);
     }
 

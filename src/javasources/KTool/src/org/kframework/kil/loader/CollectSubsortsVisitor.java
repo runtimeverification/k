@@ -5,8 +5,8 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.UserList;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -25,9 +25,9 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 
     public Void visit(Syntax syn, Void _) {
         if (syn.getPriorityBlocks().size() == 0) {
-            Sort2 sort = syn.getSort().getSort2();
-            if (!sort.equals(Sort2.KITEM)) {
-                context.addSubsort(Sort2.KITEM, sort);
+            Sort sort = syn.getSort().getSort2();
+            if (!sort.equals(Sort.KITEM)) {
+                context.addSubsort(Sort.KITEM, sort);
             }
         }
         return super.visit(syn, _);
@@ -35,11 +35,11 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 
     public Void visit(Production prd, Void _) {
         if (!prd.getSort().isBaseSort())
-            context.addSubsort(Sort2.KITEM, prd.getSort());
+            context.addSubsort(Sort.KITEM, prd.getSort());
         if (prd.isSubsort()) {
             if (!prd.containsAttribute("onlyLabel")
                     && !prd.containsAttribute("notInRules")) {
-                Sort2 sort = ((Sort) prd.getItems().get(0)).getSort2();
+                Sort sort = ((NonTerminal) prd.getItems().get(0)).getSort2();
                 context.addSubsort(prd.getSort(), sort);
             }
         } else if (prd.isListDecl()) {
@@ -49,10 +49,10 @@ public class CollectSubsortsVisitor extends BasicVisitor {
             context.addSubsort(prd.getSort(), srt.getSort());
         } else {
             for (ProductionItem pi : prd.getItems()) {
-                if (pi instanceof Sort) {
-                    Sort2 s = ((Sort) pi).getSort2();
+                if (pi instanceof NonTerminal) {
+                    Sort s = ((NonTerminal) pi).getSort2();
                     if (!s.isBaseSort())
-                        context.addSubsort(Sort2.KITEM, s);
+                        context.addSubsort(Sort.KITEM, s);
                 }
             }
         }

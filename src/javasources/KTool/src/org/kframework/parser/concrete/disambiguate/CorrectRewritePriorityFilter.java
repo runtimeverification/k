@@ -11,8 +11,8 @@ import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -50,9 +50,9 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
         Term krw = null;
         for (Term t : amb.getContents()) {
             if (t instanceof Rewrite) {
-                if (t.getSort().equals(Sort2.KLIST))
+                if (t.getSort().equals(Sort.KLIST))
                     klist = true;
-                if (t.getSort().equals(Sort2.K))
+                if (t.getSort().equals(Sort.K))
                     krw = t;
                 children.add(t);
             }
@@ -99,7 +99,7 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
             tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
-                if (tc.getProduction().getItems().get(i) instanceof Sort) {
+                if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
                     // look for the outermost element
                     if (i == 0 || i == tc.getProduction().getItems().size() - 1) {
                         tc.getContents().set(j, (Term) secondFilter.visitNode(tc.getContents().get(j)));

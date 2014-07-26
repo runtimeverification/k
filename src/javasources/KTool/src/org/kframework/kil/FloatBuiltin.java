@@ -19,7 +19,7 @@ import org.w3c.dom.Element;
 
 public class FloatBuiltin extends Token {
 
-    public static final Sort2 SORT = Sort2.of("#Float");
+    public static final Sort SORT = Sort.of("#Float");
 
     /* Token cache */
     private static Map<Pair<BigFloat, Integer>, FloatBuiltin> tokenCache = new HashMap<>();
@@ -132,7 +132,7 @@ public class FloatBuiltin extends Token {
      * Returns a {@link String} representing the sort name of a float token.
      */
     @Override
-    public Sort2 tokenSort() {
+    public Sort tokenSort() {
         return FloatBuiltin.SORT;
     }
 

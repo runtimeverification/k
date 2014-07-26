@@ -14,7 +14,7 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -119,7 +119,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     lexical.add(prd);
                 } else if (prd.isSubsort()) {
                     p.getProductions().add(prd);
-                    startSorts.add(((Sort) prd.getItems().get(0)).getName());
+                    startSorts.add(((NonTerminal) prd.getItems().get(0)).getName());
                 } else if (prd.isConstant()) {
                     constants.add(prd);
                     constantSorts.add(prd.getSort().getName());
@@ -159,8 +159,8 @@ public class ProgramSDFVisitor extends BasicVisitor {
                             if (itm instanceof Terminal) {
                                 Terminal t = (Terminal) itm;
                                 sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-                            } else if (itm instanceof Sort) {
-                                Sort srt = (Sort) itm;
+                            } else if (itm instanceof NonTerminal) {
+                                NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
                                     sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");

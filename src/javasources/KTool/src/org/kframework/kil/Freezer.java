@@ -14,7 +14,7 @@ public class Freezer extends Term implements Interfaces.MutableParent<Term, Enum
     }
 
     public Freezer(Term t) {
-        super(Sort2.K);
+        super(Sort.K);
         term = t;
     }
 

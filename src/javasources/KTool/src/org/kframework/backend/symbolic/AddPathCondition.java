@@ -16,7 +16,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -71,7 +71,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             Rewrite rew = (Rewrite) node.getBody();
 
             // variable holding the formula
-            Variable phi = Variable.getFreshVar(Sort2.K);
+            Variable phi = Variable.getFreshVar(Sort.K);
 
             // create lhs path condition cell
             Cell leftCell = new Cell();

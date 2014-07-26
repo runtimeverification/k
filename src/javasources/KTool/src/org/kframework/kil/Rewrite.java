@@ -50,7 +50,7 @@ public class Rewrite extends Term {
             sort = context.getLUBSort(left.getSort(), right.getSort());
             // TODO: use the context to disambiguate which LUB can be used, for now use K
             if (sort == null)
-                sort = Sort2.K;
+                sort = Sort.K;
         }
     }
 

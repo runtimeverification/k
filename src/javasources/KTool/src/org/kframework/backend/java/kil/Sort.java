@@ -44,6 +44,7 @@ public final class Sort implements MaximalSharing, Serializable {
     public static final Sort META_VARIABLE  =   Sort.of("MetaVariable");
 
     public static final Sort BOTTOM         =   Sort.of("Bottom");
+    public static final Sort SHARP_BOT      =   Sort.of("#Bot");
     public static final Sort MGU            =   Sort.of("Mgu");
 
     /**
@@ -100,6 +101,11 @@ public final class Sort implements MaximalSharing, Serializable {
 
     public int ordinal() {
         return ordinal;
+    }
+
+    public Sort getUserListSort(String separator) {
+        return Sort.of(org.kframework.kil.Sort.LIST_OF_BOTTOM_PREFIX + name
+                + "{\"" + separator + "\"}");
     }
 
     @Override

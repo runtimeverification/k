@@ -172,7 +172,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         prepare(sort);
         indenter.write(sort.getName());
         super.visit(sort, _);
@@ -802,7 +802,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         return null;
     }
 
-    private List<Terminal> findRightSyntax(Sort2 sort){
+    private List<Terminal> findRightSyntax(Sort sort){
 
         Production p = context.canonicalBracketForSort.get(sort);
         if (p == null) {

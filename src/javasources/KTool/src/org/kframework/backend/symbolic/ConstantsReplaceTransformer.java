@@ -7,7 +7,7 @@ import java.util.Map;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -32,7 +32,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 
         if (node.getLabel() instanceof Token) {
 //            Token token = ((Token) node.getLabel());
-            Variable newVar = Variable.getFreshVar(Sort2.K);
+            Variable newVar = Variable.getFreshVar(Sort.K);
             generatedSV.put(newVar, node);
             return newVar;
         }

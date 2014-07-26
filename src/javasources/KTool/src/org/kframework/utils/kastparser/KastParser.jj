@@ -14,7 +14,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
@@ -169,7 +169,7 @@ Term klabel() :
 	}
 	<RPAREN> <LPAREN>
 	{
-		return org.kframework.kil.Token.kAppOf(Sort2.of(sort), value);
+		return org.kframework.kil.Token.kAppOf(Sort.of(sort), value);
 	}
 |	<KLABEL>
 	{

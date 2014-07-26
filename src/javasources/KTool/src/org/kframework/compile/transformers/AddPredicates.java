@@ -15,7 +15,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -40,14 +40,14 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         private List<ModuleItem> result = new ArrayList<ModuleItem>();
-        private Set<Sort2> lists = new HashSet<>();
+        private Set<Sort> lists = new HashSet<>();
 
         @Override
         public Void visit(Module node, Void _) {
             lists.clear();
             super.visit(node, _);
             if (!lists.isEmpty()) {
-                for (Sort2 listSort : lists) {
+                for (Sort listSort : lists) {
                     Rule rule = new Rule(
                             KApp.of(KLabelConstant.of(predicate(listSort.getName()), context), new ListTerminator(listSort, null)),
                             BoolBuiltin.TRUE, context);
@@ -65,7 +65,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
         @Override
         public Void visit(Syntax node, Void _) {
-            Sort2 sort = node.getSort().getSort2();
+            Sort sort = node.getSort().getSort2();
 
             if (context.isListSort(sort))
                 lists.add(sort);
@@ -92,7 +92,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                 return null;
             }
 
-            Sort2 sort = node.getSort();
+            Sort sort = node.getSort();
             Term term = MetaK.getTerm(node, context);
 
             Term rhs;
@@ -152,7 +152,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     }
 
     public static final String syntaxPredicate(String sort) {
-        assert !Sort2.of(sort).isKSort():
+        assert !Sort.of(sort).isKSort():
                 "invalid syntactic predicate " + predicate(sort) + " for sort " + sort;
 
         return predicate(sort);
@@ -176,19 +176,19 @@ public class AddPredicates extends CopyOnWriteTransformer {
         // declare isSymbolicK predicate as KLabel
         retNode.addConstant(KSymbolicPredicate);
 
-        for (Sort2 sort : node.getAllSorts()) {
+        for (Sort sort : node.getAllSorts()) {
             if (!sort.isKSort()) {
                 String pred = AddPredicates.syntaxPredicate(sort.getName());
                 // declare isSort predicate as KLabel
-                retNode.addConstant(Sort2.KLABEL, pred);
+                retNode.addConstant(Sort.KLABEL, pred);
 
                 if (AddSymbolicK.allowKSymbolic(sort.getName())) {
                     String symPred = AddPredicates.symbolicPredicate(sort.getName());
                     // declare isSymbolicSort predicate as KLabel
-                    retNode.addConstant(Sort2.KLABEL, symPred);
+                    retNode.addConstant(Sort.KLABEL, symPred);
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
-                    Variable var = Variable.getFreshVar(Sort2.K);
+                    Variable var = Variable.getFreshVar(Sort.K);
                     Term lhs = KApp.of(KLabelConstant.of(symPred, context), var);
                     Term rhs = KApp.of(
                             KLabelConstant.BOOL_ANDTHENBOOL_KLABEL,
@@ -199,7 +199,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.appendModuleItem(rule);
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort.getName());
-                    var = Variable.getFreshVar(Sort2.KLIST);
+                    var = Variable.getFreshVar(Sort.KLIST);
                     Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
 
                     // define isSort for symbolic sort constructor symSort
@@ -242,8 +242,8 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         /* add collection membership predicates */
-        for (Sort2 sort : context.getDataStructureSorts().keySet()) {
-            retNode.addConstant(Sort2.KLABEL, AddPredicates.predicate(sort.getName()));
+        for (Sort sort : context.getDataStructureSorts().keySet()) {
+            retNode.addConstant(Sort.KLABEL, AddPredicates.predicate(sort.getName()));
         }
 
         PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", context);

@@ -16,7 +16,7 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.SetBuiltin;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
      * @return the translated term
      */
     private ASTNode transformJavaBackendSpecificTerm(Term term) {
-        return new org.kframework.kil.BackendTerm(Sort2.of(term.sort().name()), term.toString());
+        return new org.kframework.kil.BackendTerm(Sort.of(term.sort().name()), term.toString());
     }
 
     @Override
@@ -110,7 +110,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(KItemProjection kItemProj) {
         return new org.kframework.kil.KItemProjection(
-                Sort2.of(kItemProj.kind().toString()),
+                Sort.of(kItemProj.kind().toString()),
                 (org.kframework.kil.Term) kItemProj.term().accept(this));
     }
 
@@ -210,13 +210,13 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Token token) {
-        return org.kframework.kil.Token.kAppOf(Sort2.of(token.sort().name()), token.value());
+        return org.kframework.kil.Token.kAppOf(Sort.of(token.sort().name()), token.value());
     }
 
     @Override
     public ASTNode transform(Variable variable) {
 //        System.out.println("VARIABLE*************"+ variable.name()+"->"+variable.sort());
-        ASTNode node = new org.kframework.kil.Variable(variable.name(), Sort2.of(variable.sort().name()));
+        ASTNode node = new org.kframework.kil.Variable(variable.name(), Sort.of(variable.sort().name()));
 //        System.out.println("NODE: "+node.toString());
 //        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
         return node;

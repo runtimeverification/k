@@ -10,8 +10,8 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
@@ -94,18 +94,18 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
             return false;
         for (int i = 0; i < big.getItems().size(); i++) {
             if (!(big.getItems().get(i) instanceof Terminal && small.getItems().get(i) instanceof Terminal) &&
-                !(big.getItems().get(i) instanceof Sort && small.getItems().get(i) instanceof Sort) &&
+                !(big.getItems().get(i) instanceof NonTerminal && small.getItems().get(i) instanceof NonTerminal) &&
                 !(big.getItems().get(i) instanceof UserList && small.getItems().get(i) instanceof UserList) &&
                 !(big.getItems().get(i) instanceof Lexical && small.getItems().get(i) instanceof Lexical)) {
                 return false;
-            } else if (big.getItems().get(i) instanceof Sort) {
-                Sort2 bigSort = ((Sort) big.getItems().get(i)).getSort2();
-                Sort2 smallSort = ((Sort) small.getItems().get(i)).getSort2();
+            } else if (big.getItems().get(i) instanceof NonTerminal) {
+                Sort bigSort = ((NonTerminal) big.getItems().get(i)).getSort2();
+                Sort smallSort = ((NonTerminal) small.getItems().get(i)).getSort2();
                 if (!context.isSubsortedEq(bigSort, smallSort))
                     return false;
             } else if (big.getItems().get(i) instanceof UserList) {
-                Sort2 bigSort = ((UserList) big.getItems().get(i)).getSort();
-                Sort2 smallSort = ((UserList) small.getItems().get(i)).getSort();
+                Sort bigSort = ((UserList) big.getItems().get(i)).getSort();
+                Sort smallSort = ((UserList) small.getItems().get(i)).getSort();
                 if (!context.isSubsortedEq(bigSort, smallSort))
                     return false;
             } else
@@ -143,8 +143,8 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
 
                     if (!ul1.getSeparator().equals(ul2.getSeparator()))
                         return false;
-                } else if (itm1 instanceof Sort) {
-                    if (!(itm2 instanceof Sort))
+                } else if (itm1 instanceof NonTerminal) {
+                    if (!(itm2 instanceof NonTerminal))
                         return false;
                 }
             }

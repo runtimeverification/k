@@ -73,7 +73,7 @@ public class MaudeFilter extends BackendFilter {
           result.append(" is\n");
 
         result.append(" op fresh : #String -> KItem . \n");
-        for (Map.Entry<Sort2, String> entry : context.freshFunctionNames.entrySet()) {
+        for (Map.Entry<Sort, String> entry : context.freshFunctionNames.entrySet()) {
             result.append(" eq fresh(\"").append(entry.getKey()).append("\") = ");
             result.append(StringUtil.escapeMaude(entry.getValue()));
             result.append("('#counter(.KList)) .\n");
@@ -101,7 +101,7 @@ public class MaudeFilter extends BackendFilter {
                           + " .\n");
           }
 
-          for (Map.Entry<Sort2, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
+          for (Map.Entry<Sort, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
             String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey().getName()) + ", "
               + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
               + entry.getValue().type() + "), .KList))";
@@ -121,10 +121,10 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(Syntax syn, Void _) {
         for (PriorityBlock pb : syn.getPriorityBlocks()) {
             for (Production p : pb.getProductions()) {
-                if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {
+                if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof NonTerminal)) {
                     // sub-sort case
                     ProductionItem item = p.getItems().get(0);
-                    if (item instanceof Sort) {
+                    if (item instanceof NonTerminal) {
                         if (!MaudeHelper.declaredSorts.contains(p.getItems().get(0).toString()) && !MaudeHelper.basicSorts.contains(p.getItems().get(0).toString())) {
                             result.append("sort ");
                             result.append(p.getItems().get(0));
@@ -223,7 +223,7 @@ public class MaudeFilter extends BackendFilter {
             } else {
                 first = false;
             }
-            if (pi instanceof Sort) {
+            if (pi instanceof NonTerminal) {
                 this.visitNode(pi);
             }
         }
@@ -231,7 +231,7 @@ public class MaudeFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         result.append(sort.getName());
         return null;
     }
@@ -433,14 +433,14 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(Variable variable, Void _) {
         if (variable.isFreshConstant()) {
             variable = variable.shallowCopy();
-            variable.setSort(Sort2.KITEM);
+            variable.setSort(Sort.KITEM);
         }
          if (variable.getSort().isBuiltinSort()
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
             if (context.getDataStructureSorts().containsKey(variable.getSort())) {
-                  Sort2 sort = context.dataStructureSortOf(variable.getSort()).type();
-                  sort = sort.equals(Sort2.K) ? Sort2.KLIST : sort;
+                  Sort sort = context.dataStructureSortOf(variable.getSort()).type();
+                  sort = sort.equals(Sort.K) ? Sort.KLIST : sort;
                 result.append(sort + "2KLabel_(");
             } else {
                 result.append("#_(");
@@ -471,7 +471,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(ListTerminator empty, Void _) {
-        Sort2 sort = empty.getSort();
+        Sort sort = empty.getSort();
         if (MaudeHelper.basicSorts.contains(sort.getName()) || sort.isCellFragment()) {
             result.append(".");
             result.append(sort);
@@ -545,7 +545,7 @@ public class MaudeFilter extends BackendFilter {
                     }
                     addAnd = true;
                     Variable kVariable = variable.shallowCopy();
-                    kVariable.setSort(Sort2.KITEM);
+                    kVariable.setSort(Sort.KITEM);
                     this.visitNode(kVariable);
                     result.append(" := fresh(\"").append(variable.getSort()).append("\")");
                 }
@@ -905,7 +905,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
-        Sort2 sort = term.getSort().equals(Sort2.K) ? Sort2.KLIST : term.getSort();
+        Sort sort = term.getSort().equals(Sort.K) ? Sort.KLIST : term.getSort();
         if (sort.isKSort()) {
             //result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
             result.append(KInjectedLabel.getInjectedSort(sort));
@@ -957,7 +957,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Bag bag, Void _) {
         if (bag.getContents().isEmpty()) {
-            this.visitNode(new ListTerminator(Sort2.BAG, null));
+            this.visitNode(new ListTerminator(Sort.BAG, null));
             return null;
         }
         for (Term item: bag.getContents()) {
@@ -1061,14 +1061,14 @@ public class MaudeFilter extends BackendFilter {
         return null;
     }
 
-    private static java.util.Map<Sort2, String> maudeCollectionConstructors = new HashMap<>();
+    private static java.util.Map<Sort, String> maudeCollectionConstructors = new HashMap<>();
     static {
-        maudeCollectionConstructors.put(Sort2.BAG, "__");
-        maudeCollectionConstructors.put(Sort2.K, "_~>_");
-        maudeCollectionConstructors.put(Sort2.KLIST, "_`,`,_");
+        maudeCollectionConstructors.put(Sort.BAG, "__");
+        maudeCollectionConstructors.put(Sort.K, "_~>_");
+        maudeCollectionConstructors.put(Sort.KLIST, "_`,`,_");
     }
 
     public static String getMaudeConstructor(String sortName) {
-        return maudeCollectionConstructors.get(Sort2.of(sortName).getKSort());
+        return maudeCollectionConstructors.get(Sort.of(sortName).getKSort());
     }
 }

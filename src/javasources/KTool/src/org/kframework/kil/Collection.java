@@ -13,7 +13,7 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
 
     protected java.util.List<Term> contents;
 
-    public Collection(Sort2 sort) {
+    public Collection(Sort sort) {
         super(sort);
         contents = new ArrayList<Term>();
     }
@@ -23,7 +23,7 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
         this.contents = new ArrayList<Term>(c.contents);
     }
 
-    public Collection(String location, String filename, Sort2 sort) {
+    public Collection(String location, String filename, Sort sort) {
         super(location, filename, sort);
         contents = new ArrayList<Term>();
     }
@@ -37,7 +37,7 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
             contents.add((Term) JavaClassesFactory.getTerm(e));
     }
 
-    public Collection(Sort2 sort, List<Term> col) {
+    public Collection(Sort sort, List<Term> col) {
         super(sort);
         this.contents = col;
     }

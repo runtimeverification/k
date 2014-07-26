@@ -16,7 +16,7 @@ import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Production;
 import org.kframework.kil.SetBuiltin;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.mockito.Mock;
@@ -39,12 +39,12 @@ public class ToKAppTransformerTest {
     @Before
     public void setUp() {
         transformer = new ToKAppTransformer(context);
-        mapSort = new DataStructureSort("Map", Sort2.MAP, "'_Map_", "'_|->_", "'.Map", Maps.<String, String>newHashMap());
-        listSort = new DataStructureSort("List", Sort2.LIST, "'_List_", "'ListItem", "'.List", Maps.<String, String>newHashMap());
-        setSort = new DataStructureSort("Set", Sort2.SET, "'_Set_", "'SetItem", "'.Set", Maps.<String, String>newHashMap());
-        when(context.dataStructureSortOf(Sort2.MAP)).thenReturn(mapSort);
-        when(context.dataStructureSortOf(Sort2.LIST)).thenReturn(listSort);
-        when(context.dataStructureSortOf(Sort2.SET)).thenReturn(setSort);
+        mapSort = new DataStructureSort("Map", Sort.MAP, "'_Map_", "'_|->_", "'.Map", Maps.<String, String>newHashMap());
+        listSort = new DataStructureSort("List", Sort.LIST, "'_List_", "'ListItem", "'.List", Maps.<String, String>newHashMap());
+        setSort = new DataStructureSort("Set", Sort.SET, "'_Set_", "'SetItem", "'.Set", Maps.<String, String>newHashMap());
+        when(context.dataStructureSortOf(Sort.MAP)).thenReturn(mapSort);
+        when(context.dataStructureSortOf(Sort.LIST)).thenReturn(listSort);
+        when(context.dataStructureSortOf(Sort.SET)).thenReturn(setSort);
         context.canonicalBracketForSort = Maps.newHashMap();
     }
 
@@ -109,19 +109,19 @@ public class ToKAppTransformerTest {
         ListBuiltin listElement = (ListBuiltin) DataStructureBuiltin.element(listSort, KSequence.EMPTY);
         SetBuiltin setElement = (SetBuiltin) DataStructureBuiltin.element(setSort, KSequence.EMPTY);
 
-        MapBuiltin map = (MapBuiltin) DataStructureBuiltin.of(mapSort, mapElement, new Variable("M", Sort2.MAP));
-        ListBuiltin list = (ListBuiltin) DataStructureBuiltin.of(listSort, listElement, new Variable("L", Sort2.LIST));
-        SetBuiltin set = (SetBuiltin) DataStructureBuiltin.of(setSort, setElement, new Variable("S", Sort2.SET));
+        MapBuiltin map = (MapBuiltin) DataStructureBuiltin.of(mapSort, mapElement, new Variable("M", Sort.MAP));
+        ListBuiltin list = (ListBuiltin) DataStructureBuiltin.of(listSort, listElement, new Variable("L", Sort.LIST));
+        SetBuiltin set = (SetBuiltin) DataStructureBuiltin.of(setSort, setElement, new Variable("S", Sort.SET));
 
         KApp mapKApp = (KApp) transformer.visitNode(map);
         KApp listKApp = (KApp) transformer.visitNode(list);
         KApp setKApp = (KApp) transformer.visitNode(set);
 
         assertEquals(KApp.of("'_Map_", KApp.of("'_|->_", KSequence.EMPTY, KSequence.EMPTY),
-                new Variable("M", Sort2.MAP)), mapKApp);
+                new Variable("M", Sort.MAP)), mapKApp);
         assertEquals(KApp.of("'_List_", KApp.of("'ListItem", KSequence.EMPTY),
-                new Variable("L", Sort2.LIST)), listKApp);
+                new Variable("L", Sort.LIST)), listKApp);
         assertEquals(KApp.of("'_Set_", KApp.of("'SetItem", KSequence.EMPTY),
-                new Variable("S", Sort2.SET)), setKApp);
+                new Variable("S", Sort.SET)), setKApp);
     }
 }

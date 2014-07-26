@@ -19,7 +19,7 @@ public abstract class Token extends KLabel {
      * @param value
      * @return
      */
-    public static Token of(Sort2 sort, String value) {
+    public static Token of(Sort sort, String value) {
         if (sort.equals(BoolBuiltin.SORT)) {
             return BoolBuiltin.of(value);
         } else if (sort.equals(IntBuiltin.SORT)) {
@@ -39,7 +39,7 @@ public abstract class Token extends KLabel {
      * @param value
      * @return
      */
-    public static KApp kAppOf(Sort2 sort, String value) {
+    public static KApp kAppOf(Sort sort, String value) {
         if (sort.equals(BoolBuiltin.SORT)) {
             return BoolBuiltin.kAppOf(value);
         } else if (sort.equals(IntBuiltin.SORT)) {
@@ -58,7 +58,7 @@ public abstract class Token extends KLabel {
      * @return
      */
     public static KApp kAppOf(Element element) {
-        Sort2 sort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
+        Sort sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
         if (sort.equals(BoolBuiltin.SORT)) {
             return KApp.of(new BoolBuiltin(element));
         } else if (sort.equals(IntBuiltin.SORT)) {
@@ -79,7 +79,7 @@ public abstract class Token extends KLabel {
         super(element);
     }
 
-    public abstract Sort2 tokenSort();
+    public abstract Sort tokenSort();
 
     /**
      * Returns a {@link String} representing the (uninterpreted) value of the token.

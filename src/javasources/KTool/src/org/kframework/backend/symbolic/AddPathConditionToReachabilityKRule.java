@@ -14,7 +14,7 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -51,7 +51,7 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
                 Term lphi = errw.getLphi();
                 Term rphi = errw.getRphi();
 
-                Variable pc = Variable.getFreshVar(Sort2.K);
+                Variable pc = Variable.getFreshVar(Sort.K);
                 Term leftBag = addPathCondition(lcfg, pc);
 
                 List<Term> pcAndPhi = new ArrayList<Term>();

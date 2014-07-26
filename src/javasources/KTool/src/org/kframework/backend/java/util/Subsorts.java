@@ -32,10 +32,10 @@ public class Subsorts implements Serializable {
     public Subsorts(Context context) {
         this.context = context;
 
-        Set<org.kframework.kil.Sort2> genericKILSorts = context.getAllSorts();
+        Set<org.kframework.kil.Sort> genericKILSorts = context.getAllSorts();
         ImmutableSet.Builder<Sort> setBuilder = ImmutableSet.builder();
         int maxOrd = -1;
-        for (org.kframework.kil.Sort2 genericKILSort : genericKILSorts) {
+        for (org.kframework.kil.Sort genericKILSort : genericKILSorts) {
             /* ensure all sorts in context have Java-backend counterparts */
             Sort sort = Sort.of(genericKILSort.getName());
             setBuilder.add(sort);
@@ -47,7 +47,7 @@ public class Subsorts implements Serializable {
         for (Sort sort1 : sorts) {
             for (Sort sort2 : sorts) {
                 subsort[sort1.ordinal()][sort2.ordinal()] = context
-                        .isSubsorted(org.kframework.kil.Sort2.of(sort1.name()), org.kframework.kil.Sort2.of(sort2.name()));
+                        .isSubsorted(org.kframework.kil.Sort.of(sort1.name()), org.kframework.kil.Sort.of(sort2.name()));
             }
         }
     }
@@ -118,7 +118,7 @@ public class Subsorts implements Serializable {
     }
 
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
-        return context.hasCommonSubsort(org.kframework.kil.Sort2.of(sort1.name()), org.kframework.kil.Sort2.of(sort2.name()));
+        return context.hasCommonSubsort(org.kframework.kil.Sort.of(sort1.name()), org.kframework.kil.Sort.of(sort2.name()));
     }
 
 }

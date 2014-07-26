@@ -27,8 +27,8 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -54,12 +54,12 @@ public class MetaK {
 
     @Deprecated
     public static String cellSort(String cellName) {
-        return StringUtil.makeProper(cellName) + Sort2.CELL_SORT_NAME;
+        return StringUtil.makeProper(cellName) + Sort.CELL_SORT_NAME;
     }
 
     @Deprecated
     public static String cellFragment(String cellName) {
-        return StringUtil.makeProper(cellName) + Sort2.CELL_FRAGMENT_NAME;
+        return StringUtil.makeProper(cellName) + Sort.CELL_FRAGMENT_NAME;
     }
 
     @Deprecated
@@ -142,10 +142,10 @@ public class MetaK {
     }
 
     public static Term defaultTerm(Term v, org.kframework.kil.loader.Context context) {
-        Sort2 sort = v.getSort();
-        Sort2 ksort = sort.getKSort().mainSort();
+        Sort sort = v.getSort();
+        Sort ksort = sort.getKSort().mainSort();
         if (ksort.isDefaultable())
-            return new ListTerminator(Sort2.of(ksort.toString()), null);
+            return new ListTerminator(Sort.of(ksort.toString()), null);
         GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
                 .getLocation()));
         return KSequence.EMPTY;
@@ -236,7 +236,7 @@ public class MetaK {
 
     public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
         if (prod.isSubsort()) {
-            final Variable freshVar = Variable.getFreshVar(Sort2.of(prod.getItems().get(0).toString()));
+            final Variable freshVar = Variable.getFreshVar(Sort.of(prod.getItems().get(0).toString()));
             if (prod.containsAttribute("klabel")) {
                 return KApp.of(KLabelConstant.of(prod.getKLabel(), context), freshVar);
             }
@@ -244,7 +244,7 @@ public class MetaK {
         }
         if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
-            if (prod.getSort().equals(Sort2.KLABEL)) {
+            if (prod.getSort().equals(Sort.KLABEL)) {
                 return KLabelConstant.of(terminal, context);
             } else if (prod.getSort().equals(BoolBuiltin.SORT)) {
                 return BoolBuiltin.kAppOf(terminal);
@@ -259,7 +259,7 @@ public class MetaK {
         if (prod.isLexical()) {
             return KApp.of(KLabelConstant.of("#token", context),
                            StringBuiltin.kAppOf(prod.getSort().getName()),
-                           Variable.getFreshVar(Sort2.of("String")));
+                           Variable.getFreshVar(Sort.of("String")));
         }
         TermCons t = new TermCons(prod.getSort(), prod.getCons(), context);
         if (prod.isListDecl()) {
@@ -268,8 +268,8 @@ public class MetaK {
             return t;
         }
         for (ProductionItem item : prod.getItems()) {
-            if (item instanceof Sort) {
-                t.getContents().add(Variable.getFreshVar(((Sort) item).getSort2()));
+            if (item instanceof NonTerminal) {
+                t.getContents().add(Variable.getFreshVar(((NonTerminal) item).getSort2()));
             }
         }
         return t;
@@ -307,12 +307,12 @@ public class MetaK {
         return cells;
     }
 
-    public static Collection createCollection(Term contents, Sort2 sort) {
+    public static Collection createCollection(Term contents, Sort sort) {
         List<Term> col = new ArrayList<Term>();
         col.add(contents);
-        if (sort.equals(Sort2.BAG)) {
+        if (sort.equals(Sort.BAG)) {
             return new Bag(col);
-        } else if (sort.equals(Sort2.K)) {
+        } else if (sort.equals(Sort.K)) {
             return new KSequence(col);
         } else {
             return null;

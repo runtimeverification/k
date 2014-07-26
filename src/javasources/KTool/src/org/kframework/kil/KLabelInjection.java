@@ -23,7 +23,7 @@ public class KLabelInjection extends KLabel implements Interfaces.MutableParent<
         return term;
     }
 
-    public Sort2 injectedKind() {
+    public Sort injectedKind() {
         return term.getSort();
     }
 

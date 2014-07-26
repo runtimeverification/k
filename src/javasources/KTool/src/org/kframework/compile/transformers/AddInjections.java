@@ -12,8 +12,8 @@ import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -68,14 +68,14 @@ public class AddInjections extends CopyOnWriteTransformer{
         assert node.getPriorityBlocks().size() == 1;
         assert node.getPriorityBlocks().get(0).getProductions().size() == 1;
 
-        Sort2 sort = node.getSort().getSort2();
+        Sort sort = node.getSort().getSort2();
         Production production = node.getPriorityBlocks().get(0).getProductions().get(0);
         production = (Production) visit(production, _);
 
-        if ((sort.equals(Sort2.KLABEL) && production.containsAttribute(Attribute.FUNCTION_KEY))
-                || sort.equals(Sort2.K) || sort.equals(Sort2.KLIST)) {
+        if ((sort.equals(Sort.KLABEL) && production.containsAttribute(Attribute.FUNCTION_KEY))
+                || sort.equals(Sort.K) || sort.equals(Sort.KLIST)) {
             production = production.shallowCopy();
-            production.setSort(Sort2.KITEM);
+            production.setSort(Sort.KITEM);
         }
 
         Syntax returnNode;
@@ -103,12 +103,12 @@ public class AddInjections extends CopyOnWriteTransformer{
     /** Transforms {@code Sort} instances occurring as part of
      * {@link org.kframework.kil.ProductionItem}. Other instances are not changed. */
     @Override
-    public Sort visit(Sort node, Void _) {
+    public NonTerminal visit(NonTerminal node, Void _) {
         assert state == TransformationState.TRANSFORM_PRODUCTIONS;
 
-        if (node.getSort2().equals(Sort2.KLABEL) || node.getSort2().equals(Sort2.KLIST)) {
-            Sort returnNode = node.shallowCopy();
-            returnNode.setSort2(Sort2.KITEM);
+        if (node.getSort2().equals(Sort.KLABEL) || node.getSort2().equals(Sort.KLIST)) {
+            NonTerminal returnNode = node.shallowCopy();
+            returnNode.setSort2(Sort.KITEM);
             return returnNode;
         } else {
             return node;
@@ -181,11 +181,11 @@ public class AddInjections extends CopyOnWriteTransformer{
             transformedNode = node;
         }
 
-        Sort2 sort = node.getProduction().getSort();
+        Sort sort = node.getProduction().getSort();
         if (needProjectionTo(sort)) {
-            transformedNode.setSort(Sort2.KITEM);
+            transformedNode.setSort(Sort.KITEM);
             // TODO (AndreiS): remove special case
-            if (node.getProduction().getLabel().equals("#if_#then_#else_#fi") && !sort.equals(Sort2.KLIST)) {
+            if (node.getProduction().getLabel().equals("#if_#then_#else_#fi") && !sort.equals(Sort.KLIST)) {
                 return transformedNode;
             }
             return new KItemProjection(sort, transformedNode);
@@ -203,9 +203,9 @@ public class AddInjections extends CopyOnWriteTransformer{
      * @return {@code true} if an injection is required; otherwise,
      *         {@code false}
      */
-    private boolean needInjectionFrom(Sort2 sort) {
-        return sort.equals(Sort2.KLABEL) || sort.equals(Sort2.KLIST)
-                || sort.equals(Sort2.BAG) || sort.equals(Sort2.BAG_ITEM);
+    private boolean needInjectionFrom(Sort sort) {
+        return sort.equals(Sort.KLABEL) || sort.equals(Sort.KLIST)
+                || sort.equals(Sort.BAG) || sort.equals(Sort.BAG_ITEM);
     }
 
     /**
@@ -218,10 +218,10 @@ public class AddInjections extends CopyOnWriteTransformer{
      * @return {@code true} if a projection is required; otherwise,
      *         {@code false}
      */
-    private boolean needProjectionTo(Sort2 sort) {
-        return sort.equals(Sort2.KLABEL) || sort.equals(Sort2.KLIST)
-                || sort.equals(Sort2.K) || sort.equals(Sort2.BAG)
-                || sort.equals(Sort2.BAG_ITEM);
+    private boolean needProjectionTo(Sort sort) {
+        return sort.equals(Sort.KLABEL) || sort.equals(Sort.KLIST)
+                || sort.equals(Sort.K) || sort.equals(Sort.BAG)
+                || sort.equals(Sort.BAG_ITEM);
     }
 
 }

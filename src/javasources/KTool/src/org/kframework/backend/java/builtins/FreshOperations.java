@@ -7,7 +7,6 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.kil.Sort2;
 
 import com.google.common.collect.Lists;
 
@@ -26,7 +25,7 @@ public class FreshOperations {
     }
 
     public static Term fresh(StringToken term, TermContext context) {
-        String name = context.definition().context().freshFunctionNames.get(Sort2.of(term.stringValue()));
+        String name = context.definition().context().freshFunctionNames.get(org.kframework.kil.Sort.of(term.stringValue()));
         if (name == null) {
             throw new UnsupportedOperationException();
         }

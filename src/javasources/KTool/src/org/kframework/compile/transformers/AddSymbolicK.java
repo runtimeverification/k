@@ -24,7 +24,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
     }
 
     public static final boolean allowKSymbolic(String sortName) {
-        Sort2 sort = Sort2.of(sortName);
+        Sort sort = Sort.of(sortName);
         return sort.isComputationSort() && !sort.isBuiltinSort();
     }
 
@@ -41,10 +41,10 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
     public final Production getSymbolicProduction(String sortName) {
         assert allowSymbolic(sortName);
 
-        return Production.makeFunction(Sort2.of(sortName), symbolicConstructor(sortName), Sort2.K, context);
+        return Production.makeFunction(Sort.of(sortName), symbolicConstructor(sortName), Sort.K, context);
     }
 
-    public final Term makeSymbolicTerm(Sort2 sort, Term term) {
+    public final Term makeSymbolicTerm(Sort sort, Term term) {
         assert allowSymbolic(sort.getName());
 
         String ctor = symbolicConstructor(sort.getName());
@@ -59,7 +59,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         return symTerm;
     }
 
-    public Term freshSymSortN(Sort2 sort, int n) {
+    public Term freshSymSortN(Sort sort, int n) {
         return KApp.of(
                 KLabelConstant.of("'#freshSymSortN", context),
                 StringBuiltin.kAppOf(sort.getName()),
@@ -78,10 +78,10 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-        for (Sort2 sort : node.getAllSorts()) {
+        for (Sort sort : node.getAllSorts()) {
             if (allowKSymbolic(sort.getName())) {
                 //retNode.addProduction(sort, getSymbolicProduction(sort));
-                retNode.addConstant(Sort2.KLABEL, symbolicConstructor(sort.getName()));
+                retNode.addConstant(Sort.KLABEL, symbolicConstructor(sort.getName()));
             }
         }
 

@@ -3,7 +3,7 @@ package org.kframework.kil.loader;
 
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -12,7 +12,7 @@ public class UpdateReferencesVisitor extends BasicVisitor {
         super(context);
     }
 
-    private Sort2 prodSort;
+    private Sort prodSort;
     private String moduleName;
 
     @Override

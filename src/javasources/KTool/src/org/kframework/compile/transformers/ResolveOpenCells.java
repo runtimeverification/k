@@ -34,7 +34,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
                 = context.dataStructureSortOf(context.cellSorts.get(node.getLabel()));
         if (dataStructureSort != null) {
             /* data structure sort */
-            if (ellipses == Ellipses.BOTH && !dataStructureSort.type().equals(Sort2.LIST)) {
+            if (ellipses == Ellipses.BOTH && !dataStructureSort.type().equals(Sort.LIST)) {
                 ellipses = Ellipses.RIGHT;
             }
 
@@ -56,7 +56,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
             return node;
         }
 
-        Sort2 kind = node.getContents().getSort().getKSort().mainSort();
+        Sort kind = node.getContents().getSort().getKSort().mainSort();
         Collection col;
         if (node.getContents() instanceof Collection) {
             col = (Collection) node.getContents().shallowCopy();
@@ -73,14 +73,14 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
         }
         node.setContents(col);
 
-        if (ellipses == Ellipses.BOTH && !kind.equals(Sort2.K)) {
+        if (ellipses == Ellipses.BOTH && !kind.equals(Sort.K)) {
             ellipses = Ellipses.RIGHT;
         }
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
-            col.getContents().add(0, Variable.getFreshVar(Sort2.of(kind.toString())));
+            col.getContents().add(0, Variable.getFreshVar(Sort.of(kind.toString())));
         }
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
-            col.getContents().add(Variable.getFreshVar(Sort2.of(kind.toString())));
+            col.getContents().add(Variable.getFreshVar(Sort.of(kind.toString())));
         }
 
         return node;

@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class ResolveBuiltins extends CopyOnWriteTransformer {
 
-    private Set<Sort2> builtinSorts = new HashSet<>();
+    private Set<Sort> builtinSorts = new HashSet<>();
 
     public ResolveBuiltins(Context context) {
         super("Resolve Builtins", context);
@@ -34,13 +34,13 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
         List<PriorityBlock> priorities = new ArrayList<PriorityBlock>();
         PriorityBlock block = new PriorityBlock();
         priorities.add(block );
-        Syntax syn = new Syntax(new Sort(Sort2.KLABEL), priorities);
+        Syntax syn = new Syntax(new NonTerminal(Sort.KLABEL), priorities);
         items.add(syn);
-        for (Sort2 sort : builtinSorts) {
+        for (Sort sort : builtinSorts) {
             List<ProductionItem> pItems = new ArrayList<ProductionItem>();
-            Production p = new Production(new Sort(Sort2.KLABEL), pItems );
+            Production p = new Production(new NonTerminal(Sort.KLABEL), pItems );
             pItems.add(new Terminal("#"));
-            pItems.add(new Sort(sort));
+            pItems.add(new NonTerminal(sort));
             p.putAttribute("KLabelWrapper", sort.getName());
             p.putAttribute("cons", "KLabel1" + sort + "Wrapper");
             p.putAttribute("prefixlabel", "#_");
@@ -48,7 +48,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
             context.putLabel(p, "KLabel1" + sort+ "Wrapper");
             block.getProductions().add(p);
             pItems = new ArrayList<ProductionItem>();
-            p = new Production(new Sort(Sort2.KLABEL), pItems );
+            p = new Production(new NonTerminal(Sort.KLABEL), pItems );
             pItems.add(new Terminal("is" + sort));
             block.getProductions().add(p);
             Rule rule = new Rule();
@@ -65,7 +65,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Sort node, Void _)  {
+    public ASTNode visit(NonTerminal node, Void _)  {
         if (node.getSort2().isBuiltinSort())
                 builtinSorts.add(node.getSort2());
         return node;

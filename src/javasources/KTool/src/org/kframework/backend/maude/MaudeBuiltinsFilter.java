@@ -7,8 +7,8 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
@@ -90,7 +90,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 
 
     @Override
-    public Void visit(Sort node, Void _) {
+    public Void visit(NonTerminal node, Void _) {
         if (!first) {
             left += ",, ";
             right += ", ";
@@ -100,11 +100,11 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 
         Variable var;
         if (context.getDataStructureSorts().containsKey(node.getSort2())
-                || node.getSort2().equals(Sort2.K)
-                || node.getSort2().equals(Sort2.KITEM)) {
+                || node.getSort2().equals(Sort.K)
+                || node.getSort2().equals(Sort.KITEM)) {
             var = Variable.getFreshVar(node.getSort2());
         } else {
-            var = Variable.getFreshVar(Sort2.of("#" + node.getName()));
+            var = Variable.getFreshVar(Sort.of("#" + node.getName()));
         }
 
         MaudeFilter filter = new MaudeFilter(context);

@@ -14,7 +14,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -65,7 +65,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             Term right = ruleBody.getRight().shallowCopy();
 
             // create lhs path condition cell
-            Variable psi = Variable.getFreshVar(Sort2.K);
+            Variable psi = Variable.getFreshVar(Sort.K);
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
             leftCell.setEllipses(Ellipses.NONE);

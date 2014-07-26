@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
  */
 public class BoolBuiltin extends Token {
 
-    public static final Sort2 SORT = Sort2.of("#Bool");
+    public static final Sort SORT = Sort.of("#Bool");
 
     public static final String TRUE_STRING = "true";
     public static final String FALSE_STRING = "false";
@@ -98,7 +98,7 @@ public class BoolBuiltin extends Token {
      * @return
      */
     @Override
-    public Sort2 tokenSort() {
+    public Sort tokenSort() {
         return BoolBuiltin.SORT;
     }
 

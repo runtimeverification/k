@@ -650,7 +650,7 @@ class KoreFilter extends BasicVisitor {
         }
 
         @Override
-        public Void visit(Sort node, Void _) {
+        public Void visit(NonTerminal node, Void _) {
             indenter.write(node.toString());
             return null;
         }

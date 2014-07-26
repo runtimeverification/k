@@ -7,7 +7,7 @@ import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -32,7 +32,7 @@ public class MakeFreshVariables extends CopyOnWriteTransformer {
 //                        + ", " + node.isFreshVariable() + ")");
                 //return new AddSymbolicK(context).freshSymSortN(v.getSort(),
                 //        RLBackend.idx);
-                return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort().getName())), Token.kAppOf(Sort2.SHARP_ID, v.getName()));
+                return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort().getName())), Token.kAppOf(Sort.SHARP_ID, v.getName()));
             }
         }
         return super.visit(node, _);

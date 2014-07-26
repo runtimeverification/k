@@ -66,8 +66,8 @@ public class GroupProductionsBySort {
             for (Production prod : prods) {
                 List<Term> items = Lists.newArrayListWithCapacity(prod.getItems().size());
                 for (ProductionItem prodItem : prod.getItems())
-                    if (prodItem instanceof org.kframework.kil.Sort)
-                        items.add(Variable.getFreshVariable(Sort.of(((org.kframework.kil.Sort) prodItem).getSort2().getName())));
+                    if (prodItem instanceof org.kframework.kil.NonTerminal)
+                        items.add(Variable.getFreshVariable(Sort.of(((org.kframework.kil.NonTerminal) prodItem).getSort2().getName())));
                 KItem kitem = KItem.of(klabelOfProd.get(prod), new KList(items), context);
                 freshTerms.add(kitem);
             }

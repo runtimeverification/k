@@ -11,7 +11,7 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
 
     private Term term;
 
-    public KItemProjection(Sort2 kind, Term term) {
+    public KItemProjection(Sort kind, Term term) {
         super(kind);
         this.term = term;
     }
@@ -25,7 +25,7 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
         return term;
     }
 
-    public Sort2 projectedKind() {
+    public Sort projectedKind() {
         return getSort();
     }
 

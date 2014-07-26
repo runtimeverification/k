@@ -15,8 +15,8 @@ import org.kframework.kil.Module;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.Terminal;
@@ -52,7 +52,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
         if (PC) {
-            Variable pc = new Variable(PC_VAR, Sort2.of("Bool"));
+            Variable pc = new Variable(PC_VAR, Sort.of("Bool"));
             cell.setContents(pc);
             context.configVarSorts.put(pc.getName(), pc.getSort());
         }
@@ -172,11 +172,11 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         PriorityBlock topPriorityBlock = new PriorityBlock();
         List<ProductionItem> topTerminals = new ArrayList<ProductionItem>();
         topTerminals.add(new Terminal(MetaK.Constants.pathCondition));
-        Production topProduction = new Production(new Sort(Sort2.CELL_LABEL),
+        Production topProduction = new Production(new NonTerminal(Sort.CELL_LABEL),
                 topTerminals);
         topPriorityBlock.getProductions().add(topProduction);
         topCellBlocks.add(topPriorityBlock);
-        Syntax topCellDecl = new Syntax(new Sort(Sort2.CELL_LABEL), topCellBlocks);
+        Syntax topCellDecl = new Syntax(new NonTerminal(Sort.CELL_LABEL), topCellBlocks);
         node.getItems().add(topCellDecl);
         return node;
     }

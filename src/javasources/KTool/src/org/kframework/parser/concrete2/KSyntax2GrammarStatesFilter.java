@@ -7,14 +7,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.kframework.kil.Configuration;
-import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
@@ -42,7 +40,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         this.ctv = ctv;
 
         // create a NonTerminal for every declared sort
-        for (Sort2 sort : context.definedSorts) {
+        for (Sort sort : context.definedSorts) {
             grammar.add(new NonTerminal(sort.getName()));
         }
     }
@@ -230,8 +228,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
                     pstate.next.add(del);
                     previous = del;
-                } else if (prdItem instanceof Sort) {
-                    Sort srt = (Sort) prdItem;
+                } else if (prdItem instanceof org.kframework.kil.NonTerminal) {
+                    org.kframework.kil.NonTerminal srt = (org.kframework.kil.NonTerminal) prdItem;
                     NonTerminalState nts = new NonTerminalState(
                             prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
                     previous.next.add(nts);

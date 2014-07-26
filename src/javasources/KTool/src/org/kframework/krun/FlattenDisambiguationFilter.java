@@ -11,7 +11,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.ListTerminator;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
@@ -52,7 +52,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
         return amb;
     }
 
-    private Term addEmpty(Term node, Sort2 sort) {
+    private Term addEmpty(Term node, Sort sort) {
         TermCons tc = new TermCons(sort, context.listConses.get(sort).getCons(), context);
         List<Term> contents = new ArrayList<Term>();
         contents.add(node);

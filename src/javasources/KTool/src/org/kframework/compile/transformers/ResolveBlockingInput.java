@@ -196,13 +196,13 @@ public class ResolveBlockingInput extends GetLhsPattern {
         hasInputCell = true;
         resultCondition = MetaK.incrementCondition(originalCondition, getPredicateTerm((Variable) variable));
 
-        Sort2 sort = getSort((Variable) variable);
+        Sort sort = getSort((Variable) variable);
         Term parseTerm = KApp.of(parseInputLabel,
             StringBuiltin.kAppOf(sort.getName()),
             StringBuiltin.kAppOf(inputCells.get(node.getLabel())));
 
         Term ioBuffer = KApp.of(bufferLabel,
-           new Variable(Variable.getFreshVar(Sort2.K)));
+           new Variable(Variable.getFreshVar(Sort.K)));
 
 //        ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]
         Term list;
@@ -238,8 +238,8 @@ public class ResolveBlockingInput extends GetLhsPattern {
      * @throws TransformerException
      */
 
-    private Sort2 getSort(final Variable var) {
-        if (!var.getSort().equals(Sort2.KITEM)) return var.getSort();
+    private Sort getSort(final Variable var) {
+        if (!var.getSort().equals(Sort.KITEM)) return var.getSort();
         final String[] sort = {null};
         CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("find missing variables", context) {
 
@@ -263,7 +263,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
         };
         originalCondition = (Term) transformer.visitNode(originalCondition);
 
-        return Sort2.of(sort[0]);
+        return Sort.of(sort[0]);
     }
 
     private static final KLabelConstant parseInputLabel = KLabelConstant.of("#parseInput");

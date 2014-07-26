@@ -15,7 +15,7 @@ public class BackendTerm extends Term {
 
     String value;
 
-    public BackendTerm(Sort2 sort, String value) {
+    public BackendTerm(Sort sort, String value) {
         super(sort);
         this.value = value;
     }

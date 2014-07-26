@@ -12,13 +12,13 @@ public class ListTerminator extends Term {
 
     private final String separator; // Used only by toString()
 
-    public ListTerminator(Sort2 sort, String separator) {
+    public ListTerminator(Sort sort, String separator) {
         super(sort);
         this.separator = separator;
     }
 
     public ListTerminator(String separator) {
-        super(Sort2.K);
+        super(Sort.K);
         this.separator = separator;
     }
 
@@ -29,13 +29,13 @@ public class ListTerminator extends Term {
 
     public ListTerminator(Element element, String separator) {
         super(element);
-        this.sort = Sort2.of(element.getAttribute(Constants.SORT_sort_ATTR));
+        this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
         this.separator = separator;
     }
 
     @Override
     public String toString() {
-        if (separator != null && sort.equals(Sort2.K)) {
+        if (separator != null && sort.equals(Sort.K)) {
             return ".List{\"" + separator + "\"}";
         } else {
         return "." + sort;

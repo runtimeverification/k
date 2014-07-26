@@ -88,7 +88,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         result.append("{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}");
                 terminalBefore = false;
                 return null;
@@ -142,7 +142,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(UserList ul, Void _) {
         result.append("List\\{");
-        this.visitNode(new Sort(ul.getSort()));
+        this.visitNode(new NonTerminal(ul.getSort()));
         result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
         terminalBefore = false;
         return null;
@@ -390,7 +390,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(KSequence k, Void _) {
-        if (k.getContents().isEmpty()) printEmpty(Sort2.K.getName());
+        if (k.getContents().isEmpty()) printEmpty(Sort.K.getName());
         else printList(k.getContents(), "\\kra");
         return null;
 

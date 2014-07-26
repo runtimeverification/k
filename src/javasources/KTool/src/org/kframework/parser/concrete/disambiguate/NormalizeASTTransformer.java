@@ -7,7 +7,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
@@ -28,7 +28,7 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      */
     @Override
     public ASTNode visit(KApp kapp, Void _) throws ParseFailedException {
-        if (!kapp.getChild().getSort().equals(Sort2.KLIST)) {
+        if (!kapp.getChild().getSort().equals(Sort.KLIST)) {
             kapp.setChild(new KList(kapp.getChild()));
         }
         return super.visit(kapp, _);

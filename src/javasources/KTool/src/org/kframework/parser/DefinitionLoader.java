@@ -17,7 +17,7 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
@@ -350,7 +350,7 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
-        config = new TypeSystemFilter2(Sort2.of(startSymbol), context).visitNode(config);
+        config = new TypeSystemFilter2(Sort.of(startSymbol), context).visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
@@ -399,7 +399,7 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
-        config = new TypeSystemFilter2(Sort2.of(startSymbol), context).visitNode(config);
+        config = new TypeSystemFilter2(Sort.of(startSymbol), context).visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);

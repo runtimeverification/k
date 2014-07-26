@@ -16,8 +16,8 @@ import org.kframework.kil.Module;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
@@ -59,11 +59,11 @@ public class ProgramSDF {
         // this will allow the parser to accept any sort as input if the definition doesn't contain
         // a configuration, or the $PGM variable has sort K
         for (String sortName : psdfv.startSorts) {
-            Sort2 sort = Sort2.of(sortName);
+            Sort sort = Sort.of(sortName);
             if (!sort.isBaseSort() && !context.isListSort(sort)) {
                 List<ProductionItem> pi = new ArrayList<>();
-                pi.add(new Sort(sort));
-                Production prod = new Production(new Sort(Sort2.K), pi);
+                pi.add(new NonTerminal(sort));
+                Production prod = new Production(new NonTerminal(Sort.K), pi);
                 ks2gsf.visitNode(prod);
             }
         }
@@ -103,8 +103,8 @@ public class ProgramSDF {
                     if (itm instanceof Terminal) {
                         Terminal t = (Terminal) itm;
                         sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-                    } else if (itm instanceof Sort) {
-                        Sort srt = (Sort) itm;
+                    } else if (itm instanceof NonTerminal) {
+                        NonTerminal srt = (NonTerminal) itm;
                         // if we are on the first or last place and this sort is not a list, just print the sort
                         if (i == 0 || i == items.size() - 1) {
                             sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
@@ -142,7 +142,7 @@ public class ProgramSDF {
         sdf.append("\n%% start symbols subsorts\n");
         sdf.append("    KItem        -> K\n");
         for (String s : psdfv.startSorts) {
-            Sort2 sort = Sort2.of(s);
+            Sort sort = Sort.of(s);
             if (!sort.isBaseSort() && !context.isListSort(sort))
                 sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
         }
@@ -155,7 +155,7 @@ public class ProgramSDF {
             sdf.append("    DzFloat    -> UnitDz\n");
             sdf.append("    DzString-> UnitDz\n");
             for (String s : psdfv.startSorts) {
-                Sort2 sort = Sort2.of(s);
+                Sort sort = Sort.of(s);
                 if (!sort.isBaseSort() && !context.isListSort(sort))
                     if (AddSymbolicK.allowKSymbolic(s)) {
                         sdf.append("    \"" + AddSymbolicK.symbolicConstructor(s) + "\"    \"(\" UnitDz \")\"    -> ");
@@ -190,7 +190,7 @@ public class ProgramSDF {
             lexerSorts.add(p.getSort().getName());
             sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz\n");
             if (l.getFollow() != null && !l.getFollow().equals("")) {
-                psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
+                psdfv.restrictions.add(new Restrictions(new NonTerminal(p.getSort()), null, l.getFollow()));
             }
 
             // reject all terminals that match the regular expression of the lexical production

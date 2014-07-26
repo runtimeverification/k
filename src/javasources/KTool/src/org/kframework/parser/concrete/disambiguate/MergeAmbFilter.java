@@ -7,7 +7,7 @@ import java.util.HashSet;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -62,7 +62,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
                         list2.add(((TermCons) similar.get(j)).getContents().get(i));
 
                     if (list2.size() > 1) {
-                        Ambiguity amb2 = new Ambiguity(Sort2.K, new ArrayList<Term>(list2));
+                        Ambiguity amb2 = new Ambiguity(Sort.K, new ArrayList<Term>(list2));
                         amb2.setLocation(tcnew.getLocation());
                         amb2.setFilename(tcnew.getFilename());
                         tcnew.getContents().add(amb2);
@@ -77,7 +77,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
         }
 
         if (newchildren.size() > 1) {
-            Ambiguity amb2 = new Ambiguity(Sort2.K, newchildren);
+            Ambiguity amb2 = new Ambiguity(Sort.K, newchildren);
             amb2.setLocation(amb.getLocation());
             amb2.setFilename(amb.getFilename());
             return super.visit(amb2, _);

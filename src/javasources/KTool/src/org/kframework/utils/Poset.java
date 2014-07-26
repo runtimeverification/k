@@ -293,6 +293,7 @@ public class Poset<T> implements Serializable {
             if (o == null)
                 return false;
             if (o.getClass() == Tuple.class) {
+                @SuppressWarnings("unchecked")
                 Tuple s1 = (Tuple) o;
                 return s1.big.equals(big) && s1.small.equals(small);
             }

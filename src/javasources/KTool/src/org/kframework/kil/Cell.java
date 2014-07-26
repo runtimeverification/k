@@ -76,13 +76,13 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     Map<String, String> cellAttributes;
 
     public Cell(String location, String filename) {
-        super(location, filename, Sort2.BAG_ITEM);
+        super(location, filename, Sort.BAG_ITEM);
         cellAttributes = new HashMap<String, String>();
     }
 
     public Cell(Element element) {
         super(element);
-        this.sort = Sort2.BAG_ITEM;
+        this.sort = Sort.BAG_ITEM;
         this.label = element.getAttribute(Constants.LABEL_label_ATTR);
         this.endLabel = element.getAttribute(Constants.ENDLABEL_label_ATTR);
         this.contents = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
@@ -111,7 +111,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     }
 
     public Cell(String label, Term contents) {
-        super(Sort2.BAG_ITEM);
+        super(Sort.BAG_ITEM);
         this.label = label;
         this.endLabel = label;
         this.cellAttributes = new HashMap<String, String>();
@@ -119,7 +119,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     }
 
     public Cell() {
-        super(Sort2.BAG_ITEM);
+        super(Sort.BAG_ITEM);
         cellAttributes = new HashMap<String, String>();
     }
 
@@ -162,11 +162,11 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.contents = contents;
     }
 
-    public Sort2 getSort() {
+    public Sort getSort() {
         return sort;
     }
 
-    public void setSort(Sort2 sort) {
+    public void setSort(Sort sort) {
         this.sort = sort;
     }
 

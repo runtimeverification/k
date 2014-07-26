@@ -17,7 +17,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.SetLookup;
 import org.kframework.kil.SetUpdate;
-import org.kframework.kil.Sort2;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -61,7 +61,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private class ExtendedListLookup extends ListLookup implements VariableCache {
         private Set<Variable> variables;
 
-        ExtendedListLookup(Variable list, int key, Term value, Sort2 kind) {
+        ExtendedListLookup(Variable list, int key, Term value, Sort kind) {
             super(list, key, value, kind);
             variables = new HashSet<>();
             variables.add(list);
@@ -76,7 +76,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private class ExtendedMapLookup extends MapLookup implements VariableCache {
         private Set<Variable> variables;
 
-        ExtendedMapLookup(Variable map, Term key, Term value, Sort2 kind) {
+        ExtendedMapLookup(Variable map, Term key, Term value, Sort kind) {
             super(map, key, value, kind, false);
             variables = new HashSet<>();
             variables.add(map);
@@ -297,7 +297,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 return node.viewBase();
             }
 
-            Variable variable = Variable.getFreshVar(Sort2.of(node.sort().name()));
+            Variable variable = Variable.getFreshVar(Sort.of(node.sort().name()));
             if (node.hasViewBase()) {
                 /* TODO(AndreiS): check the uniqueness of list variables in the LHS */
                 assert !reverseMap.containsKey(node.viewBase());
@@ -389,7 +389,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                     return node.viewBase();
             }
 
-            Variable variable = Variable.getFreshVar(Sort2.of(node.sort().name()));
+            Variable variable = Variable.getFreshVar(Sort.of(node.sort().name()));
             if (node.hasViewBase()) {
                 /* TODO(AndreiS): check the uniqueness of map variables in the LHS */
                 assert !reverseMap.containsKey(node.viewBase());
@@ -462,7 +462,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 return node.viewBase();
             }
 
-            Variable variable = Variable.getFreshVar(Sort2.of(node.sort().name()));
+            Variable variable = Variable.getFreshVar(Sort.of(node.sort().name()));
             if (node.hasViewBase()) {
                 /* TODO(AndreiS): check the uniqueness of map variables in the LHS */
                 assert !reverseMap.containsKey(node.viewBase());

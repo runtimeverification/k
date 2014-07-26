@@ -14,8 +14,8 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Sort2;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
@@ -89,31 +89,31 @@ public class Context implements Serializable {
      */
     public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
-    public Map<String, Sort2> cellKinds = new HashMap<>();
-    public Map<String, Sort2> cellSorts = new HashMap<>();
-    public Map<Sort2, Production> listConses = new HashMap<>();
+    public Map<String, Sort> cellKinds = new HashMap<>();
+    public Map<String, Sort> cellSorts = new HashMap<>();
+    public Map<Sort, Production> listConses = new HashMap<>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
     public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
 
-    public Map<Sort2, Production> canonicalBracketForSort = new HashMap<>();
-    private Poset<Sort2> subsorts = Poset.create();
-    public java.util.Set<Sort2> definedSorts = Sort2.getBaseSorts();
+    public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
+    private Poset<Sort> subsorts = Poset.create();
+    public java.util.Set<Sort> definedSorts = Sort.getBaseSorts();
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
     private Poset<String> modules = Poset.create();
     private Poset<String> fileRequirements = Poset.create();
     public String startSymbolPgm = "K";
-    public Map<String, Sort2> configVarSorts = new HashMap<>();
+    public Map<String, Sort> configVarSorts = new HashMap<>();
     public File dotk = null;
     public File kompiled = null;
     public boolean initialized = false;
     protected java.util.List<String> komputationCells = null;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
-    public Set<Sort2> variableTokenSorts = new HashSet<>();
-    public HashMap<Sort2, String> freshFunctionNames = new HashMap<>();
+    public Set<Sort> variableTokenSorts = new HashSet<>();
+    public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
 
     public int numModules, numSentences, numProductions, numCells;
 
@@ -137,7 +137,7 @@ public class Context implements Serializable {
     /**
      * {@link Map} of sort names into {@link DataStructureSort} instances.
      */
-    private Map<Sort2, DataStructureSort> dataStructureSorts;
+    private Map<Sort, DataStructureSort> dataStructureSorts;
 
     /**
      * {@link Set} of sorts with lexical productions.
@@ -162,11 +162,11 @@ public class Context implements Serializable {
     }
 
     private void initSubsorts() {
-        subsorts.addElement(Sort2.KLABEL);
-        subsorts.addRelation(Sort2.KLIST, Sort2.K);
-        subsorts.addRelation(Sort2.K, Sort2.KITEM);
-        subsorts.addRelation(Sort2.KITEM, Sort2.KRESULT);
-        subsorts.addRelation(Sort2.BAG, Sort2.BAG_ITEM);
+        subsorts.addElement(Sort.KLABEL);
+        subsorts.addRelation(Sort.KLIST, Sort.K);
+        subsorts.addRelation(Sort.K, Sort.KITEM);
+        subsorts.addRelation(Sort.KITEM, Sort.KRESULT);
+        subsorts.addRelation(Sort.BAG, Sort.BAG_ITEM);
     }
 
     // TODO(dwightguth): remove these fields and replace with injected dependencies
@@ -245,25 +245,25 @@ public class Context implements Serializable {
     public void addCellDecl(Cell c) {
         cells.put(c.getLabel(), c);
 
-        Sort2 kind = subsorts.getMaxim(c.getContents().getSort());
-        if (kind.equals(Sort2.KLIST)) {
-            kind = Sort2.K;
+        Sort kind = subsorts.getMaxim(c.getContents().getSort());
+        if (kind.equals(Sort.KLIST)) {
+            kind = Sort.K;
         }
         cellKinds.put(c.getLabel(), kind);
 
         String sortName = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
-        Sort2 sort = sortName == null ? c.getContents().getSort() : Sort2.of(sortName);
+        Sort sort = sortName == null ? c.getContents().getSort() : Sort.of(sortName);
         cellSorts.put(c.getLabel(), sort);
     }
 
-    public boolean isListSort(Sort2 sort) {
+    public boolean isListSort(Sort sort) {
         return listConses.containsKey(sort);
     }
 
     /**
      * Returns a unmodifiable view of all sorts.
      */
-    public Set<Sort2> getAllSorts() {
+    public Set<Sort> getAllSorts() {
         return Collections.unmodifiableSet(subsorts.getElements());
     }
 
@@ -275,7 +275,7 @@ public class Context implements Serializable {
      * we suppress cast warnings because we know that the sort must be UserList
      */
     @SuppressWarnings("cast")
-    public Sort2 getListElementSort(Sort2 sort) {
+    public Sort getListElementSort(Sort sort) {
         if (!isListSort(sort))
             return null;
         return ((UserList) listConses.get(sort).getItems().get(0)).getSort();
@@ -289,7 +289,7 @@ public class Context implements Serializable {
      * @return the sort which is the LUB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public Sort2 getLUBSort(Set<Sort2> sorts) {
+    public Sort getLUBSort(Set<Sort> sorts) {
         return subsorts.getLUB(sorts);
     }
 
@@ -301,7 +301,7 @@ public class Context implements Serializable {
      * @return the sort which is the LUB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public Sort2 getLUBSort(Sort2... sorts) {
+    public Sort getLUBSort(Sort... sorts) {
         return subsorts.getLUB(Sets.newHashSet(sorts));
     }
 
@@ -313,7 +313,7 @@ public class Context implements Serializable {
      * @return the sort which is the GLB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public Sort2 getGLBSort(Set<Sort2> sorts) {
+    public Sort getGLBSort(Set<Sort> sorts) {
         return subsorts.getGLB(sorts);
     }
 
@@ -325,7 +325,7 @@ public class Context implements Serializable {
      * @return the sort which is the GLB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public Sort2 getGLBSort(Sort2... sorts) {
+    public Sort getGLBSort(Sort... sorts) {
         return subsorts.getGLB(Sets.newHashSet(sorts));
     }
 
@@ -338,17 +338,17 @@ public class Context implements Serializable {
      * @return {@code true} if there is at least one well-defined common
      *         subsort; otherwise, {@code false}
      */
-    public boolean hasCommonSubsort(Sort2... sorts) {
-        Set<Sort2> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
+    public boolean hasCommonSubsort(Sort... sorts) {
+        Set<Sort> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
 
         if (maximalLowerBounds.isEmpty()) {
             return false;
         } else if (maximalLowerBounds.size() == 1) {
-            Sort2 sort = maximalLowerBounds.iterator().next();
+            Sort sort = maximalLowerBounds.iterator().next();
             /* checks if the only common subsort is undefined */
-            if (sort.equals(Sort2.BOTTOM)
+            if (sort.equals(Sort.SHARP_BOT)
                     || isListSort(sort)
-                    && getListElementSort(sort).equals(Sort2.BOTTOM)) {
+                    && getListElementSort(sort).equals(Sort.SHARP_BOT)) {
                 return false;
             }
         }
@@ -438,7 +438,7 @@ public class Context implements Serializable {
         return fileRequirements.isInRelation(required, local);
     }
 
-    public void addSubsort(Sort2 bigSort, Sort2 smallSort) {
+    public void addSubsort(Sort bigSort, Sort smallSort) {
         subsorts.addRelation(bigSort, smallSort);
     }
 
@@ -447,10 +447,10 @@ public class Context implements Serializable {
      * becomes a partial order set.
      */
     public void computeSubsortTransitiveClosure() {
-        List<Sort2> circuit = subsorts.checkForCycles();
+        List<Sort> circuit = subsorts.checkForCycles();
         if (circuit != null) {
             String msg = "Circularity detected in subsorts: ";
-            for (Sort2 sort : circuit)
+            for (Sort sort : circuit)
                 msg += sort + " < ";
             msg += circuit.get(0);
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "Definition files", "File system."));
@@ -459,8 +459,8 @@ public class Context implements Serializable {
         // detect if lists are subsorted (Vals Ids < Exps)
         for (Production prod1 : listConses.values()) {
             for (Production prod2 : listConses.values()) {
-                Sort2 sort1 = ((UserList) prod1.getItems().get(0)).getSort();
-                Sort2 sort2 = ((UserList) prod2.getItems().get(0)).getSort();
+                Sort sort1 = ((UserList) prod1.getItems().get(0)).getSort();
+                Sort sort2 = ((UserList) prod2.getItems().get(0)).getSort();
                 if (isSubsorted(sort1, sort2)) {
                     subsorts.addRelation(prod1.getSort(), prod2.getSort());
                 }
@@ -476,7 +476,7 @@ public class Context implements Serializable {
      * @param smallSort
      * @return
      */
-    public boolean isSubsorted(Sort2 bigSort, Sort2 smallSort) {
+    public boolean isSubsorted(Sort bigSort, Sort smallSort) {
         return subsorts.isInRelation(bigSort, smallSort);
     }
 
@@ -487,7 +487,7 @@ public class Context implements Serializable {
      * @param smallSort
      * @return
      */
-    public boolean isSubsortedEq(Sort2 bigSort, Sort2 smallSort) {
+    public boolean isSubsortedEq(Sort bigSort, Sort smallSort) {
         if (bigSort.equals(smallSort))
             return true;
         return subsorts.isInRelation(bigSort, smallSort);
@@ -532,7 +532,7 @@ public class Context implements Serializable {
     }
 
     public Term kWrapper(Term t) {
-        if (isSubsortedEq(Sort2.K, t.getSort()))
+        if (isSubsortedEq(Sort.K, t.getSort()))
             return t;
         return KApp.of(new KInjectedLabel(t));
     }
@@ -541,10 +541,10 @@ public class Context implements Serializable {
 
     private String getCellSort2(String sort) {
         sort = sort.substring(0, 1).toLowerCase() + sort.substring(1);
-        if (sort.endsWith(Sort2.CELL_SORT_NAME)) {
-            return sort.substring(0, sort.length() - Sort2.CELL_SORT_NAME.length());
+        if (sort.endsWith(Sort.CELL_SORT_NAME)) {
+            return sort.substring(0, sort.length() - Sort.CELL_SORT_NAME.length());
         } else {
-            return sort.substring(0, sort.length() - Sort2.CELL_FRAGMENT_NAME.length()) + "-fragment";
+            return sort.substring(0, sort.length() - Sort.CELL_FRAGMENT_NAME.length()) + "-fragment";
         }
     }
 
@@ -560,27 +560,27 @@ public class Context implements Serializable {
         return sort.substring(0, 1).toUpperCase() + sort.substring(1);
     }
 
-    public Map<Sort2, DataStructureSort> getDataStructureSorts() {
+    public Map<Sort, DataStructureSort> getDataStructureSorts() {
         return Collections.unmodifiableMap(dataStructureSorts);
     }
 
-    public void setDataStructureSorts(Map<Sort2, DataStructureSort> dataStructureSorts) {
+    public void setDataStructureSorts(Map<Sort, DataStructureSort> dataStructureSorts) {
         assert !initialized;
 
-        this.dataStructureSorts = new HashMap<Sort2, DataStructureSort>(dataStructureSorts);
+        this.dataStructureSorts = new HashMap<Sort, DataStructureSort>(dataStructureSorts);
     }
 
-    public DataStructureSort dataStructureSortOf(Sort2 sort) {
+    public DataStructureSort dataStructureSortOf(Sort sort) {
         assert initialized : "Context is not initialized yet";
 
         return dataStructureSorts.get(sort);
     }
 
-    public DataStructureSort dataStructureListSortOf(Sort2 sort) {
+    public DataStructureSort dataStructureListSortOf(Sort sort) {
         assert initialized : "Context is not initialized yet";
         DataStructureSort dataStructSort = dataStructureSorts.get(sort);
         if (dataStructSort == null) return null;
-        if (!dataStructSort.type().equals(Sort2.LIST)) return null;
+        if (!dataStructSort.type().equals(Sort.LIST)) return null;
         return dataStructSort;
     }
 
