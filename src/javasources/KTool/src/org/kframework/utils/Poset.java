@@ -367,20 +367,4 @@ public class Poset<T> implements Serializable {
         return null;
     }
 
-    // a small test to verify if LUB works
-    // should print Exps
-    public static void main(String[] args) {
-        System.out.println("msg");
-        Poset<String> p = new Poset<String>();
-        p.addRelation(KSorts.K, "Exps");
-        p.addRelation("Exps", "Vals");
-        p.addRelation("Exps", "Ids");
-        p.transitiveClosure();
-        Set<String> input = new HashSet<String>();
-        input.add(KSorts.K);
-        input.add("Exps");
-        input.add("Vals");
-        input.add("Ids");
-        System.out.println(p.getLUB(input));
-    }
 }
