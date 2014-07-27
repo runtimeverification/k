@@ -19,8 +19,6 @@ import org.w3c.dom.Element;
 
 public class FloatBuiltin extends Token {
 
-    public static final Sort SORT = Sort.of("#Float");
-
     /* Token cache */
     private static Map<Pair<BigFloat, Integer>, FloatBuiltin> tokenCache = new HashMap<>();
 
@@ -133,7 +131,7 @@ public class FloatBuiltin extends Token {
      */
     @Override
     public Sort tokenSort() {
-        return FloatBuiltin.SORT;
+        return Sort.BUILTIN_FLOAT;
     }
 
     /**

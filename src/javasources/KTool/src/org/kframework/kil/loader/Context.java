@@ -343,9 +343,9 @@ public class Context implements Serializable {
         } else if (maximalLowerBounds.size() == 1) {
             Sort sort = maximalLowerBounds.iterator().next();
             /* checks if the only common subsort is undefined */
-            if (sort.equals(Sort.SHARP_BOT)
+            if (sort.equals(Sort.BUILTIN_BOT)
                     || isListSort(sort)
-                    && getListElementSort(sort).equals(Sort.SHARP_BOT)) {
+                    && getListElementSort(sort).equals(Sort.BUILTIN_BOT)) {
                 return false;
             }
         }

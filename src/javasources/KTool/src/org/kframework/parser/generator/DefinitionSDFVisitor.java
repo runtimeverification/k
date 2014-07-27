@@ -54,7 +54,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 
     public Void visit(Syntax syn, Void _) {
 
-        userSorts.add(syn.getSort());
+        userSorts.add(syn.getDeclaredSort());
         processPriorities(syn.getPriorityBlocks());
         return null;
     }

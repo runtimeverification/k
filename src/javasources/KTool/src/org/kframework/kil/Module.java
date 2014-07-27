@@ -80,11 +80,11 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
                 sorts.addAll(list);
         }
 
-        sorts.add(Sort.SHARP_BOOL);
-        sorts.add(Sort.SHARP_INT);
-        sorts.add(Sort.SHARP_FLOAT);
-        sorts.add(Sort.SHARP_STRING);
-        sorts.add(Sort.SHARP_ID);
+        sorts.add(Sort.BUILTIN_BOOL);
+        sorts.add(Sort.BUILTIN_INT);
+        sorts.add(Sort.BUILTIN_FLOAT);
+        sorts.add(Sort.BUILTIN_STRING);
+        sorts.add(Sort.BUILTIN_ID);
 
         return sorts;
     }
@@ -160,7 +160,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
                 continue;
             }
             Syntax syntax = (Syntax) item;
-            if (!syntax.getSort().getSort().equals(sort)) {
+            if (!syntax.getDeclaredSort().getSort().equals(sort)) {
                 continue;
             }
             for (PriorityBlock priorityBlock : syntax.getPriorityBlocks()) {

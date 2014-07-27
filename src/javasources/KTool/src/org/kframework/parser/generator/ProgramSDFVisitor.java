@@ -55,7 +55,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
     }
 
     public Void visit(Syntax syn, Void _) {
-        userSort.add(syn.getSort().getName());
+        userSort.add(syn.getDeclaredSort().getName());
         List<PriorityBlock> priblocks = syn.getPriorityBlocks();
         processPriorities(priblocks);
         return null;

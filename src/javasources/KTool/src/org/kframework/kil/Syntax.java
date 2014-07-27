@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
         this(sort, new ArrayList<PriorityBlock>());
     }
 
-    public NonTerminal getSort() {
+    public NonTerminal getDeclaredSort() {
         return sort;
     }
 
@@ -111,7 +110,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
             return false;
         Syntax syn = (Syntax) obj;
 
-        if (!syn.getSort().equals(this.sort))
+        if (!syn.getDeclaredSort().equals(this.sort))
             return false;
 
         if (syn.priorityBlocks.size() != priorityBlocks.size())

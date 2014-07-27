@@ -802,7 +802,7 @@ void Sentence(Module module) :
     | Attributes(syn)
     | "-/-" Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
-          new NonTerminal(syn.getSort().getRealSort()), null, sb.toString()))); return; } )?
+          new NonTerminal(syn.getDeclaredSort().getRealSort()), null, sb.toString()))); return; } )?
     { module.appendModuleItem(markLoc(loc, syn)); }
   
   | ("priority" | "priorities")

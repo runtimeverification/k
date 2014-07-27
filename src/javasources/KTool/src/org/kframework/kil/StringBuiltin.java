@@ -28,8 +28,6 @@ import org.w3c.dom.Element;
  */
 public class StringBuiltin extends Token {
 
-    public static final Sort SORT = Sort.of("#String");
-
     /* Token cache */
     private static Map<String, StringBuiltin> tokenCache = new HashMap<String, StringBuiltin>();
     /* KApp cache */
@@ -120,7 +118,7 @@ public class StringBuiltin extends Token {
      */
     @Override
     public Sort tokenSort() {
-        return StringBuiltin.SORT;
+        return Sort.BUILTIN_STRING;
     }
 
     /**

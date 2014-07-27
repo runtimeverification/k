@@ -127,7 +127,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         prepare(syn);
         firstPriorityBlock = true;
         buffer.append("syntax "
-                + StringEscapeUtils.escapeXml(syn.getSort().getName()));
+                + StringEscapeUtils.escapeXml(syn.getDeclaredSort().getName()));
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {
                 this.visitNode(pb);

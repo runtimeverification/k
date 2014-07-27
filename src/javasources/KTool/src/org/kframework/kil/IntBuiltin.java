@@ -14,8 +14,6 @@ import org.w3c.dom.Element;
  */
 public class IntBuiltin extends Token {
 
-    public static final Sort SORT = Sort.of("#Int");
-
     /* Token cache */
     private static Map<BigInteger, IntBuiltin> tokenCache = new HashMap<BigInteger, IntBuiltin>();
     /* KApp cache */
@@ -137,7 +135,7 @@ public class IntBuiltin extends Token {
 
     @Override
     public Sort tokenSort() {
-        return IntBuiltin.SORT;
+        return Sort.BUILTIN_INT;
     }
 
     /**

@@ -68,7 +68,7 @@ public class AddInjections extends CopyOnWriteTransformer{
         assert node.getPriorityBlocks().size() == 1;
         assert node.getPriorityBlocks().get(0).getProductions().size() == 1;
 
-        Sort sort = node.getSort().getSort();
+        Sort sort = node.getDeclaredSort().getSort();
         Production production = node.getPriorityBlocks().get(0).getProductions().get(0);
         production = (Production) visit(production, _);
 
@@ -90,8 +90,8 @@ public class AddInjections extends CopyOnWriteTransformer{
             priorityBlock.setProductions(Collections.singletonList(production));
 
             if (!production.getSort().equals(sort)) {
-                returnNode.setSort(returnNode.getSort().shallowCopy());
-                returnNode.getSort().setSort(production.getSort());
+                returnNode.setSort(returnNode.getDeclaredSort().shallowCopy());
+                returnNode.getDeclaredSort().setSort(production.getSort());
             }
         } else {
             returnNode = node;

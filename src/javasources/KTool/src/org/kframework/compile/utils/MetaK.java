@@ -246,11 +246,11 @@ public class MetaK {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(Sort.KLABEL)) {
                 return KLabelConstant.of(terminal, context);
-            } else if (prod.getSort().equals(BoolBuiltin.SORT)) {
+            } else if (prod.getSort().equals(Sort.BUILTIN_BOOL)) {
                 return BoolBuiltin.kAppOf(terminal);
-            } else if (prod.getSort().equals(IntBuiltin.SORT)) {
+            } else if (prod.getSort().equals(Sort.BUILTIN_INT)) {
                 return IntBuiltin.kAppOf(terminal);
-            } else if (prod.getSort().equals(StringBuiltin.SORT)) {
+            } else if (prod.getSort().equals(Sort.BUILTIN_STRING)) {
                 return StringBuiltin.kAppOf(terminal);
             } else {
                 return GenericToken.kAppOf(prod.getSort(), terminal);

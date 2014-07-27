@@ -115,7 +115,7 @@ public class UnparserFilter extends NonCachingVisitor {
     public Void visit(Syntax syn, Void _) {
         prepare(syn);
         firstPriorityBlock = true;
-        indenter.write("syntax " + syn.getSort().getName());
+        indenter.write("syntax " + syn.getDeclaredSort().getName());
         indenter.indentToCurrent();
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {

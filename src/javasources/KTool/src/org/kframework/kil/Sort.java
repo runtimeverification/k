@@ -27,15 +27,22 @@ public class Sort implements Serializable {
     public static final Sort SET_ITEM = Sort.of("SetItem");
 
     public static final Sort ID = Sort.of("Id");
-    public static final Sort SHARP_ID = Sort.of("#Id");
-    public static final Sort SHARP_BOOL = Sort.of("#Bool");
-    public static final Sort SHARP_INT = Sort.of("#Int");
-    public static final Sort SHARP_FLOAT = Sort.of("#Float");
-    public static final Sort SHARP_STRING = Sort.of("#String");
     public static final Sort INT = Sort.of("Int");
     public static final Sort BOOL = Sort.of("Bool");
 
-    public static final Sort SHARP_BOT = Sort.of("#Bot");
+    public static final Sort BUILTIN_ID = Sort.of("#Id");
+    public static final Sort BUILTIN_RAT = Sort.of("#Rat");
+    public static final Sort BUILTIN_BOOL = Sort.of("#Bool");
+    public static final Sort BUILTIN_INT = Sort.of("#Int");
+    public static final Sort BUILTIN_FLOAT = Sort.of("#Float");
+    public static final Sort BUILTIN_STRING = Sort.of("#String");
+    public static final Sort BUILTIN_BOT = Sort.of("#Bot");
+
+    /* LTL builtin sorts */
+    public static final Sort BUILTIN_LTL_FORMULA = Sort.of("#LtlFormula");
+    public static final Sort BUILTIN_PROP = Sort.of("#Prop");
+    public static final Sort BUILTIN_MODEL_CHECKER_STATE = Sort.of("#ModelCheckerState");
+    public static final Sort BUILTIN_MODEL_CHECK_RESULT = Sort.of("#ModelCheckResult");
 
     private String name;
 
@@ -106,21 +113,21 @@ public class Sort implements Serializable {
 
     public boolean isBuiltinSort() {
         /* TODO: replace with a proper table of builtins */
-        return equals(BoolBuiltin.SORT)
-               || equals(IntBuiltin.SORT)
-               || equals(StringBuiltin.SORT)
-               || equals(FloatBuiltin.SORT)
+        return equals(Sort.BUILTIN_BOOL)
+               || equals(Sort.BUILTIN_INT)
+               || equals(Sort.BUILTIN_STRING)
+               || equals(Sort.BUILTIN_FLOAT)
                /* LTL builtin sorts */
-//               || sort.equals("#LtlFormula")
-               || equals(Sort.of("#Prop"))
-               || equals(Sort.of("#ModelCheckerState"))
-               || equals(Sort.of("#ModelCheckResult"));
+//               || sort.equals(Sort.SHARP_LTL_FORMULA)
+               || equals(Sort.BUILTIN_PROP)
+               || equals(Sort.BUILTIN_MODEL_CHECKER_STATE)
+               || equals(Sort.BUILTIN_MODEL_CHECK_RESULT);
     }
 
     public boolean isDataSort() {
-        return equals(BoolBuiltin.SORT)
-                || equals(IntBuiltin.SORT)
-                || equals(StringBuiltin.SORT);
+        return equals(Sort.BUILTIN_BOOL)
+                || equals(Sort.BUILTIN_INT)
+                || equals(Sort.BUILTIN_STRING);
     }
 
     public static final String CELL_SORT_NAME = "CellSort";

@@ -121,7 +121,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return KApp.of(new KInjectedLabel(emp));
             }
             // if this is a list sort
-            if (!MaudeHelper.basicSorts.contains(emp.getSort().getName())) {
+            if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
                 Production listProd = context.listConses.get(emp.getSort());
                 String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
                 return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), context), KList.EMPTY);
@@ -168,10 +168,10 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return KApp.of(new KInjectedLabel(node));
             }
 
-            if (node.getSort().equals(BoolBuiltin.SORT)
-                    || node.getSort().equals(IntBuiltin.SORT)
-                    || node.getSort().equals(FloatBuiltin.SORT)
-                    || node.getSort().equals(StringBuiltin.SORT)) {
+            if (node.getSort().equals(Sort.BUILTIN_BOOL)
+                    || node.getSort().equals(Sort.BUILTIN_INT)
+                    || node.getSort().equals(Sort.BUILTIN_FLOAT)
+                    || node.getSort().equals(Sort.BUILTIN_STRING)) {
                 return node;
             }
 

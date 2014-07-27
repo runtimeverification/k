@@ -40,9 +40,9 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
                     }
 
                     if (Sort.of("#" + sort).isDataSort()) {
-                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(sort)), Token.kAppOf(Sort.SHARP_ID, name));
+                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(sort)), Token.kAppOf(Sort.BUILTIN_ID, name));
                     } else {
-                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(KSorts.K)), Token.kAppOf(Sort.SHARP_ID, node.value()));
+                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(KSorts.K)), Token.kAppOf(Sort.BUILTIN_ID, node.value()));
                     }
                 }
             }

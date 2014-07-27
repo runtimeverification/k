@@ -136,7 +136,7 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(ListTerminator empty, Void _) {
         Sort sort = empty.getSort();
-        if (MaudeHelper.basicSorts.contains(sort.getName())) {
+        if (MaudeHelper.basicSorts.contains(sort)) {
             result.write(".");
             result.write(sort.getName());
         } else {

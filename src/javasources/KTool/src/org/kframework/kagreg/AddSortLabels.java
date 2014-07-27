@@ -51,16 +51,16 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Syntax syntax, Void _)  {
-        if (labeledSorts.contains(syntax.getSort().getSort())) {
+        if (labeledSorts.contains(syntax.getDeclaredSort().getSort())) {
             return syntax;
         }
-        labeledSorts.add(syntax.getSort().getSort());
+        labeledSorts.add(syntax.getDeclaredSort().getSort());
         List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
-        productionItems.add(new Terminal("L" + syntax.getSort()));
+        productionItems.add(new Terminal("L" + syntax.getDeclaredSort()));
         productionItems.add(new NonTerminal(Sort.ID));
         productionItems.add(new Terminal(":"));
-        productionItems.add(syntax.getSort());
-        Production production = new Production(syntax.getSort(), productionItems);
+        productionItems.add(syntax.getDeclaredSort());
+        Production production = new Production(syntax.getDeclaredSort(), productionItems);
 
 //        System.out.println("Before: " + context.conses);
         AddConsesVisitor acv = new AddConsesVisitor(context);

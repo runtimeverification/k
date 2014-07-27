@@ -58,16 +58,16 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
 
         /* Add bottom sort #Bot */
         transformedNode.addProduction(
-                Sort.SHARP_BOT,
+                Sort.BUILTIN_BOT,
                 new Production(
-                        new NonTerminal(Sort.SHARP_BOT),
+                        new NonTerminal(Sort.BUILTIN_BOT),
                         Collections.<ProductionItem>emptyList()));
 
         /* Add list of bottom for each syntactic list separator (i.e. List{#Bot, separator}) */
         for (String separator : separators) {
             transformedNode.addProduction(
-                    Sort.SHARP_BOT.getUserListSort(separator),
-                    new UserList(Sort.SHARP_BOT, separator));
+                    Sort.BUILTIN_BOT.getUserListSort(separator),
+                    new UserList(Sort.BUILTIN_BOT, separator));
         }
 
         /*
@@ -176,13 +176,13 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production : context.listConses.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
-            if (userList.getSort().equals(Sort.SHARP_BOT)) {
+            if (userList.getSort().equals(Sort.BUILTIN_BOT)) {
                 continue;
             }
 
             transformedNode.addSubsort(
                     production.getSort(),
-                    Sort.SHARP_BOT.getUserListSort(userList.getSeparator()),
+                    Sort.BUILTIN_BOT.getUserListSort(userList.getSeparator()),
                     context);
         }
 

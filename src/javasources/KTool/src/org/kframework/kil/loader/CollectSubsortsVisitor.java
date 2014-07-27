@@ -25,7 +25,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 
     public Void visit(Syntax syn, Void _) {
         if (syn.getPriorityBlocks().size() == 0) {
-            Sort sort = syn.getSort().getSort();
+            Sort sort = syn.getDeclaredSort().getSort();
             if (!sort.equals(Sort.KITEM)) {
                 context.addSubsort(Sort.KITEM, sort);
             }

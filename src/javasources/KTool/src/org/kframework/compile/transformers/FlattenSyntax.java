@@ -46,7 +46,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Syntax node, Void _)  {
-        if (!node.getSort().getSort().isComputationSort()) {
+        if (!node.getDeclaredSort().getSort().isComputationSort()) {
             isComputation = false;
             return super.visit(node, _);
         }

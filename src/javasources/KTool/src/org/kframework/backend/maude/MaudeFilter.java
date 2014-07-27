@@ -89,10 +89,10 @@ public class MaudeFilter extends BackendFilter {
 
           // TODO(AndreiS): move this in a more approprite place
           for (Sort sort : context.getTokenSorts()) {
-            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT
+            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + Sort.BUILTIN_STRING
               + "), .KList)";
             String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
-            String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT + ")" + ", .KList)";
+            String valueKItem = "_`(_`)(#_(V:" + Sort.BUILTIN_STRING + ")" + ", .KList)";
             result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort.getName()) + ", "
                           + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
             result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
@@ -125,16 +125,17 @@ public class MaudeFilter extends BackendFilter {
                     // sub-sort case
                     ProductionItem item = p.getItems().get(0);
                     if (item instanceof NonTerminal) {
-                        if (!MaudeHelper.declaredSorts.contains(p.getItems().get(0).toString()) && !MaudeHelper.basicSorts.contains(p.getItems().get(0).toString())) {
+                        NonTerminal nt = (NonTerminal) item;
+                        if (!MaudeHelper.declaredSorts.contains(nt.getSort()) && !MaudeHelper.basicSorts.contains(nt.getSort())) {
                             result.append("sort ");
                             result.append(p.getItems().get(0));
                             result.append(" .\n");
-                            MaudeHelper.declaredSorts.add(p.getItems().get(0).toString());
+                            MaudeHelper.declaredSorts.add(nt.getSort());
                         }
                         result.append("subsort ");
-                        result.append(p.getItems().get(0));
+                        result.append(nt);
                         result.append(" < ");
-                        result.append(syn.getSort());
+                        result.append(syn.getDeclaredSort());
                         result.append(" .\n");
                     }
                 } else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
@@ -147,11 +148,11 @@ public class MaudeFilter extends BackendFilter {
                         msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
                     }
-                    if (!MaudeHelper.constantSorts.contains(syn.getSort().toString()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
+                    if (!MaudeHelper.constantSorts.contains(syn.getDeclaredSort().getSort()) || !syn.getDeclaredSort().getSort().equals(Sort.KLABEL) || !syn.getDeclaredSort().getSort().equals(Sort.CELL_LABEL)) {
                         result.append("op ");
                         result.append(StringUtil.escapeMaude(operation));
                         result.append(" : -> ");
-                        result.append(syn.getSort());
+                        result.append(syn.getDeclaredSort());
                         if (!isEmptyAttributes(p.getAttributes())) {
                             result.append(" [metadata \"");
                             this.visitNode(p.getAttributes());
@@ -189,7 +190,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append(" : ");
                         this.visitNode(p);
                         result.append(" -> ");
-                        result.append(syn.getSort());
+                        result.append(syn.getDeclaredSort());
                         // if (!isEmptyAttributes(p.getCellAttributes())) {
                         result.append(" [metadata \"");
                         this.visitNode(p.getAttributes());
@@ -472,7 +473,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(ListTerminator empty, Void _) {
         Sort sort = empty.getSort();
-        if (MaudeHelper.basicSorts.contains(sort.getName()) || sort.isCellFragment()) {
+        if (MaudeHelper.basicSorts.contains(sort) || sort.isCellFragment()) {
             result.append(".");
             result.append(sort);
         } else {

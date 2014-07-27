@@ -665,7 +665,7 @@ class KoreFilter extends BasicVisitor {
         public Void visit(Syntax node, Void _) {
 
             indenter.write("  syntax ");
-            this.visitNode(node.getSort());
+            this.visitNode(node.getDeclaredSort());
             indenter.write(" ::=");
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlock production = node.getPriorityBlocks().get(i);
