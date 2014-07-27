@@ -27,10 +27,6 @@ public class UserList extends ProductionItem {
         this.listType = listType;
     }
 
-    public UserList(String sort, String separator, String listType) {
-        this(Sort.of(sort), separator, listType);
-    }
-
     public UserList(UserList userList) {
         super(userList);
         sort = userList.sort;

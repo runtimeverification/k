@@ -235,7 +235,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.getCellAttributes().getContents().add(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                      */
-                } else if (context.getTokenSorts().contains(sort.getName())) {
+                } else if (context.getTokenSorts().contains(sort)) {
                     /* defer membership predicate for lexical token to each backend */
                 }
             }

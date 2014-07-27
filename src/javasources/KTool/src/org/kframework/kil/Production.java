@@ -92,7 +92,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public boolean isConstant(org.kframework.kil.loader.Context context) {
         return isTerminal() && (sort.getName().startsWith("#") ||
                                 sort.equals(Sort.KLABEL) ||
-                                context.getTokenSorts().contains(this.getSort().getName()));
+                                context.getTokenSorts().contains(getSort()));
     }
 
     public boolean isBracket() {

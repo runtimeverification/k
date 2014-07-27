@@ -2,7 +2,6 @@
 package org.kframework.kil.loader;
 
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -12,9 +11,7 @@ import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
-import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
@@ -142,7 +139,7 @@ public class Context implements Serializable {
     /**
      * {@link Set} of sorts with lexical productions.
      */
-    private Set<String> tokenSorts;
+    private Set<Sort> tokenSorts;
 
 
     public java.util.List<String> getKomputationCells() {
@@ -544,7 +541,7 @@ public class Context implements Serializable {
         if (sort.endsWith(Sort.CELL_SORT_NAME)) {
             return sort.substring(0, sort.length() - Sort.CELL_SORT_NAME.length());
         } else {
-            return sort.substring(0, sort.length() - Sort.CELL_FRAGMENT_NAME.length()) + "-fragment";
+            return sort.substring(0, sort.length() - Sort.CELL_FRAGMENT_NAME.length()) + fragment;
         }
     }
 
@@ -587,14 +584,14 @@ public class Context implements Serializable {
     /**
      * Returns the set of sorts that have lexical productions.
      */
-    public Set<String> getTokenSorts() {
+    public Set<Sort> getTokenSorts() {
         return Collections.unmodifiableSet(tokenSorts);
     }
 
-    public void setTokenSorts(Set<String> tokenSorts) {
+    public void setTokenSorts(Set<Sort> tokenSorts) {
         assert !initialized;
 
-        this.tokenSorts = new HashSet<String>(tokenSorts);
+        this.tokenSorts = new HashSet<>(tokenSorts);
     }
 
     public void makeFreshFunctionNamesMap(Set<Production> freshProductions) {

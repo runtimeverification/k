@@ -88,12 +88,12 @@ public class MaudeFilter extends BackendFilter {
           }
 
           // TODO(AndreiS): move this in a more approprite place
-          for (String sort : context.getTokenSorts()) {
+          for (Sort sort : context.getTokenSorts()) {
             String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT
               + "), .KList)";
             String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
             String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT + ")" + ", .KList)";
-            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
+            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort.getName()) + ", "
                           + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
             result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
                           + ")) = " + tokenKItem + " .\n");

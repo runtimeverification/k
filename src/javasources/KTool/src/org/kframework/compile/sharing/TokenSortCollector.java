@@ -5,6 +5,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -25,9 +26,9 @@ import java.util.Set;
  */
 public class TokenSortCollector extends BasicVisitor {
 
-    private final Set<String> tokenSorts = new HashSet<String>();
+    private final Set<Sort> tokenSorts = new HashSet<>();
 
-    private final Set<String> nonTokenSorts = new HashSet<String>();
+    private final Set<Sort> nonTokenSorts = new HashSet<>();
 
     /**
      * Collects the names of all token sorts within a specified
@@ -41,7 +42,7 @@ public class TokenSortCollector extends BasicVisitor {
      *
      * @see TokenSortCollector
      */
-    public static Set<String> collectTokenSorts(Definition definition, Context context) {
+    public static Set<Sort> collectTokenSorts(Definition definition, Context context) {
         TokenSortCollector collector = new TokenSortCollector(context);
         collector.visitNode(definition);
         return collector.tokenSorts;
@@ -60,7 +61,7 @@ public class TokenSortCollector extends BasicVisitor {
             checkIllegalProduction(production);
         } else {
             if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
-                tokenSorts.add(production.getSort().getName());
+                tokenSorts.add(production.getSort());
             }
         }
         return null;
@@ -77,7 +78,7 @@ public class TokenSortCollector extends BasicVisitor {
      *            the specified production
      */
     private void checkIllegalProduction(Production production) {
-        String sort = production.getSort().getName();
+        Sort sort = production.getSort();
 
         if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
             if (nonTokenSorts.contains(sort)) {

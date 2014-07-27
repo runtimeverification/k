@@ -142,9 +142,4 @@ public class Cell<T extends Term> extends Term {
         return transformer.transform(this);
     }
 
-//    @Override
-//    public String sort() {
-//        return KSorts.BAG_ITEM;
-//    }
-
 }

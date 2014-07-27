@@ -874,11 +874,11 @@ void ProductionItem(List<ProductionItem> items) :
 | nonTerminal = SimpleSortID() { items.add(nonTerminal); }
 | "List"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(str, sep, "*"))); return; })?
+    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "*"))); return; })?
   { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
 | "NeList"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(str, sep, "+"))); return; })?
+    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "+"))); return; })?
   { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
 | ("Lexer" | "Token" { isToken = true; })
   ( "{" { SwitchTo(REGEX_STATE); }

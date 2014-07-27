@@ -138,8 +138,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
         }
 
         /* defer =K to ==K for lexical tokens */
-        for (String sortName : context.getTokenSorts()) {
-            Sort sort = Sort.of(sortName);
+        for (Sort sort : context.getTokenSorts()) {
             KList kList = new KList();
             kList.add(Variable.getFreshVar(sort));
             kList.add(Variable.getFreshVar(sort));
