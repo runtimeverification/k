@@ -59,7 +59,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
             if (AddSymbolicK.allowKSymbolic(sort.getName())) {
                 String symCtor = AddSymbolicK.symbolicConstructor(sort.getName());
 
-                Variable var = Variable.getFreshVar(Sort.of("Int"));
+                Variable var = Variable.getFreshVar(Sort.INT);
                 Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
                 Term lhs = KApp.of(K_TO_SMTLIB, symTerm);
                 KApp strTerm = KApp.of(KLabelConstant.of("Int2String", context), var);
@@ -68,7 +68,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
-                var = Variable.getFreshVar(Sort.of("#String"));
+                var = Variable.getFreshVar(Sort.BUILTIN_STRING);
                 symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
                 rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), var, context);
@@ -77,7 +77,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 retNode.appendModuleItem(rule);
 
                 /* TODO: replace Id2String with some generic function of #token(..., ...) */
-                var = Variable.getFreshVar(Sort.of("Id"));
+                var = Variable.getFreshVar(Sort.ID);
                 symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
                 strTerm = KApp.of(KLabelConstant.of("#tokenToString", context), var);
@@ -86,7 +86,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
-                var = Variable.getFreshVar(Sort.of("#Id"));
+                var = Variable.getFreshVar(Sort.BUILTIN_ID);
                 symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
                 strTerm = KApp.of(KLabelConstant.of("#tokenToString", context), var);

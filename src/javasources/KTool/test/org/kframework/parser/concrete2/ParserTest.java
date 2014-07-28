@@ -719,7 +719,7 @@ public class ParserTest {
 
         NonTerminalState expInt = new NonTerminalState("Int-nts(Exp)", expNt, intNt, false);
         Production p22 = prod(EXP_SORT, new org.kframework.kil.NonTerminal(Sort.INT));
-        RuleState rs2 = new RuleState("Exp-wrapInt", expNt, new WrapLabelRule(p22, Sort.of("Int")));
+        RuleState rs2 = new RuleState("Exp-wrapInt", expNt, new WrapLabelRule(p22, Sort.INT));
         expNt.entryState.next.add(expInt);
         expInt.next.add(rs2);
         rs2.next.add(expNt.exitState);
@@ -729,7 +729,7 @@ public class ParserTest {
         NonTerminalState expExp = new NonTerminalState("Exp-nts(Exp)", expNt, expNt, false);
         Production p1 = prod(EXP_SORT, new Terminal("-"), new org.kframework.kil.NonTerminal(EXP_SORT));
         p1.putAttribute("klabel", "'-_");
-        RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1, Sort.of("Int")));
+        RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1, Sort.INT));
         expNt.entryState.next.add(minus);
         minus.next.add(deleteToken);
         deleteToken.next.add(expExp);

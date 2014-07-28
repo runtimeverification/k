@@ -52,7 +52,7 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
         if (PC) {
-            Variable pc = new Variable(PC_VAR, Sort.of("Bool"));
+            Variable pc = new Variable(PC_VAR, Sort.BOOL);
             cell.setContents(pc);
             context.configVarSorts.put(pc.getName(), pc.getSort());
         }

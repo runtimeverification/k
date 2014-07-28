@@ -29,6 +29,7 @@ public class Sort implements Serializable {
     public static final Sort ID = Sort.of("Id");
     public static final Sort INT = Sort.of("Int");
     public static final Sort BOOL = Sort.of("Bool");
+    public static final Sort STRING = Sort.of("String");
 
     public static final Sort BUILTIN_ID = Sort.of("#Id");
     public static final Sort BUILTIN_RAT = Sort.of("#Rat");
@@ -37,6 +38,12 @@ public class Sort implements Serializable {
     public static final Sort BUILTIN_FLOAT = Sort.of("#Float");
     public static final Sort BUILTIN_STRING = Sort.of("#String");
     public static final Sort BUILTIN_BOT = Sort.of("#Bot");
+
+    /* IO */
+    public static final Sort STREAM = Sort.of("Stream");
+
+    /* tokens */
+    public static final Sort BUILTIN_INT32 = Sort.of("#Int32");
 
     /* LTL builtin sorts */
     public static final Sort BUILTIN_LTL_FORMULA = Sort.of("#LtlFormula");

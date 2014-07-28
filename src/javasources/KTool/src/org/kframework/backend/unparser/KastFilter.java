@@ -158,11 +158,11 @@ public class KastFilter extends BasicVisitor {
     public Void visit(KApp kapp, Void _) {
         if (kapp.getLabel() instanceof Token) {
             Token token = (Token)kapp.getLabel();
-            if (token.tokenSort().equals(Sort.of("#Id"))) {
+            if (token.tokenSort().equals(Sort.BUILTIN_ID)) {
                 result.write("#id \"");
             }
             result.write(token.value());
-            if (token.tokenSort().equals(Sort.of("#Id"))) {
+            if (token.tokenSort().equals(Sort.BUILTIN_ID)) {
                 result.write("\"");
             }
             result.write(token.toString());

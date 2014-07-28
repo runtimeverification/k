@@ -259,7 +259,7 @@ public class MetaK {
         if (prod.isLexical()) {
             return KApp.of(KLabelConstant.of("#token", context),
                            StringBuiltin.kAppOf(prod.getSort().getName()),
-                           Variable.getFreshVar(Sort.of("String")));
+                           Variable.getFreshVar(Sort.STRING));
         }
         TermCons t = new TermCons(prod.getSort(), prod.getCons(), context);
         if (prod.isListDecl()) {

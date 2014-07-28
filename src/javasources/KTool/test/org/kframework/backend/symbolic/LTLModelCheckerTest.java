@@ -49,8 +49,8 @@ public class LTLModelCheckerTest {
         // LHS
         Variable inputLTLState = new Variable("B", Sort.BAG);
         KApp inputLTLStateKApp = KApp.of(new KInjectedLabel(inputLTLState), KList.EMPTY);
-        Variable X = new Variable("X", Sort.of("Id"));
-        Variable I = new Variable("I", Sort.of("Int"));
+        Variable X = new Variable("X", Sort.ID);
+        Variable I = new Variable("I", Sort.INT);
         KApp predicate = KApp.of(KLabelConstant.of("eq"), X, I);
         Term inputLhs = KApp.of(KLabelConstant.of(ResolveLtlAttributes.LTL_SAT), inputLTLStateKApp, predicate);
 

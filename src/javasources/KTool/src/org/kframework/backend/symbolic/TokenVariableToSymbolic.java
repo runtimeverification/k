@@ -32,7 +32,7 @@ public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
                     Term token = ((KApp) child).getLabel();
                     if (token instanceof GenericToken) {
                         GenericToken gToken = (GenericToken) token;
-                        if (gToken.tokenSort().equals(Sort.of("#Id"))) {
+                        if (gToken.tokenSort().equals(Sort.BUILTIN_ID)) {
                             Variable v = new Variable(gToken.value(), Sort.of(sort));
                             return v;
                         }
