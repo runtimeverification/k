@@ -488,7 +488,7 @@ String String() : {}
   <STRING>
   {
     String s = image();
-    return StringUtil.unescape(s.substring(1, s.length() - 1));
+    return StringUtil.unquoteCString(s);
   }
 }
 

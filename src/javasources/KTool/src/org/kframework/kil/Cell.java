@@ -97,7 +97,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
                                                                                     // !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.ENDLABEL_label_ATTR)) {
-                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteString("\"" + its.item(i).getNodeValue() + "\""));
+                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteKString("\"" + its.item(i).getNodeValue() + "\""));
             }
         }
     }
