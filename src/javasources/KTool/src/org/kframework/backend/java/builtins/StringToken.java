@@ -108,7 +108,7 @@ public final class StringToken extends Token implements MaximalSharing {
      */
     @Override
     public String value() {
-        return StringUtil.enquoteString(value);
+        return StringUtil.enquoteKString(value);
     }
 
     @Override
