@@ -156,7 +156,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                         ((FloatBuiltin) node.getLabel()).exponent());
             } else if (node.getLabel() instanceof GenericToken) {
                 return UninterpretedToken.of(
-                        Sort.of(((GenericToken) node.getLabel()).tokenSort().getName()),
+                        ((GenericToken) node.getLabel()).tokenSort().toBackendJava(),
                         ((GenericToken) node.getLabel()).value());
             } else {
                 assert false : "unsupported Token " + node.getLabel();
@@ -173,7 +173,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KItemProjection node, Void _)  {
-        return new KItemProjection(Kind.of(Sort.of(node.projectedKind().getName())), (Term) this.visitNode(node.getTerm()));
+        return new KItemProjection(Kind.of(node.projectedKind().toBackendJava()), (Term) this.visitNode(node.getTerm()));
     }
 
     @Override
@@ -539,7 +539,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        return new Variable(node.getName(), Sort.of(node.getSort().getName()));
+        return new Variable(node.getName(), node.getSort().toBackendJava());
     }
 
     @Override

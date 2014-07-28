@@ -51,7 +51,7 @@ public class Sort implements Serializable {
     public static final Sort BUILTIN_MODEL_CHECKER_STATE = Sort.of("#ModelCheckerState");
     public static final Sort BUILTIN_MODEL_CHECK_RESULT = Sort.of("#ModelCheckResult");
 
-    private String name;
+    private final String name;
 
     public static Sort of(String name) {
         return new Sort(name);
@@ -63,6 +63,10 @@ public class Sort implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public org.kframework.backend.java.kil.Sort toBackendJava() {
+        return org.kframework.backend.java.kil.Sort.of(name);
     }
 
     @Override
@@ -106,7 +110,7 @@ public class Sort implements Serializable {
     }
 
     /**
-     * TODO(???)
+     * TODO(dwightguth)
      * @param sort
      * @return
      */
@@ -154,7 +158,7 @@ public class Sort implements Serializable {
     }
 
     /**
-     * TODO(???)
+     * TODO(dwightguth)
      * @return
      */
     public Sort mainSort() {

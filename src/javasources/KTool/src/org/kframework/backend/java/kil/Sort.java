@@ -108,6 +108,10 @@ public final class Sort implements MaximalSharing, Serializable {
                 + "{\"" + separator + "\"}");
     }
 
+    public org.kframework.kil.Sort toFrontEnd() {
+        return org.kframework.kil.Sort.of(name);
+    }
+
     @Override
     public int hashCode() {
         return ordinal;

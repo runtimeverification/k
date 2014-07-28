@@ -47,7 +47,7 @@ public class Subsorts implements Serializable {
         for (Sort sort1 : sorts) {
             for (Sort sort2 : sorts) {
                 subsort[sort1.ordinal()][sort2.ordinal()] = context
-                        .isSubsorted(org.kframework.kil.Sort.of(sort1.name()), org.kframework.kil.Sort.of(sort2.name()));
+                        .isSubsorted(sort1.toFrontEnd(), sort2.toFrontEnd());
             }
         }
     }
@@ -118,7 +118,7 @@ public class Subsorts implements Serializable {
     }
 
     public boolean hasCommonSubsort(Sort sort1, Sort sort2) {
-        return context.hasCommonSubsort(org.kframework.kil.Sort.of(sort1.name()), org.kframework.kil.Sort.of(sort2.name()));
+        return context.hasCommonSubsort(sort1.toFrontEnd(), sort2.toFrontEnd());
     }
 
 }
