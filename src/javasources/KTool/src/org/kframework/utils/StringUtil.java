@@ -12,7 +12,7 @@ import com.beust.jcommander.ParameterDescription;
 
 public class StringUtil {
     /**
-     * Unescape the textual representation of a string specific tu SDF.
+     * Unescape the textual representation of a string specific to SDF and Maude.
      * It removes the double quote at the beginning and end, and transforms special sequence
      * of characters like "\n" into the newline character.
      */
@@ -150,8 +150,8 @@ public class StringUtil {
      * Removes the first and last double-quote characters and unescapes special characters
      * that start with backslash: newline, carriage return, line feed, tab and backslash.
      * Characters between 127 and 255 are stored as \xFF
-     * Characters between 256 and 65535 are stored as \uFFFFFF
-     * Characters above 65536 are stored as \UFFFFFFFFFFFF
+     * Characters between 256 and 65535 are stored as \uFFFF
+     * Characters above 65536 are stored as \u0010FFFF
      * @param str Python like double-quoted string
      * @return unescaped and unquoted string
      */
@@ -211,8 +211,8 @@ public class StringUtil {
      * Adds double-quote at the beginning and end of the string and escapes special characters
      * with backslash: newline, carriage return, line feed, tab and backslash.
      * Characters between 127 and 255 are stored as \xFF
-     * Characters between 256 and 65535 are stored as \uFFFFFF
-     * Characters above 65536 are stored as \UFFFFFFFFFFFF
+     * Characters between 256 and 65535 are stored as \uFFFF
+     * Characters above 65536 are stored as \u0010FFFF
      * @param value any string
      * @return Python like textual representation of the string
      */
