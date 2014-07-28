@@ -56,7 +56,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
      * @return the translated term
      */
     private ASTNode transformJavaBackendSpecificTerm(Term term) {
-        return new org.kframework.kil.BackendTerm(Sort.of(term.sort().name()), term.toString());
+        return new org.kframework.kil.BackendTerm(term.sort().toFrontEnd(), term.toString());
     }
 
     @Override
@@ -210,13 +210,13 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Token token) {
-        return org.kframework.kil.Token.kAppOf(Sort.of(token.sort().name()), token.value());
+        return org.kframework.kil.Token.kAppOf(token.sort().toFrontEnd(), token.value());
     }
 
     @Override
     public ASTNode transform(Variable variable) {
 //        System.out.println("VARIABLE*************"+ variable.name()+"->"+variable.sort());
-        ASTNode node = new org.kframework.kil.Variable(variable.name(), Sort.of(variable.sort().name()));
+        ASTNode node = new org.kframework.kil.Variable(variable.name(), variable.sort().toFrontEnd());
 //        System.out.println("NODE: "+node.toString());
 //        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
         return node;

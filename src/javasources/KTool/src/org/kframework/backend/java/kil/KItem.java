@@ -177,7 +177,7 @@ public final class KItem extends Term {
                     }
                     Sort childSort = term.sort();
 
-                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), org.kframework.kil.Sort.of(childSort.name()))) {
+                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.toFrontEnd())) {
                         mustMatch = false;
                         /*
                          * YilongL: the following analysis can be made more
@@ -186,7 +186,7 @@ public final class KItem extends Term {
                          * compute for our purpose
                          */
                         mayMatch = !term.isExactSort()
-                                && definition.context().hasCommonSubsort(production.getChildSort(idx), org.kframework.kil.Sort.of(childSort.name()));
+                                && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.toFrontEnd());
                     }
                     idx++;
                 }

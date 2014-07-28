@@ -110,7 +110,7 @@ public class Sort implements Serializable {
     }
 
     /**
-     * TODO(dwightguth)
+     * TODO(traiansf)
      * @param sort
      * @return
      */
@@ -158,7 +158,7 @@ public class Sort implements Serializable {
     }
 
     /**
-     * TODO(dwightguth)
+     * TODO(traiansf)
      * @return
      */
     public Sort mainSort() {
