@@ -1,15 +1,25 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import java.io.File;
+import java.util.Map;
+
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
+import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.kil.Configuration;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.InitialConfigurationProvider;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRun;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.First;
 import org.kframework.utils.inject.Second;
@@ -20,8 +30,11 @@ import com.beust.jcommander.JCommander;
 import com.google.common.base.Optional;
 import com.google.inject.AbstractModule;
 import com.google.inject.PrivateModule;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
 
 public class KRunModule extends AbstractModule {
 
@@ -41,9 +54,46 @@ public class KRunModule extends AbstractModule {
         bind(JavaExecutionOptions.class).toInstance(options.experimental.javaExecution);
     }
 
-    @Provides
-    DefinitionLoadingOptions defLoadingOptions(ConfigurationCreationOptions options) {
-        return options.definitionLoading;
+    public static class CommonModule extends AbstractModule {
+
+        @Override
+        protected void configure() {
+            install(new DefinitionLoadingModule());
+            MapBinder<KompileOptions.Backend, KRun> mapBinder = MapBinder.newMapBinder(
+                    binder(), KompileOptions.Backend.class, KRun.class);
+            for (KompileOptions.Backend enumVal : KompileOptions.Backend.values()) {
+                if (enumVal.generatesDefinition()) {
+                    mapBinder.addBinding(enumVal).to(enumVal.krun());
+                }
+            }
+
+            bind(Term.class).toProvider(InitialConfigurationProvider.class);
+        }
+
+        @Provides
+        DefinitionLoadingOptions defLoadingOptions(ConfigurationCreationOptions options) {
+            return options.definitionLoading;
+        }
+
+        @Provides
+        KRun getKRun(KompileOptions options, Map<KompileOptions.Backend, Provider<KRun>> map) {
+            return map.get(options.backend).get();
+        }
+
+        @Provides @Singleton
+        Configuration configuration(BinaryLoader loader, Context context, Stopwatch sw) {
+            Configuration cfg = loader.loadOrDie(Configuration.class,
+                    new File(context.kompiled, "configuration.bin").getAbsolutePath());
+            sw.printIntermediate("Reading configuration from binary");
+            return cfg;
+        }
+
+        @Provides @Singleton
+        Definition javaDefinition(BinaryLoader loader, Context context) {
+            Definition def = loader.loadOrDie(Definition.class,
+                    new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString());
+            return def;
+        }
     }
 
     public static class MainExecutionContextModule extends PrivateModule {
@@ -56,7 +106,7 @@ public class KRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            install(new DefinitionLoadingModule());
+            install(new CommonModule());
 
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
 
@@ -76,7 +126,7 @@ public class KRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            install(new DefinitionLoadingModule());
+            install(new CommonModule());
 
             bind(Term.class).annotatedWith(Second.class).to(Term.class);
             bind(JavaSymbolicKRun.class).annotatedWith(Second.class).to(JavaSymbolicKRun.class);
@@ -114,7 +164,7 @@ public class KRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            install(new DefinitionLoadingModule());
+            install(new CommonModule());
             bind(new TypeLiteral<Optional<Waitor>> () {})
                 .toInstance(Optional.<Waitor>absent());
 
