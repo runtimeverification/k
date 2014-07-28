@@ -5,10 +5,13 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.Parameter;
+import com.google.inject.ProvidedBy;
 
+@ProvidedBy(NullProvider.class)
 public final class GlobalOptions {
 
     public static enum Warnings {

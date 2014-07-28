@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import java.util.Map;
 
 import org.kframework.backend.Backend;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -30,6 +31,7 @@ public class KompileModule extends AbstractModule {
         bind(KompileOptions.class).toInstance(options);
         bind(GlobalOptions.class).toInstance(options.global);
         bind(SMTOptions.class).toInstance(options.experimental.smt);
+        bind(JavaExecutionOptions.class).toInstance(new JavaExecutionOptions());
 
         MapBinder<KompileOptions.Backend, Backend> mapBinder = MapBinder.newMapBinder(
                 binder(), KompileOptions.Backend.class, Backend.class);

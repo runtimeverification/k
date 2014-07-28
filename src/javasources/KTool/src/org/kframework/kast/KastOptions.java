@@ -9,12 +9,15 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.ProvidedBy;
 
+@ProvidedBy(NullProvider.class)
 public final class KastOptions {
     @Parameter(description="<file>")
     private List<String> parameters;

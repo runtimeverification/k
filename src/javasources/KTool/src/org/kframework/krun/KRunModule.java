@@ -13,6 +13,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.First;
 import org.kframework.utils.inject.Second;
+import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
 import com.beust.jcommander.JCommander;
@@ -38,6 +39,11 @@ public class KRunModule extends AbstractModule {
         bind(GlobalOptions.class).toInstance(options.global);
         bind(ColorOptions.class).toInstance(options.color);
         bind(JavaExecutionOptions.class).toInstance(options.experimental.javaExecution);
+    }
+
+    @Provides
+    DefinitionLoadingOptions defLoadingOptions(ConfigurationCreationOptions options) {
+        return options.definitionLoading;
     }
 
     public static class MainExecutionContextModule extends PrivateModule {
