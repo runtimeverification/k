@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableMultiset;
@@ -40,7 +41,9 @@ public abstract class AssociativeCommutativeCollection extends Collection {
      * TODO: improve name/description
      */
     public boolean isConcreteCollection() {
-        return collectionPatterns.isEmpty() && collectionVariables.isEmpty() && collectionFunctions.isEmpty();
+        return collectionPatterns.isEmpty()
+                && collectionVariables.isEmpty()
+                && collectionFunctions.isEmpty();
     }
 
     @Override
