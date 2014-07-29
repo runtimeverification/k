@@ -209,10 +209,14 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * {@code evaluate} method instead.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-        // TODO(AndreiS): assert that there are not any unevaluated functions in this term
-        //if (substitution.isEmpty() || isGround()) {
-        //    return this;
-        //}
+        // TODO(AndreiS): disable the check below when proving things until this is properly fixed by Cosmin
+        if (context.definition().context().krunOptions == null
+                || context.definition().context().krunOptions.experimental.prove() == null) {
+            // TODO(AndreiS): assert that there are not any unevaluated functions in this term
+            if (substitution.isEmpty() || isGround()) {
+                return this;
+            }
+        }
 
         // YilongL: comment out the slow implementation
 //        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
