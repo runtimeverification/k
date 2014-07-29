@@ -13,9 +13,9 @@ import java.util.ArrayList;
 
 public class TypeSystemFilter2 extends LocalTransformer {
 
-    private String maxSort;
+    private Sort maxSort;
 
-    public TypeSystemFilter2(String maxSort, org.kframework.kil.loader.Context context) {
+    public TypeSystemFilter2(Sort maxSort, org.kframework.kil.loader.Context context) {
         super("Type system", context);
         this.maxSort = maxSort;
     }
@@ -27,8 +27,8 @@ public class TypeSystemFilter2 extends LocalTransformer {
 
     @Override
     public ASTNode visit(Term trm, Void _) throws ParseFailedException {
-        if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
-                && !trm.getSort().equals(KSorts.KRESULT)) {
+        if (!trm.getSort().equals(Sort.K) && !trm.getSort().equals(Sort.KITEM)
+                && !trm.getSort().equals(Sort.KRESULT)) {
             if (!context.isSubsortedEq(maxSort, trm.getSort())) {
                 KException kex = new KException(
                         ExceptionType.ERROR,

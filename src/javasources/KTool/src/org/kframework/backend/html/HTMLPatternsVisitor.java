@@ -2,7 +2,7 @@
 package org.kframework.backend.html;
 
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
@@ -76,7 +76,7 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         return _;
         /*if (prevNonTerm) pattern += "\\mathrel{}";
         pattern += "{#" + nonTerm++ + "}";

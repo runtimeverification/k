@@ -7,6 +7,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -14,7 +15,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
 
-    private final String ML_SORT = "MLFormula";
+    private final Sort ML_SORT = Sort.of("MLFormula");
     private final String ML_AND_KLABEL = "'_/\\ML_";
     public static final String RL_ATR = "reachability-formula";
     public static final String RR_COND = "'RRCondition(_,_,_)";

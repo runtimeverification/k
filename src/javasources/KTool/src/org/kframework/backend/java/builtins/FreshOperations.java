@@ -25,7 +25,7 @@ public class FreshOperations {
     }
 
     public static Term fresh(StringToken term, TermContext context) {
-        String name = context.definition().context().freshFunctionNames.get(term.stringValue());
+        String name = context.definition().context().freshFunctionNames.get(org.kframework.kil.Sort.of(term.stringValue()));
         if (name == null) {
             throw new UnsupportedOperationException();
         }

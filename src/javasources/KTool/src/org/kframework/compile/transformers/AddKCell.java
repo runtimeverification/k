@@ -53,7 +53,7 @@ public class AddKCell extends CopyOnWriteTransformer {
             return node;
         }
 
-        if (!MetaK.isComputationSort(node.getBody().getSort())) {
+        if (!node.getBody().getSort().isComputationSort()) {
             return node;
         }
         node = node.shallowCopy();

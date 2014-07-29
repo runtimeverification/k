@@ -18,6 +18,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.Module;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunExecutionException;
@@ -328,12 +329,12 @@ public class JavaSymbolicKRun implements KRun {
         Object o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) cfg).getContents()).getContents().get(0);
         o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) o).getContents()).getContents().get(1);
         Map<org.kframework.kil.Term, org.kframework.kil.Term> stateMap = new HashMap<org.kframework.kil.Term, org.kframework.kil.Term>();
-        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "x"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("3"));
+        stateMap.put(org.kframework.kil.GenericToken.kAppOf(Sort.ID, "x"), org.kframework.kil.IntBuiltin.kAppOf("3"));
 //        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "y"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("2"));
-        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "$1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
+        stateMap.put(org.kframework.kil.GenericToken.kAppOf(Sort.ID, "$1"), org.kframework.kil.IntBuiltin.kAppOf("1"));
         ((org.kframework.kil.Cell) o)
                 .setContents(new org.kframework.kil.MapBuiltin(context
-                        .dataStructureSortOf("Map"),
+                        .dataStructureSortOf(Sort.MAP),
                         Collections.<org.kframework.kil.Term>emptyList(),
                         stateMap));
 

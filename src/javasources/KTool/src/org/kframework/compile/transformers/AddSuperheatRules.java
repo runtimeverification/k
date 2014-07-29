@@ -71,12 +71,12 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
             // rule heat(redex((C[e] =>  e ~> C) ~> _:K),, _:KList)
             KSequence kSequence = new KSequence();
             kSequence.getContents().add(body);
-            kSequence.add(new Variable(MetaK.Constants.anyVarSymbol,"K"));
+            kSequence.add(new Variable(MetaK.Constants.anyVarSymbol, Sort.K));
             Term redex = KApp.of(KLabelConstant.REDEX_KLABEL, kSequence);
             Term heat = KApp.of(
                     KLabelConstant.HEAT_KLABEL,
                     redex,
-                    new Variable(MetaK.Constants.anyVarSymbol, KSorts.KLIST));
+                    new Variable(MetaK.Constants.anyVarSymbol, Sort.KLIST));
             Rule superHeat = node.shallowCopy();
             superHeat.setBody(heat);
             superHeats.add(superHeat);
@@ -89,8 +89,8 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
         Rule superHeat = node.shallowCopy();
         Term left = body.getLeft(); // C[e]
         Term right = body.getRight(); // e ~> C
-        Variable restHeat = Variable.getFreshVar("K");
-        Variable lHeat = Variable.getFreshVar(KSorts.KLIST);
+        Variable restHeat = Variable.getFreshVar(Sort.K);
+        Variable lHeat = Variable.getFreshVar(Sort.KLIST);
         KSequence red1Seq = new KSequence();
         red1Seq.add(left); red1Seq.add(restHeat); //C[e] ~> RestHeat:K,
         KList red1List = new KList();
@@ -107,7 +107,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
                                                                //       (.KList => redex(e ~> C ~> RestHeat:K)))
         KList heatList = new KList();
         heatList.add(red1);
-        heatList.add(new Variable(MetaK.Constants.anyVarSymbol, KSorts.KLIST));
+        heatList.add(new Variable(MetaK.Constants.anyVarSymbol, Sort.KLIST));
         Term heat = new KApp(KLabelConstant.HEAT_KLABEL, heatList);
         superHeat.setBody(heat);
 

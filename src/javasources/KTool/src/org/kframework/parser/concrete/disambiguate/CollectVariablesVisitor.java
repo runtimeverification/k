@@ -11,6 +11,7 @@ import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -55,10 +56,10 @@ public class CollectVariablesVisitor extends BasicVisitor {
             return null;
 
         for (int i = 0, j = 0; i < node.getProduction().getItems().size(); i++) {
-            if (node.getProduction().getItems().get(i) instanceof Sort) {
+            if (node.getProduction().getItems().get(i) instanceof NonTerminal) {
                 Term t = node.getContents().get(j);
                 try {
-                    new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()).visitNode(t);
+                    new CollectVariablesVisitor2(context, ((NonTerminal) node.getProduction().getItems().get(i)).getSort()).visitNode(t);
                 } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
@@ -107,9 +108,9 @@ public class CollectVariablesVisitor extends BasicVisitor {
      *
      */
     public class CollectVariablesVisitor2 extends LocalTransformer {
-        String expectedSort = null;
+        Sort expectedSort = null;
 
-        public CollectVariablesVisitor2(Context context, String expectedSort) {
+        public CollectVariablesVisitor2(Context context, Sort expectedSort) {
             super("org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor2", context);
             this.expectedSort = expectedSort;
         }

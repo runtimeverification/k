@@ -3,6 +3,7 @@ package org.kframework.backend.symbolic;
 
 import java.util.Map;
 
+import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
@@ -33,7 +34,7 @@ public class ResolveInputStreamCell extends CopyOnWriteTransformer {
 
         if (node.getCellAttributes().get("stream").equals(Constants.STDIN) && notSet){
 
-            Variable in = new Variable(IN, "List");
+            Variable in = new Variable(IN, Sort.LIST);
 
             node.shallowCopy();
             node.setContents(in);

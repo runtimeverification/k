@@ -12,6 +12,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -80,16 +81,16 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                 VarHashMap solution = new VarHashMap();
                 for (Map.Entry<String, Set<String>> entry : variant.entrySet()) {
                     Set<String> mins = new HashSet<String>();
-                    for (String sort : context.definedSorts) { // for every declared sort
+                    for (Sort sort : context.definedSorts) { // for every declared sort
                         boolean min = true;
                         for (String var : entry.getValue()) {
-                            if (!context.isSubsortedEq(var, sort)) {
+                            if (!context.isSubsortedEq(Sort.of(var), sort)) {
                                 min = false;
                                 break;
                             }
                         }
                         if (min)
-                            mins.add(sort);
+                            mins.add(sort.getName());
                     }
                     if (mins.size() == 0) {
                         fails = entry.getKey();
@@ -101,7 +102,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         for (String vv1 : mins) {
                             boolean maxSort = true;
                             for (String vv2 : mins)
-                                if (context.isSubsorted(vv2, vv1))
+                                if (context.isSubsorted(Sort.of(vv2), Sort.of(vv1)))
                                     maxSort = false;
                             if (maxSort)
                                 maxSorts.add(vv1);
@@ -142,7 +143,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     for (Map.Entry<String, Set<String>> entry : solutions.iterator().next().entrySet()) {
                         Variable var = new Variable(entry.getKey(), null);
                         var.setUserTyped(false);
-                        var.setExpectedSort(entry.getValue().iterator().next());
+                        var.setExpectedSort(Sort.of(entry.getValue().iterator().next()));
                         var.setSyntactic(false);
                         varDeclMap.put(entry.getKey(), var);
                     }

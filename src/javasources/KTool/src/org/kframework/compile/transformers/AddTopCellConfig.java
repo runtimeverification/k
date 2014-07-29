@@ -44,7 +44,7 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
         PriorityBlock topPriorityBlock = new PriorityBlock();
         List<ProductionItem> topTerminals = new ArrayList<ProductionItem>();
         topTerminals.add(new Terminal(MetaK.Constants.generatedTopCellLabel));
-        Production topProduction = new Production(new Sort("CellLabel"), topTerminals );
+        Production topProduction = new Production(new NonTerminal(Sort.CELL_LABEL), topTerminals );
         topPriorityBlock.getProductions().add(topProduction);
         topCellBlocks.add(topPriorityBlock);
         return node;

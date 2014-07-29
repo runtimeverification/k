@@ -156,7 +156,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                         ((FloatBuiltin) node.getLabel()).exponent());
             } else if (node.getLabel() instanceof GenericToken) {
                 return UninterpretedToken.of(
-                        Sort.of(((GenericToken) node.getLabel()).tokenSort()),
+                        ((GenericToken) node.getLabel()).tokenSort().toBackendJava(),
                         ((GenericToken) node.getLabel()).value());
             } else {
                 assert false : "unsupported Token " + node.getLabel();
@@ -173,7 +173,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KItemProjection node, Void _)  {
-        return new KItemProjection(Kind.of(Sort.of(node.projectedKind())), (Term) this.visitNode(node.getTerm()));
+        return new KItemProjection(Kind.of(node.projectedKind().toBackendJava()), (Term) this.visitNode(node.getTerm()));
     }
 
     @Override
@@ -221,7 +221,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
-                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.KSorts.K)) {
+                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.Sort.K)) {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
@@ -241,7 +241,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
-                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.KSorts.KLIST)) {
+                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.Sort.KLIST)) {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
@@ -304,7 +304,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Bag node, Void _) {
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
         org.kframework.kil.Bag.flatten(contents,
-                ((org.kframework.kil.Bag) node).getContents());
+                node.getContents());
 
         Multimap<String, Cell> cells = ArrayListMultimap.create();
         List<Variable> baseTerms = Lists.newArrayList();
@@ -316,7 +316,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 Cell<?> cell = (Cell<?>) this.visitNode(term);
                 cells.put(cell.getLabel(), cell);
             } else if (term instanceof org.kframework.kil.Variable
-                    && (term.getSort().equals(org.kframework.kil.KSorts.BAG))) {
+                    && (term.getSort().equals(org.kframework.kil.Sort.BAG))) {
                 baseTerms.add((Variable) this.visitNode(term));
             } else {
                 throw new RuntimeException();
@@ -455,25 +455,25 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             name = "!" + name;
         }
 
-        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
+        if (node.getSort().equals(org.kframework.kil.Sort.BAG)) {
             return new Variable(name, Kind.CELL_COLLECTION.asSort());
         }
 
-        if (node.getSort().equals(org.kframework.kil.KSorts.K)) {
+        if (node.getSort().equals(org.kframework.kil.Sort.K)) {
             return new Variable(name, Sort.KSEQUENCE);
         }
-        if (node.getSort().equals(org.kframework.kil.KSorts.KLIST)) {
+        if (node.getSort().equals(org.kframework.kil.Sort.KLIST)) {
             return new Variable(name, Sort.KLIST);
         }
 
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
         if (dataStructureSort != null) {
             Sort sort = null;
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.LIST)) {
+            if (dataStructureSort.type().equals(org.kframework.kil.Sort.LIST)) {
                 sort = Sort.LIST;
-            } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.MAP)) {
+            } else if (dataStructureSort.type().equals(org.kframework.kil.Sort.MAP)) {
                 sort = Sort.MAP;
-            } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.SET)) {
+            } else if (dataStructureSort.type().equals(org.kframework.kil.Sort.SET)) {
                 sort = Sort.SET;
             } else {
                 assert false: "unexpected data structure " + dataStructureSort.type();
@@ -489,7 +489,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        return new Variable(name, Sort.of(node.getSort()));
+        return new Variable(name, node.getSort().toBackendJava());
     }
 
     @Override
@@ -517,28 +517,21 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
             Kind kind;
-            switch (lookup.kind()) {
-                case KItem:
-                    kind = Kind.KITEM;
-                    break;
-                case K:
-                    kind = Kind.K;
-                    break;
-                case KList:
-                    kind = Kind.KLIST;
-                    break;
-                case KLabel:
-                    kind = Kind.KLABEL;
-                    break;
-                case BagItem:
-                    kind = Kind.CELL;
-                    break;
-                case Bag:
-                    kind = Kind.CELL_COLLECTION;
-                    break;
-                default:
-                    assert false: "unexpected lookup kind";
-                    kind = null;
+            if (lookup.kind().equals(org.kframework.kil.Sort.KITEM)) {
+                kind = Kind.KITEM;
+            } else if (lookup.kind().equals(org.kframework.kil.Sort.K)) {
+                kind = Kind.K;
+            } else if (lookup.kind().equals(org.kframework.kil.Sort.KLIST)) {
+                kind = Kind.KLIST;
+            } else if (lookup.kind().equals(org.kframework.kil.Sort.KLABEL)) {
+                kind = Kind.KLABEL;
+            } else if (lookup.kind().equals(org.kframework.kil.Sort.BAG_ITEM)) {
+                kind = Kind.CELL;
+            } else if (lookup.kind().equals(org.kframework.kil.Sort.BAG)) {
+                kind = Kind.CELL_COLLECTION;
+            } else {
+                assert false: "unexpected lookup kind";
+                kind = null;
             }
 
             if (lookup instanceof org.kframework.kil.SetLookup) {
@@ -752,7 +745,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (rule.isCompiledForFastRewriting()) {
             rhsOfWriteCell = new HashMap<>();
             for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
-                rhsOfWriteCell.put(entry.getKey(), (Term) entry.getValue().evaluate(termContext));
+                rhsOfWriteCell.put(entry.getKey(), entry.getValue().evaluate(termContext));
             }
         }
 

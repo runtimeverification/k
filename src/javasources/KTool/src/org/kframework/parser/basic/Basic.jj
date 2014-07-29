@@ -60,7 +60,7 @@ was passed to it.  The reason it returns the 'ASTNode' is as a
 convenience so you can write things like the following without having
 to save the newly created 'ASTNode' to a variable:
 
-  return markLoc(loc, new Sort(image()));
+  return markLoc(loc, new NonTerminal(Sort.of(image())));
 
 For single token 'ASTNode' objects, the function 'tokenLoc' computes
 both the start and end location from the start and end location of the
@@ -168,6 +168,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
@@ -491,22 +492,22 @@ String String() : {}
   }
 }
 
-/** Parses and returns a Sort but not a List, NeList, Lexer, or Token */
-Sort SimpleSortID() : { String loc = startLoc(); String str; }
+/** Parses and returns a NonTerminal but not a List, NeList, Lexer, or Token */
+NonTerminal SimpleSortID() : { String loc = startLoc(); String str; }
 {
   <UPPER_ID> { str = image(); }
   ("{"  { str = str + specialAndImage(); }
    UpperId() { str = str + specialAndImage(); }
    "}"  { str = str + specialAndImage(); })?
-  { return markLoc(loc, new Sort(str)); }
+  { return markLoc(loc, new NonTerminal(Sort.of(str))); }
 }
 
-/** Parses and returns a Sort */
-Sort SortID() : { Sort sort; }
+/** Parses and returns a NonTerminal */
+NonTerminal SortID() : { NonTerminal nonTerminal; }
 {
-  sort = SimpleSortID() { return sort; }
+  nonTerminal = SimpleSortID() { return nonTerminal; }
   | ("List" | "NeList" | "Lexer" | "Token")
-    { return tokenLoc(new Sort(image())); }
+    { return tokenLoc(new NonTerminal(Sort.of(image()))); }
 }
 
 ///////
@@ -783,7 +784,7 @@ void Import(Module module): { String loc = startLoc(); }
 void Sentence(Module module) :
 { String loc = startLoc(), type, str;
   StringBuilder sb = new StringBuilder();
-  Sort sort;
+  NonTerminal nonTerminal;
   StringSentence ss;
   List<KLabelConstant> list; }
 {
@@ -794,14 +795,14 @@ void Sentence(Module module) :
   ss = Bubble(type) { module.appendModuleItem(markLoc(loc, ss)); }
 
 | "syntax"
-  ( sort = SortID() { Syntax syn = new Syntax(sort); }
+  ( nonTerminal = SortID() { Syntax syn = new Syntax(nonTerminal); }
     ( "::=" { List<PriorityBlock> pblocks = new ArrayList<PriorityBlock>(); }
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*
       { syn.setPriorityBlocks(pblocks); }
     | Attributes(syn)
     | "-/-" Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
-          new Sort(syn.getSort().getRealName()), null, sb.toString()))); return; } )?
+          new NonTerminal(syn.getDeclaredSort().getRealSort()), null, sb.toString()))); return; } )?
     { module.appendModuleItem(markLoc(loc, syn)); }
   
   | ("priority" | "priorities")
@@ -836,7 +837,7 @@ void PriorityBlock(List<PriorityBlock> pblocks) :
 
 /** Parses a Production and adds it to 'prods' */
 void Production(List<Production> prods) :
-{ String loc = startLoc(); Sort sort;
+{ String loc = startLoc(); NonTerminal nonTerminal;
   List<ProductionItem> items = new ArrayList<ProductionItem>();
   String klabel = null; }
 {
@@ -844,19 +845,19 @@ void Production(List<Production> prods) :
   (UpperId() | <LOWER_ID>)
   { items.add(tokenLoc(new Terminal(image()))); klabel = image(); }
   "("              { items.add(tokenLoc(new Terminal(image()))); }
-  sort = SortID()  { items.add(sort); }
+  nonTerminal = SortID()  { items.add(nonTerminal); }
   (","             { items.add(tokenLoc(new Terminal(image()))); }
-   sort = SortID() { items.add(sort); }
+   nonTerminal = SortID() { items.add(nonTerminal); }
   )*
   ")"              { items.add(tokenLoc(new Terminal(image()))); }
 | "("              { items.add(tokenLoc(new Terminal(image()))); }
-  sort = SortID()  { items.add(sort); }
+  nonTerminal = SortID()  { items.add(nonTerminal); }
   (","             { items.add(tokenLoc(new Terminal(image()))); }
-   sort = SortID() { items.add(sort); }
+   nonTerminal = SortID() { items.add(nonTerminal); }
   )*
   ")"              { items.add(tokenLoc(new Terminal(image()))); }
 | (ProductionItem(items))+
-) { Production prod = new Production(new Sort(""), items); }
+) { Production prod = new Production(new NonTerminal(Sort.of("")), items); }
   (Attributes(prod))?
   { if (klabel != null && prod.getAttribute("klabel") == null) {
       prod.addAttribute("klabel", "'"+klabel);
@@ -866,19 +867,19 @@ void Production(List<Production> prods) :
 
 /** Parses a ProductionItem and adds it to 'items' */
 void ProductionItem(List<ProductionItem> items) :
-{ String loc = startLoc(); String str; String sep; Sort sort;
+{ String loc = startLoc(); String str; String sep; NonTerminal nonTerminal;
   StringBuilder follow = new StringBuilder(); boolean isToken = false; }
 {
   str = String() { items.add(tokenLoc(new Terminal(str))); }
-| sort = SimpleSortID() { items.add(sort); }
+| nonTerminal = SimpleSortID() { items.add(nonTerminal); }
 | "List"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(str, sep, "*"))); return; })?
-  { items.add(tokenLoc(new Sort(image()))); }
+    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "*"))); return; })?
+  { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
 | "NeList"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(str, sep, "+"))); return; })?
-  { items.add(tokenLoc(new Sort(image()))); }
+    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "+"))); return; })?
+  { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
 | ("Lexer" | "Token" { isToken = true; })
   ( "{" { SwitchTo(REGEX_STATE); }
     str = RegEx(follow)
@@ -888,5 +889,5 @@ void ProductionItem(List<ProductionItem> items) :
             isToken && follow.length() != 0 ?
                follow.toString() : null)));
           return; })?
-  { items.add(tokenLoc(new Sort(image()))); }
+  { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
 }

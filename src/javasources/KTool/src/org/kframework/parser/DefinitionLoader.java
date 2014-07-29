@@ -17,6 +17,7 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
@@ -74,7 +75,7 @@ public class DefinitionLoader {
 
         String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
         if ("bin".equals(extension)) {
-            javaDef = (Definition) BinaryLoader.loadOrDie(Definition.class, canoFile.toString());
+            javaDef = BinaryLoader.loadOrDie(Definition.class, canoFile.toString());
 
             Stopwatch.instance().printIntermediate("Load definition from binary");
 
@@ -254,7 +255,7 @@ public class DefinitionLoader {
             // load definition if possible
             try {
                 @SuppressWarnings("unchecked")
-                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.load(Map.class, cacheFile);
+                Map<String, CachedSentence> cachedDefTemp = BinaryLoader.load(Map.class, cacheFile);
                 cachedDef = cachedDefTemp;
             } catch (IOException | ClassNotFoundException e) {
                 // it means the cache is not valid, or it doesn't exist
@@ -341,7 +342,7 @@ public class DefinitionLoader {
         XmlLoader.reportErrors(doc);
 
         JavaClassesFactory.startConstruction(context);
-        org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
+        org.kframework.kil.ASTNode config = JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
         JavaClassesFactory.endConstruction();
 
         // TODO: reject rewrites
@@ -349,7 +350,7 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
-        config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
+        config = new TypeSystemFilter2(Sort.of(startSymbol), context).visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
@@ -398,7 +399,7 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
-        config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
+        config = new TypeSystemFilter2(Sort.of(startSymbol), context).visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);

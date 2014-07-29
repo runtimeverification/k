@@ -35,14 +35,14 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Variable node, Void _)  {
-        if (MetaK.isComputationSort(node.getSort()) && !node.isFreshConstant())
+        if (node.getSort().isComputationSort() && !node.isFreshConstant())
             return kTrans.visitNode(node);
         return node;
     }
 
     @Override
     public ASTNode visit(ListTerminator node, Void _)  {
-        if (MetaK.isComputationSort(node.getSort()))
+        if (node.getSort().isComputationSort())
             return kTrans.visitNode(node);
         return node;
     }
@@ -53,7 +53,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
      */
     @Override
     public ASTNode visit(TermCons tc, Void _)  {
-        if (MetaK.isComputationSort(tc.getSort()))
+        if (tc.getSort().isComputationSort())
             return kTrans.visitNode(tc);
         return super.visit(tc, _);
     }
@@ -85,7 +85,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(TermCons tc, Void _)  {
-            if (!MetaK.isComputationSort(tc.getSort())) {
+            if (!tc.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel((Term) trans.visitNode(tc)));
             }
 
@@ -117,7 +117,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         public ASTNode visit(ListTerminator emp, Void _) {
             String l = emp.getLocation();
             String f = emp.getFilename();
-            if (!MetaK.isComputationSort(emp.getSort())) {
+            if (!emp.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel(emp));
             }
             // if this is a list sort
@@ -161,17 +161,17 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         @Override
         public ASTNode visit(Variable node, Void _)  {
             if (node.isFreshConstant()) return node;
-            if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
+            if (node.getSort().equals(Sort.KITEM) || node.getSort().equals(Sort.K)) {
                 return node;
             }
-            if (MetaK.isKSort(node.getSort())) {
+            if (node.getSort().isKSort()) {
                 return KApp.of(new KInjectedLabel(node));
             }
 
-            if (node.getSort().equals(BoolBuiltin.SORT_NAME)
-                    || node.getSort().equals(IntBuiltin.SORT_NAME)
-                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
-                    || node.getSort().equals(StringBuiltin.SORT_NAME)) {
+            if (node.getSort().equals(Sort.BUILTIN_BOOL)
+                    || node.getSort().equals(Sort.BUILTIN_INT)
+                    || node.getSort().equals(Sort.BUILTIN_FLOAT)
+                    || node.getSort().equals(Sort.BUILTIN_STRING)) {
                 return node;
             }
 
@@ -186,7 +186,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             if (kompileOptions.backend.java()) {
                 /* the Java Rewrite Engine preserves sort information for variables */
             } else {
-                node.setSort(KSorts.KITEM);
+                node.setSort(Sort.KITEM);
             }
             return node;
         }

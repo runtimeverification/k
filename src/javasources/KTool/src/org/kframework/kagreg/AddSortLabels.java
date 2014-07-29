@@ -9,6 +9,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -33,9 +34,9 @@ public class AddSortLabels extends CopyOnWriteTransformer {
     /*
      * list of sorts already labeled, when encountered again ignore.
      */
-    final protected List<String> labeledSorts;
+    final protected List<Sort> labeledSorts;
 
-    public AddSortLabels(Context context, List<String> labeledSorts) {
+    public AddSortLabels(Context context, List<Sort> labeledSorts) {
         super("AddSortLabels", context);
         this.labeledSorts = labeledSorts;
     }
@@ -50,16 +51,16 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Syntax syntax, Void _)  {
-        if (labeledSorts.contains(syntax.getSort().getName())) {
+        if (labeledSorts.contains(syntax.getDeclaredSort().getSort())) {
             return syntax;
         }
-        labeledSorts.add(syntax.getSort().getName());
+        labeledSorts.add(syntax.getDeclaredSort().getSort());
         List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
-        productionItems.add(new Terminal("L" + syntax.getSort()));
-        productionItems.add(new Sort("Id"));
+        productionItems.add(new Terminal("L" + syntax.getDeclaredSort()));
+        productionItems.add(new NonTerminal(Sort.ID));
         productionItems.add(new Terminal(":"));
-        productionItems.add(syntax.getSort());
-        Production production = new Production(syntax.getSort(), productionItems);
+        productionItems.add(syntax.getDeclaredSort());
+        Production production = new Production(syntax.getDeclaredSort(), productionItems);
 
 //        System.out.println("Before: " + context.conses);
         AddConsesVisitor acv = new AddConsesVisitor(context);

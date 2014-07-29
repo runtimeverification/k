@@ -373,8 +373,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                             && ((KItem) rightHandSide).kLabel() instanceof KLabelConstant
                             && ((KLabelConstant) ((KItem) rightHandSide).kLabel()).isConstructor()) {
                         boolean flag = false;
-                        for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) rightHandSide).kLabel()).label())) {
-                            if (definition.context().isSubsortedEq(leftHandSide.sort(), production.getSort())) {
+                        //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) rightHandSide).kLabel()).label())) {
+                        for (Production production : ((KLabelConstant) ((KItem) rightHandSide).kLabel()).productions()) {
+                            if (definition.subsorts().isSubsortedEq(
+                                    leftHandSide.sort(),
+                                    production.getSort().toBackendJava())) {
                                 flag = true;
                             }
                         }
@@ -386,8 +389,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                             && ((KItem) leftHandSide).kLabel() instanceof KLabelConstant
                             && ((KLabelConstant) ((KItem) leftHandSide).kLabel()).isConstructor()) {
                         boolean flag = false;
-                        for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) leftHandSide).kLabel()).label())) {
-                            if (definition.context().isSubsortedEq(rightHandSide.sort(), production.getSort())) {
+                        //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) leftHandSide).kLabel()).label())) {
+                        for (Production production : ((KLabelConstant) ((KItem) leftHandSide).kLabel()).productions()) {
+                            if (definition.subsorts().isSubsortedEq(
+                                    rightHandSide.sort(),
+                                    production.getSort().toBackendJava())) {
                                 flag = true;
                             }
                         }

@@ -13,8 +13,8 @@ public abstract class BuiltinLookup extends Term implements Interfaces.Parent<Te
     /** {@link Variable} representing the set */
     private final Variable base;
 
-    /** {@link KSorts} representation of the the kind of the value returned by this lookup */
-    private final KSort kind;
+    /** {@link Sort} representation of the the kind of the value returned by this lookup */
+    private final Sort kind;
 
     /** True if the key of this lookup is not determined, and this lookup can choose one */
     private final boolean choice;
@@ -23,7 +23,7 @@ public abstract class BuiltinLookup extends Term implements Interfaces.Parent<Te
         KEY, BASE, VALUE
     }
 
-    protected BuiltinLookup(Variable base, Term key, KSort kind, boolean choice) {
+    protected BuiltinLookup(Variable base, Term key, Sort kind, boolean choice) {
         this.base = base;
         this.key = key;
         this.kind = kind;
@@ -42,7 +42,7 @@ public abstract class BuiltinLookup extends Term implements Interfaces.Parent<Te
         return key;
     }
 
-    public KSort kind() {
+    public Sort kind() {
         return kind;
     }
 

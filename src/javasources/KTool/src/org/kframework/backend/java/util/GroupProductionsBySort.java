@@ -45,12 +45,12 @@ public class GroupProductionsBySort {
                 if (prod.containsAttribute(Attribute.BRACKET.getKey()))
                     continue;
 
-                String sort = prod.getSort();
-                if (!prodsBuilders.containsKey(sort)) {
+                String sortName = prod.getSort().getName();
+                if (!prodsBuilders.containsKey(sortName)) {
                     ImmutableList.Builder<Production> b = ImmutableList.builder();
-                    prodsBuilders.put(sort, b);
+                    prodsBuilders.put(sortName, b);
                 }
-                prodsBuilders.get(sort).add(prod);
+                prodsBuilders.get(sortName).add(prod);
                 klabelOfProd.put(prod, klabel);
             }
         for (Entry<String, ImmutableList.Builder<Production>> entry : prodsBuilders.entrySet()) {
@@ -66,8 +66,8 @@ public class GroupProductionsBySort {
             for (Production prod : prods) {
                 List<Term> items = Lists.newArrayListWithCapacity(prod.getItems().size());
                 for (ProductionItem prodItem : prod.getItems())
-                    if (prodItem instanceof org.kframework.kil.Sort)
-                        items.add(Variable.getFreshVariable(Sort.of(((org.kframework.kil.Sort) prodItem).getName())));
+                    if (prodItem instanceof org.kframework.kil.NonTerminal)
+                        items.add(Variable.getFreshVariable(Sort.of(((org.kframework.kil.NonTerminal) prodItem).getSort().getName())));
                 KItem kitem = KItem.of(klabelOfProd.get(prod), new KList(items), context);
                 freshTerms.add(kitem);
             }

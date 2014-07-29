@@ -2,11 +2,13 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
@@ -25,13 +27,13 @@ public class VariableWarningTest {
     @Test
     public void testWarnings() throws ParseFailedException {
         Rule r = new Rule();
-        Variable v1 = new Variable("A", KSorts.K);
+        Variable v1 = new Variable("A", Sort.K);
         v1.setUserTyped(false);
-        Variable v2 = new Variable("A", KSorts.K);
+        Variable v2 = new Variable("A", Sort.K);
         v2.setUserTyped(false);
-        Variable v3 = new Variable("B", KSorts.K);
+        Variable v3 = new Variable("B", Sort.K);
         v3.setUserTyped(true);
-        Variable v4 = new Variable("B", KSorts.K);
+        Variable v4 = new Variable("B", Sort.K);
         v4.setUserTyped(false);
         KSequence ks = new KSequence();
         ks.getContents().add(v1);

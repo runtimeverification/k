@@ -17,6 +17,7 @@ import org.kframework.kil.KList;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.MapUpdate;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.mockito.Mock;
@@ -42,7 +43,7 @@ public class CompileDataStructuresTest {
     @Before
     public void setUp() {
         compileDataStructures = new CompileDataStructures(context);
-        mapSort = new DataStructureSort("Map", "Map", "'_Map_", "'_|->_", "'.Map", Collections.singletonMap("update", "'_[_<-_]"));
+        mapSort = new DataStructureSort("Map", Sort.MAP, "'_Map_", "'_|->_", "'.Map", Collections.singletonMap("update", "'_[_<-_]"));
     }
 
     /**
@@ -54,11 +55,11 @@ public class CompileDataStructuresTest {
                 ImmutableList.of(production1));
         when(context.productionsOf("'.Map")).thenReturn(
                 ImmutableList.of(production2));
-        when(production1.getSort()).thenReturn("Map");
-        when(production2.getSort()).thenReturn("Map");
-        when(context.dataStructureSortOf("Map")).thenReturn(mapSort);
+        when(production1.getSort()).thenReturn(Sort.MAP);
+        when(production2.getSort()).thenReturn(Sort.MAP);
+        when(context.dataStructureSortOf(Sort.MAP)).thenReturn(mapSort);
         KApp node = KApp.of(KLabelConstant.of("'_[_<-_]"), new Variable("M",
-                "Map"), new Variable("F", "CId"), KApp.of("'map",
+                Sort.MAP), new Variable("F", Sort.of("CId")), KApp.of("'map",
                 KApp.of("'.Map")));
         ASTNode result = compileDataStructures.visit(node, null);
         assertTrue(((KList) ((KApp) ((MapUpdate) result).updateEntries()
