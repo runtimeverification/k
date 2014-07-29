@@ -13,7 +13,7 @@ public class Hole extends Term {
 
     public static final Hole KITEM_HOLE = new Hole(Sort.KITEM);
 
-    private Hole(Element element) {
+    public Hole(Element element) {
         super(element);
         this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
     }

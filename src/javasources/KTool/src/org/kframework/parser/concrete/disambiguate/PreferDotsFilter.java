@@ -72,22 +72,22 @@ public class PreferDotsFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
-        String sort = context.cellSorts.get(cell.getLabel());
+        Sort sort = context.cellSorts.get(cell.getLabel());
         // if the k cell is opened, then the sort should be K because of ... desugaring
         if (cell.getLabel().equals("k") && cell.getEllipses() != Ellipses.NONE)
-            sort = KSorts.K;
+            sort = Sort.K;
 
         if (sort == null) {
             if (cell.getLabel().equals("k"))
-                sort = "K";
+                sort = Sort.K;
             else if (cell.getLabel().equals("T"))
-                sort = "Bag";
+                sort = Sort.BAG;
             else if (cell.getLabel().equals("generatedTop"))
-                sort = "Bag";
+                sort = Sort.BAG;
             else if (cell.getLabel().equals("freshCounter"))
-                sort = "K";
+                sort = Sort.K;
             else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
-                sort = "K";
+                sort = Sort.K;
         }
 
         if (sort != null) {
@@ -126,7 +126,7 @@ public class PreferDotsFilter extends ParseForestTransformer {
      * Given the context from the visitor, match on an ambiguity node, and choose only those terms
      * that have exactly the sort of the context. If the result is 0, keep the original ambiguity.
      */
-    private ASTNode preferStrict(String expectedSort, Term t) {
+    private ASTNode preferStrict(Sort expectedSort, Term t) {
         if (t instanceof Ambiguity) {
             Ambiguity node = (Ambiguity) t;
             ArrayList<Term> eqSort = new ArrayList<>();
