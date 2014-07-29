@@ -534,29 +534,6 @@ public class Context implements Serializable {
         return KApp.of(new KInjectedLabel(t));
     }
 
-    private static final String fragment = "-fragment";
-
-    private String getCellSort2(String sort) {
-        sort = sort.substring(0, 1).toLowerCase() + sort.substring(1);
-        if (sort.endsWith(Sort.CELL_SORT_NAME)) {
-            return sort.substring(0, sort.length() - Sort.CELL_SORT_NAME.length());
-        } else {
-            return sort.substring(0, sort.length() - Sort.CELL_FRAGMENT_NAME.length()) + fragment;
-        }
-    }
-
-    public String getCellSort(String sort) {
-        sort = getCellSort2(sort);
-        String cellName = sort;
-        if (sort.endsWith(fragment)) {
-            cellName = sort.substring(0, sort.length() - fragment.length());
-        }
-        if (cells.containsKey(cellName)) {
-            return sort;
-        }
-        return sort.substring(0, 1).toUpperCase() + sort.substring(1);
-    }
-
     public Map<Sort, DataStructureSort> getDataStructureSorts() {
         return Collections.unmodifiableMap(dataStructureSorts);
     }
