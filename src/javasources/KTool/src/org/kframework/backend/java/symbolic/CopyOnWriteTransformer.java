@@ -555,14 +555,24 @@ public class CopyOnWriteTransformer implements Transformer {
         UninterpretedConstraint processedLookups
                 = (UninterpretedConstraint) rule.lookups().accept(this);
 
+        Map<String, Term> processedLhsOfReadCell = null;
+        Map<String, Term> processedRhsOfWriteCell = null;
+        if (rule.isCompiledForFastRewriting()) {
+            processedLhsOfReadCell = new HashMap<>();
+            for (Map.Entry<String, Term> entry : rule.lhsOfReadCell().entrySet()) {
+                processedLhsOfReadCell.put(entry.getKey(), (Term) entry.getValue().accept(this));
+            }
+            processedRhsOfWriteCell = new HashMap<>();
+            for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+                processedRhsOfWriteCell.put(entry.getKey(), (Term) entry.getValue().accept(this));
+            }
+        }
+
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()
-//                || !processedRequires.equals(rule.requires())
-//                || !processedEnsures.equals(rule.ensures())
-//                || !processedFreshVariables.equals(rule.freshVariables())
-                || processedRequires != rule.requires()
-                || processedEnsures != rule.ensures()
-                || processedFreshVariables != rule.freshVariables()
+                || processedRequires.equals(rule.requires())
+                || processedEnsures.equals(rule.ensures())
+                || processedFreshVariables.equals(rule.freshVariables())
                 || processedLookups != rule.lookups()) {
             return new Rule(
                     rule.label(),
@@ -572,6 +582,11 @@ public class CopyOnWriteTransformer implements Transformer {
                     processedEnsures,
                     processedFreshVariables,
                     processedLookups,
+                    rule.isCompiledForFastRewriting(),
+                    processedLhsOfReadCell,
+                    processedRhsOfWriteCell,
+                    rule.cellsToCopy(),
+                    rule.instructions(),
                     rule.getAttributes(),
                     definition);
         } else {

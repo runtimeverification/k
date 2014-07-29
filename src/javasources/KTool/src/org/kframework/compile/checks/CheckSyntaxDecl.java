@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import java.util.HashMap;
 import java.util.List;
 
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
@@ -18,9 +19,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Check for various errors in syntax declarations. 1. You are not allowed to use empty terminals ("") in definitions. You need to have at least two sorts, or a non empty terminal.
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class CheckSyntaxDecl extends BasicVisitor {
 
@@ -61,12 +62,18 @@ public class CheckSyntaxDecl extends BasicVisitor {
         }
 
         if (node.isSubsort()) {
-            String sort = ((Sort) node.getItems().get(0)).getName();
+            String sort = node.getSubsort().getName();
             if (Sort.isBasesort(sort) && !context.isSubsorted(node.getSort(), sort)) {
-                String msg = "Extending  built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
+                String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
+        } else if (!node.containsAttribute(Constants.FUNCTION)
+                && (node.getSort().equals(KSorts.K) ||
+                    node.getSort().equals(KSorts.KLIST))) {
+            String msg = "Extending sort K or KList is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }
+
         if (node.containsAttribute("reject")) {
             if (node.getItems().size() != 1) {
                 String msg = "Only single Terminals can be rejected.";
@@ -87,7 +94,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                         String msg = "Undefined sort " + s.getName();
                         GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                     }
-                if (s.getName().equals("KResult") && !(node.isSubsort() && node.getSort().equals("K"))) {
+                if (s.getName().equals(KSorts.KRESULT) && !(node.isSubsort() && node.getSort().equals(KSorts.KITEM))) {
                     String msg = "KResult is only allowed in the left hand side of syntax.";
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }
@@ -119,7 +126,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
         }
-        
+
         if (eTerminals > 0 && (neTerminals == 0 || sorts < 2))
             if (!node.containsAttribute("onlyLabel") || !node.containsAttribute("klabel")) {
                 String msg = "Cannot declare empty terminals in the definition.\n";
@@ -134,7 +141,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
         // optimization to not visit the entire tree
         return null;
     }
-    
+
     private boolean isBinaryInfixProd(Production node) {
         if (node.getArity() != 2) {
             return false;

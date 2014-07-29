@@ -28,13 +28,13 @@ public class ToKAppTransformerTest {
 
     @Mock
     private Context context;
-    
+
     private ToKAppTransformer transformer;
-    
+
     private DataStructureSort mapSort;
     private DataStructureSort listSort;
     private DataStructureSort setSort;
-    
+
     @Before
     public void setUp() {
         transformer = new ToKAppTransformer(context);
@@ -52,31 +52,31 @@ public class ToKAppTransformerTest {
         MapBuiltin mapUnit = (MapBuiltin) DataStructureBuiltin.empty(mapSort);
         ListBuiltin listUnit = (ListBuiltin) DataStructureBuiltin.empty(listSort);
         SetBuiltin setUnit = (SetBuiltin) DataStructureBuiltin.empty(setSort);
-        
+
         KApp mapKApp = (KApp) transformer.visitNode(mapUnit);
         KApp listKApp = (KApp) transformer.visitNode(listUnit);
         KApp setKApp = (KApp) transformer.visitNode(setUnit);
-        
+
         assertEquals(KApp.of("'.Map"), mapKApp);
         assertEquals(KApp.of("'.List"), listKApp);
         assertEquals(KApp.of("'.Set"), setKApp);
     }
-    
+
     @Test
     public void testElement() {
         MapBuiltin mapElement = (MapBuiltin) DataStructureBuiltin.element(mapSort, KSequence.EMPTY, KSequence.EMPTY);
         ListBuiltin listElement = (ListBuiltin) DataStructureBuiltin.element(listSort, KSequence.EMPTY);
         SetBuiltin setElement = (SetBuiltin) DataStructureBuiltin.element(setSort, KSequence.EMPTY);
-        
+
         KApp mapKApp = (KApp) transformer.visitNode(mapElement);
         KApp listKApp = (KApp) transformer.visitNode(listElement);
         KApp setKApp = (KApp) transformer.visitNode(setElement);
-        
+
         assertEquals(KApp.of("'_|->_", KSequence.EMPTY, KSequence.EMPTY), mapKApp);
         assertEquals(KApp.of("'ListItem", KSequence.EMPTY), listKApp);
         assertEquals(KApp.of("'SetItem", KSequence.EMPTY), setKApp);
     }
-    
+
     @Test
     public void testConstructor() {
         MapBuiltin mapElement1 = (MapBuiltin) DataStructureBuiltin.element(mapSort, IntBuiltin.kAppOf(1), KSequence.EMPTY);
@@ -84,38 +84,38 @@ public class ToKAppTransformerTest {
         ListBuiltin listElement = (ListBuiltin) DataStructureBuiltin.element(listSort, KSequence.EMPTY);
         SetBuiltin setElement1 = (SetBuiltin) DataStructureBuiltin.element(setSort, IntBuiltin.kAppOf(1));
         SetBuiltin setElement2 = (SetBuiltin) DataStructureBuiltin.element(setSort, IntBuiltin.kAppOf(2));
-        
+
         MapBuiltin map = (MapBuiltin) DataStructureBuiltin.of(mapSort, mapElement1, mapElement2);
         ListBuiltin list = (ListBuiltin) DataStructureBuiltin.of(listSort, listElement, listElement);
         SetBuiltin set = (SetBuiltin) DataStructureBuiltin.of(setSort, setElement1, setElement2);
-        
+
         KApp mapKApp = (KApp) transformer.visitNode(map);
         KApp listKApp = (KApp) transformer.visitNode(list);
         KApp setKApp = (KApp) transformer.visitNode(set);
-        
+
         assertEquals(KApp.of("'_Map_", KApp.of("'_|->_", IntBuiltin.kAppOf(1), KSequence.EMPTY),
                 KApp.of("'_|->_", IntBuiltin.kAppOf(2), KSequence.EMPTY)), mapKApp);
         assertEquals(KApp.of("'_List_", KApp.of("'ListItem", KSequence.EMPTY),
                 KApp.of("'ListItem", KSequence.EMPTY)), listKApp);
         assertEquals(KApp.of("'_Set_", KApp.of("'SetItem", IntBuiltin.kAppOf(1)),
                 KApp.of("'SetItem", IntBuiltin.kAppOf(2))), setKApp);
-        
+
     }
-    
+
     @Test
     public void testFrame() {
         MapBuiltin mapElement = (MapBuiltin) DataStructureBuiltin.element(mapSort, KSequence.EMPTY, KSequence.EMPTY);
         ListBuiltin listElement = (ListBuiltin) DataStructureBuiltin.element(listSort, KSequence.EMPTY);
         SetBuiltin setElement = (SetBuiltin) DataStructureBuiltin.element(setSort, KSequence.EMPTY);
-        
+
         MapBuiltin map = (MapBuiltin) DataStructureBuiltin.of(mapSort, mapElement, new Variable("M", "Map"));
         ListBuiltin list = (ListBuiltin) DataStructureBuiltin.of(listSort, listElement, new Variable("L", "List"));
         SetBuiltin set = (SetBuiltin) DataStructureBuiltin.of(setSort, setElement, new Variable("S", "Set"));
-        
+
         KApp mapKApp = (KApp) transformer.visitNode(map);
         KApp listKApp = (KApp) transformer.visitNode(list);
         KApp setKApp = (KApp) transformer.visitNode(set);
-        
+
         assertEquals(KApp.of("'_Map_", KApp.of("'_|->_", KSequence.EMPTY, KSequence.EMPTY),
                 new Variable("M", "Map")), mapKApp);
         assertEquals(KApp.of("'_List_", KApp.of("'ListItem", KSequence.EMPTY),

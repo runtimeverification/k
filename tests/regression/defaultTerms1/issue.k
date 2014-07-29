@@ -5,12 +5,12 @@ module ISSUE
                         <k> $PGM:K </k>
                         <holds> .Map </holds>
                   </thread>
-		</T>
-				
-  syntax K ::= "spawn"
+        </T>
+
+  syntax KItem ::= "spawn"
 
   rule <k> spawn => . ...</k>
-	   (. => 
+       (. =>
             <thread>
               ...
               <k> .K </k>
@@ -18,7 +18,7 @@ module ISSUE
            )
 
   rule <k> spawn => . ...</k>
-	   (. => 
+       (. =>
             <thread>
               <k> .K </k>
               ...
@@ -26,7 +26,7 @@ module ISSUE
            )
 
   rule <k> spawn => . ...</k>
-	   (. => 
+       (. =>
             <thread>
               ...
               <k> .K </k>

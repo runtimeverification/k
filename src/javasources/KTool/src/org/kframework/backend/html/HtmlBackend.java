@@ -10,7 +10,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
 import java.io.File;
-import java.io.IOException;
 
 public class HtmlBackend extends BasicBackend {
 
@@ -19,7 +18,7 @@ public class HtmlBackend extends BasicBackend {
     }
 
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         String fileSep = System.getProperty("file.separator");
         String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
         HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath, context);

@@ -5,9 +5,9 @@ import org.kframework.kil.visitors.Visitor;
 
 /**
  * Used as a container for unparsed sentences like rule, context and configuration.
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class StringSentence extends ModuleItem {
     private String content;
@@ -35,7 +35,7 @@ public class StringSentence extends ModuleItem {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     public String getContent() {
         return content;
     }

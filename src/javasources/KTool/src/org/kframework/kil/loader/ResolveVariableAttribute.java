@@ -6,7 +6,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.krun.K;
+import org.kframework.kompile.KompileOptions;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,7 +29,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             so whenever somebody refactors the backends should split this transformer
             for each backend.
              */
-            if (K.backend.equals("maude")) {
+            if (kompileOptions.backend == KompileOptions.Backend.MAUDE) {
                 if (context.variableTokenSorts.contains(node.tokenSort())) {
                     String sort = "K";
                     String name = node.value();

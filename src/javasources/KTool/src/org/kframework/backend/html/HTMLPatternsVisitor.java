@@ -20,14 +20,14 @@ public class HTMLPatternsVisitor extends BasicVisitor {
     public enum HTMLPatternType {
         LATEX, HTML, DEFAULT
     };
-    
+
     private Map<String,String> patterns = new HashMap<String,String>();
     private Map<String,HTMLPatternType> type = new HashMap<String,HTMLPatternType>();
-    
+
     String pattern = "";
     int nonTerm;
     boolean prevNonTerm;
-    
+
     public void setPatterns(Map<String,String> patterns) {
         this.patterns = patterns;
     }
@@ -44,34 +44,34 @@ public class HTMLPatternsVisitor extends BasicVisitor {
             return null;
     }
 
-    @Override 
+    @Override
     public Void visit(Production p, Void _) {
         if (!p.containsAttribute("cons")) {
             return _;
         }
         if(p.containsAttribute("latex") || p.containsAttribute("html")) {
             if (p.containsAttribute("latex")) {
-                
+
                 pattern = p.getAttribute("latex");
                 pattern = pattern.replace("\\\\", "\\");
                 patterns.put(p.getAttribute("cons"), pattern);
                 type.put(p.getAttribute("cons"), HTMLPatternType.LATEX);
-                
+
             }
             if (p.containsAttribute("html")) {
-                
+
                 pattern = p.getAttribute("html");
                 pattern = pattern.substring(1, pattern.length()-1).replace("\\\\", "\\");
                 patterns.put(p.getAttribute("cons"), pattern);
                 type.put(p.getAttribute("cons"), HTMLPatternType.HTML);
-                
-            } 
+
+            }
         } else {
             type.put(p.getAttribute("cons"), HTMLPatternType.DEFAULT);
             //super.visit(p);
         }
         return _;
-        
+
     }
 
 
@@ -82,8 +82,8 @@ public class HTMLPatternsVisitor extends BasicVisitor {
         pattern += "{#" + nonTerm++ + "}";
         prevNonTerm = true;*/
     }
-    
-    
+
+
     @Override
     public Void visit(UserList sort, Void _) {
         return _;
@@ -92,8 +92,8 @@ public class HTMLPatternsVisitor extends BasicVisitor {
         pattern += "\\mathpunct{\\terminalNoSpace{" + StringUtil.latexify(sort.getSeparator()) + "}}";
         pattern += "{#" + nonTerm++ + "}";*/
     }
-    
-    
+
+
     @Override
     public Void visit(Terminal pi, Void _) {
         return _;

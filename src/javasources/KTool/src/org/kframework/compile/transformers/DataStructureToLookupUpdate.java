@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import com.google.common.collect.Sets;
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BuiltinLookup;
@@ -21,9 +20,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.krun.CommandlineOptions;
 import org.kframework.krun.K;
-import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -36,6 +33,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 
 /**
  * Transformer class compiling builtin data structure accesses into lookup and update operations.
@@ -134,7 +134,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                "expected rewrite at the top of rule " + node + ". "
                + "DataStructureToLookupUpdate pass should be applied after ResolveRewrite pass.";
 
-        if (!K.prove.equals("")) {
+        if (context.krunOptions.experimental.prove() != null) {
             return node;
         }
 

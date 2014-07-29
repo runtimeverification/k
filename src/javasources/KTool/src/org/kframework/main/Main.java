@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.fusesource.jansi.AnsiConsole;
+import org.kframework.krun.K;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 import org.kframework.utils.file.KPaths;
@@ -33,9 +34,9 @@ public class Main {
     /**
      * @param args
      *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
-     * @throws IOException when loadDefinition fails 
+     * @throws IOException when loadDefinition fails
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Stopwatch.instance();
         setJavaLibraryPath();
         AnsiConsole.systemInstall();
@@ -46,24 +47,31 @@ public class Main {
             try {
                 switch (args[0]) {
                     case "-kompile":
+                        K.setTool(K.Tool.KOMPILE);
                         org.kframework.kompile.KompileFrontEnd.main(args2);
                         break;
                     case "-kagreg":
+                        K.setTool(K.Tool.OTHER);
                         org.kframework.kagreg.KagregFrontEnd.kagreg(args2);
                         break;
                     case "-kcheck":
+                        K.setTool(K.Tool.OTHER);
                         succeeded = org.kframework.kcheck.KCheckFrontEnd.kcheck(args2);
                         break;
                     case "-ktest":
+                        K.setTool(K.Tool.KTEST);
                         succeeded = org.kframework.ktest.KTest.main(args2);
                         break;
                     case "-kast":
+                        K.setTool(K.Tool.KAST);
                         succeeded = org.kframework.kast.KastFrontEnd.kast(args2);
                         break;
                     case "-krun":
-                        succeeded = org.kframework.krun.Main.execute_Krun(args2);
+                        K.setTool(K.Tool.KRUN);
+                        succeeded = org.kframework.krun.KRunFrontEnd.execute_Krun(args2);
                         break;
                     case "-kpp":
+                        K.setTool(K.Tool.OTHER);
                         Kpp.codeClean(args2);
                         break;
                     default:
@@ -75,13 +83,13 @@ public class Main {
                 GlobalSettings.kem.print();
                 System.exit(1);
             }
-             
+
             GlobalSettings.kem.print();
             System.exit(succeeded ? 0 : 1);
         }
         invalidJarArguments();
     }
-    
+
     private static void invalidJarArguments() {
         System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
         System.exit(1);

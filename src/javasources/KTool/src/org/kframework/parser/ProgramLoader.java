@@ -10,7 +10,6 @@ import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
@@ -40,7 +39,7 @@ public class ProgramLoader {
 
     /**
      * Load program file to ASTNode.
-     * 
+     *
      * @param kappize
      *            If true, then apply KAppModifier to AST.
      */
@@ -77,14 +76,14 @@ public class ProgramLoader {
 
     /**
      * Print maudified program to standard output.
-     * 
+     *
      * Save it in kompiled cache under pgm.maude.
      */
-    public static Term processPgm(String content, String filename, Definition def, String startSymbol,
+    public static Term processPgm(String content, String filename, String startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         if (!context.definedSorts.contains(startSymbol)) {
-            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "The start symbol must be declared in the definition. Found: " + startSymbol));
         }
 
@@ -104,7 +103,7 @@ public class ProgramLoader {
                 out = new AddEmptyLists(context).visitNode(out);
                 out = new RemoveSyntacticCasts(context).visitNode(out);
                 try {
-                    out = new RuleCompilerSteps(def, context).compile(
+                    out = new RuleCompilerSteps(context).compile(
                             new Rule((Sentence) out),
                             null);
                 } catch (CompilerStepDone e) {
@@ -112,12 +111,12 @@ public class ProgramLoader {
                 }
                 out = ((Rule) out).getBody();
             } else if (whatParser == ParserType.BINARY) {
-                out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
+                out = BinaryLoader.loadOrDie(Term.class, filename);
             } else if (whatParser == ParserType.NEWPROGRAM) {
                 // load the new parser
                 // TODO(Radu): after the parser is in a good enough shape, replace the program parser
                 // TODO(Radu): (the default one) with this branch of the 'if'
-                Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
+                Grammar grammar = (Grammar) BinaryLoader.loadOrDie(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
 
                 Parser parser = new Parser(content);
                 out = parser.parse(grammar.get(startSymbol), 0);

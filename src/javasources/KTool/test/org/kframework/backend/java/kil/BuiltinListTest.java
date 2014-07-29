@@ -3,7 +3,6 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.util.KSorts;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +17,7 @@ public class BuiltinListTest {
     @Test
     public void testOf() throws Exception {
         BuiltinList baseBuiltinList = BuiltinList.of(
-                new Variable("L", KSorts.LIST),
+                new Variable("L", Sort.LIST),
                 1,
                 1,
                 new ArrayList<>(ImmutableList.<Term>of(IntToken.of(0))),

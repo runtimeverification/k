@@ -51,11 +51,11 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
 
     /**
      * A new class (nested) that goes down one level (jumps over Ambiguity) and checks to see if there is a Cast
-     * 
+     *
      * if found, throw an exception and until an Ambiguity node catches it
-     * 
+     *
      * @author Radu
-     * 
+     *
      */
     public class CorrectCastPriorityFilter2 extends LocalTransformer {
         public CorrectCastPriorityFilter2(Context context) {

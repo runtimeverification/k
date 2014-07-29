@@ -2,9 +2,8 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.*;
-import org.kframework.ktest.CmdArgs.CmdArg;
+import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
 import org.kframework.utils.OS;
@@ -86,7 +85,7 @@ public class TestCase {
         this.skips = skips;
     }
 
-    public static TestCase makeTestCaseFromK(CmdArg cmdArgs) throws InvalidConfigError {
+    public static TestCase makeTestCaseFromK(KTestOptions cmdArgs) throws InvalidConfigError {
         Annotated<String, LocationData> targetFile =
                 new Annotated<>(cmdArgs.getTargetFile(), new LocationData());
 
@@ -101,8 +100,10 @@ public class TestCase {
 
         Map<String, ProgramProfile> emptyOptsMap = Collections.emptyMap();
 
-        return new TestCase(targetFile, programs, cmdArgs.getExtensions(),
-                cmdArgs.getExcludes(), results, emptyOpts, emptyProfile, emptyOptsMap,
+        return new TestCase(targetFile, programs,
+                cmdArgs.getExtensions().toArray(new String[cmdArgs.getExtensions().size()]),
+                cmdArgs.getExcludes().toArray(new String[cmdArgs.getExcludes().size()]),
+                results, emptyOpts, emptyProfile, emptyOptsMap,
                 new HashSet<KTestStep>());
     }
 
@@ -139,13 +140,13 @@ public class TestCase {
         assert new File(definition.getObj()).isFile();
         return definition.getObj();
     }
-    
+
     public File getWorkingDir() {
         File f = new File(definition.getObj());
         assert f.isFile();
         return f.getParentFile();
     }
-    
+
     /**
      * @return command array to pass process builder
      */
@@ -310,7 +311,7 @@ public class TestCase {
                     ProgramProfile profile = getPgmOptions(pgmFilePath);
                     boolean hasDirectory = false;
                     for (PgmArg arg : profile.getArgs()) {
-                        if (arg.arg.equals("--directory")) {
+                        if (arg.arg.equals("--directory") || arg.arg.equals("-d")) {
                             hasDirectory = true;
                         }
                         args.add(arg);
@@ -318,7 +319,7 @@ public class TestCase {
                     if (!hasDirectory) {
                         args.add(new PgmArg("--directory", definitionFilePath));
                     }
-                    
+
                     ret.add(new KRunProgram(
                             pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,
                             getNewOutputFilePath(outputFileName), profile.isRegex()));

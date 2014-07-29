@@ -32,7 +32,7 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
     public void setTerm(Term term) {
         this.term = term;
     }
-    
+
     @Override
     public KItemProjection shallowCopy() {
         return new KItemProjection(this);
@@ -59,7 +59,7 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
 
         return getSort().equals(kItemProjection.getSort()) && term.equals(kItemProjection.term);
     }
-    
+
     @Override
     public String toString() {
         return "projection(" + term + ")";

@@ -15,7 +15,7 @@ public class CommandSeek extends Command {
 
     public CommandSeek(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
         super(args, socket, logger, fs); //, maudeId);
-        
+
         try {
             ID = Long.parseLong(args[1]);
             position = Integer.parseInt(args[2]);

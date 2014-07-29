@@ -4,11 +4,9 @@ package org.kframework.krun.api;
 import java.util.List;
 import java.util.Map;
 
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
@@ -33,12 +31,13 @@ public class TestGenResults {
         int n = 1;
         StringBuilder sb = new StringBuilder();
         sb.append("Test generation results:");
-        
-        for (TestGenResult testGenResult : testGenResults) {
+
+        for (TestGenResult testGenResult : getTestGenResults()) {
             // TODO(YilongL): how to set state id?
             sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
-            
-            UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
+
+            UnparserFilterNew t = new UnparserFilterNew(true, context.colorOptions.color(),
+                    context.krunOptions.output, false, context);
             Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
             t.visitNode(concretePgm);
             // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
@@ -46,15 +45,17 @@ public class TestGenResults {
             sb.append("\nResult:");
             Map<String, Term> substitution = testGenResult.getSubstitution();
 
-            if (isDefaultPattern) {
-                UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+            if (isDefaultPattern()) {
+                UnparserFilterNew unparser = new UnparserFilterNew(true, context.colorOptions.color(),
+                        context.krunOptions.output, false, context);
                 unparser.visitNode(substitution.get("B:Bag"));
                 sb.append("\n" + unparser.getResult());
             } else {
                 boolean empty = true;
 
                 for (String variable : substitution.keySet()) {
-                    UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+                    UnparserFilterNew unparser = new UnparserFilterNew(true, context.colorOptions.color(),
+                            context.krunOptions.output, false, context);
                     sb.append("\n" + variable + " -->");
                     unparser.visitNode(substitution.get(variable));
                     sb.append("\n" + unparser.getResult());
@@ -75,14 +76,14 @@ public class TestGenResults {
             strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
             strCnstr = strCnstr.replace("/\\ ", "/\\\n");
             sb.append(strCnstr);
-            
+
             n++;
         }
-        
+
         if (n == 1) {
             sb.append("\nNo test generation results");
         }
-        
+
         return sb.toString();
     }
 
@@ -93,9 +94,9 @@ public class TestGenResults {
     public List<TestGenResult> getTestGenResults() {
         return testGenResults;
     }
-    
+
     public boolean isDefaultPattern(){
-        
+
         return this.isDefaultPattern;
     }
 }

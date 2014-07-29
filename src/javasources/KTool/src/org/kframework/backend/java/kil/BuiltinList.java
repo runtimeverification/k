@@ -14,7 +14,6 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.ImprovedArrayDeque;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
@@ -93,10 +92,10 @@ public class BuiltinList extends Collection {
     public boolean isLHSView() {
         return true;
     }
-    
+
     /**
      * Checks if this {@code BuiltinList} is actually a list update operation.
-     * 
+     *
      * @return {@code true} if there is pending update operation on this
      *         {@code BuiltinList}; otherwise, {@code false}
      */
@@ -110,8 +109,8 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public String sort() {
-        return KSorts.LIST;
+    public Sort sort() {
+        return Sort.LIST;
     }
 
     @Override
@@ -133,7 +132,7 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
         hashCode = hashCode * Utils.HASH_PRIME + removeLeft;
@@ -144,10 +143,28 @@ public class BuiltinList extends Collection {
     }
 
     @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Term term : elementsLeft) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        for (Term term : elementsRight) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);
@@ -187,7 +204,7 @@ public class BuiltinList extends Collection {
             return iterator.next();
         }
         // TODO(AndreiS): use correct kind/sort
-        if (frame == null) return new Bottom(Kind.K);
+        if (frame == null) return Bottom.of(Kind.K);
         java.util.Collection<Term> left = elementsLeft;
         java.util.Collection<Term> right = elementsRight;
         if (onLeft) {

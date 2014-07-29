@@ -29,14 +29,14 @@ module FLOAT-HOOKS
   syntax MInt ::= significandFloat(Float) [function, hook(#FLOAT:significand)]
 
   syntax Float ::= "--Float" Float          [function, hook(#FLOAT:neg)]
-				 > Float "^Float" Float		[function, left, latex({#1}^{#2}), hook(#FLOAT:pow)]
+                 > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(#FLOAT:pow)]
                  > left:
-				   Float "*Float" Float		[function, left, latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:mul)]
-				 | Float "/Float" Float		[function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:div)]
-				 | Float "%Float" Float		[function, left, latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:rem)]
-				 > left:
-				   Float "+Float" Float		[function, left, latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:add)]
-				 | Float "-Float" Float		[function, left, latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:sub)]
+                   Float "*Float" Float        [function, left, latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:mul)]
+                 | Float "/Float" Float        [function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:div)]
+                 | Float "%Float" Float        [function, left, latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:rem)]
+                 > left:
+                   Float "+Float" Float        [function, left, latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:add)]
+                 | Float "-Float" Float        [function, left, latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:sub)]
 
   syntax Float ::= rootFloat(Float, Int) [function, hook(#FLOAT:root)]
                  | absFloat(Float) [function, hook(#FLOAT:abs)]
@@ -56,18 +56,18 @@ module FLOAT-HOOKS
                  | minFloat(Float, Float) [function, hook(#FLOAT:min)]
 
   syntax Bool ::= left:
-  				  Float "<=Float" Float		[function, left, latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:le)]
-				| Float "<Float" Float		[function, left, latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:lt)]
-				| Float ">=Float" Float		[function, left, latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:ge)]
-				| Float ">Float" Float		[function, left, latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:gt)]
-				| Float "==Float" Float		[function, left, latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:eq)]
-				| Float "=/=Float" Float	[function, left, latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+                    Float "<=Float" Float        [function, left, latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:le)]
+                | Float "<Float" Float        [function, left, latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:lt)]
+                | Float ">=Float" Float        [function, left, latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:ge)]
+                | Float ">Float" Float        [function, left, latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:gt)]
+                | Float "==Float" Float        [function, left, latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:eq)]
+                | Float "=/=Float" Float    [function, left, latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
 
   rule F1:Float =/=Float F2:Float => notBool(F1 ==Float F2)
 
-  syntax Float ::= Int2Float(Int, Int, Int)	[function, klabel(Int2Float), latex({\\it{}Int2Float}), hook(#CONVERSION:int2Float)]
-  syntax Int ::= Float2Int(Float)	[function, klabel(Float2Int), latex({\\it{}Float2Int}), hook(#CONVERSION:float2Int)] 
+  syntax Float ::= Int2Float(Int, Int, Int)    [function, klabel(Int2Float), latex({\\it{}Int2Float}), hook(#CONVERSION:int2Float)]
+  syntax Int ::= Float2Int(Float)    [function, klabel(Float2Int), latex({\\it{}Float2Int}), hook(#CONVERSION:float2Int)]
 
 
 endmodule

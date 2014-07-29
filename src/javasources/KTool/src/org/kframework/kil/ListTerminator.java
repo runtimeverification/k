@@ -3,7 +3,6 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
 
 import org.w3c.dom.Element;
 
@@ -60,7 +59,7 @@ public class ListTerminator extends Term {
     public int hashCode() {
         return (sort + separator).hashCode();
     }
-    
+
     public String separator() {
         return this.separator;
     }

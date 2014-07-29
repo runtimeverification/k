@@ -12,7 +12,7 @@ public class ResolveAnonymousVariables extends CopyOnWriteTransformer {
     public ResolveAnonymousVariables(Context context) {
         super("Resolve anonymous variables", context);
     }
-    
+
     @Override
     public ASTNode visit(Variable node, Void _)  {
         if (MetaK.isAnonVar(node))

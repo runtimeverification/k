@@ -54,13 +54,18 @@ public class KItemProjection extends Term {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return term.hashCode();
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        return term.hasCell();
     }
 
     @Override

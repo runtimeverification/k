@@ -1,6 +1,6 @@
 #!/bin/bash
 # Copyright (c) 2014 K Team. All Rights Reserved.
-# Usage: ./copyright <file>
+# Usage: ./add_copyright <file>
 # TODO(dwightguth): currently this script will add a duplicate xml declaration
 # to files containing an xml declaration but no copyright, and will not
 # add an xml declaration to files with a copyright but no xml declaration.

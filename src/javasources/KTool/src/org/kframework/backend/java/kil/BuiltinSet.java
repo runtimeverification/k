@@ -5,7 +5,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
@@ -60,7 +59,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     public int size() {
         return elements.size();
     }
-    
+
     /**
      * {@code BuiltinSet} is guaranteed to have only one frame; thus, they can
      * always be used in the left-hand side of a rule.
@@ -73,8 +72,8 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public String sort() {
-        return KSorts.SET;
+    public Sort sort() {
+        return Sort.SET;
     }
 
     @Override
@@ -95,13 +94,25 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + elements.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + collectionPatterns.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + collectionFunctions.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Term term : elements) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -170,11 +181,14 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
             return elements.remove(element);
         }
 
+        /**
+         * Concatenates terms of sort Set to this builder
+         */
         public void concatenate(Term... terms) {
             for (Term term : terms) {
-                assert term.sort().equals(KSorts.SET)
+                assert term.sort().equals(Sort.SET)
                         : "unexpected sort " + term.sort() + " of concatenated term " + term
-                        + "; expected " + KSorts.SET;
+                        + "; expected " + Sort.SET;
 
                 if (term instanceof BuiltinSet) {
                     BuiltinSet set = (BuiltinSet) term;

@@ -40,44 +40,64 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     private String location;
     private String filename;
 
+    /**
+     * Simplified constructor for the common case
+     * @param context The context of the rules being compiled
+     */
     public CompileDataStructures(Context context) {
         super("Compile collections to internal K representation", context);
     }
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
-
         location = node.getLocation();
         filename = node.getFilename();
+        boolean change = false;
 
-        assert node.getBody() instanceof Rewrite :
-                "expected rewrite at the top of rule\n" + node + "\n"
-                + "CompileDataStructures pass should be applied after ResolveRewrite pass";
+        Term body;
+        if (node.getBody() instanceof Rewrite) {
+            Rewrite rewrite = (Rewrite) node.getBody();
+            Term lhs = (Term) this.visitNode(rewrite.getLeft());
+            Term rhs = (Term) this.visitNode(rewrite.getRight());
+            if (lhs != rewrite.getLeft() || rhs != rewrite.getRight()) {
+                rewrite = rewrite.shallowCopy();
+                rewrite.setLeft(lhs, context);
+                rewrite.setRight(rhs, context);
+                change = true;
+            }
+            body = rewrite;
+        } else {
+            body = (Term) this.visitNode(node.getBody());
+        }
 
-        Rewrite rewrite = (Rewrite) node.getBody();
-        Term lhs = (Term) this.visitNode(rewrite.getLeft());
-        Term rhs = (Term) this.visitNode(rewrite.getRight());
         Term requires;
         if (node.getRequires() != null) {
             requires = (Term) this.visitNode(node.getRequires());
+            if (requires != node.getRequires()) {
+                change = true;
+            }
         } else {
             requires = null;
         }
-        
-        //TODO: handle ensures, too.
 
-        if (lhs == rewrite.getLeft()
-            && rhs == rewrite.getRight()
-            && requires == node.getRequires()) {
+        Term ensures;
+        if (node.getEnsures() != null) {
+            ensures = (Term) this.visitNode(node.getEnsures());
+            if (ensures != node.getEnsures()) {
+                change = true;
+            }
+        } else {
+            ensures = null;
+        }
+
+        if (!change) {
             return node;
         }
 
         node = node.shallowCopy();
-        rewrite = rewrite.shallowCopy();
-        node.setBody(rewrite);
-        rewrite.setLeft(lhs, context);
-        rewrite.setRight(rhs, context);
+        node.setBody(body);
         node.setRequires(requires);
+        node.setEnsures(ensures);
         return node;
     }
 
@@ -89,34 +109,35 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(KApp node, Void _)  {
+        node = (KApp) super.visit(node, _);
         if (!(node.getLabel() instanceof KLabelConstant)) {
             /* only consider KLabel constants */
-            return super.visit(node, _);
+            return node;
         }
         KLabelConstant kLabelConstant = (KLabelConstant) node.getLabel();
 
         if (!(node.getChild() instanceof KList)) {
             /* only consider KList constants */
-            return super.visit(node, _);
+            return node;
         }
         KList kList = (KList) node.getChild();
 
         List<Production> productions = context.productionsOf(kLabelConstant.getLabel());
         if (productions.isEmpty()) {
-            return super.visit(node, _);
+            return node;
         }
         Production production = productions.iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
-            return super.visit(node, _);
+            return node;
         }
-        
+
         Term[] arguments = new Term[kList.getContents().size()];
         for (int i = 0; i < kList.getContents().size(); ++i) {
             arguments[i] = (Term) this.visitNode(kList.getContents().get(i));
         }
-        
+
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())
                 || sort.elementLabel().equals(kLabelConstant.getLabel())
                 || sort.unitLabel().equals(kLabelConstant.getLabel())
@@ -134,7 +155,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         location));
             }
         }
-        
+
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
             return DataStructureBuiltin.of(sort, arguments);
         } else if (sort.elementLabel().equals(kLabelConstant.getLabel())) {
@@ -151,12 +172,13 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         getName(),
                         filename,
                         location));
-                return super.visit(node, _);
+                return node;
             }
         } else if (sort.type().equals(KSorts.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
-            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update")) 
-                    && kList.getContents().size() >= 3 && kList.getContents().get(0) instanceof Variable) {
+            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update"))
+                    && kList.getContents().size() == 3
+                    && kList.getContents().get(0) instanceof Variable) {
                 return new MapUpdate(
                         (Variable) kList.getContents().get(0),
                         Collections.<Term, Term>emptyMap(),
@@ -164,10 +186,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                                 kList.getContents().get(1),
                                 kList.getContents().get(2)));
             }
-            return super.visit(node, _);
+            return node;
         } else {
             /* custom function */
-            return super.visit(node, _);
+            return node;
         }
     }
 

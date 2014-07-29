@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
  * </p>
  * Additionally, a data structure sort may provide other hooked operations. Each
  * backend must implement these builtin data structures types.
- * 
+ *
  * @author AndreiS
  */
 public class DataStructureSort implements Serializable {

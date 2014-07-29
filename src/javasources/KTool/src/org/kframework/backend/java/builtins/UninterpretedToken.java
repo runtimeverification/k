@@ -1,12 +1,15 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.MaximalSharing;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.HashMap;
@@ -16,18 +19,18 @@ import java.util.Map;
 /**
  * Represents an uninterpreted token which consists of the {@code String}
  * representation of a sort and a value.
- * 
+ *
  * @author AndreiS
  */
-public final class UninterpretedToken extends Token {
+public final class UninterpretedToken extends Token implements MaximalSharing {
 
     /* Token cache */
-    private static final Map<String, Map <String, UninterpretedToken>> cache = new HashMap<String, Map <String, UninterpretedToken>>();
+    private static final Map<Sort, Map<String, UninterpretedToken>> cache = new HashMap<>();
 
-    private final String sort;
+    private final Sort sort;
     private final String value;
 
-    private UninterpretedToken(String sort, String value) {
+    private UninterpretedToken(Sort sort, String value) {
         this.sort = sort;
         this.value = value;
     }
@@ -37,7 +40,7 @@ public final class UninterpretedToken extends Token {
      * UninterpretedToken instances are cached to ensure uniqueness (subsequent invocations of
      * this method with the same sort and value return the same {@code UninterpretedToken} object).
      */
-    public static UninterpretedToken of(String sort, String value) {
+    public static UninterpretedToken of(Sort sort, String value) {
         Map<String, UninterpretedToken> sortCache = cache.get(sort);
         if (sortCache == null) {
             sortCache = new HashMap<String, UninterpretedToken>();
@@ -53,11 +56,8 @@ public final class UninterpretedToken extends Token {
         return cachedGenericToken;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this UninterpretedToken.
-     */
     @Override
-    public String sort() {
+    public Sort sort() {
         return sort;
     }
 
@@ -70,6 +70,14 @@ public final class UninterpretedToken extends Token {
     }
 
     @Override
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        return hashCode;
+    }
+
+    @Override
     public boolean equals(Object object) {
         /* UninterpretedToken instances are cached */
         return this == object;
@@ -79,7 +87,7 @@ public final class UninterpretedToken extends Token {
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);

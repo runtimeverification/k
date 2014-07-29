@@ -18,7 +18,7 @@ public abstract class BasicCompilerStep<T extends ASTNode> implements CompilerSt
     public BasicCompilerStep(Context context) {
         this.context = context;
     }
-    
+
     public void setSw(Stopwatch sw) {
         this.sw = sw;
     }

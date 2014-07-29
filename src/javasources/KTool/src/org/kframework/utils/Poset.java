@@ -10,24 +10,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import org.apache.commons.collections15.set.UnmodifiableSet;
+import org.apache.commons.collections4.set.UnmodifiableSet;
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.Table;
 
 public class Poset implements Serializable {
 
     private boolean cacheEnabled = false;
-    
+
     private java.util.Set<Tuple> relations = new HashSet<Tuple>();
     private java.util.Set<String> elements = new HashSet<String>();
-        
+
     /**
      * Returns a unmodifiable view of elements in this poset.
      */
     public java.util.Set<String> getElements() {
         return java.util.Collections.unmodifiableSet(elements);
     }
-    
+
     public void addElement(String element) {
         elements.add(element);
         invalidateCache();
@@ -80,20 +80,20 @@ public class Poset implements Serializable {
 
     private abstract class BoundType implements Serializable {
         public abstract boolean isInRelation(String first, String second);
-        
+
         public Table<String, String, Set<String>> cache;
     }
-    
+
     private BoundType lowerBound = new BoundType() {
-        
+
         @Override
         public boolean isInRelation(String first, String second) {
             return Poset.this.isInRelation(first, second);
         }
     };
-    
+
     private BoundType upperBound = new BoundType() {
-        
+
         @Override
         public boolean isInRelation(String first, String second) {
             return Poset.this.isInRelation(second, first);
@@ -102,13 +102,13 @@ public class Poset implements Serializable {
 
     /**
      * finds the least upper bound of a subset of the elements of
-     * 
+     *
      * returns null if none exists
-     * 
+     *
      * assumes that all elements in subset are actually elements of the Poset
-     * 
+     *
      * also assumes that the Poset is actually a Poset (transitively closed)
-     * 
+     *
      */
     public String getLUB(Set<String> subset) {
         return getUniqueBound(subset, upperBound);
@@ -116,18 +116,18 @@ public class Poset implements Serializable {
 
     /**
      * finds the greatest lower bound of a subset of the elements of
-     * 
+     *
      * returns null if none exists
-     * 
+     *
      * assumes that all elements in subset are actually elements of the Poset
-     * 
+     *
      * also assumes that the Poset is actually a Poset (transitively closed)
-     * 
+     *
      */
     public String getGLB(Set<String> subset) {
         return getUniqueBound(subset, lowerBound);
     }
-    
+
     private String getUniqueBound(Set<String> subset, BoundType type) {
         if (subset == null || subset.size() == 0) {
             return null;
@@ -139,7 +139,7 @@ public class Poset implements Serializable {
         if (lowerBounds.size() == 0) {
             return null;
         }
-        
+
         String candidate = null;
         for (String lowerBound : lowerBounds) {
             if (candidate == null) {
@@ -181,17 +181,17 @@ public class Poset implements Serializable {
         }
         return bounds;
     }
-    
+
     private Set<String> getClosestBounds(Set<String> subset, BoundType type) {
         assert elements.containsAll(subset);
-        
+
         if (subset == null || subset.size() == 0) {
             return Collections.emptySet();
         }
         if (subset.size() == 1) {
             return Collections.singleton(subset.iterator().next());
         }
-        
+
         if (subset.size() == 2) {
             if (!cacheEnabled) {
                 initializeCache();
@@ -204,9 +204,9 @@ public class Poset implements Serializable {
                 return cachedBound;
             }
         }
-        
+
         Set<String> bounds = getBounds(subset, type);
-        
+
         /* find closest bounds from the candidate bounds */
         if (!bounds.isEmpty()) {
             Set<String> nonClosestBs = new HashSet<String>();
@@ -222,12 +222,12 @@ public class Poset implements Serializable {
                     }
                 }
             }
-        
+
             bounds.removeAll(nonClosestBs);
         }
 
         /* make it immutable */
-        bounds = UnmodifiableSet.decorate(bounds);
+        bounds = UnmodifiableSet.unmodifiableSet(bounds);
 
         /* cache the result for the most common use case */
         if (subset.size() == 2) {
@@ -239,10 +239,10 @@ public class Poset implements Serializable {
         }
         return bounds;
     }
-    
+
     /**
      * Finds the maximal lower bounds of a subset of the elements in this poset.
-     * 
+     *
      * @param subset
      *            the subset of elements
      * @return an immutable set of the maximal lower bounds
@@ -250,10 +250,10 @@ public class Poset implements Serializable {
     public Set<String> getMaximalLowerBounds(Set<String> subset) {
         return getClosestBounds(subset, lowerBound);
     }
-    
+
     /**
      * Finds the minimal upper bounds of a subset of the elements in this poset.
-     * 
+     *
      * @param subset
      *            the subset of elements
      * @return an immutable set of the minimal upper bounds
@@ -261,18 +261,18 @@ public class Poset implements Serializable {
     public Set<String> getMinimalUpperBounds(Set<String> subset) {
         return getClosestBounds(subset, upperBound);
     }
-    
+
     private void invalidateCache() {
         cacheEnabled = false;
         lowerBound.cache = null;
         upperBound.cache = null;
     }
-    
+
     private void initializeCache() {
         cacheEnabled = true;
         lowerBound.cache = ArrayTable.create(elements, elements);
         upperBound.cache = ArrayTable.create(elements, elements);
-    }    
+    }
 
     private class Tuple implements Serializable {
         private String big, small;
@@ -306,7 +306,7 @@ public class Poset implements Serializable {
 
     /**
      * Checks to see if the current set of relations has a circuit.
-     * 
+     *
      * @return null if there aren't any circuits, or a list of relations that create a circuit.
      */
     public List<String> checkForCycles() {

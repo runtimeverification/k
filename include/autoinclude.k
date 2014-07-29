@@ -11,7 +11,7 @@ require "io/io.k"
 
 module AUTO-INCLUDED-MODULE-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
-  
+
 endmodule
 
 module AUTO-INCLUDED-MODULE

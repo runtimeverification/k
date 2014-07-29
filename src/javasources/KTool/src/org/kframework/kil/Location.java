@@ -12,5 +12,5 @@ public class Location extends Attribute {
     int columnNumber;
     int startOffset;
     int endOffset;
-    
+
 }

@@ -40,7 +40,7 @@ public class SDFHelper {
 
     /**
      * Search for all the productions that have either 'klabel(tag)' or the 'tag' attribute
-     * 
+     *
      * @param tag
      * @return
      */
@@ -73,7 +73,7 @@ public class SDFHelper {
         String sdf = "lexical restrictions\n";
         sdf += "    %% follow restrictions\n";
         for (Ttuple tt : mytuples) {
-            sdf += "    \"" + StringUtil.escape(tt.value) + "\" -/- ";
+            sdf += "    " + StringUtil.enquoteCString(tt.value) + " -/- ";
             String ending = tt.key.substring(tt.value.length());
             for (int i = 0; i < ending.length(); i++) {
                 String ch = "" + ending.charAt(i);
@@ -90,9 +90,9 @@ public class SDFHelper {
 
     /**
      * Using this class to collect the prefixes amongst terminals
-     * 
+     *
      * @author RaduFmse
-     * 
+     *
      */
     private static class Ttuple {
         public String key;

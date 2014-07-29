@@ -20,10 +20,10 @@ module LIST
   //TODO(AndreiS): move the paragraph below
   /*@ \section{User-Defined Lists} It is very common in \K to define a shorthand
    for lists of user-defined sorts. \K 's builtin way of doing this is to use
-   List\{K,"Separator"\}, where "Separator" is any valid character or sequence of
-   characters used to separate distinct elements.
+   List\{KItem,"Separator"\}, where "Separator" is any valid character or
+   sequence of characters used to separate distinct elements.
    For example, after defining \\
-   syntax K ::= Elt\\ 
+   syntax KItem ::= Elt\\
    a user could then define
    syntax Elts ::= List\{Elt,","\} \\
    which would be a comma-separated list whose elements are all of sort Elt. A

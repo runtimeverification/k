@@ -20,18 +20,18 @@ public class DeclareCellLabels extends BasicCompilerStep<Definition> {
     public String getName() {
         return "Generate CellLabel sort";
     }
-        
+
     @Override
     public Definition compile(Definition def, String stepName) {
-        Module module = def.getSingletonModule();        
+        Module module = def.getSingletonModule();
 
         CellLabelCollector labels = new CellLabelCollector(context);
         labels.visitNode(module);
-        
+
         for (String cellLabel : labels.cellLabels) {
             module.addProduction("CellLabel", new Terminal(cellLabel));
         }
-        
+
         return def;
     }
 }

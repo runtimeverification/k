@@ -17,19 +17,19 @@ module EXP-SYNTAX
              | Exp "==" Exp  [eq, strict]                   // equality test
 
              > "not" Exp   [not, strict]                   // boolean negation
-             > left: 
+             > left:
                Exp "and" Exp [and, strict(1)]    // boolean conjunction
 endmodule
 
 module EXP imports EXP-SYNTAX
   imports BOOL-EXP
   imports INT-EXP
-  rule  I1:Int + I2:Int => I1 +Int I2  
-  rule  I1:Int * I2:Int => I1 *Int I2  
-  rule  I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0  
-  rule  I1:Int <= I2:Int => I1 <=Int I2  
-  rule  V1:Val == V2:Val => V1 ==K V2  
-  rule  not T:Bool => notBool T  
-  rule  true and E:Exp => E  
-  rule  false and E => false  
+  rule  I1:Int + I2:Int => I1 +Int I2
+  rule  I1:Int * I2:Int => I1 *Int I2
+  rule  I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
+  rule  I1:Int <= I2:Int => I1 <=Int I2
+  rule  V1:Val == V2:Val => V1 ==K V2
+  rule  not T:Bool => notBool T
+  rule  true and E:Exp => E
+  rule  false and E => false
 endmodule

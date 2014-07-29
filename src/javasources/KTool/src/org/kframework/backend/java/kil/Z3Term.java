@@ -11,9 +11,9 @@ import com.microsoft.z3.Expr;
 
 /**
  * The Z3 representation of a K term.
- * 
+ *
  * @see org.kframework.backend.java.symbolic.KILtoZ3
- * 
+ *
  * @author: AndreiS
  */
 public class Z3Term extends Term {
@@ -40,7 +40,7 @@ public class Z3Term extends Term {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         throw new UnsupportedOperationException();
     }
 
@@ -65,8 +65,18 @@ public class Z3Term extends Term {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return System.identityHashCode(this);
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return this == object;
     }
 
 }

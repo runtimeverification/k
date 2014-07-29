@@ -18,7 +18,7 @@ public abstract class BuiltinLookup extends Term implements Interfaces.Parent<Te
 
     /** True if the key of this lookup is not determined, and this lookup can choose one */
     private final boolean choice;
-    
+
     public static enum Children {
         KEY, BASE, VALUE
     }
@@ -47,7 +47,7 @@ public abstract class BuiltinLookup extends Term implements Interfaces.Parent<Te
     }
 
     public abstract Term value();
-    
+
     @Override
     public Term getChild(Children type) {
         switch (type) {
@@ -59,7 +59,7 @@ public abstract class BuiltinLookup extends Term implements Interfaces.Parent<Te
                 throw new IllegalArgumentException("not a valid child type for class " + getClass().getSimpleName());
         }
     }
-    
+
     public abstract BuiltinLookup shallowCopy(Variable base, Term key);
-    
+
 }

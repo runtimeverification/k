@@ -115,7 +115,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public boolean isTerminal() {
         return items.size() == 1 && items.get(0) instanceof Terminal;
     }
-    
+
     public String getBracketSort() {
         assert isBracket();
         return getChildSort(0);
@@ -147,6 +147,10 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return attributes.get("cons");
     }
 
+    /**
+     * Use .getKLabel() if you want the klabel
+     */
+    @Deprecated
     public String getLabel() {
         String label = attributes.get("prefixlabel");
         if (label == null) {
@@ -366,7 +370,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public List<ProductionItem> getChildren(Enum<?> _) {
         return items;
     }
-    
+
     @Override
     public void setChildren(List<ProductionItem> children, Enum<?> _) {
         this.items = children;

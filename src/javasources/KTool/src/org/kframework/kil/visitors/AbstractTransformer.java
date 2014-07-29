@@ -6,9 +6,9 @@ import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
 
 /**
- * A helper class designed to encapsulate functionality shared between 
+ * A helper class designed to encapsulate functionality shared between
  * {@link LocalTransformer}, {@link ParseForestTransformer}, and {@link CopyOnWriteTransformer}.
- * 
+ *
  * This class serves to replace the Transformable interface that existed before, and implements
  * functionality specific to visitors which transform terms.
  * @author dwightguth
@@ -19,7 +19,7 @@ public abstract class AbstractTransformer<E extends Throwable> extends AbstractV
     public AbstractTransformer(String name, Context context) {
         super(name, context);
     }
-    
+
     public AbstractTransformer(Context context) {
         super(context);
     }

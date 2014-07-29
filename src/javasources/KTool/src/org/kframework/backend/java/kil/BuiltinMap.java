@@ -1,12 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.ImmutableMultiset;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
@@ -17,7 +15,7 @@ import java.util.Map;
 import org.apache.commons.collections15.map.UnmodifiableMap;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 
 
 /**
@@ -87,9 +85,9 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         // TODO(AndreiS): track the original sort from the grammar
-        return KSorts.MAP;
+        return Sort.MAP;
     }
 
     @Override
@@ -110,13 +108,25 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + collectionPatterns.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + collectionFunctions.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Map.Entry<Term, Term> entry : entries.entrySet()) {
+            hasCell = hasCell || entry.getKey().hasCell() || entry.getValue().hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -140,7 +150,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);
@@ -170,7 +180,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         public void put(Term key, Term value) {
             entries.put(key, value);
         }
-        
+
         /**
          * Copies all key-value pairs of the given map into the BuiltinMap being
          * built.
@@ -178,23 +188,23 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         public void putAll(Map<? extends Term, ? extends Term> map) {
             entries.putAll(map);
         }
-        
+
         public Term remove(Term key) {
             return entries.remove(key);
         }
-        
+
         public Map<Term, Term> getEntries() {
             return UnmodifiableMap.decorate(entries);
         }
 
         /**
-         * Concatenates the BuiltinMap being built with another term
+         * Concatenates terms of sort Map to this builder
          */
         public void concatenate(Term... terms) {
             for (Term term : terms) {
-                assert term.sort().equals(KSorts.MAP)
+                assert term.sort().equals(Sort.MAP)
                         : "unexpected sort " + term.sort() + " of concatenated term " + term
-                        + "; expected " + KSorts.MAP;
+                        + "; expected " + Sort.MAP;
 
                 if (term instanceof BuiltinMap) {
                     BuiltinMap map = (BuiltinMap) term;

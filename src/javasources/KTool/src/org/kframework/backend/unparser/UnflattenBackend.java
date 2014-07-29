@@ -12,7 +12,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
-import java.io.IOException;
 
 public class UnflattenBackend extends BasicBackend {
     private Backend backend;
@@ -21,7 +20,7 @@ public class UnflattenBackend extends BasicBackend {
         super(sw, context);
         this.backend = backend;
     }
-    
+
     @Override
     public Definition lastStep(Definition def) {
         return backend.lastStep(def);
@@ -31,9 +30,9 @@ public class UnflattenBackend extends BasicBackend {
     public Definition firstStep(Definition def) {
         return backend.firstStep(def);
     }
-    
+
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         /* first unflatten the syntax */
         ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
         definition = (Definition) concretizeSyntax.visitNode(definition);
@@ -56,11 +55,11 @@ public class UnflattenBackend extends BasicBackend {
     public String getDefaultStep() {
         return backend.getDefaultStep();
     }
-    
+
     @Override
     public boolean autoinclude() {
         return backend.autoinclude();
-    }    
+    }
 
     @Override
     public CompilerSteps<Definition> getCompilationSteps() {

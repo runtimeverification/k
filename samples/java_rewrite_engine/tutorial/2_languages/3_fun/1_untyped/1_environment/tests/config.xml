@@ -12,9 +12,23 @@
             exclude="constructor-bst-sorting stuck-letrec polymorphism-6"
             >
         <kompile-option name="--backend" value="java" />
-        <kompile-option name="--rule-index" value="path" />
         <all-programs>
-            <krun-option name="--search" />
+            <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        </all-programs>
+    </test>
+    
+    <test
+            definition="fun-untyped.k"
+            programs="../../../../../../../../tutorial/2_languages/3_fun/programs"
+            results="../../../../../../../../tutorial/2_languages/3_fun/1_untyped/1_environment/tests"
+            extension="fun"
+            exclude="constructor-bst-sorting stuck-letrec polymorphism-6"
+            >
+        <kompile-option name="--backend" value="java" />
+        <kompile-option name="-d" value="pattern-matching" />
+        <all-programs>
+            <krun-option name="-d" value="pattern-matching" />
+            <krun-option name="--pattern-matching" />
             <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
         </all-programs>
     </test>

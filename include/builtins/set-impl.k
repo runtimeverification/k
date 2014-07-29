@@ -14,8 +14,8 @@ module SET-IMPL
   rule .Set -Set _:Set => .Set
 
   // syntax Bool ::= K "in" Set
-  rule K:K in SetItem(K) _:Set => true
-  rule K1:K in SetItem(K2:K) S:Set => K1 =K K2 orBool K1 in S
+  rule K1:K in SetItem(K2:K) _:Set => true requires K1 =K K2
+  rule K1:K in SetItem(K2:K) S:Set => K1 in S requires notBool(K1 =K K2)
   rule _ in .Set => false
 
   // syntax Bool ::= Set "<=Set" Set

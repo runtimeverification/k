@@ -11,16 +11,16 @@ import org.kframework.utils.Stopwatch;
  * For instance, the ASTs on which this compilation operates can be just
  * {@code Module}s or {@code Rule}s of the definition.
  * </p>
- * 
+ *
  * @param <T>
  *            the type of the AST
  */
 public interface CompilerStep<T extends ASTNode> {
-    
+
     /**
      * Applies a certain compilation step to a given abstract syntax tree (AST)
      * in the definition.
-     * 
+     *
      * @param ast
      *            the given AST
      * @param haltAfterStep
@@ -30,7 +30,7 @@ public interface CompilerStep<T extends ASTNode> {
      * @throws CompilerStepDone
      */
     T compile(T ast, String haltAfterStep) throws CompilerStepDone;
-    
+
     /**
      * Returns the name of this compilation step.
      */

@@ -46,7 +46,7 @@ public class BuiltinMapOperations {
                 map,
                 Collections.<Term>emptySet(),
                 Collections.singletonMap(key, value));
-        return mapUpdate.evaluateUpdate(context);
+        return mapUpdate.evaluateUpdate();
     }
 
     public static Term remove(BuiltinMap map, Term key, TermContext context) {
@@ -54,7 +54,7 @@ public class BuiltinMapOperations {
                 map,
                 Collections.singleton(key),
                 Collections.<Term, Term>emptyMap());
-        return mapUpdate.evaluateUpdate(context);
+        return mapUpdate.evaluateUpdate();
     }
 
     public static Term updateAll(BuiltinMap map1, BuiltinMap map2, TermContext context) {

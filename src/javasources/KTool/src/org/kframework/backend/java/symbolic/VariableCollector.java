@@ -11,7 +11,7 @@ import org.kframework.backend.java.kil.Variable;
 
 /**
  * A visitor which computes the set of variables in a term.
- * 
+ *
  * @author AndreiS
  */
 public class VariableCollector extends PrePostVisitor {
@@ -58,7 +58,7 @@ public class VariableCollector extends PrePostVisitor {
     /**
      * Gets the computed set of variables in the term which accepts this
      * visitor.
-     * 
+     *
      * @return the set of variables in that term
      */
     public Set<Variable> getVariableSet() {

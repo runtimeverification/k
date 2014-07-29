@@ -31,7 +31,7 @@
 		  skip="pdf"
           results="03-arithmetic-expressions-amb/">
         <all-programs>
-            <krun-option name="-parser" value="kast --parser newprogram" />
+            <krun-option name="--parser" value="kast --parser newprogram" />
         </all-programs>
     </test>
 
@@ -42,7 +42,7 @@
 		  skip="pdf"
           results="04-ambiguous-constructor/">
         <all-programs>
-            <krun-option name="-parser" value="kast --parser newprogram" />
+            <krun-option name="--parser" value="kast --parser newprogram" />
         </all-programs>
     </test>
 

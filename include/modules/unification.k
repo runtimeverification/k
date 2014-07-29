@@ -25,7 +25,7 @@ module UNIFICATION
     (e.g. _ in Prolog), they should declare some syntax like the following:
 syntax ThingThatCanBeUnified ::= "_" [onlyLabel, klabel($dontcare)]
 */
-  syntax K ::= "$dontcare" [klabel($dontcare), latex(\AnyVar[K])]
+  syntax KItem ::= "$dontcare" [klabel($dontcare), latex(\AnyVar[K])]
 
 // Traian: I would remove applySubst all together and only keep applyMgu
 //         Mgu gives a nicer, more intuitive user interface than Subst
@@ -109,14 +109,14 @@ Note that ~> is not handled  and neither are binding operations.
   rule substitute(X:K,,K:K,,X) => K   [structural, anywhere]
   rule substitute(X:K,,K:K,,L:KLabel(Ks:KList))
     => L:KLabel(substitute(X,,K,,Ks))
-    when X =/=K L:KLabel(Ks) 
+    when X =/=K L:KLabel(Ks)
      andBool (isCollection(L(Ks)) =/=K true)
    [structural, anywhere]
 
   //TODO:  Consider implementing substitute for other collections, too
-  rule substitute(X:K,, K:K,, L:List,,Ks:KList) 
+  rule substitute(X:K,, K:K,, L:List,,Ks:KList)
     => substituteList(X, K, L),, substitute(X,, K,, Ks)
-  rule substitute(X:K,, K:K,, S:Set,,Ks:KList) 
+  rule substitute(X:K,, K:K,, S:Set,,Ks:KList)
     => substituteSet(X, K, S),, substitute(X,, K,, Ks)
 
   syntax Set ::= substituteSet(K,K,Set) [function]
@@ -204,7 +204,7 @@ constraint.
 
 // alpha conversion moved here by grigore
  syntax K ::= renameVariables(K)  [function, hook(MetaK:renameVariables)]
-            | applyAlpha(K)
+//            | applyAlpha(K)
 
 // rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
 // rule subst(Eqns:KList) ~> applyAlpha(K) => applySubst(subst(Eqns),K)

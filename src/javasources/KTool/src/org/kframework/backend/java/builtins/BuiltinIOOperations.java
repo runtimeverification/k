@@ -11,7 +11,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.K;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
 
@@ -117,7 +116,9 @@ public class BuiltinIOOperations {
     public static Term parse(StringToken term1, StringToken term2, TermContext context) {
         try {
             RunProcess rp = new RunProcess();
-            org.kframework.kil.Term kast = rp.runParser(K.parser, term1.stringValue(), true, term2.stringValue(), context(context));
+            org.kframework.kil.Term kast = rp.runParser(
+                    context(context).ccOptions.parser(context(context)),
+                    term1.stringValue(), true, term2.stringValue(), context(context));
             Term term = Term.of(kast, definition(context));
             term = term.evaluate(context);
             return term;

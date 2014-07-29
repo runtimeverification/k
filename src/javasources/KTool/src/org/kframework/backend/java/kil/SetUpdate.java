@@ -1,10 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -12,8 +8,11 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+
 
 /**
  *
@@ -56,7 +55,7 @@ public class SetUpdate extends Term implements DataStructureUpdate {
             if (!builtinSet.isConcreteCollection()) {
                 return new SetUpdate(builder.build(), pendingRemoveSet);
             } else {
-                return new Bottom(Kind.KITEM);
+                return Bottom.of(Kind.KITEM);
             }
         }
 
@@ -83,16 +82,21 @@ public class SetUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return set.sort();
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + set.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

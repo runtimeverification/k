@@ -1,11 +1,16 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.*;
-
-import org.kframework.backend.java.symbolic.*;
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -30,7 +35,7 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         this.updateMap = ImmutableMap.copyOf(updateMap);
     }
 
-    public Term evaluateUpdate(TermContext context) {
+    public Term evaluateUpdate() {
         if (removeSet.isEmpty() && updateMap().isEmpty()) {
             return map;
         }
@@ -54,7 +59,7 @@ public class MapUpdate extends Term implements DataStructureUpdate {
             if (!builtinMap.isConcreteCollection()) {
                 return new MapUpdate(builder.build(), pendingRemoveSet, updateMap);
             } else {
-                return new Bottom(Kind.KITEM);
+                return Bottom.of(Kind.KITEM);
             }
         }
 
@@ -86,17 +91,22 @@ public class MapUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return map.sort();
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

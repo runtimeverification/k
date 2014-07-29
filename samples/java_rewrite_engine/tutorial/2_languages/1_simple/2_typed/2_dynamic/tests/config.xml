@@ -12,8 +12,8 @@
       exclude="dekker.simple exceptions_07.simple threads_05.simple"
       >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="--rule-index" value="path" />
     <all-programs>
+      <krun-option name="--pattern-matching" />
       <krun-option name="--output" value="none" />
       <krun-option name="--smt" value="none" />
     </all-programs>

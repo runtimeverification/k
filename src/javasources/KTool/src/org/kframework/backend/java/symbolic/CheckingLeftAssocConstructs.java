@@ -11,9 +11,9 @@ import org.kframework.kil.loader.Constants;
 /**
  * Checks syntactic constructs tagged with label [left] are actually
  * left-associative.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class CheckingLeftAssocConstructs implements KastStructureCheckerPlugin {
 
@@ -22,7 +22,7 @@ public class CheckingLeftAssocConstructs implements KastStructureCheckerPlugin {
     private final LocalVisitor preVisitor = new CheckLeftAssociativity();
     private final LocalVisitor postVisitor = null;
     private PluggableKastStructureChecker checker;
-    
+
     public CheckingLeftAssocConstructs(Definition definition) {
         for (KLabel kLabel : definition.kLabels()) {
             if (kLabel instanceof KLabelConstant) {
@@ -31,7 +31,7 @@ public class CheckingLeftAssocConstructs implements KastStructureCheckerPlugin {
                     // has attribute [left]?
                     continue;
                 }
-                
+
                 Production prod = ((KLabelConstant) kLabel).productions().get(0);
                 if (prod.containsAttribute(Constants.LEFT)) {
                     leftAssocKLabels.add((KLabelConstant) kLabel);
@@ -44,13 +44,13 @@ public class CheckingLeftAssocConstructs implements KastStructureCheckerPlugin {
     public void registerTo(PluggableKastStructureChecker checker) {
         assert this.checker == null;
         this.checker = checker;
-    }        
-    
+    }
+
     @Override
     public void reset() {
         preVisitor.resetProceed();
     }
-    
+
     @Override
     public LocalVisitor getPreVisitor() {
         return preVisitor;
@@ -74,12 +74,12 @@ public class CheckingLeftAssocConstructs implements KastStructureCheckerPlugin {
                     // TODO(YilongL): why is 'notBool or absInt left-assoc?
                     return;
                 }
-                
+
                 if (klist.get(1) instanceof KItem) {
                     // TODO(AndreiS): deal with KLabel variables
                     assert ((KItem) klist.get(1)).kLabel() instanceof KLabel;
                     KLabel kLabel2 = (KLabel) ((KItem) klist.get(1)).kLabel();
-                    
+
                     if (kLabel1.equals(kLabel2)) {
                         this.proceed = false;
                         checker.flagFailure(CheckingLeftAssocConstructs.this);

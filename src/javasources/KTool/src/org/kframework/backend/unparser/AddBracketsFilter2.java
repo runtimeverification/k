@@ -7,6 +7,7 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ColorSetting;
+import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.parser.DefinitionLoader;
 
 import java.io.IOException;
@@ -94,7 +95,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         ASTNode result = super.visit(ast, _);
         return postpare((Term)result, tmp);
     }
-    
+
     private ASTNode postpare(Term ast, boolean atTop) throws ParseFailedException {
         if (reparsed != null) {
             ASTNode result = addBracketsIfNeeded(ast);
@@ -103,7 +104,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
             }
             return result;
         }
-        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, false, true, context);
+        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, OutputMode.SMART, true, context);
         unparser.visitNode(ast);
         String unparsed = unparser.getResult();
         try {
@@ -125,7 +126,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         }
 
         public Void visit(ASTNode ast, Void _) {
-            if (ast.getLocation().equals("generated")) 
+            if (ast.getLocation().equals("generated"))
                 return null;
             Scanner scanner = new Scanner(ast.getLocation()).useDelimiter("[,)]").skip("\\(");
             int beginLine = scanner.nextInt();
@@ -183,7 +184,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
 
         public ASTNode visit(Term t, Void _) throws ParseFailedException {
             if (t.equals(ast) && t.getLocation().equals(realLocation)) {
-                hasTerm = true; 
+                hasTerm = true;
             }
             return t;
         }

@@ -84,7 +84,7 @@ public class CheckRewrite extends BasicVisitor {
         inFunction = temp;
         return null;
     }
-    
+
     @Override
     public Void visit(Rewrite node, Void _) {
         if (inConfig) {

@@ -48,7 +48,7 @@ public class MetaK {
         } catch (UnificationFailure e) {
             return BoolToken.FALSE;
         }
-        return BoolToken.TRUE;
+        return constraint.isFalse() ? BoolToken.FALSE : BoolToken.TRUE;
     }
 
     /**

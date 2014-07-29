@@ -22,7 +22,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * A KList represented as a non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     private Term child;
-    
+
     public static enum Children {
         LABEL, CHILD;
     }
@@ -37,7 +37,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
     public static KApp of(Term label, Term... elements) {
         return new KApp(label, new KList(Arrays.asList(elements)));
     }
-    
+
     /**
      * Constructs the application of the given KLabel to a KList with the given elements.
      *

@@ -85,9 +85,9 @@ module IMP
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <out>... .List => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]
-  
+
   rule <k> halt; ~> _ => . </k>
-  
+
   rule <k> spawn S => . ...</k> <env> Rho </env>
        (. => <thread>... <k> S </k> <env> Rho </env> ...</thread>)
   rule <thread>... <k> . </k> ...</thread> => .  [structural]

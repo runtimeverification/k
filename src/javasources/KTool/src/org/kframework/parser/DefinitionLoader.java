@@ -68,13 +68,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class DefinitionLoader {
-    public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws IOException {
+    public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) {
         Definition javaDef;
-        File canoFile = mainFile.getCanonicalFile();
+        File canoFile = mainFile.getAbsoluteFile();
 
         String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
         if ("bin".equals(extension)) {
-            javaDef = (Definition) BinaryLoader.load(canoFile.toString());
+            javaDef = (Definition) BinaryLoader.loadOrDie(Definition.class, canoFile.toString());
 
             Stopwatch.instance().printIntermediate("Load definition from binary");
 
@@ -84,8 +84,6 @@ public class DefinitionLoader {
 
         } else {
             javaDef = parseDefinition(mainFile, lang, autoinclude, context);
-
-            BinaryLoader.save(context.kompiled.getAbsolutePath() + "/defx-" + context.kompileOptions.backend.name().toLowerCase() + ".bin", javaDef);
         }
         return javaDef;
     }
@@ -125,7 +123,7 @@ public class DefinitionLoader {
                 } else {
                     def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
                 }
-                
+
                 if (!def.getModulesMap().containsKey(mainModule)) {
                     String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
@@ -133,10 +131,10 @@ public class DefinitionLoader {
             }
             Stopwatch.instance().printIntermediate("Basic Parsing");
 
-            //This following line was commented out to make the latex backend 
+            //This following line was commented out to make the latex backend
             //parse files importing from other files
             def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
-            
+
             // HERE: add labels to sorts
 
             def.preprocess(context);
@@ -150,18 +148,10 @@ public class DefinitionLoader {
             Stopwatch.instance().printIntermediate("Checks");
 
             // ------------------------------------- generate files
-            try {
-                ResourceExtractor.ExtractDefSDF(new File(context.dotk, "def"));
-                ResourceExtractor.ExtractGroundSDF(new File(context.dotk, "ground"));
-    
-                ResourceExtractor.ExtractProgramSDF(new File(context.dotk, "pgm"));
-            } catch (IOException e) {
-                if (context.globalOptions.debug) {
-                    e.printStackTrace();
-                }
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
-                        "IO error detected writing to " + context.kompiled.getAbsolutePath()));
-            }
+            ResourceExtractor.ExtractDefSDF(new File(context.dotk, "def"));
+            ResourceExtractor.ExtractGroundSDF(new File(context.dotk, "ground"));
+
+            ResourceExtractor.ExtractProgramSDF(new File(context.dotk, "pgm"));
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
             if (!context.kompileOptions.backend.documentation()) {
@@ -181,15 +171,12 @@ public class DefinitionLoader {
                     try {
                         FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.sdf"), context.kompiled);
                         FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.tbl"), context.kompiled);
-                        } catch (IOException e) {
-                        if (context.globalOptions.debug) {
-                            e.printStackTrace();
-                        }
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
-                                "IO error detected writing program parser to file"));
-                        return null; //unreachable
+                    } catch (IOException e) {
+                        GlobalSettings.kem.registerInternalError(
+                                "IO error detected writing program parser to file", e);
+                        throw new AssertionError("unreachable");
                     }
-                    
+
                     Stopwatch.instance().printIntermediate("Generate TBLPgm");
                 }
             }
@@ -223,12 +210,9 @@ public class DefinitionLoader {
                         try {
                             FileUtils.copyFile(new File(context.dotk, "ground/Concrete.tbl"), new File(context.kompiled, "Ground.tbl"));
                         } catch (IOException e) {
-                            if (context.globalOptions.debug) {
-                                e.printStackTrace();
-                            }
-                            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
-                                    "IO error detected writing ground parser to file"));
-                            return null; //unreachable
+                            GlobalSettings.kem.registerInternalError(
+                                    "IO error detected writing ground parser to file", e);
+                            throw new AssertionError("unreachable");
                         }
                     }
                     t1.join();
@@ -236,23 +220,20 @@ public class DefinitionLoader {
                         FileUtils.copyFileToDirectory(new File(context.dotk, "def/Integration.sdf"), context.kompiled);
                         FileUtils.copyFile(new File(context.dotk, "def/Concrete.tbl"), new File(context.kompiled, "Rule.tbl"));
                     } catch (IOException e) {
-                        if (context.globalOptions.debug) {
-                            e.printStackTrace();
-                        }
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, 
-                                "IO error detected writing rule parser to file"));
-                        return null; //unreachable
+                        GlobalSettings.kem.registerInternalError(
+                                "IO error detected writing rule parser to file", e);
+                        throw new AssertionError("unreachable");
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                             "Thread was interrupted trying to run SDF2Table"));
                 }
-                
-                
+
+
                 Stopwatch.instance().printIntermediate("Generate TBLDef");
             }
-            
+
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
 
             Stopwatch.instance().printIntermediate("Importing Files");
@@ -273,7 +254,7 @@ public class DefinitionLoader {
             // load definition if possible
             try {
                 @SuppressWarnings("unchecked")
-                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.loadWithThrow(cacheFile);
+                Map<String, CachedSentence> cachedDefTemp = (Map<String, CachedSentence>) BinaryLoader.load(Map.class, cacheFile);
                 cachedDef = cachedDefTemp;
             } catch (IOException | ClassNotFoundException e) {
                 // it means the cache is not valid, or it doesn't exist
@@ -292,7 +273,7 @@ public class DefinitionLoader {
                 te.printStackTrace();
             } finally {
                 // save definition
-                BinaryLoader.save(cacheFile, clf.getKept());
+                BinaryLoader.saveOrDie(cacheFile, clf.getKept());
             }
             JavaClassesFactory.endConstruction();
 

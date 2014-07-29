@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!DOCTYPE module PUBLIC
+"-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+"http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+  <module name="FileTabCharacter" />
+  <module name="RegexpMultiline">
+    <property name="format" value="(?s:((\r)|([ \t\x0B\f]$)).*)" />
+    <property name="message" value="File has non-Unix line endings or trailing whitespace" />
+  </module>
+</module>

@@ -18,6 +18,7 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -29,6 +30,7 @@ import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.krun.K;
+import org.kframework.utils.options.SMTSolver;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,15 +45,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
-import com.microsoft.z3.Sort;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Symbol;
 import com.microsoft.z3.Z3Exception;
-
 
 /**
  * A conjunction of equalities between terms (with variables).
@@ -103,10 +102,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          * It is null is this constraint is not false.
          */
         public Equality falsifyingEquality;
-        
+
         public SymbolicUnifier.Data unifierData;
 
-        public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution, 
+        public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution,
                 TruthValue truthValue, boolean isNormal, SymbolicUnifier.Data unifierData) {
             this.equalities = equalities;
             this.substitution = substitution;
@@ -358,18 +357,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
-            if (!K.do_testgen) {
-                if (leftHandSide instanceof KItem) {
-
-                }
+            if (!termContext().definition().context().javaExecutionOptions.generateTests) {
                 if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
                     return !leftHandSide.sort().equals(rightHandSide.sort());
                 } else if (leftHandSide.isExactSort()) {
-                    return !definition.context().isSubsortedEq(
+                    return !definition.subsorts().isSubsortedEq(
                             rightHandSide.sort(),
                             leftHandSide.sort());
                 } else if (rightHandSide.isExactSort()) {
-                    return !definition.context().isSubsortedEq(
+                    return !definition.subsorts().isSubsortedEq(
                             leftHandSide.sort(),
                             rightHandSide.sort());
                 } else {
@@ -399,29 +395,29 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                             return true;
                         }
                     }
-                    return !definition.context().hasCommonSubsort(
+                    return !definition.subsorts().hasCommonSubsort(
                             leftHandSide.sort(),
                             rightHandSide.sort());
                 }
             } else {
                 if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
                         && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
-                    for (String pms : ((KItem) leftHandSide).possibleMinimalSorts()) {
-                        if (definition.context().isSubsortedEq(rightHandSide.sort(), pms)) {
+                    for (Sort pms : ((KItem) leftHandSide).possibleMinimalSorts()) {
+                        if (definition.subsorts().isSubsortedEq(rightHandSide.sort(), pms)) {
                             return false;
                         }
                     }
                     return true;
                 } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
                         && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
-                    for (String pms : ((KItem) rightHandSide).possibleMinimalSorts()) {
-                        if (definition.context().isSubsortedEq(leftHandSide.sort(), pms)) {
+                    for (Sort pms : ((KItem) rightHandSide).possibleMinimalSorts()) {
+                        if (definition.subsorts().isSubsortedEq(leftHandSide.sort(), pms)) {
                             return false;
                         }
                     }
                     return true;
                 } else {
-                    return definition.context().hasCommonSubsort(
+                    return definition.subsorts().hasCommonSubsort(
                         (leftHandSide).sort(),
                         (rightHandSide).sort());
                 }
@@ -561,7 +557,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * one-to-one relationship between unifiers and constraints.
      */
     private final SymbolicUnifier unifier;
-    
+
     public SymbolicConstraint(Data data, TermContext context) {
         this.data = data;
         this.context = context;
@@ -577,8 +573,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public SymbolicConstraint(TermContext context) {
         this(new Data(
-                new LinkedList<Equality>(), new HashMap<Variable, Term>(), TruthValue.TRUE, true, 
-                new SymbolicUnifier.Data()), 
+                new LinkedList<Equality>(), new HashMap<Variable, Term>(), TruthValue.TRUE, true,
+                new SymbolicUnifier.Data()),
                 context);
     }
 
@@ -708,7 +704,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean checkUnsat() {
-        if (!K.smt.equals("z3")) {
+        if (termContext().definition().context().smtOptions.smt != SMTSolver.Z3) {
             return false;
         }
 
@@ -844,7 +840,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private static boolean impliesSMT(SymbolicConstraint left, SymbolicConstraint right) {
         boolean result = false;
-        if (K.smt.equals("gappa")) {
+        assert left.termContext().definition().context() == right.termContext().definition().context();
+        if (left.termContext().definition().context().smtOptions.smt == SMTSolver.GAPPA) {
 
             GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(left);
             String gterm1 = premises.result;
@@ -871,7 +868,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 result = true;
 
 //            System.out.println(constraint);
-        } else if (K.smt.equals("z3")) {
+        } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
             Set<Variable> rightHandSideVariables = new HashSet<Variable>(right.variableSet());
             rightHandSideVariables.removeAll(left.variableSet());
 
@@ -903,13 +900,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             */
 
-                Sort[] variableSorts = new Sort[rightHandSideVariables.size()];
+                com.microsoft.z3.Sort[] variableSorts = new com.microsoft.z3.Sort[rightHandSideVariables.size()];
                 Symbol[] variableNames = new Symbol[rightHandSideVariables.size()];
                 i = 0;
                 for (Variable variable : rightHandSideVariables) {
-                    if (variable.sort().equals(BoolToken.SORT_NAME)) {
+                    if (variable.sort().equals(BoolToken.SORT)) {
                         variableSorts[i] = context.MkBoolSort();
-                    } else if (variable.sort().equals(IntToken.SORT_NAME)) {
+                    } else if (variable.sort().equals(IntToken.SORT)) {
                         variableSorts[i] = context.MkIntSort();
                     //} else if (variable.sort().equals(BitVector.SORT_NAME)) {
                     //    variableSorts[i] = context.MkBitVecSort(32);
@@ -1356,19 +1353,19 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         for (Map.Entry<Variable, Term> entry : data.substitution.entrySet()) {
-            String sortOfPatVar = entry.getKey().sort();
+            Sort sortOfPatVar = entry.getKey().sort();
             Term subst = entry.getValue();
             if (subst instanceof DataStructureLookupOrChoice) {
                 return false;
             }
-            String sortOfSubst = subst.sort();
+            Sort sortOfSubst = subst.sort();
             /* YilongL: There are three different cases:
              * 1) sortOfParVar >= sortOfSubst
              * 2) sortOfParVar < sortOfSubst
              * 3) there is no order between sortOfParVar & sortOfSubst
              * Only case 1) represents a pattern matching
              */
-            if (!definition.context().isSubsortedEq(sortOfPatVar, sortOfSubst)) {
+            if (!definition.subsorts().isSubsortedEq(sortOfPatVar, sortOfSubst)) {
                 return false;
             }
 

@@ -27,40 +27,40 @@ module AGENT-SYNTAX
   imports QUOTE-UNQUOTE-SYNTAX
 
 //  syntax priorities dref > mul > and > app >  assgn if prnt rndv > spwn while > seq  > lam
-  syntax priorities app 
-                  > dref 
-                  > mul 
-                  > and 
+  syntax priorities app
+                  > dref
+                  > mul
+                  > and
                   > assgn prnt sndTo sndSyn bcst rndv newAg
-                  > if spwn while 
-                  > seq  
+                  > if spwn while
+                  > seq
                   > lam mu
 endmodule
 
 module AGENT
   imports AGENT-SYNTAX
-  imports EXP 
+  imports EXP
   imports LAMBDA
   imports MU
   imports CALLCC
-  imports HALT 
-  imports IO 
-  imports REF 
-  imports WHILE 
-  imports THREADS 
-  imports AGENTS 
-  imports QUOTE-UNQUOTE 
+  imports HALT
+  imports IO
+  imports REF
+  imports WHILE
+  imports THREADS
+  imports AGENTS
+  imports QUOTE-UNQUOTE
 
  configuration
     <T>
-      <agent multiplicity="*"> 
+      <agent multiplicity="*">
           <control>
               <thread multiplicity="*">
                   <k color="green">$PGM:K</k>
                   <holds>.Map</holds>
               </thread>
           </control>
-          <busy>.Set</busy> 
+          <busy>.Set</busy>
 //          @latex(\\kBR)
           <mem> .Map </mem> <nextLoc> 0 </nextLoc>
           <me>0</me>
