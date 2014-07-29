@@ -54,7 +54,7 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.content = t;
     }
 
-    public Cast(String location, String filename, String sort) {
+    public Cast(String location, String filename, Sort sort) {
         super(location, filename, sort);
     }
 
@@ -76,19 +76,19 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
-    public Cast(String sort) {
+    public Cast(Sort sort) {
         super(sort);
     }
 
-    public String getSort() {
+    public Sort getSort() {
         if (type == CastType.INNER)
-            return KSorts.K;
+            return Sort.K;
         return sort;
     }
 
-    public String getInnerSort() {
+    public Sort getInnerSort() {
         if (type == CastType.OUTER)
-            return KSorts.K;
+            return Sort.K;
         return sort;
     }
 

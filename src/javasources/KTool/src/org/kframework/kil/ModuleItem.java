@@ -18,7 +18,7 @@ public abstract class ModuleItem extends ASTNode {
         return null;
     }
 
-    public java.util.List<String> getAllSorts() {
+    public java.util.List<Sort> getAllSorts() {
         return null;
     }
 }

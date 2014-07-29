@@ -14,8 +14,6 @@ import org.w3c.dom.Element;
  */
 public class IntBuiltin extends Token {
 
-    public static final String SORT_NAME = "#Int";
-
     /* Token cache */
     private static Map<BigInteger, IntBuiltin> tokenCache = new HashMap<BigInteger, IntBuiltin>();
     /* KApp cache */
@@ -135,12 +133,9 @@ public class IntBuiltin extends Token {
         return value;
     }
 
-    /**
-     * Returns a {@link String} representing the sort name of a int token.
-     */
     @Override
-    public String tokenSort() {
-        return IntBuiltin.SORT_NAME;
+    public Sort tokenSort() {
+        return Sort.BUILTIN_INT;
     }
 
     /**

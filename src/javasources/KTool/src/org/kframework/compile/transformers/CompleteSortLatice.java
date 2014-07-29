@@ -7,6 +7,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.AddConsesVisitor;
@@ -40,15 +41,8 @@ import java.util.Set;
  */
 public class CompleteSortLatice extends CopyOnWriteTransformer {
 
-    public static final String LIST_OF_BOTTOM_PREFIX = "#ListOf";
-    public static final String BOTTOM_SORT_NAME = "#Bot";
-
     public CompleteSortLatice(Context context) {
         super("Subsort syntactic lists", context);
-    }
-
-    public static String getUserListName(String sort, String separator) {
-        return CompleteSortLatice.LIST_OF_BOTTOM_PREFIX + sort + "{\"" + separator + "\"}";
     }
 
     @Override
@@ -64,18 +58,16 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
 
         /* Add bottom sort #Bot */
         transformedNode.addProduction(
-                CompleteSortLatice.BOTTOM_SORT_NAME,
+                Sort.BUILTIN_BOT,
                 new Production(
-                        new Sort(CompleteSortLatice.BOTTOM_SORT_NAME),
+                        new NonTerminal(Sort.BUILTIN_BOT),
                         Collections.<ProductionItem>emptyList()));
 
         /* Add list of bottom for each syntactic list separator (i.e. List{#Bot, separator}) */
         for (String separator : separators) {
             transformedNode.addProduction(
-                    CompleteSortLatice.getUserListName(
-                            CompleteSortLatice.BOTTOM_SORT_NAME,
-                            separator),
-                    new UserList(CompleteSortLatice.BOTTOM_SORT_NAME, separator));
+                    Sort.BUILTIN_BOT.getUserListSort(separator),
+                    new UserList(Sort.BUILTIN_BOT, separator));
         }
 
         /*
@@ -88,7 +80,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
             change = false;
 
         sort1_loop:
-            for (String sort1 : node.getAllSorts()) {
+            for (Sort sort1 : node.getAllSorts()) {
                 Collection<Production> productions = node.getProductionsOf(sort1);
                 if (productions.isEmpty()) {
                     continue;
@@ -101,7 +93,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 }
 
             sort2_loop:
-                for (String sort2 : node.getAllSorts()) {
+                for (Sort sort2 : node.getAllSorts()) {
                     // TODO(AndreiS): deal with equivalent sorts
                     if (context.isSubsortedEq(sort2, sort1) || context.isSubsortedEq(sort1, sort2)
                             || context.isListSort(sort2)) {
@@ -131,7 +123,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production1 : context.listConses.values()) {
             UserList userList1 = (UserList) production1.getItems().get(0);
 
-            Set<String> subsorts = new HashSet<String>();
+            Set<Sort> subsorts = new HashSet<>();
             for (Production production2 : context.listConses.values()) {
                 UserList userList2 = (UserList) production2.getItems().get(0);
 
@@ -142,10 +134,10 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 }
             }
 
-            for (String sort : node.getAllSorts()) {
+            for (Sort sort : node.getAllSorts()) {
                 if (!subsorts.contains(sort) && context.isSubsorted(userList1.getSort(), sort)) {
                     transformedNode.addProduction(
-                            CompleteSortLatice.getUserListName(sort, userList1.getSeparator()),
+                            sort.getUserListSort(userList1.getSeparator()),
                             new UserList(sort, userList1.getSeparator()));
                 }
             }
@@ -184,15 +176,13 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production : context.listConses.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
-            if (userList.getSort().equals(CompleteSortLatice.BOTTOM_SORT_NAME)) {
+            if (userList.getSort().equals(Sort.BUILTIN_BOT)) {
                 continue;
             }
 
             transformedNode.addSubsort(
                     production.getSort(),
-                    CompleteSortLatice.getUserListName(
-                            CompleteSortLatice.BOTTOM_SORT_NAME,
-                            userList.getSeparator()),
+                    Sort.BUILTIN_BOT.getUserListSort(userList.getSeparator()),
                     context);
         }
 
@@ -203,8 +193,8 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         for (Production production : context.listConses.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
-            if (context.isSubsorted(KSorts.KRESULT, userList.getSort())) {
-                transformedNode.addSubsort(KSorts.KRESULT, production.getSort(), context);
+            if (context.isSubsorted(Sort.KRESULT, userList.getSort())) {
+                transformedNode.addSubsort(Sort.KRESULT, production.getSort(), context);
             }
         }
 

@@ -34,7 +34,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
                 = context.dataStructureSortOf(context.cellSorts.get(node.getLabel()));
         if (dataStructureSort != null) {
             /* data structure sort */
-            if (ellipses == Ellipses.BOTH && !dataStructureSort.type().equals(KSorts.LIST)) {
+            if (ellipses == Ellipses.BOTH && !dataStructureSort.type().equals(Sort.LIST)) {
                 ellipses = Ellipses.RIGHT;
             }
 
@@ -42,21 +42,21 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
             if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
                 content = KApp.of(
                         KLabelConstant.of(dataStructureSort.constructorLabel()),
-                        Variable.getFreshVar(dataStructureSort.name()),
+                        Variable.getFreshVar(dataStructureSort.sort()),
                         content);
             }
             if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
                 content = KApp.of(
                         KLabelConstant.of(dataStructureSort.constructorLabel()),
                         content,
-                        Variable.getFreshVar(dataStructureSort.name()));
+                        Variable.getFreshVar(dataStructureSort.sort()));
             }
 
             node.setContents(content);
             return node;
         }
 
-        KSort kind = KSort.getKSort(node.getContents().getSort()).mainSort();
+        Sort kind = node.getContents().getSort().getKSort().mainSort();
         Collection col;
         if (node.getContents() instanceof Collection) {
             col = (Collection) node.getContents().shallowCopy();
@@ -73,14 +73,14 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
         }
         node.setContents(col);
 
-        if (ellipses == Ellipses.BOTH && kind != KSort.K) {
+        if (ellipses == Ellipses.BOTH && !kind.equals(Sort.K)) {
             ellipses = Ellipses.RIGHT;
         }
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
-            col.getContents().add(0, Variable.getFreshVar(kind.toString()));
+            col.getContents().add(0, Variable.getFreshVar(Sort.of(kind.toString())));
         }
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
-            col.getContents().add(Variable.getFreshVar(kind.toString()));
+            col.getContents().add(Variable.getFreshVar(Sort.of(kind.toString())));
         }
 
         return node;

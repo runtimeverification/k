@@ -16,6 +16,7 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -197,7 +198,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             if (term instanceof Cell) {
                 terms.add(term);
             } else if (term instanceof Variable) {
-                terms.add(new Variable(((Variable) term).getName(), listSort.name()));
+                terms.add(new Variable(((Variable) term).getName(), Sort.of(listSort.name())));
             } else {
                 assert false;
             }
@@ -243,7 +244,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
                     entries.put(key, KApp.of(new KInjectedLabel(value)));
                 }
             } else if (term instanceof Variable) {
-                terms.add(new Variable(((Variable) term).getName(), mapSort.name()));
+                terms.add(new Variable(((Variable) term).getName(), Sort.of(mapSort.name())));
             } else {
                 assert false;
             }

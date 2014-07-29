@@ -122,7 +122,7 @@ public class HTMLFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         result.append("<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>");
         return _;
     }
@@ -239,7 +239,7 @@ public class HTMLFilter extends BackendFilter {
 
     public Void visit(Collection col, Void _) {
         if (col.isEmpty()) {
-            printEmpty(col.getSort());
+            printEmpty(col.getSort().getName());
             return _;
         }
         List<Term> contents = col.getContents();
@@ -414,7 +414,7 @@ public class HTMLFilter extends BackendFilter {
                         if (pi instanceof Terminal) {
                             this.visitNode(pi);
                             empty = false;
-                        } else if (pi instanceof Sort) {
+                        } else if (pi instanceof NonTerminal) {
                             Term t = trm.getContents().get(j++);
                             this.visitNode(t);
                             empty = false;

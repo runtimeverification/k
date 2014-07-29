@@ -3,7 +3,7 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -28,7 +28,7 @@ public class PriorityFilter extends ParseForestTransformer {
             }
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
-                if (tc.getProduction().getItems().get(i) instanceof Sort) {
+                if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
                     // look for the outermost element
                     if ((i == 0 || i == tc.getProduction().getItems().size() - 1)
                             && (tc.getContents().get(j) instanceof TermCons || tc.getContents().get(j) instanceof Ambiguity)) {

@@ -34,7 +34,7 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(Production node, P p) throws E;
     public R visit(ProductionItem node, P p) throws E;
     // <ProductionItems>
-    public R visit(Sort node, P p) throws E;
+    public R visit(NonTerminal node, P p) throws E;
     public R visit(Lexical node, P p) throws E;
     public R visit(Terminal node, P p) throws E;
     public R visit(UserList node, P p) throws E;

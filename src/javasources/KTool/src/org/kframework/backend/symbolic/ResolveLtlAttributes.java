@@ -9,6 +9,7 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -89,7 +90,7 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                             rule.getLocation()));
                 } else {
                     // create a variable representing the path condition
-                    Variable phi = Variable.getFreshVar("K");
+                    Variable phi = Variable.getFreshVar(Sort.K);
 
                     // wrap the LTL state variable and the path condition phi with
                     // <generatedTop> cell

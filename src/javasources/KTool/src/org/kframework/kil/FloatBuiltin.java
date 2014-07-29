@@ -19,8 +19,6 @@ import org.w3c.dom.Element;
 
 public class FloatBuiltin extends Token {
 
-    public static final String SORT_NAME = "#Float";
-
     /* Token cache */
     private static Map<Pair<BigFloat, Integer>, FloatBuiltin> tokenCache = new HashMap<>();
 
@@ -132,8 +130,8 @@ public class FloatBuiltin extends Token {
      * Returns a {@link String} representing the sort name of a float token.
      */
     @Override
-    public String tokenSort() {
-        return FloatBuiltin.SORT_NAME;
+    public Sort tokenSort() {
+        return Sort.BUILTIN_FLOAT;
     }
 
     /**

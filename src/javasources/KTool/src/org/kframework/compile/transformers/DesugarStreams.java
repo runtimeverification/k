@@ -51,16 +51,16 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 //            eq evalCleanConf(T, "stdin") = mkCollection(List, (T, ioBuffer(stdinVariable), noIOVariable, stdinStream)) .
             addAtBeginning = contents;
 //            syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-            TermCons buffer = new TermCons("Stream", "Stream1IOBufferSyn", context);
+            TermCons buffer = new TermCons(Sort.STREAM, "Stream1IOBufferSyn", context);
             java.util.List<Term> bufferTerms = new ArrayList<Term>();
-            bufferTerms.add(new Variable("$stdin", "String")); // eq stdinVariable = mkVariable('$stdin,K) .
+            bufferTerms.add(new Variable("$stdin", Sort.STRING)); // eq stdinVariable = mkVariable('$stdin,K) .
             buffer.setContents(bufferTerms);
             items.add(newListItem(buffer));
 
-            items.add(new Variable("$noIO", ("List")));//          eq noIOVariable = mkVariable('$noIO,List) .
+            items.add(new Variable("$noIO", Sort.LIST));//          eq noIOVariable = mkVariable('$noIO,List) .
 
 //            syntax List ::= "#istream" "(" Int ")"        [cons(List1InputStreamSyn)]
-            TermCons stdinStream = new TermCons("Stream", "Stream1InputStreamSyn", context);
+            TermCons stdinStream = new TermCons(Sort.STREAM, "Stream1InputStreamSyn", context);
             java.util.List<Term> stdinStreamTerms = new ArrayList<Term>();
             stdinStreamTerms.add(IntBuiltin.ZERO);
             stdinStream.setContents(stdinStreamTerms);
@@ -69,16 +69,16 @@ public class DesugarStreams extends CopyOnWriteTransformer {
         if ("stdout".equals(stream)) {
 //            eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, noIOVariable, ioBuffer(nilK),T)) .
 //            | "#ostream" "(" Int ")"        [cons(List1OutputStreamSyn)]
-            TermCons stdoutStream = new TermCons("Stream", "Stream1OutputStreamSyn", context);
+            TermCons stdoutStream = new TermCons(Sort.STREAM, "Stream1OutputStreamSyn", context);
             java.util.List<Term> stdinStreamTerms = new ArrayList<Term>();
             stdinStreamTerms.add(IntBuiltin.ONE);
             stdoutStream.setContents(stdinStreamTerms);
             items.add(newListItem(stdoutStream));
 
-            items.add(new Variable("$noIO", ("List")));//          eq noIOVariable = mkVariable('$noIO,List) .
+            items.add(new Variable("$noIO", Sort.LIST));//          eq noIOVariable = mkVariable('$noIO,List) .
 
 //            syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-            TermCons buffer = new TermCons("Stream", "Stream1IOBufferSyn", context);
+            TermCons buffer = new TermCons(Sort.STREAM, "Stream1IOBufferSyn", context);
             java.util.List<Term> bufferTerms = new ArrayList<Term>();
             bufferTerms.add(StringBuiltin.EMPTY);
             buffer.setContents(bufferTerms);

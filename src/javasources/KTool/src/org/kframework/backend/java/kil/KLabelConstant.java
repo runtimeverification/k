@@ -9,7 +9,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
@@ -104,9 +103,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     private KItem buildListTerminator(Definition definition) {
         String separator = definition.context().listLabelSeparator.get(label);
         if (separator != null) {
-            return new KItem(this, KList.EMPTY, Sort.of(CompleteSortLatice
-                    .getUserListName(CompleteSortLatice.BOTTOM_SORT_NAME,
-                            separator)), true);
+            return new KItem(this, KList.EMPTY, Sort.SHARP_BOT.getUserListSort(separator), true);
         }
         return null;
     }

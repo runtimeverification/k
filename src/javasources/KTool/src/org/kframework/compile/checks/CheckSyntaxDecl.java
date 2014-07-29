@@ -8,6 +8,7 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -48,7 +49,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
         if (node.containsAttribute("bracket")) {
             int countSorts = 0;
             for (ProductionItem pi : node.getItems()) {
-                if (pi instanceof Sort)
+                if (pi instanceof NonTerminal)
                     countSorts++;
                 else if (!(pi instanceof Terminal)) {
                     String msg = "Bracket can be used on productions with Terminals and only one NonTerminal.";
@@ -62,14 +63,14 @@ public class CheckSyntaxDecl extends BasicVisitor {
         }
 
         if (node.isSubsort()) {
-            String sort = node.getSubsort().getName();
-            if (Sort.isBasesort(sort) && !context.isSubsorted(node.getSort(), sort)) {
+            Sort sort = node.getSubsort().getSort();
+            if (sort.isBaseSort() && !context.isSubsorted(node.getSort(), sort)) {
                 String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
         } else if (!node.containsAttribute(Constants.FUNCTION)
-                && (node.getSort().equals(KSorts.K) ||
-                    node.getSort().equals(KSorts.KLIST))) {
+                && (node.getSort().equals(Sort.K) ||
+                    node.getSort().equals(Sort.KLIST))) {
             String msg = "Extending sort K or KList is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }
@@ -86,15 +87,16 @@ public class CheckSyntaxDecl extends BasicVisitor {
         }
 
         for (ProductionItem pi : node.getItems()) {
-            if (pi instanceof Sort) {
+            if (pi instanceof NonTerminal) {
                 sorts++;
-                Sort s = (Sort) pi;
-                if (!(s.getName().endsWith("CellSort") || s.getName().endsWith("CellFragment")))
-                    if (!context.definedSorts.contains(s.getName())) {
-                        String msg = "Undefined sort " + s.getName();
+                NonTerminal s = (NonTerminal) pi;
+                if (!s.getSort().isCellSort()) {
+                    if (!context.definedSorts.contains(s.getSort())) {
+                        String msg = "Undefined sort " + s;
                         GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                     }
-                if (s.getName().equals(KSorts.KRESULT) && !(node.isSubsort() && node.getSort().equals(KSorts.KITEM))) {
+                }
+                if (s.getSort().equals(Sort.KRESULT) && !(node.isSubsort() && node.getSort().equals(Sort.KITEM))) {
                     String msg = "KResult is only allowed in the left hand side of syntax.";
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }
@@ -102,11 +104,11 @@ public class CheckSyntaxDecl extends BasicVisitor {
             if (pi instanceof UserList) {
                 sorts++;
                 UserList s = (UserList) pi;
-                if (!s.getSort().startsWith("#") && !context.definedSorts.contains(s.getSort())) {
+                if (!s.getSort().getName().startsWith("#") && !context.definedSorts.contains(s.getSort())) {
                     String msg = "Undefined sort " + s.getSort();
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }
-                if (s.getSort().equals("KResult")) {
+                if (s.getSort().equals(Sort.KRESULT)) {
                     String msg = "KResult is only allowed in the left hand side of syntax declarations.";
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
                 }
@@ -150,12 +152,12 @@ public class CheckSyntaxDecl extends BasicVisitor {
         if (prodItems.size() == 2) {
             ProductionItem oprnd1 = node.getItems().get(0);
             ProductionItem oprnd2 = node.getItems().get(1);
-            return (oprnd1 instanceof Sort) && (oprnd2 instanceof Sort);
+            return (oprnd1 instanceof NonTerminal) && (oprnd2 instanceof NonTerminal);
         } else if (prodItems.size() == 3) {
             ProductionItem oprnd1 = node.getItems().get(0);
             ProductionItem op = node.getItems().get(1);
             ProductionItem oprnd2 = node.getItems().get(2);
-            return (oprnd1 instanceof Sort) && (oprnd2 instanceof Sort) && (op instanceof Terminal);
+            return (oprnd1 instanceof NonTerminal) && (oprnd2 instanceof NonTerminal) && (op instanceof Terminal);
         } else {
             return false;
         }

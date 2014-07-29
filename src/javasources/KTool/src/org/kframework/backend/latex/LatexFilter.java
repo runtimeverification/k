@@ -88,7 +88,7 @@ public class LatexFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         result.append("{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}");
                 terminalBefore = false;
                 return null;
@@ -142,7 +142,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(UserList ul, Void _) {
         result.append("List\\{");
-        this.visitNode(new Sort(ul.getSort()));
+        this.visitNode(new NonTerminal(ul.getSort()));
         result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
         terminalBefore = false;
         return null;
@@ -193,7 +193,7 @@ public class LatexFilter extends BackendFilter {
         final boolean parens = wantParens.peek();
         final boolean hasBR = containsBR(col);
         if (col.isEmpty()) {
-            printEmpty(col.getSort());
+            printEmpty(col.getSort().getName());
             return null;
         }
         if (hasBR) {
@@ -243,7 +243,7 @@ public class LatexFilter extends BackendFilter {
             result.append("\\variable");
         }
         if (var.getSort() != null) {
-            result.append("[" + StringUtil.latexify(var.getSort()) + "]");
+            result.append("[" + StringUtil.latexify(var.getSort().getName()) + "]");
         }
         if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
             result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
@@ -270,7 +270,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(ListTerminator e, Void _) {
-        printEmpty(e.getSort());
+        printEmpty(e.getSort().getName());
         return null;
     }
 
@@ -384,13 +384,13 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Token t, Void _) {
-        result.append("\\constant[" + StringUtil.latexify(t.tokenSort()) + "]{" + StringUtil.latexify(t.value()) + "}");
+        result.append("\\constant[" + StringUtil.latexify(t.tokenSort().getName()) + "]{" + StringUtil.latexify(t.value()) + "}");
         return null;
     }
 
     @Override
     public Void visit(KSequence k, Void _) {
-        if (k.getContents().isEmpty()) printEmpty(KSort.K.name());
+        if (k.getContents().isEmpty()) printEmpty(Sort.K.getName());
         else printList(k.getContents(), "\\kra");
         return null;
 
@@ -399,7 +399,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(KApp app, Void _) {
         if (app.getLabel() instanceof Token) {
-            result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
+            result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort().getName()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
         } else {
             this.visitNode(app.getLabel());
             result.append("(");

@@ -10,11 +10,11 @@ import com.google.common.collect.Sets;
 
 public class PosetTest {
 
-    private Poset poset;
+    private Poset<String> poset;
 
     @Before
     public void setUp() {
-        poset = new Poset();
+        poset = Poset.create();
         poset.addRelation("Top", "A0");
         poset.addRelation("Top", "A1");
         poset.addRelation("Top", "A2");
