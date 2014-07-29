@@ -64,11 +64,13 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                 rewrite = rewrite.shallowCopy();
                 rewrite.setLeft(lhs, context);
                 rewrite.setRight(rhs, context);
-                change = true;
             }
             body = rewrite;
         } else {
             body = (Term) this.visitNode(node.getBody());
+        }
+        if (body != node.getBody()) {
+            change = true;
         }
 
         Term requires;
