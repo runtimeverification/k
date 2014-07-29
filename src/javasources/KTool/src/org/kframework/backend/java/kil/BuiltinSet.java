@@ -60,17 +60,6 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         return elements.size();
     }
 
-    /**
-     * {@code BuiltinSet} is guaranteed to have only one frame; thus, they can
-     * always be used in the left-hand side of a rule.
-     */
-    @Override
-    public boolean isLHSView() {
-        // TODO(YilongL): allow BuiltinSet to have a list of Terms instead of
-        // just substitution entries; revise the javadoc
-        return true;
-    }
-
     @Override
     public Sort sort() {
         return Sort.SET;

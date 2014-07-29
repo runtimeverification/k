@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.kil.TermContext;
 
@@ -14,8 +15,14 @@ public final class BuiltinCollectionOperations {
 
     private BuiltinCollectionOperations() { }
 
-    public static IntToken size(Collection term, TermContext context) {
-        return !term.hasFrame() ? IntToken.of(term.size()) : null;
+    public static IntToken size(Collection collection, TermContext context) {
+        if (collection instanceof AssociativeCommutativeCollection) {
+            return ((AssociativeCommutativeCollection) collection).isConcreteCollection()
+                    ? IntToken.of(collection.size()) : null;
+        } else {
+            // TODO(AndreiS): support List
+            return null;
+        }
     }
 
 }
