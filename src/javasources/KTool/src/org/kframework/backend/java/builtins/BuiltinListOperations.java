@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class BuiltinListOperations {
 
-    public static BuiltinList construct(BuiltinList term1, BuiltinList term2, TermContext context) {
+    public static BuiltinList constructor(BuiltinList term1, BuiltinList term2, TermContext context) {
         Variable frame = null;
         List<Term> elementsLeft = new ArrayList<>();
         List<Term> elementsRight = new ArrayList<>();

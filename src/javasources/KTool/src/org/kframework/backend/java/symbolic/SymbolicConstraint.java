@@ -29,7 +29,6 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
-import org.kframework.krun.K;
 import org.kframework.utils.options.SMTSolver;
 
 import java.util.ArrayList;
