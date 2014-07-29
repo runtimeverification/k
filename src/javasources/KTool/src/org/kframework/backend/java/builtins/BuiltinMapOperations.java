@@ -10,9 +10,9 @@ import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
-import java.util.*;
-
-import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -64,28 +64,29 @@ public class BuiltinMapOperations {
     }
 
     public static BuiltinSet keys(BuiltinMap map, TermContext context) {
-        Preconditions.checkArgument(!map.hasFrame(), "argument " + map + " has frame");
+        if (!map.isConcreteCollection()) {
+            return null;
+        }
 
-        Set<Term> elements = new HashSet<>(map.getEntries().keySet());
-        return new BuiltinSet(elements);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.addAll(map.getEntries().keySet());
+        return (BuiltinSet) builder.build();
     }
 
     public static BuiltinList values(BuiltinMap map, TermContext context) {
-        Preconditions.checkArgument(!map.hasFrame(), "argument " + map + " has frame");
+        if (!map.isConcreteCollection()) {
+            return null;
+        }
 
         List<Term> elements = new ArrayList<>(map.getEntries().values());
         return new BuiltinList(elements);
     }
 
     public static BoolToken inclusion(BuiltinMap map1, BuiltinMap map2, TermContext context) {
-        Preconditions.checkArgument(!map1.hasFrame(), "argument " + map1 + " has frame");
-
-        for (Map.Entry<Term, Term> entry : map1.getEntries().entrySet()) {
-            if (!entry.getValue().equals(map2.get(entry.getKey()))) {
-                return BoolToken.FALSE;
-            }
+        if (!map1.isGround() || !map2.isGround()) {
+            return null;
         }
 
-        return BoolToken.TRUE;
+        return BoolToken.of(map2.getEntries().entrySet().containsAll(map1.getEntries().entrySet()));
     }
 }

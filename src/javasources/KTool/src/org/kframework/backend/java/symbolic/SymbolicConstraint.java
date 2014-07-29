@@ -800,7 +800,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
 
             right = left.simplifyConstraint(right);
-            right.orientSubstitution(left.variableSet());
+            right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
                 if (DEBUG) {
                     System.out.println("Implication proved by simplification");

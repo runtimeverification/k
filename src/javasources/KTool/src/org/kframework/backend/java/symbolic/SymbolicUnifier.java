@@ -1,10 +1,11 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.*;
-
-import com.google.common.collect.*;
-import org.kframework.backend.java.builtins.*;
+import org.kframework.backend.java.builtins.BitVector;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -29,8 +30,23 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.loader.Context;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -205,7 +221,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     public boolean unifyMap(BuiltinMap map, BuiltinMap otherMap, boolean addUnchanged) {
-        assert map.mapFunctions().isEmpty() && otherMap.mapFunctions().isEmpty();
+        assert map.collectionFunctions().isEmpty() && otherMap.collectionFunctions().isEmpty();
 
         Map<Term, Term> entries = map.getEntries();
         Map<Term, Term> otherEntries = otherMap.getEntries();
@@ -226,8 +242,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
 
-        List<KItem> patterns = map.mapPatterns();
-        List<KItem> otherPatterns = otherMap.mapPatterns();
+        Multiset<KItem> patterns = map.collectionPatterns();
+        Multiset<KItem> otherPatterns = otherMap.collectionPatterns();
         Set<KItem> unifiedPatterns = new HashSet<>();
         Set<KItem> otherUnifiedPatterns = new HashSet<>();
         List<KItem> remainingPatterns = new ArrayList<>();
@@ -256,8 +272,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
 
-        List<Variable> variables = map.mapVariables();
-        List<Variable> otherVariables = otherMap.mapVariables();
+        Multiset<Variable> variables = map.collectionVariables();
+        Multiset<Variable> otherVariables = otherMap.collectionVariables();
         Set<Variable> commonVariables = Sets.intersection(
                 ImmutableSet.copyOf(variables),
                 ImmutableSet.copyOf(otherVariables));

@@ -348,24 +348,25 @@ public class CopyOnWriteTransformer implements Transformer {
             }
         }
         /* special case for maps composed only of entries */
-        if (builtinMap.isEntryBuiltinMap()) {
+        if (builtinMap.isConcreteCollection()) {
             return changed ? builder.build() : builtinMap;
         }
 
         if (!changed) {
             builder.putAll(builtinMap.getEntries());
         }
-        for (KItem kItem : builtinMap.mapPatterns()) {
+
+        for (KItem kItem : builtinMap.collectionPatterns()) {
             Term term = (Term) kItem.accept(this);
             changed = changed || (term != kItem);
             builder.concatenate(term);
         }
-        for (Variable variable : builtinMap.mapVariables()) {
+        for (Variable variable : builtinMap.collectionVariables()) {
             Term term = (Term) variable.accept(this);
             changed = changed || (term != variable);
             builder.concatenate(term);
         }
-        for (Term term : builtinMap.mapFunctions()) {
+        for (Term term : builtinMap.collectionFunctions()) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
             builder.concatenate(transformedTerm);
@@ -375,41 +376,29 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
-        BuiltinSet transformedSet = null;
-        if (builtinSet.hasFrame()) {
-            Term frame = (Term) builtinSet.frame().accept(this);
-            if (frame != builtinSet.frame()) {
-                transformedSet = BuiltinSet.of(Collections.<Term>emptySet(), frame);
-            }
+        boolean changed = false;
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        for(Term element : builtinSet.elements()) {
+            Term transformedElement = (Term) element.accept(this);
+            builder.add(transformedElement);
+            changed = changed || (transformedElement != element);
         }
-
-        for(Term entry : builtinSet.elements()) {
-            Term key = (Term) entry.accept(this);
-
-            if (transformedSet == null && (key != entry)) {
-                if (builtinSet.hasFrame()) {
-                    transformedSet = new BuiltinSet(builtinSet.frame());
-                } else {
-                    transformedSet = new BuiltinSet();
-                }
-                for(Term copyEntry : builtinSet.elements()) {
-                    if (copyEntry.equals(entry)) {
-                        break;
-                    }
-                    transformedSet.add(copyEntry);
-                }
-            }
-
-            if (transformedSet != null) {
-                transformedSet.add(key);
-            }
+        for (KItem kItem : builtinSet.collectionPatterns()) {
+            Term term = (Term) kItem.accept(this);
+            changed = changed || (term != kItem);
+            builder.concatenate(term);
         }
-
-        if (transformedSet != null) {
-            return transformedSet;
-        } else {
-            return builtinSet;
+        for (Variable variable : builtinSet.collectionVariables()) {
+            Term term = (Term) variable.accept(this);
+            changed = changed || (term != variable);
+            builder.concatenate(term);
         }
+        for (Term term : builtinSet.collectionFunctions()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
+        }
+        return changed ? builder.build() : builtinSet;
     }
 
     @Override

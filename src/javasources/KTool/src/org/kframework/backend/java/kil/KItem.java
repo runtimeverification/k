@@ -539,7 +539,7 @@ public final class KItem extends Term {
                 requires.addAll(unificationConstraint);
                 requires.simplify();
                 requires.orientSubstitution(ruleInputKList.variableSet());
-                if (!constraint.implies(requires, ruleInputKList.variableSet)) {
+                if (!constraint.implies(requires, ruleInputKList.variableSet())) {
                     continue;
                 }
             }

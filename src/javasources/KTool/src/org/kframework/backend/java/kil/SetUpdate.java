@@ -40,27 +40,27 @@ public class SetUpdate extends Term implements DataStructureUpdate {
         if (!(set instanceof BuiltinSet)) {
             return this;
         }
+        BuiltinSet builtinSet = (BuiltinSet) set;
 
-        BuiltinSet builtinSet = ((BuiltinSet) set);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.concatenate(set);
 
-        Set<Term> elems = new HashSet<Term>(builtinSet.elements());
-        Set<Term> elemsToRemove = new HashSet<Term>();
-        for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            Term nextElem = iterator.next();
-            if (elems.remove(nextElem)) {
-                elemsToRemove.add(nextElem);
+        Set<Term> pendingRemoveSet = new HashSet<>();
+        for (Term key : removeSet) {
+            if (!builder.remove(key)) {
+                pendingRemoveSet.add(key);
             }
         }
 
-        if (removeSet.size() > elemsToRemove.size()) {
-            return new SetUpdate(set, Sets.difference(elems, elemsToRemove));
+        if (!pendingRemoveSet.isEmpty()) {
+            if (!builtinSet.isConcreteCollection()) {
+                return new SetUpdate(builder.build(), pendingRemoveSet);
+            } else {
+                return new Bottom(Kind.KITEM);
+            }
         }
 
-        if (builtinSet.hasFrame()) {
-            return new BuiltinSet(elems, builtinSet.frame());
-        } else {
-            return new BuiltinSet(elems);
-        }
+        return builder.build();
     }
 
     public Term base() {

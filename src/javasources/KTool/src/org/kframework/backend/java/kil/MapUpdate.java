@@ -38,9 +38,10 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         if (!(map instanceof BuiltinMap)) {
             return this;
         }
+        BuiltinMap builtinMap = (BuiltinMap) map;
 
         BuiltinMap.Builder builder = BuiltinMap.builder();
-        builder.concatenate(map);
+        builder.concatenate(builtinMap);
 
         Set<Term> pendingRemoveSet = new HashSet<>();
         for (Term key : removeSet) {
@@ -50,8 +51,11 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         }
 
         if (!pendingRemoveSet.isEmpty()) {
-            // TODO(YilongL): why not return Bottom when there is no frame
-            return new MapUpdate(builder.build(), pendingRemoveSet, updateMap);
+            if (!builtinMap.isConcreteCollection()) {
+                return new MapUpdate(builder.build(), pendingRemoveSet, updateMap);
+            } else {
+                return new Bottom(Kind.KITEM);
+            }
         }
 
         builder.putAll(updateMap);

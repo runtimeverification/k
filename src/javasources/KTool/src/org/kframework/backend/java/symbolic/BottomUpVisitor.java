@@ -42,13 +42,13 @@ public class BottomUpVisitor implements Visitor {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
-        for (KItem pattern : builtinMap.mapPatterns()) {
+        for (KItem pattern : builtinMap.collectionPatterns()) {
             pattern.accept(this);
         }
-        for (Variable variable : builtinMap.mapVariables()) {
+        for (Variable variable : builtinMap.collectionVariables()) {
             variable.accept(this);
         }
-        for (Term term : builtinMap.mapFunctions()) {
+        for (Term term : builtinMap.collectionFunctions()) {
             term.accept(this);
         }
         visit((Collection) builtinMap);

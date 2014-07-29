@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.ImmutableMultiset;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -24,32 +25,26 @@ import com.google.common.collect.ImmutableList;
  *
  * @author AndreiS
  */
-public class BuiltinMap extends Collection {
+public class BuiltinMap extends AssociativeCommutativeCollection {
 
     public static final BuiltinMap EMPTY_MAP = new BuiltinMap(
             (UnmodifiableMap<Term, Term>) UnmodifiableMap.decorate(Collections.<Term, Term>emptyMap()),
-            ImmutableList.<KItem>of(),
-            ImmutableList.<Variable>of(),
-            ImmutableList.<Term>of());
-    
+            ImmutableMultiset.<KItem>of(),
+            ImmutableMultiset.<Term>of(),
+            ImmutableMultiset.<Variable>of());
+
     private final UnmodifiableMap<Term, Term> entries;
-    private final ImmutableList<KItem> mapPatterns;
-    private final ImmutableList<Variable> mapVariables;
-    private final ImmutableList<Term> mapFunctions;
 
     /**
      * Private efficient constructor used by {@link BuiltinMap.Builder}.
      */
     private BuiltinMap(
             UnmodifiableMap<Term, Term> entries,
-            ImmutableList<KItem> mapPatterns,
-            ImmutableList<Variable> mapVariables,
-            ImmutableList<Term> mapFunctions) {
-        super(null, Kind.KITEM);
+            ImmutableMultiset<KItem> collectionPatterns,
+            ImmutableMultiset<Term> collectionFunctions,
+            ImmutableMultiset<Variable> collectionVariables) {
+        super(collectionPatterns, collectionFunctions, collectionVariables);
         this.entries = entries;
-        this.mapPatterns = mapPatterns;
-        this.mapVariables = mapVariables;
-        this.mapFunctions = mapFunctions;
     }
 
     public static Term concatenate(Term... maps) {
@@ -66,32 +61,13 @@ public class BuiltinMap extends Collection {
         return entries;
     }
 
-    public ImmutableList<KItem> mapPatterns() {
-        return mapPatterns;
-    }
-
-    public ImmutableList<Variable> mapVariables() {
-        return mapVariables;
-    }
-
-    public ImmutableList<Term> mapFunctions() {
-        return mapFunctions;
-    }
-
-    public boolean isEntryBuiltinMap() {
-        return mapPatterns.isEmpty() && mapVariables.isEmpty() && mapFunctions.isEmpty();
-    }
-
     public boolean isUnifiableByCurrentAlgorithm() {
-        return mapFunctions.isEmpty() && mapVariables.size() <= 1;
+        return collectionFunctions.isEmpty() && collectionVariables.size() <= 1;
     }
 
     @Override
     public boolean isEmpty() {
-        return entries.isEmpty()
-                && mapPatterns.isEmpty()
-                && mapVariables.isEmpty()
-                && mapFunctions.isEmpty();
+        return entries.isEmpty() && super.isConcreteCollection();
     }
 
     @Override
@@ -107,11 +83,6 @@ public class BuiltinMap extends Collection {
     public boolean isLHSView() {
         // TODO(YilongL): allow BuiltinMap to have a list of Terms instead of
         // just substitution entries; revise the javadoc
-        return true;
-    }
-
-    @Override
-    public boolean isExactSort() {
         return true;
     }
 
@@ -133,18 +104,18 @@ public class BuiltinMap extends Collection {
 
         BuiltinMap map = (BuiltinMap) object;
         return entries.equals(map.entries)
-                && mapPatterns.equals(map.mapPatterns)
-                && mapVariables.equals(map.mapVariables)
-                && mapFunctions.equals(map.mapFunctions);
+                && collectionPatterns.equals(map.collectionPatterns)
+                && collectionFunctions.equals(map.collectionFunctions)
+                && collectionVariables.equals(map.collectionVariables);
     }
 
     @Override
     public int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + mapPatterns.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + mapVariables.hashCode();
-        hashCode = hashCode * Utils.HASH_PRIME + mapFunctions.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + collectionPatterns.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + collectionFunctions.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
     }
 
@@ -157,9 +128,9 @@ public class BuiltinMap extends Collection {
         if (!isEmpty()) {
             return Joiner.on(operator).join(
                     Joiner.on(operator).withKeyValueSeparator(mapsTo).join(entries),
-                    Joiner.on(operator).join(mapPatterns),
-                    Joiner.on(operator).join(mapVariables),
-                    Joiner.on(operator).join(mapFunctions));
+                    Joiner.on(operator).join(collectionPatterns),
+                    Joiner.on(operator).join(collectionFunctions),
+                    Joiner.on(operator).join(collectionVariables));
         } else {
             return identity;
         }
@@ -192,9 +163,9 @@ public class BuiltinMap extends Collection {
     public static class Builder {
         
         private Map<Term, Term> entries = new HashMap<>();
-        private ImmutableList.Builder<KItem> patternsBuilder = new ImmutableList.Builder<>();
-        private ImmutableList.Builder<Variable> variablesBuilder = new ImmutableList.Builder<>();
-        private ImmutableList.Builder<Term> functionsBuilder = new ImmutableList.Builder<>();
+        private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
+        private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
+        private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
 
         public void put(Term key, Term value) {
             entries.put(key, value);
@@ -204,7 +175,7 @@ public class BuiltinMap extends Collection {
          * Copies all key-value pairs of the given map into the BuiltinMap being
          * built.
          */
-        public void putAll(Map<Term, Term> map) {
+        public void putAll(Map<? extends Term, ? extends Term> map) {
             entries.putAll(map);
         }
         
@@ -217,8 +188,7 @@ public class BuiltinMap extends Collection {
         }
 
         /**
-         * Concatenates the BuiltinMap being built with another term, which can only
-         * be a {@code Variable} or {@code BuiltinMap}.
+         * Concatenates the BuiltinMap being built with another term
          */
         public void concatenate(Term... terms) {
             for (Term term : terms) {
@@ -229,9 +199,9 @@ public class BuiltinMap extends Collection {
                 if (term instanceof BuiltinMap) {
                     BuiltinMap map = (BuiltinMap) term;
                     entries.putAll(map.entries);
-                    patternsBuilder.addAll(map.mapPatterns);
-                    variablesBuilder.addAll(map.mapVariables);
-                    functionsBuilder.addAll(map.mapFunctions);
+                    patternsBuilder.addAll(map.collectionPatterns);
+                    functionsBuilder.addAll(map.collectionFunctions);
+                    variablesBuilder.addAll(map.collectionVariables);
                 } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isPattern()) {
                     patternsBuilder.add((KItem) term);
                 } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isFunction()) {
@@ -254,13 +224,13 @@ public class BuiltinMap extends Collection {
             BuiltinMap builtinMap = new BuiltinMap(
                     (UnmodifiableMap<Term, Term>) UnmodifiableMap.decorate(entries),
                     patternsBuilder.build(),
-                    variablesBuilder.build(),
-                    functionsBuilder.build());
-            if (builtinMap.mapVariables.size() == 1
+                    functionsBuilder.build(),
+                    variablesBuilder.build());
+            if (builtinMap.collectionVariables.size() == 1
                     && builtinMap.entries.isEmpty()
-                    && builtinMap.mapPatterns.isEmpty()
-                    && builtinMap.mapFunctions.isEmpty()) {
-                return builtinMap.mapVariables.get(0);
+                    && builtinMap.collectionPatterns.isEmpty()
+                    && builtinMap.collectionFunctions.isEmpty()) {
+                return builtinMap.collectionVariables.iterator().next();
             } else {
                 return builtinMap;
             }

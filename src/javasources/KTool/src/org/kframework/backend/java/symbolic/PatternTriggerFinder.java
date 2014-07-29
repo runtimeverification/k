@@ -25,7 +25,7 @@ public class PatternTriggerFinder extends BottomUpVisitor {
         if (!(mapLookup.map() instanceof BuiltinMap)) {
             return;
         }
-        for (KItem pattern : ((BuiltinMap) mapLookup.map()).mapPatterns()) {
+        for (KItem pattern : ((BuiltinMap) mapLookup.map()).collectionPatterns()) {
             // TODO(AndreiS): refine to only consider input parameters
             if (((KList) pattern.kList()).getContents().contains(mapLookup.key())) {
                 patterns.add(pattern);
