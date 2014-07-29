@@ -120,17 +120,17 @@ public class MetaK {
             }
 
             @Override
-            public Void visit(org.kframework.kil.Context node, Void _) { 
+            public Void visit(org.kframework.kil.Context node, Void _) {
                 return null;
             }
 
             @Override
-            public Void visit(Rule node, Void _) { 
+            public Void visit(Rule node, Void _) {
                 return null;
             }
 
             @Override
-            public Void visit(Syntax node, Void _) { 
+            public Void visit(Syntax node, Void _) {
                 return null;
             }
         }.visitNode(node);

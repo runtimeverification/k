@@ -93,7 +93,7 @@ public class Definition extends JavaSymbolicObject {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
             functionRules.put(rule.definedKLabel(), rule);
             if (rule.isSortPredicate()) {
-                sortPredicateRules.put((KLabelConstant) rule.sortPredicateArgument().kLabel(), rule);                
+                sortPredicateRules.put((KLabelConstant) rule.sortPredicateArgument().kLabel(), rule);
             }
         } else if (rule.containsAttribute(Attribute.PATTERN_KEY)) {
             patternRules.put(rule.definedKLabel(), rule);
@@ -147,7 +147,7 @@ public class Definition extends JavaSymbolicObject {
     public Multimap<KLabelConstant, Rule> functionRules() {
         return functionRules;
     }
-    
+
     public Collection<Rule> sortPredicateRulesOn(KLabelConstant kLabel) {
         if (sortPredicateRules.isEmpty()) {
             return Collections.emptyList();
@@ -166,7 +166,7 @@ public class Definition extends JavaSymbolicObject {
     public Set<KLabelConstant> kLabels() {
         return Collections.unmodifiableSet(kLabels);
     }
-    
+
     public List<Rule> macros() {
         // TODO(AndreiS): fix this issue with modifiable collections
         //return Collections.unmodifiableList(macros);

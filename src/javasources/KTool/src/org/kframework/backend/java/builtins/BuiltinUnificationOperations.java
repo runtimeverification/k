@@ -24,7 +24,7 @@ public class BuiltinUnificationOperations {
         BuiltinMgu updatedMgu = BuiltinMgu.of(mgu.constraint(), context);
         updatedMgu.constraint().add(leftHandSide, rightHandSide);
         updatedMgu.constraint().simplify();
-        // TODO(YilongL): eliminate anony. vars? 
+        // TODO(YilongL): eliminate anony. vars?
         // updatedMgu.constraint().eliminateAnonymousVariables();
         return updatedMgu;
     }
@@ -37,7 +37,7 @@ public class BuiltinUnificationOperations {
     public static Term applyMgu(BuiltinMgu mgu, BuiltinMap map,
             TermContext context) {
         Preconditions.checkArgument(!map.hasFrame(), "argument " + map + " has frame");
-        
+
         BuiltinMap.Builder builder = BuiltinMap.builder();
         Map<Variable, Term> subst = mgu.constraint().substitution();
         for (Map.Entry<Term, Term> entry : map.getEntries().entrySet()) {

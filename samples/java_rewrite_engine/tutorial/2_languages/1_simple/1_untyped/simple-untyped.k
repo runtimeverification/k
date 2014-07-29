@@ -1037,7 +1037,7 @@ No kompile options are needed if you only only want to execute the definition
 program behaviors then you need to kompile with the transition option
 including rule tags such as lookup, increment, acquire, etc.  See the
 IMP++ tutorial for what the transition option means how to use it. */
-endmodule 
+endmodule
 
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SEMANTICS

@@ -16,9 +16,9 @@ import org.kframework.backend.java.kil.TermContext;
 /**
  * Expands the macros in each rule of a definition and those in the initial
  * configuration.
- * 
+ *
  * @author AndreiS
- * 
+ *
  */
 public class MacroExpander extends TermTransformer {
 
@@ -93,11 +93,11 @@ public class MacroExpander extends TermTransformer {
     public Term processTerm(Term term) {
         return (Term) expandMacro(term);
     }
-    
+
     /**
      * Private helper method that keeps expanding macros in a specified node
      * until no macro is found.
-     * 
+     *
      * @param node
      *            the specified node
      * @return the expanded node

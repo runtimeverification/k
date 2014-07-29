@@ -11,7 +11,7 @@ module LIST
    duplicate elements. These behave more like lists in functional programming
    languages than arrays in imperative programming languages; there's no
    numerical indexing, but instead specific elements are refered to using the
-   Mylist,Mylist construct in combination with the MyListItem construct. It's 
+   Mylist,Mylist construct in combination with the MyListItem construct. It's
    worth noting that \K lists aren't exactly like lists in functional languages;
    they're associative, which means that it's easy to access elements at both
    ends of the lists and concatenate them. For example, L:Mylist,E accesses

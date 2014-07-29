@@ -171,7 +171,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     public static class Builder {
-        
+
         private Map<Term, Term> entries = new HashMap<>();
         private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
         private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
@@ -225,7 +225,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                 }
             }
         }
-        
+
         public Term build() {
             // YilongL: Guava's ImmutableMap.copyOf(entries) is not smart enough
             // to avoid actually copying the entries, because entries is not an

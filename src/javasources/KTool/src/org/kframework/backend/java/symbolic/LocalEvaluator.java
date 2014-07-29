@@ -11,11 +11,11 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Evaluates predicates and functions without doing tree traversal.
- * 
+ *
  * @author Traian
  */
 public class LocalEvaluator extends LocalTransformer {
-    
+
     /**
      * TODO(YilongL): this field needs to be removed; this was added long time
      * ago for test generation; definitely not the right solution
@@ -33,13 +33,13 @@ public class LocalEvaluator extends LocalTransformer {
         super(context);
         this.constraint = constraint;
     }
-    
+
     public SymbolicConstraint constraint() {
         return constraint;
     }
-    
+
     private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
-    
+
     @Override
     public ASTNode transform(KItem kItem) {
         try {

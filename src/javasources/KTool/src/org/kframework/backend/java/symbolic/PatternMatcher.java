@@ -134,7 +134,7 @@ public class PatternMatcher extends AbstractMatcher {
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(rule.containsAttribute("lemma"), context);
-        
+
         boolean failed = true;
         if (rule.isFunction()) {
             /* match function rule */

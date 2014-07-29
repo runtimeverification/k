@@ -9,7 +9,7 @@ module LIST-PATTERN
   syntax Seq ::= Seq "@" Seq      [function]
                | rev(Seq)         [function]
   rule (E::L1) @ L2 => E::(L1 @ L2)
-  rule [] @ L => L 
+  rule [] @ L => L
   rule rev(E::L) => rev(L) @ E::[]
   rule rev([]) => []
 

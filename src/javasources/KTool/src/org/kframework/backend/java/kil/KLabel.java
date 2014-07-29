@@ -36,7 +36,7 @@ public abstract class KLabel extends Term {
     /**
      * Checks if this {@code KLabel} represents a constructor. A {@code KLabel}
      * represents a constructor, a function, or a pattern.
-     * 
+     *
      * @return true if this {@code KLabel} represents a constructor; otherwise,
      *         false
      */

@@ -4,7 +4,7 @@ require "builtins/set.k"
 
 
 module MAP
-  imports LIST 
+  imports LIST
   imports SET
 
   /*@\section{Description} The Map represents a generalized associative array.
@@ -39,10 +39,10 @@ module MAP
   syntax Map ::= updateMap(Map, Map)            [function, hook(Map:updateAll)]
 
   /*@ Get a Set consisting of all keys in the Map:*/
-	syntax Set ::= keys(Map)                      [function, hook(Map:keys)]
+    syntax Set ::= keys(Map)                      [function, hook(Map:keys)]
 
   /*@ Get a List consisting of all values in the Map: */
-	syntax List ::= values(Map)                   [function, hook(Map:values)]
+    syntax List ::= values(Map)                   [function, hook(Map:values)]
 
   /*@ Get the Map size (number of key/value pairs) */
   syntax Int ::= size(Map)                      [function, hook(Map:size)]

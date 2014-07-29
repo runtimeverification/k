@@ -10,14 +10,14 @@ rule
     <threads>
         <thread>
             <k>
-               reverse(X:Int) => ?Y:Int 
+               reverse(X:Int) => ?Y:Int
             </k>
             <control>
                 <fstack>
-                   _:List 
+                   _:List
                 </fstack>
                 <xstack>
-                   _:List 
+                   _:List
                 </xstack>
             </control>
             <env>
@@ -35,7 +35,7 @@ rule
         reverse |-> 0
     </genv>
     <store>...
-        0 |-> lambda ( x , { var y ; (y = 0) ; while ( (x != 0) ) { var t 
+        0 |-> lambda ( x , { var y ; (y = 0) ; while ( (x != 0) ) { var t
           ; (t = (x [ 1 ])) ; ((x [ 1 ]) = y) ; (y = x) ; (x = t) ; } } )
         (list(X)(A:Seq) => list(?Y)(rev(A)))
     ...</store>
@@ -68,10 +68,10 @@ rule
             ...</k>
             <control>
                 <fstack>
-                   _:List 
+                   _:List
                 </fstack>
                 <xstack>
-                   _:List 
+                   _:List
                 </xstack>
             </control>
             <env>...
