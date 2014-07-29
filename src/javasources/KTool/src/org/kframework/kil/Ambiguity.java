@@ -21,11 +21,13 @@ public class Ambiguity extends Collection {
         super(node);
     }
 
-    public Ambiguity(String sort, java.util.List<Term> col) {
+    public Ambiguity(Sort sort, java.util.List<Term> col) {
         super(sort, col);
     }
 
-    public Ambiguity(String sort, java.util.Collection<? extends Term> col) { this(sort, new ArrayList<>(col)); }
+    public Ambiguity(Sort sort, java.util.Collection<? extends Term> col) {
+        this(sort, new ArrayList<>(col));
+    }
 
     @Override
     public String toString() {
@@ -64,7 +66,7 @@ public class Ambiguity extends Collection {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

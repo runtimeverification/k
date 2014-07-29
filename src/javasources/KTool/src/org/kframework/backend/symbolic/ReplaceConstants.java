@@ -20,9 +20,9 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 /**
- * Replace each (data) constant with a symbolic value 
+ * Replace each (data) constant with a symbolic value
  * and add an equality in the side condition of the rule.
- * 
+ *
  * @author andreiarusoaie
  */
 public class ReplaceConstants extends CopyOnWriteTransformer {
@@ -56,9 +56,9 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
                 terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), context), new KList(vars)));
 
                 Token token = (Token) (entry.getValue().getLabel());
-                terms.add(KApp.of( 
+                terms.add(KApp.of(
                         KLabelConstant.of(AddPredicates.predicate(
-                                token.tokenSort().replaceFirst("#", "")), context),
+                                token.tokenSort().getName().replaceFirst("#", "")), context),
                         entry.getKey()));
             }
 

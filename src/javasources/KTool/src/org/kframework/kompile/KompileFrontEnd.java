@@ -23,7 +23,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
-import org.kframework.krun.K;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -41,52 +40,51 @@ import com.beust.jcommander.ParameterException;
 
 public class KompileFrontEnd {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         KompileOptions options = new KompileOptions();
         options.global.initialize();
         try {
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kompile");
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class));
-            
+
             if (options.global.help) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
                 return;
             }
-            
+
             if (options.helpExperimental) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
                 System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
-                return;    
+                return;
             }
-            
+
             if (options.global.version) {
                 String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.print(msg);
                 return;
             }
-            
+
             kompile(options);
         } catch (ParameterException ex) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
         }
     }
 
-    private static void kompile(KompileOptions options) throws IOException {
-        K.do_kompilation = true;
+    private static void kompile(KompileOptions options) {
         org.kframework.utils.Error.checkIfOutputDirectory(options.directory);
 
         final Context context = new Context(options);
-        
+
         context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
         context.dotk.mkdirs();
-        
+
         // default for documentation backends is to store intermediate outputs in temp directory
         context.kompiled = context.dotk;
-        
+
         if (!options.global.debug) {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -108,15 +106,13 @@ public class KompileFrontEnd {
                 backend = new LatexBackend(Stopwatch.instance(), context);
                 break;
             case DOC:
-                backend = new LatexBackend(Stopwatch.instance(), context, true);                
+                backend = new LatexBackend(Stopwatch.instance(), context, true);
                 break;
             case HTML:
                 backend = new HtmlBackend(Stopwatch.instance(), context);
                 break;
             case KORE:
                 backend = new KoreBackend(Stopwatch.instance(), context);
-                backend.run(DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
-                        backend.autoinclude(), context));
                 return;
             case MAUDE:
                 backend = new KompileBackend(Stopwatch.instance(), context);
@@ -160,8 +156,8 @@ public class KompileFrontEnd {
         if (backend != null) {
             genericCompile(options, backend, options.experimental.step, context);
         }
-        
-        BinaryLoader.save(new File(context.kompiled, "kompile-options.bin").getAbsolutePath(), options);
+
+        BinaryLoader.saveOrDie(new File(context.kompiled, "context.bin").getAbsolutePath(), context);
 
         verbose(context);
     }
@@ -175,14 +171,14 @@ public class KompileFrontEnd {
 
 
     private static void genericCompile(KompileOptions options, Backend backend, String step,
-                                       Context context) throws IOException {
+                                       Context context) {
         org.kframework.kil.Definition javaDef;
         Stopwatch.instance().start();
         javaDef = DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 backend.autoinclude(), context);
-        
+
         new CountNodesVisitor(context).visitNode(javaDef);
-        
+
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
         if (step == null) {
@@ -194,11 +190,11 @@ public class KompileFrontEnd {
             javaDef = (Definition) e.getResult();
         }
 
-        BinaryLoader.save(context.kompiled.getAbsolutePath() + "/configuration.bin",
+        BinaryLoader.saveOrDie(context.kompiled.getAbsolutePath() + "/configuration.bin",
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
-        
+
     }
 
     private static void checkAnotherKompiled(File kompiled) {

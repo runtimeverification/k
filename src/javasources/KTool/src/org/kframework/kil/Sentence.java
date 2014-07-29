@@ -20,7 +20,7 @@ public class Sentence extends ModuleItem implements MutableParent<Term, Sentence
     Term body;
     Term requires = null;
     Term ensures = null;
-    
+
     public static enum Children {
         BODY, REQUIRES, ENSURES
     }

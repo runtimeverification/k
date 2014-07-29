@@ -282,7 +282,7 @@
         <krun-option name="--ltlmc" value="TrueLtl" />
       </program>
       <program name="b.issue">
-        <krun-option name="--ltlmc" value="FalseLtl" />
+        <krun-option name="--ltlmc-file" value="b.formula" />
       </program>
   </test>
   <test
@@ -430,6 +430,11 @@
            directory="list-applyMGU"
            programs="list-applyMGU/tests"
            results="list-applyMGU/tests" />
+
+  <include file="issue720/tests/config.xml"
+           directory="issue720"
+           programs="issue720/tests"
+           results="issue720/tests" />
 
 </tests>
 

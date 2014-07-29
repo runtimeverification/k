@@ -17,7 +17,7 @@ public class MapLookup extends BuiltinLookup {
     /** {@link Term} representation of the value */
     private final Term value;
 
-    public MapLookup(Variable base, Term key, Term value, KSort kind, boolean choice) {
+    public MapLookup(Variable base, Term key, Term value, Sort kind, boolean choice) {
         super(base, key, kind, choice);
         this.value = value;
     }
@@ -60,7 +60,7 @@ public class MapLookup extends BuiltinLookup {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Term getChild(Children type) {
         if (type == Children.VALUE) {
@@ -68,7 +68,7 @@ public class MapLookup extends BuiltinLookup {
         }
         return super.getChild(type);
     }
-    
+
     @Override
     public BuiltinLookup shallowCopy(Variable base, Term key) {
         return new MapLookup(base, key, value, kind(), choice());

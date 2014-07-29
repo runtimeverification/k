@@ -44,7 +44,7 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public final boolean equals(Object object) {
         if (this == object) {
             return true;
         }
@@ -58,18 +58,23 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
-    public boolean isConstructor() {
+    public final boolean isConstructor() {
         return true;
     }
 
     @Override
-    public boolean isFunction() {
+    public final boolean isFunction() {
         return false;
     }
 
     @Override
-    public int computeHash() {
+    protected final int computeHash() {
         return term.hashCode();
+    }
+
+    @Override
+    protected final boolean computeHasCell() {
+        return term.hasCell();
     }
 
     @Override

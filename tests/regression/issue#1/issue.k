@@ -1,5 +1,5 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-module ISSUE 
+module ISSUE
   syntax Foo ::= foo(Int, Int)
   rule foo(I, I) => .
 endmodule

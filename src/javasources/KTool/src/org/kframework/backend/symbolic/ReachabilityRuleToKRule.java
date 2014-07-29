@@ -7,6 +7,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -14,7 +15,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
 
-    private final String ML_SORT = "MLFormula";
+    private final Sort ML_SORT = Sort.of("MLFormula");
     private final String ML_AND_KLABEL = "'_/\\ML_";
     public static final String RL_ATR = "reachability-formula";
     public static final String RR_COND = "'RRCondition(_,_,_)";
@@ -44,18 +45,18 @@ public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
                 if (ltc.getProduction().getKLabel().equals(ML_AND_KLABEL)
                         && ltc.getProduction().getKLabel()
                                 .equals(ML_AND_KLABEL)) {
-                    
+
                     // process left
                     Term lcfg = ltc.getContents().get(0).shallowCopy();
                     Term lphi = ltc.getContents().get(1).shallowCopy();
-                    
+
                     // process right
                     Term rcfg = rtc.getContents().get(0).shallowCopy();
                     Term rphi = rtc.getContents().get(1).shallowCopy();
-                    
+
                     Sentence rule = new Sentence();
                     rule.setBody(new Rewrite(lcfg, rcfg, context));
-                    
+
                     if(ruleCond != null) {
                         rule.setRequires(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.of(RR_COND), lphi, rphi), ruleCond));
                     }

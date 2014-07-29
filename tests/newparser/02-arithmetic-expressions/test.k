@@ -3,10 +3,10 @@ module TEST
 
   configuration
     <k> $PGM:Exp </k>
-    <env> 
-	       a |-> 1
-		   b |-> 2
-		   c |-> 3
+    <env>
+           a |-> 1
+           b |-> 2
+           c |-> 3
     </env>
 
   syntax Id ::= "a" | "b" | "c"
@@ -17,7 +17,7 @@ module TEST
                 | Lit
   syntax Exp  ::= Exp "+" Term [strict]
                 | Term
-	
+
   rule A:Int + B:Int => A +Int B
   rule A:Int * B:Int => A *Int B
   rule <k> X:Id => V ...</k>

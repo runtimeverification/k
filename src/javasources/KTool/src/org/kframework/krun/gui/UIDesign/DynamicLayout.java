@@ -20,7 +20,7 @@ import edu.uci.ics.jung.graph.Graph;
 /**
  * @author Karlheinz Toni
  * @author Tom Nelson - converted to jung2
- * 
+ *
  */
 
 public class DynamicLayout<V, E> extends AbstractLayout<V, E> {

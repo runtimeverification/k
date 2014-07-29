@@ -19,15 +19,13 @@ import org.w3c.dom.Element;
 
 public class FloatBuiltin extends Token {
 
-    public static final String SORT_NAME = "#Float";
-    
     /* Token cache */
     private static Map<Pair<BigFloat, Integer>, FloatBuiltin> tokenCache = new HashMap<>();
-    
+
     /**
      * Returns a {@link FloatBuiltin} representing the given {@link BigFloat} value
      * and the given exponent range, in bits.
-     * 
+     *
      * @param value
      * @return
      */
@@ -44,27 +42,27 @@ public class FloatBuiltin extends Token {
 
     /**
      * Returns a {@link FloatBuiltin} representing the given {@link double} value.
-     * 
+     *
      * @param value
      * @return
      */
     public static FloatBuiltin of(double value) {
         return of(new BigFloat(value, BinaryMathContext.BINARY64), BinaryMathContext.BINARY64_EXPONENT_BITS);
     }
-    
+
     /**
      * Returns a {@link FloatBuiltin} representing the given {@link float} value.
-     * 
+     *
      * @param value
      * @return
      */
     public static FloatBuiltin of(float value) {
         return of(new BigFloat(value, BinaryMathContext.BINARY32), BinaryMathContext.BINARY32_EXPONENT_BITS);
     }
-    
+
     private final BigFloat value;
     private final int exponent;
-    
+
     private FloatBuiltin(BigFloat value, int exponent) {
         this.value = value;
         this.exponent = exponent;
@@ -101,26 +99,26 @@ public class FloatBuiltin extends Token {
             throw new NumberFormatException();
         }
     }
-    
+
     protected FloatBuiltin(Element element) {
         super(element);
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
         Pair<BigFloat, Integer> pair = parseKFloat(s);
         if (pair == null) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     s + " is not parseable as a valid Float.", this.getLocation(), this.getFilename()));
         }
         this.value = pair.getLeft();
         this.exponent = pair.getRight();
     }
-    
+
     /**
      * Returns a {@link BigFloat} representing the (interpreted) value of the float token.
      */
     public BigFloat bigFloatValue() {
         return value;
     }
-    
+
     /**
      * Returns a {@link BinaryMathContext} representing the context to perform arithmetic under.
      */
@@ -132,8 +130,8 @@ public class FloatBuiltin extends Token {
      * Returns a {@link String} representing the sort name of a float token.
      */
     @Override
-    public String tokenSort() {
-        return FloatBuiltin.SORT_NAME;
+    public Sort tokenSort() {
+        return Sort.BUILTIN_FLOAT;
     }
 
     /**
@@ -143,9 +141,9 @@ public class FloatBuiltin extends Token {
     public String value() {
         return printKFloat(value) + printKFloatSuffix(value, exponent);
     }
-    
+
     /**
-     * Return a {@link String} representing the (uninterpreted) value of the numerical 
+     * Return a {@link String} representing the (uninterpreted) value of the numerical
      * float corresponding to the value of the float token.
      */
     public static String printKFloat(BigFloat value) {
@@ -161,13 +159,13 @@ public class FloatBuiltin extends Token {
             return value.toString();
         }
     }
-    
+
     public static String printKFloatSuffix(BigFloat value, int exponent) {
-        if (value.precision() == BinaryMathContext.BINARY64.precision 
+        if (value.precision() == BinaryMathContext.BINARY64.precision
                 && exponent == BinaryMathContext.BINARY64_EXPONENT_BITS) {
             return "";
         }
-        if (value.precision() == BinaryMathContext.BINARY32.precision 
+        if (value.precision() == BinaryMathContext.BINARY32.precision
                 && exponent == BinaryMathContext.BINARY32_EXPONENT_BITS) {
             return "f";
         }
@@ -178,5 +176,5 @@ public class FloatBuiltin extends Token {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
 }

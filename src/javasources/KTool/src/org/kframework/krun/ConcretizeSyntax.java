@@ -56,7 +56,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 TermCons termCons = (TermCons) child;
                 if (termCons.getProduction().isListDecl()) {
                     if (new AddEmptyLists(context).isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof ListTerminator) {
-                        
+
                         tcParent.getContents().set(i, termCons.getContents().get(0));
                     }
                 }
@@ -82,7 +82,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             }
             Term injected = ((KInjectedLabel)label).getTerm();
 //            if (injected instanceof Token) {
-                return (Term) this.visitNode(injected);
+                return this.visitNode(injected);
 //            }
         } else if (label instanceof KLabelConstant) {
             String klabel = ((KLabelConstant) label).getLabel();
@@ -92,7 +92,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             if (child instanceof KList) {
                 contents = ((KList)child).getContents();
             }
-            if (conses != null) {    
+            if (conses != null) {
                 for (int i = 0; i < contents.size(); i++) {
                     contents.set(i, (Term) this.visitNode(contents.get(i)));
                 }
@@ -121,7 +121,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 if (possibleTerms.size() == 1) {
                     return possibleTerms.get(0);
                 } else {
-                    return new Ambiguity("K", possibleTerms);
+                    return new Ambiguity(Sort.K, possibleTerms);
                 }
             } else if (child.equals(KList.EMPTY)) {
                 //could be a list terminator, which don't have conses
@@ -129,7 +129,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 possibleTerms = new ArrayList<Term>();
                 if (sorts != null) {
                     for (String sort : sorts) {
-                            possibleTerms.add(new ListTerminator(sort, null));
+                            possibleTerms.add(new ListTerminator(Sort.of(sort), null));
                     }
                     if (possibleTerms.size() == 0) {
                         return super.visit(kapp, null);
@@ -137,8 +137,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                     if (possibleTerms.size() == 1) {
                         return possibleTerms.get(0);
                     } else {
-                        
-                        return new Ambiguity("K", possibleTerms);
+
+                        return new Ambiguity(Sort.K, possibleTerms);
                     }
                 }
             }
@@ -167,7 +167,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             Term accept = (Term) this.visitNode(child);
             if (accept instanceof ListTerminator) {
                 ListTerminator empty = (ListTerminator) accept;
-                if (!empty.getSort().equals("Bag")) {
+                if (!empty.getSort().equals(Sort.BAG)) {
                     contents.add(accept);
                 }
             } else {
@@ -175,26 +175,26 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             }
         }
         if (contents.size() == 0) {
-            return new ListTerminator("Bag", null);
+            return new ListTerminator(Sort.BAG, null);
         }
         if (contents.size() == 1) {
             return contents.get(0);
         }
         return new Bag(contents);
     }
-    
+
     @Override
     public ASTNode visit(MapBuiltin map, Void _) {
         Term kapp = (Term) toKApp.visitNode(super.visit(map, _));
         return this.visitNode(kapp);
     }
-    
+
     @Override
     public ASTNode visit(ListBuiltin list, Void _) {
         Term kapp = (Term) toKApp.visitNode(super.visit(list, _));
         return this.visitNode(kapp);
     }
-    
+
     @Override
     public ASTNode visit(SetBuiltin set, Void _) {
         Term kapp = (Term) toKApp.visitNode(super.visit(set, _));

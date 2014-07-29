@@ -4,6 +4,7 @@ package org.kframework.kil.loader;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
@@ -23,7 +24,7 @@ public class AddConsesVisitor extends BasicVisitor {
         if (p.containsAttribute("bracket")) {
             // don't add cons to bracket production
             String cons = p.getAttribute("cons");
-            String cons2 = StringUtil.escapeSortName(p.getSort()) + "1Bracket";
+            String cons2 = StringUtil.escapeSortName(p.getSort().getName()) + "1Bracket";
             if (cons != null) {
                 if (!cons.equals(cons2)) {
                     String msg = "Cons must be of the form: '" + cons2 + "'";
@@ -33,8 +34,8 @@ public class AddConsesVisitor extends BasicVisitor {
                 p.putAttribute("cons", cons2);
         } else if (p.getItems().size() == 1
                     && p.getItems().get(0) instanceof Terminal
-                    && (p.getSort().startsWith("#")
-                || p.getSort().equals(KSorts.KLABEL))) {
+                    && (p.getSort().getName().startsWith("#")
+                || p.getSort().equals(Sort.KLABEL))) {
             // don't add any cons, if it is a constant
             // a constant is a single terminal for a builtin sort
             String cons = p.getAttribute("cons");
@@ -49,20 +50,20 @@ public class AddConsesVisitor extends BasicVisitor {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
             }
             if (p.containsAttribute("klabel") && !p.containsAttribute("cons")) {
-                p.putAttribute("cons", StringUtil.escapeSortName(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn");
+                p.putAttribute("cons", StringUtil.escapeSortName(p.getSort().getName()) + "1" + StringUtil.getUniqueId() + "Syn");
             }
         } else {
             if (!p.containsAttribute("cons")) {
                 String cons;
                 if (p.isListDecl())
-                    cons = StringUtil.escapeSortName(p.getSort()) + "1" + "ListSyn";
+                    cons = StringUtil.escapeSortName(p.getSort().getName()) + "1" + "ListSyn";
                 else
-                    cons = StringUtil.escapeSortName(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn";
+                    cons = StringUtil.escapeSortName(p.getSort().getName()) + "1" + StringUtil.getUniqueId() + "Syn";
                 p.addAttribute(new Attribute("cons", cons));
             } else {
                 // check if the provided cons is correct
                 String cons = p.getAttribute("cons");
-                String escSort = StringUtil.escapeSortName(p.getSort());
+                String escSort = StringUtil.escapeSortName(p.getSort().getName());
                 if (!cons.startsWith(escSort)) {
                     String msg = "The cons attribute must start with '" + escSort + "' and not with " + cons;
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));

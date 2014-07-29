@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.collections15.map.UnmodifiableMap;
+import org.apache.commons.collections4.map.UnmodifiableMap;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
@@ -30,9 +29,9 @@ import com.google.common.base.Preconditions;
 public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, Term>> {
 
     public static final BuiltinMap EMPTY_MAP = new BuiltinMap();
-    
+
     private final Map<Term, Term> entries;
-    
+
     private BuiltinMap() {
         super(null, Kind.KITEM);
         entries = Collections.emptyMap();
@@ -43,7 +42,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     public Map<Term, Term> getEntries() {
-        return UnmodifiableMap.decorate(entries);
+        return UnmodifiableMap.unmodifiableMap(entries);
     }
 
     @Override
@@ -73,9 +72,9 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         // TODO(AndreiS): track the original sort from the grammar
-        return KSorts.MAP;
+        return Sort.MAP;
     }
 
     @Override
@@ -94,11 +93,23 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
         hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Map.Entry<Term, Term> entry : entries.entrySet()) {
+            hasCell = hasCell || entry.getKey().hasCell() || entry.getValue().hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -126,7 +137,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);
@@ -141,7 +152,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
-    
+
     /**
      * Private efficient constructor used by {@link BuiltinMap.Builder}.
      * @param entries
@@ -157,66 +168,66 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
     }
 
     public static class Builder {
-        
+
         private boolean done = false;
-        
+
         private Map<Term, Term> entries = new HashMap<>();
         private Variable frame = null;
 
         public void put(Term key, Term value) {
             entries.put(key, value);
         }
-        
+
         /**
          * Copies all key-value pairs of the given map into the BuiltinMap being
          * built.
-         * 
+         *
          * @param map
          */
         public void putAll(Map<Term, Term> map) {
             entries.putAll(map);
         }
-        
+
         public Term remove(Term key) {
             return entries.remove(key);
         }
-        
+
         public Map<Term, Term> getEntries() {
-            return UnmodifiableMap.decorate(entries);
+            return UnmodifiableMap.unmodifiableMap(entries);
         }
-        
+
         /**
          * Sets the entries as the given {@code BuiltinMap} without copying the
          * contents. Once the entries are set, no more modification is allowed.
-         * 
+         *
          * @param map
          */
         public void setEntriesAs(BuiltinMap builtinMap) {
             // builtinMap.entries must be an UnmodifiableMap
             entries = builtinMap.entries;
         }
-        
+
         /**
          * Sets the frame of the BuiltinMap being built. Once the frame is set,
          * it cannot be changed.
-         * 
+         *
          * @param frame
          */
         public void setFrame(Variable frame) {
             this.frame = frame;
         }
-        
+
         /**
          * Concatenates the BuiltinMap being built with another term, which can only
          * be a {@code Variable} or {@code BuiltinMap}.
-         * 
+         *
          * @param term
          */
         public void concat(Term term) {
             if (term == null) {
                 return;
             }
-            
+
             if (term instanceof Variable) {
                 setFrame((Variable) term);
             } else if (term instanceof BuiltinMap) {
@@ -229,7 +240,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
                 assert false : "The concatenated term must be a Variable or BuiltinMap; found: " + term;
             }
         }
-        
+
         public BuiltinMap build() {
             Preconditions.checkArgument(!done, "Only one BuiltinMap can be built from a builder.");
             done = true;
@@ -237,7 +248,7 @@ public class BuiltinMap extends Collection implements Iterable<Map.Entry<Term, T
             // to avoid actually copying the entries, because entries is not an
             // ImmutableMap yet; using Apache's decorate method because it would
             // avoid creating nesting wrappers
-            return new BuiltinMap((UnmodifiableMap<Term, Term>) UnmodifiableMap.decorate(entries), frame);
+            return new BuiltinMap((UnmodifiableMap<Term, Term>) UnmodifiableMap.unmodifiableMap(entries), frame);
         }
     }
 }

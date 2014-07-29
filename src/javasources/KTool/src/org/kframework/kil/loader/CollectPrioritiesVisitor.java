@@ -11,7 +11,7 @@ import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.parser.generator.SDFHelper;
@@ -37,12 +37,12 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                 // allow priorities only between productions that have a sort at the left or right
                 if (prd1.isSubsort() || prd1.isConstant())
                     continue;
-                if (!(prd1.getItems().get(0) instanceof Sort) && !(prd1.getItems().get(prd1.getItems().size() - 1) instanceof Sort))
+                if (!(prd1.getItems().get(0) instanceof NonTerminal) && !(prd1.getItems().get(prd1.getItems().size() - 1) instanceof NonTerminal))
                     continue;
                 for (Production prd2 : pb2.getProductions()) {
                     if (prd2.isSubsort() || prd2.isConstant())
                         continue;
-                    if (!(prd2.getItems().get(0) instanceof Sort) && !(prd2.getItems().get(prd2.getItems().size() - 1) instanceof Sort))
+                    if (!(prd2.getItems().get(0) instanceof NonTerminal) && !(prd2.getItems().get(prd2.getItems().size() - 1) instanceof NonTerminal))
                         continue;
                     context.addPriority(prd1.getKLabel(), prd2.getKLabel());
                 }

@@ -36,7 +36,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
-import org.kframework.krun.K;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.io.FileSystem;
 
@@ -61,6 +60,7 @@ public class SymbolicRewriter {
     private final PluggableKastStructureChecker phase1PluggableKastChecker;
     private final PluggableKastStructureChecker phase2PluggableKastChecker;
     private RuleIndex ruleIndex;
+    private final boolean indexingStats;
 
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
@@ -68,12 +68,13 @@ public class SymbolicRewriter {
      */
     public SymbolicRewriter(Definition definition) {
         this.definition = definition;
+        this.indexingStats = definition.context().javaExecutionOptions.indexingStats;
         ruleIndex = definition.getIndex();
 
         this.strategy = new TransitionCompositeStrategy(definition.context().kompileOptions.transition);
-        
+
         /* initialize the K AST checker for test generation */
-        if (K.do_testgen) {
+        if (definition.context().javaExecutionOptions.generateTests) {
             phase1PluggableKastChecker = new PluggableKastStructureChecker();
             phase1PluggableKastChecker.register(new CheckingNestedStructureDepth());
             phase1PluggableKastChecker.register(new CheckingLeftAssocConstructs(definition));
@@ -134,7 +135,7 @@ public class SymbolicRewriter {
      */
     private List<Rule> getSimulationRules(Term term) {
         List<Rule> rules = new ArrayList<Rule>();
-        for (IndexingPair pair : term.getIndexingPairs(definition)) {
+        for (IndexingPair pair : term.getKCellIndexingPairs(definition)) {
             if (((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first) != null) {
                 rules.addAll(((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first));
             }
@@ -152,14 +153,14 @@ public class SymbolicRewriter {
      */
     private List<Rule> getRules(Term term) {
         List<Rule> rules = new ArrayList<>();
-        if (K.get_indexing_stats){
+        if (indexingStats){
             IndexingStatistics.getRulesForTermStopWatch.reset();
             IndexingStatistics.getRulesForTermStopWatch.start();
         }
 
         rules.addAll(ruleIndex.getRules(term));
 
-        if (K.get_indexing_stats){
+        if (indexingStats){
             IndexingStatistics.rulesSelectedAtEachStep.add(rules.size());
             long elapsed =
                     IndexingStatistics.getRulesForTermStopWatch.stop().elapsed(TimeUnit.MICROSECONDS);
@@ -239,7 +240,7 @@ public class SymbolicRewriter {
 
     private void computeRewriteStep(ConstrainedTerm constrainedSubject, int successorBound) {
         int rulesTried = 0;
-        if (K.get_indexing_stats){
+        if (indexingStats){
             IndexingStatistics.rewriteStepStopWatch.reset();
             IndexingStatistics.rewriteStepStopWatch.start();
         }
@@ -257,7 +258,7 @@ public class SymbolicRewriter {
         strategy.reset(getRules(constrainedSubject.term()));
 
         while (strategy.hasNext()) {
-            if (K.get_indexing_stats){
+            if (indexingStats){
                 IndexingStatistics.rewritingStopWatch.reset();
                 IndexingStatistics.rewritingStopWatch.start();
             }
@@ -281,7 +282,7 @@ public class SymbolicRewriter {
 //                    }
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
-                    if (K.get_indexing_stats){
+                    if (indexingStats){
                         IndexingStatistics.rulesTried.add(rulesTried);
                         if (IndexingStatistics.rewritingStopWatch.isRunning()){
                             IndexingStatistics.rewritingStopWatch.stop();
@@ -290,7 +291,7 @@ public class SymbolicRewriter {
                                 IndexingStatistics.rewritingStopWatch.elapsed(TimeUnit.MICROSECONDS));
                     }
                     if (results.size() == successorBound) {
-                        if (K.get_indexing_stats) {
+                        if (indexingStats) {
                             IndexingStatistics.rewriteStepStopWatch.stop();
                             long elapsed =
                                     IndexingStatistics.rewriteStepStopWatch.elapsed(TimeUnit.MICROSECONDS);
@@ -305,7 +306,7 @@ public class SymbolicRewriter {
             // in the same step.
             if (results.size() > 0) {
                 //TODO(OwolabiL): Remove duplication
-                if (K.get_indexing_stats){
+                if (indexingStats){
                     IndexingStatistics.rewriteStepStopWatch.stop();
                     long elapsed =
                             IndexingStatistics.rewriteStepStopWatch.elapsed(TimeUnit.MICROSECONDS);
@@ -321,11 +322,11 @@ public class SymbolicRewriter {
     private void computeRewriteStep(ConstrainedTerm constrainedTerm) {
         computeRewriteStep(constrainedTerm, -1);
     }
-    
+
     /**
      * Prepares the pattern term used in unification by composing the left-hand
      * side of a specified rule and its side-conditions.
-     * 
+     *
      * @param rule
      *            the specified rule
      * @param termContext
@@ -353,7 +354,7 @@ public class SymbolicRewriter {
     /**
      * Constructs the new subject term by applying the resulting symbolic
      * constraint of unification to the right-hand side of the rewrite rule.
-     * 
+     *
      * @param rule
      *            the rewrite rule
      * @param constraint
@@ -650,7 +651,7 @@ public class SymbolicRewriter {
 
             for (ConstrainedTerm term : queue) {
                 computeRewriteStep(term);
-                
+
                 /* first eliminate terms that fail the K AST checker */
                 performKastStructureCheck(phase1PluggableKastChecker, initialTerm);
                 /* then eliminate terms that have too many free variables */
@@ -690,8 +691,8 @@ public class SymbolicRewriter {
                 }
             }
 
-            System.out.println("rule distribution stats: " + ruleDistStats);            
-            
+            System.out.println("rule distribution stats: " + ruleDistStats);
+
             /* debugging: test generation runs into a (local) dead end */
 //            if (nextQueue.isEmpty()) {
 //                System.err.printf("The state queue drains out...\n)");
@@ -700,7 +701,7 @@ public class SymbolicRewriter {
 //                    System.err.println(term);
 //                }
 //            }
-            
+
             /* swap the queues */
             List<ConstrainedTerm> temp;
             temp = queue;
@@ -767,7 +768,7 @@ public class SymbolicRewriter {
      * by its preceding rules for test generation.
      */
     private void eliminateShadowedRewriteSteps() {
-        assert K.do_testgen;
+        assert definition.context().javaExecutionOptions.generateTests;
 
         Set<String> shadowedLabels = new HashSet<String>();
 

@@ -7,7 +7,6 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
@@ -111,7 +110,7 @@ public class BuiltinSet extends Collection {
     public int size() {
         return elements.size();
     }
-    
+
     /**
      * {@code BuiltinSet} is guaranteed to have only one frame; thus, they can
      * always be used in the left-hand side of a rule.
@@ -129,8 +128,8 @@ public class BuiltinSet extends Collection {
     }
 
     @Override
-    public String sort() {
-        return KSorts.SET;
+    public Sort sort() {
+        return Sort.SET;
     }
 
     @Override
@@ -150,12 +149,24 @@ public class BuiltinSet extends Collection {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
         hashCode = hashCode * Utils.HASH_PRIME + elements.hashCode();
         // hashCode = hashCode * Utils.HASH_PRIME + operations.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Term term : elements) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

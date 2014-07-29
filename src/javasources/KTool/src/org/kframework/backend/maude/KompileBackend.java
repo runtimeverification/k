@@ -5,7 +5,6 @@ import org.kframework.backend.BasicBackend;
 import org.kframework.compile.transformers.DeleteFunctionRules;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -47,7 +46,7 @@ public class KompileBackend extends BasicBackend {
     }
 
     @Override
-    public void run(Definition javaDef) throws IOException {
+    public void run(Definition javaDef) {
         MaudeBackend maude = new MaudeBackend(sw, context);
         maude.run(javaDef);
 

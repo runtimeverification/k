@@ -60,7 +60,7 @@ public class IOServer {
                 _logger.info(clientSocket.toString());
                 String msg = getMessage(clientSocket);
                 Command command = parseCommand(msg, clientSocket);
-    
+
                 // execute command == append it to pool
                 if (command != null) {
                     pool.execute(command);
@@ -71,7 +71,7 @@ public class IOServer {
             pool.shutdown();
         }
     }
-    
+
     private String getMessage(Socket clientSocket) throws IOException {
         StringWriter writer = new StringWriter();
         BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -99,25 +99,25 @@ public class IOServer {
     /**
      * Read input from a socket until end of message found. Then, parse the
      * command and return a Command object.
-     * 
+     *
      * @param clientSocket
      * @return
      */
     private Command parseCommand(String msg, Socket clientSocket) {
         String inputLine = msg;
-        
+
         _logger.info("received request: " + inputLine);
-        
+
         // parse
         // TODO: here XML should be used...
         // maudeId#command#args#
         String[] args = inputLine.split("\001", -1);
         String[] args1 = new String[args.length];
-        
+
         System.arraycopy(args, 2, args1, 0, args.length-2);
-        
+
         Command command = createCommand(args1, clientSocket, _logger);
-        
+
         command.maudeId = Integer.parseInt(args[0]);
         return command;
     }
@@ -137,8 +137,8 @@ public class IOServer {
             command = args[0];
         } else {
             fail("Empty command", socket);
-        }        
-        
+        }
+
         // switch on command and create appropriate objects
         if (command.equals("open")) {
             return new CommandOpen(args, socket, logger, fs); //, maudeId);
@@ -188,7 +188,7 @@ public class IOServer {
      * @param socket
      */
     public static void fail(String msgId, String reason, Socket socket) {
-        
+
         reason = msgId + "\001fail\001" + reason + "\001\001\001\n";
         //System.out.println(reason);
         BufferedWriter output;
@@ -208,7 +208,7 @@ public class IOServer {
             e.printStackTrace();
         }
     }
-    
+
     public static void fail(String reason, Socket socket) {
         fail("-1", reason, socket);
     }
@@ -216,29 +216,29 @@ public class IOServer {
 
 /*
  * 1. server fisiere - accepta command -> execute
- * 
+ *
  * accept(Command c) { c.execute(lookup(c.ID));
- * 
+ *
  * /*
- * 
+ *
  * mesaj === comanda
- * 
+ *
  * 1. open(uri, attr) success: ID fail: string: ""
- * 
+ *
  * 2. resopen(ID, uri, attr) success fail: string
- * 
+ *
  * 3. close(ID) success fail
- * 
+ *
  * 4. seek(ID, pos) success fail
- * 
+ *
  * 4'. position(ID) success fail ?
- * 
- * 
+ *
+ *
  * 5. readbyte(ID) return ASCII fail: EOF
- * 
+ *
  * 6. writechar(ID) success fail
- * 
+ *
  * 7. flush(ID) success fail
- * 
+ *
  * 8. peek(ID) success: ASCII fail
  */

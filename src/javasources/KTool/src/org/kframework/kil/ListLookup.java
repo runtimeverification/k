@@ -18,12 +18,12 @@ public class ListLookup extends BuiltinLookup {
     /** {@link Term} representation of the value */
     private final Term value;
 
-    public ListLookup(Variable base, Term key, Term value, KSort kind) {
+    public ListLookup(Variable base, Term key, Term value, Sort kind) {
         super(base, key, kind, false);
         this.value = value;
     }
 
-    public ListLookup(Variable base, int key, Term value, KSort kind) {
+    public ListLookup(Variable base, int key, Term value, Sort kind) {
         this(base, IntBuiltin.kAppOf(key), value, kind);
     }
 
@@ -64,7 +64,7 @@ public class ListLookup extends BuiltinLookup {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Term getChild(Children type) {
         if (type == Children.VALUE) {
@@ -72,7 +72,7 @@ public class ListLookup extends BuiltinLookup {
         }
         return super.getChild(type);
     }
-    
+
     @Override
     public BuiltinLookup shallowCopy(Variable base, Term key) {
         return new ListLookup(base, key, value, kind());

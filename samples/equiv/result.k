@@ -52,7 +52,7 @@ module RESULT
 
     rule <k1> if false then _:K else S2:Stmt => S2 ...</k1>
 
-    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else 
+    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else
       skip ...</k1>
 
     syntax FExp ::= Id

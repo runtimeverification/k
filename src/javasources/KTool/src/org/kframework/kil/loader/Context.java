@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import org.kframework.compile.transformers.CompleteSortLatice;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -11,18 +11,21 @@ import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.ColorOptions;
+import org.kframework.krun.KRunOptions;
+import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.options.SMTOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,7 +74,7 @@ public class Context implements Serializable {
     /**
      * Represents a map from all Klabels in string representation plus two
      * strings, "cons" and "prefixlabel", to sets of corresponding productions.
-     * 
+     *
      * TODO(YilongL): it doesn't contain getKLabel_ in key set?! instead the
      * production "getKLabel" K is in the values of both "cons" and "prefix".
      * why?
@@ -83,31 +86,31 @@ public class Context implements Serializable {
      */
     public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
-    public Map<String, String> cellKinds = new HashMap<String, String>();
-    public Map<String, String> cellSorts = new HashMap<String, String>();
-    public Map<String, Production> listConses = new HashMap<String, Production>();
+    public Map<String, Sort> cellKinds = new HashMap<>();
+    public Map<String, Sort> cellSorts = new HashMap<>();
+    public Map<Sort, Production> listConses = new HashMap<>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
     public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
-    
-    public Map<String, Production> canonicalBracketForSort = new HashMap<>();
-    private Poset subsorts = new Poset();
-    public java.util.Set<String> definedSorts = Sort.getBaseSorts();
-    private Poset priorities = new Poset();
-    private Poset assocLeft = new Poset();
-    private Poset assocRight = new Poset();
-    private Poset modules = new Poset();
-    private Poset fileRequirements = new Poset();
+
+    public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
+    private Poset<Sort> subsorts = Poset.create();
+    public java.util.Set<Sort> definedSorts = Sort.getBaseSorts();
+    private Poset<String> priorities = Poset.create();
+    private Poset<String> assocLeft = Poset.create();
+    private Poset<String> assocRight = Poset.create();
+    private Poset<String> modules = Poset.create();
+    private Poset<String> fileRequirements = Poset.create();
     public String startSymbolPgm = "K";
-    public Map<String, String> configVarSorts = new HashMap<String, String>();
+    public Map<String, Sort> configVarSorts = new HashMap<>();
     public File dotk = null;
     public File kompiled = null;
     public boolean initialized = false;
     protected java.util.List<String> komputationCells = null;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
-    public Set<String> variableTokenSorts = new HashSet<>();
-    public HashMap<String, String> freshFunctionNames = new HashMap<>();
+    public Set<Sort> variableTokenSorts = new HashSet<>();
+    public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
 
     public int numModules, numSentences, numProductions, numCells;
 
@@ -131,14 +134,14 @@ public class Context implements Serializable {
     /**
      * {@link Map} of sort names into {@link DataStructureSort} instances.
      */
-    private Map<String, DataStructureSort> dataStructureSorts;
+    private Map<Sort, DataStructureSort> dataStructureSorts;
 
     /**
-     * {@link Set} of the names of the sorts with lexical productions.
+     * {@link Set} of sorts with lexical productions.
      */
-    private Set<String> tokenSorts;
+    private Set<Sort> tokenSorts;
 
-    
+
     public java.util.List<String> getKomputationCells() {
         return kompileOptions.experimental.kCells;
     }
@@ -156,26 +159,44 @@ public class Context implements Serializable {
     }
 
     private void initSubsorts() {
-        subsorts.addElement(KSorts.KLABEL);
-        subsorts.addRelation(KSorts.KLIST, KSorts.K);
-        subsorts.addRelation(KSorts.KLIST, KSorts.KRESULT);
-        subsorts.addRelation(KSorts.K, KSorts.KRESULT);
-        subsorts.addRelation(KSorts.K, KSorts.KITEM);
-        subsorts.addRelation(KSorts.BAG, KSorts.BAG_ITEM);
+        subsorts.addElement(Sort.KLABEL);
+        subsorts.addRelation(Sort.KLIST, Sort.K);
+        subsorts.addRelation(Sort.K, Sort.KITEM);
+        subsorts.addRelation(Sort.KITEM, Sort.KRESULT);
+        subsorts.addRelation(Sort.BAG, Sort.BAG_ITEM);
     }
 
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
-    
+    public SMTOptions smtOptions;
+    public KRunOptions krunOptions;
+    public ConfigurationCreationOptions ccOptions;
+    public ColorOptions colorOptions;
+    public transient JavaExecutionOptions javaExecutionOptions;
+
     public Context(GlobalOptions globalOptions) {
         this.globalOptions = globalOptions;
         initSubsorts();
     }
-    
+
     public Context(KompileOptions kompileOptions) {
         this(kompileOptions.global);
         this.kompileOptions = kompileOptions;
+        this.smtOptions = kompileOptions.experimental.smt;
+        //TODO(dwightguth): replace this with a provider in Guice
+        this.javaExecutionOptions = new JavaExecutionOptions();
+    }
+
+    public Context(KRunOptions krunOptions, ConfigurationCreationOptions ccOptions, KompileOptions kompileOptions) {
+        this(kompileOptions);
+        this.krunOptions = krunOptions;
+        this.ccOptions = ccOptions;
+        this.colorOptions = krunOptions.color;
+        if (krunOptions.experimental.smt.smt != null) {
+            smtOptions = krunOptions.experimental.smt;
+        }
+        this.javaExecutionOptions = krunOptions.experimental.javaExecution;
     }
 
     public void putLabel(Production p, String cons) {
@@ -191,7 +212,7 @@ public class Context implements Serializable {
 //        s.add(cons);
         putLabel(p.getKLabel(), cons);
     }
-    
+
     private void putLabel(String label, String cons) {
         Set<String> s = labels.get(label);
         if (s == null) {
@@ -207,7 +228,7 @@ public class Context implements Serializable {
         listLabelSeparator.put(label, separator);
         if (s == null)
             listLabels.put(label, s = new HashSet<String>());
-        s.add(p.getSort());
+        s.add(p.getSort().getName());
     }
 
     public void putAssoc(String cons, Collection<Production> prods) {
@@ -221,41 +242,39 @@ public class Context implements Serializable {
     public void addCellDecl(Cell c) {
         cells.put(c.getLabel(), c);
 
-        String kind = subsorts.getMaxim(c.getContents().getSort());
-        if (kind.equals(KSorts.KLIST)) {
-            kind = "K";
+        Sort kind = subsorts.getMaxim(c.getContents().getSort());
+        if (kind.equals(Sort.KLIST)) {
+            kind = Sort.K;
         }
         cellKinds.put(c.getLabel(), kind);
 
-        String sort = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
-        if (sort == null) {
-            sort = c.getContents().getSort();
-        }
-        if (sort.equals(KSorts.BAG_ITEM))
-            sort = KSorts.BAG;
+        String sortName = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
+        Sort sort = sortName == null ? c.getContents().getSort() : Sort.of(sortName);
+        if (sort.equals(Sort.BAG_ITEM))
+            sort = Sort.BAG;
         cellSorts.put(c.getLabel(), sort);
     }
 
-    public boolean isListSort(String sort) {
+    public boolean isListSort(Sort sort) {
         return listConses.containsKey(sort);
     }
-    
+
     /**
      * Returns a unmodifiable view of all sorts.
      */
-    public Set<String> getAllSorts() {
+    public Set<Sort> getAllSorts() {
         return Collections.unmodifiableSet(subsorts.getElements());
     }
 
     /**
      * Takes a List sort and returns the sort of the elements of that List sort. e.g, for List{Exp, ","}, returns Exp.
-     * 
+     *
      * returns null if not a List sort
-     * 
+     *
      * we suppress cast warnings because we know that the sort must be UserList
      */
     @SuppressWarnings("cast")
-    public String getListElementSort(String sort) {
+    public Sort getListElementSort(Sort sort) {
         if (!isListSort(sort))
             return null;
         return ((UserList) listConses.get(sort).getItems().get(0)).getSort();
@@ -263,76 +282,76 @@ public class Context implements Serializable {
 
     /**
      * Finds the LUB (Least Upper Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the LUB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getLUBSort(Set<String> sorts) {
+    public Sort getLUBSort(Set<Sort> sorts) {
         return subsorts.getLUB(sorts);
     }
-    
+
     /**
      * Finds the LUB (Least Upper Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the LUB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getLUBSort(String... sorts) {
+    public Sort getLUBSort(Sort... sorts) {
         return subsorts.getLUB(Sets.newHashSet(sorts));
     }
 
     /**
      * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the GLB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getGLBSort(Set<String> sorts) {
+    public Sort getGLBSort(Set<Sort> sorts) {
         return subsorts.getGLB(sorts);
     }
-    
+
     /**
      * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return the sort which is the GLB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public String getGLBSort(String... sorts) {
+    public Sort getGLBSort(Sort... sorts) {
         return subsorts.getGLB(Sets.newHashSet(sorts));
     }
-    
+
     /**
      * Checks if there is any well-defined common subsort of a given set of
      * sorts.
-     * 
+     *
      * @param sorts
      *            the given set of sorts
      * @return {@code true} if there is at least one well-defined common
      *         subsort; otherwise, {@code false}
      */
-    public boolean hasCommonSubsort(String... sorts) {
-        Set<String> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
-        
+    public boolean hasCommonSubsort(Sort... sorts) {
+        Set<Sort> maximalLowerBounds = subsorts.getMaximalLowerBounds(Sets.newHashSet(sorts));
+
         if (maximalLowerBounds.isEmpty()) {
             return false;
         } else if (maximalLowerBounds.size() == 1) {
-            String sort = maximalLowerBounds.iterator().next();
+            Sort sort = maximalLowerBounds.iterator().next();
             /* checks if the only common subsort is undefined */
-            if (sort.equals(CompleteSortLatice.BOTTOM_SORT_NAME)
+            if (sort.equals(Sort.BUILTIN_BOT)
                     || isListSort(sort)
-                    && getListElementSort(sort).equals(CompleteSortLatice.BOTTOM_SORT_NAME)) {
+                    && getListElementSort(sort).equals(Sort.BUILTIN_BOT)) {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -363,7 +382,7 @@ public class Context implements Serializable {
 
     /**
      * Check to see if the two klabels are in the wrong order according to the priority filter.
-     * 
+     *
      * @param klabelParent
      * @param klabelChild
      * @return
@@ -418,8 +437,7 @@ public class Context implements Serializable {
         return fileRequirements.isInRelation(required, local);
     }
 
-    public void addSubsort(String bigSort, String smallSort) {
-        // add the new subsorting
+    public void addSubsort(Sort bigSort, Sort smallSort) {
         subsorts.addRelation(bigSort, smallSort);
     }
 
@@ -428,22 +446,22 @@ public class Context implements Serializable {
      * becomes a partial order set.
      */
     public void computeSubsortTransitiveClosure() {
-        List<String> circuit = subsorts.checkForCycles();
+        List<Sort> circuit = subsorts.checkForCycles();
         if (circuit != null) {
             String msg = "Circularity detected in subsorts: ";
-            for (String sort : circuit)
+            for (Sort sort : circuit)
                 msg += sort + " < ";
             msg += circuit.get(0);
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "Definition files", "File system."));
         }
         subsorts.transitiveClosure();
         // detect if lists are subsorted (Vals Ids < Exps)
-        for (Map.Entry<String, Production> ls1 : listConses.entrySet()) {
-            for (Map.Entry<String, Production> ls2 : listConses.entrySet()) {
-                String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort();
-                String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort();
+        for (Production prod1 : listConses.values()) {
+            for (Production prod2 : listConses.values()) {
+                Sort sort1 = ((UserList) prod1.getItems().get(0)).getSort();
+                Sort sort2 = ((UserList) prod2.getItems().get(0)).getSort();
                 if (isSubsorted(sort1, sort2)) {
-                    subsorts.addRelation(ls1.getValue().getSort(), ls2.getValue().getSort());
+                    subsorts.addRelation(prod1.getSort(), prod2.getSort());
                 }
             }
         }
@@ -452,23 +470,23 @@ public class Context implements Serializable {
 
     /**
      * Check to see if smallSort is subsorted to bigSort (strict)
-     * 
+     *
      * @param bigSort
      * @param smallSort
      * @return
      */
-    public boolean isSubsorted(String bigSort, String smallSort) {
+    public boolean isSubsorted(Sort bigSort, Sort smallSort) {
         return subsorts.isInRelation(bigSort, smallSort);
     }
 
     /**
      * Check to see if smallSort is subsorted or equal to bigSort
-     * 
+     *
      * @param bigSort
      * @param smallSort
      * @return
      */
-    public boolean isSubsortedEq(String bigSort, String smallSort) {
+    public boolean isSubsortedEq(Sort bigSort, Sort smallSort) {
         if (bigSort.equals(smallSort))
             return true;
         return subsorts.isInRelation(bigSort, smallSort);
@@ -490,7 +508,7 @@ public class Context implements Serializable {
 
     /**
      * Returns a {@link List} of productions associated with the specified KLabel
-     * 
+     *
      * @param label
      *            string representation of the KLabel
      * @return list of productions associated with the label
@@ -499,7 +517,7 @@ public class Context implements Serializable {
     public List<Production> productionsOf(String label) {
         Set<String> conses = labels.get(label);
         if (conses == null) {
-            return (List<Production>) Collections.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         }
 
         ArrayList<Production> productions = new ArrayList<Production>();
@@ -513,66 +531,46 @@ public class Context implements Serializable {
     }
 
     public Term kWrapper(Term t) {
-        if (isSubsortedEq("K", t.getSort()))
+        if (isSubsortedEq(Sort.K, t.getSort()))
             return t;
         return KApp.of(new KInjectedLabel(t));
     }
 
-    private static final String fragment = "-fragment";
-
-    private String getCellSort2(String sort) {
-        sort = sort.substring(0, 1).toLowerCase() + sort.substring(1);
-        if (sort.endsWith(MetaK.cellSort)) {
-            return sort.substring(0, sort.length() - MetaK.cellSort.length());
-        } else {
-            return sort.substring(0, sort.length() - MetaK.cellFragment.length()) + "-fragment";
-        }
-    }
-
-    public String getCellSort(String sort) {
-        sort = getCellSort2(sort);
-        String cellName = sort;
-        if (sort.endsWith(fragment)) {
-            cellName = sort.substring(0, sort.length() - fragment.length());
-        }
-        if (cells.containsKey(cellName)) {
-            return sort;
-        }
-        return sort.substring(0, 1).toUpperCase() + sort.substring(1);
-    }
-
-    public Map<String, DataStructureSort> getDataStructureSorts() {
+    public Map<Sort, DataStructureSort> getDataStructureSorts() {
         return Collections.unmodifiableMap(dataStructureSorts);
     }
 
-    public void setDataStructureSorts(Map<String, DataStructureSort> dataStructureSorts) {
+    public void setDataStructureSorts(Map<Sort, DataStructureSort> dataStructureSorts) {
         assert !initialized;
 
-        this.dataStructureSorts = new HashMap<String, DataStructureSort>(dataStructureSorts);
+        this.dataStructureSorts = new HashMap<Sort, DataStructureSort>(dataStructureSorts);
     }
 
-    public DataStructureSort dataStructureSortOf(String sortName) {
+    public DataStructureSort dataStructureSortOf(Sort sort) {
         assert initialized : "Context is not initialized yet";
 
-        return dataStructureSorts.get(sortName);
+        return dataStructureSorts.get(sort);
     }
 
-    public DataStructureSort dataStructureListSortOf(String sortName) {
+    public DataStructureSort dataStructureListSortOf(Sort sort) {
         assert initialized : "Context is not initialized yet";
-        DataStructureSort sort = dataStructureSorts.get(sortName);
-        if (sort == null) return null;
-        if (!sort.type().equals(KSorts.LIST)) return null;
-        return sort;
+        DataStructureSort dataStructSort = dataStructureSorts.get(sort);
+        if (dataStructSort == null) return null;
+        if (!dataStructSort.type().equals(Sort.LIST)) return null;
+        return dataStructSort;
     }
 
-    public Set<String> getTokenSorts() {
+    /**
+     * Returns the set of sorts that have lexical productions.
+     */
+    public Set<Sort> getTokenSorts() {
         return Collections.unmodifiableSet(tokenSorts);
     }
 
-    public void setTokenSorts(Set<String> tokenSorts) {
+    public void setTokenSorts(Set<Sort> tokenSorts) {
         assert !initialized;
 
-        this.tokenSorts = new HashSet<String>(tokenSorts);
+        this.tokenSorts = new HashSet<>(tokenSorts);
     }
 
     public void makeFreshFunctionNamesMap(Set<Production> freshProductions) {

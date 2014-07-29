@@ -13,6 +13,7 @@ import org.kframework.kil.ConfigurationNotFound;
 import org.kframework.kil.ConfigurationNotUnique;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
@@ -26,12 +27,12 @@ import org.kframework.utils.general.GlobalSettings;
 
 /*
  * @author StefanC
- * 
+ *
  * Front-end for the equivalance checker.
  */
 public class KagregFrontEnd {
 
-    public static void kagreg(String[] args) throws IOException {
+    public static void kagreg(String[] args) {
         if (args.length != 2) {
             Error.report("There must be exactly two K definitions as arguments to kagreg.");
         }
@@ -57,11 +58,11 @@ public class KagregFrontEnd {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
             }
         }
-        
+
         GlobalOptions globalOptions = new GlobalOptions();
         globalOptions.verbose = true;
         globalOptions.initialize();
-        
+
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
 //        GlobalSettings.javaBackend = false;
@@ -69,9 +70,9 @@ public class KagregFrontEnd {
 
         String firstLang = FileUtil.getMainModule(firstDefinitionFile.getName());
         String secondLang = FileUtil.getMainModule(secondDefinitionFile.getName());
-        
+
         Context context1 = new Context(globalOptions);
-        context1.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+        context1.dotk = new File(firstDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context1.dotk.mkdirs();
         Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true,
                 context1);
@@ -81,7 +82,7 @@ public class KagregFrontEnd {
         CollectImportsVisitor collectImportsVisitor1 = new CollectImportsVisitor(context1, false);
         collectImportsVisitor1.visitNode(firstDef);
         List<Import> imports1 = collectImportsVisitor1.getImports();
-        
+
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
 //        GlobalSettings.javaBackend = false;
@@ -90,7 +91,7 @@ public class KagregFrontEnd {
         KParser.reset();
         Context context2 = new Context(globalOptions);
         assert context2 != null;
-        context2.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+        context2.dotk = new File(secondDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context2.dotk.mkdirs();
         Definition secondDef = DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true,
                 context2);
@@ -111,7 +112,7 @@ public class KagregFrontEnd {
             System.err.println("The first definition must have a configuration; found none.");
             return;
         }
-        
+
         Configuration secondConf = null;
         try {
             secondConf = secondDef.getSingletonConfiguration();
@@ -124,7 +125,7 @@ public class KagregFrontEnd {
         }
 
         Indenter indenter = new Indenter();
-        
+
         indenter.write("module RESULT");
         indenter.endLine();
         indenter.indent(UnparserFilter.TAB);
@@ -140,8 +141,8 @@ public class KagregFrontEnd {
         }
         indenter.endLine();
 
-        List<String> labeledSorts = new ArrayList<String>();
-        labeledSorts.add("KResult"); // temporary bug fix for https://code.google.com/p/k-framework/issues/detail?id=541
+        List<Sort> labeledSorts = new ArrayList<>();
+        labeledSorts.add(Sort.KRESULT); // temporary bug fix for https://code.google.com/p/k-framework/issues/detail?id=541
         AddSortLabels addSortLabels1 = new AddSortLabels(context1, labeledSorts);
         firstDef = (Definition) addSortLabels1.visitNode(firstDef);
 
@@ -152,12 +153,12 @@ public class KagregFrontEnd {
         unparserFirst.setIndenter(indenter);
         unparserFirst.setForEquivalence();
         unparserFirst.visitNode(firstDef);
-        
+
         UnparserFilter unparserSecond = new UnparserFilter(context2);
         unparserSecond.setIndenter(indenter);
         unparserSecond.setForEquivalence();
         unparserSecond.visitNode(secondDef);
-        
+
         indenter.write("configuration");
         indenter.endLine();
         indenter.indent(UnparserFilter.TAB);
@@ -192,7 +193,7 @@ public class KagregFrontEnd {
         indenter.write("</second>");
         indenter.endLine();
         indenter.unindent();
-        
+
         indenter.write("</aggregation>");
         indenter.endLine();
         indenter.unindent();
@@ -204,6 +205,8 @@ public class KagregFrontEnd {
 
         try (Writer writer = new BufferedWriter(new FileWriter("result.k"))) {
             writer.write(indenter.toString());
+        } catch (IOException e) {
+            GlobalSettings.kem.registerCriticalError("Could not write to result.k", e);
         }
     }
 }

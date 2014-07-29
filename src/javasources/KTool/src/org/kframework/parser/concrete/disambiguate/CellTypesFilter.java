@@ -10,13 +10,10 @@ import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.ParseForestTransformer;
@@ -44,22 +41,22 @@ public class CellTypesFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
-        String sort = context.cellSorts.get(cell.getLabel());
+        Sort sort = context.cellSorts.get(cell.getLabel());
         // if the k cell is opened, then the sort should be K because of ... desugaring
         if (cell.getLabel().equals("k") && cell.getEllipses() != Ellipses.NONE)
-            sort = KSorts.K;
+            sort = Sort.K;
 
         if (sort == null) {
             if (cell.getLabel().equals("k"))
-                sort = "K";
+                sort = Sort.K;
             else if (cell.getLabel().equals("T"))
-                sort = "Bag";
+                sort = Sort.BAG;
             else if (cell.getLabel().equals("generatedTop"))
-                sort = "Bag";
+                sort = Sort.BAG;
             else if (cell.getLabel().equals("freshCounter"))
-                sort = "K";
+                sort = Sort.K;
             else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
-                sort = "K";
+                sort = Sort.K;
         }
 
         if (sort != null) {
@@ -80,20 +77,18 @@ public class CellTypesFilter extends ParseForestTransformer {
      * 
      */
     public class CellTypesFilter2 extends LocalTransformer {
-        String expectedSort;
+        Sort expectedSort;
         String cellLabel;
 
-        public CellTypesFilter2(Context context, String expectedSort, String cellLabel) {
-            super(CellTypesFilter2.class.getName(), context);
+        public CellTypesFilter2(Context context, Sort expectedSort, String cellLabel) {
+            super("org.kframework.parser.concrete.disambiguate.CellTypesFilter2", context);
             this.expectedSort = expectedSort;
             this.cellLabel = cellLabel;
         }
 
         @Override
         public ASTNode visit(Term trm, Void _) throws ParseFailedException {
-            // accept only terms that have sort <= to the cell type, or terms of sort K
-            if (!(context.isSubsortedEq(expectedSort, trm.getSort()) ||
-                  (trm.getSort().equals(KSorts.K) && context.isSubsortedEq(KSorts.K, expectedSort)))) {
+            if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
                 throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));

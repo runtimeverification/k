@@ -4,6 +4,7 @@ package org.kframework.backend.maude;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.compile.sharing.FreshVariableNormalizer;
+import org.kframework.compile.sharing.SortRulesNormalizer;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.UserList;
@@ -12,7 +13,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringBuilderUtil;
 import org.kframework.utils.file.FileUtil;
 
-import java.io.IOException;
 import java.util.Map;
 
 public class MaudeBackend extends BasicBackend {
@@ -22,8 +22,9 @@ public class MaudeBackend extends BasicBackend {
     }
 
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         definition = (Definition) new FreshVariableNormalizer(context).visitNode(definition);
+        definition = (Definition) new SortRulesNormalizer(context).visitNode(definition);
         MaudeFilter maudeFilter = new MaudeFilter(context);
         maudeFilter.visitNode(definition);
 
@@ -37,7 +38,7 @@ public class MaudeBackend extends BasicBackend {
         StringBuilder consTable = getLabelTable(definition);
         FileUtil.save(context.dotk.getAbsolutePath() + "/consTable.txt", consTable);
     }
-    
+
     private StringBuilder getLabelTable(Definition def) {
         StringBuilder b = new StringBuilder();
         /*
@@ -67,7 +68,7 @@ public class MaudeBackend extends BasicBackend {
                 b.append('P');
                 b.append(StringEscapeUtils.escapeJava(p.getKLabel()));
             }
-            b.append('\n');            
+            b.append('\n');
         }
         return b;
     }

@@ -32,7 +32,7 @@ public class BasicParser {
     private String mainModule;
     private boolean autoinclude;
     private static final String missingFileMsg = "Could not find 'required' file: ";
-    
+
     private KompileOptions kompileOptions;
     private GlobalOptions globalOptions;
 

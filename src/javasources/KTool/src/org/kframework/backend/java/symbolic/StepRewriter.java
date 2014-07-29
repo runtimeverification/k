@@ -141,7 +141,7 @@ public class StepRewriter {
             if (!constraint.isMatching(leftHandSide)) {
                 continue;
             }
-            
+
             constraint.orientSubstitution(leftHandSide.variableSet());
 
             Term result = rule.rightHandSide();

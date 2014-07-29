@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -23,7 +24,7 @@ import java.util.List;
  */
 public abstract class BitVector<T extends Number> extends Token {
 
-    public static final String SORT_NAME = "MInt";
+    public static final Sort SORT = Sort.BIT_VECTOR;
 
     /**
      * Integer value wrapped by this BitVector. The signed value and the unsigned value of this
@@ -95,12 +96,9 @@ public abstract class BitVector<T extends Number> extends Token {
      */
     public abstract BigInteger unsignedValue();
 
-    /**
-     * Returns a {@code String} representation of the sort of this BitVector.
-     */
     @Override
-    public String sort() {
-        return BitVector.SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**
@@ -126,7 +124,7 @@ public abstract class BitVector<T extends Number> extends Token {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + bitwidth;

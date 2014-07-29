@@ -5,9 +5,11 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
-import org.kframework.krun.K;
+import org.kframework.krun.KRunOptions;
+import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.utils.ColorUtil;
 
+import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -18,8 +20,10 @@ public class UnparserFilter extends NonCachingVisitor {
     private boolean firstProduction = false;
     private boolean inConfiguration = false;
     private boolean addParentheses;
+    private final KRunOptions.OutputMode outputMode;
     private int inTerm = 0;
     private ColorSetting color = ColorSetting.OFF;
+    private Color terminalColor = Color.black;
     private boolean annotateLocation;
     public static int TAB = 4;
     private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
@@ -34,7 +38,7 @@ public class UnparserFilter extends NonCachingVisitor {
     public void setIndenter(Indenter indenter) {
         this.indenter = indenter;
     }
-    
+
     public UnparserFilter(org.kframework.kil.loader.Context context) {
         this(false, context);
     }
@@ -44,20 +48,25 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     public UnparserFilter(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, true, context);
+        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, OutputMode.PRETTY, context);
     }
 
-    public UnparserFilter(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color, addParentheses, false, context);
+    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputMode outputMode, org.kframework.kil.loader.Context context) {
+        this(inConfiguration, color, outputMode, false, context);
     }
 
-    public UnparserFilter(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context) {
+    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputMode outputMode, boolean annotateLocation, org.kframework.kil.loader.Context context) {
         super(context);
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
-        this.addParentheses = addParentheses;
+        this.addParentheses = outputMode != OutputMode.SMART;
         this.annotateLocation = annotateLocation;
+        this.outputMode = outputMode;
+        //TODO(dwightguth): clean up pretty printing so we don't need this ugly hack
+        if (context.colorOptions != null) {
+            terminalColor = context.colorOptions.terminalColor();
+        }
     }
 
     public String getResult() {
@@ -106,7 +115,7 @@ public class UnparserFilter extends NonCachingVisitor {
     public Void visit(Syntax syn, Void _) {
         prepare(syn);
         firstPriorityBlock = true;
-        indenter.write("syntax " + syn.getSort().getName());
+        indenter.write("syntax " + syn.getDeclaredSort().getName());
         indenter.indentToCurrent();
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {
@@ -153,7 +162,7 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         prepare(sort);
         indenter.write(sort.getName());
         super.visit(sort, _);
@@ -265,7 +274,7 @@ public class UnparserFilter extends NonCachingVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color, terminalColor);
                 indenter.write(colorCode);
             }
         }
@@ -357,8 +366,9 @@ public class UnparserFilter extends NonCachingVisitor {
             assert child instanceof KList : "child of KApp with Token is not KList";
             assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
             indenter.write(((Token) label).value());
-        } else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
-            
+        } else if ((outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP)
+                && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
+
             String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";
 
             if (child instanceof KList) {
@@ -529,8 +539,8 @@ public class UnparserFilter extends NonCachingVisitor {
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort())) {
-            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
+        if (term.getSort().isKSort()) {
+            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             indenter.write("2KLabel ");
         } else {
             indenter.write("# ");
@@ -646,7 +656,7 @@ public class UnparserFilter extends NonCachingVisitor {
         if (c.isSyntactic()) {
             indenter.write(":");
         }
-        indenter.write(c.getSort());
+        indenter.write(c.getSort().getName());
         return postpare();
     }
 

@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
  * </p>
  * Additionally, a data structure sort may provide other hooked operations. Each
  * backend must implement these builtin data structures types.
- * 
+ *
  * @author AndreiS
  */
 public class DataStructureSort implements Serializable {
@@ -32,11 +32,11 @@ public class DataStructureSort implements Serializable {
     public enum Label { CONSTRUCTOR, ELEMENT, UNIT }
 
     /** {@code Set} of builtin data structure types */
-    public static final java.util.Set<String> TYPES = ImmutableSet.of(
-            KSorts.BAG,
-            KSorts.LIST,
-            KSorts.MAP,
-            KSorts.SET);
+    public static final java.util.Set<Sort> TYPES = ImmutableSet.of(
+            Sort.BAG,
+            Sort.LIST,
+            Sort.MAP,
+            Sort.SET);
 
     /**
      * {@code Map} of builtin data structure types (Bag, List, Set, Map) to fundamental hooks
@@ -44,27 +44,27 @@ public class DataStructureSort implements Serializable {
      * The full name of a hook is obtained by using the builtin module name as a prefix (e.g.
      * Map:__).
      */
-    public static final Map<String, ImmutableMap<Label, String>> LABELS = ImmutableMap.of(
-            KSorts.BAG, ImmutableMap.of(
+    public static final Map<Sort, ImmutableMap<Label, String>> LABELS = ImmutableMap.of(
+            Sort.BAG, ImmutableMap.of(
                     Label.CONSTRUCTOR, "__",
                     Label.ELEMENT, "BagItem",
                     Label.UNIT, ".Bag"),
-            KSorts.LIST, ImmutableMap.of(
+            Sort.LIST, ImmutableMap.of(
                     Label.CONSTRUCTOR, "__",
                     Label.ELEMENT, "ListItem",
                     Label.UNIT, ".List"),
-            KSorts.MAP, ImmutableMap.of(
+            Sort.MAP, ImmutableMap.of(
                     Label.CONSTRUCTOR, "__",
                     Label.ELEMENT, "_|->_",
                     Label.UNIT, ".Map"),
-            KSorts.SET, ImmutableMap.of(
+            Sort.SET, ImmutableMap.of(
                     Label.CONSTRUCTOR, "__",
                     Label.ELEMENT, "SetItem",
                     Label.UNIT, ".Set"));
 
-    public static final String DEFAULT_LIST_SORT = "List";
-    public static final String DEFAULT_MAP_SORT = "Map";
-    public static final String DEFAULT_SET_SORT = "Set";
+    public static final Sort DEFAULT_LIST_SORT = Sort.LIST;
+    public static final Sort DEFAULT_MAP_SORT = Sort.MAP;
+    public static final Sort DEFAULT_SET_SORT = Sort.SET;
     public static final String DEFAULT_LIST_LABEL = "'_List_";
     public static final String DEFAULT_LIST_ITEM_LABEL = "'ListItem";
     public static final String DEFAULT_LIST_UNIT_LABEL = "'.List";
@@ -78,7 +78,7 @@ public class DataStructureSort implements Serializable {
     /** Name of this data structure sort. */
     private final String name;
     /** Type of the builtin data structure this sort is hooked to (an element of {@code TYPES}). */
-    private final String type;
+    private final Sort type;
     /** {@code String} representation of the data structure constructor KLabel. */
     private final String constructorLabel;
     /** {@code String} representation of the data structure element KLabel*/
@@ -90,7 +90,7 @@ public class DataStructureSort implements Serializable {
 
     public DataStructureSort(
             String name,
-            String type,
+            Sort type,
             String constructorLabel,
             String elementLabel,
             String unitLabel,
@@ -121,8 +121,13 @@ public class DataStructureSort implements Serializable {
         return operatorLabels;
     }
 
-    public String type() {
+    public Sort type() {
         return type;
+    }
+
+    @Deprecated
+    public Sort sort() {
+        return type();
     }
 
     public String unitLabel() {

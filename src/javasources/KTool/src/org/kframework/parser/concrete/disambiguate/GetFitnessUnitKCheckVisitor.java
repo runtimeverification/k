@@ -6,9 +6,9 @@ import org.kframework.kil.loader.Context;
 
 /**
  * Check to see which branch of an ambiguity has less K insertions
- * 
+ *
  * @author RaduFmse
- * 
+ *
  */
 public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
@@ -28,10 +28,10 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
         } else {
             int j = 0;
             for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
-                if (tc.getProduction().getItems().get(i) instanceof Sort) {
-                    Sort sort = (Sort) tc.getProduction().getItems().get(i);
-                    Term child = (Term) tc.getContents().get(j);
-                    score += getFitnessUnit2(sort.getName(), child);
+                if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
+                    NonTerminal sort = (NonTerminal) tc.getProduction().getItems().get(i);
+                    Term child = tc.getContents().get(j);
+                    score += getFitnessUnit2(sort.getSort(), child);
                     j++;
                 }
             }
@@ -41,14 +41,14 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
     /**
      * Get the score for two sorts
-     * 
+     *
      * @param declSort
      *            - the sort declared in the production.
      * @param termSort
      *            - the sort found in the term.
      * @return
      */
-    private int getFitnessUnit2(String declSort, Term childTerm) {
+    private int getFitnessUnit2(Sort declSort, Term childTerm) {
         if (childTerm instanceof Rewrite) {
             Rewrite rw = (Rewrite) childTerm;
             return getFitnessUnit2(declSort, rw.getLeft()) + getFitnessUnit2(declSort, rw.getRight());
@@ -63,14 +63,14 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
         return getFitnessUnit3(declSort, childTerm.getSort());
     }
 
-    private int getFitnessUnit3(String declSort, String termSort) {
-        if (termSort.equals(""))
+    private int getFitnessUnit3(Sort declSort, Sort termSort) {
+        if (termSort.getName().equals(""))
             return 0; // if it is amb it won't have a sort
         int score;
         if (context.isSubsortedEq(declSort, termSort))
             score = 0;
         // isSubsortEq(|"K", expect) ; <?"K"> place ; !-1
-        else if (context.isSubsortedEq("K", declSort) && termSort.equals("K"))
+        else if (context.isSubsortedEq(Sort.K, declSort) && termSort.equals(Sort.K))
             score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
         else {
             score = -1;

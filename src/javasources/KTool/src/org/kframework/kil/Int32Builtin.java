@@ -13,8 +13,6 @@ import org.w3c.dom.Element;
  */
 public class Int32Builtin extends Token {
 
-    public static final String SORT_NAME = "#Int32";
-
     /* Token cache */
     private static Map<Integer, Int32Builtin> tokenCache = new HashMap<Integer, Int32Builtin>();
     /* KApp cache */
@@ -40,7 +38,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link Int32Builtin} representing the given {@link Integer} value.
-     * 
+     *
      * @param value
      * @return
      */
@@ -56,7 +54,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link Int32Builtin} representing a {@link Integer} with the given {@link String} representation.
-     * 
+     *
      * @param value
      * @return
      */
@@ -68,7 +66,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link Int32Builtin} with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -84,7 +82,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link Int32Builtin} with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -94,7 +92,7 @@ public class Int32Builtin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link Int32Builtin} with the given {@link String} representation applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -126,8 +124,8 @@ public class Int32Builtin extends Token {
      * Returns a {@link String} representing the sort name of a int token.
      */
     @Override
-    public String tokenSort() {
-        return Int32Builtin.SORT_NAME;
+    public Sort tokenSort() {
+        return Sort.BUILTIN_INT32;
     }
 
     /**

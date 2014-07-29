@@ -45,7 +45,9 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.main.FirstStep;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.general.GlobalSettings;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -59,8 +61,8 @@ public class KoreBackend extends BasicBackend {
   }
 
   @Override
-  public void run(Definition toKore) throws IOException {
-      
+  public void run(Definition toKore) {
+
       try {
         toKore = this.getCompilationSteps().compile(toKore, this.getDefaultStep());
     } catch (CompilerStepDone e) {
@@ -70,24 +72,29 @@ public class KoreBackend extends BasicBackend {
       KilTransformer trans = new KilTransformer(context);
       HashMap<String,PrintWriter> fileTable = new HashMap<String,PrintWriter>();
       for(int i = 0; i < toKore.getItems().size(); ++i){
-          
+
           if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
-              
-              fileTable.put((toKore.getItems().get(i)).getFilename(), 
-                      new PrintWriter(((toKore.getItems().get(i)).getFilename().substring(0, 
-                              (toKore.getItems().get(i)).getFilename().length()-2))+".kore"));
+
+              String filename = ((toKore.getItems().get(i)).getFilename().substring(0,
+                      (toKore.getItems().get(i)).getFilename().length()-2))+".kore";
+              try {
+              fileTable.put((toKore.getItems().get(i)).getFilename(),
+                      new PrintWriter(filename));
+              } catch (IOException e) {
+                  GlobalSettings.kem.registerCriticalError("Could not write to " + filename, e);
               }
+          }
       }
-      
+
       for(int i = 0; i < toKore.getItems().size(); ++i){
 
           fileTable.get((toKore.getItems().get(i)).getFilename()).println(trans.kilToKore(((toKore.getItems().get(i)))));
       }
-      
+
       ArrayList<PrintWriter> toClosedFiles = new ArrayList<PrintWriter>(fileTable.values());
-      
+
       for(int i = 0; i < toClosedFiles.size(); ++i){
-          
+
           toClosedFiles.get(i).close();
       }
   }
@@ -96,7 +103,7 @@ public class KoreBackend extends BasicBackend {
   public String getDefaultStep() {
       return "LastStep";
   }
-  
+
   @Override
     public CompilerSteps<Definition> getCompilationSteps() {
         CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
@@ -142,7 +149,7 @@ public class KoreBackend extends BasicBackend {
 }
 
 class KoreFilter extends BasicVisitor {
-    
+
     protected Indenter indenter = new Indenter();
     private boolean inConfiguration = false;
     private int inTerm = 0;
@@ -160,15 +167,15 @@ class KoreFilter extends BasicVisitor {
         this.inTerm = 0;
         this.indenter.setWidth(500);
     }
-    
+
     public String getResult() {
         String a = indenter.toString();
         this.clear();
         return a;
     }
-    
+
     public void clear(){
-        
+
         indenter=new Indenter();
         this.indenter.setWidth(500);
     }
@@ -177,7 +184,7 @@ class KoreFilter extends BasicVisitor {
     public String getName() {
         return "KoreFilter";
     }
-    
+
     @Override
     public Void visit(Ambiguity node, Void _) {
 
@@ -194,16 +201,16 @@ class KoreFilter extends BasicVisitor {
         indenter.write(")");
         return null;
     }
-    
+
     @Override
     public Void visit(Attribute node, Void _) {
         indenter.write(" "+node.getKey()+"("+node.getValue()+")");
         return null;
     }
-    
+
     @Override
     public Void visit(Attributes node, Void _) {
-        
+
         if(node.isEmpty()){
             return null;
         }
@@ -218,40 +225,40 @@ class KoreFilter extends BasicVisitor {
         indenter.write("]");
         return null;
     }
-    
+
     @Override
     public Void visit(BackendTerm node, Void _) {
         indenter.write(node.getValue());
         return null;
     }
-    
+
     @Override
     public Void visit(Collection node, Void _) {
-        
+
         if(node.getContents().size()==0){
             indenter.write("."+node.getSort());
             return null;
         }
-        
+
         for(int i = 0;i < node.getContents().size(); ++i){
             Term term = node.getContents().get(i);
             this.visitNode(term);
         }
         return null;
     }
-    
+
     @Override
     public Void visit(BagItem node, Void _) {
         this.visitNode(node.getItem());
         return null;
     }
-    
+
     @Override
     public Void visit(Token node, Void _) {
         indenter.write("#token(\"" + node.tokenSort() + "\", \"" + node.value() + "\")");
         return null;
     }
-    
+
     @Override
     public Void visit(Bracket node, Void _) {
         indenter.write("(");
@@ -259,7 +266,7 @@ class KoreFilter extends BasicVisitor {
         indenter.write(")");
         return null;
     }
-    
+
     @Override
     public Void visit(Cast node, Void _) {
         indenter.write("(");
@@ -268,11 +275,11 @@ class KoreFilter extends BasicVisitor {
         if (node.isSyntactic()) {
             indenter.write(":");
         }
-        indenter.write(node.getSort());
+        indenter.write(node.getSort().getName());
         indenter.write(")");
         return null;
     }
-    
+
     @Override
     public Void visit(Cell cell, Void _) {
 
@@ -287,7 +294,7 @@ class KoreFilter extends BasicVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color, Color.black);
                 indenter.write(colorCode);
             }
         }
@@ -325,7 +332,7 @@ class KoreFilter extends BasicVisitor {
 
         return null;
     }
-    
+
     @Override
     public Void visit(Configuration node, Void _) {
         indenter.write("  configuration ");
@@ -334,7 +341,7 @@ class KoreFilter extends BasicVisitor {
         indenter.endLine();
         return null;
     }
-    
+
     @Override
     public Void visit(org.kframework.kil.Context node, Void _) {
         indenter.write("  context ");
@@ -343,12 +350,12 @@ class KoreFilter extends BasicVisitor {
         this.visitNode(node.getAttributes());
         return null;
     }
-    
+
     public Void visit(DataStructureSort node, Void _) {
         indenter.write(node.name());
         return null;
     }
-    
+
     @Override
     public Void visit(Definition node, Void _) {
         for (DefinitionItem di : node.getItems()) {
@@ -356,7 +363,7 @@ class KoreFilter extends BasicVisitor {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(Freezer node, Void _) {
         indenter.write("#freezer");
@@ -364,13 +371,13 @@ class KoreFilter extends BasicVisitor {
         indenter.write("(.KList)");
         return null;
     }
-    
+
     @Override
     public Void visit(FreezerHole hole, Void _) {
         indenter.write("HOLE(" + hole.getIndex() + ")");
         return null;
     }
-    
+
     @Override
     public Void visit(Hole hole, Void _) {
         indenter.write("HOLE");
@@ -383,7 +390,7 @@ class KoreFilter extends BasicVisitor {
         indenter.endLine();
         return null;
     }
-  
+
     private void visitList(List<? extends ASTNode> nodes, String sep, String empty) {
         if (nodes.size() == 0) { this.indenter.write(empty); }
         else {
@@ -395,7 +402,7 @@ class KoreFilter extends BasicVisitor {
       }
 
           @Override
-        public Void visit(KSequence node, Void _) { 
+        public Void visit(KSequence node, Void _) {
             visitList(node.getContents(), " ~> ", ".K");
             return null;
         }
@@ -423,7 +430,7 @@ class KoreFilter extends BasicVisitor {
             this.indenter.write(node.value());
             return null;
         }
-        
+
         @Override
         public Void visit(KApp node, Void _) {
               this.visitNode(node.getLabel());
@@ -438,12 +445,12 @@ class KoreFilter extends BasicVisitor {
             this.indenter.write(node.getLabel().replaceAll("\\(", "`(").replaceAll("\\)", "`)")); // TODO: escape the label
             return null;
         }
-        
+
         @Override
         public Void visit(KInjectedLabel kInjectedLabel, Void _) {
             Term term = kInjectedLabel.getTerm();
-            if (MetaK.isKSort(term.getSort())) {
-                indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
+            if (term.getSort().isKSort()) {
+                indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
                 indenter.write("2KLabel ");
             } else {
                 indenter.write("# ");
@@ -451,36 +458,36 @@ class KoreFilter extends BasicVisitor {
             this.visitNode(term);
             return null;
         }
-        
+
         @Override
         public Void visit(Lexical node, Void _) {
             this.indenter.write("Lexical{"+node.getLexicalRule()+"}");
             return null;
         }
-  
+
         @Override
         public Void visit(ListTerminator node, Void _) {
             this.indenter.write(node.toString());
             return null;
         }
-        
+
         @Override
         public Void visit(LiterateModuleComment node, Void _) {
             indenter.write(node.toString());
             return null;
         }
-        
+
         @Override
         public Void visit(LiterateDefinitionComment node, Void _) {
             indenter.write(node.toString());
             return null;
         }
-          
+
         @Override
         public Void visit(Module mod, Void _) {
             indenter.write("module " + mod.getName() + "\n");
             for (ModuleItem i : mod.getItems()){
-                
+
                 this.visitNode(i);
             }
             indenter.write("\nendmodule");
@@ -492,24 +499,24 @@ class KoreFilter extends BasicVisitor {
             indenter.write("Parse error: " + node.getMessage());
             return null;
         }
-        
+
         @Override
         public Void visit(Production node, Void _) {
             for (ProductionItem i : node.getItems()){
-                
+
                 this.visitNode(i);
                 indenter.write(" ");
             }
             return null;
         }
-        
+
         @Override
         public Void visit(PriorityBlock node, Void _) {
-            
+
             if (node.getAssoc() != null && !node.getAssoc().equals("")){
                 indenter.write(node.getAssoc()+": ");
             }
-            
+
             for (int i = 0; i < node.getProductions().size(); ++i){
                 Production production = node.getProductions().get(i);
                 this.visitNode(production);
@@ -519,10 +526,10 @@ class KoreFilter extends BasicVisitor {
             }
             return null;
         }
-        
+
         @Override
         public Void visit(PriorityBlockExtended node, Void _) {
-            
+
             for (int i = 0; i < node.getProductions().size(); ++i){
                 KLabelConstant production = node.getProductions().get(i);
                 this.visitNode(production);
@@ -532,10 +539,10 @@ class KoreFilter extends BasicVisitor {
             }
             return null;
         }
-        
+
         @Override
         public Void visit(PriorityExtended node, Void _) {
-            
+
             indenter.write("  syntax priorities" );
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlockExtended production = node.getPriorityBlocks().get(i);
@@ -547,10 +554,10 @@ class KoreFilter extends BasicVisitor {
             indenter.endLine();
             return null;
         }
-        
+
         @Override
         public Void visit(PriorityExtendedAssoc node, Void _) {
-            
+
             indenter.write("  syntax "+node.getAssoc() );
             for (int i = 0; i < node.getTags().size(); ++i){
                 KLabelConstant production = node.getTags().get(i);
@@ -562,15 +569,15 @@ class KoreFilter extends BasicVisitor {
             indenter.endLine();
             return null;
         }
-        
+
         @Override
         public Void visit(Require node, Void _) {
-            
+
             indenter.write(node.toString());
             indenter.endLine();
             return null;
         }
-        
+
         @Override
         public Void visit(Restrictions node, Void _) {
             indenter.write("  syntax ");
@@ -583,7 +590,7 @@ class KoreFilter extends BasicVisitor {
             indenter.endLine();
             return null;
         }
-        
+
         @Override
         public Void visit(Rewrite rewrite, Void _) {
             this.visitNode(rewrite.getLeft());
@@ -592,7 +599,7 @@ class KoreFilter extends BasicVisitor {
             indenter.endLine();
             return null;
         }
-        
+
         @Override
         public Void visit(Rule node, Void _) {
             indenter.write("  rule ");
@@ -602,7 +609,7 @@ class KoreFilter extends BasicVisitor {
 
             this.visitNode(node.getBody());
             indenter.write(" ");
-            
+
             if (node.getRequires() != null) {
                 indenter.write("requires ");
                 this.visitNode(node.getRequires());
@@ -617,7 +624,7 @@ class KoreFilter extends BasicVisitor {
             indenter.endLine();
             return null;
         }
-        
+
         @Override
         public Void visit(Sentence node, Void _) {
 
@@ -626,7 +633,7 @@ class KoreFilter extends BasicVisitor {
 
             this.visitNode(node.getBody());
             indenter.write(" ");
-            
+
             if (node.getRequires() != null) {
                 indenter.write("requires ");
                 this.visitNode(node.getRequires());
@@ -641,9 +648,9 @@ class KoreFilter extends BasicVisitor {
             indenter.endLine();
             return null;
         }
-        
+
         @Override
-        public Void visit(Sort node, Void _) {
+        public Void visit(NonTerminal node, Void _) {
             indenter.write(node.toString());
             return null;
         }
@@ -653,12 +660,12 @@ class KoreFilter extends BasicVisitor {
             indenter.write(node.toString());
             return null;
         }
-        
+
         @Override
         public Void visit(Syntax node, Void _) {
-            
+
             indenter.write("  syntax ");
-            this.visitNode(node.getSort());
+            this.visitNode(node.getDeclaredSort());
             indenter.write(" ::=");
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlock production = node.getPriorityBlocks().get(i);
@@ -670,19 +677,19 @@ class KoreFilter extends BasicVisitor {
             indenter.endLine();
             return null;
         }
-        
+
         @Override
         public Void visit(TermComment node, Void _) {
             indenter.write(node.toString());
             return null;
         }
-  
+
         @Override
         public Void visit(Terminal node, Void _) {
             indenter.write(node.toString());
             return null;
         }
-        
+
         @Override
         public Void visit(UserList node, Void _) {
             indenter.write(node.toString());
@@ -694,7 +701,7 @@ class KoreFilter extends BasicVisitor {
             this.indenter.write(node.getName() + ":" + node.getSort());
             return null;
         }
-        
+
         @Override
         public Void visit(TermCons node, Void _){
             this.visitNode(new KApp(new KLabelConstant(node.getProduction().getKLabel()),new KList(node.getContents())));

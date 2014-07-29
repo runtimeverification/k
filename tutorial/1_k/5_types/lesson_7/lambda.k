@@ -44,7 +44,7 @@ module LAMBDA
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule mu X . E => (?T:Type -> ?T) E[?T/X]
 
-  syntax K ::= Type "=" Type
+  syntax KItem ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
   rule <k> T:Type => applyMgu(Theta,T) </k>  <mgu> Theta:Mgu => . </mgu>
 endmodule

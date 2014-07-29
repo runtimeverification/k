@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class ContextsToHeating extends CopyOnWriteTransformer {
     private List<ModuleItem> rules = new ArrayList<ModuleItem>();
-    
+
     public ContextsToHeating(Context context) {
            super("Contexts to Heating Rules", context);
     }
@@ -31,8 +31,8 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     public ASTNode visit(Module node, Void _)  {
         return ((Module)super.visit(node, _)).addModuleItems(rules);
     }
-    
-    /* assumes term has exactly one rewrite and returns the list 
+
+    /* assumes term has exactly one rewrite and returns the list
      * C[v], v, t1, t2 such that
      * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term)  {
@@ -45,7 +45,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                     int index = 0;
                     //TODO(OwolabiL): what if there is more than 1 KItem?
                     for (int i = 0; i < termCons.arity(); i++) {
-                        if (termCons.getContents().get(i).getSort().equals("KItem")){
+                        if (termCons.getContents().get(i).getSort().equals(Sort.KITEM)){
                             index = i;
                             break;
                         }
@@ -57,10 +57,10 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                 }
 
             } else{
-                v = Variable.getFreshVar(KSorts.KITEM);
+                v = Variable.getFreshVar(Sort.KITEM);
             }
         } else {
-            v = Variable.getFreshVar(KSorts.K);
+            v = Variable.getFreshVar(Sort.K);
         }
         final List<Term> list = new ArrayList<Term>();
         CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("splitter", context) {
@@ -75,7 +75,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         list.add(0, result);
         return list;
     }
-    
+
     private Term substituteHole(Term term, Term replacement)  {
         return substituteSubstitutable(term, Hole.KITEM_HOLE, replacement);
     }
@@ -175,9 +175,9 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                     break;
                 }
             }
-        }        
+        }
         rules.add(coolingRule);
-        
+
         return null;
     }
 

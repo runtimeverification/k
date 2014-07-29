@@ -13,7 +13,7 @@ public class AddTopCellRules extends CopyOnWriteTransformer {
     public AddTopCellRules(Context context) {
         super("Add top cell for rules", context);
     }
-    
+
     @Override
     public ASTNode visit(Rule node, Void _) {
         if (MetaK.isAnywhere(node)) return node;
@@ -22,12 +22,12 @@ public class AddTopCellRules extends CopyOnWriteTransformer {
         node.setBody(MetaK.wrap(node.getBody(),MetaK.Constants.generatedTopCellLabel,Ellipses.BOTH));
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Configuration node, Void _) {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _) {
         return node;

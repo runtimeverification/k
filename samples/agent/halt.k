@@ -7,5 +7,5 @@ endmodule
 module HALT
   imports HALT-SYNTAX
   imports VAL
-  rule <k>(halt V:Val)~>_ => V</k> 
+  rule <k>(halt V:Val)~>_ => V</k>
 endmodule

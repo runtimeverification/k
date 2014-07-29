@@ -7,7 +7,7 @@ module TEST1
   syntax KItem ::= start(Int)
 
   configuration <T> <k> $PGM:K </k> <set> .Set </set> </T>
-  
+
   rule <k> start(I:Int => I -Int 1) ...</k> <set>... .Set => SetItem(I) ...</set>
     when I >Int 0
   rule start(0) => .

@@ -13,17 +13,17 @@ import java.util.ArrayList;
 
 public class TypeSystemFilter2 extends LocalTransformer {
 
-    private String maxSort;
+    private Sort maxSort;
     // if true, reject anything which is not below maxSort, even K
     private final boolean strict;
 
-    public TypeSystemFilter2(String maxSort, org.kframework.kil.loader.Context context) {
+    public TypeSystemFilter2(Sort maxSort, org.kframework.kil.loader.Context context) {
         super(TypeSystemFilter2.class.getName(), context);
         this.maxSort = maxSort;
         strict = false;
     }
 
-    public TypeSystemFilter2(String maxSort, boolean strict, org.kframework.kil.loader.Context context) {
+    public TypeSystemFilter2(Sort maxSort, boolean strict, org.kframework.kil.loader.Context context) {
         super(TypeSystemFilter2.class.getName(), context);
         this.maxSort = maxSort;
         this.strict = strict;
@@ -40,9 +40,9 @@ public class TypeSystemFilter2 extends LocalTransformer {
         boolean error = false;
         if (strict && !trm.getSort().equals(maxSort))
             error = true;
-        if ((!trm.getSort().equals(KSorts.K) &&
-             !trm.getSort().equals(KSorts.KITEM) &&
-             !trm.getSort().equals(KSorts.KRESULT)))
+        if ((!trm.getSort().equals(Sort.K) &&
+             !trm.getSort().equals(Sort.KITEM) &&
+             !trm.getSort().equals(Sort.KRESULT)))
             if (!context.isSubsortedEq(maxSort, trm.getSort()))
                 error = true;
         if (error) {

@@ -4,6 +4,7 @@ package org.kframework.backend.java.builtins;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.FloatBuiltin;
 import org.kframework.backend.java.kil.Token;
@@ -101,7 +102,7 @@ public class BuiltinStringOperations {
     public static IntToken string2base(StringToken term, IntToken base, TermContext context) {
         return IntToken.of(new BigInteger(term.stringValue(), base.intValue()));
     }
-    
+
     public static StringToken base2string(IntToken integer, IntToken base, TermContext context) {
         return StringToken.of(integer.bigIntegerValue().toString(base.intValue()));
     }
@@ -156,12 +157,12 @@ public class BuiltinStringOperations {
     }
 
     public static Token string2token(StringToken sort, StringToken value, TermContext context) {
-        return Token.of(sort.stringValue(), value.stringValue());
+        return Token.of(Sort.of(sort.stringValue()), value.stringValue());
     }
-    
+
     /**
      * Replaces all occurrences of a string within another string.
-     * 
+     *
      * @param text
      *            the string to search and replace in
      * @param search
@@ -178,11 +179,11 @@ public class BuiltinStringOperations {
         return StringToken.of(StringUtils.replace(text.stringValue(),
                 searchString.stringValue(), replacement.stringValue()));
     }
-    
+
     /**
      * Replaces all occurrences of a string within another string, for the first
      * max values of the search string.
-     * 
+     *
      * @param text
      *            the string to search and replace in
      * @param search
@@ -202,10 +203,10 @@ public class BuiltinStringOperations {
                 searchString.stringValue(), replacement.stringValue(),
                 max.intValue()));
     }
-    
+
     /**
      * Replaces the first occurrence of a string within another string.
-     * 
+     *
      * @param text
      *            the string to search and replace in
      * @param search
@@ -222,10 +223,10 @@ public class BuiltinStringOperations {
         return StringToken.of(StringUtils.replaceOnce(text.stringValue(),
                 searchString.stringValue(), replacement.stringValue()));
     }
-    
+
     /**
      * Counts how many times the substring appears in another string.
-     * 
+     *
      * @param text
      *            the string to search in
      * @param substr

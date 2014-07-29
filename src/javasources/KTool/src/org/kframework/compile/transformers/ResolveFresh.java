@@ -21,7 +21,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
     public ResolveFresh(Context context) {
         super("Resolve fresh variables condition.", context);
     }
-    
+
     @Override
     public ASTNode visit(Definition node, Void _)  {
         isFresh = false;
@@ -61,7 +61,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 
         node = node.shallowCopy();
         node.setRequires((Term) condNode);
-        Variable freshVar = Variable.getFreshVar("Int");
+        Variable freshVar = Variable.getFreshVar(Sort.INT);
         ASTNode bodyNode = freshSubstitution(vars, freshVar).visitNode(node.getBody());
         assert(bodyNode instanceof Term);
         Bag bag;
@@ -72,19 +72,19 @@ public class ResolveFresh extends CopyOnWriteTransformer {
             bag.getContents().add((Term)bodyNode);
         }
         node.setBody(bag);
-        
+
         Cell fCell = new Cell();
         fCell.setLabel("freshCounter");
         fCell.setEllipses(Ellipses.NONE);
-        TermCons t = new TermCons("Int", "Int1PlusSyn", context);
+        TermCons t = new TermCons(Sort.INT, "Int1PlusSyn", context);
         t.getContents().add(freshVar);
         t.getContents().add(IntBuiltin.kAppOf(vars.size()));
         fCell.setContents(new Rewrite(freshVar, t, context));
         bag.getContents().add(fCell);
-        
+
         return node;
     }
-    
+
     @Override
     public ASTNode visit(TermCons node, Void _)  {
         if (MetaK.Constants.freshCons.equals(node.getCons())) {
@@ -106,13 +106,13 @@ public class ResolveFresh extends CopyOnWriteTransformer {
         Map<Term, Term> symMap = new HashMap<Term, Term>();
         int idx = 0;
         for (Variable var : vars) {
-            TermCons idxTerm = new TermCons("Int", MetaK.Constants.plusIntCons, context);
+            TermCons idxTerm = new TermCons(Sort.INT, MetaK.Constants.plusIntCons, context);
             List<Term> subterms = idxTerm.getContents();
             subterms.add(idxVar);
             subterms.add(IntBuiltin.kAppOf(idx));
             ++idx;
 
-            String sort = var.getSort();
+            Sort sort = var.getSort();
             Term symTerm = new AddSymbolicK(context).makeSymbolicTerm(sort, idxTerm);
             symMap.put(var, symTerm);
         }

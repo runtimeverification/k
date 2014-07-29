@@ -13,13 +13,13 @@ import java.util.Set;
 
 /**
  * Substitutes variables with terms according to a given substitution map.
- * 
+ *
  * @author AndreiS
  */
 public class SubstitutionTransformer extends PrePostTransformer {
 
     private final Map<Variable, ? extends Term> substitution;
-    
+
     public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
         super(context);
         this.substitution = substitution;
@@ -27,11 +27,11 @@ public class SubstitutionTransformer extends PrePostTransformer {
         postTransformer.addTransformer(new LocalSubstitutionTransformer());
         postTransformer.addTransformer(new VariableUpdaterTransformer());
     }
-    
+
     /**
      * Stops further traversing the term when it contains no variable that needs
      * to be substituted.
-     * 
+     *
      */
     private class LocalVariableChecker extends LocalTransformer {
         @Override
@@ -62,10 +62,10 @@ public class SubstitutionTransformer extends PrePostTransformer {
             }
         }
     }
-   
+
     /**
      * Recomputes the set of variables contained in each node of the AST.
-     * 
+     *
      * @author TraianSF
      */
     private class VariableUpdaterTransformer extends LocalTransformer {

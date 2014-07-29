@@ -3,11 +3,6 @@ package org.kframework.utils;
 
 import java.io.File;
 
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-
-import java.util.Comparator;
-
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -34,19 +29,6 @@ public class Error {
     @Deprecated
     public static void silentReport(String localizedMessage) {
         System.out.println("Warning: " + localizedMessage);
-    }
-
-    /**
-     * @deprecated Use {@link KExceptionManager} instead.
-     */
-    @Deprecated
-    public static void helpMsg(String usage, String header, String footer, Options options, Comparator comparator) {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.setOptionComparator(comparator);
-        helpFormatter.setWidth(79);
-        helpFormatter.printHelp(usage, header, options, footer);
-        System.out.println();
-        //System.exit(1);
     }
 
     public static void checkIfInputDirectory(String directory) {

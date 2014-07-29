@@ -6,9 +6,9 @@ endmodule
 
 module ISSUE
   imports ISSUE-SYNTAX
-  
+
   configuration <k> $PGM:K </k>
-  
-  
-  
+
+
+
 endmodule

@@ -14,6 +14,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -27,25 +28,25 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
-        
+
         if(node.getAttribute(AddCircularityRules.RRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
 
-            
+
             //TODO:  use ensures to get phi'
-            
+
             // extract phi and phi'
             Term cnd = node.getRequires();
             ExtractPatternless ep = new ExtractPatternless(context, false);
             cnd = (Term) ep.visitNode(cnd);
-            
+
             // separate left and right
             Rewrite ruleBody = (Rewrite) node.getBody();
             Term left = ruleBody.getLeft().shallowCopy();
             Term right = ruleBody.getRight().shallowCopy();
-            
-            
+
+
             // create lhs path condition cell
-            Variable psi = Variable.getFreshVar("K");
+            Variable psi = Variable.getFreshVar(Sort.K);
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
             leftCell.setEllipses(Ellipses.NONE);
@@ -66,7 +67,7 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 //            implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
             Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhi()), ep.getPhiPrime());
             pc = AddPathCondition.checkSat(pc, context);
-            
+
             Rule newRule = new Rule(left, right, context);
             Term cc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd, pc);
             if (RLBackend.SIMPLIFY) {
@@ -76,7 +77,7 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
             newRule.setAttributes(node.getAttributes().shallowCopy());
             return newRule;
         }
-        
+
         return super.visit(node, _);
     }
 }

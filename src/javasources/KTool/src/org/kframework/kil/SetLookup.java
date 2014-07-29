@@ -15,7 +15,7 @@ import org.kframework.kil.visitors.Visitor;
 public class SetLookup extends BuiltinLookup {
 
     public SetLookup(Variable base, Term key, boolean choice) {
-        super(base, key, KSort.KItem, choice);
+        super(base, key, Sort.KITEM, choice);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class SetLookup extends BuiltinLookup {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public BuiltinLookup shallowCopy(Variable base, Term key) {
         return new SetLookup(base, key, choice());

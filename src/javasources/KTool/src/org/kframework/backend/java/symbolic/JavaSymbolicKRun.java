@@ -15,10 +15,12 @@ import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.*;
 //import org.kframework.kil.*;
 import org.kframework.kil.Module;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
+import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
+import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.krun.api.*;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
@@ -44,29 +46,24 @@ public class JavaSymbolicKRun implements KRun {
     //Liyi Li: add a build-in SymbolicRewriter to fix the simulation rules
     private SymbolicRewriter simulationRewriter;
 
-    public JavaSymbolicKRun(Context context) throws KRunExecutionException {
+    public JavaSymbolicKRun(Context context) {
         /* context is unused for directory paths; the actual context is de-serialized */
         /* load the definition from a binary file */
-        definition = (Definition) BinaryLoader.load(
+        definition = BinaryLoader.loadOrDie(Definition.class,
             new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString());
 
-        if (definition == null) {
-            throw new KRunExecutionException("cannot load definition");
-        }
-
-        this.context = definition.context();
-        this.context.kompiled = context.kompiled;
-        this.context.globalOptions = context.globalOptions;
+        this.context = context;
+        definition.setContext(context);
         transformer = new KILtoBackendJavaKILTransformer(this.context);
     }
-    
+
     public Definition getDefinition(){
         return this.definition;
     }
 
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
-        if (K.get_indexing_stats){
+        if (context.javaExecutionOptions.indexingStats){
             IndexingStatistics.totalKrunStopwatch.start();
             KRunResult<KRunState> result = internalRun(cfg, -1);
             IndexingStatistics.totalKrunStopwatch.stop();
@@ -81,15 +78,15 @@ public class JavaSymbolicKRun implements KRun {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTransformer(context));
-        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, context));
-        UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, context), context);
+        UnparserFilter unparser = new UnparserFilter(true, ColorSetting.OFF, OutputMode.PRETTY, context);
         unparser.visitNode(kilTerm);
         returnResult.setRawOutput(unparser.getResult());
         return returnResult;
     }
 
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
-        if (K.get_indexing_stats){
+        if (context.javaExecutionOptions.indexingStats){
             IndexingStatistics.preProcessStopWatch.start();
         }
 
@@ -98,19 +95,19 @@ public class JavaSymbolicKRun implements KRun {
         TermContext termContext = TermContext.of(globalContext);
         term = term.evaluate(termContext);
 
-        if (K.pattern_matching) {
-            GroundRewriter groundRewriter = new GroundRewriter(definition, termContext);
-            ConstrainedTerm rewriteResult = new ConstrainedTerm(groundRewriter.rewrite(term, bound), termContext);
+        if (context.javaExecutionOptions.patternMatching) {
+            FastDestructiveRewriter rewriter = new FastDestructiveRewriter(definition, termContext);
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(rewriter.rewrite(term, bound), termContext);
             return rewriteResult;
         } else {
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
             SymbolicConstraint constraint = new SymbolicConstraint(termContext);
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
-            if (K.get_indexing_stats){
+            if (context.javaExecutionOptions.indexingStats){
                 IndexingStatistics.preProcessStopWatch.stop();
             }
             ConstrainedTerm rewriteResult;
-            if (K.get_indexing_stats) {
+            if (context.javaExecutionOptions.indexingStats) {
                 IndexingStatistics.totalRewriteStopwatch.start();
                 rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
                 IndexingStatistics.totalRewriteStopwatch.stop();
@@ -203,7 +200,7 @@ public class JavaSymbolicKRun implements KRun {
         System.err.println(proofResults);
 
         return new KRunProofResult<Set<org.kframework.kil.Term>>(
-                proofResults.isEmpty(), Collections.<org.kframework.kil.Term>emptySet());
+                proofResults.isEmpty(), Collections.<org.kframework.kil.Term>emptySet(), context);
     }
 
     @Override
@@ -215,7 +212,7 @@ public class JavaSymbolicKRun implements KRun {
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
 
-        if (K.get_indexing_stats){
+        if (context.javaExecutionOptions.indexingStats){
             IndexingStatistics.totalSearchStopwatch.start();
         }
 
@@ -241,7 +238,7 @@ public class JavaSymbolicKRun implements KRun {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Map<Variable,Term>> hits;
-        if (K.pattern_matching) {
+        if (context.javaExecutionOptions.patternMatching) {
             Term initialTerm = Term.of(cfg, definition);
             Term targetTerm = null;
             GroundRewriter rewriter = new GroundRewriter(definition, TermContext.of(globalContext));
@@ -283,9 +280,9 @@ public class JavaSymbolicKRun implements KRun {
                 searchResults,
                 null,
                 false,
-                context));
+                context), context);
 
-        if (K.get_indexing_stats){
+        if (context.javaExecutionOptions.indexingStats){
             IndexingStatistics.totalSearchStopwatch.stop();
             IndexingStatistics.print();
         }
@@ -305,20 +302,20 @@ public class JavaSymbolicKRun implements KRun {
         if (searchType != SearchType.STAR) {
             throw new UnsupportedOperationException("Search type should be SearchType.STAR");
         }
-        
+
         // TODO: get rid of this ugly hack
         Object o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) cfg).getContents()).getContents().get(0);
         o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) o).getContents()).getContents().get(1);
         Map<org.kframework.kil.Term, org.kframework.kil.Term> stateMap = new HashMap<org.kframework.kil.Term, org.kframework.kil.Term>();
-        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "x"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("3"));
+        stateMap.put(org.kframework.kil.GenericToken.kAppOf(Sort.ID, "x"), org.kframework.kil.IntBuiltin.kAppOf("3"));
 //        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "y"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("2"));
-        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "$1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
+        stateMap.put(org.kframework.kil.GenericToken.kAppOf(Sort.ID, "$1"), org.kframework.kil.IntBuiltin.kAppOf("1"));
         ((org.kframework.kil.Cell) o)
                 .setContents(new org.kframework.kil.MapBuiltin(context
-                        .dataStructureSortOf("Map"),
-                        Collections.<org.kframework.kil.Term>emptyList(), 
+                        .dataStructureSortOf(Sort.MAP),
+                        Collections.<org.kframework.kil.Term>emptyList(),
                         stateMap));
-        
+
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         GlobalContext globalContext = new GlobalContext(definition, new PortableFileSystem());
         final TermContext termContext = TermContext.of(globalContext);
@@ -332,14 +329,14 @@ public class JavaSymbolicKRun implements KRun {
         for (String s : strRules) {
             System.out.println(s);
         }
-        
+
         if (bound == null) {
             bound = -1;
         }
         if (depth == null) {
             depth = -1;
         }
-        
+
         for (Rule rule : definition.functionRules().values()) {
             System.out.println(rule);
         }
@@ -351,7 +348,7 @@ public class JavaSymbolicKRun implements KRun {
             // obtained from the result configuration to the initial one
             Term pgm = Term.of(cfg, definition);
             pgm = pgm.substituteWithBinders(result.constraint().substitution(), termContext);
-            
+
             /* concretize the pgm; only reasonable when the 2nd phase of the
              * test generation is performed */
             if (TestCaseGenerationSettings.TWO_PHASE_GENERATION) {
@@ -385,7 +382,7 @@ public class JavaSymbolicKRun implements KRun {
                 generatorResults,
                 null,
                 true,
-                context));
+                context), context);
     }
 
     @Override
@@ -400,46 +397,46 @@ public class JavaSymbolicKRun implements KRun {
             throws KRunExecutionException {
         return internalRun(cfg, steps);
     }
-    
+
     /*
      * author: Liyi Li
      * to get the symbolic rewriter
      */
     public SymbolicRewriter getSimulationRewriter(){
-        
+
         return this.simulationRewriter;
     }
-    
+
     public void initialSimulationRewriter(){
-        
+
         this.simulationRewriter = new SymbolicRewriter(definition);
     }
-    
+
     /* author: Liyi Li
      * a function return all the next step of a given simulation term
      */
     public ConstrainedTerm simulationSteps(ConstrainedTerm cfg)
             throws KRunExecutionException {
-        
+
         ConstrainedTerm result = this.simulationRewriter.computeSimulationStep(cfg);
-  
+
         return result;
     }
-    
+
     /* author: Liyi Li
      * a function return all the next steps of a given term
      */
     public ArrayList<ConstrainedTerm> steps(ConstrainedTerm cfg)
             throws KRunExecutionException {
 
-        ArrayList<ConstrainedTerm> results = this.simulationRewriter.rewriteAll(cfg);    
-        
+        ArrayList<ConstrainedTerm> results = this.simulationRewriter.rewriteAll(cfg);
+
 
 
         return results;
     }
-    
- 
+
+
     @Override
     public KRunDebugger debug(org.kframework.kil.Term cfg) {
         throw new UnsupportedBackendOptionException("--debug");

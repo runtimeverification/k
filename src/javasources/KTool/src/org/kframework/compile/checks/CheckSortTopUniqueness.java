@@ -3,6 +3,7 @@ package org.kframework.compile.checks;
 
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -11,9 +12,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Check for various errors in syntax declarations. 1. You are not allowed to use empty terminals ("") in definitions. You need to have at least two sorts, or a non empty terminal.
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class CheckSortTopUniqueness extends BasicVisitor {
     public CheckSortTopUniqueness(Context context) {
@@ -22,13 +23,13 @@ public class CheckSortTopUniqueness extends BasicVisitor {
 
     @Override
     public Void visit(Syntax node, Void _) {
-        String msg = "Multiple top sorts found for " + node.getSort() + ": ";
+        String msg = "Multiple top sorts found for " + node.getDeclaredSort() + ": ";
         int count = 0;
-        if (context.isSubsorted(KSorts.KLIST, node.getSort().getName())) {
+        if (context.isSubsorted(Sort.KLIST, node.getDeclaredSort().getSort())) {
             msg += KSorts.KLIST + ", ";
             count++;
         }
-        if (context.isSubsorted("Bag", node.getSort().getName())) {
+        if (context.isSubsorted(Sort.BAG, node.getDeclaredSort().getSort())) {
             msg += "Bag, ";
             count++;
         }

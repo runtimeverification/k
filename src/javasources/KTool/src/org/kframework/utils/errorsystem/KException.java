@@ -10,6 +10,7 @@ public class KException {
     private final String filename;
     private final String location;
     private final String message;
+    private final Throwable exception;
     private String compilationPhase = null;
     private StringBuilder trace = new StringBuilder();
 
@@ -31,21 +32,47 @@ public class KException {
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message) {
-        this(type, label, message, null, null);
+        this(type, label, message, null, null, null, null);
+    }
+
+    public KException(ExceptionType type, KExceptionGroup label, String message, Throwable e) {
+        this(type, label, message, null, null, null, e);
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location) {
+        this(type, label, message, null, filename, location, null);
+    }
+
+    public KException(
+            ExceptionType type,
+            KExceptionGroup label,
+            String message,
+            String filename,
+            String location,
+            Throwable e) {
+        this(type, label, message, null, filename, location, e);
+    }
+
+    public KException(
+            ExceptionType type,
+            KExceptionGroup label,
+            String message,
+            String compilationPhase,
+            String filename,
+            String location,
+            Throwable exception) {
         super();
         this.type = type;
         this.exceptionGroup = label;
         this.message = message;
+        this.compilationPhase = compilationPhase;
         this.filename = filename;
         this.location = location;
+        this.exception = exception;
     }
-    
+
     public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, String filename, String location) {
-        this(type,label,message,filename,location);
-        this.compilationPhase = compilationPhase;
+        this(type,label,message,compilationPhase,filename,location, null);
     }
 
     public enum KExceptionGroup {
@@ -58,25 +85,29 @@ public class KException {
 
     @Override
     public String toString() {
-        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message 
+        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
             + trace.toString() + traceTail()
             + (filename == null ? "" : "\n\tFile: " + filename)
             + (location == null ? "" : "\n\tLocation: " + location)
             + (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
-        
+
     }
 
     public String getMessage() {
         return message;
     }
-    
+
+    public Throwable getException() {
+        return exception;
+    }
+
     private String traceTail() {
         if (identicalFrames > 1) {
             return " * " + identicalFrames;
         }
         return "";
     }
-    
+
     private int frames = 0;
     private int identicalFrames = 1;
     private String lastFrame;

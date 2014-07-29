@@ -22,20 +22,20 @@ import com.google.common.collect.Multimap;
  * Represents a collection of {@link Cell}s. The ordering of the internal cells
  * is fixed and agrees with the ordering of the cells used to construct this
  * cell collection.
- * 
+ *
  * @author AndreiS
- * 
+ *
  */
 @SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
     private final Multimap<String, Cell> cells;
-    
+
     /**
      * Only allow {@code Variable}s as base terms for now.
      */
     private final List<Variable> baseTerms;
-    
+
     /**
      * Contains {@code true} if the explicitly specified part of this cell
      * collection contains one or more types of cells whose multiplicity
@@ -43,22 +43,22 @@ public class CellCollection extends Collection {
      */
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasStar;
-    
+
     public CellCollection(Multimap<String, Cell> cells, Variable frame, Context context) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
-        this.baseTerms = frame != null ? 
-                Collections.<Variable>singletonList(frame) : 
+        this.baseTerms = frame != null ?
+                Collections.<Variable>singletonList(frame) :
                 Collections.<Variable>emptyList();
-        
+
         this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
     }
-    
+
     public CellCollection(Multimap<String, Cell> cells, List<Variable> baseTerms, Context context) {
         super(getFrame(baseTerms), Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
         this.baseTerms = ImmutableList.copyOf(baseTerms);
-        
+
         this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
     }
 
@@ -69,7 +69,7 @@ public class CellCollection extends Collection {
     public CellCollection(Multimap<String, Cell> cells, Context context) {
         this(cells, (Variable) null, context);
     }
-    
+
     public CellCollection() {
         this(ArrayListMultimap.<String, Cell>create(), (Variable) null, null);
     }
@@ -81,7 +81,7 @@ public class CellCollection extends Collection {
     public Multimap<String, Cell> cellMap() {
         return cells;
     }
-    
+
     public List<Variable> baseTerms() {
         return baseTerms;
     }
@@ -111,7 +111,7 @@ public class CellCollection extends Collection {
     public int size() {
         return cells.size();
     }
-    
+
     @Override
     public boolean hasFrame() {
         assert isLHSView() : "This CellCollection cannot be used in the left-hand side of a rule";
@@ -133,8 +133,8 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override
@@ -153,11 +153,16 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
         hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        return true;
     }
 
     @Override
@@ -194,7 +199,7 @@ public class CellCollection extends Collection {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
-    
+
     private static int numOfTypesOfStarredSubcells(Multimap<String, Cell> cells, Context context) {
         int count = 0;
         for (String cellLabel : cells.keySet()) {
@@ -207,15 +212,15 @@ public class CellCollection extends Collection {
             }
         }
 
-        assert count <= 1 : 
+        assert count <= 1 :
             "Multiple types of starred cells in one cell collection not supported at present";
         return count;
     }
-    
+
     /**
      * Private helper method that gets the frame variable from a list of base
      * terms.
-     * 
+     *
      * @param baseTerms
      * @return the frame if there is only one variable in the base terms;
      *         otherwise, {@code null}
@@ -232,7 +237,7 @@ public class CellCollection extends Collection {
      * <p>
      * To be more specific, a {@code Cell} can be promoted to a single-element
      * {@code CellCollection}.
-     * 
+     *
      * @param term
      *            the given term to be promoted
      * @param kind
@@ -258,7 +263,7 @@ public class CellCollection extends Collection {
 
         return term;
     }
-    
+
     /**
      * Degrades a given {@link Term} to a given {@link Kind}. The {@code Kind}s
      * involved in this method can only be {@code Kind#CELL} or
@@ -267,7 +272,7 @@ public class CellCollection extends Collection {
      * <p>
      * To be more specific, a single-element {@code CellCollection} can be
      * degraded to a {@code Cell}.
-     * 
+     *
      * @param term
      *            the given term to be degraded
      * @return the resulting term after kind degradation
@@ -279,8 +284,8 @@ public class CellCollection extends Collection {
                 && !((CellCollection) term).baseTerms().isEmpty()
                 && ((CellCollection) term).size() == 1) {
             term = ((CellCollection) term).cells().iterator().next();
-        } 
-        
+        }
+
         // YilongL: do not degrade the kind of a Variable since you cannot
         // upgrade it later
 

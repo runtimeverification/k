@@ -22,7 +22,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * A KList represented as a non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     private Term child;
-    
+
     public static enum Children {
         LABEL, CHILD;
     }
@@ -37,7 +37,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
     public static KApp of(Term label, Term... elements) {
         return new KApp(label, new KList(Arrays.asList(elements)));
     }
-    
+
     /**
      * Constructs the application of the given KLabel to a KList with the given elements.
      *
@@ -58,7 +58,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     public KApp(String location, String filename, Term label, Term child) {
-        super(location, filename, KSorts.KITEM);
+        super(location, filename, Sort.KITEM);
         setLabel(label);
         setChild(child);
     }
@@ -70,7 +70,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     public KApp(Term label, Term child) {
-        super(label.getLocation(), label.getFilename(), KSorts.KITEM);
+        super(label.getLocation(), label.getFilename(), Sort.KITEM);
         setLabel(label);
         setChild(child);
     }
@@ -84,7 +84,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
         setLabel((Term) JavaClassesFactory.getTerm(body));
         Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
-        if (!(term.getSort().equals(KSorts.KLIST) || term instanceof Ambiguity)) {
+        if (!(term.getSort().equals(Sort.KLIST) || term instanceof Ambiguity)) {
             setChild(new KList(Collections.<Term> singletonList(term)));
         } else {
             setChild(term);

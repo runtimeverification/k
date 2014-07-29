@@ -9,7 +9,7 @@ module DNF
   // distributivity
   rule (B1:Bool orBool B2:Bool) andBool B3:Bool => (B1 orBool B3) andBool (B3 orBool B2) [simplification]
   rule B3:Bool andBool (B1:Bool orBool B2:Bool) => (B1 orBool B3) andBool (B3 orBool B2) [simplification]
-  
+
   // negation
   rule notBool(notBool(B:Bool)) => B [simplification]
 endmodule

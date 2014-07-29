@@ -9,12 +9,12 @@ import org.junit.Test;
 import com.google.common.collect.Sets;
 
 public class PosetTest {
-    
-    private Poset poset;
-    
+
+    private Poset<String> poset;
+
     @Before
     public void setUp() {
-        poset = new Poset();
+        poset = Poset.create();
         poset.addRelation("Top", "A0");
         poset.addRelation("Top", "A1");
         poset.addRelation("Top", "A2");
@@ -31,21 +31,21 @@ public class PosetTest {
 
     @Test
     public void testGetMaximalLowerBounds() throws Exception {
-        Assert.assertEquals(Sets.newHashSet("B0", "B1"), 
+        Assert.assertEquals(Sets.newHashSet("B0", "B1"),
                 poset.getMaximalLowerBounds(Sets.newHashSet("A0", "A1", "A2")));
     }
-    
+
     @Test
     public void testGetMinimalUpperBounds() throws Exception {
         Assert.assertEquals(Sets.newHashSet("A0", "A1", "A2"),
                 poset.getMinimalUpperBounds(Sets.newHashSet("B0", "B1")));
     }
-    
+
     @Test
     public void testGetGLB() throws Exception {
         // multiple lower bounds, but no GLB
         Assert.assertNull(poset.getGLB(Sets.newHashSet("A0", "A1", "A2")));
-        
+
         // create a GLB for A0, A1, and A2
         poset.addRelation("A0", "GLB");
         poset.addRelation("A1", "GLB");
@@ -55,12 +55,12 @@ public class PosetTest {
         poset.transitiveClosure();
         Assert.assertEquals("GLB", poset.getGLB(Sets.newHashSet("A0", "A1", "A2")));
     }
-    
+
     @Test
     public void testGetLUB() throws Exception {
         // multiple upper bounds, but no LUB
         Assert.assertNull(poset.getLUB(Sets.newHashSet("B0", "B1")));
-        
+
         // create a LUB for B0, B1
         poset.addRelation("A0", "LUB");
         poset.addRelation("A1", "LUB");

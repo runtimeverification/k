@@ -94,13 +94,13 @@ constructs. */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-        	    //| "for" "(" Stmt Exp ";" Exp ")" Block
-           	    | "for" "(" Stmts Exp ";" Exp ")" Block
+                //| "for" "(" Stmt Exp ";" Exp ")" Block
+                   | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "try" Block "catch" "(" Param ")" Block
-        	    | "throw" Exp ";"                       [strict]
+                | "throw" Exp ";"                       [strict]
                 | "join" Exp ";"                        [strict]
                 | "acquire" Exp ";"                     [strict]
                 | "release" Exp ";"                     [strict]

@@ -5,11 +5,8 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Represents {@code =>} in the syntax of rules. May occur in multiple places in the body of a {@link Rule}, but may not be nested.
@@ -53,7 +50,7 @@ public class Rewrite extends Term {
             sort = context.getLUBSort(left.getSort(), right.getSort());
             // TODO: use the context to disambiguate which LUB can be used, for now use K
             if (sort == null)
-                sort = KSorts.K;
+                sort = Sort.K;
         }
     }
 
@@ -90,7 +87,7 @@ public class Rewrite extends Term {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Rewrite shallowCopy() {
         return new Rewrite(this);

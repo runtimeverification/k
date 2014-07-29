@@ -29,14 +29,14 @@ public abstract class KLabel extends Term {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     /**
      * Checks if this {@code KLabel} represents a constructor. A {@code KLabel}
      * represents either a constructor or a function.
-     * 
+     *
      * @return true if this {@code KLabel} represents a constructor; otherwise,
      *         false
      */
@@ -45,7 +45,7 @@ public abstract class KLabel extends Term {
     /**
      * Checks if this {@code KLabel} represents a function. A {@code KLabel}
      * represents either a constructor or a function.
-     * 
+     *
      * @return true if this {@code KLabel} represents a function; otherwise,
      *         false
      */

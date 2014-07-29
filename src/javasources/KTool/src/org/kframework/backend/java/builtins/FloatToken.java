@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.java.kil.MaximalSharing;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -15,21 +17,21 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.FloatBuiltin;
 import org.kframework.mpfr.BigFloat;
 
-public class FloatToken extends Token {
+public class FloatToken extends Token implements MaximalSharing {
 
-    public static final String SORT_NAME = "Float";
-    
+    public static final Sort SORT = Sort.FLOAT;
+
     /* Token cache */
     private static final Map<Integer, Map<BigFloat, FloatToken>> cache = new HashMap<>();
-    
+
     private final BigFloat value;
     private final int exponent;
-    
+
     private FloatToken(BigFloat value, int exponent) {
         this.value = value;
         this.exponent = exponent;
     }
-    
+
     /**
      * Returns a {@code FloatToken} representation of the given {@link BigFloat} value in the
      * specified exponent range. The {@code FloatToken} instances are cached to ensure
@@ -51,19 +53,19 @@ public class FloatToken extends Token {
 
         return cachedFloatToken;
     }
-    
+
     public static FloatToken of(String value) {
         Pair<BigFloat, Integer> pair = FloatBuiltin.parseKFloat(value);
         return of(pair.getLeft(), pair.getRight());
     }
-    
+
     /**
      * Returns a {@link BigFloat} representation of the (interpreted) value of this FloatToken.
      */
     public BigFloat bigFloatValue() {
         return value;
     }
-    
+
     /**
      * Returns an integer containing the number of bits in the exponent range of this FloatToken.
      */
@@ -71,13 +73,13 @@ public class FloatToken extends Token {
         return exponent;
     }
 
-    
+
     /**
      * Returns a {@code String} representation of the sort of this FlaotToken.
      */
     @Override
-    public String sort() {
-        return FloatToken.SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**
@@ -87,9 +89,9 @@ public class FloatToken extends Token {
     public String value() {
         return FloatBuiltin.printKFloat(value) + FloatBuiltin.printKFloatSuffix(value, exponent);
     }
-    
+
     @Override
-    public int computeHash() {
+    protected int computeHash() {
         return value.hashCode() * 31 + exponent;
     }
 
@@ -103,7 +105,7 @@ public class FloatToken extends Token {
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);

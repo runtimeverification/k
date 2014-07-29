@@ -2,20 +2,20 @@
 module MINIMP-SYNTAX
 
 syntax Exp ::= Id
-       	     | Int
-	     | Bool
-	     | Exp "i+" Exp [strict]
-	     | Exp "i-" Exp [strict]
-	     | Exp "i==" Exp [strict]
-	     | Exp "i<" Exp [strict]
-	     | "(" Exp ")" [bracket]
+                | Int
+         | Bool
+         | Exp "i+" Exp [strict]
+         | Exp "i-" Exp [strict]
+         | Exp "i==" Exp [strict]
+         | Exp "i<" Exp [strict]
+         | "(" Exp ")" [bracket]
 
 syntax Stmt ::= Id ":=" Exp [strict(2)]
               | "skip"
-	      | Stmt ";" Stmt [left]
-	      | "if" Exp "then" Stmt "else" Stmt [strict(1)]
-	      | "while" Exp "do" Stmt	    
-	      | "{" Stmt "}" [bracket]
+          | Stmt ";" Stmt [left]
+          | "if" Exp "then" Stmt "else" Stmt [strict(1)]
+          | "while" Exp "do" Stmt
+          | "{" Stmt "}" [bracket]
 
 syntax Code ::= Exp | Stmt
 

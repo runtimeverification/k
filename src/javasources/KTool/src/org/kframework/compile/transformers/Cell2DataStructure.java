@@ -15,17 +15,24 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Translates a builtin data structure (list, map, set) from a {@link Cell} representation
@@ -40,8 +47,10 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     public static final String LIST_CELL_ATTRIBUTE_NAME = "list";
     public static final String MAP_CELL_ATTRIBUTE_NAME = "map";
     public static final String KEY_CELL_ATTRIBUTE_NAME = "key";
-    
+
     public static final String MAP_CELL_CELL_LABEL_PREFIX = "value-cell-label-prefix-";
+
+    private Set<String> cellMapLabels = Sets.newHashSet();
 
     public Cell2DataStructure(Context context) {
         super("Transform cells with key attribute to maps", context);
@@ -53,6 +62,59 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode visit(Rule rule, Void _) {
+        if (!rule.isCompiledForFastRewriting()) {
+            return super.visit(rule, _);
+        }
+
+        cellMapLabels.clear();
+
+        rule = (Rule) super.visit(rule, _);
+        /* compiling cell to cell map changes the cells of interest used for fast rewriting */
+        if (!cellMapLabels.isEmpty()) {
+            Set<String> cellsOfInterest = Sets.newHashSet(rule.getCellsOfInterest());
+            Map<String, Term> lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
+            Map<String, Term> rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
+            Set<String> cellMapLabelsToAdd = Sets.newHashSet();
+
+            Iterator<String> iter = cellsOfInterest.iterator();
+            while (iter.hasNext()) {
+                String cellLabel = iter.next();
+
+                Set<String> intersect = Sets.intersection(
+                                context.getConfigurationStructureMap().get(cellLabel).ancestorIds,
+                                cellMapLabels);
+                /* lift the cell of interest to the level of cell map */
+                if (!intersect.isEmpty()) {
+                    iter.remove();
+
+                    assert intersect.size() == 1;
+                    String cellMapLabel = intersect.iterator().next();
+                    cellMapLabelsToAdd.add(cellMapLabel);
+
+                    /* update lhsOfReadCell & rhsOfWriteCell accordingly */
+                    if (lhsOfReadCell.containsKey(cellLabel)) {
+                        lhsOfReadCell.put(cellMapLabel, null);
+                        lhsOfReadCell.remove(cellLabel);
+                    }
+                    if (rhsOfWriteCell.containsKey(cellLabel)) {
+                        rhsOfWriteCell.put(cellMapLabel, null);
+                        rhsOfWriteCell.remove(cellLabel);
+                    }
+                }
+            }
+            cellsOfInterest.addAll(cellMapLabelsToAdd);
+
+            rule = rule.shallowCopy();
+            rule.setCellsOfInterest(cellsOfInterest);
+            rule.setLhsOfReadCell(lhsOfReadCell);
+            rule.setRhsOfWriteCell(rhsOfWriteCell);
+        }
+
+        return rule;
+    }
+
+    @Override
     public ASTNode visit(Cell cell, Void _)  {
         // TODO(AndreiS): should only be applied once
         makeCellDataStructures();
@@ -60,6 +122,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
             return super.visit(cell, _);
+        } else if (cellDataStructure instanceof CellMap) {
+            cellMapLabels.add(cellDataStructure.dataStructureCellLabel());
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());
@@ -106,7 +170,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
             if (context.kompileOptions.backend.java()) {
-                elementsLeft.add(elementCell);                
+                elementsLeft.add(elementCell);
             } else {
                 elementsLeft.add(KApp.of(new KInjectedLabel(elementCell)));
             }
@@ -122,7 +186,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
             if (context.kompileOptions.backend.java()) {
-                elementsRight.add(elementCell);                
+                elementsRight.add(elementCell);
             } else {
                 elementsRight.add(KApp.of(new KInjectedLabel(elementCell)));
             }
@@ -134,7 +198,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             if (term instanceof Cell) {
                 terms.add(term);
             } else if (term instanceof Variable) {
-                terms.add(new Variable(((Variable) term).getName(), listSort.name()));
+                terms.add(new Variable(((Variable) term).getName(), Sort.of(listSort.name())));
             } else {
                 assert false;
             }
@@ -175,12 +239,12 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
                 assert key != null : "there should be exactly one key cell";
                 entries.put(key, value);
                 if (context.kompileOptions.backend.java()) {
-                    entries.put(key, value);  
+                    entries.put(key, value);
                 } else {
                     entries.put(key, KApp.of(new KInjectedLabel(value)));
                 }
             } else if (term instanceof Variable) {
-                terms.add(new Variable(((Variable) term).getName(), mapSort.name()));
+                terms.add(new Variable(((Variable) term).getName(), Sort.of(mapSort.name())));
             } else {
                 assert false;
             }

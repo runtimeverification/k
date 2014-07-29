@@ -14,6 +14,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -33,7 +34,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rule node, Void _)  {
         if(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
-            
+
             // get the corresponding reachability rule
             int rIndex = Integer.parseInt(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR));
             ASTNode rrule = reachabilityRules.get(rIndex);
@@ -50,21 +51,21 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
                     fresh.add(v);
                 }
             }
-            
+
             //TODO:  use ensures to get phi'
-            
+
             // extract phi and phi'
             Term cnd = node.getRequires();
             ExtractPatternless ep = new ExtractPatternless(context, true);
             cnd = (Term) ep.visitNode(cnd);
-            
+
             // separate left and right
             Rewrite ruleBody = (Rewrite) node.getBody();
             Term left = ruleBody.getLeft().shallowCopy();
             Term right = ruleBody.getRight().shallowCopy();
-            
+
             // create lhs path condition cell
-            Variable psi = Variable.getFreshVar("K");
+            Variable psi = Variable.getFreshVar(Sort.K);
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
             leftCell.setEllipses(Ellipses.NONE);
@@ -84,7 +85,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             KApp unsat = StringBuiltin.kAppOf("unsat");
             KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
             implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
-            
+
             // return new rule
             Rule newRule = new Rule(left, right, context);
             Term cc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd.shallowCopy(), implication);
@@ -94,10 +95,10 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             newRule.setRequires(cc);
             newRule.setAttributes(node.getAttributes().shallowCopy());
             newRule = (Rule) new MakeFreshVariables(context, fresh).visitNode(newRule);
-            
+
             return newRule;
         }
-        
+
         return super.visit(node, _);
     }
 }

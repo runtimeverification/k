@@ -6,7 +6,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
 /**
- * A {@link AbstractTransformer} which doesn't visit its children. See also 
+ * A {@link AbstractTransformer} which doesn't visit its children. See also
  * {@link org.kframework.backend.java.symbolic.LocalTransformer}.
  * @author dwightguth
  *

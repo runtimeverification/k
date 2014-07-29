@@ -18,7 +18,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         super("Add brackets", context);
     }
 
-    @Override    
+    @Override
     public ASTNode visit(TermCons ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -28,7 +28,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(Collection ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -38,7 +38,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(Cell ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -48,7 +48,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(CollectionItem ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -58,7 +58,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(KApp ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -68,7 +68,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(Hole ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -78,7 +78,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(Freezer ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -88,7 +88,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(KInjectedLabel ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -159,7 +159,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return Associativity.LEFT;
                 }
             }*/
-            
+
         } else if (t instanceof Collection) {
             return Associativity.ASSOC;
         }
@@ -340,15 +340,15 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return inner instanceof TermCons && context.isPriorityWrong(tcOuter.getProduction().getKLabel(), ((TermCons)inner).getProduction().getKLabel());
                 }
             }
-            return !inner.getSort().equals("K");
+            return !inner.getSort().equals(Sort.K);
         } else if (inner instanceof Rewrite && !(outer instanceof Cell)) {
             return true;
         } else if (inner instanceof KSequence && outer instanceof TermCons) {
             return true;
         } else if (outer instanceof KInjectedLabel) {
             KInjectedLabel lbl = (KInjectedLabel)outer;
-            String sort = lbl.getTerm().getSort();
-            if (MetaK.isKSort(sort)) {
+            Sort sort = lbl.getTerm().getSort();
+            if (sort.isKSort()) {
                 sort = KInjectedLabel.getInjectedSort(sort);
                 if (!context.isSubsortedEq(sort, inner.getSort())) {
                     return true;
@@ -388,7 +388,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                 lc = null;
                 rc = null;
             }
-            leftCapture.push(lc);    
+            leftCapture.push(lc);
             rightCapture.push(rc);
             parens.push(needsParentheses(ast, outer, lc, rc));
         } else {
@@ -452,7 +452,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 }
             }
-            
+
 */
 
             if (innerFixity.contains(Fixity.BARE_RIGHT) && rightCapture != null) {

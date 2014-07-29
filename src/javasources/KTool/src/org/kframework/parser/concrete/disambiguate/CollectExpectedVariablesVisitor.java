@@ -52,7 +52,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
             if (vars.isEmpty())
                 vars.add(HashMultimap.<String, String>create());
             for (Multimap<String, String> vars2 : vars)
-                vars2.put(var.getName(), var.getExpectedSort());
+                vars2.put(var.getName(), var.getExpectedSort().getName());
         }
         return null;
     }

@@ -13,7 +13,7 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 
 public class BasicParsingTests {
-    
+
     @Test
     public void testLexicalRules() throws Exception {
         // TODO: remove once the new parser is fully functional

@@ -10,12 +10,12 @@ import org.w3c.dom.Element;
 public class FreezerHole extends Term {
     /** Currently always zero, until nested freezers are implemented */
     private int index;
-    
+
     public FreezerHole(int index) {
-        super("K");
+        super(Sort.K);
         this.index = index;
     }
-    
+
     public FreezerHole(Element element) {
         // TODO: for Radu
         super(element);
@@ -25,7 +25,7 @@ public class FreezerHole extends Term {
     public Term shallowCopy() {
         return new FreezerHole(this.index);
     }
-    
+
     public int getIndex() {
         return index;
     }

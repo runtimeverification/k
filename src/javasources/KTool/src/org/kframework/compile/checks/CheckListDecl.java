@@ -5,7 +5,7 @@ import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -20,7 +20,7 @@ public class CheckListDecl extends BasicVisitor {
 
     @Override
     public Void visit(Production node, Void _) {
-        if (node.isListDecl() && Sort.isBasesort(node.getSort())) {
+        if (node.isListDecl() && node.getSort().isBaseSort()) {
             String msg = node.getSort() + " can not be extended to be a list sort.";
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
         }

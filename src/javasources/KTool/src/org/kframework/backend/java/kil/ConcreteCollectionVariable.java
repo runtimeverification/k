@@ -3,19 +3,19 @@ package org.kframework.backend.java.kil;
 
 /**
  * A variable which represents a concrete collection.
- * 
+ *
  * @author AndreiS
  */
 public class ConcreteCollectionVariable extends Variable {
 
     private final int concreteSize;
 
-    public ConcreteCollectionVariable(String name, String sort, boolean anonymous, int concreteSize) {
+    public ConcreteCollectionVariable(String name, Sort sort, boolean anonymous, int concreteSize) {
         super(name, sort, anonymous);
         this.concreteSize = concreteSize;
     }
 
-    public ConcreteCollectionVariable(String name, String sort, int concreteSize) {
+    public ConcreteCollectionVariable(String name, Sort sort, int concreteSize) {
         this(name, sort, false, concreteSize);
     }
 
@@ -31,15 +31,13 @@ public class ConcreteCollectionVariable extends Variable {
             if (term instanceof BuiltinList && ((BuiltinList) term).isUpdate()) {
                 return false;
             }
-            
+
             Collection collection = (Collection) term;
             if (collection.hasFrame()) {
                 return collection.size() <= concreteSize;
             } else {
                 return collection.size() == concreteSize;
             }
-        } else if (term instanceof Variable) {
-            return true;
         } else {
             return false;
         }

@@ -20,8 +20,6 @@ import org.kframework.utils.general.GlobalSettings;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.*;
-import java.util.Map;
-import java.util.Set;
 
 public class MaudeFilter extends BackendFilter {
     private boolean firstAttribute;
@@ -75,7 +73,7 @@ public class MaudeFilter extends BackendFilter {
           result.append(" is\n");
 
         result.append(" op fresh : #String -> KItem . \n");
-        for (Map.Entry<String, String> entry : context.freshFunctionNames.entrySet()) {
+        for (Map.Entry<Sort, String> entry : context.freshFunctionNames.entrySet()) {
             result.append(" eq fresh(\"").append(entry.getKey()).append("\") = ");
             result.append(StringUtil.escapeMaude(entry.getValue()));
             result.append("('#counter(.KList)) .\n");
@@ -90,12 +88,12 @@ public class MaudeFilter extends BackendFilter {
           }
 
           // TODO(AndreiS): move this in a more approprite place
-          for (String sort : context.getTokenSorts()) {
-            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
+          for (Sort sort : context.getTokenSorts()) {
+            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + Sort.BUILTIN_STRING
               + "), .KList)";
             String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
-            String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
-            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
+            String valueKItem = "_`(_`)(#_(V:" + Sort.BUILTIN_STRING + ")" + ", .KList)";
+            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort.getName()) + ", "
                           + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
             result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
                           + ")) = " + tokenKItem + " .\n");
@@ -103,8 +101,8 @@ public class MaudeFilter extends BackendFilter {
                           + " .\n");
           }
 
-          for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
-            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
+          for (Map.Entry<Sort, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
+            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey().getName()) + ", "
               + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
               + entry.getValue().type() + "), .KList))";
             result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
@@ -123,20 +121,21 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(Syntax syn, Void _) {
         for (PriorityBlock pb : syn.getPriorityBlocks()) {
             for (Production p : pb.getProductions()) {
-                if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {
+                if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof NonTerminal)) {
                     // sub-sort case
                     ProductionItem item = p.getItems().get(0);
-                    if (item instanceof Sort) {
-                        if (!MaudeHelper.declaredSorts.contains(p.getItems().get(0).toString()) && !MaudeHelper.basicSorts.contains(p.getItems().get(0).toString())) {
+                    if (item instanceof NonTerminal) {
+                        NonTerminal nt = (NonTerminal) item;
+                        if (!MaudeHelper.declaredSorts.contains(nt.getSort()) && !MaudeHelper.basicSorts.contains(nt.getSort())) {
                             result.append("sort ");
                             result.append(p.getItems().get(0));
                             result.append(" .\n");
-                            MaudeHelper.declaredSorts.add(p.getItems().get(0).toString());
+                            MaudeHelper.declaredSorts.add(nt.getSort());
                         }
                         result.append("subsort ");
-                        result.append(p.getItems().get(0));
+                        result.append(nt);
                         result.append(" < ");
-                        result.append(syn.getSort());
+                        result.append(syn.getDeclaredSort());
                         result.append(" .\n");
                     }
                 } else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
@@ -149,11 +148,11 @@ public class MaudeFilter extends BackendFilter {
                         msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
                     }
-                    if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
+                    if (!MaudeHelper.constantSorts.contains(syn.getDeclaredSort().getSort()) || !syn.getDeclaredSort().getSort().equals(Sort.KLABEL) || !syn.getDeclaredSort().getSort().equals(Sort.CELL_LABEL)) {
                         result.append("op ");
                         result.append(StringUtil.escapeMaude(operation));
                         result.append(" : -> ");
-                        result.append(syn.getSort());
+                        result.append(syn.getDeclaredSort());
                         if (!isEmptyAttributes(p.getAttributes())) {
                             result.append(" [metadata \"");
                             this.visitNode(p.getAttributes());
@@ -191,7 +190,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append(" : ");
                         this.visitNode(p);
                         result.append(" -> ");
-                        result.append(syn.getSort());
+                        result.append(syn.getDeclaredSort());
                         // if (!isEmptyAttributes(p.getCellAttributes())) {
                         result.append(" [metadata \"");
                         this.visitNode(p.getAttributes());
@@ -225,7 +224,7 @@ public class MaudeFilter extends BackendFilter {
             } else {
                 first = false;
             }
-            if (pi instanceof Sort) {
+            if (pi instanceof NonTerminal) {
                 this.visitNode(pi);
             }
         }
@@ -233,7 +232,7 @@ public class MaudeFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         result.append(sort.getName());
         return null;
     }
@@ -361,7 +360,7 @@ public class MaudeFilter extends BackendFilter {
                 if (!cellStr.id.equals("k")) {
                     placeHolders="_";
                     format = "ni ";
-                    sorts = KSort.getKSort(cell.getContents().getSort()).mainSort()
+                    sorts = cell.getContents().getSort().getKSort().mainSort()
                             .toString();
                     declareCell(id,placeHolders, sorts, cellSort, format);
                 }
@@ -435,14 +434,14 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(Variable variable, Void _) {
         if (variable.isFreshConstant()) {
             variable = variable.shallowCopy();
-            variable.setSort(KSorts.KITEM);
+            variable.setSort(Sort.KITEM);
         }
-         if (MetaK.isBuiltinSort(variable.getSort())
+         if (variable.getSort().isBuiltinSort()
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
             if (context.getDataStructureSorts().containsKey(variable.getSort())) {
-                  String sort = context.dataStructureSortOf(variable.getSort()).type();
-                  sort = sort.equals("K") ? "KList" : sort;
+                  Sort sort = context.dataStructureSortOf(variable.getSort()).type();
+                  sort = sort.equals(Sort.K) ? Sort.KLIST : sort;
                 result.append(sort + "2KLabel_(");
             } else {
                 result.append("#_(");
@@ -461,7 +460,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(variable.getSort());
         }
 
-        if (MetaK.isBuiltinSort(variable.getSort())
+        if (variable.getSort().isBuiltinSort()
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append(")");
             result.append(", ");
@@ -473,8 +472,8 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(ListTerminator empty, Void _) {
-        String sort = empty.getSort();
-        if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellFragment(sort)) {
+        Sort sort = empty.getSort();
+        if (MaudeHelper.basicSorts.contains(sort) || sort.isCellFragment()) {
             result.append(".");
             result.append(sort);
         } else {
@@ -547,7 +546,7 @@ public class MaudeFilter extends BackendFilter {
                     }
                     addAnd = true;
                     Variable kVariable = variable.shallowCopy();
-                    kVariable.setSort(KSorts.KITEM);
+                    kVariable.setSort(Sort.KITEM);
                     this.visitNode(kVariable);
                     result.append(" := fresh(\"").append(variable.getSort()).append("\")");
                 }
@@ -675,20 +674,20 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(GenericToken token, Void _) {
-        if (maudeBuiltinTokenSorts.contains(token.tokenSort())) {
+        if (maudeBuiltinTokenSorts.contains(token.tokenSort().getName())) {
             result.append("#_(" + token.value() + ")");
         } else {
             result.append(token);
         }
         return null;
     }
-    
+
     boolean floatWarning = false;
     @Override
     public Void visit(FloatBuiltin token, Void _) {
         result.append("#_(");
         if (token.bigFloatValue().isNegativeZero() || token.bigFloatValue().isNaN()) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "Attempting to compile a definition containing -0.0 or NaN with the Maude backend. "
                             + "Maude does not support these features, and floating point arithmetic is "
                             + "unsupported in the Maude backend. Please recompile with --backend java."));
@@ -696,7 +695,7 @@ public class MaudeFilter extends BackendFilter {
         result.append(FloatBuiltin.printKFloat(token.bigFloatValue()));
         result.append(")");
         if (!floatWarning) {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL, 
+            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL,
                     "The Maude backend does not officially support floating point numbers. The results of "
                     + "this semantics may be undefined or, in some cases, "
                     + "incorrect."));
@@ -704,10 +703,10 @@ public class MaudeFilter extends BackendFilter {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(StringBuiltin token, Void _) {
-        result.append("#_(\"" + StringUtil.escape(token.stringValue()) + "\")");
+        result.append("#_(" + StringUtil.enquoteCString(token.stringValue()) + ")");
         return null;
     }
 
@@ -724,7 +723,7 @@ public class MaudeFilter extends BackendFilter {
         } else if (collection.getContents().size() == 1) {
             this.visitNode(collection.getContents().get(0));
         } else {
-            String constructor = getMaudeConstructor(collection.getSort());
+            String constructor = getMaudeConstructor(collection.getSort().getName());
             result.append(constructor);
             result.append("(");
 
@@ -844,7 +843,7 @@ public class MaudeFilter extends BackendFilter {
             if (term instanceof Variable) {
                 visitDataStructureVariable(
                         ((Variable)term).getName(),
-                        listBuiltin.sort().type());
+                        listBuiltin.sort().type().getName());
             } else {
                 result.append("K2" + listBuiltin.sort().type());
                 result.append("(");
@@ -878,13 +877,13 @@ public class MaudeFilter extends BackendFilter {
         visit((DataStructureBuiltin) map, _);
         return null;
     }
-    
+
     @Override
     public Void visit(SetBuiltin set, Void _) throws RuntimeException {
         visit((DataStructureBuiltin) set, _);
         return null;
     }
-    
+
     @Override
     public Void visit(ListBuiltin set, Void _) throws RuntimeException {
         visit((DataStructureBuiltin) set, _);
@@ -907,12 +906,12 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
-        String sort = term.getSort().equals("K") ? "KList" : term.getSort();
-        if (MetaK.isKSort(sort)) {
+        Sort sort = term.getSort().equals(Sort.K) ? Sort.KLIST : term.getSort();
+        if (sort.isKSort()) {
             //result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
             result.append(KInjectedLabel.getInjectedSort(sort));
             result.append("2KLabel_(");
-        } else if (MetaK.isCellSort(sort)){
+        } else if (sort.isCellSort()){
             result.append(sort + "2KLabel_(");
 
         } else {
@@ -959,7 +958,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Bag bag, Void _) {
         if (bag.getContents().isEmpty()) {
-            this.visitNode(new ListTerminator(KSorts.BAG, null));
+            this.visitNode(new ListTerminator(Sort.BAG, null));
             return null;
         }
         for (Term item: bag.getContents()) {
@@ -1063,14 +1062,14 @@ public class MaudeFilter extends BackendFilter {
         return null;
     }
 
-    private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
+    private static java.util.Map<Sort, String> maudeCollectionConstructors = new HashMap<>();
     static {
-        maudeCollectionConstructors.put(KSort.Bag, "__");
-        maudeCollectionConstructors.put(KSort.K, "_~>_");
-        maudeCollectionConstructors.put(KSort.KList, "_`,`,_");
+        maudeCollectionConstructors.put(Sort.BAG, "__");
+        maudeCollectionConstructors.put(Sort.K, "_~>_");
+        maudeCollectionConstructors.put(Sort.KLIST, "_`,`,_");
     }
 
-    public static String getMaudeConstructor(String sort) {
-        return maudeCollectionConstructors.get(KSort.getKSort(sort));
+    public static String getMaudeConstructor(String sortName) {
+        return maudeCollectionConstructors.get(Sort.of(sortName).getKSort());
     }
 }

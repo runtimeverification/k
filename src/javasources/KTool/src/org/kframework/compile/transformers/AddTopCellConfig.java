@@ -20,23 +20,23 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
     public AddTopCellConfig(Context context) {
         super("Add top cell for configurations", context);
     }
-    
+
     @Override
     public ASTNode visit(Module node, Void _)  {
         ASTNode result = super.visit(node, _);
         if (result == node) return node;
-        if (result == null) { 
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                    KExceptionGroup.COMPILER, 
-                    "Expecting Module, but got null. Returning the untransformed module.", 
-                    getName(), node.getFilename(), node.getLocation()));                    
+        if (result == null) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                    KExceptionGroup.COMPILER,
+                    "Expecting Module, but got null. Returning the untransformed module.",
+                    getName(), node.getFilename(), node.getLocation()));
             return node;
         }
         if (!(result instanceof Module)) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                    KExceptionGroup.INTERNAL, 
-                    "Expecting Module, but got " + result.getClass() + " while transforming.", 
-                    node.getFilename(), node.getLocation()));    
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                    KExceptionGroup.INTERNAL,
+                    "Expecting Module, but got " + result.getClass() + " while transforming.",
+                    node.getFilename(), node.getLocation()));
             return node;
         }
         node = (Module) result;
@@ -44,12 +44,12 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
         PriorityBlock topPriorityBlock = new PriorityBlock();
         List<ProductionItem> topTerminals = new ArrayList<ProductionItem>();
         topTerminals.add(new Terminal(MetaK.Constants.generatedTopCellLabel));
-        Production topProduction = new Production(new Sort("CellLabel"), topTerminals );
+        Production topProduction = new Production(new NonTerminal(Sort.CELL_LABEL), topTerminals );
         topPriorityBlock.getProductions().add(topProduction);
         topCellBlocks.add(topPriorityBlock);
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Rule node, Void _) {
         return node;
@@ -61,7 +61,7 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
         node.setBody(MetaK.wrap(node.getBody(),MetaK.Constants.generatedTopCellLabel,Ellipses.NONE));
         return node;
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _) {
         return node;
