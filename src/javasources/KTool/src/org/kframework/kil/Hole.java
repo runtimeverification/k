@@ -15,7 +15,7 @@ public class Hole extends Term {
 
     public Hole(Element element) {
         super(element);
-        this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
+        this.sort = Sort.KITEM; //Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
     }
 
     private Hole(Hole hole) {

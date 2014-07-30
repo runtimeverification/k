@@ -81,14 +81,18 @@ public class CellTypesFilter extends ParseForestTransformer {
         String cellLabel;
 
         public CellTypesFilter2(Context context, Sort expectedSort, String cellLabel) {
-            super("org.kframework.parser.concrete.disambiguate.CellTypesFilter2", context);
+            super(CellTypesFilter2.class.getName(), context);
             this.expectedSort = expectedSort;
             this.cellLabel = cellLabel;
         }
 
         @Override
         public ASTNode visit(Term trm, Void _) throws ParseFailedException {
-            if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
+            if (!context.isSubsortedEq(expectedSort, trm.getSort()) &&
+                !(context.isSubsortedEq(Sort.KLIST, expectedSort) &&
+                                (trm.getSort().equals(Sort.KLIST) ||
+                                trm.getSort().equals(Sort.K) ||
+                                trm.getSort().equals(Sort.KITEM)))) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
                 throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
