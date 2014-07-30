@@ -92,7 +92,8 @@ public class Rule extends JavaSymbolicObject {
      * checking algorithm used in the {@link CheckVariables} pass.
      */
     private final ImmutableSet<Variable> unboundVars;
-    private final boolean isSortPredicate;
+    // TODO(YilongL): make it final
+    private boolean isSortPredicate;
     private final Sort predSort;
     private final KItem sortPredArg;
 
@@ -186,13 +187,15 @@ public class Rule extends JavaSymbolicObject {
             }
 
             if (sortPredArg == null) {
+                isSortPredicate = false;
+
                 /*
                  * YilongL: the right-hand side of the sort predicate rule
                  * is not necessarily {@code BoolToken#True}? for example:
                  *     rule isNat(I:Int) => '_>=Int_(I:Int,, Int(#"0"))
                  */
                 // TODO(YilongL): properly re-implement support for sort predicate rules
-                GlobalSettings.kem.registerCriticalWarning("Unexpected sort predicate rule: " + this, null, this);
+//                GlobalSettings.kem.registerCriticalWarning("Unexpected sort predicate rule: " + this, null, this);
             }
         } else {
             predSort = null;
