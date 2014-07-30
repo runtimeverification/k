@@ -25,8 +25,6 @@ import org.kframework.kil.ASTNode;
  */
 public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
 
-    private static final boolean ENABLE_DEBUG = false;
-
     protected final Map<Variable, ? extends Term> substitution;
 
     protected boolean copyOnShareSubstAndEval = false;
@@ -140,18 +138,17 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
                     .transform(BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem, context)))
                     .resolveFunctionAndAnywhere(copyOnShareSubstAndEval, context);
 
-            // TODO(YilongL): had to comment out the following assertion because the visitor/imp.k somehow fails here
-            if (ENABLE_DEBUG) {
-//                if (kItem.isEvaluable(context) && kItem.isGround() && kItem == result) {
-//                    String message = "Unable to resolve function symbol:\n\t" + this;
-//                    if (!definition.functionRules().isEmpty()) {
-//                        message += "\n\tDefined function rules:";
-//                        for (Rule rule : definition.functionRules().get((KLabelConstant) kItem.kLabel())) {
-//                            message +=  "\n\t" + rule;
-//                        }
-//                    }
-//                    GlobalSettings.kem.registerCriticalError(message, null);
-//                }
+            // TODO(YilongL): visitor/imp.k would fail the following assertion
+            if (context.definition().context().globalOptions.debug) {
+                if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
+                    System.err.println("Unable to resolve function symbol:\n\t" + result);
+                    if (!definition.functionRules().isEmpty()) {
+                        System.err.print("\n\tDefined function rules:");
+                        for (Rule rule : definition.functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
+                            System.err.print("\n\t" + rule);
+                        }
+                    }
+                }
             }
         }
 
