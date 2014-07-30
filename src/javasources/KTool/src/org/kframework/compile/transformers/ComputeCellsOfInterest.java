@@ -62,7 +62,8 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rule rule, Void _)  {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)
-                || rule.containsAttribute(Attribute.MACRO_KEY)) {
+                || rule.containsAttribute(Attribute.MACRO_KEY)
+                || rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
             rule.setCompiledForFastRewriting(false);
             return rule;
         }

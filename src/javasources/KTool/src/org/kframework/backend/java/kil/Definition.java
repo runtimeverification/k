@@ -43,6 +43,7 @@ public class Definition extends JavaSymbolicObject {
     private final List<Rule> macros;
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
+    private final Multimap<KLabelConstant, Rule> anywhereRules = HashMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
     private transient Context context;
@@ -96,6 +97,8 @@ public class Definition extends JavaSymbolicObject {
             }
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
+        } else if (rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
+            anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
         }
@@ -143,6 +146,10 @@ public class Definition extends JavaSymbolicObject {
 
     public Multimap<KLabelConstant, Rule> functionRules() {
         return functionRules;
+    }
+
+    public Multimap<KLabelConstant, Rule> anywhereRules() {
+        return anywhereRules;
     }
 
     public Collection<Rule> sortPredicateRulesOn(KLabelConstant kLabel) {

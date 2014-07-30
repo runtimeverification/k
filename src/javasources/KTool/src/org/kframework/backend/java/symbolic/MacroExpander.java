@@ -39,6 +39,9 @@ public class MacroExpander extends TermTransformer {
         for (Rule rule : definition.functionRules().values()) {
             processedDefinition.addRule(processRule(rule));
         }
+        for (Rule rule : definition.anywhereRules().values()) {
+            processedDefinition.addRule(processRule(rule));
+        }
         processedDefinition.addRuleCollection(definition.macros());
         return processedDefinition;
     }
