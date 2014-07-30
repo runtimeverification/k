@@ -81,7 +81,7 @@ public abstract class Collection extends Term {
     public abstract boolean isLHSView();
 
     @Override
-    public final boolean isSymbolic() {
+    public boolean isSymbolic() {
         return false;
     }
 

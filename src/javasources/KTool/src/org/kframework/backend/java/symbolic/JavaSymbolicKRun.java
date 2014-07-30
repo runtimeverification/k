@@ -200,7 +200,6 @@ public class JavaSymbolicKRun implements KRun {
                     definition);
 
             SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
-            //initialConstraint.addAll(rule.condition());
             initialConstraint.addAll(dummyRule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
                     transformer.transformTerm(kilLeftHandSide, definition),

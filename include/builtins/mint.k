@@ -166,5 +166,24 @@ module MINT
    */
   syntax MInt ::= mIntOfDigits(List)   [function, hook(#MINT:fromDigits)]
 
+  // TODO(AndreiS): change
+  rule zeroMInt(MI:MInt) => eqMInt(MI, xorMInt(MI, MI))
+
+  /*
+   * Conversion to and from a list of digits
+   */
+  rule
+    digitsOfMInt(MI:MInt, N:Int, M:Int)
+  =>
+    digitsOfMInt(MI, N, M -Int 1)
+    ListItem(extractMInt(MI, (N *Int (M -Int 1)), (N *Int M)))
+  when M >Int 0
+  rule digitsOfMInt(_:MInt, _:Int, 0) => .List
+
+  rule
+    mIntOfDigits(ListItem(MI1:MInt) ListItem(MI2:MInt) L:List)
+  =>
+    concatenateMInt(MI1, mIntOfDigits(ListItem(MI2) L))
+  rule mIntOfDigits(ListItem(MI:MInt)) => MI
 endmodule
 

@@ -207,6 +207,13 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(term, otherTerm);
             }
 
+            if (term.isSymbolic() && term instanceof BuiltinList) {
+                term = ((BuiltinList) term).frame();
+            }
+            if (otherTerm.isSymbolic() && otherTerm instanceof BuiltinList) {
+                otherTerm = ((BuiltinList) otherTerm).frame();
+            }
+
             /* add symbolic constraint */
             fConstraint.add(term, otherTerm);
             // YilongL: not the right time to check the truth value because it

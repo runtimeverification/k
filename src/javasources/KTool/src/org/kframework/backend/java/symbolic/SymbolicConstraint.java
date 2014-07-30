@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.CellCollection;
@@ -356,6 +357,18 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
+            if (leftHandSide instanceof Variable
+                    && rightHandSide instanceof AssociativeCommutativeCollection
+                    && ((AssociativeCommutativeCollection) rightHandSide).collectionVariables().contains(leftHandSide)
+                    && ((AssociativeCommutativeCollection) rightHandSide).size() != 0) {
+                return true;
+            } else if (rightHandSide instanceof Variable
+                    && leftHandSide instanceof AssociativeCommutativeCollection
+                    && ((AssociativeCommutativeCollection) leftHandSide).collectionVariables().contains(rightHandSide)
+                    && ((AssociativeCommutativeCollection) leftHandSide).size() != 0) {
+                return true;
+            }
+
             if (!termContext().definition().context().javaExecutionOptions.generateTests) {
                 if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
                     return !leftHandSide.sort().equals(rightHandSide.sort());
@@ -683,7 +696,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     public TruthValue addAll(Collection<Term> condition) {
         for (Term term : condition) {
-            add(term, BoolToken.TRUE);
+            // TODO(AndreiS): remove this condition when function evaluation works properly
+            if (context.definition().context().krunOptions != null
+                    && context.definition().context().krunOptions.experimental.prove() != null) {
+                add(term.evaluate(context), BoolToken.TRUE);
+            } else {
+                add(term, BoolToken.TRUE);
+
+            }
         }
 
         return data.truthValue;
