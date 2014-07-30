@@ -796,14 +796,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             SymbolicConstraint right = implication.right;
             if (left.isFalse()) continue;
 
-            if (DEBUG) {
+            if (context.definition().context().globalOptions.verbose) {
                 System.out.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
             right = left.simplifyConstraint(right);
             right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-                if (DEBUG) {
+                if (context.definition().context().globalOptions.verbose) {
                     System.out.println("Implication proved by simplification");
                 }
                 continue;
@@ -814,7 +814,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (DEBUG) {
+                if (context.definition().context().globalOptions.verbose) {
                     System.out.println("Split on " + condition);
                 }
                 SymbolicConstraint left1 = new SymbolicConstraint(left, context);
@@ -829,12 +829,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
 //            }
             if (!impliesSMT(left,right)) {
-                if (DEBUG) {
+                if (context.definition().context().globalOptions.verbose) {
                     System.out.println("Failure!");
                 }
                 return false;
             } else {
-                if (DEBUG) {
+                if (context.definition().context().globalOptions.verbose) {
                     System.out.println("Proved!");
                 }
             }
