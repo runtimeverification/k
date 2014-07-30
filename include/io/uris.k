@@ -28,7 +28,7 @@ module URIS
   rule #open(S:String) => #open(S:String, "rw")
   rule #open(S:String, Mode:String) => #string2Int(#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01")<:TCPAnswer) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
 
-  rule #close(N:Int) 
+  rule #close(N:Int)
       => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))<:TCPAnswer)
 
   syntax K ::= String2DotK(TCPAnswer)  [function]

@@ -2,7 +2,7 @@
 module TEST
 
   configuration <T> <k> $PGM:K </k> <bag> <b multiplicity="*"> .K </b> </bag> </T>
-  
+
   syntax KItem ::= start(Int)
 
   syntax Bag ::= mergeBag(Bag, Bag) [function]
