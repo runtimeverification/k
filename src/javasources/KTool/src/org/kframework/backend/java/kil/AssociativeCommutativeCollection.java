@@ -47,7 +47,7 @@ public abstract class AssociativeCommutativeCollection extends Collection {
     }
 
     @Override
-    public boolean isExactSort() {
+    public final boolean isExactSort() {
         return true;
     }
 

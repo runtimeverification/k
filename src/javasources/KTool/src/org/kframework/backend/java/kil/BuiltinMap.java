@@ -7,13 +7,12 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.collections15.map.UnmodifiableMap;
-
+import org.apache.commons.collections4.map.UnmodifiableMap;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMultiset;
 
@@ -25,12 +24,7 @@ import com.google.common.collect.ImmutableMultiset;
  */
 public class BuiltinMap extends AssociativeCommutativeCollection {
 
-    public static final BuiltinMap EMPTY_MAP = new BuiltinMap(
-            (UnmodifiableMap<Term, Term>) UnmodifiableMap.decorate(Collections.<Term, Term>emptyMap()),
-            ImmutableMultiset.<KItem>of(),
-            ImmutableMultiset.<Term>of(),
-            ImmutableMultiset.<Variable>of());
-
+    public static final BuiltinMap EMPTY_MAP = (BuiltinMap) builder().build();
     private final UnmodifiableMap<Term, Term> entries;
 
     /**
@@ -120,7 +114,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
     @Override
     public String toString() {
-        return toString(" ", " |-> ", ".Map");
+        return toString(" ", " |-> ", DataStructureSort.DEFAULT_MAP_UNIT_LABEL);
     }
 
     private String toString(String operator, String mapsTo, String identity) {
@@ -183,7 +177,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         }
 
         public Map<Term, Term> getEntries() {
-            return UnmodifiableMap.decorate(entries);
+            return UnmodifiableMap.unmodifiableMap(entries);
         }
 
         /**
@@ -221,7 +215,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
             // ImmutableMap yet; using Apache's decorate method because it would
             // avoid creating nesting wrappers
             BuiltinMap builtinMap = new BuiltinMap(
-                    (UnmodifiableMap<Term, Term>) UnmodifiableMap.decorate(entries),
+                    (UnmodifiableMap<Term, Term>) UnmodifiableMap.unmodifiableMap(entries),
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build());

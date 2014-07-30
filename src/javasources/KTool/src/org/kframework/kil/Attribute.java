@@ -19,6 +19,7 @@ public class Attribute extends ASTNode {
     public static final String PATTERN_KEY = "pattern";
     public static final String HOOK_KEY = "hook";
     public static final String MACRO_KEY = "macro";
+    public static final String LEMMA_KEY = "lemma";
     public static final String SIMPLIFICATION_KEY = "simplification";
     public static final String FRESH_GENERATOR = "freshGenerator";
 

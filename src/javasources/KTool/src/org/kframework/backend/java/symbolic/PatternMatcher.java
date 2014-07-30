@@ -31,6 +31,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Profiler;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
@@ -133,7 +134,9 @@ public class PatternMatcher extends AbstractMatcher {
      *         variables in the pattern to sub-terms in the subject)
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(rule.containsAttribute("lemma"), context);
+        PatternMatcher matcher = new PatternMatcher(
+                rule.containsAttribute(Attribute.LEMMA_KEY),
+                context);
 
         boolean failed = true;
         if (rule.isFunction()) {
@@ -223,7 +226,9 @@ public class PatternMatcher extends AbstractMatcher {
                         // the non-lookup term is not a variable and thus requires further pattern matching
                         // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
                         //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
-                        PatternMatcher lookupMatcher = new PatternMatcher(rule.containsAttribute("lemma"), context);
+                        PatternMatcher lookupMatcher = new PatternMatcher(
+                                rule.containsAttribute(Attribute.LEMMA_KEY),
+                                context);
                         if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
                             resolved = true;
                             assert lookupMatcher.multiSubstitutions.isEmpty();

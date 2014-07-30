@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class BuiltinMapOperations {
 
-    public static Term construct(BuiltinMap map1, BuiltinMap map2, TermContext context) {
+    public static Term constructor(BuiltinMap map1, BuiltinMap map2, TermContext context) {
         return BuiltinMap.concatenate(map1, map2);
     }
 

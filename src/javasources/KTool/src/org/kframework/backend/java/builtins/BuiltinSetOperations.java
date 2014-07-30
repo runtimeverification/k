@@ -15,7 +15,7 @@ import com.google.common.collect.Sets;
  */
 public class BuiltinSetOperations {
 
-    public static Term construct(BuiltinSet set1, BuiltinSet set2, TermContext context) {
+    public static Term constructor(BuiltinSet set1, BuiltinSet set2, TermContext context) {
         return BuiltinSet.concatenate(set1, set2);
     }
 
