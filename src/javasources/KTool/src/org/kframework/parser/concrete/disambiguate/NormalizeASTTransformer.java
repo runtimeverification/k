@@ -69,21 +69,21 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      */
     public ASTNode visit(ListTerminator lt, Void _) throws ParseFailedException {
         ASTNode result = null;
-        if (lt.getSort().equals(KSorts.K)) {
+        if (lt.getSort().equals(Sort.K)) {
             result = KSequence.EMPTY;
-        } else if (lt.getSort().equals(KSorts.KLIST)) {
+        } else if (lt.getSort().equals(Sort.KLIST)) {
             result = KList.EMPTY;
-        } else if (lt.getSort().equals(KSorts.BAG)) {
+        } else if (lt.getSort().equals(Sort.BAG)) {
             result = Bag.EMPTY;
-        // TODO: unfortunately, these 3 are kind of a hack. Normally should be declared directly in K
+        // TODO(Radu): unfortunately, these 3 are kind of a hack. Normally should be declared directly in K
         // but at the moment because we are using SDF, I have to declare the dots directly in
         // SDF in order to avoid certain types of ambiguities.
         // with the new parser I should be able to
-        } else if (lt.getSort().equals(KSorts.LIST)) {
+        } else if (lt.getSort().equals(Sort.LIST)) {
             result = KApp.of("'.List");
-        } else if (lt.getSort().equals(KSorts.MAP)) {
+        } else if (lt.getSort().equals(Sort.MAP)) {
             result = KApp.of("'.Map");
-        } else if (lt.getSort().equals(KSorts.SET)) {
+        } else if (lt.getSort().equals(Sort.SET)) {
             result = KApp.of("'.Set");
         }
         if (result != null) {
