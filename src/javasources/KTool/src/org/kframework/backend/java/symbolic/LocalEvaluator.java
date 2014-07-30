@@ -12,8 +12,13 @@ import org.kframework.utils.general.GlobalSettings;
 /**
  * Evaluates predicates and functions without doing tree traversal.
  *
+ * @deprecated This {@link PrePostTransformer}-based implementation for
+ *             substitute and evaluate is just too slow; switch to
+ *             {@link SubstituteAndEvaluateTransformer} instead
+ *
  * @author Traian
  */
+@Deprecated
 public class LocalEvaluator extends LocalTransformer {
 
     /**
@@ -44,12 +49,7 @@ public class LocalEvaluator extends LocalTransformer {
     public ASTNode transform(KItem kItem) {
         try {
             // TODO(YilongL): shall we consider cache evaluation result in certain cases?
-            Term evaluatedTerm = kItem.evaluateFunction(false, context);
-            // TODO(YilongL): had to comment out the following assertion because the visitor/imp.k somehow fails here
-    //        if (kItem.isGround() && kItem.isEvaluable(context)) {
-    //            assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;
-    //        }
-            return evaluatedTerm;
+            return kItem.resolveFunctionAndAnywhere(false, context);
         } catch (StackOverflowError e) {
             GlobalSettings.kem.registerCriticalError(TRACE_MSG, e);
             throw e; //unreachable
