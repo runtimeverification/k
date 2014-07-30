@@ -564,14 +564,8 @@ and is defined at the end of the file. */
 //
 // Besides the top level of the computation, they are only needed
 // inside the lvalue wrapper.  Maybe add to K some additional notation?
-//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]    [structural, anywhere]
-//  rule array(L,_)[N:Int] => lookup(L +Int N)      [structural, anywhere]
-
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]            [structural]
-  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])    [structural]
-
-  rule array(L,_)[N:Int] => lookup(L +Int N)            [structural]
-  rule lvalue(array(L,_)[N:Int] => lookup(L +Int N))    [structural]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]    [structural, anywhere]
+  rule array(L,_)[N:Int] => lookup(L +Int N)              [structural, anywhere]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
