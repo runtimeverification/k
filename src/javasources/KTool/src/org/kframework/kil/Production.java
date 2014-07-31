@@ -2,7 +2,6 @@
 package org.kframework.kil;
 
 import com.google.common.collect.Multimap;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
@@ -33,10 +32,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         funProd.addAttribute(new Attribute("prefixlabel", funName));
         if (funSort.isComputationSort()) {
             funProd.addAttribute(new Attribute("klabel", funName));
-            String consAttr = funSort + "1" + funName + "Syn";
-            funProd.addAttribute(new Attribute("cons", consAttr));
-            context.conses.put(consAttr, funProd);
-            context.putLabel(funProd, consAttr);
+            context.addProduction(funProd);
         }
 
         return funProd;
@@ -141,10 +137,6 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         this.sort = sort.getSort();
         attributes = new Attributes();
         this.ownerModuleName = ownerModule;
-    }
-
-    public String getCons() {
-        return attributes.get("cons");
     }
 
     /**

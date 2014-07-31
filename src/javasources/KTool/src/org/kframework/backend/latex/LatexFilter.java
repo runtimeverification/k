@@ -102,9 +102,9 @@ public class LatexFilter extends BackendFilter {
         } else {
             result.append("\\syntaxCont{");
         }
-        if (!(p.getItems().get(0) instanceof UserList) && p.containsAttribute(Constants.CONS_cons_ATTR)
-                && patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
-            String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
+        if (!(p.getItems().get(0) instanceof UserList)
+                && patternsVisitor.getPatterns().containsKey(p)) {
+            String pattern = patternsVisitor.getPatterns().get(p);
             int n = 1;
             LatexFilter termFilter = new LatexFilter(context);
             for (ProductionItem pi : p.getItems()) {
@@ -359,11 +359,11 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(TermCons trm, Void _) {
-        String pattern = patternsVisitor.getPatterns().get(trm.getCons());
+        String pattern = patternsVisitor.getPatterns().get(trm.getProduction());
         if (pattern == null) {
-            Production pr = context.conses.get(trm.getCons());
+            Production pr = trm.getProduction();
             patternsVisitor.visitNode(pr);
-            pattern = patternsVisitor.getPatterns().get(trm.getCons());
+            pattern = patternsVisitor.getPatterns().get(trm.getProduction());
         }
         int n = 1;
         LatexFilter termFilter = new LatexFilter(context);

@@ -181,7 +181,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         }
 
         if (inner) {
-            List<Production> productions1 = context.productionsOf(currentLabel);
+            Set<Production> productions1 = context.productionsOf(currentLabel);
             //the production of .K is empty
             if (productions1.isEmpty()) {
                 return;

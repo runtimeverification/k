@@ -4,7 +4,7 @@ package org.kframework.kil;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.loader.Constants;
@@ -98,16 +98,16 @@ public class KLabelConstant extends KLabel {
     /* un-escaped label */
     private final String label;
     /* unmodifiable view of the production list */
-    private final List<Production> productions;
+    private final Set<Production> productions;
 
     public KLabelConstant(String label) {
         this.label = label;
-        productions = Collections.emptyList();
+        productions = Collections.emptySet();
     }
 
     private KLabelConstant(String label, Context context) {
         this.label = label;
-        productions = Collections.unmodifiableList(context.productionsOf(label));
+        productions = Collections.unmodifiableSet(context.productionsOf(label));
     }
 
     /**
@@ -117,20 +117,20 @@ public class KLabelConstant extends KLabel {
     public KLabelConstant(Element element, Context context) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = Collections.unmodifiableList(context.productionsOf(label));
+        productions = Collections.unmodifiableSet(context.productionsOf(label));
     }
 
     @SuppressWarnings("unchecked")
     public KLabelConstant(Element element) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = (List<Production>) Collections.EMPTY_LIST;
+        productions = Collections.emptySet();
     }
 
     /**
      * @return unmodifiable list of productions generating this KLabel
      */
-    public List<Production> productions() {
+    public Set<Production> productions() {
         return productions;
     }
 
@@ -174,7 +174,7 @@ public class KLabelConstant extends KLabel {
         if (isPredicate()) {
             return true;
         } else {
-            List<Production> productions = context.productionsOf(getLabel());
+            Set<Production> productions = context.productionsOf(getLabel());
             Production functionProduction = null;
             for (Production production : productions) {
                 if (production.containsAttribute(Attribute.FUNCTION_KEY)

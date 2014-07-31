@@ -4,7 +4,6 @@ package org.kframework.kcheck.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BoolBuiltin;
@@ -17,7 +16,6 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -98,7 +96,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
                         List<Term> vlist = new ArrayList<Term>();
                         vlist.add(v);
 //                        System.out.println("Generate fresh "  + v);
-                        fresh.add(new TermCons(v.getSort(), MetaK.Constants.freshCons, vlist, context));
+                        //fresh.add(new TermCons(v.getSort(), MetaK.Constants.freshCons, vlist, context));
 //                        fresh.add(KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), org.kframework.kil.Token.kAppOf("#Id", v.getName())));
                     }
                 }

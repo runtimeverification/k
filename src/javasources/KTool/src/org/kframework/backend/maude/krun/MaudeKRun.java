@@ -391,23 +391,21 @@ public class MaudeKRun implements KRun {
                 //return new Hole(sort);
                 return Hole.KITEM_HOLE;
             } else {
-                Set<String> conses = context.labels.get(StringUtil.unescapeMaude(op));
-                Set<String> validConses = new HashSet<String>();
+                Set<Production> prods = context.klabels.get(StringUtil.unescapeMaude(op));
+                Set<Production> validProds = new HashSet<>();
                 List<Term> possibleTerms = new ArrayList<Term>();
-                assertXMLTerm(conses != null);
-                for (String cons : conses) {
-                    Production p = context.conses.get(cons);
+                for (Production p : prods) {
                     if (p.getSort().getName().equals(sort) && p.getArity() == list.size()) {
-                        validConses.add(cons);
+                        validProds.add(p);
                     }
                 }
-                assertXMLTerm(validConses.size() > 0);
+                assertXMLTerm(validProds.size() > 0);
                 List<Term> contents = new ArrayList<Term>();
                 for (Element elem : list) {
                     contents.add(parseXML(elem, context));
                 }
-                for (String cons : validConses) {
-                    possibleTerms.add(new TermCons(Sort.of(sort), cons, contents, context));
+                for (Production prod : validProds) {
+                    possibleTerms.add(new TermCons(Sort.of(sort), contents, prod));
                 }
                 if (possibleTerms.size() == 1) {
                     return possibleTerms.get(0);

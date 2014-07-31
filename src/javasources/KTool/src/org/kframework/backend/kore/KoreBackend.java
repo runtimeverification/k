@@ -23,7 +23,6 @@ import org.kframework.compile.transformers.ContextsToHeating;
 import org.kframework.compile.transformers.DesugarStreams;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.FreshCondToFreshVar;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
@@ -131,8 +130,6 @@ public class KoreBackend extends BasicBackend {
         steps.add(new AddStreamCells(context));
         steps.add(new AddSymbolicK(context));
         steps.add(new AddSemanticEquality(context));
-        // steps.add(new ResolveFresh());
-        steps.add(new FreshCondToFreshVar(context));
         steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
         if (options.experimental.addTopCell) {

@@ -286,7 +286,6 @@ public class MaudeFilter extends BackendFilter {
 
     private boolean isEmptyAttribute(Attribute entry) {
         java.util.List<String> reject = new LinkedList<String>();
-        reject.add("cons");
         reject.add("kgeneratedlabel");
         reject.add("latex");
         reject.add("prefixlabel");
@@ -301,7 +300,6 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Attribute attribute, Void _) {
         java.util.List<String> reject = new LinkedList<String>();
-        reject.add("cons");
         reject.add("kgeneratedlabel");
         reject.add("latex");
         reject.add("prefixlabel");
@@ -477,7 +475,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(".");
             result.append(sort);
         } else {
-            Production prd = context.listConses.get(sort);
+            Production prd = context.listProductions.get(sort);
             UserList ul = (UserList) prd.getItems().get(0);
             result.append(".List`{\"");
             result.append(ul.getSeparator());
@@ -587,7 +585,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(TermCons termCons, Void _) {
-        Production pr = context.conses.get(termCons.getCons());
+        Production pr = termCons.getProduction();
         String cons = StringUtil.escapeMaude(pr.getLabel());
 
         if (pr.containsAttribute("maudeop")) {

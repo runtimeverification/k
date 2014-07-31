@@ -18,8 +18,7 @@ public class PriorityFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-        if (tc.getProduction() == null)
-            System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
+        assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
             if (tc.getContents().size() == 2) { // I made the parser so it instantiates a TermCons
                 // with 0 children if the list is empty. It also takes the place of the list terminator

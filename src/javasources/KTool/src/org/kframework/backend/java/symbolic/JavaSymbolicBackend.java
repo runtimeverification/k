@@ -19,9 +19,8 @@ import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.*;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectBracketsVisitor;
-import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectProductionsVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.BinaryLoader;
@@ -93,8 +92,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new FlattenModules(context));
 
         steps.add(new CompleteSortLatice(context));
-        steps.add(new CheckVisitorStep<Definition>(new AddConsesVisitor(context), context));
-        steps.add(new CheckVisitorStep<Definition>(new CollectConsesVisitor(context), context));
+        steps.add(new CheckVisitorStep<Definition>(new CollectProductionsVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectSubsortsVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectBracketsVisitor(context), context));
 

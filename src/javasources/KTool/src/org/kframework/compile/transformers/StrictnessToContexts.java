@@ -314,7 +314,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     }
 
     private Set<Production> getStrictContextProductions(String strictType, Production prod) {
-        Set<Production> productions = context.productions.get(strictType);
+        Set<Production> productions = context.klabels.get(strictType);
         if (productions == null) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,

@@ -13,7 +13,6 @@ import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -63,8 +62,6 @@ public class AddSortLabels extends CopyOnWriteTransformer {
         Production production = new Production(syntax.getDeclaredSort(), productionItems);
 
 //        System.out.println("Before: " + context.conses);
-        AddConsesVisitor acv = new AddConsesVisitor(context);
-        acv.visitNode(production);
 //        System.out.println("After: " + context.conses);
 //        acv.visit(production);
         List<PriorityBlock> priorityBlocks = syntax.getPriorityBlocks();
