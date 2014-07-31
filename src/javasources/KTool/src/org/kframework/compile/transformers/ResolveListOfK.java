@@ -44,9 +44,9 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
                             getName(), t.getFilename(), t.getLocation()));
                 }
                 Term result = (Term) resultAST;
-                if (pitem instanceof Sort
-                        && ((Sort)pitem).getName().equals(KSorts.KLIST)
-                        && !t.getSort().equals(KSorts.KLIST)) {
+                if (pitem instanceof NonTerminal
+                        && ((NonTerminal)pitem).getSort().equals(Sort.KLIST)
+                        && !t.getSort().equals(Sort.KLIST)) {
                     KList list = new KList();
                     list.getContents().add(result);
                     result = list;

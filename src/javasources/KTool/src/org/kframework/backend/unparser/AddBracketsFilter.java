@@ -340,15 +340,15 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return inner instanceof TermCons && context.isPriorityWrong(tcOuter.getProduction().getKLabel(), ((TermCons)inner).getProduction().getKLabel());
                 }
             }
-            return !inner.getSort().equals("K");
+            return !inner.getSort().equals(Sort.K);
         } else if (inner instanceof Rewrite && !(outer instanceof Cell)) {
             return true;
         } else if (inner instanceof KSequence && outer instanceof TermCons) {
             return true;
         } else if (outer instanceof KInjectedLabel) {
             KInjectedLabel lbl = (KInjectedLabel)outer;
-            String sort = lbl.getTerm().getSort();
-            if (MetaK.isKSort(sort)) {
+            Sort sort = lbl.getTerm().getSort();
+            if (sort.isKSort()) {
                 sort = KInjectedLabel.getInjectedSort(sort);
                 if (!context.isSubsortedEq(sort, inner.getSort())) {
                     return true;

@@ -14,7 +14,7 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -55,7 +55,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
     }
 
     public Void visit(Syntax syn, Void _) {
-        userSort.add(syn.getSort().getName());
+        userSort.add(syn.getDeclaredSort().getName());
         List<PriorityBlock> priblocks = syn.getPriorityBlocks();
         processPriorities(priblocks);
         return null;
@@ -111,7 +111,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
             // filter the productions according to their form
             for (Production prd : prt.getProductions()) {
-                startSorts.add(prd.getSort());
+                startSorts.add(prd.getSort().getName());
 
                 if (prd.containsAttribute("notInPrograms")) {
                     // if a production has this attribute, don't add it to the list
@@ -119,15 +119,15 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     lexical.add(prd);
                 } else if (prd.isSubsort()) {
                     p.getProductions().add(prd);
-                    startSorts.add(((Sort) prd.getItems().get(0)).getName());
+                    startSorts.add(((NonTerminal) prd.getItems().get(0)).getName());
                 } else if (prd.isConstant()) {
                     constants.add(prd);
-                    constantSorts.add(prd.getSort());
+                    constantSorts.add(prd.getSort().getName());
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
                     outsides.add(prd);
                 } else if (prd.getItems().get(0) instanceof UserList) {
                     outsides.add(prd);
-                    listSorts.add(prd.getSort());
+                    listSorts.add(prd.getSort().getName());
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -158,9 +158,9 @@ public class ProgramSDFVisitor extends BasicVisitor {
                             ProductionItem itm = items.get(i);
                             if (itm instanceof Terminal) {
                                 Terminal t = (Terminal) itm;
-                                sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-                            } else if (itm instanceof Sort) {
-                                Sort srt = (Sort) itm;
+                                sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
+                            } else if (itm instanceof NonTerminal) {
+                                NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
                                     sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
@@ -174,7 +174,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
+                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
                         sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
                     }
                     sdf.append("} > ");

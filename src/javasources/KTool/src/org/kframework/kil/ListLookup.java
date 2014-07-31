@@ -18,12 +18,12 @@ public class ListLookup extends BuiltinLookup {
     /** {@link Term} representation of the value */
     private final Term value;
 
-    public ListLookup(Variable base, Term key, Term value, KSort kind) {
+    public ListLookup(Variable base, Term key, Term value, Sort kind) {
         super(base, key, kind, false);
         this.value = value;
     }
 
-    public ListLookup(Variable base, int key, Term value, KSort kind) {
+    public ListLookup(Variable base, int key, Term value, Sort kind) {
         this(base, IntBuiltin.kAppOf(key), value, kind);
     }
 

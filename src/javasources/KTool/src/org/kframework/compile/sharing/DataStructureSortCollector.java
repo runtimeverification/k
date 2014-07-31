@@ -4,6 +4,7 @@ package org.kframework.compile.sharing;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -22,20 +23,20 @@ import com.google.common.collect.ImmutableMap;
 public class DataStructureSortCollector extends BasicVisitor {
     /* TODO(AndreiS): merge with the rest of the builtins */
 
-    private Map<String, String> types = new HashMap<String, String>();
-    private Map<String, String> constructorLabels = new HashMap<String, String>();
-    private Map<String, String> elementLabels = new HashMap<String, String>();
-    private Map<String, String> unitLabels = new HashMap<String, String>();
-    private Map<String, Map<String, String>> operatorLabels = new HashMap<String, Map<String, String>>();
+    private Map<Sort, Sort> types = new HashMap<>();
+    private Map<Sort, String> constructorLabels = new HashMap<>();
+    private Map<Sort, String> elementLabels = new HashMap<>();
+    private Map<Sort, String> unitLabels = new HashMap<>();
+    private Map<Sort, Map<String, String>> operatorLabels = new HashMap<>();
 
     public DataStructureSortCollector(Context context) {
         super(context);
     }
 
-    public Map<String, DataStructureSort> getSorts() {
-        ImmutableMap.Builder<String, DataStructureSort> builder = ImmutableMap.builder();
-        for (Map.Entry<String, String> entry : types.entrySet()) {
-            String sort = entry.getKey();
+    public Map<Sort, DataStructureSort> getSorts() {
+        ImmutableMap.Builder<Sort, DataStructureSort> builder = ImmutableMap.builder();
+        for (Map.Entry<Sort, Sort> entry : types.entrySet()) {
+            Sort sort = entry.getKey();
 
             if (!types.containsKey(sort)) {
                 /* TODO: print error message */
@@ -55,7 +56,7 @@ public class DataStructureSortCollector extends BasicVisitor {
             }
 
             DataStructureSort dataStructureSort = new DataStructureSort(
-                    sort,
+                    sort.getName(),
                     types.get(sort),
                     constructorLabels.get(sort),
                     elementLabels.get(sort),
@@ -69,7 +70,7 @@ public class DataStructureSortCollector extends BasicVisitor {
 
     @Override
     public Void visit(Production node, Void _) {
-        String sort = node.getSort();
+        Sort sort = node.getSort();
 
         String hookAttribute = node.getAttribute(Attribute.HOOK_KEY);
         if (hookAttribute == null) {
@@ -83,7 +84,7 @@ public class DataStructureSortCollector extends BasicVisitor {
             return null;
         }
 
-        String type = strings[0];
+        Sort type = Sort.of(strings[0]);
         String operator = strings[1];
         if (!DataStructureSort.TYPES.contains(type)) {
             /* not a builtin collection */

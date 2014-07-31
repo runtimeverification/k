@@ -21,11 +21,11 @@ public class KSequence extends Collection {
     }
 
     public KSequence() {
-        super("K");
+        super(Sort.K);
     }
 
     public KSequence(List<Term> col) {
-        super("K", col);
+        super(Sort.K, col);
     }
 
     @Override

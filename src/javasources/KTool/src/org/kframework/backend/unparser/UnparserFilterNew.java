@@ -125,7 +125,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     public Void visit(Syntax syn, Void _) {
         prepare(syn);
         firstPriorityBlock = true;
-        indenter.write("syntax " + syn.getSort().getName());
+        indenter.write("syntax " + syn.getDeclaredSort().getName());
         indenter.indentToCurrent();
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {
@@ -172,7 +172,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         prepare(sort);
         indenter.write(sort.getName());
         super.visit(sort, _);
@@ -646,8 +646,8 @@ public class UnparserFilterNew extends NonCachingVisitor {
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort())) {
-            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
+        if (term.getSort().isKSort()) {
+            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             indenter.write("2KLabel ");
         } else {
             indenter.write("# ");
@@ -763,7 +763,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (c.isSyntactic()) {
             indenter.write(":");
         }
-        indenter.write(c.getSort());
+        indenter.write(c.getSort().getName());
         return postpare();
     }
 
@@ -802,7 +802,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
         return null;
     }
 
-    private List<Terminal> findRightSyntax(String sort){
+    private List<Terminal> findRightSyntax(Sort sort){
 
         Production p = context.canonicalBracketForSort.get(sort);
         if (p == null) {

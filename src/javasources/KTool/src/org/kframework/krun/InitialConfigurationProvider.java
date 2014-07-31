@@ -19,6 +19,7 @@ import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -77,7 +78,8 @@ public class InitialConfigurationProvider implements Provider<Term> {
                 GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.CRITICAL,
                         "User specified configuration variable " + name + " which does not exist."));
             }
-            String startSymbol = context.configVarSorts.get(name);
+            Sort sort = context.configVarSorts.get(name);
+            String startSymbol = sort == null ? null : sort.getName();
             Term parsed = new RunProcess().runParserOrDie(parser, value, false, startSymbol, context);
             parsed = (Term) new ResolveVariableAttribute(context).visitNode(parsed);
             output.put("$" + name, parsed);

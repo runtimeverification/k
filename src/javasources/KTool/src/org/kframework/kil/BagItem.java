@@ -8,7 +8,7 @@ import org.w3c.dom.Element;
 
 public class BagItem extends CollectionItem {
     public BagItem(String location, String filename) {
-        super(location, filename, "BagItem");
+        super(location, filename, Sort.BAG_ITEM);
     }
 
     public BagItem(Element element) {
@@ -21,7 +21,7 @@ public class BagItem extends CollectionItem {
     }
 
     public BagItem(Term node) {
-        super("BagItem");
+        super(Sort.BAG_ITEM);
         this.value = node;
     }
 

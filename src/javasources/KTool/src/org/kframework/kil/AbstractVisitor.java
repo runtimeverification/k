@@ -387,7 +387,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     }
 
     @Override
-    public R visit(Sort node, P p) throws E {
+    public R visit(NonTerminal node, P p) throws E {
         return visit((ProductionItem) node, p);
     }
 

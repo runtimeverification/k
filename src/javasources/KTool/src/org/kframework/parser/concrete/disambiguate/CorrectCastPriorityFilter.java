@@ -8,7 +8,7 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Cast;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Rewrite;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
@@ -83,7 +83,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
             assert tc.getProduction() != null : this.getClass() + ":" + " cons not found." + tc.getCons();
 
             int lastElement = tc.getProduction().getItems().size() - 1;
-            if (tc.getProduction().getItems().get(lastElement) instanceof Sort || tc.getProduction().isListDecl()) {
+            if (tc.getProduction().getItems().get(lastElement) instanceof NonTerminal || tc.getProduction().isListDecl()) {
                 String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
                 KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
                 throw new PriorityException(kex);

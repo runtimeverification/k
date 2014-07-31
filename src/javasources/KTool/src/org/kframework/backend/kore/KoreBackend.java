@@ -279,7 +279,7 @@ class KoreFilter extends BasicVisitor {
         if (node.isSyntactic()) {
             indenter.write(":");
         }
-        indenter.write(node.getSort());
+        indenter.write(node.getSort().getName());
         indenter.write(")");
         return null;
     }
@@ -453,8 +453,8 @@ class KoreFilter extends BasicVisitor {
         @Override
         public Void visit(KInjectedLabel kInjectedLabel, Void _) {
             Term term = kInjectedLabel.getTerm();
-            if (MetaK.isKSort(term.getSort())) {
-                indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
+            if (term.getSort().isKSort()) {
+                indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
                 indenter.write("2KLabel ");
             } else {
                 indenter.write("# ");
@@ -654,7 +654,7 @@ class KoreFilter extends BasicVisitor {
         }
 
         @Override
-        public Void visit(Sort node, Void _) {
+        public Void visit(NonTerminal node, Void _) {
             indenter.write(node.toString());
             return null;
         }
@@ -669,7 +669,7 @@ class KoreFilter extends BasicVisitor {
         public Void visit(Syntax node, Void _) {
 
             indenter.write("  syntax ");
-            this.visitNode(node.getSort());
+            this.visitNode(node.getDeclaredSort());
             indenter.write(" ::=");
             for (int i = 0; i < node.getPriorityBlocks().size(); ++i){
                 PriorityBlock production = node.getPriorityBlocks().get(i);

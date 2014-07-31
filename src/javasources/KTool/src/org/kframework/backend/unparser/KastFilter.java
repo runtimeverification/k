@@ -61,7 +61,7 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         throw new RuntimeException("don't know how to kast Sort");
     }
 
@@ -135,10 +135,10 @@ public class KastFilter extends BasicVisitor {
 
     @Override
     public Void visit(ListTerminator empty, Void _) {
-        String sort = empty.getSort();
+        Sort sort = empty.getSort();
         if (MaudeHelper.basicSorts.contains(sort)) {
             result.write(".");
-            result.write(sort);
+            result.write(sort.getName());
         } else {
             Production prd = context.listConses.get(sort);
             UserList ul = (UserList) prd.getItems().get(0);
@@ -158,11 +158,11 @@ public class KastFilter extends BasicVisitor {
     public Void visit(KApp kapp, Void _) {
         if (kapp.getLabel() instanceof Token) {
             Token token = (Token)kapp.getLabel();
-            if (token.tokenSort().equals("#Id")) {
+            if (token.tokenSort().equals(Sort.BUILTIN_ID)) {
                 result.write("#id \"");
             }
             result.write(token.value());
-            if (token.tokenSort().equals("#Id")) {
+            if (token.tokenSort().equals(Sort.BUILTIN_ID)) {
                 result.write("\"");
             }
             result.write(token.toString());
@@ -251,8 +251,8 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort())) {
-            result.write(KInjectedLabel.getInjectedSort(term.getSort()));
+        if (term.getSort().isKSort()) {
+            result.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             result.write("2KLabel_(");
         } else {
             result.write("#_(");

@@ -44,6 +44,7 @@ public final class Sort implements MaximalSharing, Serializable {
     public static final Sort META_VARIABLE  =   Sort.of("MetaVariable");
 
     public static final Sort BOTTOM         =   Sort.of("Bottom");
+    public static final Sort SHARP_BOT      =   Sort.of("#Bot");
     public static final Sort MGU            =   Sort.of("Mgu");
 
     /**
@@ -81,10 +82,10 @@ public final class Sort implements MaximalSharing, Serializable {
         return sort;
     }
 
-    public static Set<Sort> of(Collection<String> names) {
+    public static Set<Sort> of(Collection<org.kframework.kil.Sort> sorts) {
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
-        for (String name : names) {
-            builder.add(Sort.of(name));
+        for (org.kframework.kil.Sort name : sorts) {
+            builder.add(Sort.of(name.getName()));
         }
         return builder.build();
     }
@@ -100,6 +101,15 @@ public final class Sort implements MaximalSharing, Serializable {
 
     public int ordinal() {
         return ordinal;
+    }
+
+    public Sort getUserListSort(String separator) {
+        return Sort.of(org.kframework.kil.Sort.LIST_OF_BOTTOM_PREFIX + name
+                + "{\"" + separator + "\"}");
+    }
+
+    public org.kframework.kil.Sort toFrontEnd() {
+        return org.kframework.kil.Sort.of(name);
     }
 
     @Override

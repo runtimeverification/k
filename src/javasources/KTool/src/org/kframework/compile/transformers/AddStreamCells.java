@@ -79,7 +79,7 @@ public class AddStreamCells extends CopyOnWriteTransformer {
 
     private void addRules(Rule rule, String stream) {
         DataStructureSort sort = context.dataStructureSortOf(rule.getBody().getSort());
-        if (!(rule.getBody().getSort().equals("List") || rule.getBody().getSort().equals("ListItem") || context.dataStructureListSortOf(rule.getBody().getSort()) != null)) {
+        if (!(rule.getBody().getSort().equals(Sort.LIST) || rule.getBody().getSort().equals(Sort.LIST_ITEM) || context.dataStructureListSortOf(rule.getBody().getSort()) != null)) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                     KExceptionGroup.INTERNAL,
                     "Found a rule tagged '" + stream + "' whose body wasn't a list.",

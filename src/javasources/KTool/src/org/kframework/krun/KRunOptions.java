@@ -13,6 +13,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
@@ -243,7 +244,7 @@ public final class KRunOptions {
         }
         if (patternToParse.equals(DEFAULT_PATTERN)) {
             Sentence s = new Sentence();
-            s.setBody(new Cell("generatedTop", new Variable("B", "Bag")));
+            s.setBody(new Cell("generatedTop", new Variable("B", Sort.BAG)));
             s.addAttribute(Attribute.ANYWHERE);
             return s;
         }

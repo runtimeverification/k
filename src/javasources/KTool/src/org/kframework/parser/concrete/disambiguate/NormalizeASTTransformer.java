@@ -7,6 +7,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
@@ -27,7 +28,7 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
      */
     @Override
     public ASTNode visit(KApp kapp, Void _) throws ParseFailedException {
-        if (!kapp.getChild().getSort().equals(KSorts.KLIST)) {
+        if (!kapp.getChild().getSort().equals(Sort.KLIST)) {
             kapp.setChild(new KList(kapp.getChild()));
         }
         return super.visit(kapp, _);
@@ -43,7 +44,7 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         if (context.getTokenSorts().contains(tc.getSort())) {
-            Production p = (Production) tc.getProduction();
+            Production p = tc.getProduction();
             if (p.getItems().size() == 1 && p.getItems().get(0) instanceof Terminal) {
                 Terminal t = (Terminal) p.getItems().get(0);
                 Term trm = GenericToken.kAppOf(p.getSort(), t.getTerminal());

@@ -28,8 +28,6 @@ import org.w3c.dom.Element;
  */
 public class StringBuiltin extends Token {
 
-    public static final String SORT_NAME = "#String";
-
     /* Token cache */
     private static Map<String, StringBuiltin> tokenCache = new HashMap<String, StringBuiltin>();
     /* KApp cache */
@@ -80,7 +78,7 @@ public class StringBuiltin extends Token {
     public static StringBuiltin valueOf(String value) {
         assert value.charAt(0) == '"';
         assert value.charAt(value.length() - 1) == '"';
-        String stringValue = StringUtil.unquoteString(value);
+        String stringValue = StringUtil.unquoteKString(value);
         return StringBuiltin.of(stringValue);
     }
 
@@ -97,7 +95,7 @@ public class StringBuiltin extends Token {
         super(element);
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
         try {
-            value = StringUtil.unquoteString(s);
+            value = StringUtil.unquoteKString(s);
         } catch (IllegalArgumentException e) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, encodingErrorMsg, this.getLocation(), this.getFilename()));
             throw e; //unreachable
@@ -119,8 +117,8 @@ public class StringBuiltin extends Token {
      * @return
      */
     @Override
-    public String tokenSort() {
-        return StringBuiltin.SORT_NAME;
+    public Sort tokenSort() {
+        return Sort.BUILTIN_STRING;
     }
 
     /**
@@ -130,7 +128,7 @@ public class StringBuiltin extends Token {
      */
     @Override
     public String value() {
-        return StringUtil.enquoteString(value);
+        return StringUtil.enquoteKString(value);
     }
 
     @Override

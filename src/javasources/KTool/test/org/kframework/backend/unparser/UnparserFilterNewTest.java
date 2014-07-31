@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunOptions;
@@ -30,7 +31,7 @@ public class UnparserFilterNewTest {
     @Test
     public void testTrailingUnderscores() {
         UnparserFilterNew v = new UnparserFilterNew(context);
-        KApp t = KApp.of(KLabelConstant.of("'__", context), Variable.getFreshVar("K"), Variable.getFreshVar("K"));
+        KApp t = KApp.of(KLabelConstant.of("'__", context), Variable.getFreshVar(Sort.K), Variable.getFreshVar(Sort.K));
         v.visit(t, null);
         v.getResult();
     }

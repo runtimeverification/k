@@ -163,7 +163,8 @@ public class TestCaseGenerationUtil {
     public static int getNumOfFreeVars(ConstrainedTerm cnstrTerm, Context context) {
         Set<Variable> set = cnstrTerm.term().variableSet();
         for (Iterator<Variable> iter = set.iterator(); iter.hasNext();) {
-            if (context.isSubsortedEq("KResult", iter.next().sort().name())) {
+            if (context.isSubsortedEq(org.kframework.kil.Sort.KRESULT,
+                    iter.next().sort().toFrontEnd())) {
                 iter.remove();
             }
         }
