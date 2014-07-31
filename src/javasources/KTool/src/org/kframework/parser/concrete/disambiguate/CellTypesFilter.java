@@ -41,23 +41,7 @@ public class CellTypesFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
-        Sort sort = context.cellSorts.get(cell.getLabel());
-        // if the k cell is opened, then the sort should be K because of ... desugaring
-        if (cell.getLabel().equals("k") && cell.getEllipses() != Ellipses.NONE)
-            sort = Sort.K;
-
-        if (sort == null) {
-            if (cell.getLabel().equals("k"))
-                sort = Sort.K;
-            else if (cell.getLabel().equals("T"))
-                sort = Sort.BAG;
-            else if (cell.getLabel().equals("generatedTop"))
-                sort = Sort.BAG;
-            else if (cell.getLabel().equals("freshCounter"))
-                sort = Sort.K;
-            else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
-                sort = Sort.K;
-        }
+        Sort sort = context.getCellSort(cell);
 
         if (sort != null) {
             cell.setContents((Term) new CellTypesFilter2(context, sort, cell.getLabel()).visitNode(cell.getContents()));

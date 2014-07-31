@@ -7,6 +7,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
@@ -87,7 +88,7 @@ public class Context implements Serializable {
     public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
     public Map<String, Sort> cellKinds = new HashMap<>();
-    public Map<String, Sort> cellSorts = new HashMap<>();
+    private Map<String, Sort> cellSorts = new HashMap<>();
     public Map<Sort, Production> listConses = new HashMap<>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
     public Map<String, String> listLabelSeparator = new HashMap<>();
@@ -253,6 +254,27 @@ public class Context implements Serializable {
         if (sort.equals(Sort.BAG_ITEM))
             sort = Sort.BAG;
         cellSorts.put(c.getLabel(), sort);
+    }
+
+    public Sort getCellSort(Cell cell) {
+        Sort sort = cellSorts.get(cell.getLabel());
+        // if the k cell is opened, then the sort should be K because of ... desugaring
+        if (cell.getLabel().equals("k") && cell.getEllipses() != Ellipses.NONE)
+            sort = Sort.K;
+
+        if (sort == null) {
+            if (cell.getLabel().equals("k"))
+                sort = Sort.K;
+            else if (cell.getLabel().equals("T"))
+                sort = Sort.BAG;
+            else if (cell.getLabel().equals("generatedTop"))
+                sort = Sort.BAG;
+            else if (cell.getLabel().equals("freshCounter"))
+                sort = Sort.K;
+            else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
+                sort = Sort.K;
+        }
+        return sort;
     }
 
     public boolean isListSort(Sort sort) {
