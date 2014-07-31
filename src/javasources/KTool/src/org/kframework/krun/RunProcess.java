@@ -113,38 +113,42 @@ public class RunProcess {
             startSymbol = context.startSymbolPgm;
         }
         String content = value;
+        File file = null;
 
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
+                    file = new File(value);
                 }
-
-                term = ProgramLoader.processPgm(content, value, startSymbol, context, ParserType.PROGRAM);
+                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast -e":
-                term = ProgramLoader.processPgm(value, value, startSymbol, context, ParserType.PROGRAM);
+                term = ProgramLoader.processPgm(value, file, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
+                    file = new File(value);
                 }
-                term = ProgramLoader.processPgm(content, value, startSymbol, context, ParserType.GROUND);
+                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser ground -e":
-                term = ProgramLoader.processPgm(value, value, startSymbol, context, ParserType.GROUND);
+                term = ProgramLoader.processPgm(value, file, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
+                    file = new File(value);
                 }
-                term = ProgramLoader.processPgm(content, value, startSymbol, context, ParserType.RULES);
+                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
+                    file = new File(value);
                 }
-                term = ProgramLoader.processPgm(content, value, startSymbol, context, ParserType.BINARY);
+                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.BINARY);
                 break;
             default: //external parser
                 List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));

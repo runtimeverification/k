@@ -7,6 +7,7 @@ import org.kframework.kil.BuiltinLookup;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListLookup;
 import org.kframework.kil.ListUpdate;
+import org.kframework.kil.Location;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.MapLookup;
 import org.kframework.kil.MapUpdate;
@@ -23,6 +24,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -120,8 +122,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private Map<Variable, Integer> concreteSize = new HashMap<>();
     private ArrayList<VariableCache> queue = new ArrayList<>();
     private Status status;
-    private String location;
-    private String filename;
+    private Location location;
+    private File filename;
 
     public DataStructureToLookupUpdate(Context context) {
         super("Compile maps into load and store operations", context);

@@ -1,6 +1,8 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
+import java.io.File;
+
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -21,7 +23,7 @@ public class InclusionFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-        String consFile = tc.getProduction().getFilename();
+        File consFile = tc.getProduction().getFilename();
         String consModule = tc.getProduction().getOwnerModuleName();
 //        Trying to fix issue 651, by removing file inclusion check
 //        String localFile = tc.getFilename();

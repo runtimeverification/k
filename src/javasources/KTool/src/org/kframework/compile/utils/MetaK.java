@@ -237,7 +237,7 @@ public class MetaK {
     public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
         if (prod.isSubsort()) {
             final Variable freshVar = Variable.getFreshVar(Sort.of(prod.getItems().get(0).toString()));
-            if (prod.containsAttribute("klabel")) {
+            if (prod.getKLabel() != null) {
                 return KApp.of(KLabelConstant.of(prod.getKLabel(), context), freshVar);
             }
             return freshVar;

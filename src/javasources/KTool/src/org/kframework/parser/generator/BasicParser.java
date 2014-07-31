@@ -14,7 +14,6 @@ import org.kframework.kil.Module;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.basic.Basic;
 import org.kframework.utils.errorsystem.KException;
@@ -54,7 +53,7 @@ public class BasicParser {
             // parse first the file given at console for fast failure in case of error
             File file = new File(fileName);
             if (!file.exists())
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, missingFileMsg + fileName + " given at console.", "", ""));
+                GlobalSettings.kem.registerCriticalError(missingFileMsg + fileName + " given at console.");
 
             slurp2(file, context);
 
@@ -68,8 +67,7 @@ public class BasicParser {
                 else
                     file = buildCanonicalPath("autoinclude.k", new File(fileName));
                 if (file == null)
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                            missingFileMsg + fileName + " autoimported for every definition ", fileName, ""));
+                    GlobalSettings.kem.registerCriticalError(missingFileMsg + fileName + " autoimported for every definition ");
 
                 slurp2(file, context);
                 moduleItems.addAll(tempmi);
@@ -100,7 +98,7 @@ public class BasicParser {
 
             if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
-            List<DefinitionItem> defItemList = Basic.parse(file.getAbsolutePath(), FileUtil.getFileContent(file.getAbsolutePath()), context);
+            List<DefinitionItem> defItemList = Basic.parse(file, FileUtil.getFileContent(file.getAbsolutePath()), context);
 
             // go through every required file
             for (ASTNode di : defItemList) {

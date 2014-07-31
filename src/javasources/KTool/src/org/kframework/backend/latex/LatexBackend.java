@@ -7,7 +7,6 @@ import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
@@ -82,8 +81,7 @@ public class LatexBackend extends BasicBackend {
             compile(javaDef);
             copyFiles();
         } catch (IOException e) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, e.getMessage(), "", ""));
+            GlobalSettings.kem.registerCriticalError(e.getMessage(), e);
         }
     }
 

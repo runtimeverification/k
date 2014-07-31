@@ -97,7 +97,7 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
                 context);
         Rule superCoolNode = node.shallowCopy();
         final Attributes attrs = new Attributes();
-        attrs.getContents().addAll(node.getAttributes().getContents());
+        attrs.putAll(node.getAttributes());
         attrs.remove("cool");
         superCoolNode.setAttributes(attrs);
 

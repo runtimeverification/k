@@ -16,7 +16,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collections;
@@ -37,8 +36,7 @@ import java.util.Set;
  */
 public class CompileDataStructures extends CopyOnWriteTransformer {
 
-    private String location;
-    private String filename;
+    private ASTNode location;
 
     /**
      * Simplified constructor for the common case
@@ -50,8 +48,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
-        location = node.getLocation();
-        filename = node.getFilename();
+        location = node;
         boolean change = false;
 
         Term body;
@@ -146,15 +143,12 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                 || sort.sort().equals(Sort.MAP)) {
             // TODO(AndreiS): the lines below should work once KLabelConstant are properly created
             if (productions.size() > 1) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.WARNING,
-                        KException.KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerWarning(
                         "unable to transform the KApp: " + node
                         + "\nbecause of multiple productions associated:\n"
                         + productions,
-                        getName(),
-                        filename,
-                        location));
+                        this,
+                        location);
             }
         }
 
@@ -167,13 +161,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             if (kList.isEmpty()) {
                 return DataStructureBuiltin.empty(sort);
             } else {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                         "unexpected non-empty KList applied to constant KLabel " + kLabelConstant,
-                        getName(),
-                        filename,
-                        location));
+                        this,
+                        location);
                 return node;
             }
         } else if (sort.sort().equals(Sort.MAP)) {

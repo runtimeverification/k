@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
         this.contents = new ArrayList<Term>(c.contents);
     }
 
-    public Collection(String location, String filename, Sort sort) {
+    public Collection(Location location, File filename, Sort sort) {
         super(location, filename, sort);
         contents = new ArrayList<Term>();
     }

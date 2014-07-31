@@ -20,9 +20,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.FirstArg;
@@ -91,7 +88,7 @@ public class KagregFrontEnd extends FrontEnd {
             firstDefinitionFile = new File(firstDefinitionFileName + ".k");
             if (!firstDefinitionFile.exists()) {
                 String msg = "File: " + errorFile.getName() + "(.k) not found.";
-                kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
+                kem.registerCriticalError(msg);
             }
         }
         if (!secondDefinitionFile.exists()) {
@@ -99,7 +96,7 @@ public class KagregFrontEnd extends FrontEnd {
             secondDefinitionFile = new File(secondDefinitionFileName + ".k");
             if (!secondDefinitionFile.exists()) {
                 String msg = "File: " + errorFile.getName() + "(.k) not found.";
-                kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
+                kem.registerCriticalError(msg);
             }
         }
 

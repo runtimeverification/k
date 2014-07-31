@@ -137,7 +137,7 @@ public class DefinitionLoader {
             if (!context.kompileOptions.backend.documentation()) {
                 if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
                     String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
-                    kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg, def.getMainFile(), "File system."));
+                    kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
                     def.setMainSyntaxModule(mainModule);
                 } else {
                     def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
@@ -145,7 +145,7 @@ public class DefinitionLoader {
 
                 if (!def.getModulesMap().containsKey(mainModule)) {
                     String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
-                    kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
+                    kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg));
                 }
             }
             sw.printIntermediate("Basic Parsing");
@@ -325,7 +325,7 @@ public class DefinitionLoader {
      *            - the context for disambiguation purposes.
      * @return A lightweight Definition element which contain all the definition items found in the string.
      */
-    public static Definition parseString(String content, String filename, Context context) throws ParseFailedException {
+    public static Definition parseString(String content, File filename, Context context) throws ParseFailedException {
         List<DefinitionItem> di = Basic.parse(filename, content, context);
 
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
@@ -350,7 +350,7 @@ public class DefinitionLoader {
         return def;
     }
 
-    public static Term parseCmdString(String content, String filename, String startSymbol, Context context) throws ParseFailedException {
+    public static Term parseCmdString(String content, File filename, String startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
@@ -398,7 +398,7 @@ public class DefinitionLoader {
         return (Term) config;
     }
 
-    public static ASTNode parsePattern(String pattern, String filename, String startSymbol, Context context) throws ParseFailedException {
+    public static ASTNode parsePattern(String pattern, File filename, String startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }

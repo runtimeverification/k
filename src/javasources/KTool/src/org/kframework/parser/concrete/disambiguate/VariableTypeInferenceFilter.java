@@ -14,6 +14,7 @@ import com.google.common.collect.Multimap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Location;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
@@ -171,7 +172,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                             continue;
 
                         // divide into locations
-                        Map<String, java.util.Set<Variable>> varLoc = new HashMap<>();
+                        Map<Location, java.util.Set<Variable>> varLoc = new HashMap<>();
                         for (Variable var : varList) {
                             if (varLoc.containsKey(var.getLocation()))
                                 varLoc.get(var.getLocation()).add(var);
@@ -183,7 +184,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         }
 
                         // choose maximum on each location
-                        for (Map.Entry<String, Set<Variable>> ent : varLoc.entrySet()) {
+                        for (Map.Entry<Location, Set<Variable>> ent : varLoc.entrySet()) {
                             Variable vmax = ent.getValue().iterator().next();
                             for (Variable vv1 : ent.getValue()) {
                                 if (context.isSubsorted(vv1.getSort(), vmax.getSort()))
@@ -195,7 +196,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
 
                         // choose minimum on all locations
                         Variable vmin = varLoc.entrySet().iterator().next().getValue().iterator().next();
-                        for (Map.Entry<String, Set<Variable>> ent : varLoc.entrySet()) {
+                        for (Map.Entry<Location, Set<Variable>> ent : varLoc.entrySet()) {
                             Variable vloc = ent.getValue().iterator().next();
                             if (context.isSubsorted(vmin.getSort(), vloc.getSort()))
                                 vmin = vloc;

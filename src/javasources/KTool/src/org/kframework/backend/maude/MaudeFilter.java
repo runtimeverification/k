@@ -45,10 +45,8 @@ public class MaudeFilter extends BackendFilter {
             result.append(" \n");
         }
         if (!(unusedTransitions.isEmpty())) {
-            GlobalSettings.kem
-                    .register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
-                            "These specified transition tags were not used (mispelled?):\n\t\t" + unusedTransitions,
-                            "command line arguments", "--transition"));
+            GlobalSettings.kem.registerCompilerWarning(
+                            "These specified transition tags were not used (mispelled?):\n\t\t" + unusedTransitions);
         }
         return null;
     }
@@ -265,7 +263,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
-        for (Attribute entry : attributes.getContents()) {
+        for (Attribute entry : attributes.values()) {
             if (!entry.getKey().equals("klabel")) {
                 this.visitNode(entry);
             }
@@ -274,8 +272,8 @@ public class MaudeFilter extends BackendFilter {
     }
 
     private boolean isEmptyAttributes(Attributes attributes) {
-        for (Attribute entry : attributes.getContents()) {
-            if (!entry.getKey().equals("klabel") && !entry.getKey().equals("location") && !entry.getKey().equals("filename")) {
+        for (Attribute entry : attributes.values()) {
+            if (!entry.getKey().equals("klabel")) {
                 if (!isEmptyAttribute(entry)) {
                     return false;
                 }
@@ -286,9 +284,7 @@ public class MaudeFilter extends BackendFilter {
 
     private boolean isEmptyAttribute(Attribute entry) {
         java.util.List<String> reject = new LinkedList<String>();
-        reject.add("kgeneratedlabel");
         reject.add("latex");
-        reject.add("prefixlabel");
         reject.add("regex");
 
         if (!reject.contains(entry.getKey())) {
@@ -300,9 +296,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Attribute attribute, Void _) {
         java.util.List<String> reject = new LinkedList<String>();
-        reject.add("kgeneratedlabel");
         reject.add("latex");
-        reject.add("prefixlabel");
         reject.add("regex");
 
         if (!reject.contains(attribute.getKey())) {
@@ -487,7 +481,7 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Rule rule, Void _) {
         boolean isTransition = false;
-        for (Attribute a : rule.getAttributes().getContents()) {
+        for (Attribute a : rule.getAttributes().values()) {
             if (options.transition.contains(a.getKey())) {
                 isTransition = true;
                 unusedTransitions.remove(a.getKey());

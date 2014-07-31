@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +76,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     Term contents;
     Map<String, String> cellAttributes;
 
-    public Cell(String location, String filename) {
+    public Cell(Location location, File filename) {
         super(location, filename, Sort.BAG_ITEM);
         cellAttributes = new HashMap<String, String>();
     }

@@ -1,14 +1,17 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.errorsystem;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.kframework.kil.Location;
 
 public class KException {
     protected final ExceptionType type;
     private final KExceptionGroup exceptionGroup;
-    private final String filename;
-    private final String location;
+    private final File filename;
+    private final Location location;
     private final String message;
     private final Throwable exception;
     private String compilationPhase = null;
@@ -43,7 +46,7 @@ public class KException {
         this(type, label, message, null, null, null, e);
     }
 
-    public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location) {
+    public KException(ExceptionType type, KExceptionGroup label, String message, File filename, Location location) {
         this(type, label, message, null, filename, location, null);
     }
 
@@ -51,8 +54,8 @@ public class KException {
             ExceptionType type,
             KExceptionGroup label,
             String message,
-            String filename,
-            String location,
+            File filename,
+            Location location,
             Throwable e) {
         this(type, label, message, null, filename, location, e);
     }
@@ -62,8 +65,8 @@ public class KException {
             KExceptionGroup label,
             String message,
             String compilationPhase,
-            String filename,
-            String location,
+            File filename,
+            Location location,
             Throwable exception) {
         super();
         this.type = type;
@@ -75,7 +78,7 @@ public class KException {
         this.exception = exception;
     }
 
-    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, String filename, String location) {
+    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, File filename, Location location) {
         this(type,label,message,compilationPhase,filename,location, null);
     }
 

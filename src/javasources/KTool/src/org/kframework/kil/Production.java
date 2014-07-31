@@ -29,9 +29,8 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         prodItems.add(new Terminal(")"));
 
         Production funProd = new Production(new NonTerminal(funSort), prodItems);
-        funProd.addAttribute(new Attribute("prefixlabel", funName));
         if (funSort.isComputationSort()) {
-            funProd.addAttribute(new Attribute("klabel", funName));
+            funProd.putAttribute("klabel", funName);
             context.addProduction(funProd);
         }
 
@@ -128,45 +127,29 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         super();
         this.items = items;
         this.sort = sort.getSort();
-        attributes = new Attributes();
     }
 
     public Production(NonTerminal sort, java.util.List<ProductionItem> items, String ownerModule) {
         super();
         this.items = items;
         this.sort = sort.getSort();
-        attributes = new Attributes();
         this.ownerModuleName = ownerModule;
     }
 
-    /**
-     * Use .getKLabel() if you want the klabel
-     */
     @Deprecated
     public String getLabel() {
-        String label = attributes.get("prefixlabel");
-        if (label == null) {
-            label = getPrefixLabel();
-            attributes.set("prefixlabel", label);
-        }
-        return label.replace(" ", "");
+        return getPrefixLabel();
     }
 
     public String getKLabel() {
-        /*
-        assert MetaK.isComputationSort(sort) || sort.equals(KSorts.KLABEL) && isConstant():
-                sort + " ::= " + this + " -> " + getPrefixLabel();
-        */
-
-        String klabel = attributes.get("klabel");
+        String klabel = getAttribute("klabel");
         if (klabel == null && isSubsort()) {
             return null;
         } else if (klabel == null) {
-            if (sort.toString().equals(KSorts.KLABEL))
+            if (sort.toString().equals(KSorts.KLABEL) && getArity() == 0)
                 klabel = getPrefixLabel();
             else
                 klabel = "'" + getPrefixLabel();
-            attributes.set("klabel", klabel);
         }
         return klabel.replace(" ", "");
     }
@@ -259,8 +242,8 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
             if (!prd.getItems().get(i).equals(items.get(i)))
                 return false;
         }
-        String klabel1 = prd.getAttributes().get("klabel");
-        String klabel2 = getAttributes().get("klabel");
+        String klabel1 = prd.getKLabel();
+        String klabel2 = getKLabel();
         if ((klabel1 == null && klabel2 != null) || (klabel1 != null && klabel2 == null)) {
             return false;
         }

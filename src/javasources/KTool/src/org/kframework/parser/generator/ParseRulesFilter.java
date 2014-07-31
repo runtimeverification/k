@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Formatter;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
@@ -76,6 +78,8 @@ public class ParseRulesFilter extends ParseForestTransformer {
             assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
             st.setLabel(ss.getLabel());
             st.setAttributes(ss.getAttributes());
+            st.setLocation(ss.getLocation());
+            st.setFilename(ss.getFilename());
 
             if (Constants.CONTEXT.equals(ss.getType()))
                 sentence = new org.kframework.kil.Context(st);
@@ -88,8 +92,8 @@ public class ParseRulesFilter extends ParseForestTransformer {
 
             String key = localModule + ss.getContent();
             if (cachedDef.containsKey(key)) {
-                String file = ss.getFilename();
-                String location = ss.getLocation();
+                File file = ss.getFilename();
+                Location location = ss.getLocation();
                 String msg = "Duplicate rule found in module " + localModule + " at: " + cachedDef.get(key).sentence.getLocation();
                 throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
             }

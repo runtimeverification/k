@@ -178,10 +178,7 @@ public class Proc<T> implements Runnable {
             handlePgmResult(returnCode);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.WARNING,
-                            KException.KExceptionGroup.INTERNAL, e.getMessage(), "command line",
-                            "System file."));
+            GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
             reportErr("program failed with exception: " + e.getMessage());
         }
     }

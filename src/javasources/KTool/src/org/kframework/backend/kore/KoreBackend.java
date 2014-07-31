@@ -37,7 +37,6 @@ import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.loader.Context;
@@ -49,6 +48,7 @@ import org.kframework.utils.general.GlobalSettings;
 import com.google.inject.Inject;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -73,13 +73,13 @@ public class KoreBackend extends BasicBackend {
         toKore = (Definition) e.getResult();
     }
       KilTransformer trans = new KilTransformer(context);
-      HashMap<String,PrintWriter> fileTable = new HashMap<String,PrintWriter>();
+      HashMap<File,PrintWriter> fileTable = new HashMap<File,PrintWriter>();
       for(int i = 0; i < toKore.getItems().size(); ++i){
 
           if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
 
-              String filename = ((toKore.getItems().get(i)).getFilename().substring(0,
-                      (toKore.getItems().get(i)).getFilename().length()-2))+".kore";
+              String filename = ((toKore.getItems().get(i)).getFilename().getAbsolutePath().substring(0,
+                      (toKore.getItems().get(i)).getFilename().getAbsolutePath().length()-2))+".kore";
               try {
               fileTable.put((toKore.getItems().get(i)).getFilename(),
                       new PrintWriter(filename));
@@ -216,10 +216,10 @@ class KoreFilter extends BasicVisitor {
             return null;
         }
         indenter.write("[");
-        for (int i = 0; i < node.getContents().size() ; ++i){
-            Attribute term=node.getContents().get(i);
+        for (int i = 0; i < node.size() ; ++i){
+            Attribute term=node.get(i);
                 this.visitNode(term);
-                if(i!=node.getContents().size()-1){
+                if(i!=node.size()-1){
                     indenter.write(", ");
             }
         }

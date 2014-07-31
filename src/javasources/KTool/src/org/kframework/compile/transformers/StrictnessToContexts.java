@@ -38,8 +38,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Module node, Void _)  {
         //collect the productions which have the attributes strict and seqstrict
-        Set<Production> prods = SyntaxByTag.get(node, "strict", true, context);
-        prods.addAll(SyntaxByTag.get(node, "seqstrict", true, context));
+        Set<Production> prods = SyntaxByTag.get(node, "strict", context);
+        prods.addAll(SyntaxByTag.get(node, "seqstrict", context));
         if (prods.isEmpty()) {
             return node;
         }
@@ -49,9 +49,9 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         node.setItems(items);
 
         for (Production prod : prods) {
-            assert prod.containsAttribute("strict", true) && !prod.containsAttribute("seqstrict", true)
-                   || !prod.containsAttribute("strict", true) && prod.containsAttribute("seqstrict", true);
-            Boolean isSeq = prod.containsAttribute("seqstrict", true);
+            assert prod.containsAttribute("strict") && !prod.containsAttribute("seqstrict")
+                   || !prod.containsAttribute("strict") && prod.containsAttribute("seqstrict");
+            Boolean isSeq = prod.containsAttribute("seqstrict");
 
             if (!(prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL))) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
@@ -65,7 +65,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             if (prod.isSubsort()) {
-                if (prod.getAttribute("klabel") == null) {
+                if (prod.getKLabel() == null) {
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                             KExceptionGroup.COMPILER,
                             "Production is a subsort and cannot be strict.",
@@ -97,10 +97,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             Attribute allStrictAttr;
             if (!isSeq) {
                 strictType = STRICT;
-                allStrictAttr = prod.getAttributes().getAttributeByKey(strictType, true);
+                allStrictAttr = prod.getAttributes().get(strictType);
             } else {
                 strictType = SEQSTRICT;
-                allStrictAttr = prod.getAttributes().getAttributeByKey(strictType, true);
+                allStrictAttr = prod.getAttributes().get(strictType);
             }
             String attribute = allStrictAttr.getValue();
             String allStrictAttrKey = allStrictAttr.getKey();
@@ -144,7 +144,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                         prod.getFilename(),
                         prod.getLocation()));
             }
-            for (Attribute strictAttr : strictAttrs.getContents()) {
+            for (Attribute strictAttr : strictAttrs.values()) {
                 Attributes strictAttrAttrs = null;
                 String strictAttrValue = strictAttr.getValue();
                 if (strictAttrValue.isEmpty()) strictAttrAttrs = new Attributes();
@@ -165,13 +165,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
             List<Attribute> newStrictAttrs = new ArrayList<>();
             java.util.Map<Integer,Integer> strictPositions = new HashMap<>();
-            for (Attribute strictAttr : strictAttrs.getContents()) {
+            for (Attribute strictAttr : strictAttrs.values()) {
                 boolean other = false;
                 String strictAttrKey = strictAttr.getKey();
                 String strictAttrValue = strictAttr.getValue();
                 if (strictAttrKey.equals(ALL)) {
                     for (Attribute newStrictAttr :  newStrictAttrs) {
-                        newStrictAttr.getAttributes().setAll(strictAttr.getAttributes());
+                        newStrictAttr.getAttributes().putAll(strictAttr.getAttributes());
+                        newStrictAttr.setFilename(strictAttr.getFilename());
+                        newStrictAttr.setLocation(strictAttr.getLocation());
                     }
                     other = true;
                 } else if (strictAttrKey.equals(OTHER)) {
@@ -202,11 +204,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                         strictPositions.put(i, newStrictAttrs.size());
                         Attribute newStrictAttr = strictAttr.shallowCopy();
                         newStrictAttr.setAttributes(new Attributes());
-                        newStrictAttr.getAttributes().set(strictCellAttr);
-                        newStrictAttr.getAttributes().setAll(strictAttr.getAttributes());
+                        newStrictAttr.getAttributes().add(strictCellAttr);
+                        newStrictAttr.getAttributes().putAll(strictAttr.getAttributes());
+                        newStrictAttr.setFilename(strictAttr.getFilename());
+                        newStrictAttr.setLocation(strictAttr.getLocation());
                         newStrictAttrs.add(strictAttr);
                     } else {
-                        newStrictAttrs.get(strictPositions.get(i)).getAttributes().setAll(strictAttr.getAttributes());
+                        newStrictAttrs.get(strictPositions.get(i)).getAttributes().putAll(strictAttr.getAttributes());
+                        newStrictAttrs.get(strictPositions.get(i)).setFilename(strictAttr.getFilename());
+                        newStrictAttrs.get(strictPositions.get(i)).setLocation(strictAttr.getLocation());
                     }
                 }
                 if (other) {
@@ -215,8 +221,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                             strictPositions.put(i,newStrictAttrs.size());
                             Attribute newStrictAttr = new Attribute(Integer.toString(i), strictAttrValue);
                             newStrictAttr.setAttributes(new Attributes());
-                            newStrictAttr.getAttributes().set(strictCellAttr);
-                            newStrictAttr.getAttributes().setAll(strictAttr.getAttributes());
+                            newStrictAttr.getAttributes().add(strictCellAttr);
+                            newStrictAttr.getAttributes().putAll(strictAttr.getAttributes());
+                            newStrictAttr.setFilename(strictAttr.getFilename());
+                            newStrictAttr.setLocation(strictAttr.getLocation());
                             newStrictAttrs.add(newStrictAttr);
                         }
                     }
@@ -248,7 +256,9 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 org.kframework.kil.Context ctx = new org.kframework.kil.Context();
                 ctx.setBody(termCons);
                 ctx.setAttributes(new Attributes());
-                ctx.getAttributes().setAll(prod.getAttributes());
+                ctx.getAttributes().putAll(prod.getAttributes());
+                ctx.setLocation(prod.getLocation());
+                ctx.setFilename(prod.getFilename());
                 String strictContext = newStrictAttr.getAttribute(CONTEXT);
                 if (strictContext != null) {
                     Set<Production> productions = getStrictContextProductions(strictContext, prod);
@@ -260,7 +270,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                         try {
                             Attributes strictContextAttrs = Basic.parseAttributes(
                                     strictContextProdAttribute, strictContextProd.getFilename());
-                            ctx.getAttributes().setAll(strictContextAttrs);
+                            ctx.getAttributes().putAll(strictContextAttrs);
                         } catch (ParseException e) {
                             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                                 KExceptionGroup.COMPILER,
@@ -272,7 +282,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                         }
                     }
                 }
-                ctx.getAttributes().setAll(newStrictAttr.getAttributes());
+                ctx.getAttributes().putAll(newStrictAttr.getAttributes());
                 if (sideCond != null)
                     ctx.setRequires(sideCond);
                 items.add(ctx);
@@ -284,15 +294,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
     private Term getHoleTerm(Attributes strictnessAttributes, Production prod) {
         Term hole;
-        String strictType = null;
+        Attribute strictType = null;
         if (strictnessAttributes != null) {
             strictType = strictnessAttributes.get(CONTEXT);
         }
         if (null == strictType) {
             hole = Hole.KITEM_HOLE;
         } else {
-            getStrictContextProductions(strictType, prod);
-            hole = new Rewrite(Hole.KITEM_HOLE, KApp.of(KLabelConstant.of(strictType), Hole.KITEM_HOLE),context);
+            getStrictContextProductions(strictType.getValue(), prod);
+            hole = new Rewrite(Hole.KITEM_HOLE, KApp.of(KLabelConstant.of(strictType.getValue()), Hole.KITEM_HOLE),context);
         }
         return hole;
     }
@@ -327,6 +337,8 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         org.kframework.kil.Context ctx = new org.kframework.kil.Context();
         ctx.setBody(kapp);
         ctx.setAttributes(prod.getAttributes());
+        ctx.setLocation(prod.getLocation());
+        ctx.setFilename(prod.getFilename());
         if (isSeq) {
             //set the condition
             KApp condApp = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);

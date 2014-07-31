@@ -53,11 +53,11 @@ public final class KastOptions {
      * {@link #stringToParse()}.
      * @return A textual description of the source of the string to parse.
      */
-    public String source() {
+    public File source() {
         if (expression != null) {
-            return "Command line";
+            return null;
         } else {
-            return parameters.get(0);
+            return new File(parameters.get(0));
         }
     }
 

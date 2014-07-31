@@ -8,9 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.kframework.kil.KApp;
-import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
+import org.kframework.kil.Location;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
@@ -168,7 +167,8 @@ public abstract class Rule implements Serializable {
         protected int getSuffixLength() { return 1; }
         public List<Term> applySuffix(List<Term> terms, MetaData metaData) {
             Term newTerm = terms.get(0).shallowCopy();
-            newTerm.setLocation("("+metaData.start.line+","+metaData.start.column+","+metaData.end.line+","+metaData.end.column+")");
+            newTerm.setLocation(new Location(metaData.start.line, metaData.start.column,
+                                             metaData.end.line, metaData.end.column));
             return Arrays.asList(newTerm);
         }
     }

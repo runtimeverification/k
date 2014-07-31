@@ -85,7 +85,7 @@ public class Rule extends Sentence {
             content += "ensures " + this.ensures + " ";
         }
 
-        return content + attributes;
+        return content + getAttributes();
     }
 
     @Override

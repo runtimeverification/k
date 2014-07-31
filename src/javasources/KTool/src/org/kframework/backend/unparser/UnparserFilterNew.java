@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -213,26 +213,13 @@ public class UnparserFilterNew extends NonCachingVisitor {
     @Override
     public Void visit(Attributes attributes, Void _) {
         prepare(attributes);
-        java.util.List<String> reject = new LinkedList<String>();
-        reject.add("kgeneratedlabel");
-        reject.add("prefixlabel");
-        reject.add("filename");
-        reject.add("location");
-
-        List<Attribute> attributeList = new LinkedList<Attribute>();
-        List<Attribute> oldAttributeList = attributes.getContents();
-        for (int i = 0; i < oldAttributeList.size(); ++i) {
-            if (!reject.contains(oldAttributeList.get(i).getKey())) {
-                attributeList.add(oldAttributeList.get(i));
-            }
-        }
-
-        if (!attributeList.isEmpty()) {
+        if (!attributes.isEmpty()) {
             indenter.write(" ");
             indenter.write("[");
-            for (int i = 0; i < attributeList.size(); ++i) {
-                this.visitNode(attributeList.get(i));
-                if (i != attributeList.size() - 1) {
+            Iterator<Attribute> iter = attributes.values().iterator();
+            for (int i = 0; i < attributes.size(); ++i) {
+                this.visitNode(iter.next());
+                if (i != attributes.size() - 1) {
                     indenter.write(", ");
                 }
             }
@@ -780,7 +767,8 @@ public class UnparserFilterNew extends NonCachingVisitor {
         }
         stack.push(astNode);
         if (annotateLocation) {
-            astNode.setLocation("(" + indenter.getLineNo() + "," + indenter.getColNo());
+            astNode.getLocation().lineStart = indenter.getLineNo();
+            astNode.getLocation().columnStart = indenter.getColNo();
         }
     }
 
@@ -792,10 +780,8 @@ public class UnparserFilterNew extends NonCachingVisitor {
             }
         }
         if (annotateLocation) {
-            String loc = astNode.getLocation();
-            if (!loc.substring(loc.length() - 1).equals(")")) {
-                astNode.setLocation(loc + "," + indenter.getLineNo() + "," + indenter.getColNo() + ")");
-            }
+            astNode.getLocation().lineEnd = indenter.getLineNo();
+            astNode.getLocation().columnEnd = indenter.getColNo();
         }
         return null;
     }

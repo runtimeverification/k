@@ -1,11 +1,12 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -52,8 +53,8 @@ public class XmlLoader {
                     Element node = (Element) ch.item(i);
                     if (node.getNodeName().equals(Tag.localized)) {
                         String msg = node.getAttribute("message");
-                        String file = node.getAttribute("filename");
-                        String location = node.getAttribute("loc");
+                        File file = ASTNode.getElementFile(node);
+                        Location location = ASTNode.getElementLocation(node);
                         throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
                     }
                 }
@@ -76,8 +77,8 @@ public class XmlLoader {
                         String msg = node.getAttribute("message");
                         if (msg.equals("Unexpected end of file"))
                             msg = "Unexpected end of " + fromWhere;
-                        String file = node.getAttribute("filename");
-                        String location = node.getAttribute("loc");
+                        File file = ASTNode.getElementFile(node);
+                        Location location = ASTNode.getElementLocation(node);
                         throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
                     }
                 }
@@ -125,13 +126,16 @@ public class XmlLoader {
         return node;
     }
 
-    public static Node addFilename(Node node, String filename) {
+    public static Node addFilename(Node node, File filename) {
+        if (filename == null) {
+            return node;
+        }
         if (Node.ELEMENT_NODE == node.getNodeType()) {
             NamedNodeMap attr = node.getAttributes();
             Node item = attr.getNamedItem(Tag.location);
             if (item != null) {
                 Element e = (Element) node;
-                    e.setAttribute("filename", filename);
+                    e.setAttribute(Tag.filename, filename.getAbsolutePath());
             }
         }
         NodeList list = node.getChildNodes();

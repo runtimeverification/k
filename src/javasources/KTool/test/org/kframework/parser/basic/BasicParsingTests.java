@@ -19,7 +19,7 @@ public class BasicParsingTests {
         // TODO: remove once the new parser is fully functional
         String def = "module TEST syntax Str ::= Token{((~[\\'\\n\\r\\\\])|([\\\\]~[\\n\\r]))*} endmodule";
 
-        List<DefinitionItem> defItemList = Basic.parse("UnitTest", def, null);
+        List<DefinitionItem> defItemList = Basic.parse(null, def, null);
 
         Module mod = (Module) defItemList.get(0);
         Syntax syn = (Syntax) mod.getItems().get(0);
@@ -34,7 +34,7 @@ public class BasicParsingTests {
         String def = "module TEST rule endmodule";
 
 
-        List<DefinitionItem> defItemList = Basic.parse("UnitTest", def, null);
+        List<DefinitionItem> defItemList = Basic.parse(null, def, null);
 
         Module mod = (Module) defItemList.get(0);
         StringSentence sen = (StringSentence) mod.getItems().get(0);

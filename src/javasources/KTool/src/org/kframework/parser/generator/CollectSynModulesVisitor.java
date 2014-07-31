@@ -33,15 +33,14 @@ public class CollectSynModulesVisitor extends BasicVisitor {
             String msg = "Module " + def.getMainSyntaxModule() + " is not imported by the main module " +
                     def.getMainModule() + ".  The parser generator will use " + def.getMainModule() +
                     " as the main syntax module.";
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg,
-                    def.getMainFile(), "File system."));
+            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg));
             synQue.add(def.getMainModule());
         }
 
         Module bshm = def.getModulesMap().get("AUTO-INCLUDED-MODULE-SYNTAX");
         if (bshm == null) {
             String msg = "Could not find module AUTO-INCLUDED-MODULE-SYNTAX (automatically included in the main syntax module)!";
-            GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg, def.getMainFile(), "File system."));
+            GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
         } else
             synQue.add("AUTO-INCLUDED-MODULE-SYNTAX");
 

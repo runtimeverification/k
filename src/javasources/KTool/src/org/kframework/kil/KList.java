@@ -4,6 +4,7 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,7 @@ public class KList extends Collection {
         super(Sort.KLIST);
     }
 
-    public KList(String location, String filename) {
+    public KList(Location location, File filename) {
         super(location, filename, Sort.KLIST);
     }
 

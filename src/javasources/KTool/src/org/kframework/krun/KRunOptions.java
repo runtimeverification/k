@@ -261,7 +261,7 @@ public final class KRunOptions {
         .ImportTblRule(configurationCreation.definitionLoading.definition());
         return DefinitionLoader.parsePattern(
                 patternToParse,
-                "Command line pattern",
+                null,
                 KSorts.BAG,
                 context);
     }

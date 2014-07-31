@@ -1,8 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser;
 
-import java.io.IOException;
-
+import java.io.File;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
@@ -10,6 +9,7 @@ import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
@@ -44,8 +44,8 @@ public class ProgramLoader {
      * @param kappize
      *            If true, then apply KAppModifier to AST.
      */
-    public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, Context context) throws IOException,
-            ParseFailedException {
+    public static ASTNode loadPgmAst(String content, File filename, Boolean kappize, String startSymbol, Context context)
+            throws ParseFailedException {
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
@@ -71,7 +71,7 @@ public class ProgramLoader {
         return out;
     }
 
-    public static ASTNode loadPgmAst(String content, String filename, String startSymbol, Context context) throws IOException, ParseFailedException {
+    public static ASTNode loadPgmAst(String content, File filename, String startSymbol, Context context) throws ParseFailedException {
         return loadPgmAst(content, filename, true, startSymbol, context);
     }
 
@@ -80,7 +80,7 @@ public class ProgramLoader {
      *
      * Save it in kompiled cache under pgm.maude.
      */
-    public static Term processPgm(String content, String filename, String startSymbol,
+    public static Term processPgm(String content, File filename, String startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         if (!context.definedSorts.contains(Sort.of(startSymbol))) {
@@ -88,75 +88,70 @@ public class ProgramLoader {
                     "The start symbol must be declared in the definition. Found: " + startSymbol));
         }
 
-        try {
-            ASTNode out;
-            if (whatParser == ParserType.GROUND) {
-                org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled);
-                out = DefinitionLoader.parseCmdString(content, filename, startSymbol, context);
-                out = new RemoveBrackets(context).visitNode(out);
-                out = new AddEmptyLists(context).visitNode(out);
-                out = new RemoveSyntacticCasts(context).visitNode(out);
-                out = new FlattenTerms(context).visitNode(out);
-            } else if (whatParser == ParserType.RULES) {
-                org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
-                out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
-                out = new RemoveBrackets(context).visitNode(out);
-                out = new AddEmptyLists(context).visitNode(out);
-                out = new RemoveSyntacticCasts(context).visitNode(out);
-                try {
-                    out = new RuleCompilerSteps(context).compile(
-                            new Rule((Sentence) out),
-                            null);
-                } catch (CompilerStepDone e) {
-                    out = (ASTNode) e.getResult();
-                }
-                out = ((Rule) out).getBody();
-            } else if (whatParser == ParserType.BINARY) {
-                out = BinaryLoader.instance().loadOrDie(Term.class, filename);
-            } else if (whatParser == ParserType.NEWPROGRAM) {
-                // load the new parser
-                // TODO(Radu): after the parser is in a good enough shape, replace the program parser
-                // TODO(Radu): (the default one) with this branch of the 'if'
-                Grammar grammar = BinaryLoader.instance().loadOrDie(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
-
-                Parser parser = new Parser(content);
-                out = parser.parse(grammar.get(startSymbol), 0);
-                if (context.globalOptions.debug)
-                    System.out.println("Raw: " + out + "\n");
-                try {
-                    out = new TreeCleanerVisitor(context).visitNode(out);
-                    out = new MakeConsList(context).visitNode(out);
-                    if (context.globalOptions.debug)
-                        System.out.println("Clean: " + out + "\n");
-                    out = new PriorityFilter(context).visitNode(out);
-                    out = new PreferAvoidFilter(context).visitNode(out);
-                    if (context.globalOptions.debug)
-                        System.out.println("Filtered: " + out + "\n");
-                    out = new AmbFilter(context).visitNode(out);
-                    out = new RemoveBrackets(context).visitNode(out);
-                    out = new FlattenTerms(context).visitNode(out);
-                } catch (ParseFailedException te) {
-                    ParseError perror = parser.getErrors();
-
-                    String msg = content.length() == perror.position ?
-                        "Parse error: unexpected end of file." :
-                        "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
-                    String loc = "(" + perror.line + "," + perror.column + "," +
-                                       perror.line + "," + (perror.column + 1) + ")";
-                    throw new ParseFailedException(new KException(
-                            ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
-                }
-                out = new ResolveVariableAttribute(context).visitNode(out);
-            } else {
-                out = loadPgmAst(content, filename, startSymbol, context);
-                out = new ResolveVariableAttribute(context).visitNode(out);
+        ASTNode out;
+        if (whatParser == ParserType.GROUND) {
+            org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled);
+            out = DefinitionLoader.parseCmdString(content, filename, startSymbol, context);
+            out = new RemoveBrackets(context).visitNode(out);
+            out = new AddEmptyLists(context).visitNode(out);
+            out = new RemoveSyntacticCasts(context).visitNode(out);
+            out = new FlattenTerms(context).visitNode(out);
+        } else if (whatParser == ParserType.RULES) {
+            org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
+            out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
+            out = new RemoveBrackets(context).visitNode(out);
+            out = new AddEmptyLists(context).visitNode(out);
+            out = new RemoveSyntacticCasts(context).visitNode(out);
+            try {
+                out = new RuleCompilerSteps(context).compile(
+                        new Rule((Sentence) out),
+                        null);
+            } catch (CompilerStepDone e) {
+                out = (ASTNode) e.getResult();
             }
-            Stopwatch.instance().printIntermediate("Parsing Program");
+            out = ((Rule) out).getBody();
+        } else if (whatParser == ParserType.BINARY) {
+            out = BinaryLoader.instance().loadOrDie(Term.class, filename.getAbsolutePath());
+        } else if (whatParser == ParserType.NEWPROGRAM) {
+            // load the new parser
+            // TODO(Radu): after the parser is in a good enough shape, replace the program parser
+            // TODO(Radu): (the default one) with this branch of the 'if'
+            Grammar grammar = BinaryLoader.instance().loadOrDie(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
 
-            return (Term) out;
-        } catch (IOException e) {
-            String msg = "Cannot parse program: " + e.getLocalizedMessage();
-            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, "File system."));
+            Parser parser = new Parser(content);
+            out = parser.parse(grammar.get(startSymbol), 0);
+            if (context.globalOptions.debug)
+                System.out.println("Raw: " + out + "\n");
+            try {
+                out = new TreeCleanerVisitor(context).visitNode(out);
+                out = new MakeConsList(context).visitNode(out);
+                if (context.globalOptions.debug)
+                    System.out.println("Clean: " + out + "\n");
+                out = new PriorityFilter(context).visitNode(out);
+                out = new PreferAvoidFilter(context).visitNode(out);
+                if (context.globalOptions.debug)
+                    System.out.println("Filtered: " + out + "\n");
+                out = new AmbFilter(context).visitNode(out);
+                out = new RemoveBrackets(context).visitNode(out);
+                out = new FlattenTerms(context).visitNode(out);
+            } catch (ParseFailedException te) {
+                ParseError perror = parser.getErrors();
+
+                String msg = content.length() == perror.position ?
+                    "Parse error: unexpected end of file." :
+                    "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+                Location loc = new Location(perror.line, perror.column,
+                                            perror.line, perror.column + 1);
+                throw new ParseFailedException(new KException(
+                        ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
+            }
+            out = new ResolveVariableAttribute(context).visitNode(out);
+        } else {
+            out = loadPgmAst(content, filename, startSymbol, context);
+            out = new ResolveVariableAttribute(context).visitNode(out);
         }
+        Stopwatch.instance().printIntermediate("Parsing Program");
+
+        return (Term) out;
     }
 }

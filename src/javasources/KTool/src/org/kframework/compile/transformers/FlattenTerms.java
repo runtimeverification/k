@@ -9,7 +9,7 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
-import java.util.*;
+import java.io.File;
 
 /**
  * Transformer flattening concrete syntax terms to applications of KLabels
@@ -89,8 +89,8 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return KApp.of(new KInjectedLabel((Term) trans.visitNode(tc)));
             }
 
-            String l = tc.getLocation();
-            String f = tc.getFilename();
+            Location l = tc.getLocation();
+            File f = tc.getFilename();
             Production ppp = tc.getProduction();
             KList lok = new KList(l, f);
             for (Term t : tc.getContents()) {
@@ -115,8 +115,8 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(ListTerminator emp, Void _) {
-            String l = emp.getLocation();
-            String f = emp.getFilename();
+            Location l = emp.getLocation();
+            File f = emp.getFilename();
             if (!emp.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel(emp));
             }

@@ -1,8 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.Controller;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -222,26 +221,13 @@ public class XmlUnparseFilter extends BasicVisitor {
     public Void visit(Attributes attributes, Void _) {
 
         prepare(attributes);
-        java.util.List<String> reject = new LinkedList<String>();
-        reject.add("kgeneratedlabel");
-        reject.add("prefixlabel");
-        reject.add("filename");
-        reject.add("location");
-
-        List<Attribute> attributeList = new LinkedList<Attribute>();
-        List<Attribute> oldAttributeList = attributes.getContents();
-        for (int i = 0; i < oldAttributeList.size(); ++i) {
-            if (!reject.contains(oldAttributeList.get(i).getKey())) {
-                attributeList.add(oldAttributeList.get(i));
-            }
-        }
-
-        if (!attributeList.isEmpty()) {
+        if (!attributes.isEmpty()) {
             buffer.append(" ");
             buffer.append("[");
-            for (int i = 0; i < attributeList.size(); ++i) {
-                this.visitNode(attributeList.get(i));
-                if (i != attributeList.size() - 1) {
+            Iterator<Attribute> iter = attributes.values().iterator();
+            for (int i = 0; i < attributes.size(); ++i) {
+                this.visitNode(iter.next());
+                if (i != attributes.size() - 1) {
                     buffer.append(", ");
                 }
             }

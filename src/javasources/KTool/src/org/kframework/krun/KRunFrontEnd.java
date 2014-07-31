@@ -126,7 +126,7 @@ public class KRunFrontEnd extends FrontEnd {
                     String content = FileUtil.getFileContent(
                             proofFile.getAbsoluteFile().toString());
                     Definition parsed = DefinitionLoader.parseString(content,
-                            proofFile.getAbsolutePath(), context);
+                            proofFile, context);
                     Module mod = parsed.getSingletonModule();
                     result = krun.prove(mod, initialConfiguration);
                     sw.printIntermediate("Proof total");

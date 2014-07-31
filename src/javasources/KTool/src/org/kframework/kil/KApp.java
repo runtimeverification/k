@@ -6,6 +6,7 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +58,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @param label the KLabel which is applied to the given KList. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
-    public KApp(String location, String filename, Term label, Term child) {
+    public KApp(Location location, File filename, Term label, Term child) {
         super(location, filename, Sort.KITEM);
         setLabel(label);
         setChild(child);

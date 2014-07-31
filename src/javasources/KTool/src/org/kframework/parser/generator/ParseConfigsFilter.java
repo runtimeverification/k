@@ -83,6 +83,8 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 st.setLabel(ss.getLabel());
                 //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
                 st.setAttributes(ss.getAttributes());
+                st.setLocation(ss.getLocation());
+                st.setFilename(ss.getFilename());
 
                 // disambiguate configs
                 config = new SentenceVariablesFilter(context).visitNode(config);

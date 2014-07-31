@@ -72,7 +72,7 @@ public class KastFrontEnd extends FrontEnd {
     @Override
     public boolean run() {
         String stringToParse = options.stringToParse();
-        String source = options.source();
+        File source = options.source();
 
         Context context = contextProvider.get();
         String sort = options.sort(context);
