@@ -5,7 +5,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.DefinitionLoadingModule;
-import org.kframework.utils.inject.First;
+import org.kframework.utils.inject.Main;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.google.inject.AbstractModule;
@@ -27,7 +27,7 @@ public class KastModule extends AbstractModule {
 
         install(new DefinitionLoadingModule());
 
-        bind(Context.class).annotatedWith(First.class).to(Context.class);
+        bind(Context.class).annotatedWith(Main.class).to(Context.class);
     }
 
 }

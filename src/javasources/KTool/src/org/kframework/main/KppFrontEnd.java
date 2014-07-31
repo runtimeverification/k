@@ -4,7 +4,7 @@ package org.kframework.main;
 import java.io.*;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.inject.First;
+import org.kframework.utils.inject.FirstArg;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -23,7 +23,7 @@ public class KppFrontEnd extends FrontEnd {
     KppFrontEnd(
             KExceptionManager kem,
             GlobalOptions globalOptions,
-            @First String fileName) {
+            @FirstArg String fileName) {
         super(kem, globalOptions, USAGE, "");
         this.fileName = fileName;
     }
@@ -36,7 +36,7 @@ public class KppFrontEnd extends FrontEnd {
         return new Module[] { new AbstractModule() {
             @Override
             protected void configure() {
-                bind(String.class).annotatedWith(First.class).toInstance(args[0]);
+                bind(String.class).annotatedWith(FirstArg.class).toInstance(args[0]);
             }
         }};
     }

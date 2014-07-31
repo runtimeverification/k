@@ -9,8 +9,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
-import org.kframework.utils.inject.First;
-import org.kframework.utils.inject.Second;
+import org.kframework.utils.inject.Main;
+import org.kframework.utils.inject.Spec;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
@@ -60,10 +60,10 @@ public class Waitor extends Thread{
 
     @Inject
     Waitor(
-            @First JavaSymbolicKRun impl,
-            @Second JavaSymbolicKRun spec,
-            @First Provider<org.kframework.kil.Term> implTerm,
-            @Second Provider<org.kframework.kil.Term> specTerm) throws KRunExecutionException{
+            @Main JavaSymbolicKRun impl,
+            @Spec JavaSymbolicKRun spec,
+            @Main Provider<org.kframework.kil.Term> implTerm,
+            @Spec Provider<org.kframework.kil.Term> specTerm) throws KRunExecutionException{
 
         this.impl = impl;
         this.spec = spec;

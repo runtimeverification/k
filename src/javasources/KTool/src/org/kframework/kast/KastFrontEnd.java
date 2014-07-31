@@ -15,11 +15,11 @@ import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.First;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
+import org.kframework.utils.inject.Main;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
@@ -54,7 +54,7 @@ public class KastFrontEnd extends FrontEnd {
     @Inject
     KastFrontEnd(
             KastOptions options,
-            @First Context context,
+            @Main Context context,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             Stopwatch sw,

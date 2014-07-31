@@ -25,8 +25,8 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.First;
-import org.kframework.utils.inject.Second;
+import org.kframework.utils.inject.FirstArg;
+import org.kframework.utils.inject.SecondArg;
 import org.kframework.utils.inject.CommonModule;
 
 import com.google.inject.AbstractModule;
@@ -47,8 +47,8 @@ public class KagregFrontEnd extends FrontEnd {
 
     @Inject
     KagregFrontEnd(KExceptionManager kem,
-            @First String firstDefinitionFileName,
-            @Second String secondDefinitionFileName,
+            @FirstArg String firstDefinitionFileName,
+            @SecondArg String secondDefinitionFileName,
             GlobalOptions globalOptions,
             DefinitionLoader loader) {
         super(kem, globalOptions, "Usage: kagreg <file1.k> <file2.k>", "");
@@ -71,8 +71,8 @@ public class KagregFrontEnd extends FrontEnd {
         return new Module[] { new CommonModule(), new AbstractModule() {
             @Override
             protected void configure() {
-                bind(String.class).annotatedWith(First.class).toInstance(args[0]);
-                bind(String.class).annotatedWith(Second.class).toInstance(args[1]);
+                bind(String.class).annotatedWith(FirstArg.class).toInstance(args[0]);
+                bind(String.class).annotatedWith(SecondArg.class).toInstance(args[1]);
                 bind(GlobalOptions.class).toInstance(globalOptions);
             }
         }};

@@ -21,8 +21,8 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.inject.DefinitionLoadingModule;
-import org.kframework.utils.inject.First;
-import org.kframework.utils.inject.Second;
+import org.kframework.utils.inject.Main;
+import org.kframework.utils.inject.Spec;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -110,15 +110,15 @@ public class KRunModule extends AbstractModule {
 
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
 
-            bind(Term.class).annotatedWith(First.class).to(Term.class);
-            bind(JavaSymbolicKRun.class).annotatedWith(First.class).to(JavaSymbolicKRun.class);
-            bind(KRun.class).annotatedWith(First.class).to(KRun.class);
-            bind(Context.class).annotatedWith(First.class).to(Context.class);
+            bind(Term.class).annotatedWith(Main.class).to(Term.class);
+            bind(JavaSymbolicKRun.class).annotatedWith(Main.class).to(JavaSymbolicKRun.class);
+            bind(KRun.class).annotatedWith(Main.class).to(KRun.class);
+            bind(Context.class).annotatedWith(Main.class).to(Context.class);
 
-            expose(Term.class).annotatedWith(First.class);
-            expose(JavaSymbolicKRun.class).annotatedWith(First.class);
-            expose(KRun.class).annotatedWith(First.class);
-            expose(Context.class).annotatedWith(First.class);
+            expose(Term.class).annotatedWith(Main.class);
+            expose(JavaSymbolicKRun.class).annotatedWith(Main.class);
+            expose(KRun.class).annotatedWith(Main.class);
+            expose(Context.class).annotatedWith(Main.class);
         }
     }
 
@@ -128,13 +128,13 @@ public class KRunModule extends AbstractModule {
         protected void configure() {
             install(new CommonModule());
 
-            bind(Term.class).annotatedWith(Second.class).to(Term.class);
-            bind(JavaSymbolicKRun.class).annotatedWith(Second.class).to(JavaSymbolicKRun.class);
-            bind(Context.class).annotatedWith(Second.class).to(Context.class);
+            bind(Term.class).annotatedWith(Spec.class).to(Term.class);
+            bind(JavaSymbolicKRun.class).annotatedWith(Spec.class).to(JavaSymbolicKRun.class);
+            bind(Context.class).annotatedWith(Spec.class).to(Context.class);
 
-            expose(JavaSymbolicKRun.class).annotatedWith(Second.class);
-            expose(Term.class).annotatedWith(Second.class);
-            expose(Context.class).annotatedWith(Second.class);
+            expose(JavaSymbolicKRun.class).annotatedWith(Spec.class);
+            expose(Term.class).annotatedWith(Spec.class);
+            expose(Context.class).annotatedWith(Spec.class);
 
             expose(new TypeLiteral<Optional<Waitor>>() {});
         }
@@ -169,9 +169,9 @@ public class KRunModule extends AbstractModule {
                 .toInstance(Optional.<Waitor>absent());
 
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
-            bind(Term.class).annotatedWith(First.class).to(Term.class);
-            bind(KRun.class).annotatedWith(First.class).to(KRun.class);
-            bind(Context.class).annotatedWith(First.class).to(Context.class);
+            bind(Term.class).annotatedWith(Main.class).to(Term.class);
+            bind(KRun.class).annotatedWith(Main.class).to(KRun.class);
+            bind(Context.class).annotatedWith(Main.class).to(Context.class);
         }
     }
 }

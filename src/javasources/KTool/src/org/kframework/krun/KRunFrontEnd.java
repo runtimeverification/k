@@ -50,11 +50,11 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.First;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
+import org.kframework.utils.inject.Main;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
@@ -452,9 +452,9 @@ public class KRunFrontEnd extends FrontEnd {
             KRunOptions options,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
-            @First KRun krun,
-            @First Context context,
-            @First Provider<Term> initialConfigurationProvider,
+            @Main KRun krun,
+            @Main Context context,
+            @Main Provider<Term> initialConfigurationProvider,
             Optional<Waitor> waitor,
             Stopwatch sw,
             KExceptionManager kem,
