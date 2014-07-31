@@ -316,6 +316,9 @@ public class Rule extends JavaSymbolicObject {
         return super.containsAttribute(Attribute.PATTERN_KEY);
     }
 
+    /**
+     * Returns the KLabel constant defined by this rule (either a function or a pattern).
+     */
     public KLabelConstant definedKLabel() {
         assert isFunction() || isPattern();
 

@@ -146,8 +146,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    private static final boolean DEBUG = true;
-
     public void orientSubstitution(Set<Variable> variables) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
         if (data.substitution.keySet().containsAll(variables)) {
@@ -306,10 +304,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             this.rightHandSide = rightHandSide;
         }
 
-        public boolean isTermEquality(Term leftHandSide) {
-            return leftHandSide instanceof KItem
-                    && ((KItem) leftHandSide).kLabel() instanceof KLabelConstant
-                    && ((KLabelConstant) ((KItem) leftHandSide).kLabel()).label().equals("'_==K_");
+        public boolean isTermEquality(Term term) {
+            return term instanceof KItem
+                    && ((KItem) term).kLabel() instanceof KLabelConstant
+                    && ((KLabelConstant) ((KItem) term).kLabel()).label().equals("'_==K_");
         }
 
         public Term leftHandSide() {
@@ -816,14 +814,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             SymbolicConstraint right = implication.right;
             if (left.isFalse()) continue;
 
-            if (context.definition().context().globalOptions.verbose) {
+            if (context.definition().context().globalOptions.debug) {
                 System.out.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
             right = left.simplifyConstraint(right);
             right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
-                if (context.definition().context().globalOptions.verbose) {
+                if (context.definition().context().globalOptions.debug) {
                     System.out.println("Implication proved by simplification");
                 }
                 continue;
@@ -834,7 +832,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (context.definition().context().globalOptions.verbose) {
+                if (context.definition().context().globalOptions.debug) {
                     System.out.println("Split on " + condition);
                 }
                 SymbolicConstraint left1 = new SymbolicConstraint(left, context);
@@ -849,12 +847,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
 //            }
             if (!impliesSMT(left,right)) {
-                if (context.definition().context().globalOptions.verbose) {
+                if (context.definition().context().globalOptions.debug) {
                     System.out.println("Failure!");
                 }
                 return false;
             } else {
-                if (context.definition().context().globalOptions.verbose) {
+                if (context.definition().context().globalOptions.debug) {
                     System.out.println("Proved!");
                 }
             }
@@ -886,7 +884,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
             input += "(" + gterm2 + ")";
-            if (DEBUG) {
+            if (left.termContext().definition().context().globalOptions.debug) {
                 System.out.println("Verifying " + input);
             }
             if (GappaServer.proveTrue(input))

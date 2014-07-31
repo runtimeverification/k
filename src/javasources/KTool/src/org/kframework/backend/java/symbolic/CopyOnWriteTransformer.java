@@ -356,21 +356,12 @@ public class CopyOnWriteTransformer implements Transformer {
             builder.putAll(builtinMap.getEntries());
         }
 
-        for (KItem kItem : builtinMap.collectionPatterns()) {
-            Term term = (Term) kItem.accept(this);
-            changed = changed || (term != kItem);
-            builder.concatenate(term);
-        }
-        for (Variable variable : builtinMap.collectionVariables()) {
-            Term term = (Term) variable.accept(this);
-            changed = changed || (term != variable);
-            builder.concatenate(term);
-        }
-        for (Term term : builtinMap.collectionFunctions()) {
+        for (Term term : builtinMap.baseTerms()) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
             builder.concatenate(transformedTerm);
         }
+
         return changed ? builder.build() : builtinMap;
     }
 
@@ -383,17 +374,7 @@ public class CopyOnWriteTransformer implements Transformer {
             builder.add(transformedElement);
             changed = changed || (transformedElement != element);
         }
-        for (KItem kItem : builtinSet.collectionPatterns()) {
-            Term term = (Term) kItem.accept(this);
-            changed = changed || (term != kItem);
-            builder.concatenate(term);
-        }
-        for (Variable variable : builtinSet.collectionVariables()) {
-            Term term = (Term) variable.accept(this);
-            changed = changed || (term != variable);
-            builder.concatenate(term);
-        }
-        for (Term term : builtinSet.collectionFunctions()) {
+        for (Term term : builtinSet.baseTerms()) {
             Term transformedTerm = (Term) term.accept(this);
             changed = changed || (transformedTerm != term);
             builder.concatenate(transformedTerm);

@@ -448,12 +448,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Variable node, Void _)  {
-        String name = node.getName();
-        if (node.isFreshVariable()) {
-           name = "?" + name;
-        } else if (node.isFreshConstant()) {
-            name = "!" + name;
-        }
+        String name = node.fullName();
 
         if (node.getSort().equals(org.kframework.kil.Sort.BAG)) {
             return new Variable(name, Kind.CELL_COLLECTION.asSort());

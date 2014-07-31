@@ -68,7 +68,7 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
-    public boolean isPattern() {
+    public final boolean isPattern() {
         return false;
     }
 

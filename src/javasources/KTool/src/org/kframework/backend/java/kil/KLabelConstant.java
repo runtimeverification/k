@@ -79,7 +79,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                 Production fstProd = iterator.next();
                 isFunction = fstProd.containsAttribute(Attribute.FUNCTION.getKey())
                         || fstProd.containsAttribute(Attribute.PREDICATE.getKey());
-                isPattern = fstProd.containsAttribute("pattern");
+                isPattern = fstProd.containsAttribute(Attribute.PATTERN_KEY);
             }
 
             while (iterator.hasNext()) {
@@ -95,7 +95,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                         + label
                         + " is a function symbol because there are multiple productions associated with this KLabel: "
                         + productions;
-                assert isPattern == production.containsAttribute("pattern") :
+                assert isPattern == production.containsAttribute(Attribute.PATTERN_KEY) :
                         "Cannot determine if the KLabel " + label
                         + " is a pattern symbol because there are multiple productions associated with this KLabel: "
                         + productions;

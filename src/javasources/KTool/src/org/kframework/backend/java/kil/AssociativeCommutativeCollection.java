@@ -2,6 +2,8 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 
 
 /**
@@ -24,6 +26,17 @@ public abstract class AssociativeCommutativeCollection extends Collection {
         this.collectionFunctions = collectionFunctions;
     }
 
+    /**
+     * Returns an unmodifiable view of the union of the patterns, functions and variables multisets.
+     *
+     * @see org.kframework.kil.CollectionBuiltin#baseTerms
+     */
+    public Multiset<Term> baseTerms() {
+        return Multisets.union(
+                Multisets.union(collectionPatterns, collectionFunctions),
+                collectionVariables);
+    }
+
     public ImmutableMultiset<KItem> collectionPatterns() {
         return collectionPatterns;
     }
@@ -37,10 +50,10 @@ public abstract class AssociativeCommutativeCollection extends Collection {
     }
 
     /**
-     * Returns true if this collection consists only of elements or entries, but no patterns, functions or variables.
-     * TODO: improve name/description
+     * Returns true if this collection contains elements or entries, but does not contain patterns,
+     * functions or variables.
      */
-    public boolean isConcreteCollection() {
+    public final boolean isConcreteCollection() {
         return collectionPatterns.isEmpty()
                 && collectionVariables.isEmpty()
                 && collectionFunctions.isEmpty();
@@ -52,7 +65,7 @@ public abstract class AssociativeCommutativeCollection extends Collection {
     }
 
     @Override
-    public boolean isGround() {
+    public final boolean isGround() {
         return isConcreteCollection() && super.isGround();
     }
 
