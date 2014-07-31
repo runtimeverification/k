@@ -8,6 +8,7 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,6 +99,13 @@ public class Definition extends JavaSymbolicObject {
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
         } else if (rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
+            if (!(rule.leftHandSide() instanceof KItem)) {
+                GlobalSettings.kem.registerCriticalWarning(
+                        "The Java backend only supports [anywhere] rule that rewrites KItem; but found:\n\t"
+                                + rule, null, rule);
+                return;
+            }
+
             anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
