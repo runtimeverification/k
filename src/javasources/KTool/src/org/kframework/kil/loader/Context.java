@@ -457,13 +457,12 @@ public class Context implements Serializable {
     public static final int HASH_PRIME = 37;
 
     /**
-     * Returns a {@link List} of productions associated with the specified KLabel
+     * Returns a {@link Set} of productions associated with the specified KLabel
      *
      * @param label
      *            string representation of the KLabel
      * @return list of productions associated with the label
      */
-    @SuppressWarnings("unchecked")
     public Set<Production> productionsOf(String label) {
         return klabels.get(label);
     }

@@ -2,7 +2,6 @@
 
 package org.kframework.kil;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -14,6 +13,8 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * AST representation of a KLabel constant.
@@ -98,16 +99,17 @@ public class KLabelConstant extends KLabel {
     /* un-escaped label */
     private final String label;
     /* unmodifiable view of the production list */
-    private final Set<Production> productions;
+    private final ImmutableSet<Production> productions;
 
     public KLabelConstant(String label) {
         this.label = label;
-        productions = Collections.emptySet();
+        productions = ImmutableSet.of();
     }
 
     private KLabelConstant(String label, Context context) {
         this.label = label;
-        productions = Collections.unmodifiableSet(context.productionsOf(label));
+        // context.productionsOf returns a view into a multimap, which is not serializable. So we copy it
+        productions = ImmutableSet.copyOf(context.productionsOf(label));
     }
 
     /**
@@ -117,14 +119,15 @@ public class KLabelConstant extends KLabel {
     public KLabelConstant(Element element, Context context) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = Collections.unmodifiableSet(context.productionsOf(label));
+        // context.productionsOf returns a view into a multimap, which is not serializable. So we copy it
+        productions = ImmutableSet.copyOf(context.productionsOf(label));
     }
 
     @SuppressWarnings("unchecked")
     public KLabelConstant(Element element) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = Collections.emptySet();
+        productions = ImmutableSet.of();
     }
 
     /**
