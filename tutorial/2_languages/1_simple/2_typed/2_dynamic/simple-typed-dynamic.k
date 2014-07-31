@@ -292,8 +292,8 @@ Check array bounds, as part of the dynamic typing policy. */
     [structural, anywhere]
 
 // Same comment as for simple untyped regarding [anywhere]
-  rule array(L,_)[N:Int] => lookup(L +Int N)
-    [structural, anywhere]
+  rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
+    when N >=Int 0 andBool N <Int M  [structural, anywhere]
 
 //@ \subsubsection{Size of an array}
 
