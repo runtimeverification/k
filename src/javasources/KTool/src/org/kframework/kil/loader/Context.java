@@ -179,8 +179,10 @@ public class Context implements Serializable {
 
     public void addProduction(Production p) {
         productions.add(p);
-        klabels.put(p.getKLabel(), p);
-        tags.put(p.getKLabel(), p);
+        if (p.getKLabel() != null) {
+            klabels.put(p.getKLabel(), p);
+            tags.put(p.getKLabel(), p);
+        }
         for (Attribute a : p.getAttributes().getContents()) {
             tags.put(a.getKey(), p);
         }

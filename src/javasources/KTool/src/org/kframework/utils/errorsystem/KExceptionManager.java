@@ -89,7 +89,7 @@ public class KExceptionManager {
     private void register(ExceptionType type, KExceptionGroup group, String message,
             AbstractVisitor<?, ?, ?> phase, String filename, String location, Throwable e) {
         printStackTrace(e);
-        registerInternal(new KException(type, group, message, phase.getName(), filename, location, e));
+        registerInternal(new KException(type, group, message, phase == null ? null : phase.getName(), filename, location, e));
     }
 
     @Deprecated

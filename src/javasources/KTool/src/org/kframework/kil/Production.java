@@ -159,7 +159,9 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         */
 
         String klabel = attributes.get("klabel");
-        if (klabel == null) {
+        if (klabel == null && isSubsort()) {
+            return null;
+        } else if (klabel == null) {
             if (sort.toString().equals(KSorts.KLABEL))
                 klabel = getPrefixLabel();
             else
