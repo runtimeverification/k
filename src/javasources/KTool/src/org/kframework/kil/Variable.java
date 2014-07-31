@@ -83,6 +83,16 @@ public class Variable extends Term {
         return name;
     }
 
+    public String fullName() {
+        if (isFreshVariable()) {
+            return "?" + name;
+        } else if (isFreshConstant()) {
+            return "!" + name;
+        } else {
+            return name;
+        }
+    }
+
     public String toString() {
         return name + ":" + sort + " ";
     }

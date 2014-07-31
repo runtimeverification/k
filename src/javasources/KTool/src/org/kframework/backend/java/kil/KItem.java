@@ -1,25 +1,20 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
-import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.krun.K;
 import org.kframework.utils.errorsystem.KException;
@@ -28,7 +23,17 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -417,7 +422,8 @@ public final class KItem extends Term {
     public boolean isSymbolic() {
         // TODO(AndreiS): handle KLabel variables
         //return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
-        return kLabel instanceof KLabel && ((KLabel) kLabel).isFunction();
+        return kLabel instanceof KLabel
+                && (((KLabel) kLabel).isFunction() || ((KLabel) kLabel).isPattern());
     }
 
     @Override
@@ -485,6 +491,89 @@ public final class KItem extends Term {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    public Term expandPattern(SymbolicConstraint constraint, boolean narrowing, TermContext context) {
+        if (constraint == null) {
+            return this;
+        }
+
+        if (!(kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList)) {
+            return this;
+        }
+        KLabelConstant kLabel = (KLabelConstant) kLabel();
+        KList kList = (KList) kList();
+
+        List<ConstrainedTerm> results = new ArrayList<>();
+        KList inputKList = new KList(getPatternInput());
+        KList outputKList = new KList(getPatternOutput());
+        for (Rule rule : context.definition().patternRules().get(kLabel)) {
+            KList ruleInputKList = new KList(((KItem) rule.leftHandSide()).getPatternInput());
+            KList ruleOutputKList = new KList(((KItem) rule.leftHandSide()).getPatternOutput());
+            SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
+            unificationConstraint.add(inputKList, ruleInputKList);
+            unificationConstraint.simplify();
+            // TODO(AndreiS): there is only one solution here, so no list of constraints
+            if (unificationConstraint.isFalse()) {
+                continue;
+            }
+
+            if (narrowing) {
+                SymbolicConstraint globalConstraint = new SymbolicConstraint(context);
+                for (SymbolicConstraint.Equality equality : constraint.equalities()) {
+                    globalConstraint.add(equality.leftHandSide(), equality.rightHandSide());
+                }
+                globalConstraint.addAll(unificationConstraint);
+                globalConstraint.addAll(rule.requires());
+                globalConstraint.simplify();
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                    continue;
+                }
+            } else {
+                if (!unificationConstraint.isMatching(ruleInputKList.variableSet())) {
+                    continue;
+                }
+
+                SymbolicConstraint requires = new SymbolicConstraint(context);
+                requires.addAll(rule.requires());
+                requires.addAll(unificationConstraint);
+                requires.simplify();
+                requires.orientSubstitution(ruleInputKList.variableSet());
+                if (!constraint.implies(requires, ruleInputKList.variableSet())) {
+                    continue;
+                }
+            }
+
+            unificationConstraint.add(outputKList, ruleOutputKList);
+            unificationConstraint.addAll(rule.ensures());
+            unificationConstraint.simplify();
+            results.add(SymbolicRewriter.constructNewSubjectTerm(
+                    rule,
+                    unificationConstraint,
+                    variableSet()));
+        }
+
+        if (results.size() == 1) {
+            constraint.addAll(results.get(0).constraint());
+            return results.get(0).term();
+        } else {
+            return this;
+        }
+    }
+
+    public ImmutableList<Term> getPatternInput() {
+        assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
+        int inputCount = Integer.parseInt(
+                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        return ImmutableList.copyOf(((KList) kList).getContents()).subList(0, inputCount);
+    }
+
+    public ImmutableList<Term> getPatternOutput() {
+        assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
+        int inputCount = Integer.parseInt(
+                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        return ImmutableList.copyOf(((KList) kList).getContents())
+                .subList(inputCount, ((KList) kList).getContents().size());
     }
 
     /**

@@ -48,7 +48,15 @@ public class MetaK {
         } catch (UnificationFailure e) {
             return BoolToken.FALSE;
         }
-        return constraint.isFalse() ? BoolToken.FALSE : BoolToken.TRUE;
+
+        constraint.simplify();
+        if (constraint.isSubstitution()) {
+            return BoolToken.TRUE;
+        } else if (constraint.isFalse()) {
+            return BoolToken.FALSE;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -117,41 +125,28 @@ public class MetaK {
     /**
      * Returns all {@link Variable}s inside a given {@link Term} as a
      * {@link BuiltinSet} of {@link MetaVariable}s.
-     *
-     * @param term
-     *            the given term
-     * @param context
-     *            the term context
-     * @return a {@code BuiltinSet} of {@code MetaVariable}s
      */
     public static BuiltinSet variables(Term term, TermContext context) {
-        Set<Term> metaVariables = new HashSet<Term>();
+        BuiltinSet.Builder builder = BuiltinSet.builder();
         for (Variable variable : term.variableSet()) {
-            metaVariables.add(new MetaVariable(variable));
+            builder.add(new MetaVariable(variable));
         }
-        return new BuiltinSet(metaVariables);
+        return (BuiltinSet) builder.build();
     }
 
     /**
      * Returns all {@link Variable}s inside a given {@link Term} as a
      * {@link BuiltinSet}.
-     *
-     * @param term
-     *            the given term
-     * @param context
-     *            the term context
-     * @return a {@code BuiltinSet} of {@code Variable}s
      */
     public static BuiltinSet trueVariables(Term term, TermContext context) {
-        Set<Variable> trueVariables = term.variableSet();
-        return new BuiltinSet(trueVariables);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.addAll(term.variableSet());
+        return (BuiltinSet) builder.build();
     }
 
-    public static BuiltinMap variablesMap(Term term, TermContext context) {
+    public static Term variablesMap(Term term, TermContext context) {
         BuiltinMap.Builder builder = BuiltinMap.builder();
-        Set<Variable> variables = term.variableSet();
-        for (Variable variable : variables) {
-            assert variable instanceof Variable : "this function only applies on variables";
+        for (Variable variable : term.variableSet()) {
             builder.put(new MetaVariable(variable), variable);
         }
         return builder.build();

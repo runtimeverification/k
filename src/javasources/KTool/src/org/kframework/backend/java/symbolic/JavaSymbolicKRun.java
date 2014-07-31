@@ -12,8 +12,11 @@ import org.kframework.backend.java.util.TestCaseGenerationSettings;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.DataStructureToLookupUpdate;
-import org.kframework.compile.utils.*;
-//import org.kframework.kil.*;
+import org.kframework.compile.utils.CompilerStepDone;
+import org.kframework.compile.utils.ConfigurationSubstitutionVisitor;
+import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.RuleCompilerSteps;
+import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
@@ -21,17 +24,32 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.KRunOptions.OutputMode;
-import org.kframework.krun.api.*;
+import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunProofResult;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchResult;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.TestGenResult;
+import org.kframework.krun.api.TestGenResults;
+import org.kframework.krun.api.Transition;
+import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.general.IndexingStatistics;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-
-import org.kframework.utils.general.IndexingStatistics;
 
 /**
  *
@@ -146,17 +164,23 @@ public class JavaSymbolicKRun implements KRun {
 
         List<Rule> rules = new ArrayList<Rule>();
         for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
-            assert moduleItem instanceof org.kframework.kil.Rule;
+            if (!(moduleItem instanceof org.kframework.kil.Rule)) {
+                continue;
+            }
 
             Rule rule = transformer.transformRule(
                     (org.kframework.kil.Rule) mapTransformer.visitNode(moduleItem),
                     definition);
             Rule freshRule = rule.getFreshRule(termContext);
-//                System.out.println(freshRule.toString());
+            rules.add(freshRule);
         }
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
+            if (!(moduleItem instanceof org.kframework.kil.Rule)) {
+                continue;
+            }
+
             org.kframework.kil.Rule kilRule = (org.kframework.kil.Rule) moduleItem;
             org.kframework.kil.Term kilLeftHandSide
                     = ((org.kframework.kil.Rewrite) kilRule.getBody()).getLeft();
@@ -176,7 +200,6 @@ public class JavaSymbolicKRun implements KRun {
                     definition);
 
             SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
-            //initialConstraint.addAll(rule.condition());
             initialConstraint.addAll(dummyRule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
                     transformer.transformTerm(kilLeftHandSide, definition),
@@ -186,13 +209,11 @@ public class JavaSymbolicKRun implements KRun {
             SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);
             targetConstraint.addAll(dummyRule.ensures());
             ConstrainedTerm targetTerm = new ConstrainedTerm(
-                    dummyRule.leftHandSide(),
+                    dummyRule.leftHandSide().evaluate(termContext),
                     dummyRule.lookups().getSymbolicConstraint(termContext),
                     targetConstraint,
                     termContext);
 
-//                System.out.println("Initial: " + initialTerm);
-//                System.out.println("Target: " + targetTerm);
             proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
         }
 

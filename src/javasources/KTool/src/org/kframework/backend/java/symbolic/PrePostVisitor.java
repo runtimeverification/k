@@ -43,12 +43,18 @@ public class PrePostVisitor implements Visitor {
         preVisitor.resetProceed();
         builtinMap.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
-        for (Map.Entry<Term, Term> entry : builtinMap) {
+        for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
-        if (builtinMap.hasFrame()) {
-            builtinMap.frame().accept(this);
+        for (KItem pattern : builtinMap.collectionPatterns()) {
+            pattern.accept(this);
+        }
+        for (Variable variable : builtinMap.collectionVariables()) {
+            variable.accept(this);
+        }
+        for (Term term : builtinMap.collectionFunctions()) {
+            term.accept(this);
         }
         builtinMap.accept(postVisitor);
     }
