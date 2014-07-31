@@ -287,7 +287,7 @@ public final class BuiltinBitVectorOperations {
     }
 
     public static BitVector fromDigits(BuiltinList digitList, TermContext context) {
-        if (!digitList.hasFrame()) {
+        if (digitList.isGround()) {
             List<BitVector> digits;
             try {
                 // AndreiS: double cast because Java in its infinite wisdom does not allow to cast
@@ -298,7 +298,8 @@ public final class BuiltinBitVectorOperations {
             }
             return BitVector.fromDigits(digits);
         } else {
-            throw new IllegalArgumentException(digitList + " contains list variables");
+            //throw new IllegalArgumentException(digitList + " contains list variables");
+            return null;
         }
     }
 

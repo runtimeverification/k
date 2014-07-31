@@ -162,11 +162,13 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
             elements.add((org.kframework.kil.Term)entry.accept(this));
         }
         Collections.sort(elements);
-        if (set.hasFrame()) {
-            baseTerms.add((org.kframework.kil.Term) set.frame().accept(this));
+        for (Term term : set.baseTerms()) {
+            baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
-        return new SetBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),
-                baseTerms, elements);
+        return new SetBuiltin(
+                context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),
+                baseTerms,
+                elements);
     }
 
 
@@ -201,11 +203,13 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
                     (org.kframework.kil.Term) key.accept(this),
                     (org.kframework.kil.Term) value.accept(this));
         }
-        if (map.hasFrame()) {
-            baseTerms.add((org.kframework.kil.Term) map.frame().accept(this));
+        for (Term term : map.baseTerms()) {
+            baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
-        return new MapBuiltin(context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT),
-                baseTerms, elements);
+        return new MapBuiltin(
+                context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT),
+                baseTerms,
+                elements);
     }
 
     @Override

@@ -381,42 +381,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.SetBuiltin node, Void _)  {
-        HashSet<Term> entries = new HashSet<Term>(node.elements().size());
-        for (org.kframework.kil.Term entry : node.elements()) {
-            Term key = (Term) this.visitNode(entry);
-            entries.add(key);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        for (org.kframework.kil.Term element : node.elements()) {
+            builder.add((Term) this.visitNode(element));
         }
-
-        if (node.isLHSView()) {
-            if (node.hasViewBase()) {
-                Term base = (Term) this.visitNode(node.viewBase());
-                if (base instanceof SetUpdate) {
-                    SetUpdate setUpdate = (SetUpdate) base;
-                    /* TODO(AndreiS): check key uniqueness */
-                    return new SetUpdate(setUpdate.base(), setUpdate.removeSet());
-                } else {
-                    /* base instanceof Variable */
-                    return new BuiltinSet(entries, (Variable) base);
-                }
-            } else {
-                return new BuiltinSet(entries);
-            }
-        } else {
-            ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
-            for (org.kframework.kil.Term term : node.baseTerms()) {
-                baseTerms.add((Term) this.visitNode(term));
-            }
-            baseTerms.add(new BuiltinSet(entries));
-
-            Term result = baseTerms.get(0);
-            for (int i = 1; i < baseTerms.size(); ++i) {
-                result = KItem.of(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, definition),
-                        new KList(ImmutableList.of(result, baseTerms.get(i))),
-                        TermContext.of(globalContext));
-            }
-            return result;
+        for (org.kframework.kil.Term term : node.baseTerms()) {
+            builder.concatenate((Term) this.visitNode(term));
         }
+        return builder.build();
     }
 
     @Override
@@ -424,43 +396,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         BuiltinMap.Builder builder = BuiltinMap.builder();
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.elements().entrySet()) {
-            Term key = (Term) this.visitNode(entry.getKey());
-            Term value = (Term) this.visitNode(entry.getValue());
-            builder.put(key, value);
+            builder.put(
+                    (Term) this.visitNode(entry.getKey()),
+                    (Term) this.visitNode(entry.getValue()));
         }
-
-        if (node.isLHSView()) {
-            if (node.hasViewBase()) {
-                Term base = (Term) this.visitNode(node.viewBase());
-                if (base instanceof MapUpdate) {
-                    MapUpdate mapUpdate = (MapUpdate) base;
-                    /* TODO(AndreiS): check key uniqueness */
-                    builder.putAll(mapUpdate.updateMap());
-                    return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), builder.getEntries());
-                } else {
-                    /* base instanceof Variable */
-                    builder.setFrame((Variable) base);
-                    return builder.build();
-                }
-            } else {
-                return builder.build();
-            }
-        } else {
-            ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
-            for (org.kframework.kil.Term term : node.baseTerms()) {
-                baseTerms.add((Term) this.visitNode(term));
-            }
-            baseTerms.add(builder.build());
-
-            Term result = baseTerms.get(0);
-            for (int i = 1; i < baseTerms.size(); ++i) {
-                result = KItem.of(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, definition),
-                        new KList(ImmutableList.of(result, baseTerms.get(i))),
-                        TermContext.of(globalContext));
-            }
-            return result;
+        for (org.kframework.kil.Term term : node.baseTerms()) {
+            builder.concatenate((Term) this.visitNode(term));
         }
+        return builder.build();
     }
 
     @Override
@@ -505,15 +448,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.Variable node, Void _)  {
+        String name = node.fullName();
+
         if (node.getSort().equals(org.kframework.kil.Sort.BAG)) {
-            return new Variable(node.getName(), Kind.CELL_COLLECTION.asSort());
+            return new Variable(name, Kind.CELL_COLLECTION.asSort());
         }
 
         if (node.getSort().equals(org.kframework.kil.Sort.K)) {
-            return new Variable(node.getName(), Sort.KSEQUENCE);
+            return new Variable(name, Sort.KSEQUENCE);
         }
         if (node.getSort().equals(org.kframework.kil.Sort.KLIST)) {
-            return new Variable(node.getName(), Sort.KLIST);
+            return new Variable(name, Sort.KLIST);
         }
 
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
@@ -531,15 +476,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
             if (concreteCollectionSize.containsKey(node)) {
                 return new ConcreteCollectionVariable(
-                        node.getName(),
+                        name,
                         sort,
                         concreteCollectionSize.get(node));
             } else {
-                return new Variable(node.getName(), sort);
+                return new Variable(name, sort);
             }
         }
 
-        return new Variable(node.getName(), node.getSort().toBackendJava());
+        return new Variable(name, node.getSort().toBackendJava());
     }
 
     @Override
@@ -559,7 +504,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Collection<Term> ensures = new ArrayList<>();
         if (node.getEnsures() != null) {
-            transformConjunction(requires, (Term) this.visitNode(node.getEnsures()));
+            transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
         }
 
         UninterpretedConstraint lookups = new UninterpretedConstraint();
@@ -738,11 +683,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         /* replace the unevaluated rules and macros with their partially evaluated counterparts */
         partiallyEvaluatedRules.clear();
-        for (Rule rule : Iterables.concat(definition.rules(), definition.macros())) {
+        Iterable<Rule> rules = Iterables.concat(
+                definition.rules(),
+                definition.macros(),
+                definition.patternRules().values());
+        for (Rule rule : rules) {
             partiallyEvaluatedRules.add(evaluateRule(rule, globalContext));
         }
         definition.rules().clear();
         definition.macros().clear();
+        definition.patternRules().clear();
         definition.addRuleCollection(partiallyEvaluatedRules);
 
         return definition;

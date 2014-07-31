@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-
 package org.kframework.backend.java.kil;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.backend.java.indexing.ConfigurationTermIndex;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
@@ -10,6 +8,7 @@ import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.backend.java.symbolic.Matchable;
+import org.kframework.backend.java.symbolic.PatternExpander;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
@@ -22,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 
 /**
@@ -208,9 +209,13 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * {@code evaluate} method instead.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-        // TODO(AndreiS): assert that there are not any unevaluated functions in this term
-        if (substitution.isEmpty() || isGround()) {
-            return this;
+        // TODO(AndreiS): disable the check below when proving things until this is properly fixed by Cosmin
+        if (context.definition().context().krunOptions == null
+                || context.definition().context().krunOptions.experimental.prove() == null) {
+            // TODO(AndreiS): assert that there are not any unevaluated functions in this term
+            if (substitution.isEmpty() || isGround()) {
+                return this;
+            }
         }
 
         // YilongL: comment out the slow implementation
@@ -255,6 +260,10 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     @Override
     public Term substituteWithBinders(Variable variable, Term term, TermContext context) {
         return (Term) super.substituteWithBinders(variable, term, context);
+    }
+
+    public Term expandPatterns(SymbolicConstraint constraint, boolean narrow, TermContext context) {
+        return PatternExpander.expand(this, constraint, narrow, context);
     }
 
     @Override

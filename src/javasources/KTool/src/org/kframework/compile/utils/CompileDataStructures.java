@@ -38,67 +38,43 @@ import java.util.List;
  */
 public class CompileDataStructures extends CopyOnWriteTransformer {
 
-    private final boolean noRHS;
-
-    private enum Status { LHS, RHS, CONDITION }
-
-    private Status status;
     private String location;
     private String filename;
-
-    /**
-     * @param context The context of the rules being compiled
-     * @param noRHS  Whether this is supposed to run on rules with no right-hand-side
-     *               arising when compiling search patterns for KRun.
-     */
-    public CompileDataStructures(Context context, boolean noRHS) {
-        super("Compile collections to internal K representation", context);
-        this.noRHS = noRHS;
-    }
 
     /**
      * Simplified constructor for the common case
      * @param context The context of the rules being compiled
      */
     public CompileDataStructures(Context context) {
-         this(context, false);
+        super("Compile collections to internal K representation", context);
     }
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
-
         location = node.getLocation();
         filename = node.getFilename();
         boolean change = false;
 
-        Term body = node.getBody();
-        if (! noRHS) { // Regular rule
-            assert body instanceof Rewrite :
-                    "expected rewrite at the top of rule\n" + node + "\n"
-                            + "CompileDataStructures pass should be applied after ResolveRewrite pass";
-
-            Rewrite rewrite = (Rewrite) body;
-            status = Status.LHS;
+        Term body;
+        if (node.getBody() instanceof Rewrite) {
+            Rewrite rewrite = (Rewrite) node.getBody();
             Term lhs = (Term) this.visitNode(rewrite.getLeft());
-            status = Status.RHS;
             Term rhs = (Term) this.visitNode(rewrite.getRight());
             if (lhs != rewrite.getLeft() || rhs != rewrite.getRight()) {
-                change = true;
                 rewrite = rewrite.shallowCopy();
                 rewrite.setLeft(lhs, context);
                 rewrite.setRight(rhs, context);
-                body = rewrite;
             }
-        } else { // Krun "rule"
-            status = Status.LHS;
-            body = (Term) this.visitNode(body);
-            if (body != node.getBody()) {
-                change = true;
-            }
+            body = rewrite;
+        } else {
+            body = (Term) this.visitNode(node.getBody());
         }
+        if (body != node.getBody()) {
+            change = true;
+        }
+
         Term requires;
         if (node.getRequires() != null) {
-            status = Status.CONDITION;
             requires = (Term) this.visitNode(node.getRequires());
             if (requires != node.getRequires()) {
                 change = true;
@@ -107,7 +83,15 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             requires = null;
         }
 
-        //TODO: handle ensures, too.
+        Term ensures;
+        if (node.getEnsures() != null) {
+            ensures = (Term) this.visitNode(node.getEnsures());
+            if (ensures != node.getEnsures()) {
+                change = true;
+            }
+        } else {
+            ensures = null;
+        }
 
         if (!change) {
             return node;
@@ -116,6 +100,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         node = node.shallowCopy();
         node.setBody(body);
         node.setRequires(requires);
+        node.setEnsures(ensures);
         return node;
     }
 
@@ -175,20 +160,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
 
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
-            DataStructureBuiltin dataStructure = DataStructureBuiltin.of(sort, arguments);
-            if (status == Status.LHS && !dataStructure.isLHSView()) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
-                        "unexpected left-hand side data structure format; "
-                        + "expected elements and at most one variable\n"
-                        + node,
-                        getName(),
-                        filename,
-                        location));
-                return null;
-            }
-            return dataStructure;
+            return DataStructureBuiltin.of(sort, arguments);
         } else if (sort.elementLabel().equals(kLabelConstant.getLabel())) {
             /* TODO(AndreiS): check sort restrictions */
             return DataStructureBuiltin.element(sort, arguments);
@@ -208,7 +180,8 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         } else if (sort.sort().equals(Sort.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
             if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update"))
-                    && kList.getContents().size() >= 3 && kList.getContents().get(0) instanceof Variable) {
+                    && kList.getContents().size() == 3
+                    && kList.getContents().get(0) instanceof Variable) {
                 return new MapUpdate(
                         (Variable) kList.getContents().get(0),
                         Collections.<Term, Term>emptyMap(),

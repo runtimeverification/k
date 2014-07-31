@@ -1,6 +1,39 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FreshOperations;
+import org.kframework.backend.java.builtins.TermEquality;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.DataStructureChoice;
+import org.kframework.backend.java.kil.DataStructureLookup;
+import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.Profiler;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Context;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,12 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.TermEquality;
-import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.util.Profiler;
-import org.kframework.kil.loader.Context;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -63,6 +90,8 @@ public class PatternMatcher extends AbstractMatcher {
      */
     private boolean isStarNested;
 
+    private final boolean isLemma;
+
     private final TermContext termContext;
 
     /**
@@ -78,7 +107,7 @@ public class PatternMatcher extends AbstractMatcher {
      *         {@code false}
      */
     public static boolean matchable(Term subject, Term pattern, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(context);
+        PatternMatcher matcher = new PatternMatcher(false, context);
         try {
             matcher.match(subject, pattern);
         } catch (PatternMatchingFailure e) {
@@ -105,7 +134,9 @@ public class PatternMatcher extends AbstractMatcher {
      *         variables in the pattern to sub-terms in the subject)
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(context);
+        PatternMatcher matcher = new PatternMatcher(
+                rule.containsAttribute(Attribute.LEMMA_KEY),
+                context);
 
         boolean failed = true;
         if (rule.isFunction()) {
@@ -114,7 +145,7 @@ public class PatternMatcher extends AbstractMatcher {
                 KItem kItem = (KItem) subject;
                 Term kLabel = kItem.kLabel();
                 Term kList = kItem.kList();
-                if (kLabel.equals(rule.functionKLabel())) {
+                if (kLabel.equals(rule.definedKLabel())) {
                     failed = !matcher.patternMatch(kList, ((KItem) rule.leftHandSide()).kList());
                 }
             }
@@ -132,7 +163,7 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     public static Map<Variable, Term> nonAssocCommPatternMatch(Term subject, Term pattern, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(context);
+        PatternMatcher matcher = new PatternMatcher(false, context);
         if (!matcher.patternMatch(subject, pattern)) {
             return null;
         } else {
@@ -195,7 +226,9 @@ public class PatternMatcher extends AbstractMatcher {
                         // the non-lookup term is not a variable and thus requires further pattern matching
                         // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
                         //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
-                        PatternMatcher lookupMatcher = new PatternMatcher(context);
+                        PatternMatcher lookupMatcher = new PatternMatcher(
+                                rule.containsAttribute(Attribute.LEMMA_KEY),
+                                context);
                         if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
                             resolved = true;
                             assert lookupMatcher.multiSubstitutions.isEmpty();
@@ -396,9 +429,10 @@ public class PatternMatcher extends AbstractMatcher {
         }
     }
 
-    private PatternMatcher(TermContext context) {
+    private PatternMatcher(boolean isLemma, TermContext context) {
+        this.isLemma = isLemma;
         this.termContext = context;
-        multiSubstitutions = new ArrayList<Collection<Map<Variable, Term>>>();
+        multiSubstitutions = new ArrayList<>();
     }
 
     /**
@@ -468,7 +502,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* add substitution */
             addSubstitution(variable, subject);
-        } else if (subject.isSymbolic()) {
+        } else if (subject.isSymbolic() && !isLemma) {
             fail(subject, pattern);
         } else {
             /* match */

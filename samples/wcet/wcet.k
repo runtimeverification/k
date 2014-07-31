@@ -251,8 +251,8 @@ module WCET
   priority 0.*/
 
   syntax KItem ::= time(OpCode)
-  rule <k> time(O:OpCode) => waitFor(Timing[O]) ...</k>
-       <timing> Timing:Map </timing>
+  rule <k> time(O:OpCode) => waitFor(I) ...</k>
+       <timing>... O |-> I:Int ...</timing>
   /*@ For modularity, we allow the time each instruction executes for to be specified dynamically
   in the \texttt{timing} cell.*/
 

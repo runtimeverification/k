@@ -320,4 +320,12 @@ public class BuiltinList extends Collection {
         return removeRight;
     }
 
+    @Override
+    public final boolean isSymbolic() {
+        return hasFrame()
+                && elementsLeft.isEmpty()
+                && elementsRight.isEmpty()
+                && removeLeft == 0
+                && removeRight == 0;
+    }
 }
