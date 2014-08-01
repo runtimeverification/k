@@ -71,6 +71,8 @@ public class KagregFrontEnd extends FrontEnd {
         return new Module[] { new CommonModule(), new AbstractModule() {
             @Override
             protected void configure() {
+                bind(FrontEnd.class).to(KagregFrontEnd.class);
+                bind(Tool.class).toInstance(Tool.OTHER);
                 bind(String.class).annotatedWith(FirstArg.class).toInstance(args[0]);
                 bind(String.class).annotatedWith(SecondArg.class).toInstance(args[1]);
                 bind(GlobalOptions.class).toInstance(globalOptions);
@@ -249,10 +251,5 @@ public class KagregFrontEnd extends FrontEnd {
             kem.registerCriticalError("Could not write to result.k", e);
         }
         return true;
-    }
-
-    @Override
-    public Tool tool() {
-        return Tool.OTHER;
     }
 }

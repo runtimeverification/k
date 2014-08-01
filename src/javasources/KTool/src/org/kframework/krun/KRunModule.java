@@ -18,6 +18,7 @@ import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.KRun;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.Tool;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.inject.DefinitionLoadingModule;
@@ -47,6 +48,7 @@ public class KRunModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(FrontEnd.class).to(KRunFrontEnd.class);
+        bind(Tool.class).toInstance(Tool.KRUN);
         bind(KRunOptions.class).toInstance(options);
         bind(SMTOptions.class).toInstance(options.experimental.smt);
         bind(GlobalOptions.class).toInstance(options.global);

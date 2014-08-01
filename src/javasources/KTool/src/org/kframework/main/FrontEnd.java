@@ -11,8 +11,6 @@ public abstract class FrontEnd {
 
     protected abstract boolean run();
 
-    public abstract Tool tool();
-
     private final KExceptionManager kem;
     private final GlobalOptions globalOptions;
     private final String usage, experimentalUsage;

@@ -10,7 +10,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.main.FrontEnd;
-import org.kframework.main.Tool;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -110,10 +109,5 @@ public class KastFrontEnd extends FrontEnd {
             e.report();
             return false;
         }
-    }
-
-    @Override
-    public Tool tool() {
-        return Tool.KAST;
     }
 }

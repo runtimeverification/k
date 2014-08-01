@@ -22,7 +22,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.OnOffConverter;
@@ -33,10 +32,15 @@ import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.ProvidedBy;
+import com.google.inject.Inject;
 
-@ProvidedBy(NullProvider.class)
 public final class KRunOptions {
+
+    public KRunOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public KRunOptions(Void v) {}
 
     public enum OutputMode {
         PRETTY(true), SMART(true), COMPATIBLE(true), KORE(true), RAW(false), BINARY(false), NONE(false), NO_WRAP(true);
@@ -58,8 +62,13 @@ public final class KRunOptions {
     @ParametersDelegate
     public ConfigurationCreationOptions configurationCreation = new ConfigurationCreationOptions();
 
-    @ProvidedBy(NullProvider.class)
     public static final class ConfigurationCreationOptions {
+
+        public ConfigurationCreationOptions() {}
+
+        //TODO(dwightguth): remove in Guice 4.0
+        @Inject
+        public ConfigurationCreationOptions(Void v) {}
 
         @Parameter(description="<file>")
         private List<String> parameters;
