@@ -184,6 +184,7 @@ public class Context implements Serializable {
             tags.put(p.getKLabel(), p);
             if (p.isListDecl()) {
                 listKLabels.put(p.getListDecl().getTerminatorKLabel(), p);
+                listLabelSeparator.put(p.getListDecl().getTerminatorKLabel(), p.getListDecl().getSeparator());
             }
         }
         for (Attribute a : p.getAttributes().getContents()) {
