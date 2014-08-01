@@ -1,4 +1,6 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.ktest;
+
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
