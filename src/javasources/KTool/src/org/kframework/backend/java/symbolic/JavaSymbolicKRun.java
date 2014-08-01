@@ -38,18 +38,18 @@ import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
-import org.kframework.utils.BinaryLoader;
+import edu.uci.ics.jung.graph.DirectedGraph;
+
 import org.kframework.utils.general.IndexingStatistics;
 
-import java.io.File;
+import com.google.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import edu.uci.ics.jung.graph.DirectedGraph;
 
 /**
  *
@@ -64,14 +64,10 @@ public class JavaSymbolicKRun implements KRun {
     //Liyi Li: add a build-in SymbolicRewriter to fix the simulation rules
     private SymbolicRewriter simulationRewriter;
 
-    public JavaSymbolicKRun(Context context) {
-        /* context is unused for directory paths; the actual context is de-serialized */
-        /* load the definition from a binary file */
-        definition = BinaryLoader.loadOrDie(Definition.class,
-            new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString());
-
+    @Inject
+    JavaSymbolicKRun(Context context, Definition definition) {
+        this.definition = definition;
         this.context = context;
-        definition.setContext(context);
         transformer = new KILtoBackendJavaKILTransformer(this.context);
     }
 

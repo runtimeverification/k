@@ -4,7 +4,6 @@ package org.kframework.ktest.Config;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest.Annotated;
 import org.kframework.ktest.CmdArgs.KTestOptions;
-import org.kframework.ktest.KTest;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.ProgramProfile;

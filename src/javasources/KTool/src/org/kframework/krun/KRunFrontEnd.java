@@ -20,8 +20,6 @@ import jline.SimpleCompletor;
 import org.fusesource.jansi.AnsiString;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
-import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -33,8 +31,6 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.kompile.KompileOptions.Backend;
-import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
@@ -46,40 +42,30 @@ import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
+import org.kframework.main.FrontEnd;
+import org.kframework.main.Tool;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.JCommanderModule;
+import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
+import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.inject.CommonModule;
+import org.kframework.utils.inject.Main;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import edu.uci.ics.jung.graph.DirectedGraph;
 
-public class KRunFrontEnd {
-
-    private static Stopwatch sw = Stopwatch.instance();
-
-    private static KRun obtainKRun(Context context) {
-        if (context.kompileOptions.backend == Backend.MAUDE
-                || context.kompileOptions.backend == Backend.SYMBOLIC) {
-            return new MaudeKRun(context, sw);
-        } else if (context.kompileOptions.backend == Backend.JAVA) {
-            return new JavaSymbolicKRun(context);
-        } else {
-            throw new AssertionError("currently only three execution backends are supported: "
-                    + "MAUDE, SYMBOLIC, and JAVA");
-        }
-    }
+public class KRunFrontEnd extends FrontEnd {
 
     /**
      * Execute krun in normal mode (i.e. not in debug mode).
@@ -87,13 +73,10 @@ public class KRunFrontEnd {
      * and definition context to use to execute.
      * @return true if the application completed normally; false otherwise
      */
-    public static boolean normalExecution(ExecutionContext executionContext) {
-        Term initialConfiguration = executionContext.getInitialConfiguration();
-        Context context = executionContext.getContext();
+    public boolean normalExecution(Term initialConfiguration) {
 
         try {
             KRunOptions options = context.krunOptions;
-            KRun krun = obtainKRun(context);
             KRunResult<?> result = null;
             //Set<String> varNames = null;
             try {
@@ -132,7 +115,7 @@ public class KRunFrontEnd {
                                 initialConfiguration, steps);
                     }
 
-                    sw.printTotal("Search total");
+                    sw.printIntermediate("Search total");
                 } else if (options.experimental.ltlmc() != null) {
                     Term formula = new RunProcess().runParserOrDie("kast -e",
                             options.experimental.ltlmc(), false, "LtlFormula", context);
@@ -141,7 +124,7 @@ public class KRunFrontEnd {
                                     formula,
                                     initialConfiguration);
 
-                    sw.printTotal("Model checking total");
+                    sw.printIntermediate("Model checking total");
                 } else if (options.experimental.prove() != null) {
                     File proofFile = options.experimental.prove();
                     String content = FileUtil.getFileContent(
@@ -150,13 +133,13 @@ public class KRunFrontEnd {
                             proofFile.getAbsolutePath(), context);
                     Module mod = parsed.getSingletonModule();
                     result = krun.prove(mod, initialConfiguration);
-                    sw.printTotal("Proof total");
+                    sw.printIntermediate("Proof total");
                 } else if (options.depth != null) {
                     result = krun.step(initialConfiguration, options.depth);
-                    sw.printTotal("Bounded execution total");
+                    sw.printIntermediate("Bounded execution total");
                 } else {
                     result = krun.run(initialConfiguration);
-                    sw.printTotal("Normal execution total");
+                    sw.printIntermediate("Normal execution total");
                 }
                 if (patternRule != null && !options.search()) {
                     Object krs = result.getResult();
@@ -175,10 +158,9 @@ public class KRunFrontEnd {
             } catch (ParseFailedException e) {
                 e.report();
             } catch (UnsupportedBackendOptionException e) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.CRITICAL, "Backend \""
+                kem.registerCriticalError("Backend \""
                                 + context.kompileOptions.backend.name().toLowerCase()
-                                + "\" does not support option " + e.getMessage()));
+                                + "\" does not support option " + e.getMessage(), e);
             }
 
             if (options.output.isPrettyPrinting()) {
@@ -188,16 +170,14 @@ public class KRunFrontEnd {
                 writeOutput(options, output);
                 // print search graph
                 if (options.search() && options.graph) {
-                    System.out.println(K.lineSeparator + "The search graph is:"
-                            + K.lineSeparator);
+                    System.out.println("\nThe search graph is:\n");
                     @SuppressWarnings("unchecked")
                     KRunResult<SearchResults> searchResult = (KRunResult<SearchResults>) result;
                     System.out.println(searchResult.getResult().getGraph());
                     // offer the user the possibility to turn execution into
                     // debug mode
                     while (true) {
-                        System.out.print(K.lineSeparator
-                                + "Do you want to enter in debug mode? (y/n):");
+                        System.out.print("\nDo you want to enter in debug mode? (y/n):");
                         BufferedReader stdin = new BufferedReader(
                                 new InputStreamReader(System.in));
                         System.out.flush();
@@ -206,7 +186,7 @@ public class KRunFrontEnd {
                             System.out.println();
                             break;
                         } else if (input.equals("y")) {
-                            debugExecution(executionContext, searchResult);
+                            debugExecution(initialConfiguration, searchResult);
                             break;
                         } else {
                             System.out
@@ -224,14 +204,14 @@ public class KRunFrontEnd {
                     Term res = ((KRunState) krs).getRawResult();
 
                     if (options.experimental.outputFile == null) {
-                        BinaryLoader.saveOrDie(System.out, res);
+                        loader.saveOrDie(System.out, res);
 
                     } else {
-                        BinaryLoader.saveOrDie(options.experimental.outputFile.getAbsolutePath(), res);
+                        loader.saveOrDie(options.experimental.outputFile.getAbsolutePath(), res);
                     }
                 } else {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                            "Binary output mode is not supported by search and model checking"));
+                    kem.registerCriticalError("Binary output mode is not supported by search " +
+                            "and model checking");
                 }
 
             }
@@ -239,6 +219,7 @@ public class KRunFrontEnd {
             e.printStackTrace();
             return false;
         }
+        sw.printTotal("Total");
         return true;
     }
     private static void writeOutput(KRunOptions options, String output)
@@ -264,21 +245,12 @@ public class KRunFrontEnd {
      * @param context The definition context loaded from the compiled definition.
      * @return true if the application completed normally; false otherwise
      */
-    @SuppressWarnings("unchecked")
-    public static boolean debugExecution(ExecutionContext executionContext,
-                                      KRunResult<SearchResults> state) {
-
-        Term initialConfiguration = executionContext.getInitialConfiguration();
-        Context context = executionContext.getContext();
+    public boolean debugExecution(Term initialConfiguration, KRunResult<SearchResults> state) {
         ConsoleReader reader;
         try {
             reader = new ConsoleReader();
         } catch (IOException e) {
-            if (context.globalOptions.debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                    "IO error detected interacting with console"));
+            kem.registerInternalError("IO error detected interacting with console", e);
             return false;
         }
         try {
@@ -295,7 +267,6 @@ public class KRunFrontEnd {
             completors.add(new ArgumentCompletor(argCompletor));
             reader.addCompletor(new MultiCompletor(completors));
 
-            KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
             KRunDebugger debugger;
             try {
@@ -308,9 +279,9 @@ public class KRunFrontEnd {
                     debugger = krun.debug(state.getResult().getGraph());
                 }
             } catch (UnsupportedBackendOptionException e) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                        "Backend \"" + context.kompileOptions.backend.name().toLowerCase()
-                        + "\" does not support option " + e.getMessage()));
+                kem.registerCriticalError("Backend \""
+                        + context.kompileOptions.backend.name().toLowerCase()
+                        + "\" does not support option " + e.getMessage(), e);
                 return false; //unreachable
             }
             while (true) {
@@ -319,11 +290,7 @@ public class KRunFrontEnd {
                 try {
                     input = reader.readLine("Command > ");
                 } catch (IOException e) {
-                    if (context.globalOptions.debug) {
-                        e.printStackTrace();
-                    }
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                            "IO error detected interacting with console"));
+                    kem.registerInternalError("IO error detected interacting with console", e);
                     return false;
                 }
                 if (input == null) {
@@ -387,11 +354,12 @@ public class KRunFrontEnd {
                         int state2 = options.showTransition.state2();
                         System.out.println(debugger.printEdge(state1, state2));
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandSave) {
-                        BinaryLoader.saveOrDie(options.save.file.getAbsolutePath(), debugger.getGraph());
+                        loader.saveOrDie(options.save.file.getAbsolutePath(), debugger.getGraph());
                         System.out.println("File successfully saved.");
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
+                        @SuppressWarnings("unchecked")
                         DirectedGraph<KRunState, Transition> savedGraph =
-                                BinaryLoader.loadOrDie(DirectedGraph.class, options.load.file.getAbsolutePath());
+                                loader.loadOrDie(DirectedGraph.class, options.load.file.getAbsolutePath());
                         debugger = krun.debug(savedGraph);
                         debugger.setCurrentState(1);
                         System.out.println("File successfully loaded.");
@@ -417,11 +385,8 @@ public class KRunFrontEnd {
         }
     }
 
-    private static boolean guiDebugExecution(ExecutionContext executionContext) {
-        Term initialConfiguration = executionContext.getInitialConfiguration();
-        Context context = executionContext.getContext();
+    private boolean guiDebugExecution(Term initialConfiguration) {
         try {
-            KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
             RunKRunCommand cmd = new RunKRunCommand(initialConfiguration, krun, context);
             MainWindow window = new MainWindow(cmd);
@@ -436,23 +401,16 @@ public class KRunFrontEnd {
                 }
             }
         } catch (KRunExecutionException e) {
-            if (context.globalOptions.debug) {
-                e.printStackTrace();
-            }
-            new RunProcess().printError(e.getMessage());
+            kem.registerCriticalError(e.getMessage(), e);
             return false;
         }
     }
 
-    /**
-     * @param cmds represents the arguments/options given to krun command..
-     * @return true if the application completed normally; false otherwise
-     */
-    public static boolean execute_Krun(String[] cmds) {
-        KRunOptions options = new KRunOptions();
-        options.global.initialize();
+    public static com.google.inject.Module[] getModules(String[] args) {
         try {
-            JCommander jc = new JCommander(options, cmds);
+            KRunOptions options = new KRunOptions();
+
+            JCommander jc = new JCommander(options, args);
             jc.setProgramName("krun");
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KRunOptions.Experimental.class, SMTOptions.class, JavaExecutionOptions.class));
 
@@ -460,78 +418,86 @@ public class KRunFrontEnd {
                 System.setProperty("java.awt.headless", "false");
             }
 
-            if (options.global.help) {
-                StringBuilder sb = new StringBuilder();
-                jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
-                return true;
-            }
-
-            if (options.helpExperimental) {
-                StringBuilder sb = new StringBuilder();
-                jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
-                return true;
-            }
-
-            if (options.global.version) {
-                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-                System.out.print(msg);
-                return true;
-            }
-
-            sw.printIntermediate("Deleting temporary krun directory");
-
-            ExecutionContext mainExecutionContext = new ExecutionContext(options, options.configurationCreation, sw);
-
-            // Parse the program arguments
-
-            if(options.experimental.simulation != null) {
-                ConfigurationCreationOptions simulationCCOptions = new ConfigurationCreationOptions();
-                new JCommander(simulationCCOptions,
-                        options.experimental.simulation.toArray(
-                                new String[options.experimental.simulation.size()]));
-
-                ExecutionContext simulationExecutionContext = new ExecutionContext(options, simulationCCOptions, sw);
-
-                Term leftInitTerm = mainExecutionContext.getInitialConfiguration();
-                Term rightInitTerm = simulationExecutionContext.getInitialConfiguration();
-                Context contextLeft = mainExecutionContext.getContext();
-                Context contextRight = mainExecutionContext.getContext();
-
-                Waitor runSimulation;
-                try {
-                    runSimulation = new Waitor(contextLeft, contextRight, leftInitTerm, rightInitTerm);
-                } catch (KRunExecutionException e) {
-                    if (options.global.debug) {
-                        e.printStackTrace();
-                    }
-                    new RunProcess().printError(e.getMessage());
-                    return false;
-                }
-
-                runSimulation.start();
-
-                try {
-                    runSimulation.join();
-                } catch (InterruptedException e) {
-                    return false;
-                }
-                return true;
-            }
-
-            if (!options.experimental.debugger() && !options.experimental.debuggerGui()) {
-                normalExecution(mainExecutionContext);
+            if (options.experimental.simulation != null) {
+                return new com.google.inject.Module[] {
+                        new KRunModule(options),
+                        new CommonModule(),
+                        new JCommanderModule(jc),
+                        new KRunModule.SimulationModule(),
+                        new KRunModule.MainExecutionContextModule(options) };
             } else {
-                if (options.experimental.debuggerGui())
-                    return guiDebugExecution(mainExecutionContext);
-                else
-                    debugExecution(mainExecutionContext, null);
+                return new com.google.inject.Module[] {
+                        new KRunModule(options),
+                        new CommonModule(),
+                        new JCommanderModule(jc),
+                        new KRunModule.NoSimulationModule(options) };
+            }
+        } catch (ParameterException ex) {
+            printBootError(ex.getMessage());
+            return null;
+        }
+    }
+
+    private final KRunOptions options;
+    private final KRun krun;
+    private final Context context;
+    private final Provider<Term> initialConfigurationProvider;
+    private final Optional<Waitor> waitor;
+    private final Stopwatch sw;
+    private final KExceptionManager kem;
+    private final BinaryLoader loader;
+
+    @Inject
+    KRunFrontEnd(
+            KRunOptions options,
+            @Usage String usage,
+            @ExperimentalUsage String experimentalUsage,
+            @Main KRun krun,
+            @Main Context context,
+            @Main Provider<Term> initialConfigurationProvider,
+            Optional<Waitor> waitor,
+            Stopwatch sw,
+            KExceptionManager kem,
+            BinaryLoader loader) {
+        super(kem, options.global, usage, experimentalUsage);
+        this.options = options;
+        this.krun = krun;
+        this.context = context;
+        this.initialConfigurationProvider = initialConfigurationProvider;
+        this.waitor = waitor;
+        this.sw = sw;
+        this.kem = kem;
+        this.loader = loader;
+    }
+
+    /**
+     * @param cmds represents the arguments/options given to krun command..
+     * @return true if the application completed normally; false otherwise
+     */
+    public boolean run() {
+        if (options.experimental.simulation != null) {
+            Waitor runSimulation = waitor.get();
+            runSimulation.start();
+            try {
+                runSimulation.join();
+            } catch (InterruptedException e) {
+                return false;
             }
             return true;
-        } catch (ParameterException ex) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
-            return false;
         }
+
+        if (!options.experimental.debugger() && !options.experimental.debuggerGui()) {
+            normalExecution(initialConfigurationProvider.get());
+        } else {
+            if (options.experimental.debuggerGui())
+                return guiDebugExecution(initialConfigurationProvider.get());
+            else
+                debugExecution(initialConfigurationProvider.get(), null);
+        }
+        return true;
+    }
+    @Override
+    public Tool tool() {
+        return Tool.KRUN;
     }
 }

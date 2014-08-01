@@ -31,6 +31,10 @@ public class KException {
         labels.put(KExceptionGroup.CRITICAL, "Critical");
     }
 
+    public static KException criticalError(String message) {
+        return new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message);
+    }
+
     public KException(ExceptionType type, KExceptionGroup label, String message) {
         this(type, label, message, null, null, null, null);
     }
@@ -99,6 +103,10 @@ public class KException {
 
     public Throwable getException() {
         return exception;
+    }
+
+    public ExceptionType getType() {
+        return type;
     }
 
     private String traceTail() {

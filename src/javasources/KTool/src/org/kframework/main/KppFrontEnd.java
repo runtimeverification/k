@@ -3,25 +3,55 @@ package org.kframework.main;
 
 import java.io.*;
 
-public class Kpp {
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.FirstArg;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Module;
+
+public class KppFrontEnd extends FrontEnd {
 
     private enum State {
         CODE, SINGLE_LINE_COMMENT, MULTI_LINE_COMMENT, STRING
     }
 
-    public static void codeClean(String[] args) {
-        if (args.length != 1)
-            System.err.println("Usage: kpp <filename>");
-        else {
-            File f = new File(args[0]);
-            if (!f.exists())
-                System.err.println("File not found.");
+    private final String fileName;
+    private static final String USAGE = "Usage: kpp <filename>";
 
-            try (BufferedReader input = new BufferedReader(new FileReader(f))) {
-                Kpp.codeClean(input, System.out);
-            } catch (IOException e) {
-                e.printStackTrace();
+    @Inject
+    KppFrontEnd(
+            KExceptionManager kem,
+            GlobalOptions globalOptions,
+            @FirstArg String fileName) {
+        super(kem, globalOptions, USAGE, "");
+        this.fileName = fileName;
+    }
+
+    public static Module[] getModules(final String[] args) {
+        if (args.length != 1) {
+            printBootError("Kpp takes exactly one file");
+            return null;
+        }
+        return new Module[] { new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(String.class).annotatedWith(FirstArg.class).toInstance(args[0]);
             }
+        }};
+    }
+
+    public boolean run() {
+        File f = new File(fileName);
+        if (!f.exists())
+            System.err.println("File not found.");
+
+        try (BufferedReader input = new BufferedReader(new FileReader(f))) {
+            KppFrontEnd.codeClean(input, System.out);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -70,5 +100,10 @@ public class Kpp {
         if ((state == State.CODE || state == State.STRING) && previous != 0)
             out.write(previous);
         out.flush();
+    }
+
+    @Override
+    public Tool tool() {
+        return Tool.OTHER;
     }
 }

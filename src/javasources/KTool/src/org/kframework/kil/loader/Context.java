@@ -40,12 +40,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-
+@Singleton
 public class Context implements Serializable {
 
     public static final Set<String> generatedTags = ImmutableSet.of(
@@ -167,36 +171,16 @@ public class Context implements Serializable {
     }
 
     // TODO(dwightguth): remove these fields and replace with injected dependencies
-    public transient GlobalOptions globalOptions;
+    @Inject public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
-    public SMTOptions smtOptions;
-    public KRunOptions krunOptions;
-    public ConfigurationCreationOptions ccOptions;
-    public ColorOptions colorOptions;
-    public transient JavaExecutionOptions javaExecutionOptions;
+    @Inject public SMTOptions smtOptions;
+    @Inject @Nullable public KRunOptions krunOptions;
+    @Inject @Nullable public ConfigurationCreationOptions ccOptions;
+    @Inject @Nullable public ColorOptions colorOptions;
+    @Inject @Nullable public transient JavaExecutionOptions javaExecutionOptions;
 
-    public Context(GlobalOptions globalOptions) {
-        this.globalOptions = globalOptions;
+    public Context() {
         initSubsorts();
-    }
-
-    public Context(KompileOptions kompileOptions) {
-        this(kompileOptions.global);
-        this.kompileOptions = kompileOptions;
-        this.smtOptions = kompileOptions.experimental.smt;
-        //TODO(dwightguth): replace this with a provider in Guice
-        this.javaExecutionOptions = new JavaExecutionOptions();
-    }
-
-    public Context(KRunOptions krunOptions, ConfigurationCreationOptions ccOptions, KompileOptions kompileOptions) {
-        this(kompileOptions);
-        this.krunOptions = krunOptions;
-        this.ccOptions = ccOptions;
-        this.colorOptions = krunOptions.color;
-        if (krunOptions.experimental.smt.smt != null) {
-            smtOptions = krunOptions.experimental.smt;
-        }
-        this.javaExecutionOptions = krunOptions.experimental.javaExecution;
     }
 
     public void putLabel(Production p, String cons) {

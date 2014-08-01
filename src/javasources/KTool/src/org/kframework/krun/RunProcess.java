@@ -46,7 +46,7 @@ public class RunProcess {
             realEnvironment.putAll(environment);
 
             // set execution directory to current user dir
-            pb.directory(new File(K.userdir));
+            pb.directory(new File("."));
 
             // start process
             Process process = pb.start();

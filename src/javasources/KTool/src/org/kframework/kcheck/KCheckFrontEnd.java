@@ -4,12 +4,10 @@ package org.kframework.kcheck;
 import org.kframework.backend.Backend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kcheck.gui.KCheckMainWindow;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -104,7 +102,7 @@ public class KCheckFrontEnd {
                 context.dotk.mkdirs();
             }
 
-            Backend backend = new RLBackend(Stopwatch.instance(), context);
+            Backend backend = null;//new RLBackend(Stopwatch.instance(), context);
             //output = FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled";
             context.dotk.mkdirs();
 
@@ -146,8 +144,8 @@ public class KCheckFrontEnd {
             javaDef = (Definition) e.getResult();
         }
 
-        BinaryLoader.saveOrDie(
-                context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context));
+        //BinaryLoader.saveOrDie(
+        //        context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context));
         backend.run(javaDef);
     }
 }
