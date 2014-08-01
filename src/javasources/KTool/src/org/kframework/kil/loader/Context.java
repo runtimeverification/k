@@ -171,7 +171,7 @@ public class Context implements Serializable {
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     @Inject public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
-    @Inject public SMTOptions smtOptions;
+    @Inject(optional=true) public transient SMTOptions smtOptions;
     @Inject(optional=true) public KRunOptions krunOptions;
     @Inject(optional=true) public ConfigurationCreationOptions ccOptions;
     @Inject(optional=true) public ColorOptions colorOptions;
