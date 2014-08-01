@@ -2,13 +2,18 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.main.Tool;
-import org.kframework.utils.inject.NullProvider;
-
 import com.beust.jcommander.Parameter;
+import com.google.inject.Inject;
 import com.google.inject.ProvidedBy;
 
-@ProvidedBy(NullProvider.class)
 public final class JavaExecutionOptions {
+
+    public JavaExecutionOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public JavaExecutionOptions(Void v) {}
+
     @Parameter(names="--generate-tests", description="Test programs will be generated along with "
         + "normal search.")
     public boolean generateTests = false;

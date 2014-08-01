@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.Tool;
 import org.kframework.utils.options.SMTOptions;
 
 import com.google.inject.AbstractModule;
@@ -27,6 +28,7 @@ public class KompileModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(FrontEnd.class).to(KompileFrontEnd.class);
+        bind(Tool.class).toInstance(Tool.KOMPILE);
         bind(Context.class).toInstance(context);
         bind(KompileOptions.class).toInstance(options);
         bind(GlobalOptions.class).toInstance(options.global);

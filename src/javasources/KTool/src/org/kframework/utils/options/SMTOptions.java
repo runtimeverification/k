@@ -3,13 +3,17 @@ package org.kframework.utils.options;
 
 import java.io.Serializable;
 
-import org.kframework.utils.inject.NullProvider;
-
 import com.beust.jcommander.Parameter;
+import com.google.inject.Inject;
 import com.google.inject.ProvidedBy;
 
-@ProvidedBy(NullProvider.class)
 public class SMTOptions implements Serializable {
+
+    public SMTOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public SMTOptions(Void v) {}
 
     @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|gappa|none].")
     public SMTSolver smt = SMTSolver.Z3;

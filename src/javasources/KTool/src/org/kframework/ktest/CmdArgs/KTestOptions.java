@@ -8,7 +8,6 @@ import org.kframework.ktest.IgnoringStringMatcher;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.StringMatcher;
 import org.kframework.main.GlobalOptions;
-import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.EnumSetConverter;
 import org.kframework.utils.options.OnOffConverter;
@@ -18,8 +17,7 @@ import org.kframework.utils.options.StringListConverter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.ProvidedBy;
-
+import com.google.inject.Inject;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
@@ -36,8 +34,13 @@ import java.util.Set;
  *   - Only one unnamed argument is passed
  *   - File extension is either .k or .xml
  */
-@ProvidedBy(NullProvider.class)
 public class KTestOptions {
+
+    public KTestOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public KTestOptions(Void v) {}
 
     public static final class KTestStepSetConverter extends EnumSetConverter<KTestStep, KTestStepConverter> {
         @Override
@@ -174,8 +177,6 @@ public class KTestOptions {
                 "command to be executed without actual execution.")
     private boolean dry = false;
 
-    public KTestOptions() {}
-
     /**
      * Copy constructor.
      * @param obj KTestOptions object to copy
@@ -267,6 +268,10 @@ public class KTestOptions {
 
     public Color getTerminalColor() {
         return color.terminalColor();
+    }
+
+    public ColorOptions getColorOptions() {
+        return color;
     }
 
     public List<String> getExtensions() {

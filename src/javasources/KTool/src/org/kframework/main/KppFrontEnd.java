@@ -36,7 +36,10 @@ public class KppFrontEnd extends FrontEnd {
         return new Module[] { new AbstractModule() {
             @Override
             protected void configure() {
+                bind(FrontEnd.class).to(KppFrontEnd.class);
+                bind(Tool.class).toInstance(Tool.OTHER);
                 bind(String.class).annotatedWith(FirstArg.class).toInstance(args[0]);
+                bind(GlobalOptions.class).toInstance(new GlobalOptions());
             }
         }};
     }
@@ -100,10 +103,5 @@ public class KppFrontEnd extends FrontEnd {
         if ((state == State.CODE || state == State.STRING) && previous != 0)
             out.write(previous);
         out.flush();
-    }
-
-    @Override
-    public Tool tool() {
-        return Tool.OTHER;
     }
 }

@@ -5,14 +5,17 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
-
 import com.beust.jcommander.Parameter;
-import com.google.inject.ProvidedBy;
+import com.google.inject.Inject;
 
-@ProvidedBy(NullProvider.class)
 public final class GlobalOptions {
+
+    public GlobalOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public GlobalOptions(Void v) {}
 
     public static enum Warnings {
         /**

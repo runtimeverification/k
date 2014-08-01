@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
@@ -174,10 +172,10 @@ public class Context implements Serializable {
     @Inject public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
     @Inject public SMTOptions smtOptions;
-    @Inject @Nullable public KRunOptions krunOptions;
-    @Inject @Nullable public ConfigurationCreationOptions ccOptions;
-    @Inject @Nullable public ColorOptions colorOptions;
-    @Inject @Nullable public transient JavaExecutionOptions javaExecutionOptions;
+    @Inject(optional=true) public KRunOptions krunOptions;
+    @Inject(optional=true) public ConfigurationCreationOptions ccOptions;
+    @Inject(optional=true) public ColorOptions colorOptions;
+    @Inject(optional=true) public transient JavaExecutionOptions javaExecutionOptions;
 
     public Context() {
         initSubsorts();

@@ -4,14 +4,19 @@ package org.kframework.krun;
 import java.awt.Color;
 
 import org.kframework.utils.ColorUtil;
-import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.Parameter;
+import com.google.inject.Inject;
 import com.google.inject.ProvidedBy;
 
-@ProvidedBy(NullProvider.class)
 public class ColorOptions {
+
+    public ColorOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public ColorOptions(Void v) {}
 
     @Parameter(names="--color", description="Use colors in output. Default is on.")
     private ColorSetting color;
