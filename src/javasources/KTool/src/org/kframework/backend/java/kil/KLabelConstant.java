@@ -39,6 +39,12 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
      */
     private final boolean isFunction;
 
+    /*
+     * boolean flag set iff a production tagged with "pattern" generates
+     * this {@code KLabelConstant}
+     */
+    private final boolean isPattern;
+
     private final boolean isSortPredicate;
 
     private final Sort predicateSort;
@@ -64,6 +70,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
         boolean isFunction = false;
+        boolean isPattern = false;
         if (!label.startsWith("is")) {
             predicateSort = null;
 
@@ -72,6 +79,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                 Production fstProd = iterator.next();
                 isFunction = fstProd.containsAttribute(Attribute.FUNCTION.getKey())
                         || fstProd.containsAttribute(Attribute.PREDICATE.getKey());
+                isPattern = fstProd.containsAttribute(Attribute.PATTERN_KEY);
             }
 
             while (iterator.hasNext()) {
@@ -87,6 +95,10 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                         + label
                         + " is a function symbol because there are multiple productions associated with this KLabel: "
                         + productions;
+                assert isPattern == production.containsAttribute(Attribute.PATTERN_KEY) :
+                        "Cannot determine if the KLabel " + label
+                        + " is a pattern symbol because there are multiple productions associated with this KLabel: "
+                        + productions;
             }
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
@@ -95,6 +107,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         }
         this.isSortPredicate = predicateSort != null;
         this.isFunction = isFunction;
+        this.isPattern = isPattern;
 
         this.listTerminator = buildListTerminator(definition);
         this.isListLabel = listTerminator != null;
@@ -128,8 +141,8 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     }
 
     /**
-     * Returns true iff no production tagged with "function" or "predicate" generates this {@code
-     * KLabelConstant}.
+     * Returns true iff no production tagged with "function" or "predicate" or "pattern"
+     * generates this {@code KLabelConstant}.
      */
     @Override
     public boolean isConstructor() {
@@ -143,6 +156,15 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     @Override
     public boolean isFunction() {
         return isFunction;
+    }
+
+    /**
+     * Returns true iff a production tagged with "pattern" generates
+     * this {@code KLabelConstant}.
+     */
+    @Override
+    public boolean isPattern() {
+        return isPattern;
     }
 
     /**

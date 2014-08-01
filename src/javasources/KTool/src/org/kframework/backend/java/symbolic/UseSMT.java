@@ -1,33 +1,30 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.io.Serializable;
-
-import org.kframework.backend.java.kil.BuiltinMap;
-
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.FuncDecl;
-import com.microsoft.z3.Model;
-
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
+import org.kframework.utils.options.SMTSolver;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.Collections;
 
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Expr;
+import com.microsoft.z3.FuncDecl;
+import com.microsoft.z3.Model;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
-import org.kframework.utils.options.SMTSolver;
 
 public class UseSMT implements Serializable {
 
-    public static BuiltinMap checkSat(Term term, TermContext termContext) {
+    public static Term checkSat(Term term, TermContext termContext) {
         if (termContext.definition().context().smtOptions.smt != SMTSolver.Z3) {
             return null;
         }

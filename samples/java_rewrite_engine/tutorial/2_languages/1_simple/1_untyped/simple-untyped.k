@@ -1,4 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
+require "verification/list_pattern.k"
+
 /*!
 \title{SIMPLE --- Untyped}
 \author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
@@ -227,7 +229,7 @@ the declaration. */
 endmodule
 
 
-module SIMPLE-UNTYPED
+module SIMPLE-UNTYPED-SEMANTICS
   imports SIMPLE-UNTYPED-SYNTAX
 
 /*@ \section{Basic Semantic Infrastructure}
@@ -1029,5 +1031,14 @@ No kompile options are needed if you only only want to execute the definition
 program behaviors then you need to kompile with the transition option
 including rule tags such as lookup, increment, acquire, etc.  See the
 IMP++ tutorial for what the transition option means how to use it. */
+endmodule
+
+module SIMPLE-UNTYPED
+  imports SIMPLE-UNTYPED-SEMANTICS
+  imports LIST-PATTERN
+
+  // verification stuff
+  syntax Id ::= "x" | "y" | "t" | "reverse"
+  syntax Exp ::= "breakpoint"
 endmodule
 

@@ -4,7 +4,8 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddKCell;
 import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.Cell2DataStructure;
+import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
@@ -37,10 +38,11 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new AddTopCellRules(context));
         add(new ResolveAnonymousVariables(context));
         add(new ResolveListOfK(context));
-        add(new FlattenSyntax(context));
+        add(new FlattenTerms(context));
         add(new ResolveContextAbstraction(context));
         add(new ResolveOpenCells(context));
         add(new ResolveRewrite(context));
+        add(new Cell2DataStructure(context));
         add(new CompileDataStructures(context));
         //add(new DataStructureToLookupUpdate(context));
     }

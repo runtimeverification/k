@@ -1,11 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -13,9 +8,12 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 /**
  *
@@ -45,28 +43,27 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         if (!(map instanceof BuiltinMap)) {
             return this;
         }
-        BuiltinMap builtinMap = ((BuiltinMap) map);
+        BuiltinMap builtinMap = (BuiltinMap) map;
 
         BuiltinMap.Builder builder = BuiltinMap.builder();
-        builder.putAll(builtinMap.getEntries());
-        Set<Term> keysToRemove = new HashSet<Term>();
-        for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            Term nextKey = iterator.next();
-            if (builder.remove(nextKey) != null) {
-                keysToRemove.add(nextKey);
+        builder.concatenate(builtinMap);
+
+        Set<Term> pendingRemoveSet = new HashSet<>();
+        for (Term key : removeSet) {
+            if (builder.remove(key) == null) {
+                pendingRemoveSet.add(key);
             }
         }
 
-        if (removeSet.size() > keysToRemove.size()) {
-            // TODO(YilongL): why not return Bottom when there is no frame
-            return new MapUpdate(builtinMap, Sets.difference(removeSet, keysToRemove), updateMap);
+        if (!pendingRemoveSet.isEmpty()) {
+            if (!builtinMap.isConcreteCollection()) {
+                return new MapUpdate(builder.build(), pendingRemoveSet, updateMap);
+            } else {
+                return Bottom.of(Kind.KITEM);
+            }
         }
 
         builder.putAll(updateMap);
-
-        if (builtinMap.hasFrame()) {
-            builder.setFrame(builtinMap.frame());
-        }
         return builder.build();
     }
 

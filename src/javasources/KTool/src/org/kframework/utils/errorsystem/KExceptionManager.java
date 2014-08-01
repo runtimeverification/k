@@ -8,15 +8,22 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+@Singleton
 public class KExceptionManager {
     private final List<KException> exceptions = new ArrayList<KException>();
 
-    private GlobalOptions options;
+    private final GlobalOptions options;
 
-    public KExceptionManager(GlobalOptions options) {
+    @Inject
+    KExceptionManager(GlobalOptions options) {
         this.options = options;
     }
 
@@ -29,7 +36,11 @@ public class KExceptionManager {
     }
 
     public void registerCriticalError(String message, Throwable e) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, e, null);
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, e, (ASTNode) null);
+    }
+
+    public void registerCriticalError(String message) {
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, (ASTNode) null);
     }
 
     public void registerCriticalError(String message, Throwable e, LocationData location) {
@@ -38,7 +49,7 @@ public class KExceptionManager {
     }
 
     public void registerInternalError(String message, Throwable e) {
-        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e, null);
+        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e, (ASTNode) null);
     }
 
     public void registerCriticalWarning(String message, ASTNode node) {
@@ -46,7 +57,7 @@ public class KExceptionManager {
     }
 
     public void registerCriticalWarning(String message, Throwable e) {
-        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, null);
+        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, (ASTNode) null);
     }
 
     public void registerCriticalWarning(String message, Throwable e, ASTNode node) {
@@ -81,11 +92,22 @@ public class KExceptionManager {
     }
 
     public void print() {
+        Collections.sort(exceptions, new Comparator<KException>() {
+            @Override
+            public int compare(KException arg0, KException arg1) {
+                return arg0.toString().compareTo(arg1.toString());
+            }
+        });
+        KException last = null;
         for (KException e : exceptions) {
             if (!options.warnings.includesExceptionType(e.type))
                 continue;
 
+            if (last != null && last.toString().equals(e.toString())) {
+                continue;
+            }
             System.err.println(StringUtil.splitLines(e.toString()));
+            last = e;
         }
     }
 

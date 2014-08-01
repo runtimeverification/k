@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BoolBuiltin;
@@ -94,13 +95,12 @@ public class MetaK {
         kModules.add("K-WRAPPERS-LABELS");
     };
 
-    public static Set<Attribute> anywheres = new HashSet<Attribute>();
-    static {
-        anywheres.add(Attribute.ANYWHERE);
-        anywheres.add(new Attribute("macro", ""));
-        anywheres.add(new Attribute("predicate", ""));
-        anywheres.add(new Attribute("function", ""));
-    }
+    public static final ImmutableSet<Attribute> anywheres = ImmutableSet.of(
+            Attribute.FUNCTION,
+            Attribute.PREDICATE,
+            Attribute.PATTERN,
+            Attribute.MACRO,
+            Attribute.ANYWHERE);
 
     public static boolean isKModule(String key) {
         return kModules.contains(key);

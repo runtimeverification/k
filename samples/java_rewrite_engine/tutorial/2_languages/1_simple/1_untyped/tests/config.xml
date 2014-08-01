@@ -17,5 +17,8 @@
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
+
+  <!-- prover tests -->
+  <include file="config_verification.xml"/>
 </tests>
 

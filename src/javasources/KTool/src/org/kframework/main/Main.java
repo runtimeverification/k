@@ -6,11 +6,18 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.fusesource.jansi.AnsiConsole;
-import org.kframework.krun.K;
-import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.kagreg.KagregFrontEnd;
+import org.kframework.kast.KastFrontEnd;
+import org.kframework.kompile.KompileFrontEnd;
+import org.kframework.krun.KRunFrontEnd;
+import org.kframework.ktest.KTestFrontEnd;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.ProvisionException;
 
 public class Main {
 
@@ -37,61 +44,57 @@ public class Main {
      * @throws IOException when loadDefinition fails
      */
     public static void main(String[] args) {
-        Stopwatch.instance();
-        setJavaLibraryPath();
         AnsiConsole.systemInstall();
+        setJavaLibraryPath();
 
-        boolean succeeded = true;
+        Module[] modules;
         if (args.length >= 1) {
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
-            try {
                 switch (args[0]) {
                     case "-kompile":
-                        K.setTool(K.Tool.KOMPILE);
-                        org.kframework.kompile.KompileFrontEnd.main(args2);
+                        modules = KompileFrontEnd.getModules(args2);
                         break;
                     case "-kagreg":
-                        K.setTool(K.Tool.OTHER);
-                        org.kframework.kagreg.KagregFrontEnd.kagreg(args2);
+                        modules = KagregFrontEnd.getModules(args2);
                         break;
                     case "-kcheck":
-                        K.setTool(K.Tool.OTHER);
-                        succeeded = org.kframework.kcheck.KCheckFrontEnd.kcheck(args2);
-                        break;
+                        assert false : "kcheck no longer supported";
+                        return;
                     case "-ktest":
-                        K.setTool(K.Tool.KTEST);
-                        succeeded = org.kframework.ktest.KTest.main(args2);
+                        modules = KTestFrontEnd.getModules(args2);
                         break;
                     case "-kast":
-                        K.setTool(K.Tool.KAST);
-                        succeeded = org.kframework.kast.KastFrontEnd.kast(args2);
+                        modules = KastFrontEnd.getModules(args2);
                         break;
                     case "-krun":
-                        K.setTool(K.Tool.KRUN);
-                        succeeded = org.kframework.krun.KRunFrontEnd.execute_Krun(args2);
+                        modules = KRunFrontEnd.getModules(args2);
                         break;
                     case "-kpp":
-                        K.setTool(K.Tool.OTHER);
-                        Kpp.codeClean(args2);
+                        modules = KppFrontEnd.getModules(args2);
                         break;
                     default:
                         invalidJarArguments();
-                        break;
-                }
-            } catch (KEMException e) {
-                // terminated with errors, so we need to return nonzero error code.
-                GlobalSettings.kem.print();
+                        return;
+            }
+            if (modules == null) {
+                //boot error, we should have printed it already
                 System.exit(1);
             }
-
-            GlobalSettings.kem.print();
-            System.exit(succeeded ? 0 : 1);
+            Injector injector = Guice.createInjector(modules);
+            KExceptionManager kem = injector.getInstance(KExceptionManager.class);
+            try {
+                boolean succeeded = injector.getInstance(FrontEnd.class).main();
+                System.exit(succeeded ? 0 : 1);
+            } catch (ProvisionException e) {
+                kem.print();
+                System.exit(1);
+            }
         }
         invalidJarArguments();
     }
 
     private static void invalidJarArguments() {
-        System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
+        System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -krun, -ktest, or -kpp.");
         System.exit(1);
     }
 }

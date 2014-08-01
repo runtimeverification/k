@@ -4,9 +4,13 @@ package org.kframework.utils.options;
 import java.io.File;
 import java.io.FilenameFilter;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
+import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.NullProvider;
 
+import com.beust.jcommander.Parameter;
+import com.google.inject.ProvidedBy;
+
+@ProvidedBy(NullProvider.class)
 public class DefinitionLoadingOptions {
     @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the kompiled " +
             "K definition resides. The default is the unique, only directory with the suffix '-kompiled' " +
@@ -26,7 +30,7 @@ public class DefinitionLoadingOptions {
         for (int i = 0; i < dirs.length; i++) {
             if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
                 if (directory != null) {
-                    throw new ParameterException("Multiple compiled definitions found in the "
+                    GlobalSettings.kem.registerCriticalError("Multiple compiled definitions found in the "
                             + "current working directory: " + directory.getAbsolutePath() + " and " +
                             dirs[i].getAbsolutePath());
                 } else {
@@ -36,11 +40,11 @@ public class DefinitionLoadingOptions {
         }
 
         if (directory == null) {
-            throw new ParameterException("Could not find a compiled definition. " +
+            GlobalSettings.kem.registerCriticalError("Could not find a compiled definition. " +
                     "Use --directory to specify one.");
         }
         if (!directory.isDirectory()) {
-            throw new ParameterException("Does not exist or not a directory: " + directory.getAbsolutePath());
+            GlobalSettings.kem.registerCriticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
         }
         return directory;
     }
@@ -54,7 +58,7 @@ public class DefinitionLoadingOptions {
             }
         }
         if (!directory.isDirectory()) {
-            throw new ParameterException("Does not exist or not a directory: " + directory.getAbsolutePath());
+            GlobalSettings.kem.registerCriticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
         }
         return directory;
     }

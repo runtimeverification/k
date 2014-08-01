@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
+import org.kframework.backend.FirstStep;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
@@ -84,13 +85,12 @@ import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
-import org.kframework.main.FirstStep;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
-public class RLBackend extends BasicBackend implements Backend {
+public abstract class RLBackend extends BasicBackend implements Backend {
 
     public static int idx = 5000;
 

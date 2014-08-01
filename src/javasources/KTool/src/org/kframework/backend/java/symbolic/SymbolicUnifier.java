@@ -1,15 +1,11 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.kframework.backend.java.builtins.*;
+import org.kframework.backend.java.builtins.BitVector;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -36,9 +32,21 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -181,6 +189,13 @@ public class SymbolicUnifier extends AbstractUnifier {
                "kind mismatch between " + term + " (" + term.kind() + ")"
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";
 
+        // TODO(AndreiS): treat Map unification less adhoc
+        if (term instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()
+                && otherTerm instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()) {
+            unifyMap((BuiltinMap) term, (BuiltinMap) otherTerm, true);
+            return;
+        }
+
         if (term.isSymbolic() || otherTerm.isSymbolic()) {
             // TODO(YilongL): can we move this adhoc code to another place?
             /* special case for concrete collections  */
@@ -190,6 +205,13 @@ public class SymbolicUnifier extends AbstractUnifier {
             } else if (otherTerm instanceof ConcreteCollectionVariable
                     && !((ConcreteCollectionVariable) otherTerm).matchConcreteSize(term)) {
                 fail(term, otherTerm);
+            }
+
+            if (term.isSymbolic() && term instanceof BuiltinList) {
+                term = ((BuiltinList) term).frame();
+            }
+            if (otherTerm.isSymbolic() && otherTerm instanceof BuiltinList) {
+                otherTerm = ((BuiltinList) otherTerm).frame();
             }
 
             /* add symbolic constraint */
@@ -204,6 +226,112 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (!term.equals(otherTerm)) {
                 term.accept(this, otherTerm);
             }
+        }
+    }
+
+    public boolean unifyMap(BuiltinMap map, BuiltinMap otherMap, boolean addUnchanged) {
+        assert map.collectionFunctions().isEmpty() && otherMap.collectionFunctions().isEmpty();
+
+        Map<Term, Term> entries = map.getEntries();
+        Map<Term, Term> otherEntries = otherMap.getEntries();
+        Set<Term> commonKeys = Sets.intersection(map.getEntries().keySet(), otherEntries.keySet());
+        Map<Term, Term> remainingEntries = new HashMap<>();
+        Map<Term, Term> otherRemainingEntries = new HashMap<>();
+        for (Term key : commonKeys) {
+            unify(entries.get(key), otherEntries.get(key));
+        }
+        for (Term key : entries.keySet()) {
+            if (!commonKeys.contains(key)) {
+                remainingEntries.put(key, entries.get(key));
+            }
+        }
+        for (Term key : otherEntries.keySet()) {
+            if (!commonKeys.contains(key)) {
+                otherRemainingEntries.put(key, otherEntries.get(key));
+            }
+        }
+
+        Multiset<KItem> patterns = map.collectionPatterns();
+        Multiset<KItem> otherPatterns = otherMap.collectionPatterns();
+        Set<KItem> unifiedPatterns = new HashSet<>();
+        Set<KItem> otherUnifiedPatterns = new HashSet<>();
+        List<KItem> remainingPatterns = new ArrayList<>();
+        List<KItem> otherRemainingPatterns = new ArrayList<>();
+        for (KItem pattern : patterns) {
+            for (KItem otherPattern : otherPatterns) {
+                if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
+                    ImmutableList<Term> patternOutput = pattern.getPatternOutput();
+                    ImmutableList<Term> otherPatternOutput = otherPattern.getPatternOutput();
+                    for (int i = 0; i < patternOutput.size(); ++i) {
+                        unify(patternOutput.get(i), otherPatternOutput.get(i));
+                    }
+                    unifiedPatterns.add(pattern);
+                    otherUnifiedPatterns.add(otherPattern);
+                }
+            }
+        }
+        for (KItem pattern : patterns) {
+            if (!unifiedPatterns.contains(pattern)) {
+                remainingPatterns.add(pattern);
+            }
+        }
+        for (KItem otherPattern : otherPatterns) {
+            if (!otherUnifiedPatterns.contains(otherPattern)) {
+                otherRemainingPatterns.add(otherPattern);
+            }
+        }
+
+        Multiset<Variable> variables = map.collectionVariables();
+        Multiset<Variable> otherVariables = otherMap.collectionVariables();
+        Set<Variable> commonVariables = Sets.intersection(
+                ImmutableSet.copyOf(variables),
+                ImmutableSet.copyOf(otherVariables));
+        List<Variable> remainingVariables = new ArrayList<>();
+        List<Variable> otherRemainingVariables = new ArrayList<>();
+        for (Variable variable : variables) {
+            if (!commonVariables.contains(variable)) {
+                remainingVariables.add(variable);
+            }
+        }
+        for (Variable otherVariable : otherVariables) {
+            if (!commonVariables.contains(otherVariable)) {
+                otherRemainingVariables.add(otherVariable);
+            }
+        }
+
+        if (remainingEntries.isEmpty()
+                && remainingPatterns.isEmpty()
+                && remainingVariables.isEmpty()
+                && !otherRemainingEntries.isEmpty()) {
+            fail(map, otherMap);
+        }
+        if (otherRemainingEntries.isEmpty()
+                && otherRemainingPatterns.isEmpty()
+                && otherRemainingVariables.isEmpty()
+                && !remainingEntries.isEmpty()) {
+            fail(map, otherMap);
+        }
+
+        if (!(commonKeys.isEmpty() && unifiedPatterns.isEmpty() && commonVariables.isEmpty()) || addUnchanged) {
+            BuiltinMap.Builder builder = BuiltinMap.builder();
+            builder.putAll(remainingEntries);
+            builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
+            builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
+
+            BuiltinMap.Builder otherBuilder = BuiltinMap.builder();
+            otherBuilder.putAll(otherRemainingEntries);
+            otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
+            otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
+
+            Term remainingMap = builder.build();
+            Term otherRemainingMap = otherBuilder.build();
+            if (!(remainingMap instanceof BuiltinMap && ((BuiltinMap) remainingMap).isEmpty())
+                    || !(otherRemainingMap instanceof BuiltinMap && ((BuiltinMap) otherRemainingMap).isEmpty())) {
+                fConstraint.add(remainingMap, otherRemainingMap);
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -229,8 +357,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 //        if (builtinMap.equals(BuiltinMap.EMPTY) && term.equals(BuiltinMap.EMPTY))
 //            return;
 
-        throw new UnsupportedOperationException(
-                "map matching is only supported when one of the maps is a variable.");
+        //throw new UnsupportedOperationException(
+        //        "map matching is only supported when one of the maps is a variable.");
+        this.fail(builtinMap, term);
     }
 
     @Override

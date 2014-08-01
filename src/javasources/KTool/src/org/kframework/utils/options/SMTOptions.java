@@ -3,8 +3,12 @@ package org.kframework.utils.options;
 
 import java.io.Serializable;
 
-import com.beust.jcommander.Parameter;
+import org.kframework.utils.inject.NullProvider;
 
+import com.beust.jcommander.Parameter;
+import com.google.inject.ProvidedBy;
+
+@ProvidedBy(NullProvider.class)
 public class SMTOptions implements Serializable {
 
     @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|gappa|none].")

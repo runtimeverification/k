@@ -37,12 +37,6 @@ public class Error {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
         }
     }
-    public static void checkIfOutputDirectory(File directory) {
-        if (directory.isFile()) { // isFile = exists && !isDirectory
-            String msg = "Not a directory: " + directory;
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
-        }
-    }
 }
 
 // vim: noexpandtab

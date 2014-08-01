@@ -8,6 +8,7 @@ import org.kframework.ktest.IgnoringStringMatcher;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.StringMatcher;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.EnumSetConverter;
 import org.kframework.utils.options.OnOffConverter;
@@ -17,6 +18,7 @@ import org.kframework.utils.options.StringListConverter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.ProvidedBy;
 
 import java.awt.Color;
 import java.io.File;
@@ -34,6 +36,7 @@ import java.util.Set;
  *   - Only one unnamed argument is passed
  *   - File extension is either .k or .xml
  */
+@ProvidedBy(NullProvider.class)
 public class KTestOptions {
 
     public static final class KTestStepSetConverter extends EnumSetConverter<KTestStep, KTestStepConverter> {

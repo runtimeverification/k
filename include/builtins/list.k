@@ -17,6 +17,7 @@ module LIST
    ends of the lists and concatenate them. For example, L:Mylist,E accesses
    element E at the end of a list. */
 
+  //TODO(AndreiS): move the paragraph below
   /*@ \section{User-Defined Lists} It is very common in \K to define a shorthand
    for lists of user-defined sorts. \K 's builtin way of doing this is to use
    List\{KItem,"Separator"\}, where "Separator" is any valid character or
@@ -35,31 +36,19 @@ module LIST
    would define a comma-separated list containing elements of sort Elt.
   */
 
-
-  /*@ Construct a List using two Lists. This is similar to the "Cons" operation
-   in many functional programming languages.*/
-  syntax List ::= List List   [left, function, hook(List:__), klabel('_List_)]
-  /*@ Construct an empty list: */
+  /*@ Construct a new List as the concatenation of two Lists. This is similar to
+   the append "@" operation in many functional programming languages. */
+  syntax List ::= List List     [left, function, hook(List:__), klabel('_List_)]
+  /*@ Construct an empty List: */
   syntax List ::= ".List"       [function, hook(List:.List)]
-  /*@ TODO: How does this work, exactly? Create a list with one element? Also,
-   mention that MyListElement is commonly etended to create lists of arbitrary
-   contents, especially tuples. */
+                //| "."
+  /*@ Construct a singleton List (a list with only  one element) */
   syntax List ::= ListItem(K)   [function, hook(List:ListItem)]
 
-  /*@ Test element membership in the given list: */
-  syntax Bool ::= K "in" List   [function]
-//  rule
-//    K1:K in /* L1:List */ ListItem(K2:K) L2:List
-//  =>
-//    K1 =K K2 orBool /* K1 in L1 orBool */ K1 in L2
-//  rule _ in .List => false
+  /*@ Check element membership in the given list */
+  syntax Bool ::= K "in" List   [function, hook(List:.List), klabel('_inList_)]
 
-  /*@  Get list length: */
-  syntax Int ::= size(List)   [function]
-//  rule
-//    size(/* L1:List */ ListItem(_) L2:List)
-//  =>
-//    1 +Int /* size(L1) +Int */ size(L2)
-//  rule size(.List) => 0
+  /*@ Get the list length */
+  syntax Int ::= size(List)     [function, hook(Collection:size)]
 endmodule
 

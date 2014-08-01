@@ -2,6 +2,7 @@
 package org.kframework.backend.kore;
 
 import org.kframework.backend.BasicBackend;
+import org.kframework.backend.FirstStep;
 import org.kframework.backend.unparser.Indenter;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckRewrite;
@@ -42,10 +43,11 @@ import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.ColorSetting;
-import org.kframework.main.FirstStep;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.general.GlobalSettings;
+
+import com.google.inject.Inject;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -56,7 +58,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class KoreBackend extends BasicBackend {
-  public KoreBackend(Stopwatch sw, Context context) {
+
+  @Inject
+  KoreBackend(Stopwatch sw, Context context) {
     super(sw, context);
   }
 

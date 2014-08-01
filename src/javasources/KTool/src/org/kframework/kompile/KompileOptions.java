@@ -6,38 +6,63 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
+import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
+import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.backend.kore.KoreBackend;
+import org.kframework.backend.latex.DocumentationBackend;
+import org.kframework.backend.latex.LatexBackend;
+import org.kframework.backend.latex.PdfBackend;
+import org.kframework.backend.maude.KompileBackend;
+import org.kframework.backend.maude.krun.MaudeKRun;
+import org.kframework.backend.symbolic.SymbolicBackend;
+import org.kframework.backend.unparser.UnflattenBackend;
+import org.kframework.backend.unparser.UnflattenJavaBackend;
+import org.kframework.backend.unparser.UnparserBackend;
+import org.kframework.krun.api.KRun;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.ProvidedBy;
 
+@ProvidedBy(NullProvider.class)
 public final class KompileOptions implements Serializable {
 
     public static enum Backend {
-        PDF(true, false),
-        LATEX(true, false),
-        DOC(true, false),
-        HTML(true, false),
-        KORE(false, false),
-        MAUDE(false, false),
-        JAVA(false, true),
-        UNPARSE(false, false),
-        UNFLATTEN(false, false),
-        UNFLATTEN_JAVA(false, true),
-        SYMBOLIC(false, false);
+        PDF(true, false, false, PdfBackend.class, null),
+        LATEX(true, false, false, LatexBackend.class, null),
+        DOC(true, false, false, DocumentationBackend.class, null),
+        HTML(true, false, false, HtmlBackend.class, null),
+        KORE(false, false, false, KoreBackend.class, null),
+        MAUDE(false, false, true, KompileBackend.class, MaudeKRun.class),
+        JAVA(false, true, true, JavaSymbolicBackend.class, JavaSymbolicKRun.class),
+        UNPARSE(false, false, false, UnparserBackend.class, null),
+        UNFLATTEN(false, false, false, UnflattenBackend.class, null),
+        UNFLATTEN_JAVA(false, true, false, UnflattenJavaBackend.class, null),
+        SYMBOLIC(false, false, true, SymbolicBackend.class, JavaSymbolicKRun.class);
 
-        private Backend(boolean documentation, boolean java) {
+        private Backend(boolean documentation, boolean java, boolean generatesDefinition,
+                Class<? extends org.kframework.backend.Backend> backend,
+                Class<? extends KRun> krun) {
             this.documentation = documentation;
             this.isJava = java;
+            this.generatesDefinition = generatesDefinition;
+            this.backend = backend;
+            this.krun = krun;
         }
 
-        private boolean documentation;
-        private boolean isJava;
+        private final boolean documentation;
+        private final boolean isJava;
+        private final boolean generatesDefinition;
+        private final Class<? extends org.kframework.backend.Backend> backend;
+        private final Class<? extends KRun> krun;
 
         public boolean documentation() {
             return documentation;
@@ -46,6 +71,18 @@ public final class KompileOptions implements Serializable {
         public boolean java() {
             return isJava;
         }
+
+        public boolean generatesDefinition() {
+            return generatesDefinition;
+        }
+
+        public Class<? extends org.kframework.backend.Backend> backend() {
+            return backend;
+        }
+
+        public Class<? extends KRun> krun() {
+            return krun;
+        }
     }
 
     @Parameter(description="<file>")
@@ -53,7 +90,7 @@ public final class KompileOptions implements Serializable {
 
     public File mainDefinitionFile() {
         if (parameters == null || parameters.size() == 0) {
-            throw new ParameterException("You have to provide exactly one main file in order to compile.");
+            GlobalSettings.kem.registerCriticalError("You have to provide exactly one main file in order to compile.");
         }
         return new File(parameters.get(0));
     }
@@ -131,9 +168,6 @@ public final class KompileOptions implements Serializable {
     public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 
     public static final String DEFAULT_TRANSITION = "transition";
-
-    @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
-    public boolean helpExperimental = false;
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();

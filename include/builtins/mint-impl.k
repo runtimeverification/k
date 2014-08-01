@@ -16,9 +16,6 @@ module MINT-IMPL
     ((I +Int (1 <<Int (N -Int 1))) modInt (1 <<Int N)) -Int (1 <<Int (N -Int 1))
   rule uvalueMInt($mi(N:Int, I:Int)) => I modInt (1 <<Int N)
 
-  // TODO(AndreiS): change
-  rule zeroMInt(MI:MInt) => eqMInt(MI, xorMInt(MI, MI))
-
   /*
    * Arithmetic operations without overflow
    */
@@ -161,22 +158,5 @@ module MINT-IMPL
   =>
     mi(M2 -Int M1, (I >>Int (N -Int M2)) &Int umaxMInt(M2 -Int M1))
   when (M1 <Int M2) andBool (M1 <=Int N) andBool (M2 <=Int N)
-
-  /*
-   * Conversion to and from a list of digits
-   */
-  rule
-    digitsOfMInt(MI:MInt, N:Int, M:Int)
-  =>
-    digitsOfMInt(MI, N, M -Int 1)
-    ListItem(extractMInt(MI, (N *Int (M -Int 1)), (N *Int M)))
-  when M >Int 0
-  rule digitsOfMInt(_:MInt, _:Int, 0) => .List
-
-  rule
-    mIntOfDigits(ListItem(MI1:MInt) ListItem(MI2:MInt) L:List)
-  =>
-    concatenateMInt(MI1, mIntOfDigits(ListItem(MI2) L))
-  rule mIntOfDigits(ListItem(MI:MInt)) => MI
-
 endmodule
+

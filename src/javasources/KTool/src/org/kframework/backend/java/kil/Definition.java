@@ -21,6 +21,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
 
 
 /**
@@ -45,6 +46,7 @@ public class Definition extends JavaSymbolicObject {
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> anywhereRules = HashMultimap.create();
+    private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
     private transient Context context;
@@ -92,10 +94,12 @@ public class Definition extends JavaSymbolicObject {
 
     public void addRule(Rule rule) {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
-            functionRules.put(rule.functionKLabel(), rule);
+            functionRules.put(rule.definedKLabel(), rule);
             if (rule.isSortPredicate()) {
                 sortPredicateRules.put((KLabelConstant) rule.sortPredicateArgument().kLabel(), rule);
             }
+        } else if (rule.containsAttribute(Attribute.PATTERN_KEY)) {
+            patternRules.put(rule.definedKLabel(), rule);
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
         } else if (rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
@@ -147,6 +151,7 @@ public class Definition extends JavaSymbolicObject {
         return context;
     }
 
+    @Inject
     public void setContext(Context context) {
         assert this.context == null : "can only set the context once";
         this.context = context;
@@ -165,6 +170,10 @@ public class Definition extends JavaSymbolicObject {
             return Collections.emptyList();
         }
         return sortPredicateRules.get(kLabel);
+    }
+
+    public Multimap<KLabelConstant, Rule> patternRules() {
+        return patternRules;
     }
 
     public Set<KLabelConstant> frozenKLabels() {
