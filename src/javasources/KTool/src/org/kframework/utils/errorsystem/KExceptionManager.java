@@ -41,6 +41,10 @@ public class KExceptionManager {
         register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e, null);
     }
 
+    public void registerCriticalWarning(String message, ASTNode node) {
+        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, node);
+    }
+
     public void registerCriticalWarning(String message, Throwable e) {
         register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, null);
     }

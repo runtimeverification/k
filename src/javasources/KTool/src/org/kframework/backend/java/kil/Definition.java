@@ -102,7 +102,7 @@ public class Definition extends JavaSymbolicObject {
             if (!(rule.leftHandSide() instanceof KItem)) {
                 GlobalSettings.kem.registerCriticalWarning(
                         "The Java backend only supports [anywhere] rule that rewrites KItem; but found:\n\t"
-                                + rule, null, rule);
+                                + rule, rule);
                 return;
             }
 
