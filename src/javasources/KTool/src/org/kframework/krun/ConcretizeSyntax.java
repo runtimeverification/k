@@ -90,7 +90,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             if (child instanceof KList) {
                 contents = ((KList)child).getContents();
             }
-            if (prods != null) {
+            if (prods.size() > 0) {
                 for (int i = 0; i < contents.size(); i++) {
                     contents.set(i, (Term) this.visitNode(contents.get(i)));
                 }

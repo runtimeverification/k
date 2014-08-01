@@ -182,6 +182,9 @@ public class Context implements Serializable {
         if (p.getKLabel() != null) {
             klabels.put(p.getKLabel(), p);
             tags.put(p.getKLabel(), p);
+            if (p.isListDecl()) {
+                listKLabels.put(p.getListDecl().getTerminatorKLabel(), p);
+            }
         }
         for (Attribute a : p.getAttributes().getContents()) {
             tags.put(a.getKey(), p);
