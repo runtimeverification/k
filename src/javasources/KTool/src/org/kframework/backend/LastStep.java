@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-package org.kframework.main;
+package org.kframework.backend;
 
-import org.kframework.backend.Backend;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.kil.Definition;

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+  <test definition="simple-untyped.k"
+        programs="../verification"
+        results="../verification"
+        extension="simple"
+        >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--prove" value="verification/reverse_spec.k" />
+    </all-programs>
+  </test>
+</tests>
+

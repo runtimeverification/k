@@ -326,7 +326,7 @@ public class CopyOnWriteTransformer implements Transformer {
         boolean changed = false;
         BuiltinMap.Builder builder = BuiltinMap.builder();
 
-        for (Map.Entry<Term, Term> entry : builtinMap) {
+        for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
 
@@ -334,7 +334,7 @@ public class CopyOnWriteTransformer implements Transformer {
             if (!changed && (key != entry.getKey() || value != entry.getValue())) {
                 changed = true;
                 // copy previous entries into the BuiltinMap being built
-                for (Map.Entry<Term, Term> copy : builtinMap) {
+                for (Map.Entry<Term, Term> copy : builtinMap.getEntries().entrySet()) {
                     if (copy.equals(entry)) {
                         // cannot rely on reference identity check here
                         break;
@@ -347,25 +347,19 @@ public class CopyOnWriteTransformer implements Transformer {
                 builder.put(key, value);
             }
         }
+        /* special case for maps composed only of entries */
+        if (builtinMap.isConcreteCollection()) {
+            return changed ? builder.build() : builtinMap;
+        }
 
-        // at this point, if changed is false, the BuiltinMap being built is still empty
-        if (builtinMap.hasFrame()) {
-            Variable oldFrame = builtinMap.frame();
-            Term transformedFrame = (Term) oldFrame.accept(this);
-            if (transformedFrame != oldFrame) {
-                if (!changed) {
-                    // the only change is the frame
-                    changed = true;
-                    builder.setEntriesAs(builtinMap);
-                }
-                builder.concat(transformedFrame);
-            } else {
-                builder.setFrame(oldFrame);
-            }
-        } else {
-            // do nothing; if changed == true then all entries are already
-            // copied; if changed == false then we will simply return the
-            // original map later
+        if (!changed) {
+            builder.putAll(builtinMap.getEntries());
+        }
+
+        for (Term term : builtinMap.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
         }
 
         return changed ? builder.build() : builtinMap;
@@ -373,41 +367,19 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
-        BuiltinSet transformedSet = null;
-        if (builtinSet.hasFrame()) {
-            Term frame = (Term) builtinSet.frame().accept(this);
-            if (frame != builtinSet.frame()) {
-                transformedSet = BuiltinSet.of(Collections.<Term>emptySet(), frame);
-            }
+        boolean changed = false;
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        for(Term element : builtinSet.elements()) {
+            Term transformedElement = (Term) element.accept(this);
+            builder.add(transformedElement);
+            changed = changed || (transformedElement != element);
         }
-
-        for(Term entry : builtinSet.elements()) {
-            Term key = (Term) entry.accept(this);
-
-            if (transformedSet == null && (key != entry)) {
-                if (builtinSet.hasFrame()) {
-                    transformedSet = new BuiltinSet(builtinSet.frame());
-                } else {
-                    transformedSet = new BuiltinSet();
-                }
-                for(Term copyEntry : builtinSet.elements()) {
-                    if (copyEntry.equals(entry)) {
-                        break;
-                    }
-                    transformedSet.add(copyEntry);
-                }
-            }
-
-            if (transformedSet != null) {
-                transformedSet.add(key);
-            }
+        for (Term term : builtinSet.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
         }
-
-        if (transformedSet != null) {
-            return transformedSet;
-        } else {
-            return builtinSet;
-        }
+        return changed ? builder.build() : builtinSet;
     }
 
     @Override

@@ -225,7 +225,7 @@ public class SymbolicRewriter {
                 /* evaluate pending functions in the rule RHS */
                 //result = result.evaluate(constrainedTerm.termContext());
                 /* eliminate anonymous variables */
-                constraint.eliminateAnonymousVariables();
+                constraint.eliminateAnonymousVariables(constrainedTerm.variableSet());
 
                 /* return first solution */
                 return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());
@@ -275,7 +275,9 @@ public class SymbolicRewriter {
                 for (SymbolicConstraint constraint1 : getUnificationResults(constrainedSubject, constrainedPattern)) {
                     /* compute all results */
                     ConstrainedTerm newCnstrTerm = constructNewSubjectTerm(
-                            rule, constraint1);
+                            rule,
+                            constraint1,
+                            constrainedSubject.variableSet());
                     // TODO(YilongL): the following assertion is not always true; fix it
 //                    if (K.do_concrete_exec) {
 //                        assert newCnstrTerm.isGround();
@@ -362,7 +364,10 @@ public class SymbolicRewriter {
      *            rewrite rule and the current subject term
      * @return the new subject term
      */
-    private ConstrainedTerm constructNewSubjectTerm(Rule rule, SymbolicConstraint constraint) {
+    public static ConstrainedTerm constructNewSubjectTerm(
+            Rule rule,
+            SymbolicConstraint constraint,
+            Set<Variable> existingVariables) {
         /*
          * TODO(YilongL): had to comment out the following assertion because
          * logik.k uses unification even in concrete execution mode
@@ -385,7 +390,9 @@ public class SymbolicRewriter {
                 constraint.substitution(),
                 constraint.termContext());
         /* eliminate anonymous variables */
-        constraint.eliminateAnonymousVariables();
+        constraint.eliminateAnonymousVariables(existingVariables);
+        // TODO(AndreiS): functions not being evaluated is becoming quite annoying
+        result = result.evaluate(constraint.termContext());
 
         /*
         System.err.println("rule \n\t" + rule);
@@ -444,7 +451,7 @@ public class SymbolicRewriter {
             /* evaluate pending functions in the rule RHS */
             result = result.evaluate(constrainedTerm.termContext());
             /* eliminate anonymous variables */
-            constraint.eliminateAnonymousVariables();
+            constraint.eliminateAnonymousVariables(constrainedTerm.variableSet());
 
             /* return first solution */
             return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());

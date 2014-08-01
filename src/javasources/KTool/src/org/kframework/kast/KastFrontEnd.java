@@ -9,108 +9,111 @@ import org.kframework.backend.unparser.KastFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.K;
+import org.kframework.main.FrontEnd;
+import org.kframework.main.Tool;
 import org.kframework.parser.ProgramLoader;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.JCommanderModule;
+import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
+import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.inject.CommonModule;
+import org.kframework.utils.inject.Main;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import com.google.inject.Inject;
+import com.google.inject.Module;
 
-public class KastFrontEnd {
+public class KastFrontEnd extends FrontEnd {
 
-    /**
-     *
-     * @param args
-     * @return true if the application terminated normally; false otherwise
-     */
-    public static boolean kast(String[] args) {
-        KastOptions options = new KastOptions();
-        options.global.initialize();
+    public static Module[] getModules(String[] args) {
         try {
+            KastOptions options = new KastOptions();
+
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kast");
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KastOptions.Experimental.class));
 
-            if (options.global.help) {
-                StringBuilder sb = new StringBuilder();
-                jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
-                return true;
+            return new Module[] {
+                    new KastModule(options),
+                    new JCommanderModule(jc),
+                    new CommonModule() };
+        } catch (ParameterException ex) {
+            printBootError(ex.getMessage());
+            return null;
+        }
+    }
+
+    private final KastOptions options;
+    private final Context context;
+    private final Stopwatch sw;
+
+    @Inject
+    KastFrontEnd(
+            KastOptions options,
+            @Main Context context,
+            @Usage String usage,
+            @ExperimentalUsage String experimentalUsage,
+            Stopwatch sw,
+            KExceptionManager kem) {
+        super(kem, options.global, usage, experimentalUsage);
+        this.options = options;
+        this.context = context;
+        this.sw = sw;
+    }
+
+    /**
+     *
+     * @return true if the application terminated normally; false otherwise
+     */
+    @Override
+    public boolean run() {
+        String stringToParse = options.stringToParse();
+        String source = options.source();
+
+        String sort = options.sort(context);
+
+        try {
+            ASTNode out = ProgramLoader.processPgm(stringToParse, source, sort, context, options.parser);
+            StringBuilder kast;
+            if (options.experimental.pretty) {
+                IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),
+                        options.experimental.auxTabSize, options.experimental.tabSize);
+                KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
+                kastFilter.visitNode(out);
+                kast = kastFilter.getResult();
+            } else {
+                MaudeFilter maudeFilter = new MaudeFilter(context);
+                maudeFilter.visitNode(out);
+                kast = maudeFilter.getResult();
+                kast.append("\n");
             }
-
-            if (options.helpExperimental) {
-                StringBuilder sb = new StringBuilder();
-                jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
-                return true;
-            }
-
-            if (options.global.version) {
-                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-                System.out.print(msg);
-                return true;
-            }
-
-            String stringToParse = options.stringToParse();
-            String source = options.source();
-
-
-            File compiledFile = options.definitionLoading.definition();
-            Context context = BinaryLoader.loadOrDie(Context.class, new File(compiledFile, "context.bin").getAbsolutePath());
-            context.kompileOptions.global = options.global;
-            context.globalOptions = options.global;
-            context.kompiled = compiledFile;
-
-            String sort = options.sort(context);
 
             try {
-                ASTNode out = ProgramLoader.processPgm(stringToParse, source, sort, context, options.parser);
-                StringBuilder kast;
-                if (options.experimental.pretty) {
-                    IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),
-                            options.experimental.auxTabSize, options.experimental.tabSize);
-                    KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
-                    kastFilter.visitNode(out);
-                    kast = kastFilter.getResult();
-                } else {
-                    MaudeFilter maudeFilter = new MaudeFilter(context);
-                    maudeFilter.visitNode(out);
-                    kast = maudeFilter.getResult();
-                    kast.append(K.lineSeparator);
-                }
-
+                Writer outWriter = new OutputStreamWriter(System.out);
                 try {
-                    Writer outWriter = new OutputStreamWriter(System.out);
-                    try {
-                        FileUtil.toWriter(kast, outWriter);
-                    } finally {
-                        outWriter.flush();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    FileUtil.toWriter(kast, outWriter);
+                } finally {
+                    outWriter.flush();
                 }
-
-                Stopwatch.instance().printIntermediate("Maudify Program");
-                Stopwatch.instance().printTotal("Total");
-                return true;
-            } catch (ParseFailedException e) {
-                e.report();
-                return false;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (ParameterException ex) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
+
+            sw.printIntermediate("Maudify Program");
+            sw.printTotal("Total");
+            return true;
+        } catch (ParseFailedException e) {
+            e.report();
             return false;
         }
     }
-}
 
-// vim: noexpandtab
+    @Override
+    public Tool tool() {
+        return Tool.KAST;
+    }
+}

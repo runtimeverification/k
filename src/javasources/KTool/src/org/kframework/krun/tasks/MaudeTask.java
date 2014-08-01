@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.tasks;
 
-import org.kframework.krun.K;
 import org.kframework.utils.maude.MaudeRun;
 
 import java.io.*;
@@ -64,7 +63,7 @@ public class MaudeTask extends Thread {
 
     private void runCommand() throws IOException {
         BufferedWriter maudeInput = new BufferedWriter(new OutputStreamWriter(_maudeProcess.getOutputStream()));
-        maudeInput.write(_command + K.lineSeparator);
+        maudeInput.write(_command + "\n");
         maudeInput.close();
     }
 }

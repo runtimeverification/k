@@ -8,22 +8,20 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.runner.KRunner;
-import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.XmlUtil;
 import org.kframework.krun.api.*;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.google.inject.Inject;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.io.GraphIOException;
@@ -45,8 +43,9 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class MaudeKRun implements KRun {
-    protected Context context;
-    protected Stopwatch sw;
+    private final Context context;
+    private final Stopwatch sw;
+    private final KExceptionManager kem;
 
     private final File krunTempDir;
     private final File inFile;
@@ -57,9 +56,11 @@ public class MaudeKRun implements KRun {
 
     private int counter = 0;
 
-    public MaudeKRun(Context context, Stopwatch sw) {
+    @Inject
+    MaudeKRun(Context context, Stopwatch sw, KExceptionManager kem) {
         this.context = context;
         this.sw = sw;
+        this.kem = kem;
 
         krunTempDir = new File(context.dotk, FileUtil.generateUniqueFolderName("krun"));
         inFile = new File(krunTempDir, "maude_in");
@@ -109,7 +110,7 @@ public class MaudeKRun implements KRun {
             }
         }
         if (returnValue != 0) {
-            org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
+            kem.registerCriticalError("Maude returned non-zero value: " + returnValue);
         }
     }
 
@@ -124,18 +125,18 @@ public class MaudeKRun implements KRun {
         StringBuilder cmd = new StringBuilder();
 
         if(context.krunOptions.experimental.trace) {
-            cmd.append("set trace on .").append(K.lineSeparator);
+            cmd.append("set trace on .\n");
         }
         if(context.krunOptions.experimental.profile) {
-            cmd.append("set profile on .").append(K.lineSeparator);
+            cmd.append("set profile on .\n");
         }
 
-        cmd.append("set show command off .").append(K.lineSeparator)
+        cmd.append("set show command off .\n")
             .append(setCounter()).append(maude_cmd).append(" ")
-            .append(maudeFilter.getResult()).append(" .").append(K.lineSeparator);
+            .append(maudeFilter.getResult()).append(" .\n");
 
         if(context.krunOptions.experimental.profile) {
-            cmd.append("show profile .").append(K.lineSeparator);
+            cmd.append("show profile .\n");
         }
 
         cmd.append(getCounter());
@@ -150,11 +151,11 @@ public class MaudeKRun implements KRun {
     }
 
     private String setCounter() {
-        return "red setCounter(" + Integer.toString(counter) + ") ." + K.lineSeparator;
+        return "red setCounter(" + Integer.toString(counter) + ") .\n";
     }
 
     private String getCounter() {
-        return K.lineSeparator + "red counter .";
+        return "\nred counter .";
     }
 
     @Override
@@ -228,7 +229,7 @@ public class MaudeKRun implements KRun {
 
     private void assertXML(boolean assertion) {
         if (!assertion) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + xmlOutFile.getAbsolutePath().replaceAll("/krun[0-9]*/", "/krun/")));
+            kem.registerCriticalError("Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + xmlOutFile.getAbsolutePath().replaceAll("/krun[0-9]*/", "/krun/"));
         }
     }
 
@@ -455,9 +456,9 @@ public class MaudeKRun implements KRun {
             throws KRunExecutionException {
         StringBuilder cmd = new StringBuilder();
         if (context.krunOptions.experimental.trace) {
-          cmd.append("set trace on .").append(K.lineSeparator);
+          cmd.append("set trace on .\n");
         }
-        cmd.append("set show command off .").append(K.lineSeparator).append(setCounter()).append("search ");
+        cmd.append("set show command off .\n").append(setCounter()).append("search ");
         if (bound != null && depth != null) {
             cmd.append("[").append(bound).append(",").append(depth).append("] ");
         } else if (bound != null) {
@@ -481,7 +482,7 @@ public class MaudeKRun implements KRun {
         boolean showGraph = context.krunOptions.graph || context.krunOptions.experimental.debugger()
                 || context.krunOptions.experimental.debuggerGui();
         if (showGraph) {
-            cmd.append(K.lineSeparator).append("show search graph .");
+            cmd.append("\nshow search graph .");
         }
         cmd.append(getCounter());
         executeKRun(cmd);
@@ -511,7 +512,7 @@ public class MaudeKRun implements KRun {
                 writer.write(text, 0, text.length());
             }
         } catch (IOException e) {
-            GlobalSettings.kem.registerInternalError("Could not read from " + xmlOutFile
+            kem.registerInternalError("Could not read from " + xmlOutFile
                     + " and write to " + processedXmlOutFile, e);
         }
 
@@ -588,10 +589,10 @@ public class MaudeKRun implements KRun {
                 edgeTransformer, hyperEdgeTransformer);
             return graphmlParser.readGraph();
         } catch (GraphIOException e) {
-            GlobalSettings.kem.registerInternalError("Failed to parse graphml from maude", e);
+            kem.registerInternalError("Failed to parse graphml from maude", e);
             throw new AssertionError("unreachable");
         } catch (IOException e) {
-            GlobalSettings.kem.registerInternalError("Failed to read from " + processedXmlOutFile, e);
+            kem.registerInternalError("Failed to read from " + processedXmlOutFile, e);
             throw new AssertionError("unreachable");
         }
     }
@@ -643,16 +644,16 @@ public class MaudeKRun implements KRun {
         cfgFilter.visitNode(cfg);
 
         StringBuilder cmd = new StringBuilder()
-            .append("mod MCK is").append(K.lineSeparator)
+            .append("mod MCK is\n")
             .append(" including ")
-            .append(context.kompileOptions.mainModule()).append(" .").append(K.lineSeparator).append(K.lineSeparator)
-            .append(" op #initConfig : -> Bag .").append(K.lineSeparator).append(K.lineSeparator)
-            .append(" eq #initConfig  =").append(K.lineSeparator)
-            .append(cfgFilter.getResult()).append(" .").append(K.lineSeparator)
-            .append("endm").append(K.lineSeparator).append(K.lineSeparator)
-            .append("red").append(K.lineSeparator)
-            .append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList),").append(K.lineSeparator)
-            .append(formulaFilter.getResult()).append(")").append(K.lineSeparator)
+            .append(context.kompileOptions.mainModule()).append(" .\n\n")
+            .append(" op #initConfig : -> Bag .\n\n")
+            .append(" eq #initConfig  =\n")
+            .append(cfgFilter.getResult()).append(" .\n")
+            .append("endm\n\n")
+            .append("red\n")
+            .append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList),\n")
+            .append(formulaFilter.getResult()).append(")\n")
             .append(") .");
         boolean io = ioServer;
         ioServer = false;
@@ -772,7 +773,7 @@ public class MaudeKRun implements KRun {
         } else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {
             assertXML(child.size() == 0);
         } else {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude due to production " + op + " of sort " + sort + ". Please file an error on the issue tracker which includes this error message."));
+            kem.registerCriticalError("Cannot parse result xml from maude due to production " + op + " of sort " + sort + ". Please file an error on the issue tracker which includes this error message.");
             assertXML(false);
         }
     }

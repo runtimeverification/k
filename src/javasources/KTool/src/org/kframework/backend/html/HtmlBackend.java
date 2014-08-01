@@ -9,11 +9,14 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
+import com.google.inject.Inject;
+
 import java.io.File;
 
 public class HtmlBackend extends BasicBackend {
 
-    public HtmlBackend(Stopwatch sw, Context context) {
+    @Inject
+    HtmlBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 

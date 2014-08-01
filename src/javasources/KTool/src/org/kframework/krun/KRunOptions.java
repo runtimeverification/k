@@ -21,6 +21,8 @@ import org.kframework.krun.api.SearchType;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.OnOffConverter;
@@ -31,7 +33,9 @@ import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.ProvidedBy;
 
+@ProvidedBy(NullProvider.class)
 public final class KRunOptions {
 
     public enum OutputMode {
@@ -54,6 +58,7 @@ public final class KRunOptions {
     @ParametersDelegate
     public ConfigurationCreationOptions configurationCreation = new ConfigurationCreationOptions();
 
+    @ProvidedBy(NullProvider.class)
     public static final class ConfigurationCreationOptions {
 
         @Parameter(description="<file>")
@@ -64,7 +69,7 @@ public final class KRunOptions {
                 return null;
             }
             if (parameters.size() > 1) {
-                throw new ParameterException("You can only specify $PGM on the command line itself");
+                GlobalSettings.kem.registerCriticalError("You can only specify $PGM on the command line itself");
             }
             return parameters.get(0);
         }
@@ -111,7 +116,7 @@ public final class KRunOptions {
             }
             if (!term() && pgm() != null) {
                 if (configVars.containsKey("PGM")) {
-                    throw new ParameterException("Cannot specify both -cPGM and a program to parse.");
+                    GlobalSettings.kem.registerCriticalError("Cannot specify both -cPGM and a program to parse.");
                 }
                 result.put("PGM", Pair.of(pgm(), parser(context)));
             }
@@ -123,10 +128,10 @@ public final class KRunOptions {
 
         public boolean term() {
             if (term && configVars.size() > 0) {
-                throw new ParameterException("You cannot specify both the term and the configuration variables.");
+                GlobalSettings.kem.registerCriticalError("You cannot specify both the term and the configuration variables.");
             }
             if (term && pgm() == null) {
-                throw new ParameterException("You must specify something to parse with the --term option.");
+                GlobalSettings.kem.registerCriticalError("You must specify something to parse with the --term option.");
             }
             return term;
         }
@@ -138,13 +143,13 @@ public final class KRunOptions {
 
     public boolean io() {
         if (io != null && io == true && search()) {
-            throw new ParameterException("You cannot specify both --io on and --search");
+            GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --search");
         }
         if (io != null && io == true && experimental.javaExecution.generateTests) {
-            throw new ParameterException("You cannot specify both --io on and --generate-tests");
+            GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --generate-tests");
         }
         if (io != null && io == true && experimental.ltlmc() != null) {
-            throw new ParameterException("You cannot specify both --io on and --ltlmc");
+            GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --ltlmc");
         }
         if (search() || experimental.javaExecution.generateTests || experimental.ltlmc() != null) {
             return false;
@@ -192,7 +197,7 @@ public final class KRunOptions {
     public SearchType searchType() {
         if (search) {
             if (searchFinal || searchAll || searchOneStep || searchOneOrMoreSteps) {
-                throw new ParameterException("You can specify only one type of search.");
+                GlobalSettings.kem.registerCriticalError("You can specify only one type of search.");
             }
             if (depth != null) {
                 return SearchType.STAR;
@@ -200,17 +205,17 @@ public final class KRunOptions {
             return SearchType.FINAL;
         } else if (searchFinal) {
             if (searchAll || searchOneStep || searchOneOrMoreSteps) {
-                throw new ParameterException("You can specify only one type of search.");
+                GlobalSettings.kem.registerCriticalError("You can specify only one type of search.");
             }
             return SearchType.FINAL;
         } else if (searchAll) {
             if (searchOneStep || searchOneOrMoreSteps) {
-                throw new ParameterException("You can specify only one type of search.");
+                GlobalSettings.kem.registerCriticalError("You can specify only one type of search.");
             }
             return SearchType.STAR;
         } else if (searchOneStep) {
             if (searchOneOrMoreSteps) {
-                throw new ParameterException("You can specify only one type of search.");
+                GlobalSettings.kem.registerCriticalError("You can specify only one type of search.");
             }
             return SearchType.ONE;
         } else if (searchOneOrMoreSteps) {
@@ -231,7 +236,7 @@ public final class KRunOptions {
             return null;
         }
         if (pattern != null && (experimental.prove != null || experimental.ltlmc() != null)) {
-            throw new ParameterException("Pattern matching is not supported by model checking or proving");
+            GlobalSettings.kem.registerCriticalError("Pattern matching is not supported by model checking or proving");
         }
         String patternToParse = pattern;
         if (pattern == null) {
@@ -260,9 +265,6 @@ public final class KRunOptions {
 
     @Parameter(names="--graph", description="Displays the search graph generated by the last search.")
     public boolean graph = false;
-
-    @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
-    public boolean helpExperimental = false;
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
