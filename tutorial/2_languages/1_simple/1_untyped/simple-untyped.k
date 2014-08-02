@@ -566,10 +566,10 @@ precise location; we prefer to do it this way to avoid locking the store.
 The semantics of the auxiliary \texttt{lookup} operation is straightforward,
 and is defined at the end of the file. */
 
-// The [anywhere] feature would be underused, because it would only
-// be used at the top of the computation or inside the lvalue wrapper.
-// So it may not be worth, or we may need to come up with a special
-// notation allowing us to enumerate contexts for [anywhere] rules.
+// The [anywhere] feature is underused, because it would only be used
+// at the top of the computation or inside the lvalue wrapper. So it
+// may not be worth, or we may need to come up with a special notation
+// allowing us to enumerate contexts for [anywhere] rules.
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
     [structural, anywhere]
 
