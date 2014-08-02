@@ -11,6 +11,8 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -108,6 +110,11 @@ public class CellCollection extends Collection {
     }
 
     @Override
+    public boolean isEmpty() {
+        return cells.isEmpty() && baseTerms.isEmpty();
+    }
+
+    @Override
     public int size() {
         return cells.size();
     }
@@ -167,17 +174,21 @@ public class CellCollection extends Collection {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Cell cell : cells.values()) {
-            stringBuilder.append(cell);
-        }
-        for (int i = 0; i < baseTerms.size(); i++) {
-            stringBuilder.append(baseTerms.get(i));
-            if (i < baseTerms.size() - 1) {
-                stringBuilder.append(" ");
+        if (isEmpty()) {
+            return DataStructureSort.LABELS.get(org.kframework.kil.Sort.BAG).get(Label.UNIT);
+        } else {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Cell cell : cells.values()) {
+                stringBuilder.append(cell);
             }
+            for (int i = 0; i < baseTerms.size(); i++) {
+                stringBuilder.append(baseTerms.get(i));
+                if (i < baseTerms.size() - 1) {
+                    stringBuilder.append(" ");
+                }
+            }
+            return stringBuilder.toString();
         }
-        return stringBuilder.toString();
     }
 
     @Override
