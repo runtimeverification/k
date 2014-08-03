@@ -8,8 +8,6 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.TestCaseGenerationSettings;
-import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.CompilerStepDone;
@@ -314,92 +312,7 @@ public class JavaSymbolicKRun implements KRun {
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
-        // for now, test generation uses the "search-all" option
-        // we hope to add strategies on top of this in the future
-        if (searchType != SearchType.STAR) {
-            throw new UnsupportedOperationException("Search type should be SearchType.STAR");
-        }
-
-        // TODO: get rid of this ugly hack
-        Object o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) cfg).getContents()).getContents().get(0);
-        o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) o).getContents()).getContents().get(1);
-        Map<org.kframework.kil.Term, org.kframework.kil.Term> stateMap = new HashMap<org.kframework.kil.Term, org.kframework.kil.Term>();
-        stateMap.put(org.kframework.kil.GenericToken.kAppOf(Sort.ID, "x"), org.kframework.kil.IntBuiltin.kAppOf("3"));
-//        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "y"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("2"));
-        stateMap.put(org.kframework.kil.GenericToken.kAppOf(Sort.ID, "$1"), org.kframework.kil.IntBuiltin.kAppOf("1"));
-        ((org.kframework.kil.Cell) o)
-                .setContents(new org.kframework.kil.MapBuiltin(context
-                        .dataStructureSortOf(Sort.MAP),
-                        Collections.<org.kframework.kil.Term>emptyList(),
-                        stateMap));
-
-        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        GlobalContext globalContext = new GlobalContext(definition, new PortableFileSystem());
-        final TermContext termContext = TermContext.of(globalContext);
-        ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
-
-        List<TestGenResult> generatorResults = new ArrayList<TestGenResult>();
-
-        List<String> strRules = new ArrayList<String>();
-        for (Rule rule : definition.rules()) strRules.add(rule.toString());
-        Collections.sort(strRules);
-        for (String s : strRules) {
-            System.out.println(s);
-        }
-
-        if (bound == null) {
-            bound = -1;
-        }
-        if (depth == null) {
-            depth = -1;
-        }
-
-        for (Rule rule : definition.functionRules().values()) {
-            System.out.println(rule);
-        }
-
-        List<ConstrainedTerm> resultCfgs = symbolicRewriter.generate(initCfg, null, null, bound, depth);
-
-        for (ConstrainedTerm result : resultCfgs) {
-            // construct the generated program by applying the substitution
-            // obtained from the result configuration to the initial one
-            Term pgm = Term.of(cfg, definition);
-            pgm = pgm.substituteWithBinders(result.constraint().substitution(), termContext);
-
-            /* concretize the pgm; only reasonable when the 2nd phase of the
-             * test generation is performed */
-            if (TestCaseGenerationSettings.TWO_PHASE_GENERATION) {
-                final Map<Variable, Term> subst = new HashMap<Variable, Term>();
-                pgm.accept(new BottomUpVisitor() {
-                   @Override
-                   public void visit(Variable var) {
-                       subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), termContext));
-                   }
-                });
-                pgm = pgm.substituteWithBinders(subst, termContext);
-            }
-
-            /* translate back to generic KIL term */
-            org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
-                    new BackendJavaKILtoKILTransformer(context));
-
-            org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                    new BackendJavaKILtoKILTransformer(context));
-
-            generatorResults.add(new TestGenResult(
-                    new KRunState(kilTerm, context),
-                    Collections.singletonMap("B:Bag", kilTerm),
-                    compilationInfo,
-                    context,
-                    pgmTerm,
-                    result.constraint()));
-        }
-
-        return new KRunResult<TestGenResults>(new TestGenResults(
-                generatorResults,
-                null,
-                true,
-                context), context);
+        throw new UnsupportedBackendOptionException("--test-gen");
     }
 
     @Override

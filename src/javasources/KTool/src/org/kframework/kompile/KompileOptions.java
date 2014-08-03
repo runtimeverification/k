@@ -204,9 +204,6 @@ public final class KompileOptions implements Serializable {
         @Parameter(names="--non-symbolic-rules", listConverter=StringListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
         public List<String> nonSymbolicRules = Collections.emptyList();
 
-        @Parameter(names="--test-gen", description="Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.")
-        public boolean testGen = false;
-
         @Parameter(names="--kore", description="Generate kore files of a given k definition")
         public boolean kore = false;
 
