@@ -91,7 +91,6 @@ public class Context implements Serializable {
      */
     public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
-    public Map<String, Sort> cellKinds = new HashMap<>();
     private Map<String, Sort> cellSorts = new HashMap<>();
     public Map<Sort, Production> listConses = new HashMap<>();
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
@@ -227,12 +226,6 @@ public class Context implements Serializable {
     public void addCellDecl(Cell c) {
         cells.put(c.getLabel(), c);
 
-        Sort kind = subsorts.getMaxim(c.getContents().getSort());
-        if (kind.equals(Sort.KLIST)) {
-            kind = Sort.K;
-        }
-        cellKinds.put(c.getLabel(), kind);
-
         String sortName = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
         Sort sort = sortName == null ? c.getContents().getSort() : Sort.of(sortName);
         if (sort.equals(Sort.BAG_ITEM))
@@ -242,9 +235,6 @@ public class Context implements Serializable {
 
     public Sort getCellSort(Cell cell) {
         Sort sort = cellSorts.get(cell.getLabel());
-        // if the k cell is opened, then the sort should be K because of ... desugaring
-        if (cell.getLabel().equals("k") && cell.getEllipses() != Ellipses.NONE)
-            sort = Sort.K;
 
         if (sort == null) {
             if (cell.getLabel().equals("k"))
@@ -257,6 +247,20 @@ public class Context implements Serializable {
                 sort = Sort.K;
             else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
                 sort = Sort.K;
+        } else {
+            // if the k cell is opened, then the sort needs to take into consideration desugaring
+            if (cell.getEllipses() != Ellipses.NONE) {
+                if (isSubsortedEq(Sort.LIST, sort))
+                    sort = Sort.LIST;
+                else if (isSubsortedEq(Sort.BAG, sort))
+                    sort = Sort.BAG;
+                else if (isSubsortedEq(Sort.MAP, sort))
+                    sort = Sort.MAP;
+                else if (isSubsortedEq(Sort.SET, sort))
+                    sort = Sort.SET;
+                else // any other computational sort
+                    sort = Sort.K;
+            }
         }
         return sort;
     }
