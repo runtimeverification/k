@@ -123,7 +123,6 @@ public class KLabelConstant extends KLabel {
         productions = ImmutableSet.copyOf(context.productionsOf(label));
     }
 
-    @SuppressWarnings("unchecked")
     public KLabelConstant(Element element) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));

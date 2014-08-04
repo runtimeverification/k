@@ -266,8 +266,8 @@ public class ResolveBlockingInput extends GetLhsPattern {
         return Sort.of(sort[0]);
     }
 
-    private static final KLabelConstant parseInputLabel = KLabelConstant.of("#parseInput");
-    private static final KLabelConstant bufferLabel = KLabelConstant.of("#buffer");
+    private static final KLabelConstant parseInputLabel = KLabelConstant.of("'#parseInput");
+    private static final KLabelConstant bufferLabel = KLabelConstant.of("'#buffer");
 
     private Term getPredicateTerm(Variable var) {
         return KApp.of(KLabelConstant.KNEQ_KLABEL, KApp.of(KLabelConstant.STREAM_PREDICATE, var), BoolBuiltin.TRUE);

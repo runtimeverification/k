@@ -44,28 +44,22 @@ public class DesugarStreams extends CopyOnWriteTransformer {
         Term addAtEnd = null;
         java.util.List<Term> items = new ArrayList<Term>();
         if ("stdin".equals(stream)) {
-//            eq evalCleanConf(T, "stdin") = mkCollection(List, (T, ioBuffer(stdinVariable), noIOVariable, stdinStream)) .
             addAtBeginning = contents;
-//            syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-            KApp buffer = KApp.of("#buffer", new Variable("$stdin", Sort.STRING));
+            KApp buffer = KApp.of("'#buffer", new Variable("$stdin", Sort.STRING));
             items.add(newListItem(buffer));
 
-            items.add(new Variable("$noIO", Sort.LIST));//          eq noIOVariable = mkVariable('$noIO,List) .
+            items.add(new Variable("$noIO", Sort.LIST));
 
-//            syntax List ::= "#istream" "(" Int ")"        [cons(List1InputStreamSyn)]
-            KApp stdinStream = KApp.of("#istream", IntBuiltin.ZERO);
+            KApp stdinStream = KApp.of("'#istream", IntBuiltin.ZERO);
             items.add(newListItem(stdinStream));
         }
         if ("stdout".equals(stream)) {
-//            eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, noIOVariable, ioBuffer(nilK),T)) .
-//            | "#ostream" "(" Int ")"        [cons(List1OutputStreamSyn)]
-            KApp stdoutStream = KApp.of("#ostream", IntBuiltin.ONE);
+            KApp stdoutStream = KApp.of("'#ostream", IntBuiltin.ONE);
             items.add(newListItem(stdoutStream));
 
-            items.add(new Variable("$noIO", Sort.LIST));//          eq noIOVariable = mkVariable('$noIO,List) .
+            items.add(new Variable("$noIO", Sort.LIST));
 
-//            syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-            KApp buffer = KApp.of("#buffer", StringBuiltin.EMPTY);
+            KApp buffer = KApp.of("'#buffer", StringBuiltin.EMPTY);
             items.add(newListItem(buffer));
 
             addAtEnd = contents;

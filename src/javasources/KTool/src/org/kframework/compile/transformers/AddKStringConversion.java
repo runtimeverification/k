@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class AddKStringConversion extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabel2String =
-            KLabelConstant.of("KLabel2String");
+            KLabelConstant.of("'KLabel2String");
 
     public AddKStringConversion(Context context) {
         super("Define KLabel2String and String2Klabel for KLabel constants", context);

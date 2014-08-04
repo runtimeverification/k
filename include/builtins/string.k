@@ -46,8 +46,8 @@ module STRING-HOOKS
   syntax Int ::= "String2Base" "(" String "," Int ")" [function, klabel(String2Base), hook(#CONVERSION:string2base)]
 
 
-  syntax String ::= "KLabel2String" "(" KLabel ")"  [function, klabel(KLabel2String)]
-  syntax KLabel ::= "String2KLabel" "(" String ")" [function]
+  syntax String ::= KLabel2String(KLabel)  [function]
+  syntax KLabel ::= String2KLabel(String) [function]
 
   syntax String ::= "replaceAll" "(" String "," String "," String ")" [function, hook(#STRING:replaceAll)]
   syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(#STRING:replace)]
