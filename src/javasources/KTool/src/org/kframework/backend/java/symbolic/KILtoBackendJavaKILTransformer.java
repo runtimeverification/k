@@ -618,14 +618,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Module singletonModule = node.getSingletonModule();
 
-        /*
-         * Liyi Li: add new constraint such that if an anywhere rule contains an
-         * attribute with "alphaRule" then we remove the rule
-         */
         for (org.kframework.kil.Rule rule : singletonModule.getRules()) {
-            if (rule.containsAttribute(Attribute.PREDICATE.getKey())
-                    || (rule.containsAttribute(Attribute.ANYWHERE.getKey()) && (!rule
-                            .containsAttribute("alphaRule")))) {
+            if (rule.containsAttribute(Attribute.PREDICATE_KEY)) {
                 continue;
             }
 
@@ -664,7 +658,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             boolean change = false;
 
             partiallyEvaluatedRules.clear();
-            for (Rule rule : definition.functionRules().values()) {
+            for (Rule rule : Iterables.concat(definition.functionRules().values(),
+                    definition.anywhereRules().values())) {
                 Rule evaluatedRule = evaluateRule(rule, globalContext);
                 partiallyEvaluatedRules.add(evaluatedRule);
 
@@ -678,6 +673,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
 
             definition.functionRules().clear();
+            definition.anywhereRules().clear();
             definition.addRuleCollection(partiallyEvaluatedRules);
         }
 
