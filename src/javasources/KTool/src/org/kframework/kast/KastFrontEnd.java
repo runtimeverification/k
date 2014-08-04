@@ -25,6 +25,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 
 public class KastFrontEnd extends FrontEnd {
 
@@ -47,20 +48,20 @@ public class KastFrontEnd extends FrontEnd {
     }
 
     private final KastOptions options;
-    private final Context context;
+    private final Provider<Context> contextProvider;
     private final Stopwatch sw;
 
     @Inject
     KastFrontEnd(
             KastOptions options,
-            @Main Context context,
+            @Main Provider<Context> contextProvider,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             Stopwatch sw,
             KExceptionManager kem) {
         super(kem, options.global, usage, experimentalUsage);
         this.options = options;
-        this.context = context;
+        this.contextProvider = contextProvider;
         this.sw = sw;
     }
 
@@ -73,6 +74,7 @@ public class KastFrontEnd extends FrontEnd {
         String stringToParse = options.stringToParse();
         String source = options.source();
 
+        Context context = contextProvider.get();
         String sort = options.sort(context);
 
         try {
