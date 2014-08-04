@@ -20,7 +20,6 @@ module MY-PATTERN-MATCHING
 
 // Gets the matching; call myIsMatching first, for safety
   syntax Map ::= myGetMatching(KList, KList)          [function]
-  syntax KItem ::= #myPatternMatch(KList, KList)        [function]
   rule myGetMatching(Ps:KList, Ks:KList)
     => #myGetMapFromK(#myPatternMatch(Ps,Ks))
 
