@@ -1,5 +1,9 @@
 
-# General #
+# K Framework 3.4 (released 2014-08-05) #
+
+This version is a major release.
+
+## General ##
 - Discontinued compatibility with Java 6.
 - New folder structure.
 - Removed `cink` from examples. Cink is a separated repository now.
@@ -7,7 +11,7 @@
 new features.
 
 
-# Language #
+## Language ##
 - Use of `when` deprecated; using instead `requires`
 (and `ensures` for proof post-conditions).
 - Replaced (deprecated) `List{K}` by `KList` (Issue #200).
@@ -21,10 +25,10 @@ new features.
 .K, ~> sequences.
 
 
-# Editor support #
+## Editor support ##
 - Added a new plugin for working with K definitions into IntelliJ Idea.
 
-# Kompile #
+## Kompile ##
 - Added `--no-prelude` option which skips the auto inclusion of predefined 
 files/modules.
 - Implemented support for environment variable `K_OPTS` to specify additional
@@ -43,7 +47,7 @@ rules (Issue #207).
 	- Improved caching of rules to speedup re-compilation if no syntax changes.
 
 
-# Krun #
+## Krun ##
 - Changed option `--output-mode` to `--output` with short-name `-o`.
 - Improved reporting of running times in the verbose output mode (Issue #169).
 - `--search` now accepts more then one token in the input stream (Issue #159).
@@ -60,7 +64,7 @@ background color of the terminal.
 	- improved diff frame;
 	- improved duplicate detection for the `step-all` command.
 
-# KTest #
+## KTest ##
 - Failing when pdf generation fails (Issue #683).
 - Printing tested output file in case of match failure (Issue #689).
 - Fixed error messages to contain an executable command (Issue #518).
@@ -81,7 +85,7 @@ absolute paths (Issue #202).
 - Multiple program and results directories supported (Issue #96).
 
 
-# Java Backend #
+## Java Backend ##
 - Implementation for builtin string operations.
 - Added tag `interface` for data structure update operations.
 - Added option `--pattern-matching` to krun
@@ -91,5 +95,5 @@ absolute paths (Issue #202).
 (using the gappa prover).
 - Partial Z3 model integration.
 
-# Test Generation #
+## Test Generation ##
 - Option `--test-gen` added to kompile
