@@ -191,7 +191,8 @@
          </classpath>
          <batchtest>
            <fileset dir="${javasources}/KTool/test">
-             <include name="**/*.java" />
+             <include name="**/*Test.java" />
+             <include name="**/Test*.java" />
              <exclude name="org/kframework/utils/BaseTestCase.java" />
            </fileset>
          </batchtest>

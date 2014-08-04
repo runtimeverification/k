@@ -33,6 +33,12 @@ public abstract class BaseTestCase {
     @Mock
     protected KExceptionManager kem;
 
+    @Mock
+    protected Stopwatch sw;
+
+    @Mock
+    protected BinaryLoader loader;
+
     PrintStream oldOut, oldErr;
     protected ByteArrayOutputStream stdout = new ByteArrayOutputStream();
     protected ByteArrayOutputStream stderr = new ByteArrayOutputStream();

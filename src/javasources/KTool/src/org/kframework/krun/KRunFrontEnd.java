@@ -71,7 +71,7 @@ public class KRunFrontEnd extends FrontEnd {
      * and definition context to use to execute.
      * @return true if the application completed normally; false otherwise
      */
-    public boolean normalExecution(Term initialConfiguration) {
+    public boolean normalExecution(KRun krun, Context context, Term initialConfiguration) {
 
         try {
             KRunOptions options = context.krunOptions;
@@ -182,7 +182,7 @@ public class KRunFrontEnd extends FrontEnd {
                             System.out.println();
                             break;
                         } else if (input.equals("y")) {
-                            debugExecution(initialConfiguration, searchResult);
+                            debugExecution(krun, context, initialConfiguration, searchResult);
                             break;
                         } else {
                             System.out
@@ -241,7 +241,7 @@ public class KRunFrontEnd extends FrontEnd {
      * @param context The definition context loaded from the compiled definition.
      * @return true if the application completed normally; false otherwise
      */
-    public boolean debugExecution(Term initialConfiguration, KRunResult<SearchResults> state) {
+    public boolean debugExecution(KRun krun, Context context, Term initialConfiguration, KRunResult<SearchResults> state) {
         ConsoleReader reader;
         try {
             reader = new ConsoleReader();
@@ -381,7 +381,7 @@ public class KRunFrontEnd extends FrontEnd {
         }
     }
 
-    private boolean guiDebugExecution(Term initialConfiguration) {
+    private boolean guiDebugExecution(KRun krun, Context context, Term initialConfiguration) {
         try {
             krun.setBackendOption("io", false);
             RunKRunCommand cmd = new RunKRunCommand(initialConfiguration, krun, context);
@@ -435,10 +435,10 @@ public class KRunFrontEnd extends FrontEnd {
     }
 
     private final KRunOptions options;
-    private final KRun krun;
-    private final Context context;
+    private final Provider<KRun> krunProvider;
+    private final Provider<Context> contextProvider;
     private final Provider<Term> initialConfigurationProvider;
-    private final Optional<Waitor> waitor;
+    private final Provider<Optional<Waitor>> waitorProvider;
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
@@ -448,19 +448,19 @@ public class KRunFrontEnd extends FrontEnd {
             KRunOptions options,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
-            @Main KRun krun,
-            @Main Context context,
+            @Main Provider<KRun> krunProvider,
+            @Main Provider<Context> contextProvider,
             @Main Provider<Term> initialConfigurationProvider,
-            Optional<Waitor> waitor,
+            Provider<Optional<Waitor>> waitorProvider,
             Stopwatch sw,
             KExceptionManager kem,
             BinaryLoader loader) {
         super(kem, options.global, usage, experimentalUsage);
         this.options = options;
-        this.krun = krun;
-        this.context = context;
+        this.krunProvider = krunProvider;
+        this.contextProvider = contextProvider;
         this.initialConfigurationProvider = initialConfigurationProvider;
-        this.waitor = waitor;
+        this.waitorProvider = waitorProvider;
         this.sw = sw;
         this.kem = kem;
         this.loader = loader;
@@ -472,7 +472,7 @@ public class KRunFrontEnd extends FrontEnd {
      */
     public boolean run() {
         if (options.experimental.simulation != null) {
-            Waitor runSimulation = waitor.get();
+            Waitor runSimulation = waitorProvider.get().get();
             runSimulation.start();
             try {
                 runSimulation.join();
@@ -482,13 +482,17 @@ public class KRunFrontEnd extends FrontEnd {
             return true;
         }
 
+        KRun krun = krunProvider.get();
+        Term initialConfiguration = initialConfigurationProvider.get();
+        Context context = contextProvider.get();
+
         if (!options.experimental.debugger() && !options.experimental.debuggerGui()) {
-            normalExecution(initialConfigurationProvider.get());
+            normalExecution(krun, context, initialConfiguration);
         } else {
             if (options.experimental.debuggerGui())
-                return guiDebugExecution(initialConfigurationProvider.get());
+                return guiDebugExecution(krun, context, initialConfiguration);
             else
-                debugExecution(initialConfigurationProvider.get(), null);
+                debugExecution(krun, context, initialConfiguration, null);
         }
         return true;
     }
