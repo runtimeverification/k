@@ -1,0 +1,7 @@
+<k>
+    .K
+</k>
+<env>
+    "a" |-> piece ( piece ( 1 , 1 ) bit:: 0 bit:: piece ( 1 , 1 ) , 2 ) "b" 
+      |-> piece ( piece ( 1 , 1 ) bit:: 0 bit:: piece ( 1 , 1 ) , 2 )
+</env>

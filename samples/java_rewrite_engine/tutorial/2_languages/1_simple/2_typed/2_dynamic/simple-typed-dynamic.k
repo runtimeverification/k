@@ -286,19 +286,11 @@ When done with the first pass, call \texttt{main()}. */
 
 Check array bounds, as part of the dynamic typing policy. */
 
-//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-//    [structural, anywhere]
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural]
-  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals]) => lvalue(V[N1][N2, Vs])
-    [structural]
+    [structural, anywhere]
 
-//  rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-//    when N >=Int 0 andBool N <Int M  [structural, anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [structural]
-  rule lvalue(array(_:Type, L:Int, M:Int)[N:Int]) => lvalue(lookup(L +Int N))
-    when N >=Int 0 andBool N <Int M  [structural]
+    when N >=Int 0 andBool N <Int M  [structural, anywhere]
 
 //@ \subsubsection{Size of an array}
 

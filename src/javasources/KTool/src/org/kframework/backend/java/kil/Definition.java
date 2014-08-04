@@ -8,6 +8,7 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,6 +45,7 @@ public class Definition extends JavaSymbolicObject {
     private final List<Rule> macros;
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
+    private final Multimap<KLabelConstant, Rule> anywhereRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
@@ -100,6 +102,15 @@ public class Definition extends JavaSymbolicObject {
             patternRules.put(rule.definedKLabel(), rule);
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
+        } else if (rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
+            if (!(rule.leftHandSide() instanceof KItem)) {
+                GlobalSettings.kem.registerCriticalWarning(
+                        "The Java backend only supports [anywhere] rule that rewrites KItem; but found:\n\t"
+                                + rule, rule);
+                return;
+            }
+
+            anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
         }
@@ -148,6 +159,10 @@ public class Definition extends JavaSymbolicObject {
 
     public Multimap<KLabelConstant, Rule> functionRules() {
         return functionRules;
+    }
+
+    public Multimap<KLabelConstant, Rule> anywhereRules() {
+        return anywhereRules;
     }
 
     public Collection<Rule> sortPredicateRulesOn(KLabelConstant kLabel) {

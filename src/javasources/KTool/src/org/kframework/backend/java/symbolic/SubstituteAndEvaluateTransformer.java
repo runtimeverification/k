@@ -132,10 +132,27 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(KItem kItem) {
-        return proceed(kItem) ?
-                ((KItem) super.transform(
-                        BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem, context)))
-                .evaluateFunction(copyOnShareSubstAndEval, context) : kItem;
+        Term result = kItem;
+        if (proceed(kItem)) {
+            result = ((KItem) super
+                    .transform(BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem, context)))
+                    .resolveFunctionAndAnywhere(copyOnShareSubstAndEval, context);
+
+            // TODO(YilongL): visitor/imp.k would fail the following assertion
+            if (context.definition().context().globalOptions.debug) {
+                if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
+                    System.err.println("Unable to resolve function symbol:\n\t" + result);
+                    if (!definition.functionRules().isEmpty()) {
+                        System.err.print("\n\tDefined function rules:");
+                        for (Rule rule : definition.functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
+                            System.err.print("\n\t" + rule);
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override

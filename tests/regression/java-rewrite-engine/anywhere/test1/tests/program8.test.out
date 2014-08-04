@@ -1,0 +1,6 @@
+<k>
+    .K
+</k>
+<env>
+    "a" |-> dataList ( ListItem ( piece ( 18 , 6 ) ) )
+</env>
