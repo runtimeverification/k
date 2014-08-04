@@ -22,6 +22,10 @@ import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
+/**
+ * Do not use outside the parser!
+ *
+ */
 public class CollectVariablesVisitor extends BasicVisitor {
     public CollectVariablesVisitor(Context context) {
         super(context);
