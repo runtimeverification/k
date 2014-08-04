@@ -23,7 +23,7 @@ import org.kframework.kil.loader.Context;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompileDataStructuresTest {
@@ -52,9 +52,9 @@ public class CompileDataStructuresTest {
     @Test
     public void testIssue738() {
         when(context.productionsOf("'_[_<-_]")).thenReturn(
-                ImmutableList.of(production1));
+                ImmutableSet.of(production1));
         when(context.productionsOf("'.Map")).thenReturn(
-                ImmutableList.of(production2));
+                ImmutableSet.of(production2));
         when(production1.getSort()).thenReturn(Sort.MAP);
         when(production2.getSort()).thenReturn(Sort.MAP);
         when(context.dataStructureSortOf(Sort.MAP)).thenReturn(mapSort);

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
@@ -224,7 +223,6 @@ public class XmlUnparseFilter extends BasicVisitor {
 
         prepare(attributes);
         java.util.List<String> reject = new LinkedList<String>();
-        reject.add("cons");
         reject.add("kgeneratedlabel");
         reject.add("prefixlabel");
         reject.add("filename");

@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
@@ -32,7 +31,6 @@ import org.kframework.utils.StringUtil;
 public class ProgramSDF {
 
     public static StringBuilder getSdfForPrograms(Definition def, Context context) {
-
         // collect all the syntax modules
         CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context);
         csmv.visitNode(def);
@@ -94,7 +92,7 @@ public class ProgramSDF {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
                 sdf.append("    {" + StringUtil.escapeSortName(si.getSort().getName()) + " " + StringUtil.enquoteCString(si.getSeparator()) + "}" + si.getListType() + " -> " + StringUtil.escapeSortName(p.getSort().getName()));
-                sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
+                sdf.append(" {cons(\"" + context.getConses().inverse().get(p) + "\")}\n");
             } else {
                 sdf.append("    ");
                 List<ProductionItem> items = p.getItems();
@@ -119,7 +117,7 @@ public class ProgramSDF {
                     }
                 }
                 sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
-                sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+                sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
             }
         }
 

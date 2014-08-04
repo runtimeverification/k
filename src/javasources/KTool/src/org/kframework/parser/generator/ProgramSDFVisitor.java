@@ -175,7 +175,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                             }
                         }
                         sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
-                        sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+                        sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
                     }
                     sdf.append("} > ");
                 }

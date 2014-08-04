@@ -2,7 +2,6 @@
 package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
@@ -215,7 +214,6 @@ public class UnparserFilterNew extends NonCachingVisitor {
     public Void visit(Attributes attributes, Void _) {
         prepare(attributes);
         java.util.List<String> reject = new LinkedList<String>();
-        reject.add("cons");
         reject.add("kgeneratedlabel");
         reject.add("prefixlabel");
         reject.add("filename");

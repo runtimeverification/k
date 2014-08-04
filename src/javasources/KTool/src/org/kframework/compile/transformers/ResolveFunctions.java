@@ -27,7 +27,7 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
             body = ((Rewrite) body).getLeft();
         }
         if (body instanceof TermCons) {
-            Production prod = context.conses.get(((TermCons) body).getCons());
+            Production prod = ((TermCons) body).getProduction();
             if (prod.containsAttribute(Attribute.FUNCTION_KEY)
                     || prod.containsAttribute(Attribute.PREDICATE_KEY)) {
                 node = addFunction(node);

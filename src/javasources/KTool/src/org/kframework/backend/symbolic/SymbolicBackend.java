@@ -143,7 +143,6 @@ public class SymbolicBackend extends BasicBackend implements Backend {
         steps.add(new AddSymbolicK(context));
 
         steps.add(new AddSemanticEquality(context));
-        steps.add(new FreshCondToFreshVar(context));
         steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
         steps.add(new AddConditionToConfig(context)); // symbolic step

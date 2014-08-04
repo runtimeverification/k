@@ -28,7 +28,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
     public ASTNode visit(TermCons node, Void _)  {
         boolean change = false;
         ArrayList<Term> terms = new ArrayList<Term>();
-        Production prod = context.conses.get(node.getCons());
+        Production prod = node.getProduction();
         Iterator<Term> termIt = node.getContents().iterator();
         Term t;
         for (ProductionItem pitem : prod.getItems()) {

@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -42,10 +41,8 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
             pItems.add(new Terminal("#"));
             pItems.add(new NonTerminal(sort));
             p.putAttribute("KLabelWrapper", sort.getName());
-            p.putAttribute("cons", "KLabel1" + sort + "Wrapper");
             p.putAttribute("prefixlabel", "#_");
-            context.conses.put("KLabel1" + sort + "Wrapper", p);
-            context.putLabel(p, "KLabel1" + sort+ "Wrapper");
+            context.addProduction(p);
             block.getProductions().add(p);
             pItems = new ArrayList<ProductionItem>();
             p = new Production(new NonTerminal(Sort.KLABEL), pItems );

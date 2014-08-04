@@ -71,12 +71,6 @@ module K-WRAPPERS
 //               | Map2K (Map)            [klabel('Map2K_)]
 endmodule
 
-module K-EVAL
-  imports K-TECHNIQUE
-  syntax Bag ::= "#eval" Map          [cons(Bag1EvalSyn)]
-  syntax Bag ::= "#evalHelper" Map    [cons(Bag1EvalHelperSyn)]
-endmodule
-
 module K-BUILTINS
   syntax KLabel ::=  "#" K [builtinWrapper]
 endmodule
@@ -121,7 +115,7 @@ module K
   imports K-BUILTINS
   imports K-RESULT             // to express results syntactically
   // imports K-RULES              // to write k rules with in-place rewriting
-  imports K-EVAL
+  //imports K-EVAL
   // imports K-CONTEXTS
   imports K-DESTRUCTORS           // defines getKLabel and getKList for K
   //imports K-EXTRAS                // defines a KLabel substitution

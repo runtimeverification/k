@@ -36,7 +36,7 @@ public class CheckSmtLibByAddingPredicates extends BasicVisitor{
                 return null;
             }
 
-            Set<Production> prods = context.productions.get(((KLabelConstant) klabel).getLabel());
+            Set<Production> prods = context.klabels.get(((KLabelConstant) klabel).getLabel());
             if (prods == null) {
                 smtValid = false;
             } else {

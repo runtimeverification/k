@@ -6,7 +6,6 @@ import java.util.HashSet;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -97,7 +96,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
             return false;
 
         if (t1 instanceof TermCons) {
-            if (!((TermCons) t1).getCons().equals(((TermCons) t2).getCons()))
+            if (!((TermCons) t1).getProduction().equals(((TermCons) t2).getProduction()))
                 return false;
 
             TermCons tc1 = (TermCons) t1;

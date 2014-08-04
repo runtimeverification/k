@@ -46,8 +46,7 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-        if (tc.getProduction() == null)
-            System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
+        assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
             tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
             tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));

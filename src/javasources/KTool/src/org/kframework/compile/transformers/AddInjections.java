@@ -7,7 +7,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KItemProjection;
 import org.kframework.kil.KLabelInjection;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
@@ -80,9 +79,8 @@ public class AddInjections extends CopyOnWriteTransformer{
 
         Syntax returnNode;
         if (production != node.getPriorityBlocks().get(0).getProductions().get(0)) {
-            String cons = context.conses.inverse().get(
-                    node.getPriorityBlocks().get(0).getProductions().get(0));
-            context.conses.forcePut(cons, production);
+            context.productions.remove(node.getPriorityBlocks().get(0).getProductions().get(0));
+            context.productions.add(production);
 
             returnNode = node.shallowCopy();
             PriorityBlock priorityBlock = node.getPriorityBlocks().get(0).shallowCopy();

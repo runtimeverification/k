@@ -9,8 +9,11 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 
+import com.google.common.collect.BiMap;
+
 public class SDFHelper {
-    public static String getSDFAttributes(Attributes attrs) {
+    public static String getSDFAttributes(Production p, BiMap<String, Production> conses) {
+        Attributes attrs = p.getAttributes();
         String str = " {";
         if (attrs.getContents().size() == 0)
             return "";
@@ -29,8 +32,8 @@ public class SDFHelper {
             str += "non-assoc, ";
         // if (attrs.containsKey("bracket")) // should not need this since we use the Bracket class
         // str += "bracket, ";
-        if (attrs.containsKey("cons"))
-            str += "cons(\"" + attrs.get("cons") + "\"), ";
+        if (conses.containsValue(p))
+            str += "cons(\"" + conses.inverse().get(p) + "\"), ";
 
         if (str.endsWith(", "))
             return str.substring(0, str.length() - 2) + "}";
@@ -45,10 +48,7 @@ public class SDFHelper {
      * @return
      */
     public static Set<Production> getProductionsForTag(String tag, Context context) {
-        if (context.productions.containsKey(tag))
-            return context.productions.get(tag);
-        else
-            return new HashSet<Production>();
+        return context.tags.get(tag);
     }
 
     public static String getFollowRestrictionsForTerminals(Set<String> terminals) {

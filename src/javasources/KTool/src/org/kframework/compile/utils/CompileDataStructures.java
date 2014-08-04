@@ -7,7 +7,6 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.MapUpdate;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
@@ -21,7 +20,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Transformer class compiling collection (bag, list, map and set) terms into K internal
@@ -125,7 +124,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
         KList kList = (KList) node.getChild();
 
-        List<Production> productions = context.productionsOf(kLabelConstant.getLabel());
+        Set<Production> productions = context.productionsOf(kLabelConstant.getLabel());
         if (productions.isEmpty()) {
             return node;
         }

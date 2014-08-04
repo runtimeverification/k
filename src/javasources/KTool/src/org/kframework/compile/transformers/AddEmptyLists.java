@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
@@ -13,7 +12,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KException;
@@ -108,7 +106,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
     }
 
     private Term addEmpty(Term node, Sort sort) {
-        TermCons tc = new TermCons(sort, getListCons(sort), context);
+        TermCons tc = new TermCons(sort, getListProduction(sort));
         List<Term> genContents = new ArrayList<Term>();
         genContents.add(node);
         genContents.add(new ListTerminator(sort, null));
@@ -117,8 +115,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         return tc;
     }
 
-    private String getListCons(Sort psort) {
-        Production p = context.listConses.get(psort);
-        return p.getAttribute(Constants.CONS_cons_ATTR);
+    private Production getListProduction(Sort psort) {
+        return context.listProductions.get(psort);
     }
 }
