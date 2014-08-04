@@ -2,14 +2,10 @@
 package org.kframework.compile.utils;
 
 import org.kframework.compile.transformers.*;
-import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
-
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -48,12 +44,12 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 
     @Override
     public Rule compile(Rule def, String stepName) throws CompilerStepDone {
-        CollectVariablesVisitor collectVars = new CollectVariablesVisitor(context);
-        collectVars.visitNode(def);
-        vars = new HashSet<Variable>();
-        for (List<Variable> collectedVars : collectVars.getVars().values()) {
-            vars.add(collectedVars.get(0));
-        }
+        vars = new HashSet<>();
+        vars.addAll(def.getBody().variables());
+        if (def.getRequires() != null)
+            vars.addAll(def.getRequires().variables());
+        if (def.getEnsures() != null)
+            vars.addAll(def.getEnsures().variables());
         return super.compile(def, stepName);
     }
 }
