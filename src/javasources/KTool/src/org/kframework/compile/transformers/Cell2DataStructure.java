@@ -4,6 +4,7 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.CellMap;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.CellDataStructure;
@@ -13,8 +14,10 @@ import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KItemProjection;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
+import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
@@ -51,6 +54,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     public static final String MAP_CELL_CELL_LABEL_PREFIX = "value-cell-label-prefix-";
 
     private Set<String> cellMapLabels = Sets.newHashSet();
+    private String patternLabel;
 
     public Cell2DataStructure(Context context) {
         super("Transform cells with key attribute to maps", context);
@@ -63,6 +67,15 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule rule, Void _) {
+        // TODO(AndreiS): should only be applied once
+        makeCellDataStructures();
+        if ((rule.getBody().getSort().equals(Sort.BAG) || rule.getBody().getSort().equals(Sort.BAG_ITEM))
+                && rule.containsAttribute(Attribute.PATTERN_KEY)) {
+            patternLabel = ((Cell) ((Rewrite) rule.getBody()).getLeft()).getLabel();
+        } else {
+            patternLabel = null;
+        }
+
         if (!rule.isCompiledForFastRewriting()) {
             return super.visit(rule, _);
         }
@@ -116,9 +129,6 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-        // TODO(AndreiS): should only be applied once
-        makeCellDataStructures();
-
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
             return super.visit(cell, _);
@@ -127,6 +137,11 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());
+        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
+            cellContent = new Bag(cellContent.getContents().subList(
+                    0,
+                    cellContent.getContents().size() - 1));
+        }
 
         DataStructureBuiltin dataStructureBuiltin;
         if (cellDataStructure instanceof CellList) {
@@ -138,6 +153,14 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             return null;
         }
 
+        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
+            MapBuiltin mapBuiltin = (MapBuiltin) dataStructureBuiltin;
+            if (!(mapBuiltin.baseTerms().size() == 1 && mapBuiltin.elements().isEmpty())) {
+                return mapBuiltin;
+            } else {
+                return mapBuiltin.baseTerms().iterator().next();
+            }
+        }
         Cell returnCell = cell.shallowCopy();
         returnCell.setContents(dataStructureBuiltin);
         return returnCell;
@@ -146,7 +169,9 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     private Bag normalizeCellContent(Term content) {
         if (content instanceof Bag) {
             return Bag.flatten((Bag) content);
-        } else if (content instanceof Cell || content instanceof Variable) {
+        } else if (content instanceof Cell
+                || content instanceof Variable
+                || content instanceof KItemProjection) {
             return new Bag(Collections.singletonList(content));
         } else {
             assert false;
@@ -245,6 +270,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
                 }
             } else if (term instanceof Variable) {
                 terms.add(new Variable(((Variable) term).getName(), Sort.of(mapSort.name())));
+            } else if (term instanceof KItemProjection) {
+                terms.add(((KItemProjection) term).getTerm());
             } else {
                 assert false;
             }

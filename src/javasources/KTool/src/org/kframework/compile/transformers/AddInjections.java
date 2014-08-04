@@ -77,6 +77,11 @@ public class AddInjections extends CopyOnWriteTransformer{
             production.setSort(Sort.KITEM);
         }
 
+        if (sort.equals(Sort.BAG) && production.containsAttribute(Attribute.PATTERN_KEY)) {
+            production = production.shallowCopy();
+            production.setSort(Sort.MAP);
+        }
+
         Syntax returnNode;
         if (production != node.getPriorityBlocks().get(0).getProductions().get(0)) {
             context.productions.remove(node.getPriorityBlocks().get(0).getProductions().get(0));
@@ -181,7 +186,11 @@ public class AddInjections extends CopyOnWriteTransformer{
 
         Sort sort = node.getProduction().getSort();
         if (needProjectionTo(sort)) {
-            transformedNode.setSort(Sort.KITEM);
+            if (!node.getProduction().containsAttribute(Attribute.PATTERN_KEY)) {
+                transformedNode.setSort(Sort.KITEM);
+            } else {
+                transformedNode.setSort(Sort.MAP);
+            }
             // TODO (AndreiS): remove special case
             if (node.getProduction().getLabel().equals("#if_#then_#else_#fi") && !sort.equals(Sort.KLIST)) {
                 return transformedNode;
