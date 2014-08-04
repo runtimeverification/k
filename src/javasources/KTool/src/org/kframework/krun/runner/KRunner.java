@@ -112,6 +112,11 @@ public class KRunner {
         // Client.main(null);
     }
 
+    private static String maudeEscapePath(String original) {
+        // backslash-escape white spaces, backslashes, and double quotes
+        return original.replaceAll("[\\s\"\\\\]", "\\\\$0");
+    }
+
     public int run() {
         Thread ioServer = null;
         try {
@@ -121,9 +126,9 @@ public class KRunner {
             _maudeFileName = KPaths.windowfyPath(_maudeFileName);
             _maudeCommandFileName = KPaths.windowfyPath(_maudeCommandFileName);
             String commandTemplate = "load {0}\nmod KRUNNER is including {1} .\neq #TCPPORT = {2,number,#} .\nendm\nload {3}\n";
-            /*_maudeFileName = _maudeFileName.replaceAll("(\\s)", "\\\1");
-            _maudeCommandFileName = _maudeCommandFileName.replaceAll("(\\s)", "\\ ");*/
-
+            _maudeFileName = maudeEscapePath(_maudeFileName);
+            _maudeCommandFileName = maudeEscapePath(_maudeCommandFileName);
+            
             String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
             MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _xmlOutFileName);
 
