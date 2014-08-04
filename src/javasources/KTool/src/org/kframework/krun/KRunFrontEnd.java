@@ -43,9 +43,7 @@ import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.main.FrontEnd;
-import org.kframework.main.Tool;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -85,8 +83,6 @@ public class KRunFrontEnd extends FrontEnd {
                 if (options.pattern(context) != null) {
                     steps = new RuleCompilerSteps(context);
                     ASTNode pattern = options.pattern(context);
-                    CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-                    vars.visitNode(pattern);
                     //varNames = vars.getVars().keySet();
 
                     try {
@@ -495,9 +491,5 @@ public class KRunFrontEnd extends FrontEnd {
                 debugExecution(initialConfigurationProvider.get(), null);
         }
         return true;
-    }
-    @Override
-    public Tool tool() {
-        return Tool.KRUN;
     }
 }

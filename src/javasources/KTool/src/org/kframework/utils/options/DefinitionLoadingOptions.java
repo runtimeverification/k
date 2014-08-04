@@ -5,13 +5,18 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.inject.NullProvider;
-
 import com.beust.jcommander.Parameter;
+import com.google.inject.Inject;
 import com.google.inject.ProvidedBy;
 
-@ProvidedBy(NullProvider.class)
 public class DefinitionLoadingOptions {
+
+    public DefinitionLoadingOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public DefinitionLoadingOptions(Void v) {}
+
     @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the kompiled " +
             "K definition resides. The default is the unique, only directory with the suffix '-kompiled' " +
             "in the current directory. A definition may also be specified with the 'KRUN_COMPILED_DEF' " +

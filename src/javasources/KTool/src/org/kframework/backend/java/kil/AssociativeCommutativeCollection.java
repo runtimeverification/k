@@ -60,6 +60,11 @@ public abstract class AssociativeCommutativeCollection extends Collection {
     }
 
     @Override
+    public final boolean isEmpty() {
+        return size() == 0 && isConcreteCollection();
+    }
+
+    @Override
     public final boolean isExactSort() {
         return true;
     }

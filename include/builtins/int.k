@@ -24,7 +24,7 @@ module INT-HOOKS
                | Int "divInt" Int               [function, left, smtlib(div), hook(#INT:_divInt_)]
                | Int "modInt" Int               [function, left, smtlib(mod), hook(#INT:_modInt_)]
                > left:
-                 Int "+Int" Int                 [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_), cons(Int1PlusSyn)]
+                 Int "+Int" Int                 [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_)]
                | Int "-Int" Int                 [function, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(#INT:_-Int_)]
                > left:
                  Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(#INT:_>>Int_)]

@@ -23,7 +23,6 @@ public class UpdateAssocVisitor extends BasicVisitor {
         for (KLabelConstant c : pri.getTags()) {
             Set<Production> prods = SDFHelper.getProductionsForTag(c.getLabel(), context);
             for (Production p : prods) {
-                context.putAssoc(p.getCons(), prods);
                 if (!p.getAttributes().containsKey(Constants.LEFT) &&
                     !p.getAttributes().containsKey(Constants.RIGHT) &&
                     !p.getAttributes().containsKey(Constants.NON_ASSOC)) {
@@ -42,7 +41,6 @@ public class UpdateAssocVisitor extends BasicVisitor {
                     !p.getAttributes().containsKey(Constants.RIGHT) &&
                     !p.getAttributes().containsKey(Constants.NON_ASSOC)) {
                     p.addAttribute(pri.getAssoc(), "");
-                    context.putAssoc(p.getCons(), pri.getProductions());
                 }
             }
         }

@@ -23,17 +23,22 @@ import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.krun.api.KRun;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.inject.NullProvider;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 import com.google.inject.ProvidedBy;
 
-@ProvidedBy(NullProvider.class)
 public final class KompileOptions implements Serializable {
+
+    public KompileOptions() {}
+
+    //TODO(dwightguth): remove in Guice 4.0
+    @Inject
+    public KompileOptions(Void v) {}
 
     public static enum Backend {
         PDF(true, false, false, PdfBackend.class, null),
@@ -198,9 +203,6 @@ public final class KompileOptions implements Serializable {
 
         @Parameter(names="--non-symbolic-rules", listConverter=StringListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
         public List<String> nonSymbolicRules = Collections.emptyList();
-
-        @Parameter(names="--test-gen", description="Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.")
-        public boolean testGen = false;
 
         @Parameter(names="--kore", description="Generate kore files of a given k definition")
         public boolean kore = false;

@@ -54,7 +54,6 @@ public class Variable extends Term {
         this.name = name;
         this.freshVariable = freshVariable;
         this.freshConstant = freshConstant;
-        this.userTyped = true;
     }
 
     public Variable(String name, Sort sort) {

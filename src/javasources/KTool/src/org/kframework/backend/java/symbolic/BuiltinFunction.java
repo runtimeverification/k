@@ -68,7 +68,7 @@ public class BuiltinFunction {
             GlobalSettings.kem.registerInternalError("Could not read from " + propertyFile, e);
         }
 
-        for (String label : definition.context().labels.keySet()) {
+        for (String label : definition.context().klabels.keySet()) {
             for (Production production : definition.context().productionsOf(label)) {
                 if (production.getKLabel().equals(label) // make sure the label is a Klabel
                         && production.containsAttribute(Attribute.HOOK_KEY)) {

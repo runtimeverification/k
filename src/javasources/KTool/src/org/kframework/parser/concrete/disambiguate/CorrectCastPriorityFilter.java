@@ -86,7 +86,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
 
         @Override
         public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-            assert tc.getProduction() != null : this.getClass() + ":" + " cons not found." + tc.getCons();
+            assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
 
             int lastElement = tc.getProduction().getItems().size() - 1;
             if (tc.getProduction().getItems().get(lastElement) instanceof NonTerminal || tc.getProduction().isListDecl()) {

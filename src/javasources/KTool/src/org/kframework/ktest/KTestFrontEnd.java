@@ -10,7 +10,6 @@ import org.kframework.ktest.Test.TestCase;
 import org.kframework.ktest.Test.TestSuite;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
@@ -108,10 +107,5 @@ public class KTestFrontEnd extends FrontEnd {
             ret = null; assert false;
         }
         return ret;
-    }
-
-    @Override
-    public Tool tool() {
-        return Tool.KTEST;
     }
 }

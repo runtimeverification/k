@@ -2,7 +2,6 @@
 package org.kframework.kil.loader;
 
 import java.util.HashMap;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Attribute;
@@ -59,7 +58,7 @@ public class JavaClassesFactory {
             return new Rewrite(element, context);
         if (Constants.TERM.equals(element.getNodeName())) {
             assert context != null;
-            return new TermCons(element, context);
+            return new TermCons(element, context.getConses());
         }
         if (Constants.BRACKET.equals(element.getNodeName()))
             return new Bracket(element);

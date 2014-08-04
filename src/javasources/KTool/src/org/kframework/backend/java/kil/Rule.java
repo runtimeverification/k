@@ -25,6 +25,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Constants;
+import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
@@ -91,7 +92,8 @@ public class Rule extends JavaSymbolicObject {
      * checking algorithm used in the {@link CheckVariables} pass.
      */
     private final ImmutableSet<Variable> unboundVars;
-    private final boolean isSortPredicate;
+    // TODO(YilongL): make it final
+    private boolean isSortPredicate;
     private final Sort predSort;
     private final KItem sortPredArg;
 
@@ -175,13 +177,26 @@ public class Rule extends JavaSymbolicObject {
         if (isSortPredicate) {
             predSort = definedKLabel().getPredicateSort();
 
-            assert leftHandSide instanceof KItem
+            if (leftHandSide instanceof KItem
                     && rightHandSide.equals(BoolToken.TRUE)
-                    && ((KList) ((KItem) leftHandSide).kList()).size() == 1 :
-                        "unexpected sort predicate rule: " + this;
-            Term arg = ((KList) ((KItem) leftHandSide).kList()).get(0);
-            assert arg instanceof KItem : "unexpected sort predicate rule: " + this;
-            sortPredArg = (KItem) arg;
+                    && ((KList) ((KItem) leftHandSide).kList()).size() == 1) {
+                Term arg = ((KList) ((KItem) leftHandSide).kList()).get(0);
+                sortPredArg = arg instanceof KItem ? (KItem) arg : null;
+            } else {
+                sortPredArg = null;
+            }
+
+            if (sortPredArg == null) {
+                isSortPredicate = false;
+
+                /*
+                 * YilongL: the right-hand side of the sort predicate rule
+                 * is not necessarily {@code BoolToken#True}? for example:
+                 *     rule isNat(I:Int) => '_>=Int_(I:Int,, Int(#"0"))
+                 */
+                // TODO(YilongL): properly re-implement support for sort predicate rules
+//                GlobalSettings.kem.registerCriticalWarning("Unexpected sort predicate rule: " + this, null, this);
+            }
         } else {
             predSort = null;
             sortPredArg = null;
@@ -309,7 +324,11 @@ public class Rule extends JavaSymbolicObject {
     }
 
     public boolean isFunction() {
-        return super.containsAttribute(Attribute.FUNCTION_KEY);
+        return containsAttribute(Attribute.FUNCTION_KEY);
+    }
+
+    public boolean isAnywhere() {
+        return containsAttribute(Attribute.ANYWHERE_KEY);
     }
 
     public boolean isPattern() {
@@ -321,6 +340,12 @@ public class Rule extends JavaSymbolicObject {
      */
     public KLabelConstant definedKLabel() {
         assert isFunction() || isPattern();
+
+        return (KLabelConstant) ((KItem) leftHandSide).kLabel();
+    }
+
+    public KLabelConstant anywhereKLabel() {
+        assert isAnywhere();
 
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }

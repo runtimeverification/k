@@ -2,7 +2,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -10,8 +9,7 @@ import org.kframework.kil.ProductionItem;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
-import org.kframework.kil.loader.AddConsesVisitor;
-import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectProductionsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -51,7 +49,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         transformedNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         Set<String> separators = new HashSet<String>();
-        for (Production production : context.listConses.values()) {
+        for (Production production : context.listProductions.values()) {
             UserList userList = (UserList) production.getItems().get(0);
             separators.add(userList.getSeparator());
         }
@@ -120,11 +118,11 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
          * same separator such that Sort2 is a subsort of Sort1
          * (i.e. List{Sort2, separator} if List{Sort1, separator} and Sort2 < Sort1)
          */
-        for (Production production1 : context.listConses.values()) {
+        for (Production production1 : context.listProductions.values()) {
             UserList userList1 = (UserList) production1.getItems().get(0);
 
             Set<Sort> subsorts = new HashSet<>();
-            for (Production production2 : context.listConses.values()) {
+            for (Production production2 : context.listProductions.values()) {
                 UserList userList2 = (UserList) production2.getItems().get(0);
 
                 if (userList1.getSeparator().equals(userList2.getSeparator())) {
@@ -142,20 +140,18 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 }
             }
         }
-        /* add conses to new syntactic lists */
-        new AddConsesVisitor(context).visitNode(transformedNode);
         /* update syntactic lists conses information in the context */
-        new CollectConsesVisitor(context).visitNode(transformedNode);
+        new CollectProductionsVisitor(context).visitNode(transformedNode);
 
         /*
          * Subsort one syntactic list to another syntactic list with the same separator if the
          * sort of the elements of the first list is subsorted to the sort of the elements of the
          * second list (i.e. List{Sort1, separator} < List{Sort2, separator} if Sort1 < Sort2)
          */
-        for (Production production1 : context.listConses.values()) {
+        for (Production production1 : context.listProductions.values()) {
             UserList userList1 = (UserList) production1.getItems().get(0);
 
-            for (Production production2 : context.listConses.values()) {
+            for (Production production2 : context.listProductions.values()) {
                 UserList userList2 = (UserList) production2.getItems().get(0);
 
                 if (userList1.getSeparator().equals(userList2.getSeparator())) {
@@ -173,7 +169,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
          * Subsort list of bottom to each syntactic list with the same separator
          * (i.e. List{#Bot, separator} < List{Sort, separator})
          */
-        for (Production production : context.listConses.values()) {
+        for (Production production : context.listProductions.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
             if (userList.getSort().equals(Sort.BUILTIN_BOT)) {
@@ -190,7 +186,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
          * Subsort a syntactic list to KResult if the sort of the elements of the list is
          * subsorted to KResult (i.e. List{Sort, separator} < KResult if Sort < KResult)
          */
-        for (Production production : context.listConses.values()) {
+        for (Production production : context.listProductions.values()) {
             UserList userList = (UserList) production.getItems().get(0);
 
             if (context.isSubsorted(Sort.KRESULT, userList.getSort())) {

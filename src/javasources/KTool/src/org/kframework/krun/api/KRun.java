@@ -48,7 +48,6 @@ public interface KRun {
     public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
 
     /**
-     Piggyback on the "search" method for test generation
      @param bound The maximum number of search results to return; null if unbounded
      @param depth The maximum number of transitions to make before terminating; null if
      unbounded

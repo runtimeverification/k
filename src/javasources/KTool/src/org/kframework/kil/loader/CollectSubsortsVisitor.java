@@ -2,7 +2,6 @@
 package org.kframework.kil.loader;
 
 import org.kframework.kil.Definition;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.NonTerminal;
@@ -44,8 +43,6 @@ public class CollectSubsortsVisitor extends BasicVisitor {
             }
         } else if (prd.isListDecl()) {
             UserList srt = (UserList) prd.getItems().get(0);
-            context.listConses.put(prd.getSort(), prd);
-            context.putListLabel(prd);
             context.addSubsort(prd.getSort(), srt.getSort());
         } else {
             for (ProductionItem pi : prd.getItems()) {

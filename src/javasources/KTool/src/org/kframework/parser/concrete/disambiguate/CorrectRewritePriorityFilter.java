@@ -9,7 +9,6 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
@@ -92,8 +91,7 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-        if (tc.getProduction() == null)
-            System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
+        assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
             tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
             tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));

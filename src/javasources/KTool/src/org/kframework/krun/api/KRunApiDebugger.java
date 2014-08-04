@@ -22,8 +22,6 @@ import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
-
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
@@ -49,8 +47,6 @@ public class KRunApiDebugger implements KRunDebugger {
                     "Command line pattern",
                     KSorts.BAG,
                     context);
-            CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-            vars.visitNode(pattern);
             defaultPatternInfo = new RuleCompilerSteps(context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 

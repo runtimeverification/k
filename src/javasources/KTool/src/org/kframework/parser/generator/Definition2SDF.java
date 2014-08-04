@@ -127,7 +127,7 @@ public class Definition2SDF {
                 UserList si = (UserList) p.getItems().get(0);
                 sdf.append("    " + StringUtil.escapeSortName(si.getSort().getName()) + " " + StringUtil.enquoteCString(si.getSeparator()) + " " + StringUtil.escapeSortName(p.getSort().getName()) + " -> "
                         + StringUtil.escapeSortName(p.getSort().getName()));
-                sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
+                sdf.append(" {cons(\"" + context.getConses().inverse().get(p) + "\")}\n");
                 sdf.append("    \"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort().getName()));
                 sdf.append(" {cons(\"" + StringUtil.escapeSortName(p.getSort().getName()) + "1Empty\")}\n");
             } else if (p.containsAttribute("bracket")) {
@@ -156,7 +156,7 @@ public class Definition2SDF {
                     }
                 }
                 sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
-                sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+                sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
             }
         }
         for (NonTerminal ss : psdfv.insertSorts)

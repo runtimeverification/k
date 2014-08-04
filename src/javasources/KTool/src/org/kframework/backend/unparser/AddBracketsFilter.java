@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -166,19 +165,18 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return Associativity.NONE;
     }
 
-    private boolean getAssociativity(Term inner, Term outer) {
+    private boolean getAssociativity(Term inner, Term outer, Associativity side) {
         if (!(inner instanceof TermCons && outer instanceof TermCons)) {
             return false;
         }
         TermCons tcInner = (TermCons) inner;
         TermCons tcOuter = (TermCons) outer;
-        if (tcInner.getCons().equals(tcOuter.getCons())) {
-            return true;
+        if (side == Associativity.LEFT) {
+            return !context.isRightAssoc(tcOuter.getProduction().getKLabel(), tcInner.getProduction().getKLabel());
+        } else if (side == Associativity.RIGHT) {
+            return !context.isLeftAssoc(tcOuter.getProduction().getKLabel(), tcInner.getProduction().getKLabel());
         }
-        if (context.associativity.get(tcInner.getCons()) == null) {
-            return false;
-        }
-        return context.associativity.get(tcInner.getCons()).contains(tcOuter.getProduction());
+        throw new AssertionError("unreachable");
     }
 
     private boolean isAtom(Term inner) {
@@ -464,7 +462,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 } else if (assoc == Associativity.RIGHT && !inversePriority) {
                     return true;
-                } else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture)) {
+                } else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture, Associativity.RIGHT)) {
                     return true;
                 }
             }
@@ -477,7 +475,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 } else if (assoc == Associativity.LEFT && !inversePriority) {
                     return true;
-                } else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture)) {
+                } else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture, Associativity.LEFT)) {
                     return true;
                 }
             }

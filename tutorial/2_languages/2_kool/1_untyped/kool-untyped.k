@@ -415,15 +415,11 @@ definition. */
   rule false || E => E
 
 
-//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-//    [structural, anywhere]
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]  [structural]
-  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])  [structural]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+    [structural, anywhere]
 
-//  rule array(L,_)[N:Int] => lookup(L +Int N)
-//    [structural, anywhere]
-  rule array(L,_)[N:Int] => lookup(L +Int N)  [structural]
-  rule lvalue(array(L,_)[N:Int] => lookup(L +Int N))  [structural]
+  rule array(L,_)[N:Int] => lookup(L +Int N)
+    [structural, anywhere]
 
 
   rule sizeOf(array(_,N)) => N

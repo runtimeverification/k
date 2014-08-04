@@ -83,27 +83,21 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
                                 node.getLocation())
                 );
         }
-        Term term = null;
-        if (!kompileOptions.experimental.testGen) {
-            java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
-            if (vars.size() != 1) {
-                GlobalSettings.kem.register(
-                        new KException(KException.ExceptionType.ERROR,
-                                KException.KExceptionGroup.CRITICAL,
-                                "Heating/Cooling rules should heat/cool at most one variable.",
-                                getName(),
-                                node.getFilename(),
-                                node.getLocation())
-                        );
-            }
-            Variable variable = vars.iterator().next();
-            term = variable;
-        } else {
-            term = kSequence.getContents().get(0);
+        java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
+        if (vars.size() != 1) {
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.CRITICAL,
+                            "Heating/Cooling rules should heat/cool at most one variable.",
+                            getName(),
+                            node.getFilename(),
+                            node.getLocation())
+                    );
         }
+        Variable variable = vars.iterator().next();
         String resultType = node.getAttribute("result");
         KLabel resultLabel = getResultLabel(resultType);
-        final KApp isKResult = KApp.of(resultLabel, term);
+        final KApp isKResult = KApp.of(resultLabel, variable);
         if (heating) {
             kresultCnd = KApp.of(KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
         } else {

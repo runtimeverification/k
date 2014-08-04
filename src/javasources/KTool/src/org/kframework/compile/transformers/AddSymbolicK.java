@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -42,21 +41,6 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         assert allowSymbolic(sortName);
 
         return Production.makeFunction(Sort.of(sortName), symbolicConstructor(sortName), Sort.K, context);
-    }
-
-    public final Term makeSymbolicTerm(Sort sort, Term term) {
-        assert allowSymbolic(sort.getName());
-
-        String ctor = symbolicConstructor(sort.getName());
-        Term symTerm;
-        if (!allowKSymbolic(sort.getName())) {
-            symTerm = new TermCons(sort, ctor, context);
-            ((TermCons) symTerm).getContents().add(term);
-        } else {
-            symTerm = KApp.of(KLabelConstant.of(ctor, context), term);
-        }
-
-        return symTerm;
     }
 
     public Term freshSymSortN(Sort sort, int n) {

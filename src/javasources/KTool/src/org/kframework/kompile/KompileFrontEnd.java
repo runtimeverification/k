@@ -15,7 +15,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.main.FrontEnd;
-import org.kframework.main.Tool;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -173,11 +172,6 @@ public class KompileFrontEnd extends FrontEnd {
                 kem.registerCriticalError(msg);
             }
         }
-    }
-
-    @Override
-    public Tool tool() {
-        return Tool.KOMPILE;
     }
 }
 

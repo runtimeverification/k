@@ -227,17 +227,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 Attribute newStrictAttr = newStrictAttrs.get(i);
                 TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
                 for (int j = 0; j < prod.getArity(); ++j) {
-                    if (kompileOptions.backend.java()) {
-                        /*
-                         * the Java Rewrite Engine only supports strictness with
-                         * KItem variables The only exception is if the
-                         * "use_concrete" flag is used (needed for test
-                         * generation)
-                         */
-                        if (kompileOptions.experimental.testGen) {
-                            termCons.getContents().get(j).setSort(Sort.KITEM);
-                        }
-                    } else {
+                    if (!kompileOptions.backend.java()) {
                         termCons.getContents().get(j).setSort(Sort.K);
                     }
                 }
@@ -251,13 +241,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 if (isSeq) {
                     for (int j = 0; j < i; ++j) {
                         Term arg = termCons.getContents().get(-1 + Integer.parseInt(newStrictAttrs.get(j).getKey()));
-                        if (kompileOptions.experimental.testGen) {
-                            KApp kResultPred = KApp.of(KLabelConstant.KRESULT_PREDICATE, arg);
-                            sideCond = sideCond == null ? kResultPred :
-                                KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, sideCond, kResultPred);
-                        } else {
-                            arg.setSort(Sort.KRESULT);
-                        }
+                        arg.setSort(Sort.KRESULT);
                     }
                 }
 
@@ -314,7 +298,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     }
 
     private Set<Production> getStrictContextProductions(String strictType, Production prod) {
-        Set<Production> productions = context.productions.get(strictType);
+        Set<Production> productions = context.klabels.get(strictType);
         if (productions == null) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,

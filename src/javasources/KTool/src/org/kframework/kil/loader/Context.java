@@ -3,7 +3,6 @@ package org.kframework.kil.loader;
 
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
@@ -22,6 +21,7 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -31,8 +31,6 @@ import org.kframework.utils.options.SMTOptions;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -41,11 +39,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,7 +52,6 @@ import com.google.inject.Singleton;
 public class Context implements Serializable {
 
     public static final Set<String> generatedTags = ImmutableSet.of(
-            "cons",
             "kgeneratedlabel",
             "prefixlabel");
 
@@ -75,28 +72,23 @@ public class Context implements Serializable {
     /**
      * Represents the bijection map between conses and productions.
      */
-    public BiMap<String, Production> conses = HashBiMap.create();
+    public Set<Production> productions = new HashSet<>();
     /**
-     * Represents a map from all Klabels in string representation plus two
-     * strings, "cons" and "prefixlabel", to sets of corresponding productions.
+     * Represents a map from all Klabels in string representation plus "prefixlabel",
+     * to sets of corresponding productions.
      *
      * TODO(YilongL): it doesn't contain getKLabel_ in key set?! instead the
-     * production "getKLabel" K is in the values of both "cons" and "prefix".
+     * production "getKLabel" K is in the values of "prefix".
      * why?
      */
-    public Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
-    /**
-     * Represents a map from all labels (KLabels and prefix-labels) to sets of
-     * corresponding conses in string representation.
-     */
-    public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
+    public SetMultimap<String, Production> klabels = HashMultimap.create();
+    public SetMultimap<String, Production> tags = HashMultimap.create();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
-    private Map<String, Sort> cellSorts = new HashMap<>();
-    public Map<Sort, Production> listConses = new HashMap<>();
-    public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
+    public Map<String, Sort> cellSorts = new HashMap<>();
+    public Map<Sort, Production> listProductions = new HashMap<>();
+    public SetMultimap<String, Production> listKLabels = HashMultimap.create();
     public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
-    public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
 
     public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
@@ -115,6 +107,8 @@ public class Context implements Serializable {
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<Sort> variableTokenSorts = new HashSet<>();
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();
+
+    private BiMap<String, Production> conses;
 
     public int numModules, numSentences, numProductions, numCells;
 
@@ -173,53 +167,31 @@ public class Context implements Serializable {
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     @Inject public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
-    @Inject public SMTOptions smtOptions;
-    @Inject @Nullable public KRunOptions krunOptions;
-    @Inject @Nullable public ConfigurationCreationOptions ccOptions;
-    @Inject @Nullable public ColorOptions colorOptions;
-    @Inject @Nullable public transient JavaExecutionOptions javaExecutionOptions;
+    @Inject(optional=true) public transient SMTOptions smtOptions;
+    @Inject(optional=true) public KRunOptions krunOptions;
+    @Inject(optional=true) public ConfigurationCreationOptions ccOptions;
+    @Inject(optional=true) public ColorOptions colorOptions;
+    @Inject(optional=true) public transient JavaExecutionOptions javaExecutionOptions;
 
     public Context() {
         initSubsorts();
     }
 
-    public void putLabel(Production p, String cons) {
-//        String label;
-//        if (!MetaK.isComputationSort(p.getSort()))
-//            label = p.getLabel();
-//        else
-//            label = p.getKLabel();
-//        Set<String> s = labels.get(label);
-//        if (s == null) {
-//            labels.put(label, s = new HashSet<String>());
-//        }
-//        s.add(cons);
-        putLabel(p.getKLabel(), cons);
-    }
-
-    private void putLabel(String label, String cons) {
-        Set<String> s = labels.get(label);
-        if (s == null) {
-            labels.put(label, s = new HashSet<String>());
+    public void addProduction(Production p) {
+        productions.add(p);
+        if (p.getKLabel() != null) {
+            klabels.put(p.getKLabel(), p);
+            tags.put(p.getKLabel(), p);
+            if (p.isListDecl()) {
+                listKLabels.put(p.getListDecl().getTerminatorKLabel(), p);
+                listLabelSeparator.put(p.getListDecl().getTerminatorKLabel(), p.getListDecl().getSeparator());
+            }
         }
-        s.add(cons);
-    }
-
-    public void putListLabel(Production p) {
-        String separator = ((UserList) p.getItems().get(0)).getSeparator();
-        String label = MetaK.getListUnitLabel(separator);
-        Set<String> s = listLabels.get(label);
-        listLabelSeparator.put(label, separator);
-        if (s == null)
-            listLabels.put(label, s = new HashSet<String>());
-        s.add(p.getSort().getName());
-    }
-
-    public void putAssoc(String cons, Collection<Production> prods) {
-        if (associativity.get(cons) == null) {
-            associativity.put(cons, new HashSet<Production>(prods));
-        } else {
-            associativity.get(cons).addAll(prods);
+        for (Attribute a : p.getAttributes().getContents()) {
+            tags.put(a.getKey(), p);
+        }
+        if (p.isListDecl()) {
+            listProductions.put(p.getSort(), p);
         }
     }
 
@@ -245,7 +217,7 @@ public class Context implements Serializable {
                 sort = Sort.BAG;
             else if (cell.getLabel().equals("freshCounter"))
                 sort = Sort.K;
-            else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
+            else if (cell.getLabel().equals("path-condition"))
                 sort = Sort.K;
         } else {
             // if the k cell is opened, then the sort needs to take into consideration desugaring
@@ -266,7 +238,7 @@ public class Context implements Serializable {
     }
 
     public boolean isListSort(Sort sort) {
-        return listConses.containsKey(sort);
+        return listProductions.containsKey(sort);
     }
 
     /**
@@ -287,7 +259,7 @@ public class Context implements Serializable {
     public Sort getListElementSort(Sort sort) {
         if (!isListSort(sort))
             return null;
-        return ((UserList) listConses.get(sort).getItems().get(0)).getSort();
+        return ((UserList) listProductions.get(sort).getItems().get(0)).getSort();
     }
 
     /**
@@ -466,8 +438,8 @@ public class Context implements Serializable {
         }
         subsorts.transitiveClosure();
         // detect if lists are subsorted (Vals Ids < Exps)
-        for (Production prod1 : listConses.values()) {
-            for (Production prod2 : listConses.values()) {
+        for (Production prod1 : listProductions.values()) {
+            for (Production prod2 : listProductions.values()) {
                 Sort sort1 = ((UserList) prod1.getItems().get(0)).getSort();
                 Sort sort2 = ((UserList) prod2.getItems().get(0)).getSort();
                 if (isSubsorted(sort1, sort2)) {
@@ -517,27 +489,14 @@ public class Context implements Serializable {
     public static final int HASH_PRIME = 37;
 
     /**
-     * Returns a {@link List} of productions associated with the specified KLabel
+     * Returns a {@link Set} of productions associated with the specified KLabel
      *
      * @param label
      *            string representation of the KLabel
      * @return list of productions associated with the label
      */
-    @SuppressWarnings("unchecked")
-    public List<Production> productionsOf(String label) {
-        Set<String> conses = labels.get(label);
-        if (conses == null) {
-            return Collections.EMPTY_LIST;
-        }
-
-        ArrayList<Production> productions = new ArrayList<Production>();
-        for (String cons : conses) {
-            assert this.conses.containsKey(cons);
-
-            productions.add(this.conses.get(cons));
-        }
-
-        return productions;
+    public Set<Production> productionsOf(String label) {
+        return klabels.get(label);
     }
 
     public Term kWrapper(Term t) {
@@ -604,6 +563,39 @@ public class Context implements Serializable {
             }
 
             freshFunctionNames.put(production.getSort(), production.getKLabel());
+        }
+    }
+
+    /**
+     * @deprecated DO NOT USE outside the SDF frontend!
+     */
+    @Deprecated
+    public BiMap<String, Production> getConses() {
+        return conses;
+    }
+
+    public void computeConses() {
+        assert conses == null : "can only compute conses once";
+        conses = HashBiMap.create();
+        for (Production p : productions) {
+            // add cons to productions that don't have it already
+            if (p.containsAttribute("bracket")) {
+                // don't add cons to bracket production
+                String cons2 = StringUtil.escapeSortName(p.getSort().getName()) + "1Bracket";
+                conses.put(cons2, p);
+            } else if (p.isLexical()) {
+            } else if (p.isSubsort()) {
+                if (p.containsAttribute("klabel")) {
+                    conses.put(StringUtil.escapeSortName(p.getSort().getName()) + "1" + StringUtil.getUniqueId() + "Syn", p);
+                }
+            } else {
+                String cons;
+                if (p.isListDecl())
+                    cons = StringUtil.escapeSortName(p.getSort().getName()) + "1" + "ListSyn";
+                else
+                    cons = StringUtil.escapeSortName(p.getSort().getName()) + "1" + StringUtil.getUniqueId() + "Syn";
+                conses.put(cons, p);
+            }
         }
     }
 
