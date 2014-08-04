@@ -709,13 +709,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
 
         Rule origRule = rule;
-        if (rule.isFunction() || rule.isAnywhere()) {
-            /*
-             * rename variables in the function/anywhere rule to avoid variable
-             * confusion when trying to apply this rule on its RHS
-             */
-            rule = rule.getFreshRule(termContext);
-        }
         Term rightHandSide = rule.rightHandSide().evaluate(termContext);
         List<Term> requires = new ArrayList<>();
         for (Term term : rule.requires()) {

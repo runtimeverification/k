@@ -58,11 +58,6 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public boolean isEmpty() {
-        return entries.isEmpty() && super.isConcreteCollection();
-    }
-
-    @Override
     public int size() {
         return entries.size();
     }

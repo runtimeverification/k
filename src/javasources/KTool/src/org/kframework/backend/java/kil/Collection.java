@@ -59,9 +59,13 @@ public abstract class Collection extends Term {
     }
 
     /**
-     * Returns true if this {@code Collection} does not have any contents and does not have a frame.
+     * Returns true if this {@code Collection} does not contain any content.
      */
     public boolean isEmpty() {
+        /*
+         * TODO(YilongL): I think this method should be made abstract; this
+         * frame stuff becomes out-dated now
+         */
         return size() == 0 && !hasFrame();
     }
 
