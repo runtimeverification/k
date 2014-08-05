@@ -7,11 +7,12 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KItemProjection;
 import org.kframework.kil.KLabelInjection;
+import org.kframework.kil.Module;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -33,11 +34,8 @@ public class AddInjections extends CopyOnWriteTransformer{
 
     private TransformationState state;
 
-//    private Stack<String> expectedSortStack;
-
     public AddInjections(Context context) {
         super("", context);
-//        expectedSortStack = new Stack<>();
     }
 
     @Override
@@ -49,6 +47,19 @@ public class AddInjections extends CopyOnWriteTransformer{
         state = TransformationState.REMOVE_REDUNDANT_INJECTIONS;
         definition = (Definition) super.visit(definition, _);
         return definition;
+    }
+
+    @Override
+    public Module visit(Module module, Void _) {
+        if (state == null) {
+            state = TransformationState.TRANSFORM_PRODUCTIONS;
+            module = (Module) super.visit(module, _);
+            state = TransformationState.TRANSFORM_TERMS;
+            module = (Module) super.visit(module, _);
+            return module;
+        } else {
+            return (Module) super.visit(module, _);
+        }
     }
 
     /* Phase one: transform productions such that each user-defined production has sort subsorted to KItem and each
