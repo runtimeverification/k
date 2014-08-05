@@ -28,16 +28,16 @@ updated only when new stable versions are officially released.
 
 **WARNING**: The command line options for kompile, krun, kast and ktest have
 recently changed!
-Type `--help` with any of these to see the new options, or see the changelog
+Type `--help` with any of these to see the new options, or see CHANGELOG.md
 for more details.
 
 New features
 ------------
 
 For a list of high-level changes since the previous release, please refer to
-the file CHANGELOG in the current directory.
+the file CHANGELOG.md in the current directory.
 
 Developers
 ----------
 
-See src/README
+See src/README.md
