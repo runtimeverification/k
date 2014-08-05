@@ -114,8 +114,9 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     }
 
     private KItem buildListTerminator(Definition definition) {
-        String separator = definition.context().listLabelSeparator.get(label);
-        if (separator != null) {
+        if (!definition.context().listKLabels.get(label).isEmpty()) {
+            Production production = definition.context().listKLabels.get(label).iterator().next();
+            String separator = production.getListDecl().getSeparator();
             return new KItem(this, KList.EMPTY, Sort.SHARP_BOT.getUserListSort(separator), true);
         }
         return null;
