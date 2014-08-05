@@ -4,7 +4,7 @@ require "io/io.k"
 
 module TEST
   imports LIST
-  imports IO
+  imports K-IO
 
 configuration
     <T>

@@ -3,32 +3,33 @@
 
 <tests>
 <!-- begin Java Rewrite Engine tests -->
-<!--
+
   <test
       definition="io/test1/test.k"
-      extensions="test"
+      extension="test"
       programs="io/test1/programs"
       results="io/test1/tests"
       posixInitScript="io/test1/prepare.sh"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-smt" value="none" />
-      <krun-option name="-parser" value="kast -parser ground" />
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--parser" value="kast --parser ground" />
     </all-programs>
   </test>
+
   <test
       definition="io/test2/test.k"
-      extensions="test"
+      extension="test"
       programs="io/test2/programs"
       results="io/test2/tests"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-smt" value="none" />
+      <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
--->
+
 
   <test
       definition="strings/test.k"
