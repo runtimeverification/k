@@ -1,4 +1,4 @@
-﻿<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
 This is a readme file for the developers.
 
 # Prerequisites
