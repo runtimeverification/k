@@ -11,12 +11,28 @@
         exclude="dekker.simple threads_05.simple exceptions_07.simple"
         >
     <kompile-option name="--backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
     <all-programs>
+      <krun-option name="-d" value="pattern-matching" />
       <krun-option name="--pattern-matching" />
       <krun-option name="--output" value="none" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
+
+  <test definition="simple-untyped.k"
+        programs="../../../../../../../tutorial/2_languages/1_simple/1_untyped/tests/"
+        results="../../../../../../../tutorial/2_languages/1_simple/1_untyped/tests/"
+        extension="simple"
+        exclude="dekker.simple threads_05.simple exceptions_07.simple"
+        >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--output" value="none" />
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
 
   <!-- prover tests -->
   <include file="config_verification.xml"/>

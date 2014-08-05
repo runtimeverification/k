@@ -170,11 +170,14 @@ public class ConfigFileParser {
         }
 
         List<TestCase> ret = configFileParser.parse();
+        Set<KTestStep> skips = parseSkips(includeAttrs.getNamedItem("skip"), location);
 
         // handle overridden attributes
         NodeList childNodes = includeNode.getChildNodes();
         if (includeAttrs.getNamedItem("exclude") != null)
             overrideExcludes(ret, splitNodeValue(includeAttrs.getNamedItem("exclude")));
+        if (includeAttrs.getNamedItem("skip") != null)
+            overrideSkips(ret, skips);
         // note that we need to run `hasElement' because parse* methods will return containers
         // with 0 element when relevant elements are not found.
         if (hasElement(childNodes, "kompile-option"))
@@ -195,6 +198,12 @@ public class ConfigFileParser {
         for (TestCase tc : ret)
             tc.validate();
         return ret;
+    }
+
+    private void overrideSkips(List<TestCase> tests, Set<KTestStep> skips) {
+        for (TestCase tc : tests) {
+            tc.setSkips(skips);
+        }
     }
 
     private void overrideExcludes(List<TestCase> tests, String[] excludes) {
