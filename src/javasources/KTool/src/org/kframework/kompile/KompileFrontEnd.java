@@ -162,7 +162,7 @@ public class KompileFrontEnd extends FrontEnd {
             @Override
             public boolean accept(File current, String name) {
                 File f = new File(current, name);
-                return f.isDirectory() && f.getAbsolutePath().endsWith("-kompiled");
+                return f.getAbsolutePath().endsWith("-kompiled") && f.isDirectory();
             }
         });
         for (File aKompiledList : kompiledList) {
