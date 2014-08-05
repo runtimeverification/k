@@ -5,8 +5,11 @@ This version is a major release.
 
 ## General ##
 - Discontinued compatibility with Java 6.
-- New folder structure.
-- Removed `cink` from examples. Cink is a separated repository now.
+- New folder structure:
+	- Moved `editor-support` to the top level;
+	- Renamed `examples` to `samples`
+	- Improved and completely reorganized the tutorial 
+- Removed `cink` from examples. Cink is a separate repository now.
 - The `documentation/to-be-processed.txt` file contains more information about 
 new features.
 
@@ -59,7 +62,7 @@ rules (Issue #207).
 - Improved reporting of running times in the verbose output mode (Issue #169).
 - `--search` now accepts more then one token in the input stream (Issue #159).
 - Allowing syntactic sorts in `--search` patterns (Issue #114)
-- Search graph is computed by Maude and parsed by krun only if one of
+- Search graph is computed by Maude and parsed by krun only if one of the
 arguments `--graph`, `--debug`, or `--debug-gui` is set (Issue #37).
 - Colors: Improved color matching algorithm for terminals. Now more cells
 should be colored. Added a new krun option: `--terminal-color`, to specify the
