@@ -3,7 +3,7 @@ Users who checked out the sources should follow the instructions in src/README.
 
 1. Prerequisites:
   * Java Runtime Edition version 7 or higher (http://java.com/en/download/index.jsp)
-  * To make sure java is installed properly, call `java` in a terminal.
+  * To make sure java is installed properly, call `java -version` in a terminal.
 
 2. Install:
   * Unzip this directory in your preferred location.  For convenient usage,

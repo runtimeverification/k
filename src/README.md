@@ -7,8 +7,8 @@ You can follow the instructions here:
 http://docs.oracle.com/javase/7/docs/webnotes/install/index.html depending on 
 the type of your machine.
 
-To make sure that everything works you should be able to call `java` and
-`javac` from a Terminal.
+To make sure that everything works you should be able to call `java -version` and
+`javac -version` from a Terminal.
 
 ## Apache ANT
 Linux and Mac:
