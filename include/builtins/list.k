@@ -49,6 +49,6 @@ module LIST
   syntax Bool ::= K "in" List   [function, hook(List:.List), klabel('_inList_)]
 
   /*@ Get the list length */
-  syntax Int ::= size(List)     [function, hook(Collection:size)]
+  syntax Int ::= size(List)     [function, hook(Collection:size), klabel ('sizeList)]
 endmodule
 
