@@ -21,8 +21,8 @@ new features.
 - Moving the `Int`, `Float`, and `#String` declarations from SDF into K.
 - Updated `syntax K ::=` into `syntax KItem ::=`.
 - Renamed `==MInt` and `=/=MInt` to `eqMInt` and `neMInt`.
-- Improved the K-defined substitution to deal with non-syntactic entities:
-.K, ~> sequences.
+- Improved the K-defined substitution to deal with arbitrary computations
+including `.K` and `~>` sequences.
 
 
 ## Editor support ##
@@ -100,7 +100,7 @@ absolute paths (Issue #202).
 ## Java Backend ##
 - Implementation for builtin string operations.
 - Added tag `interface` for data structure update operations.
-- Added option `--pattern-matching` to krun
+- Added option `--pattern-matching` to krun.
 - Adding special `autoinclude-java.k` for the Java backend.
 - Support for maps as cells.
 - Added support for proving properties related to floats
@@ -108,4 +108,4 @@ absolute paths (Issue #202).
 - Partial Z3 model integration.
 
 ## Test Generation ##
-- Option `--test-gen` added to kompile
+- Option `--test-gen` added to kompile (experimental)
