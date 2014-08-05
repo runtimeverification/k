@@ -29,6 +29,13 @@ new features.
 - Added a new plugin for working with K definitions into IntelliJ Idea.
 
 ## Kompile ##
+- Using JCommander to handle command line options:
+	- breaks code which attempts to access "--" options with only one "-";
+	- breaks code which attempts to specify arguments to a parameter 
+with an "=" (except `-cFOO=bar`)
+	- renames experimental options to begin with an `X`
+	- some of the options were renamed. Please check usage.
+- `kcheck` tool was removed
 - Added `--no-prelude` option which skips the auto inclusion of predefined 
 files/modules.
 - Implemented support for environment variable `K_OPTS` to specify additional
@@ -63,6 +70,11 @@ background color of the terminal.
 	- export graph as PNG;
 	- improved diff frame;
 	- improved duplicate detection for the `step-all` command.
+
+## Kast ##
+- Using JCommander to handle kast options
+	- breaks code which attempts to access "--" options with only one "-";
+	- some of the options were renamed. Please check usage.
 
 ## KTest ##
 - Failing when pdf generation fails (Issue #683).
