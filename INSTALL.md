@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 Here are instructions for installing K from the release zip/tgz archive.
 Users who checked out the sources should follow the instructions in src/README.md.
 
