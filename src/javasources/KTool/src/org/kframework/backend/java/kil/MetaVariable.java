@@ -49,7 +49,9 @@ public class MetaVariable extends Token {
      * Returns a {@link Variable} with the meta representation given by this meta variable.
      */
     public Variable variable() {
-        return new Variable(name, sort);
+        Variable var = new Variable(name, sort);
+        var.copyAttributesFrom(this);
+        return var;
     }
 
     /**

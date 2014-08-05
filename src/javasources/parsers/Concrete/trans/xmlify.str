@@ -207,6 +207,22 @@ rules
 		where children := <to-xml> b
 		where sort := <getSort> a
 		where loc := <getLocAsString>
+	to-xml2:
+		a#([b, c, attr]) -> $[<cast sort="[sort]" loc="[loc]" type="[<to-cast-type> c]">
+					[children]
+		<attributes loc="[<getLocAsString> attr]">
+			[attr']
+		</attributes>
+		</cast>
+		]
+		where <string-ends-with(|"1CastAttr")> a
+		where mydebug(!"1Cast: ")
+		where children := <to-xml> b
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+                where attr' := <to-xml> attr
+
+
 	to-cast-type: "Syntactic"#(_)	-> $[syntactic]
 	to-cast-type: "Semantic"#(_)	-> $[semantic]
 	to-cast-type: "Inner"#(_)		-> $[inner]
@@ -226,6 +242,20 @@ rules
 		where mydebug(!"Var: ")
 		where sort := <getSort> a
 		where loc := <getLocAsString>
+
+	to-xml2:
+		a#([b, attr]) -> $[<var name="[b]" sort="[sort]" loc="[loc]" userTyped="true">
+		<attributes loc="[<getLocAsString> attr]">
+			[attr']
+		</attributes>
+                </var>
+		]
+		where <string-ends-with(|"12VarAttr")> a
+		where mydebug(!"Var: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+                where attr' := <to-xml> attr
+
 
 	to-xml2:
 		a#(b) -> $[<var name="[b]" sort="[sort]" loc="[loc]" userTyped="false" />

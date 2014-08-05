@@ -56,7 +56,9 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
      * @return the translated term
      */
     private ASTNode transformJavaBackendSpecificTerm(Term term) {
-        return new org.kframework.kil.BackendTerm(term.sort().toFrontEnd(), term.toString());
+        ASTNode kil = new org.kframework.kil.BackendTerm(term.sort().toFrontEnd(), term.toString());
+        kil.copyAttributesFrom(term);
+        return kil;
     }
 
     @Override
@@ -73,6 +75,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         returnCell.setLabel(label);
         returnCell.setEndLabel(label);
         returnCell.setContents((org.kframework.kil.Term) cell.getContent().accept(this));
+        returnCell.copyAttributesFrom(cell);
         return returnCell;
     }
 
@@ -91,7 +94,9 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         if (cellCollection.hasFrame()) {
             contents.add((org.kframework.kil.Term) cellCollection.frame().accept(this));
         }
-        return new org.kframework.kil.Bag(contents);
+        ASTNode kil = new org.kframework.kil.Bag(contents);
+        kil.copyAttributesFrom(cellCollection);
+        return kil;
     }
 
     @Override
@@ -102,45 +107,59 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KItem kItem) {
-        return new org.kframework.kil.KApp(
+        ASTNode kil = new org.kframework.kil.KApp(
                 (org.kframework.kil.Term) kItem.kLabel().accept(this),
                 (org.kframework.kil.Term) kItem.kList().accept(this));
+        kil.copyAttributesFrom(kItem);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KItemProjection kItemProj) {
-        return new org.kframework.kil.KItemProjection(
+        ASTNode kil = new org.kframework.kil.KItemProjection(
                 Sort.of(kItemProj.kind().toString()),
                 (org.kframework.kil.Term) kItemProj.term().accept(this));
+        kil.copyAttributesFrom(kItemProj);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
-        return org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);
+        ASTNode kil = org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);
+        kil.copyAttributesFrom(kLabelConstant);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KLabelFreezer kLabelFreezer) {
-        return new org.kframework.kil.FreezerLabel(
+        ASTNode kil = new org.kframework.kil.FreezerLabel(
                 (org.kframework.kil.Term) kLabelFreezer.term().accept(this));
+        kil.copyAttributesFrom(kLabelFreezer);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KLabelInjection kLabelInjection) {
-        return new org.kframework.kil.KInjectedLabel(
+        ASTNode kil = new org.kframework.kil.KInjectedLabel(
                 (org.kframework.kil.Term) kLabelInjection.term().accept(this));
+        kil.copyAttributesFrom(kLabelInjection);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KList kList) {
         List<org.kframework.kil.Term> terms = transformTerms(kList);
-        return new org.kframework.kil.KList(terms);
+        ASTNode kil = new org.kframework.kil.KList(terms);
+        kil.copyAttributesFrom(kList);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KSequence kSequence) {
         List<org.kframework.kil.Term> terms = transformTerms(kSequence);
-        return new org.kframework.kil.KSequence(terms);
+        ASTNode kil = new org.kframework.kil.KSequence(terms);
+        kil.copyAttributesFrom(kSequence);
+        return kil;
     }
 
     private List<org.kframework.kil.Term> transformTerms(KCollection kCollection) {
@@ -165,10 +184,12 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         for (Term term : set.baseTerms()) {
             baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
-        return new SetBuiltin(
+        ASTNode kil = new SetBuiltin(
                 context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),
                 baseTerms,
                 elements);
+        kil.copyAttributesFrom(set);
+        return kil;
     }
 
 
@@ -186,8 +207,10 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         for (Term entry : builtinList.elementsRight()) {
             elementsRight.add((org.kframework.kil.Term)entry.accept(this));
         }
-        return ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
+        ASTNode kil = ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
                 baseTerms, elementsLeft, elementsRight);
+        kil.copyAttributesFrom(builtinList);
+        return kil;
     }
 
     @Override
@@ -206,15 +229,19 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         for (Term term : map.baseTerms()) {
             baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
-        return new MapBuiltin(
+        ASTNode kil = new MapBuiltin(
                 context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT),
                 baseTerms,
                 elements);
+        kil.copyAttributesFrom(map);
+        return kil;
     }
 
     @Override
     public ASTNode transform(Token token) {
-        return org.kframework.kil.Token.kAppOf(token.sort().toFrontEnd(), token.value());
+        ASTNode kil = org.kframework.kil.Token.kAppOf(token.sort().toFrontEnd(), token.value());
+        kil.copyAttributesFrom(token);
+        return kil;
     }
 
     @Override
@@ -223,6 +250,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         ASTNode node = new org.kframework.kil.Variable(variable.name(), variable.sort().toFrontEnd());
 //        System.out.println("NODE: "+node.toString());
 //        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
+        node.copyAttributesFrom(variable);
         return node;
     }
 

@@ -67,6 +67,33 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
         return result;
     }
 
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((contents == null) ? 0 : contents.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Attributes other = (Attributes) obj;
+        if (contents == null) {
+            if (other.contents != null)
+                return false;
+        } else if (!contents.equals(other.contents))
+            return false;
+        return true;
+    }
+
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));

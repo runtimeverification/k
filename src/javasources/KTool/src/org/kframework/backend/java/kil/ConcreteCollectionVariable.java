@@ -45,11 +45,13 @@ public class ConcreteCollectionVariable extends Variable {
 
     @Override
     public ConcreteCollectionVariable getFreshCopy() {
-        return new ConcreteCollectionVariable(
+        ConcreteCollectionVariable var = new ConcreteCollectionVariable(
                 Variable.getFreshVariable(sort()).name(),
                 sort(),
                 true,
                 concreteSize);
+        var.copyAttributesFrom(this);
+        return var;
     }
 
 }

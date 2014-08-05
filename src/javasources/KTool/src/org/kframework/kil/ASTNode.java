@@ -224,6 +224,12 @@ public abstract class ASTNode implements Serializable {
         attributes = attrs;
     }
 
+    public void copyAttributesFrom(ASTNode node) {
+        if (node.attributes == null)
+            return;
+        this.getAttributes().putAll(node.attributes);
+    }
+
     /**
      * Retrieves the syntax production descendants of this ASTNode by attribute key.
      *

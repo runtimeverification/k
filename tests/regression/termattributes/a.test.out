@@ -1,0 +1,4 @@
+<k>
+    V:Int{foo} ~> foo ::A ~> V{foo} ~> V{foo} ~> GeneratedFreshVar0:K ::K
+</k>
+GeneratedFreshVar1:Bag

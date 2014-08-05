@@ -176,6 +176,7 @@ public class DefinitionSDF {
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
                 sdf.append("    VARID  \":" + s.getName() + "\"        -> " + StringUtil.escapeSortName(s.getName()) + "DzVar            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
+                sdf.append("    VARID  \":" + s.getName() + "{\" TagListDz \"}\"        -> " + StringUtil.escapeSortName(s.getName()) + "DzVar            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12VarAttr\")}\n");
             }
         }
         // print variables, cast
@@ -183,6 +184,7 @@ public class DefinitionSDF {
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
                 sdf.append("     K CastTypeDz \"" + s.getName() + "\"    -> VariableDz    {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+                sdf.append("     K CastTypeDz \"" + s.getName() + "{\" TagListDz \"}\"    -> VariableDz    {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1CastAttr\")}\n");
             }
         }
         for (NonTerminal s : psdfv.userSorts) {
@@ -190,8 +192,10 @@ public class DefinitionSDF {
                 sdf.append("     " + StringUtil.escapeSortName(s.getName()) + "DzVar   -> " + StringUtil.escapeSortName(s.getName()) + "\n");
             }
         }
-        sdf.append("     K CastTypeDz \"K\"        -> VariableDz    {cons(\"K1Cast\")}\n");
-        sdf.append("     K CastTypeDz \"KItem\"    -> VariableDz    {cons(\"KItem1Cast\")}\n");
+        sdf.append("     K CastTypeDz \"K\"                         -> VariableDz    {cons(\"K1Cast\")}\n");
+        sdf.append("     K CastTypeDz \"KItem\"                     -> VariableDz    {cons(\"KItem1Cast\")}\n");
+        sdf.append("     K CastTypeDz \"K{\" TagListDz \"}\"        -> VariableDz    {cons(\"K1CastAttr\")}\n");
+        sdf.append("     K CastTypeDz \"KItem{\" TagListDz \"}\"    -> VariableDz    {cons(\"KItem1CastAttr\")}\n");
 
         sdf.append("\n");
         sdf.append("    VariableDz -> K\n");

@@ -39,6 +39,7 @@ public class VariableTypeFilter extends ParseForestTransformer {
             newV.setExpectedSort(correctVar.getExpectedSort());
             newV.setSyntactic(correctVar.isSyntactic());
             newV.setUserTyped(r.isUserTyped());
+            newV.copyAttributesFrom(correctVar);
             return newV;
         }
         String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getExpectedSort();

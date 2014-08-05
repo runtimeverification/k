@@ -72,10 +72,13 @@ public class Variable extends Term implements Immutable {
 
     public Variable(MetaVariable metaVariable) {
         this(metaVariable.variableName(), metaVariable.variableSort());
+        this.copyAttributesFrom(metaVariable);
     }
 
     public Variable getFreshCopy() {
-        return Variable.getFreshVariable(sort);
+        Variable var = Variable.getFreshVariable(sort);
+        var.copyAttributesFrom(this);
+        return var;
     }
 
     /**

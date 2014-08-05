@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
@@ -74,6 +75,11 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         else if (element.getAttribute("type").equals("outer"))
             this.type = CastType.OUTER;
         this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+
+        java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
+        if (its.size() > 0) {
+            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+        }
     }
 
     public Cast(Sort sort) {
