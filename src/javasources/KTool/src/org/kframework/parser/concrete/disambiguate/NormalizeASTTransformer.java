@@ -2,10 +2,13 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Bag;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
@@ -15,6 +18,10 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 public class NormalizeASTTransformer extends ParseForestTransformer {
     public NormalizeASTTransformer(Context context) {
@@ -54,5 +61,43 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
             }
         }
         return super.visit(tc, _);
+    }
+
+    /**
+     * The rest of kompile works with these classes. The front end though needs an unified way
+     * of looking at the "." productions to make it easier to disambiguate.
+     */
+    public ASTNode visit(ListTerminator lt, Void _) throws ParseFailedException {
+        ASTNode result = null;
+        if (lt.getSort().equals(Sort.K)) {
+            result = KSequence.EMPTY;
+        } else if (lt.getSort().equals(Sort.KLIST)) {
+            result = KList.EMPTY;
+        } else if (lt.getSort().equals(Sort.BAG)) {
+            result = Bag.EMPTY;
+        // TODO(Radu): unfortunately, these 3 are kind of a hack. Normally should be declared directly in K
+        // but at the moment because we are using SDF, I have to declare the dots directly in
+        // SDF in order to avoid certain types of ambiguities.
+        // with the new parser I should be able to
+        } else if (lt.getSort().equals(Sort.LIST)) {
+            result = KApp.of("'.List");
+        } else if (lt.getSort().equals(Sort.MAP)) {
+            result = KApp.of("'.Map");
+        } else if (lt.getSort().equals(Sort.SET)) {
+            result = KApp.of("'.Set");
+        }
+        if (result != null) {
+            result.setFilename(lt.getFilename());
+            result.setLocation(lt.getLocation());
+            if (!lt.isUserTyped()) {
+                String msg = "Inferring the sort of . as being " + lt.getSort();
+                GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING,
+                        KExceptionGroup.LISTS, msg,
+                        lt.getFilename(), lt.getLocation()));
+            }
+            return result;
+        }
+        // user defined empty list
+        return lt;
     }
 }

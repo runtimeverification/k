@@ -40,6 +40,7 @@ import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
+import org.kframework.parser.concrete.disambiguate.PreferDotsFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
@@ -374,6 +375,7 @@ public class DefinitionLoader {
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
+        config = new PreferDotsFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
         try {
             config = new TypeSystemFilter(context).visitNode(config);
@@ -423,6 +425,7 @@ public class DefinitionLoader {
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
+        config = new PreferDotsFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
         try {
             config = new TypeSystemFilter(context).visitNode(config);
@@ -472,6 +475,7 @@ public class DefinitionLoader {
         // config = new VariableTypeInferenceFilter().visitNode(config);
         config = new AmbDuplicateFilter(context).visitNode(config);
         config = new TypeSystemFilter(context).visitNode(config);
+        config = new PreferDotsFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
         // config = new PriorityFilter().visitNode(config);
         config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);

@@ -209,7 +209,7 @@ right type to the allocated locations. */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 
 /*@ The desugaring of multi-dimensional arrays into unidimensional
 ones is also similar to that in untyped SIMPLE, although we have to
@@ -458,7 +458,7 @@ values, in which case our semantics below works fine: */
 
 /*@ Turns a list of parameters and a list of instance values for them
 into a list of variable declarations. */
-  syntax Decl ::= mkDecls(Params,Vals)  [function]
+  syntax Stmts ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}
@@ -484,8 +484,8 @@ into a list of variable declarations. */
 
   //context lvalue(_[HOLE])
   //context lvalue(HOLE[_])
-  context lvalue(_::Exp[HOLE::Exps])
-  context lvalue(HOLE::Exp[_::Exps])
+  context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(HOLE:>Exp[_:>Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 

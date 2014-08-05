@@ -1,3 +1,4 @@
+%% Copyright (c) 2011-2014 K Team. All Rights Reserved.
 %% Grammar for the K language
 module KTechnique
 imports Common %% For Comments and whitespace
@@ -39,6 +40,10 @@ context-free priorities
 context-free syntax
 	%%"(" BagItem ")"	-> BagItem {bracket}
 	"(" Bag ")"			-> Bag {cons("Bag1Bracket")}
+
+	DotDz				-> Map  {cons("Map1Empty")}
+	DotDz				-> Set  {cons("Set1Empty")}
+	DotDz				-> List {cons("List1Empty")}
 
 	"." -> DotDz
 

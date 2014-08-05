@@ -6,6 +6,7 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
@@ -83,7 +84,6 @@ public class Context implements Serializable {
     public SetMultimap<String, Production> klabels = HashMultimap.create();
     public SetMultimap<String, Production> tags = HashMultimap.create();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
-    public Map<String, Sort> cellKinds = new HashMap<>();
     public Map<String, Sort> cellSorts = new HashMap<>();
     public Map<Sort, Production> listProductions = new HashMap<>();
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
@@ -198,15 +198,43 @@ public class Context implements Serializable {
     public void addCellDecl(Cell c) {
         cells.put(c.getLabel(), c);
 
-        Sort kind = subsorts.getMaxim(c.getContents().getSort());
-        if (kind.equals(Sort.KLIST)) {
-            kind = Sort.K;
-        }
-        cellKinds.put(c.getLabel(), kind);
-
         String sortName = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
         Sort sort = sortName == null ? c.getContents().getSort() : Sort.of(sortName);
+        if (sort.equals(Sort.BAG_ITEM))
+            sort = Sort.BAG;
         cellSorts.put(c.getLabel(), sort);
+    }
+
+    public Sort getCellSort(Cell cell) {
+        Sort sort = cellSorts.get(cell.getLabel());
+
+        if (sort == null) {
+            if (cell.getLabel().equals("k"))
+                sort = Sort.K;
+            else if (cell.getLabel().equals("T"))
+                sort = Sort.BAG;
+            else if (cell.getLabel().equals("generatedTop"))
+                sort = Sort.BAG;
+            else if (cell.getLabel().equals("freshCounter"))
+                sort = Sort.K;
+            else if (cell.getLabel().equals("path-condition"))
+                sort = Sort.K;
+        } else {
+            // if the k cell is opened, then the sort needs to take into consideration desugaring
+            if (cell.getEllipses() != Ellipses.NONE) {
+                if (isSubsortedEq(Sort.LIST, sort))
+                    sort = Sort.LIST;
+                else if (isSubsortedEq(Sort.BAG, sort))
+                    sort = Sort.BAG;
+                else if (isSubsortedEq(Sort.MAP, sort))
+                    sort = Sort.MAP;
+                else if (isSubsortedEq(Sort.SET, sort))
+                    sort = Sort.SET;
+                else // any other computational sort
+                    sort = Sort.K;
+            }
+        }
+        return sort;
     }
 
     public boolean isListSort(Sort sort) {

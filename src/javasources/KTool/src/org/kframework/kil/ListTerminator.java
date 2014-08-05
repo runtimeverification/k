@@ -3,6 +3,8 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.StringUtil;
+
 import org.w3c.dom.Element;
 
 /**
@@ -11,25 +13,30 @@ import org.w3c.dom.Element;
 public class ListTerminator extends Term {
 
     private final String separator; // Used only by toString()
+    private final boolean userTyped;
 
     public ListTerminator(Sort sort, String separator) {
         super(sort);
         this.separator = separator;
+        userTyped = true;
     }
 
     public ListTerminator(String separator) {
         super(Sort.K);
         this.separator = separator;
+        userTyped = true;
     }
 
     private ListTerminator(ListTerminator terminator) {
         super(terminator);
         this.separator = terminator.separator;
+        this.userTyped = terminator.userTyped;
     }
 
     public ListTerminator(Element element, String separator) {
         super(element);
         this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
+        this.userTyped = Boolean.parseBoolean(element.getAttribute(Constants.TYPE_userTyped_ATTR));
         this.separator = separator;
     }
 
@@ -62,6 +69,10 @@ public class ListTerminator extends Term {
 
     public String separator() {
         return this.separator;
+    }
+
+    public boolean isUserTyped() {
+        return userTyped;
     }
 
     @Override

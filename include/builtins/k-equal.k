@@ -21,11 +21,11 @@ module K-EQUAL-HOOKS
   syntax priorities equalEqualK notEqualEqualK > boolOperation
   rule K1:K =/=K K2:K => notBool(K1 ==K K2)
 
-
-  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, hook(KEqual:ite)]
-  syntax KItem ::= "#if" Bool "#then" KItem "#else" KItem "#fi"   [function, hook(KEqual:ite)]
-  syntax KList ::= "#if" Bool "#then" KList "#else" KList "#fi"   [function, hook(KEqual:ite)]
-  syntax Int ::= "#if" Bool "#then" Int "#else" Int "#fi"   [function, smtlib(ite)]
+  // this is really problematic, needs to be discussed
+  //syntax KList ::= "#if" Bool "#then" KList "#else" KList "#fi"   [function, hook(KEqual:ite)]
+  syntax K     ::= "#if" Bool "#then" K     "#else" K     "#fi"   [function, hook(KEqual:ite)]
+  //syntax KItem ::= "#if" Bool "#then" KItem "#else" KItem "#fi"   [function, hook(KEqual:ite)]
+  //syntax Int   ::= "#if" Bool "#then" Int   "#else" Int   "#fi"   [function, smtlib(ite)]
   rule #if true #then K:K #else _:K #fi => K
   rule #if false #then _:K #else K:K #fi => K
 

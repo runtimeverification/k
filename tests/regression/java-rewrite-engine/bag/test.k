@@ -1,7 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 module TEST
 
-  configuration <T> <k> $PGM:K </k> <bag> <b multiplicity="*"> . </b> </bag> </T>
+  configuration <T> <k> $PGM:K </k> <bag> <b multiplicity="*"> .K </b> </bag> </T>
 
   syntax KItem ::= start(Int)
 

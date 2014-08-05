@@ -224,7 +224,7 @@ KOOL).  */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 
 
   syntax Id ::= "$1" | "$2"
@@ -339,7 +339,7 @@ KOOL).  */
 
 //@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
 
-  syntax Decl ::= mkDecls(Params,Vals)  [function]
+  syntax Stmts ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}
@@ -356,8 +356,8 @@ KOOL).  */
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_::Exp[HOLE::Exps])
-  context lvalue(HOLE::Exp[_::Exps])
+  context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(HOLE:>Exp[_:>Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
@@ -729,7 +729,7 @@ Like in untyped KOOL. */
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context lvalue(HOLE . _)
+  context lvalue((HOLE . _)<:Exp)
 
 /*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... ListItem((C,EnvC:Bag)) EStack </envStack>)

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Cast;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Rewrite;
@@ -26,7 +27,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
     private CorrectCastPriorityFilter2 secondFilter;
 
     public CorrectCastPriorityFilter(Context context) {
-        super("Correct Cast priority", context);
+        super(CorrectCastPriorityFilter.class.getName(), context);
         secondFilter = new CorrectCastPriorityFilter2(context);
     }
 
@@ -36,9 +37,14 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
         // if I find a Cast near a variable, then I remove the cast and translate the sort restrictions to the variable
         // this should be done only if the casting is syntactic, because on semantic cast there should be another branch
         // that has a typed variable.
-        if (cst.getContent() instanceof Variable) {
-            if (!((Variable) cst.getContent()).isUserTyped() && cst.getType() != CastType.OUTER) {
-                Variable var = new Variable((Variable) cst.getContent());
+
+        Term contents = cst.getContent();
+        // it may happen that the variable is wrapped with brackets
+        while (contents instanceof Bracket)
+            contents = ((Bracket) contents).getContent();
+        if (contents instanceof Variable) {
+            Variable var = new Variable((Variable) contents);
+            if (!var.isUserTyped() && cst.getType() != CastType.OUTER) {
                 var.setUserTyped(true);
                 var.setSort(cst.getSort());
                 var.setSyntactic(cst.getType() != CastType.SEMANTIC);
@@ -59,7 +65,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
      */
     public class CorrectCastPriorityFilter2 extends LocalTransformer {
         public CorrectCastPriorityFilter2(Context context) {
-            super("org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter2", context);
+            super(CorrectCastPriorityFilter2.class.getName(), context);
         }
 
         @Override

@@ -348,7 +348,7 @@ variable. */
     when notBool(X in keys(Rho))
   rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[X <- T] </tenv>
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
@@ -583,7 +583,7 @@ exceptions which are not caught. */
 /*@ The function \texttt{mkDecls} turns a list of parameters into a
 list of variable declarations. */
 
-  syntax Decl ::= mkDecls(Params)  [function]
+  syntax Stmts ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 

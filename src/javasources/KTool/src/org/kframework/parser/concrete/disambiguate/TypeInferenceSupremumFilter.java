@@ -8,6 +8,7 @@ import java.util.Set;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Lexical;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.NonTerminal;
@@ -50,19 +51,19 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
                 if (t instanceof TermCons) {
                     // finally, try to find the <strike> maximum </strike> minimum
                     for (Term tm2 : group) {
-                        boolean min = true;
+                        boolean max = true;
                         Production tcBig = ((TermCons) tm2).getProduction();
                         for (Term tm22 : group) {
                             Production tcSmall = ((TermCons) tm22).getProduction();
-                            if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
-                                min = false;
+                            if (tm2 != tm22 && isSubsorted(tcSmall, tcBig)) {
+                                max = false;
                                 break;
                             }
                         }
-                        if (min)
+                        if (max)
                             maxterms.add(tm2);
                     }
-                } else if (t instanceof Variable) {
+                } else if (t instanceof Variable || t instanceof ListTerminator) {
                     // for variables only, find maximum
                     for (Term t1 : group) {
                         boolean max = true;

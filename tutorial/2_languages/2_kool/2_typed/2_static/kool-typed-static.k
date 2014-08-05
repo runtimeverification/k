@@ -287,7 +287,7 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax KResult ::= Type
 
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 
   rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
   rule T:Type E:Exp[.Types]; => T E;          [structural]
@@ -362,7 +362,7 @@ typed SIMPLE, so we do not discuss them much here. */
 
 //@\subsubsection{Unchanged auxiliary operations from dynamically typed SIMPLE}
 
-  syntax Decl ::= mkDecls(Params)  [function]
+  syntax Stmts ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 

@@ -953,7 +953,7 @@ The \texttt{mkDecls} auxiliary construct turns a list of identifiers
 and a list of values in a sequence of corresponding variable
 declarations. */
 
-  syntax Decl ::= mkDecls(Ids,Vals)  [function]
+  syntax Stmts ::= mkDecls(Ids,Vals)  [function]
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
@@ -1029,8 +1029,8 @@ corresponding store lookup operation. */
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  context lvalue(_::Exp[HOLE::Exps])
-  context lvalue(HOLE::Exp[_::Exps])
+  context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(HOLE:>Exp[_:>Exps])
 
 // Finally, return the address of the desired object member
 

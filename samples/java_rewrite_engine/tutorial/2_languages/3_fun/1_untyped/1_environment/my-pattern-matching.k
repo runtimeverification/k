@@ -41,12 +41,10 @@ module MY-PATTERN-MATCHING
     when notBool emptyKList(Ps)
   // rule myDecomposeMatching(.KList, .KList) => .KList
   // TODO(YilongL): builtins in Java rewrite engine may not be represented as KItem's
+  rule myDecomposeMatching(Ps:KList, Ps:KList)
+    => .KList
   rule myDecomposeMatching(Ps:KList, Ks:KList)
-    => #if Ps ==KList Ks
-       #then .KList
-       #else #unmatchableError(Ps,Ks)
-       #fi
-    [owise]
+    => #unmatchableError(Ps,Ks) requires Ps =/=KList Ks [owise]
 
 // For example, one may add rules like the following in one's language
 //  rule myDecomposeMatching(([P:Exp|T:Exp] => P,T),([V:Val,Vs:Vals] => V,[Vs]))

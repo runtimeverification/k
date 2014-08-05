@@ -19,6 +19,7 @@ import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.InclusionFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
+import org.kframework.parser.concrete.disambiguate.PreferDotsFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
@@ -51,6 +52,7 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         config = new CorrectCastPriorityFilter(context).visitNode(config);
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
+        config = new PreferDotsFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
         // config = new AmbDuplicateFilter(context).visitNode(config);
         // config = new TypeSystemFilter(context).visitNode(config);

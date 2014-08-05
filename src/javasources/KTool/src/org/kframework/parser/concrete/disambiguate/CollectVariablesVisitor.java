@@ -43,13 +43,12 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
     @Override
     public Void visit(Cell c, Void _) {
-        if (c.getEllipses() == Ellipses.NONE)
-            if (context.cellSorts.containsKey(c.getLabel())) {
-                try {
-                    c.setContents((Term) new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel())).visitNode(c.getContents()));
-                } catch (ParseFailedException e) {
-                    e.printStackTrace();
-                }
+        Sort s = context.getCellSort(c);
+        if (s != null)
+            try {
+                c.setContents((Term) new CollectVariablesVisitor2(context, s).visitNode(c.getContents()));
+            } catch (ParseFailedException e) {
+                e.printStackTrace();
             }
         return super.visit(c, _);
     }

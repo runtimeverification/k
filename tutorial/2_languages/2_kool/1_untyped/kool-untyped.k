@@ -521,7 +521,7 @@ from SIMPLE unchanged. */
 
 //@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
-  syntax Decl ::= mkDecls(Ids,Vals)  [function]
+  syntax Stmts ::= mkDecls(Ids,Vals)  [function]
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
@@ -538,8 +538,8 @@ from SIMPLE unchanged. */
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_::Exp[HOLE::Exps])
-  context lvalue(HOLE::Exp[_::Exps])
+  context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(HOLE:>Exp[_:>Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
@@ -970,7 +970,7 @@ member's location based on the current class of the object. */
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context lvalue(HOLE . _)
+  context lvalue((HOLE . _)<:Exp)
 
 /*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... (C,EnvC) EStack </envStack>)
