@@ -12,26 +12,10 @@
       exclude="dekker.simple exceptions_07.simple threads_05.simple"
       >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="-d" value="pattern-matching" />
     <all-programs>
-      <krun-option name="-d" value="pattern-matching" />
       <krun-option name="--pattern-matching" />
       <krun-option name="--output" value="none" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
-  <test
-      definition="simple-typed-dynamic.k"
-      programs="../../../../../../../../tutorial/2_languages/1_simple/2_typed/programs/"
-      results="../../../../../../../../tutorial/2_languages/1_simple/2_typed/2_dynamic/tests"
-      extension="simple"
-      exclude="dekker.simple exceptions_07.simple threads_05.simple"
-      >
-    <kompile-option name="--backend" value="java" />
-    <all-programs>
-      <krun-option name="--output" value="none" />
-      <krun-option name="--smt" value="none" />
-    </all-programs>
-  </test>
-
 </tests>
