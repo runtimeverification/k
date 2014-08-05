@@ -84,8 +84,8 @@ public class AddInjections extends CopyOnWriteTransformer{
 
         Syntax returnNode;
         if (production != node.getPriorityBlocks().get(0).getProductions().get(0)) {
-            context.productions.remove(node.getPriorityBlocks().get(0).getProductions().get(0));
-            context.productions.add(production);
+            context.removeProduction(node.getPriorityBlocks().get(0).getProductions().get(0));
+            context.addProduction(production);
 
             returnNode = node.shallowCopy();
             PriorityBlock priorityBlock = node.getPriorityBlocks().get(0).shallowCopy();

@@ -184,14 +184,31 @@ public class Context implements Serializable {
             tags.put(p.getKLabel(), p);
             if (p.isListDecl()) {
                 listKLabels.put(p.getListDecl().getTerminatorKLabel(), p);
-                listLabelSeparator.put(p.getListDecl().getTerminatorKLabel(), p.getListDecl().getSeparator());
             }
+        }
+        if (p.isListDecl()) {
+            listProductions.put(p.getSort(), p);
         }
         for (Attribute a : p.getAttributes().getContents()) {
             tags.put(a.getKey(), p);
         }
+    }
+
+    public void removeProduction(Production p) {
+        productions.remove(p);
+         if (p.getKLabel() != null) {
+            klabels.remove(p.getKLabel(), p);
+            tags.remove(p.getKLabel(), p);
+            if (p.isListDecl()) {
+                listKLabels.remove(p.getListDecl().getTerminatorKLabel(), p);
+            }
+        }
         if (p.isListDecl()) {
-            listProductions.put(p.getSort(), p);
+            // AndreiS: this code assumes each list sort has only one production
+            listProductions.remove(p.getSort());
+        }
+        for (Attribute a : p.getAttributes().getContents()) {
+            tags.remove(a.getKey(), p);
         }
     }
 
