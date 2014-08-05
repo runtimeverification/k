@@ -1,4 +1,4 @@
-
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 # K Framework 3.4 (released 2014-08-05) #
 
 This version is a major release.
