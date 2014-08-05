@@ -128,7 +128,7 @@ public class KRunner {
             String commandTemplate = "load {0}\nmod KRUNNER is including {1} .\neq #TCPPORT = {2,number,#} .\nendm\nload {3}\n";
             _maudeFileName = maudeEscapePath(_maudeFileName);
             _maudeCommandFileName = maudeEscapePath(_maudeCommandFileName);
-            
+
             String command = MessageFormat.format(commandTemplate, _maudeFileName, _maudeModule, _port, _maudeCommandFileName);
             MaudeTask maude = new MaudeTask(command, _outputFileName, _errorFileName, _xmlOutFileName);
 
