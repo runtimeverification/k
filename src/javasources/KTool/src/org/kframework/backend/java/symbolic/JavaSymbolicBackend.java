@@ -122,7 +122,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveAnonymousVariables(context));
         //steps.add(new AddK2SMTLib(context));
         //steps.add(new ResolveSyntaxPredicates(context));
-        steps.add(new ResolveBuiltins(context));
+        //steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
         steps.add(new AddInjections(context));
 

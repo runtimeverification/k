@@ -71,10 +71,6 @@ module K-WRAPPERS
 //               | Map2K (Map)            [klabel('Map2K_)]
 endmodule
 
-module K-BUILTINS
-  syntax KLabel ::=  "#" K [builtinWrapper]
-endmodule
-
 module K-FREZERS
   imports K-TECHNIQUE
   syntax KLabel ::= "#freezer" K
@@ -112,7 +108,6 @@ module K
   imports DEFAULT-CONFIGURATION
   imports K-WRAPPERS
   imports K-WRAPPERS-LABELS
-  imports K-BUILTINS
   imports K-RESULT             // to express results syntactically
   // imports K-RULES              // to write k rules with in-place rewriting
   //imports K-EVAL
