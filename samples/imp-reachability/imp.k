@@ -41,7 +41,6 @@ module IMP-SYNTAX
   syntax Int ::= "(" Int ")" [bracket]
   syntax X ::= "symInt"  [dummySymInt]
 //  syntax Y ::= "symFreezeLabel"
-  syntax priorities builtinWrapper > dummySymInt
 
 
 endmodule
