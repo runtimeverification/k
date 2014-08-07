@@ -52,12 +52,19 @@ public class CoqBackend extends BasicBackend {
         }
         File directory = new File(definition.getMainFile()).getParentFile();
 
-        Process p;
         try {
-            p = new ProcessBuilder(kcoq,"syntax","--recursive",
+            Process p = new ProcessBuilder(kcoq,"syntax","--recursive",
                     definition.getMainFile(),domainFile)
               .inheritIO().directory(directory).start();
-            if (waitFor(p) != 0) {
+            int result;
+            try {
+                result = p.waitFor();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                p.destroy();
+                return;
+            }
+            if (result != 0) {
                 kem.registerCriticalError("Error generating Coq syntax definition");
                 return;
             }
@@ -65,10 +72,18 @@ public class CoqBackend extends BasicBackend {
             kem.registerCriticalError("Error generating Coq syntax definition", e);
         }
         try {
-            p = new ProcessBuilder(kcoq,"rules","--lang-name",langName,"--recursive",
+            Process p = new ProcessBuilder(kcoq,"rules","--lang-name",langName,"--recursive",
                     definition.getMainFile(),"--rules-from",labelFile,ruleFile)
               .inheritIO().directory(directory).start();
-            if (waitFor(p) != 0) {
+            int result;
+            try {
+                result = p.waitFor();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                p.destroy();
+                return;
+            }
+            if (result != 0) {
                 kem.registerCriticalError("Error generating Coq rules definition");
                 return;
             }
@@ -77,22 +92,6 @@ public class CoqBackend extends BasicBackend {
         }
     }
 
-    private int waitFor(Process p) {
-        boolean interrupted = false;
-        int result;
-        while (true) {
-            try {
-                result = p.waitFor();
-                break;
-            } catch (InterruptedException i) {
-                interrupted = true;
-            }
-        }
-        if (interrupted) {
-            Thread.currentThread().interrupt();
-        }
-        return result;
-    }
 
     @Override
     public String getDefaultStep() {
