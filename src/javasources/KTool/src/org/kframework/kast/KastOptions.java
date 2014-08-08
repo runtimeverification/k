@@ -55,7 +55,7 @@ public final class KastOptions {
      */
     public Source source() {
         if (expression != null) {
-            return null;
+            return Source.of("-e");
         } else {
             return Source.of(new File(parameters.get(0)));
         }

@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 
@@ -19,7 +20,7 @@ public class BasicParsingTests {
         // TODO: remove once the new parser is fully functional
         String def = "module TEST syntax Str ::= Token{((~[\\'\\n\\r\\\\])|([\\\\]~[\\n\\r]))*} endmodule";
 
-        List<DefinitionItem> defItemList = Basic.parse(null, def, null);
+        List<DefinitionItem> defItemList = Basic.parse(Source.of(BasicParsingTests.class), def, null);
 
         Module mod = (Module) defItemList.get(0);
         Syntax syn = (Syntax) mod.getItems().get(0);
