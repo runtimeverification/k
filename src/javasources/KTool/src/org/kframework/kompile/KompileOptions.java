@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.backend.coq.CoqBackend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
@@ -51,7 +52,8 @@ public final class KompileOptions implements Serializable {
         UNPARSE(false, false, false, UnparserBackend.class, null),
         UNFLATTEN(false, false, false, UnflattenBackend.class, null),
         UNFLATTEN_JAVA(false, true, false, UnflattenJavaBackend.class, null),
-        SYMBOLIC(false, false, true, SymbolicBackend.class, JavaSymbolicKRun.class);
+        SYMBOLIC(false, false, true, SymbolicBackend.class, JavaSymbolicKRun.class),
+        COQ(false, true, false, CoqBackend.class, null);
 
         private Backend(boolean documentation, boolean java, boolean generatesDefinition,
                 Class<? extends org.kframework.backend.Backend> backend,

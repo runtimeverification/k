@@ -29,7 +29,7 @@ module K-RESULT
     imports BOOL-HOOKS
 
     syntax KItem ::= KResult
-    syntax KLabel ::= "isKResult"
+    syntax Bool ::= isKResult(KItem) [function,klabel(isKResult)]
 
     //op .KList : -> List{KResult} [ditto metadata "latex=(renameTo \\ensuremath{\\dotCt{List\\{K\\}}})"] .
 
