@@ -6,9 +6,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.*;
@@ -42,7 +39,7 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
             Set<String> included = new HashSet<String>();
             Configuration cfg = null;
             super.visit(d, _);
-            result.setFilename(d.getFilename());
+            result.setSource(d.getSource());
             result.setLocation(d.getLocation());
             result.setMainFile(d.getMainFile());
             result.setMainModule(d.getMainModule());
@@ -68,10 +65,9 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
                                 mods.add(modules.get(name));
                                 included.add(name);
                             } else {
-                                GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-                                        KExceptionGroup.COMPILER,
+                                GlobalSettings.kem.registerCompilerWarning(
                                         "Module " + name + " undefined.",
-                                        getName(), i.getFilename(), i.getLocation()));
+                                        this, i);
                             }
                             continue;
                         } else included.add(name);

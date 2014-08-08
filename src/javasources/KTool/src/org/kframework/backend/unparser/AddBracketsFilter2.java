@@ -98,7 +98,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         if (reparsed != null) {
             ASTNode result = addBracketsIfNeeded(ast);
             if (atTop && result instanceof Bracket) {
-                return new Cast(result.getLocation(), result.getFilename(), (Term)result, context);
+                return new Cast(result.getLocation(), result.getSource(), (Term)result, context);
             }
             return result;
         }
@@ -127,7 +127,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         TraverseForest trans = new TraverseForest(ast, context);
         reparsed = (Term) trans.visitNode(reparsed);
         if (trans.needsParens) {
-            return new Bracket(ast.getLocation(), ast.getFilename(), ast, context);
+            return new Bracket(ast.getLocation(), ast.getSource(), ast, context);
         }
         return ast;
     }

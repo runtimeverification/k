@@ -6,7 +6,6 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -33,8 +32,8 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
         this.contents = c.contents;
     }
 
-    public Attributes(Location location, File filename) {
-        super(location, filename);
+    public Attributes(Location location, Source source) {
+        super(location, source);
         contents = new LinkedHashMap<String, Attribute>();
     }
 

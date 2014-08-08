@@ -43,17 +43,17 @@ public class PriorityFilter2 extends LocalTransformer {
         String localLabel = tc.getProduction().getKLabel();
         if (context.isPriorityWrong(parentLabel, localLabel)) {
             String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());
             throw new PriorityException(kex);
         }
         if (context.isLeftAssoc(parentLabel, localLabel) && Side.RIGHT == side) {
             String msg = "Associativity filter exception. Cannot use " + localLabel + " as a right child of " + parentLabel;
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());
             throw new PriorityException(kex);
         }
         if (context.isRightAssoc(parentLabel, localLabel) && Side.LEFT == side) {
             String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());
             throw new PriorityException(kex);
         }
 

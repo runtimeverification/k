@@ -4,7 +4,6 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -37,62 +36,37 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
             return node;
         Term kresultCnd = null;
         if (!(node.getBody() instanceof  Rewrite)) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Heating/Cooling rules should have rewrite at the top.",
-                            getName(),
-                            node.getFilename(),
-                            node.getLocation())
-            );
+                            this, node);
         }
         KSequence kSequence;
         Rewrite rewrite = (Rewrite) node.getBody();
         if (heating) {
             if (!(rewrite.getRight() instanceof KSequence)) {
-                GlobalSettings.kem.register(
-                        new KException(KException.ExceptionType.ERROR,
-                                KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                                 "Heating rules should have a K sequence in the rhs.",
-                                getName(),
-                                node.getFilename(),
-                                node.getLocation())
-                );
+                                this, node);
             }
             kSequence = (KSequence) rewrite.getRight();
         } else {
             if (!(rewrite.getLeft() instanceof KSequence)) {
-                GlobalSettings.kem.register(
-                        new KException(KException.ExceptionType.ERROR,
-                                KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                                 "Cooling rules should have a K sequence in the lhs.",
-                                getName(),
-                                node.getFilename(),
-                                node.getLocation())
-                );
+                                this, node);
             }
             kSequence = (KSequence) rewrite.getLeft();
         }
         if (kSequence.getContents().size() != 2 ) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Heating/Cooling rules should have exactly 2 items in their K Sequence.",
-                                getName(),
-                                node.getFilename(),
-                                node.getLocation())
-                );
+                                this, node);
         }
         java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
         if (vars.size() != 1) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Heating/Cooling rules should heat/cool at most one variable.",
-                            getName(),
-                            node.getFilename(),
-                            node.getLocation())
-                    );
+                            this, node);
         }
         Variable variable = vars.iterator().next();
         String resultType = node.getAttribute("result");

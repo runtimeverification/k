@@ -62,7 +62,7 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
     public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
         ParseFailedException exception = new ParseFailedException(new KException(
                 ExceptionType.ERROR, KExceptionGroup.INNER_PARSER,
-                "Parse forest contains no trees!", node.getFilename(), node.getLocation()));
+                "Parse forest contains no trees!", node.getSource(), node.getLocation()));
         java.util.Set<Term> terms = new HashSet<>();
         for (Term t : node.getContents()) {
             ASTNode result;

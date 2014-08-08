@@ -12,13 +12,11 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Require;
+import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.basic.Basic;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
@@ -98,7 +96,7 @@ public class BasicParser {
 
             if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
-            List<DefinitionItem> defItemList = Basic.parse(file, FileUtil.getFileContent(file.getAbsolutePath()), context);
+            List<DefinitionItem> defItemList = Basic.parse(Source.of(file), FileUtil.getFileContent(file.getAbsolutePath()), context);
 
             // go through every required file
             for (ASTNode di : defItemList) {
@@ -108,8 +106,7 @@ public class BasicParser {
                     File newFile = buildCanonicalPath(req.getValue(), file);
 
                     if (newFile == null)
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, missingFileMsg + req.getValue(), req.getFilename(), req
-                                .getLocation()));
+                        GlobalSettings.kem.registerCriticalError(missingFileMsg + req.getValue(), req);
 
                     slurp2(newFile, context);
                     context.addFileRequirement(newFile.getCanonicalPath(), file.getCanonicalPath());
@@ -131,8 +128,7 @@ public class BasicParser {
                     Module previous = this.modulesMap.put(m.getName(), m);
                     if (previous != null) {
                         String msg = "Found two modules with the same name: " + m.getName();
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                                KExceptionGroup.CRITICAL, msg, m.getFilename(), m.getLocation()));
+                        GlobalSettings.kem.registerCriticalError(msg, m);
                     }
                 }
             }

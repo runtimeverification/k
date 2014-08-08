@@ -171,6 +171,7 @@ import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -183,7 +184,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -208,38 +208,38 @@ class EndPositionComparator implements Comparator<ModuleItem> {
 }
 
 public class Basic {
-  private File filename;
+  private Source source;
   private List<DefinitionItem> items = new ArrayList<DefinitionItem>();;
   private Module module = null;
   private int beginLine, beginColumn;
   private Context context;
 
-  /** Parses a given string that was read from 'filename'. */
+  /** Parses a given string that was read from 'source'. */
   public static List<DefinitionItem> parse(
-    File filename, String string, Context context) {
+    Source source, String string, Context context) {
     Basic parser = new Basic(new StringReader(string));
-    parser.filename = filename;
+    parser.source = source;
     parser.context = context;
     try {
       return parser.Start();
     } catch (ParseException e) {
       // TODO: report location
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), source, null));
       return new ArrayList<DefinitionItem>();
     } catch (TokenMgrError e) {
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), source, null));
       return new ArrayList<DefinitionItem>();
     }
   }
 
-  /** Parses a given string that was fead from 'filename' as a list of
+  /** Parses a given string that was read from 'source' as a list of
   attributes.  Note that the source position in the returned result is
   relative to the String. */
-  public static Attributes parseAttributes(String string, File filename) throws ParseException {
+  public static Attributes parseAttributes(String string, Source source) throws ParseException {
     Basic parser = new Basic(new StringReader(string));
-    parser.filename = filename;
+    parser.source = source;
     parser.module = null;
     parser.items = new ArrayList<DefinitionItem>();
     StringSentence ss = new StringSentence("", "", "", "");
@@ -273,7 +273,7 @@ public class Basic {
   simplifies many uses of this function).
   */
   private <T extends ASTNode> T markLocExplicit(Location loc, T node) {
-    node.setFilename(filename);
+    node.setSource(source);
     node.setLocation(loc);
     return node;
   }
@@ -373,7 +373,7 @@ public class Basic {
          i >= 0;
          i = content.lastIndexOf('[', i - 1)) {
       Basic parser = new Basic(new StringReader(content.substring(i)));
-      parser.filename = this.filename;
+      parser.source = this.source;
       parser.module = this.module;
       parser.items = this.items;
       parser.beginLine = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);

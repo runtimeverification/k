@@ -73,14 +73,14 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
             assert ks.getContents().size() <= 2;
 
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
         @Override
         public ASTNode visit(Rewrite ks, Void _) throws ParseFailedException {
             String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
@@ -91,7 +91,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
             int lastElement = tc.getProduction().getItems().size() - 1;
             if (tc.getProduction().getItems().get(lastElement) instanceof NonTerminal || tc.getProduction().isListDecl()) {
                 String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
-                KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
+                KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());
                 throw new PriorityException(kex);
             }
             return super.visit(tc, _);

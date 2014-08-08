@@ -144,7 +144,7 @@ public class MaudeFilter extends BackendFilter {
                     if (operation.equals("") && !p.containsAttribute("onlyLabel")) {
                         String msg = "Cannot declare empty terminals in the definition.\n";
                         msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
+                        GlobalSettings.kem.registerCriticalError(msg, this, p);
                     }
                     if (!MaudeHelper.constantSorts.contains(syn.getDeclaredSort().getSort()) || !syn.getDeclaredSort().getSort().equals(Sort.KLABEL) || !syn.getDeclaredSort().getSort().equals(Sort.CELL_LABEL)) {
                         result.append("op ");
@@ -178,7 +178,7 @@ public class MaudeFilter extends BackendFilter {
                     String maudelabel = p.getLabel();
                     if (maudelabel.equals("")) {
                         String msg = "Empty production. Please use `prefixlabel` attribute.";
-                        GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, p.getFilename(), p.getLocation()));
+                        GlobalSettings.kem.registerCompilerWarning(msg, this, p);
                         continue;
                     }
 
@@ -492,8 +492,8 @@ public class MaudeFilter extends BackendFilter {
             isTransition = true;
         }
         if (!(rule.getBody() instanceof Rewrite)) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "This rule should have a rewrite at top by now.", getName(), rule.getFilename(), rule
-                    .getLocation()));
+            GlobalSettings.kem.registerInternalError("This rule should have a rewrite at top by now.",
+                    this, rule);
         }
         Rewrite body = (Rewrite) rule.getBody();
         assert rule.getEnsures() == null : "Maude does not support conditions on the right hand side";
@@ -727,8 +727,8 @@ public class MaudeFilter extends BackendFilter {
                     first = false;
                 }
                 if (term == null) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
-                            + ".", collection.getFilename(), collection.getLocation()));
+                    GlobalSettings.kem.registerInternalError("NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
+                            + ".", this, collection);
                 }
                 this.visitNode(term);
             }
@@ -1025,7 +1025,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public Void visit(Cast term, Void _) {
-        throw new RuntimeException("don't know how to maudify Cast at "+term.getFilename()+" "+term.getLocation());
+        throw new RuntimeException("don't know how to maudify Cast at "+term.getSource()+" "+term.getLocation());
     }
 
     @Override

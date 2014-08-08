@@ -4,6 +4,7 @@ package org.kframework.compile.transformers;
 import java.io.File;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.FileSource;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -21,10 +22,10 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
-        if (node.getFilename() == null) {
+        if (!(node.getSource() instanceof FileSource)) {
             return null;
         }
-        String filename = node.getFilename().getAbsolutePath();
+        String filename = ((FileSource)node.getSource()).getFile().getAbsolutePath();
         if ((!filename.startsWith(KPaths.getKBase(false) + File.separator + "include")
                 && !filename.startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME))
                 || (filename.equals(KPaths.getKBase(false)

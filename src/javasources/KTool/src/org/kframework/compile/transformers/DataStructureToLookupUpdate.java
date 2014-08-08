@@ -7,7 +7,6 @@ import org.kframework.kil.BuiltinLookup;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListLookup;
 import org.kframework.kil.ListUpdate;
-import org.kframework.kil.Location;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.MapLookup;
 import org.kframework.kil.MapUpdate;
@@ -21,10 +20,8 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -109,21 +106,11 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
     private enum Status {LHS, RHS, CONDITION }
 
-    private void registerError(Rule node, String message) {
-        GlobalSettings.kem.register(new KException(
-                KException.ExceptionType.ERROR,
-                KException.KExceptionGroup.CRITICAL,
-                message,
-                node.getFilename(),
-                node.getLocation()));
-    }
-
     private Map<Variable, Term> reverseMap = new HashMap<>();
     private Map<Variable, Integer> concreteSize = new HashMap<>();
     private ArrayList<VariableCache> queue = new ArrayList<>();
     private Status status;
-    private Location location;
-    private File filename;
+    private ASTNode location;
 
     public DataStructureToLookupUpdate(Context context) {
         super("Compile maps into load and store operations", context);
@@ -142,8 +129,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         reverseMap.clear();
         concreteSize.clear();
         queue.clear();
-        location = node.getLocation();
-        filename = node.getFilename();
+        location = node;
 
         Rewrite rewrite = (Rewrite) node.getBody();
 
@@ -242,7 +228,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         ((BuiltinLookup) queue.get(i)).variables(),
                         ((BuiltinLookup) queue.get(j)).variables());
                 if (!commonVariables.isEmpty()) {
-                    registerError(node, "Unsupported map pattern in the rule left-hand side");
+                    GlobalSettings.kem.registerCriticalError("Unsupported map pattern in the rule left-hand side", node);
                     /* dead code */
                     return null;
                 }
@@ -264,7 +250,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                             mapLookup.kind(),
                             true));
                 } else {
-                    registerError(node, "Unsupported map pattern in the rule left-hand side");
+                    GlobalSettings.kem.registerCriticalError("Unsupported map pattern in the rule left-hand side", node);
                     /* dead code */
                     return null;
                 }
@@ -273,7 +259,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 if (setLookup.key() instanceof Variable && !variables.contains(setLookup.key())) {
                     lookups.add(new SetLookup(setLookup.base(), setLookup.key(), true));
                 } else {
-                    registerError(node, "Unsupported map pattern in the rule left-hand side");
+                    GlobalSettings.kem.registerCriticalError("Unsupported map pattern in the rule left-hand side", node);
                     /* dead code */
                     return null;
                 }
@@ -295,7 +281,6 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         returnNode.getConcreteDataStructureSize().putAll(concreteSize);
 
         location = null;
-        filename = null;
 
         return returnNode;
     }
@@ -305,15 +290,12 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         node = (ListBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                         "unexpected left-hand side data structure format; "
                         + "expected elements and at most one variable\n"
                         + node,
-                        getName(),
-                        filename,
-                        location));
+                        this,
+                        location);
                 return null;
             }
 
@@ -409,15 +391,11 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         node = (MapBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                         "unexpected left-hand side data structure format; "
                         + "expected elements and at most one variable\n"
                         + node,
-                        getName(),
-                        filename,
-                        location));
+                        this, location);
                 return null;
             }
 
@@ -493,15 +471,11 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         node = (SetBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                         "unexpected left-hand side data structure format; "
                         + "expected elements and at most one variable\n"
                         + node,
-                        getName(),
-                        filename,
-                        location));
+                        this, location);
                 return null;
             }
 

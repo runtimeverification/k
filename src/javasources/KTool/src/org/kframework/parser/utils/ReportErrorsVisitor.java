@@ -1,11 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.parser.utils;
 
-import java.io.File;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Location;
 import org.kframework.kil.ParseError;
+import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
@@ -25,8 +24,8 @@ public class ReportErrorsVisitor extends ParseForestTransformer {
         String msg = pe.getMessage();
         if (msg.equals("Parse error: eof unexpected"))
             msg = "Parse error: Unexpected end of " + fromWhere;
-        File file = pe.getFilename();
+        Source source = pe.getSource();
         Location location = pe.getLocation();
-        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
+        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, source, location));
     }
 }

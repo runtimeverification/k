@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
-
 import org.kframework.kil.visitors.Visitor;
 
 /*
@@ -17,8 +15,8 @@ import org.kframework.kil.visitors.Visitor;
  * Usually only occurs as the label of a {@link KApp} an {@link Empty} as arguments.
  */
 public class FreezerLabel extends KInjectedLabel {
-    public FreezerLabel(Location location, File filename) {
-        super(location, filename);
+    public FreezerLabel(Location location, Source source) {
+        super(location, source);
     }
 
     public FreezerLabel(FreezerLabel l) {

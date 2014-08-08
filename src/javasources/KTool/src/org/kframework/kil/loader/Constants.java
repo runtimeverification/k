@@ -73,6 +73,7 @@ public class Constants {
     public static final String FUNCTION = "function";
     public static final String ANYWHERE = "anywhere";
     public static final String REGEX = "regex";
+    public static final String SOURCE_ATTR = "source";
 
     // Streams
     public static final String STDIN = "stdin";

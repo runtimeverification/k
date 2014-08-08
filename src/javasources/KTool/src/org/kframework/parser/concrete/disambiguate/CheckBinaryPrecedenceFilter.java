@@ -31,7 +31,7 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
     public ASTNode visit(Rewrite rw, Void _) throws ParseFailedException {
         if (parent != null || parentks != null || parentmi != null) {
             String msg = "Due to typing errors, rewrite is not greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, rw.getFilename(), rw.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, rw.getSource(), rw.getLocation());
             throw new PriorityException(kex);
         }
 
@@ -45,7 +45,7 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
     public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
         if (parent != null || parentks != null) {
             String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 

@@ -1,25 +1,21 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
-import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -59,26 +55,17 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                         if (!equalities.containsKey(prod.getChildSort(0)))
                             equalities.put(prod.getChildSort(0).getName(), prod.getKLabel());
                         else
-                            GlobalSettings.kem.register(new KException(
-                                    KException.ExceptionType.ERROR,
-                                    KException.KExceptionGroup.CRITICAL,
+                            GlobalSettings.kem.registerCriticalError(
                                     "redeclaration of equality for sort " + prod.getChildSort(0),
-                                    prod.getFilename(),
-                                    prod.getLocation()));
+                                    this, prod);
                     else
-                        GlobalSettings.kem.register(new KException(
-                                KException.ExceptionType.ERROR,
-                                KException.KExceptionGroup.CRITICAL,
+                        GlobalSettings.kem.registerCriticalError(
                                 "arguments for equality expected to be of the same sort",
-                                prod.getFilename(),
-                                prod.getLocation()));
+                                this, prod);
                 else
-                    GlobalSettings.kem.register(new KException(
-                            KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+                    GlobalSettings.kem.registerCriticalError(
                             "unexpected number of arguments for equality, expected 2",
-                            prod.getFilename(),
-                            prod.getLocation()));
+                            this, prod);
             /* TOOD(AndreiS): cink fails this check; either fix cink or remove the check
             else
                 GlobalSettings.kem.register(new KException(

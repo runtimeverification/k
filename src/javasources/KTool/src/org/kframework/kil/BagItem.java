@@ -1,16 +1,14 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
-
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public class BagItem extends CollectionItem {
-    public BagItem(Location location, File filename) {
-        super(location, filename, Sort.BAG_ITEM);
+    public BagItem(Location location, Source source) {
+        super(location, source, Sort.BAG_ITEM);
     }
 
     public BagItem(Element element) {

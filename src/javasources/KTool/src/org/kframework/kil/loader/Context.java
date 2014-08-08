@@ -22,9 +22,6 @@ import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.options.SMTOptions;
 
@@ -559,21 +556,15 @@ public class Context implements Serializable {
     public void makeFreshFunctionNamesMap(Set<Production> freshProductions) {
         for (Production production : freshProductions) {
             if (!production.containsAttribute(Attribute.FUNCTION_KEY)) {
-                GlobalSettings.kem.register(new KException(
-                        ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "missing [function] attribute for fresh function " + production,
-                        production.getFilename(),
-                        production.getLocation()));
+                        production);
             }
 
             if (freshFunctionNames.containsKey(production.getSort())) {
-                GlobalSettings.kem.register(new KException(
-                        ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "multiple fresh functions for sort " + production.getSort(),
-                        production.getFilename(),
-                        production.getLocation()));
+                        production);
             }
 
             freshFunctionNames.put(production.getSort(), production.getKLabel());

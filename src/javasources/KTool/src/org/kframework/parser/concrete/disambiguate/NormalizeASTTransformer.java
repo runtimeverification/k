@@ -7,14 +7,12 @@ import org.kframework.kil.GenericToken;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
@@ -55,8 +53,6 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
             if (p.getItems().size() == 1 && p.getItems().get(0) instanceof Terminal) {
                 Terminal t = (Terminal) p.getItems().get(0);
                 Term trm = GenericToken.kAppOf(p.getSort(), t.getTerminal());
-                trm.setFilename(tc.getFilename());
-                trm.setLocation(tc.getLocation());
                 return trm;
             }
         }
@@ -87,13 +83,11 @@ public class NormalizeASTTransformer extends ParseForestTransformer {
             result = KApp.of("'.Set");
         }
         if (result != null) {
-            result.setFilename(lt.getFilename());
-            result.setLocation(lt.getLocation());
             if (!lt.isUserTyped()) {
                 String msg = "Inferring the sort of . as being " + lt.getSort();
                 GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING,
                         KExceptionGroup.LISTS, msg,
-                        lt.getFilename(), lt.getLocation()));
+                        lt.getSource(), lt.getLocation()));
             }
             return result;
         }

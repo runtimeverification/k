@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
-
 import org.kframework.kil.visitors.Visitor;
 
 /** Represents a term of sort KLabel made by injecting something else.
@@ -12,8 +10,8 @@ import org.kframework.kil.visitors.Visitor;
 public class KInjectedLabel extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     protected Term term;
 
-    public KInjectedLabel(Location location, File filename) {
-        super(location, filename, Sort.KLABEL);
+    public KInjectedLabel(Location location, Source source) {
+        super(location, source, Sort.KLABEL);
     }
 
     public KInjectedLabel(KInjectedLabel l) {

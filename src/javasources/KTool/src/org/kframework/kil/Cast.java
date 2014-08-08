@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
-
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
@@ -56,12 +54,12 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.content = t;
     }
 
-    public Cast(Location location, File filename, Sort sort) {
-        super(location, filename, sort);
+    public Cast(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
-    public Cast(Location location, File filename, Term t, org.kframework.kil.loader.Context context) {
-        super(location, filename, t.getSort());
+    public Cast(Location location, Source source, Term t, org.kframework.kil.loader.Context context) {
+        super(location, source, t.getSort());
         this.content = t;
     }
 

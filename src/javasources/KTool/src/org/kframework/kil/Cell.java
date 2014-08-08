@@ -76,8 +76,8 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     Term contents;
     Map<String, String> cellAttributes;
 
-    public Cell(Location location, File filename) {
-        super(location, filename, Sort.BAG_ITEM);
+    public Cell(Location location, Source source) {
+        super(location, source, Sort.BAG_ITEM);
         cellAttributes = new HashMap<String, String>();
     }
 
@@ -182,8 +182,8 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
                 return Multiplicity.SOME;
             if ("1".equals(attr))
                 return Multiplicity.ONE;
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Unknown multiplicity in configuration for cell " + this.getLabel() + ".",
-                    this.getFilename(), this.getLocation()));
+            GlobalSettings.kem.registerCompilerWarning("Unknown multiplicity in configuration for cell " + this.getLabel() + ".",
+                    this);
         }
         return Multiplicity.ONE;
     }
@@ -196,7 +196,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
             }
         } catch (IllegalArgumentException e) {
             String msg = "Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.";
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, this.getFilename(), this.getLocation()));
+            GlobalSettings.kem.registerCompilerWarning(msg, e, this);
         }
         return Ellipses.NONE;
     }

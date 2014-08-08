@@ -4,6 +4,7 @@ package org.kframework.krun;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.ParserType;
@@ -113,42 +114,42 @@ public class RunProcess {
             startSymbol = context.startSymbolPgm;
         }
         String content = value;
-        File file = null;
+        Source source = Source.of("parameters");
 
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
-                    file = new File(value);
+                    source = Source.of(new File(value));
                 }
-                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.PROGRAM);
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast -e":
-                term = ProgramLoader.processPgm(value, file, startSymbol, context, ParserType.PROGRAM);
+                term = ProgramLoader.processPgm(value, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
-                    file = new File(value);
+                    source = Source.of(new File(value));
                 }
-                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.GROUND);
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser ground -e":
-                term = ProgramLoader.processPgm(value, file, startSymbol, context, ParserType.GROUND);
+                term = ProgramLoader.processPgm(value, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
-                    file = new File(value);
+                    source = Source.of(new File(value));
                 }
-                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.RULES);
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
-                    file = new File(value);
+                    source = Source.of(new File(value));
                 }
-                term = ProgramLoader.processPgm(content, file, startSymbol, context, ParserType.BINARY);
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
                 break;
             default: //external parser
                 List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));

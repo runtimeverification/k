@@ -9,9 +9,6 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -81,10 +78,9 @@ public class ResolveBlockingInput extends GetLhsPattern {
     public ASTNode visit(Module node, Void _)  {
         ASTNode result = super.visit(node, _);
         if (result != node) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                    KExceptionGroup.INTERNAL,
+            GlobalSettings.kem.registerInternalError(
                     "Should have obtained the same module.",
-                    getName(), node.getFilename(), node.getLocation()));
+                    this, node);
         }
         if (generated.isEmpty()) return node;
         node = node.shallowCopy();
@@ -131,20 +127,18 @@ public class ResolveBlockingInput extends GetLhsPattern {
             return super.visit(node, _);
         }
         if (!(node.getEllipses() == Ellipses.RIGHT)) {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-                    KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerWarning(
                     "cell should have right ellipses but it doesn't." +
                             System.getProperty("line.separator") + "Won't transform.",
-                            getName(), node.getFilename(), node.getLocation()));
+                            this, node);
             return node;
         }
         Term contents = node.getContents();
         if (!(contents instanceof Rewrite)) {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-                    KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerWarning(
                     "Expecting a rewrite of a basic type variable into the empty list but got " + contents.getClass() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
-                            getName(), contents.getFilename(), contents.getLocation()));
+                            this, contents);
             return node;
         }
         Rewrite rewrite = (Rewrite) contents;
@@ -152,11 +146,10 @@ public class ResolveBlockingInput extends GetLhsPattern {
             (!(rewrite.getLeft() instanceof KApp &&
             ((KApp)rewrite.getLeft()).getLabel().equals(
                 KLabelConstant.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, context)))))) {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-                    KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerWarning(
                     "Expecting a list item but got " + rewrite.getLeft().getClass() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
-                            getName(), rewrite.getLeft().getFilename(), rewrite.getLeft().getLocation()));
+                            this, rewrite.getLeft());
             return node;
         }
         Term item = rewrite.getLeft();
@@ -164,32 +157,29 @@ public class ResolveBlockingInput extends GetLhsPattern {
         KApp kappItem = (KApp)item;
         Term child = kappItem.getChild();
         if (!(child instanceof KList) || ((KList)child).getContents().size() != 1) {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-                KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerWarning(
                 "Expecting an input type variable but got a KList instead. Won't transform.",
-                        getName(), ((KApp)item).getChild().getFilename(), ((KApp)item).getChild().getLocation()));
+                        this, ((KApp)item).getChild());
             return node;
         }
         variable = ((KList)child).getContents().get(0);
 
         if (!(variable instanceof Variable))//&&    MetaK.isBuiltinSort(item.getItem().getSort())
                  {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-                    KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerWarning(
                     "Expecting an input type variable but got " + variable.getClass() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
-                            getName(), variable.getFilename(), variable.getLocation()));
+                            this, variable);
             return node;
         }
         if ((!(rewrite.getRight() instanceof KApp &&
             ((KApp)rewrite.getRight()).getLabel().equals(
                 KLabelConstant.of(DataStructureSort.DEFAULT_LIST_UNIT_LABEL, context))))) {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-                    KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerWarning(
                     "Expecting an empty list but got " + rewrite.getRight().getClass() + " of sort " +
                             rewrite.getRight().getSort() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
-                            getName(), rewrite.getRight().getFilename(), rewrite.getRight().getLocation()));
+                            this, rewrite.getRight());
             return node;
         }
 

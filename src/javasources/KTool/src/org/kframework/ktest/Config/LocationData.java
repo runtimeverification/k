@@ -4,6 +4,7 @@ package org.kframework.ktest.Config;
 import java.io.File;
 
 import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 
 
 /**
@@ -13,23 +14,23 @@ public class LocationData {
 
     public static final String LOCATION_DATA_KEY = "locationDataKey";
 
-    private final File file;
+    private final Source source;
     private final Location location;
 
     public LocationData(String systemId, int startLine,
             int startColumn, int endLine, int endColumn) {
         super();
         this.location = new Location(startLine, startColumn, endLine, endColumn);
-        this.file = new File(systemId);
+        this.source = Source.of(new File(systemId));
     }
 
     public LocationData() {
-        file = null;
+        source = null;
         location = null;
     }
 
-    public File getFile() {
-        return file;
+    public Source getSource() {
+        return source;
     }
 
     public Location getLocation() {

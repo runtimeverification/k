@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
-
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
@@ -38,12 +36,12 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = t;
     }
 
-    public Bracket(Location location, File filename, Sort sort) {
-        super(location, filename, sort);
+    public Bracket(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
-    public Bracket(Location location, File filename, Term t, Context context) {
-        super(location, filename, t.getSort());
+    public Bracket(Location location, Source source, Term t, Context context) {
+        super(location, source, t.getSort());
         this.content = t;
     }
 

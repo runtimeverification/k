@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
-
 import org.w3c.dom.Element;
 
 /** Subclasses wrap a term as an item in the corresponding collection */
@@ -19,8 +17,8 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
         this.value = i.value;
     }
 
-    public CollectionItem(Location location, File filename, Sort sort) {
-        super(location, filename, sort);
+    public CollectionItem(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
     public CollectionItem(Element element) {

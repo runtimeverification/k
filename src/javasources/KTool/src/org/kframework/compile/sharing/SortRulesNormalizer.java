@@ -10,6 +10,7 @@ import org.apache.commons.collections4.comparators.NullComparator;
 import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -24,10 +25,10 @@ public class SortRulesNormalizer extends CopyOnWriteTransformer {
         Collections.sort(module.getItems(), new Comparator<ModuleItem>() {
             @Override
             public int compare(ModuleItem arg0, ModuleItem arg1) {
-                ComparableComparator<File> fcc = ComparableComparator.comparableComparator();
-                NullComparator<File> nullFcc = new NullComparator<>(fcc);
+                ComparableComparator<Source> fcc = ComparableComparator.comparableComparator();
+                NullComparator<Source> nullFcc = new NullComparator<>(fcc);
                 int x;
-                if ((x = nullFcc.compare(arg0.getFilename(), arg1.getFilename())) != 0) {
+                if ((x = nullFcc.compare(arg0.getSource(), arg1.getSource())) != 0) {
                     return x;
                 }
 

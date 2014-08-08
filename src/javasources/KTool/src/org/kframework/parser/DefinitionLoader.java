@@ -18,6 +18,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
@@ -325,8 +326,8 @@ public class DefinitionLoader {
      *            - the context for disambiguation purposes.
      * @return A lightweight Definition element which contain all the definition items found in the string.
      */
-    public static Definition parseString(String content, File filename, Context context) throws ParseFailedException {
-        List<DefinitionItem> di = Basic.parse(filename, content, context);
+    public static Definition parseString(String content, Source source, Context context) throws ParseFailedException {
+        List<DefinitionItem> di = Basic.parse(source, content, context);
 
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
         def.setItems(di);
@@ -350,13 +351,13 @@ public class DefinitionLoader {
         return def;
     }
 
-    public static Term parseCmdString(String content, File filename, String startSymbol, Context context) throws ParseFailedException {
+    public static Term parseCmdString(String content, Source source, String startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
         String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
         Document doc = XmlLoader.getXMLDoc(parsed);
-        XmlLoader.addFilename(doc.getFirstChild(), filename);
+        XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
 
         JavaClassesFactory.startConstruction(context);
@@ -398,7 +399,7 @@ public class DefinitionLoader {
         return (Term) config;
     }
 
-    public static ASTNode parsePattern(String pattern, File filename, String startSymbol, Context context) throws ParseFailedException {
+    public static ASTNode parsePattern(String pattern, Source source, String startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
@@ -406,7 +407,7 @@ public class DefinitionLoader {
         String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);
         Document doc = XmlLoader.getXMLDoc(parsed);
 
-        XmlLoader.addFilename(doc.getFirstChild(), filename);
+        XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
 
         JavaClassesFactory.startConstruction(context);

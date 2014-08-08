@@ -1,7 +1,9 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
@@ -13,6 +15,7 @@ import org.kframework.kil.Location;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Source;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -33,6 +36,7 @@ import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -44,7 +48,7 @@ public class ProgramLoader {
      * @param kappize
      *            If true, then apply KAppModifier to AST.
      */
-    public static ASTNode loadPgmAst(String content, File filename, Boolean kappize, String startSymbol, Context context)
+    public static ASTNode loadPgmAst(String content, Source source, Boolean kappize, String startSymbol, Context context)
             throws ParseFailedException {
         // ------------------------------------- import files in Stratego
         ASTNode out;
@@ -53,7 +57,7 @@ public class ProgramLoader {
         String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
         Document doc = XmlLoader.getXMLDoc(parsed);
 
-        XmlLoader.addFilename(doc.getFirstChild(), filename);
+        XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
         JavaClassesFactory.startConstruction(context);
         out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
@@ -71,8 +75,8 @@ public class ProgramLoader {
         return out;
     }
 
-    public static ASTNode loadPgmAst(String content, File filename, String startSymbol, Context context) throws ParseFailedException {
-        return loadPgmAst(content, filename, true, startSymbol, context);
+    public static ASTNode loadPgmAst(String content, Source source, String startSymbol, Context context) throws ParseFailedException {
+        return loadPgmAst(content, source, true, startSymbol, context);
     }
 
     /**
@@ -80,7 +84,7 @@ public class ProgramLoader {
      *
      * Save it in kompiled cache under pgm.maude.
      */
-    public static Term processPgm(String content, File filename, String startSymbol,
+    public static Term processPgm(String content, Source source, String startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         if (!context.definedSorts.contains(Sort.of(startSymbol))) {
@@ -91,14 +95,14 @@ public class ProgramLoader {
         ASTNode out;
         if (whatParser == ParserType.GROUND) {
             org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled);
-            out = DefinitionLoader.parseCmdString(content, filename, startSymbol, context);
+            out = DefinitionLoader.parseCmdString(content, source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
             out = new FlattenTerms(context).visitNode(out);
         } else if (whatParser == ParserType.RULES) {
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
-            out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
+            out = DefinitionLoader.parsePattern(content, source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
@@ -111,7 +115,12 @@ public class ProgramLoader {
             }
             out = ((Rule) out).getBody();
         } else if (whatParser == ParserType.BINARY) {
-            out = BinaryLoader.instance().loadOrDie(Term.class, filename.getAbsolutePath());
+            try (ByteArrayInputStream in = new ByteArrayInputStream(content.getBytes())) {
+                out = BinaryLoader.instance().loadOrDie(Term.class, in);
+            } catch (IOException e) {
+                GlobalSettings.kem.registerInternalError("Error reading from binary file", e);
+                throw new AssertionError("unreachable");
+            }
         } else if (whatParser == ParserType.NEWPROGRAM) {
             // load the new parser
             // TODO(Radu): after the parser is in a good enough shape, replace the program parser
@@ -143,11 +152,11 @@ public class ProgramLoader {
                 Location loc = new Location(perror.line, perror.column,
                                             perror.line, perror.column + 1);
                 throw new ParseFailedException(new KException(
-                        ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, filename, loc));
+                        ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, loc));
             }
             out = new ResolveVariableAttribute(context).visitNode(out);
         } else {
-            out = loadPgmAst(content, filename, startSymbol, context);
+            out = loadPgmAst(content, source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);
         }
         Stopwatch.instance().printIntermediate("Parsing Program");

@@ -4,6 +4,7 @@ package org.kframework.utils.errorsystem;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -12,7 +13,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,7 +42,7 @@ public class KExceptionManager {
     }
 
     public void registerCriticalError(String message, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getFilename());
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getSource());
     }
 
     public void registerCriticalError(String message, Throwable e) {
@@ -50,32 +50,56 @@ public class KExceptionManager {
     }
 
     public void registerCriticalError(String message, Throwable e, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getFilename());
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getSource());
     }
 
-    public void registerCriticalError(String message, Throwable e, Location loc, File file) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, loc, file);
+    public void registerCriticalError(String message, Throwable e, Location loc, Source source) {
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, loc, source);
     }
 
 
     public void registerCriticalError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, phase, null, node.getLocation(), node.getFilename());
+        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, phase, null, node.getLocation(), node.getSource());
     }
 
     public void registerInternalError(String message, Throwable e) {
         register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
+    public void registerInternalError(String message, ASTNode node) {
+        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, null, node.getLocation(), node.getSource());
+    }
+
     public void registerInternalError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, phase, null, node.getLocation(), node.getFilename());
+        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, phase, null, node.getLocation(), node.getSource());
+    }
+
+    public void registerCompilerError(String message, ASTNode node) {
+        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, node.getLocation(), node.getSource());
+    }
+
+    public void registerCompilerError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
+        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, phase, null, node.getLocation(), node.getSource());
+    }
+
+    public void registerCompilerError(String message, AbstractVisitor<?, ?, ?> phase, Throwable e, ASTNode node) {
+        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, phase, e, node.getLocation(), node.getSource());
     }
 
     public void registerCompilerWarning(String message) {
         register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, null, null);
     }
 
+    public void registerCompilerWarning(String message, ASTNode node) {
+        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, node.getLocation(), node.getSource());
+    }
+
+    public void registerCompilerWarning(String message, Throwable e, ASTNode node) {
+        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, e, node.getLocation(), node.getSource());
+    }
+
     public void registerCompilerWarning(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
-        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, phase, null, node.getLocation(), node.getFilename());
+        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, phase, null, node.getLocation(), node.getSource());
     }
 
     public void registerCriticalWarning(String message) {
@@ -83,7 +107,7 @@ public class KExceptionManager {
     }
 
     public void registerCriticalWarning(String message, ASTNode node) {
-        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getFilename());
+        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getSource());
     }
 
     public void registerCriticalWarning(String message, Throwable e) {
@@ -91,7 +115,7 @@ public class KExceptionManager {
     }
 
     public void registerCriticalWarning(String message, Throwable e, ASTNode node) {
-        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getFilename());
+        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getSource());
     }
 
     public void registerInternalWarning(String message, Throwable e) {
@@ -99,9 +123,9 @@ public class KExceptionManager {
     }
 
     private void register(ExceptionType type, KExceptionGroup group, String message,
-            AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, File filename) {
+            AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
         printStackTrace(e);
-        registerInternal(new KException(type, group, message, phase == null ? null : phase.getName(), filename, location, e));
+        registerInternal(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));
     }
 
     @Deprecated

@@ -113,14 +113,14 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         heatingRule.setEnsures(substituteHole(node.getEnsures(), freshVariable));
         heatingRule.getAttributes().putAll(node.getAttributes());
         heatingRule.setLocation(node.getLocation());
-        heatingRule.setFilename(node.getFilename());
+        heatingRule.setSource(node.getSource());
         heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
         rules.add(heatingRule);
 
         Rule coolingRule = new Rule(rhsHeat, lhsHeat, context);
         coolingRule.getAttributes().putAll(node.getAttributes());
         coolingRule.setLocation(node.getLocation());
-        coolingRule.setFilename(node.getFilename());
+        coolingRule.setSource(node.getSource());
         coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
         rules.add(coolingRule);
 

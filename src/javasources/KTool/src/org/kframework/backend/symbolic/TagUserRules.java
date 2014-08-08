@@ -3,6 +3,7 @@ package org.kframework.backend.symbolic;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.FileSource;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
@@ -47,7 +48,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
                 return super.visit(node, _);
             }
 
-        if (node.getFilename() != null && (!node.getFilename().getAbsolutePath().startsWith(
+        if (node.getSource() instanceof FileSource && (!((FileSource)node.getSource()).getFile().getAbsolutePath().startsWith(
                 KPaths.getKBase(false) + File.separator + "include"))
                 ) {
 

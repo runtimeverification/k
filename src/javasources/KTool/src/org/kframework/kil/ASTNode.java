@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Scanner;
 import java.util.Set;
@@ -25,7 +24,7 @@ public abstract class ASTNode implements Serializable {
      */
     private Attributes attributes;
 
-    private File filename;
+    private Source source;
     private Location location;
 
     /**
@@ -35,7 +34,7 @@ public abstract class ASTNode implements Serializable {
      *            The XML element describing the ASTNode
      */
     public ASTNode(Element elem) {
-        this(getElementLocation(elem), getElementFile(elem));
+        this(getElementLocation(elem), getElementSource(elem));
     }
 
     /**
@@ -63,11 +62,8 @@ public abstract class ASTNode implements Serializable {
      * @param elem
      * @return the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
      */
-    public static File getElementFile(Element elem) {
-        if (elem != null && elem.hasAttribute(Constants.FILENAME_filename_ATTR))
-            return new File(elem.getAttribute(Constants.FILENAME_filename_ATTR));
-        else
-            return null;
+    public static Source getElementSource(Element elem) {
+        return (Source) elem.getUserData(Constants.SOURCE_ATTR);
     }
 
     /**
@@ -78,7 +74,7 @@ public abstract class ASTNode implements Serializable {
     public ASTNode(ASTNode astNode) {
         attributes = astNode.attributes;
         location = astNode.location;
-        filename = astNode.filename;
+        source = astNode.source;
     }
 
     /**
@@ -94,9 +90,9 @@ public abstract class ASTNode implements Serializable {
      * @param loc
      * @param file
      */
-    public ASTNode(Location loc, File file) {
+    public ASTNode(Location loc, Source source) {
         setLocation(loc);
-        setFilename(file);
+        setSource(source);
     }
 
     /**
@@ -113,26 +109,26 @@ public abstract class ASTNode implements Serializable {
      *
      * @param loc
      */
-    public void setLocation(Location loc) {
-        location = loc;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     /**
-     * Retrieves the filename of the current ASTNode.
+     * Retrieves the source of the current ASTNode.
      *
-     * @return recorded filename or null if no recorded location found.
+     * @return recorded source or null if no recorded source found.
      */
-    public File getFilename() {
-        return filename;
+    public Source getSource() {
+        return source;
     }
 
     /**
-     * Sets the filename or removes it if appropriate.
+     * Sets the source or removes it if appropriate.
      *
      * @param file
      */
-    public void setFilename(File file) {
-        filename = file;
+    public void setSource(Source source) {
+        this.source = source;
     }
 
     /*

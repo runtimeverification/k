@@ -5,6 +5,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
@@ -15,7 +16,6 @@ import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,10 +49,10 @@ public class CacheLookupFilter extends ParseForestTransformer {
                 CachedSentence cs = cachedDef.get(key);
                 sentence = cs.sentence;
                 if (kept.containsKey(key)) {
-                    File file = ss.getFilename();
+                    Source source = ss.getSource();
                     Location location = ss.getLocation();
                     String msg = "Duplicate rule found in module " + localModule + " at: " + cachedDef.get(key).sentence.getLocation();
-                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, source, location));
                 }
 
                 // fix the location information

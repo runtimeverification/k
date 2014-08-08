@@ -4,7 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.BasicVisitor;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,8 +23,8 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
         this.sort = t.sort;
     }
 
-    public Term(Location location, File filename, Sort sort) {
-        super(location, filename);
+    public Term(Location location, Source source, Sort sort) {
+        super(location, source);
         setSort(sort);
     }
 

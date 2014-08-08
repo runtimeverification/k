@@ -140,10 +140,8 @@ public class InitialConfigurationProvider implements Provider<Term> {
             cfgCleaned = Bag.EMPTY;
         } else {
             if (!(cfgCleanedNode instanceof Configuration)) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.INTERNAL,
-                        "Configuration Cleaner failed.", cfg.getFilename(), cfg
-                        .getLocation()));
+                GlobalSettings.kem.registerInternalError(
+                        "Configuration Cleaner failed.", cfg);
             }
             cfgCleaned = ((Configuration) cfgCleanedNode).getBody();
         }

@@ -4,7 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +16,8 @@ public class Bag extends Collection {
 
     public static final Bag EMPTY = new Bag(Collections.<Term> emptyList());
 
-    public Bag(Location location, File filename) {
-        super(location, filename, Sort.BAG);
+    public Bag(Location location, Source source) {
+        super(location, source, Sort.BAG);
     }
 
     public Bag(Element element) {

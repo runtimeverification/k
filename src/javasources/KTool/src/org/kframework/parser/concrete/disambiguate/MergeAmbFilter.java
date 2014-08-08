@@ -65,7 +65,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
                     if (list2.size() > 1) {
                         Ambiguity amb2 = new Ambiguity(Sort.K, new ArrayList<Term>(list2));
                         amb2.setLocation(tcnew.getLocation());
-                        amb2.setFilename(tcnew.getFilename());
+                        amb2.setSource(tcnew.getSource());
                         tcnew.getContents().add(amb2);
                     } else
                         tcnew.getContents().add(list2.iterator().next());
@@ -79,8 +79,6 @@ public class MergeAmbFilter extends ParseForestTransformer {
 
         if (newchildren.size() > 1) {
             Ambiguity amb2 = new Ambiguity(Sort.K, newchildren);
-            amb2.setLocation(amb.getLocation());
-            amb2.setFilename(amb.getFilename());
             return super.visit(amb2, _);
         } else
             return this.visitNode(newchildren.get(0));

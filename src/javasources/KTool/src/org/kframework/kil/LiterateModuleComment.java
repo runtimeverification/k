@@ -20,7 +20,7 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
     }
 
     public LiterateModuleComment(LiterateDefinitionComment ldc) {
-        setFilename(ldc.getFilename());
+        setSource(ldc.getSource());
         setLocation(ldc.getLocation());
         value = ldc.getValue();
         lcType = ldc.getType();
