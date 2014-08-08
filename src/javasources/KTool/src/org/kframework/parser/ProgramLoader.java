@@ -84,7 +84,7 @@ public class ProgramLoader {
      *
      * Save it in kompiled cache under pgm.maude.
      */
-    public static Term processPgm(String content, Source source, String startSymbol,
+    public static Term processPgm(byte[] content, Source source, String startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         if (!context.definedSorts.contains(Sort.of(startSymbol))) {
@@ -95,14 +95,14 @@ public class ProgramLoader {
         ASTNode out;
         if (whatParser == ParserType.GROUND) {
             org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled);
-            out = DefinitionLoader.parseCmdString(content, source, startSymbol, context);
+            out = DefinitionLoader.parseCmdString(new String(content), source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
             out = new FlattenTerms(context).visitNode(out);
         } else if (whatParser == ParserType.RULES) {
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
-            out = DefinitionLoader.parsePattern(content, source, startSymbol, context);
+            out = DefinitionLoader.parsePattern(new String(content), source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
@@ -115,7 +115,7 @@ public class ProgramLoader {
             }
             out = ((Rule) out).getBody();
         } else if (whatParser == ParserType.BINARY) {
-            try (ByteArrayInputStream in = new ByteArrayInputStream(content.getBytes())) {
+            try (ByteArrayInputStream in = new ByteArrayInputStream(content)) {
                 out = BinaryLoader.instance().loadOrDie(Term.class, in);
             } catch (IOException e) {
                 GlobalSettings.kem.registerInternalError("Error reading from binary file", e);
@@ -127,7 +127,8 @@ public class ProgramLoader {
             // TODO(Radu): (the default one) with this branch of the 'if'
             Grammar grammar = BinaryLoader.instance().loadOrDie(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
 
-            Parser parser = new Parser(content);
+            String contentString = new String(content);
+            Parser parser = new Parser(contentString);
             out = parser.parse(grammar.get(startSymbol), 0);
             if (context.globalOptions.debug)
                 System.out.println("Raw: " + out + "\n");
@@ -146,9 +147,9 @@ public class ProgramLoader {
             } catch (ParseFailedException te) {
                 ParseError perror = parser.getErrors();
 
-                String msg = content.length() == perror.position ?
+                String msg = contentString.length() == perror.position ?
                     "Parse error: unexpected end of file." :
-                    "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+                    "Parse error: unexpected character '" + contentString.charAt(perror.position) + "'.";
                 Location loc = new Location(perror.line, perror.column,
                                             perror.line, perror.column + 1);
                 throw new ParseFailedException(new KException(
@@ -156,7 +157,7 @@ public class ProgramLoader {
             }
             out = new ResolveVariableAttribute(context).visitNode(out);
         } else {
-            out = loadPgmAst(content, source, startSymbol, context);
+            out = loadPgmAst(new String(content), source, startSymbol, context);
             out = new ResolveVariableAttribute(context).visitNode(out);
         }
         Stopwatch.instance().printIntermediate("Parsing Program");

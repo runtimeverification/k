@@ -79,7 +79,7 @@ public class KastFrontEnd extends FrontEnd {
         String sort = options.sort(context);
 
         try {
-            ASTNode out = ProgramLoader.processPgm(stringToParse, source, sort, context, options.parser);
+            ASTNode out = ProgramLoader.processPgm(stringToParse.getBytes(), source, sort, context, options.parser);
             StringBuilder kast;
             if (options.experimental.pretty) {
                 IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),

@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -84,6 +85,19 @@ public class FileUtil {
                     "Cannot retrieve file content. An IO error occured: " + file, e);
         }
         return "";
+    }
+
+    public static byte[] getFileContentAsBytes(String file) {
+        try {
+            return FileUtils.readFileToByteArray(new File(file));
+        } catch (FileNotFoundException e) {
+            GlobalSettings.kem.registerCriticalError(
+                    "Cannot retrieve file content. Make sure that file: " + file + " exists.", e);
+        } catch (IOException e) {
+            GlobalSettings.kem.registerCriticalError(
+                    "Cannot retrieve file content. An IO error occured: " + file, e);
+        }
+        throw new AssertionError("unreachable");
     }
 
     // create a file with the specified name, create parent directory if it doesn't exist
