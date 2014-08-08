@@ -1,1 +1,0 @@
-writeToFile("test1.out", "test1.out content")

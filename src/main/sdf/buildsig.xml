@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<project basedir="." default="all.signature" name="K3 build signature files">
+
+	<!-- set the native directory depending on the os -->
+	<condition property="osNativesDir" value="linux">
+		<and>
+			<os family="unix" />
+			<not>
+				<os family="mac" />
+			</not>
+		</and>
+	</condition>
+	<condition property="osNativesDir" value="macosx">
+		<os family="mac" />
+	</condition>
+	<condition property="osNativesDir" value="cygwin">
+		<os family="windows" />
+	</condition>
+
+	<!-- compile and call the k.utils.AntPropertyHelper class to get some properties from artifacts.xml
+	representing version numbers from spoofax library -->
+
+	<!-- weird stuff to make it work:
+	- create the path for the AntPropertyHelper
+	- compile the AntPropertyHelper
+	-->
+	<property name="build.strategoxt.sdf" value="${basedir}/../../lib/native/${osNativesDir}/" />
+
+	<!-- call both targets -->
+	<target name="all.signature" depends="concrete.signature" />
+
+	<target name="concrete.signature">
+		<dependset>
+			<srcfileset file="syntax/*.sdf" />
+			<srcfileset file="trans/*.str" />
+			<targetfileset file="include/*.tbl" />
+			<targetfileset file="include/*.str" />
+		</dependset>
+		<available file="include/Concrete.tbl" property="concrete.signature.available" />
+		<antcall target="concrete.signature.helper" />
+	</target>
+	<target name="concrete.signature.helper" unless="concrete.signature.available">
+		<!-- pack the definition into a single .def file -->
+		<mkdir dir="include" />
+                <echo message="${org.kframework.dependencies:strategoxt:jar}" />
+		<java classname="run" fork="true" failonerror="true" classpath="${compile_classpath}">
+			<arg value="org.strategoxt.tools.main-pack-sdf" />
+			<arg value="-i" />
+			<arg value="syntax/Concrete.sdf" />
+			<arg value="-o" />
+			<arg value="include/Concrete.def" />
+		</java>
+		<echo>Packed to .def</echo>
+		<!-- create the rtg file -->
+		<java classname="run" fork="true" failonerror="true" classpath="${compile_classpath}">
+			<arg value="org.strategoxt.tools.main-sdf2rtg" />
+			<arg value="-i" />
+			<arg value="include/Concrete.def" />
+			<arg value="-o" />
+			<arg value="include/Concrete.rtg" />
+			<arg value="--ignore-missing-cons" />
+			<arg value="-Xnativepath" />
+			<arg value="${build.strategoxt.sdf}" />
+			<arg value="-m" />
+			<arg value="Concrete" />
+		</java>
+		<echo>Def -> Rtg</echo>
+		<!-- create the .str file representing the signature -->
+		<java classname="run" fork="true" failonerror="true" classpath="${compile_classpath}">
+			<arg value="org.strategoxt.tools.main-rtg2sig" />
+			<arg value="-i" />
+			<arg value="include/Concrete.rtg" />
+			<arg value="-o" />
+			<arg value="include/Concrete.str" />
+			<arg value="--module" />
+			<arg value="Concrete" />
+		</java>
+		<!-- create the .tbl file of the definition -->
+		<echo message="Build TBL" />
+		<exec executable="${build.strategoxt.sdf}sdf2table">
+			<arg value="-i" />
+			<arg value="include/Concrete.def" />
+			<arg value="-o" />
+			<arg value="include/Concrete.tbl" />
+			<arg value="-m" />
+			<arg value="Concrete" />
+		</exec>
+	</target>
+
+</project>

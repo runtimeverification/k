@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<project basedir="." default="all.stratego2java" name="K3Java Build requriements">
+	<!-- This is an automatic way of compiling K3.
+	To be able to call this script, you will first have to install the appropriate version of
+	the stratego-sdf bundle found here: http://strategoxt.org/Stratego/StrategoDownload
+	Don't forget to set up the propper execution rights for those programs.
+	-->
+
+	<target name="all.stratego2java" depends="concrete.stratego2java" />
+
+	<target name="concrete.stratego2java">
+		<dependset>
+			<srcfileset file="trans/*.str" />
+			<srcfileset file="include/Concrete.str" />
+			<targetfileset dir="${stratego.package.dir}">
+				<include name="*.java" />
+				<exclude name="string_trim_last_one_0_0.java" />
+				<exclude name="string_unescape_sort_0_0.java" />
+				<exclude name="annolocation_0_0.java" />
+				<exclude name="annolocationremove_0_0.java" />
+				<exclude name="clear_console_0_0.java" />
+				<exclude name="mergeamb_0_0.java" />
+				<exclude name="xml_string_escape_from_string_0_0.java" />
+			</targetfileset>
+		</dependset>
+		<available file="${stratego.package.dir}/ConcreteMain.java" property="concrete.stratego2java.available" />
+		<antcall target="concrete.stratego2java.helper" />
+	</target>
+	<target name="concrete.stratego2java.helper" unless="concrete.stratego2java.available">
+		<delete file="trans/ConcreteMain.rtree" />
+		<delete file="trans/ConcreteMain.dep" />
+		<delete dir="trans/ConcreteMain" />
+		<java failonerror="true" dir="trans/" jar="${org.kframework.dependencies:strategoxt:jar}" fork="true">
+			<arg line="-i starter.str -o ConcreteMain -la stratego-sglr --lib -I .. -p org.kframework.parser.concrete.lib --clean" />
+		</java>
+                <mkdir dir="${stratego.package.dir}" />
+		<delete>
+			<fileset dir="${stratego.package.dir}">
+				<include name="*.java" />
+				<include name="Concrete.tbl" />
+				<exclude name="string_trim_last_one_0_0.java" />
+				<exclude name="string_unescape_sort_0_0.java" />
+				<exclude name="annolocation_0_0.java" />
+				<exclude name="annolocationremove_0_0.java" />
+				<exclude name="clear_console_0_0.java" />
+				<exclude name="mergeamb_0_0.java" />
+				<exclude name="xml_string_escape_from_string_0_0.java" />
+			</fileset>
+		</delete>
+		<copy todir="${stratego.package.dir}">
+			<fileset dir="trans/ConcreteMain">
+				<include name="*" />
+			</fileset>
+		</copy>
+
+		<delete file="trans/ConcreteMain.rtree" />
+		<delete file="trans/ConcreteMain.dep" />
+		<delete dir="trans/ConcreteMain" />
+	</target>
+</project>
