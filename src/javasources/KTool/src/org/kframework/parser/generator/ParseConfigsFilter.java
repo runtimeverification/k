@@ -79,9 +79,9 @@ public class ParseConfigsFilter extends ParseForestTransformer {
 
                 Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
                 config = new Configuration(st);
-                assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+                assert st.getLabel().equals(""); // labels should have been parsed in Outer Parsing
                 st.setLabel(ss.getLabel());
-                //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+                //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Outer Parsing
                 st.setAttributes(ss.getAttributes());
 
                 // disambiguate configs

@@ -73,7 +73,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
             XmlLoader.reportErrors(doc, ss.getType());
 
             Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
-            assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+            assert st.getLabel().equals(""); // labels should have been parsed in Outer Parsing
             st.setLabel(ss.getLabel());
             st.setAttributes(ss.getAttributes());
 

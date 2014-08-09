@@ -117,12 +117,12 @@ public class DefinitionLoader {
     public Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude, Context context) {
         try {
             // for now just use this file as main argument
-            // ------------------------------------- basic parsing
+            // ------------------------------------- outer parsing
 
             OuterParser bparser = new OuterParser(autoinclude, context.kompileOptions);
             bparser.slurp(mainFile.getPath(), context);
 
-            // transfer information from the BasicParser object, to the Definition object
+            // transfer information from the OuterParser object, to the Definition object
             org.kframework.kil.Definition def = new org.kframework.kil.Definition();
             try {
                 def.setMainFile(mainFile.getCanonicalPath());
@@ -148,7 +148,7 @@ public class DefinitionLoader {
                     kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
                 }
             }
-            sw.printIntermediate("Basic Parsing");
+            sw.printIntermediate("Outer Parsing");
 
             //This following line was commented out to make the latex backend
             //parse files importing from other files
