@@ -26,7 +26,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.RemoveUnusedModules;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.parser.basic.Basic;
+import org.kframework.parser.outer.Outer;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
@@ -47,7 +47,7 @@ import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
-import org.kframework.parser.generator.BasicParser;
+import org.kframework.parser.generator.OuterParser;
 import org.kframework.parser.generator.CacheLookupFilter;
 import org.kframework.parser.generator.Definition2SDF;
 import org.kframework.parser.generator.DefinitionSDF;
@@ -117,12 +117,12 @@ public class DefinitionLoader {
     public Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude, Context context) {
         try {
             // for now just use this file as main argument
-            // ------------------------------------- basic parsing
+            // ------------------------------------- outer parsing
 
-            BasicParser bparser = new BasicParser(autoinclude, context.kompileOptions);
+            OuterParser bparser = new OuterParser(autoinclude, context.kompileOptions);
             bparser.slurp(mainFile.getPath(), context);
 
-            // transfer information from the BasicParser object, to the Definition object
+            // transfer information from the OuterParser object, to the Definition object
             org.kframework.kil.Definition def = new org.kframework.kil.Definition();
             try {
                 def.setMainFile(mainFile.getCanonicalPath());
@@ -148,7 +148,7 @@ public class DefinitionLoader {
                     kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
                 }
             }
-            sw.printIntermediate("Basic Parsing");
+            sw.printIntermediate("Outer Parsing");
 
             //This following line was commented out to make the latex backend
             //parse files importing from other files
@@ -326,7 +326,7 @@ public class DefinitionLoader {
      * @return A lightweight Definition element which contain all the definition items found in the string.
      */
     public static Definition parseString(String content, String filename, Context context) throws ParseFailedException {
-        List<DefinitionItem> di = Basic.parse(filename, content, context);
+        List<DefinitionItem> di = Outer.parse(filename, content, context);
 
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
         def.setItems(di);

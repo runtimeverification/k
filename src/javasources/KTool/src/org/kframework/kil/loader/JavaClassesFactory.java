@@ -49,7 +49,7 @@ public class JavaClassesFactory {
 
     public static ASTNode getTerm(Element element) {
         assert context != null;
-        // used for a new feature - loading java classes at first step (Basic Parsing)
+        // used for a new feature - loading java classes at first step (Outer Parsing)
         if (Constants.RULE.equals(element.getNodeName()))
             return new Rule(element);
         if (Constants.SENTENCE.equals(element.getNodeName()))
