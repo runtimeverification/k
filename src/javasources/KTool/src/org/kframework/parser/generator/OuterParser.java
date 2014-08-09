@@ -14,9 +14,8 @@ import org.kframework.kil.Module;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.basic.Basic;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -24,7 +23,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-public class BasicParser {
+public class OuterParser {
     private List<DefinitionItem> moduleItems;
     private Map<String, Module> modulesMap;
     private List<String> filePaths;
@@ -36,7 +35,7 @@ public class BasicParser {
     private KompileOptions kompileOptions;
     private GlobalOptions globalOptions;
 
-    public BasicParser(boolean autoinclude, KompileOptions kompileOptions) {
+    public OuterParser(boolean autoinclude, KompileOptions kompileOptions) {
         this.autoinclude = autoinclude;
         this.kompileOptions = kompileOptions;
         this.globalOptions = kompileOptions.global;
@@ -100,7 +99,7 @@ public class BasicParser {
 
             if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
-            List<DefinitionItem> defItemList = Basic.parse(file.getAbsolutePath(), FileUtil.getFileContent(file.getAbsolutePath()), context);
+            List<DefinitionItem> defItemList = Outer.parse(file.getAbsolutePath(), FileUtil.getFileContent(file.getAbsolutePath()), context);
 
             // go through every required file
             for (ASTNode di : defItemList) {
