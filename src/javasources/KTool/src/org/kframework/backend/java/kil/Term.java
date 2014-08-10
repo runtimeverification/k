@@ -83,8 +83,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         final List<IndexingPair> kCellIndexingPairs = new ArrayList<>();
         final List<IndexingPair> instreamIndexingPairs = new ArrayList<>();
         final List<IndexingPair> outstreamIndexingPairs = new ArrayList<>();
-        final MutableInt maxInputBufLen = new MutableInt(-1);
-        final MutableInt maxOutputBufLen = new MutableInt(-1);
+        final MutableInt maxInputBufLen = new MutableInt(0);
+        final MutableInt maxOutputBufLen = new MutableInt(0);
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
@@ -93,13 +93,17 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
                 if (cellLabel.equals("k")) {
                     kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
                 } else if (Constants.STDIN.equals(streamCellAttr)) {
-                    BuiltinList instream = (BuiltinList) cell.getContent();
+                    Term instream = cell.getContent();
                     instreamIndexingPairs.add(IndexingPair.getInstreamIndexingPair(instream, definition));
-                    maxInputBufLen.setValue(Math.max(maxInputBufLen.intValue(), instream.size()));
+                    if (instream instanceof BuiltinList) {
+                        maxInputBufLen.setValue(Math.max(maxInputBufLen.intValue(), ((BuiltinList) instream).size()));
+                    }
                 } else if (Constants.STDOUT.equals(streamCellAttr) || Constants.STDERR.equals(streamCellAttr)) {
-                    BuiltinList outstream = (BuiltinList) cell.getContent();
+                    Term outstream = cell.getContent();
                     outstreamIndexingPairs.add(IndexingPair.getOutstreamIndexingPair(outstream, definition));
-                    maxOutputBufLen.setValue(Math.max(maxOutputBufLen.intValue(), outstream.size()));
+                    if (outstream instanceof BuiltinList) {
+                        maxOutputBufLen.setValue(Math.max(maxOutputBufLen.intValue(), ((BuiltinList) outstream).size()));
+                    }
                 } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
                     super.visit(cell);
                 }
