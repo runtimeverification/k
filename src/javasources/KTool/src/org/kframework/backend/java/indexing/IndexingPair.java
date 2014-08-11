@@ -81,7 +81,7 @@ public class IndexingPair implements Serializable {
         Index fstIndex;
         Index sndIndex;
 
-        if (pattern instanceof Variable) {
+        if (!(pattern instanceof BuiltinList)) {
             return IndexingPair.TOP;
         };
         BuiltinList instream = (BuiltinList) pattern;
@@ -111,7 +111,7 @@ public class IndexingPair implements Serializable {
         Index fstIndex;
         Index sndIndex;
 
-        if (pattern instanceof Variable) {
+        if (!(pattern instanceof BuiltinList)) {
             return IndexingPair.TOP;
         }
         BuiltinList outstream = (BuiltinList) pattern;
