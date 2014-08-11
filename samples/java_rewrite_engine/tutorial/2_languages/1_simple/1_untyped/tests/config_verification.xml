@@ -3,24 +3,16 @@
 
 <tests>
   <test definition="simple-untyped.k"
-        programs="../verification/reverse"
-        results="../verification/reverse"
+        programs="../verification"
+        results="../verification"
         extension="simple"
         >
     <kompile-option name="--backend" value="java" />
-    <all-programs>
-      <krun-option name="--prove" value="verification/reverse/reverse_spec.k" />
-    </all-programs>
-  </test>
-
-  <test definition="simple-untyped.k"
-        programs="../verification/sum_iterative"
-        results="../verification/sum_iterative"
-        extension="simple"
-        >
-    <kompile-option name="--backend" value="java" />
-    <all-programs>
-      <krun-option name="--prove" value="verification/sum_iterative/sum_spec.k" />
-    </all-programs>
+    <program name="reverse.simple">
+      <krun-option name="--prove" value="verification/reverse_spec.k" />
+    </program>
+    <program name="sum.simple">
+      <krun-option name="--prove" value="verification/sum_spec.k" />
+    </program>
   </test>
 </tests>

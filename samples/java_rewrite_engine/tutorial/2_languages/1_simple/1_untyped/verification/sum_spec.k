@@ -10,7 +10,7 @@ rule
     <threads>
         <thread>
             <k>
-                sum(X:Int) => ?Y:Int
+                sum(X:Int) => (X *Int (X +Int 1)) /Int 2
             </k>
             <control>
                 <fstack>
@@ -56,7 +56,6 @@ rule
     </nextLoc>
 </T>
 requires X >=Int 0
-ensures ?Y ==Int (X *Int (X +Int 1)) /Int 2
 
 /* loop invariant */
 rule
@@ -93,7 +92,7 @@ rule
     </genv>
     <store>...
         Lx |-> (X1:Int => 0)
-        Ly |-> (Y1:Int => ?Y2:Int)
+        Ly |-> (Y1:Int => Y1 +Int (X1 *Int (X1 +Int 1)) /Int 2)
     ...</store>
     <busy>
         _:Set
@@ -112,5 +111,4 @@ rule
     </nextLoc>
 </T>
 requires X1 >=Int 0
-ensures ?Y2 ==Int Y1 +Int (X1 *Int (X1 +Int 1)) /Int 2
 endmodule

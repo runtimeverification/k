@@ -643,9 +643,6 @@ public class SymbolicRewriter {
         queue.add(initialTerm);
         boolean guarded = false;
         while (!queue.isEmpty()) {
-            if (queue.size() == 1) {
-                System.out.print("");
-            }
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
                     continue;
