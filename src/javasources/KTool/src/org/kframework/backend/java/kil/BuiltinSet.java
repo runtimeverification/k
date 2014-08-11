@@ -134,12 +134,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         Joiner joiner = Joiner.on(operator);
         StringBuilder stringBuilder = new StringBuilder();
         joiner.appendTo(stringBuilder, elements);
-        if (super.frame != null) {
-            if (stringBuilder.length() != 0) {
-                stringBuilder.append(operator);
-            }
-            stringBuilder.append(super.frame);
-        }
+        joiner.appendTo(stringBuilder, baseTerms());
         if (stringBuilder.length() == 0) {
             stringBuilder.append(identity);
         }
