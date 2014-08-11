@@ -192,10 +192,12 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             // the PrimitiveState for rejection
             Set<String> rejects = new HashSet<>();
             Pattern p = Pattern.compile(pattern);
-            for (String keyword : ctv.terminals) {
-                Matcher m = p.matcher(keyword);
-                if (m.matches())
-                    rejects.add(keyword);
+            if (!prd.containsAttribute("noAutoReject")) {
+                for (String keyword : ctv.terminals) {
+                    Matcher m = p.matcher(keyword);
+                    if (m.matches())
+                        rejects.add(keyword);
+                }
             }
             for (Production preject : ctv.rejects) {
                 if (preject.getSort().equals(prd.getSort())) {
