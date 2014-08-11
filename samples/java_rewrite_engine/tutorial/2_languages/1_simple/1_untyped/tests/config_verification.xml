@@ -14,5 +14,8 @@
     <program name="sum.simple">
       <krun-option name="--prove" value="verification/sum_spec.k" />
     </program>
+    <program name="comm_assoc.simple">
+      <krun-option name="--prove" value="verification/comm_assoc_spec.k" />
+    </program>
   </test>
 </tests>

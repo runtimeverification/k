@@ -1,0 +1,14 @@
+function f(x, y)
+{
+  return x + y + x*y;
+}
+
+function comm_assoc(x, y, z)
+{
+  return f(x,y) == f(y,x) && f(x,f(y,z)) == f(f(x,y),z);
+}
+
+function main() {
+  // breakpoint;
+  print(comm_assoc(1, 2, 3));
+}
