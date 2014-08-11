@@ -1,19 +1,15 @@
-module KERNELC-POINTER
-  imports KERNELC-SYNTAX
-
-  syntax Pointer ::= "ObjectPointer" "(" Type "," Int ")"
-                   | "MemberPointer" "(" Type "," Int "," Id ")"
-                   | "Null"
-endmodule
-
 module KERNELC-SEMANTICS
   imports KERNELC-SYNTAX
-  imports KERNELC-POINTER 
 
   /*
    * Macros
    */
-  rule if (E:Expression) S:Statement => if (E) S else ;    [macro]
+  rule if (E:Expression) S:Statement => if (E) S else ;   [macro]
+  rule E1:Expression || E2:Expression => (E1 ? 1 : E2)    [macro]
+  rule E1:Expression && E2:Expression => (E1 ? E2 : 0)    [macro]
+  rule !E:Expression => (E ? 0 : !)                       [macro]
+  rule return; => return tv(void, undef);                 [macro]
+
 
   /*
    * KernelC configuration 
@@ -25,324 +21,271 @@ module KERNELC-SEMANTICS
 
       <k> $PGM:File ~> main(.Expressions) </k>
       <env> .Map </env>
+      <fun-id> .K </fun-id>
       <stack> .List </stack>
-      <fname> .K </fname>
-      <tenv> .Map </tenv>
-                  
+               
       <heap> .Map </heap>
 
       <in> .List </in>
       <out> .List </out>
-
-      <counter> 0 </counter>
     </config>
 
-  syntax Expression ::= Value
-  syntax Value ::= Int | Pointer
 
-*** memory management
-                      | new Type
-                      | delete Expression [strict]
-*** extra stuff, not part of the language syntax, but helpful for the semantics
-                      | ExpressionHelper
-  syntax ExpressionHelper ::= load ( Type , Value )
-                            | store ( Type , Value , Value )
-                            | read ( Type )
-                            | offset ( Type , Id )
-                            | new Type
-                            | detele TypedValue
-                            | deleteObject ( Value , Nat )
+  syntax KResult ::= TypedValue | Bool
 
 
+  syntax Expression ::= TypedValue | Bool
+  syntax TypedValue ::= "tv" "(" Type "," Value ")"
+  syntax TypedValues ::= List{TypedValue, ","}
+  syntax Value ::= Int
+                 | Pointer
+                 | "undef"
+  syntax Pointer ::= "ObjectPointer" "(" Int ")"
+                   | "MemberPointer" "(" Int "," Id ")"
+                   | "Null"
 
 
-  kvar N : Nat
-  kvar I J I1 I2 : Int++
-  kvar Phi : Formula
-  kvar NzI : NzInt
-  kvar V : Value
-  kvar TV : TypedValue
-  kvar X F FName : Id
-  kvar E E1 E2 : Expression
-  kvar T : ExpressionType
-  kvar S S1 S2 : Statement
-  kvar K K1 K2 : K
-  kvar KernelC Param : KernelC
-  kvar KernelCList ParamList ArgList: List{KernelC}
-  kvar Map Env TEnv : Map
-  kvar Stack : List
-  kvar Set : Set
-
-  syntax K ::= List{KernelC}
-  syntax K ::= runMain
-  syntax K ::= fieldList ( List{KernelC} )
-  syntax TypedValue ::= localRef ( Id )
-  syntax TypedValue ::= newObject
-  syntax K ::= restoreEnv ( Set )
-  syntax ListItem ::= callContext ( K , K , Map , Map )
-
+  /*
+   * Definitions/declarations
+   */
   /* Function definition/declaration */
   rule
     <k> T:Type F:Id(PDs:ParameterDeclarations) S:Statement => .K ...</k>
     <fun>... .Map => T F(PDs) |-> { S return; } ...</fun>
-  [structural]
+    [structural]
   /* elide function declarations */
-  rule T:Type F:Id(PDs:ParameterDeclarations) => .K  [structural]
+  rule T:Type F:Id(PDs:ParameterDeclarations); => .K   [structural]
 
   /* Structure declaration */
   rule
-    <k> struct X:Id {  } ; => .K ...</k>
-    <struct>... .Map => X |-> fieldList(KernelCList) ...</struct>
-  [structural]
+    <k> struct S:Id { VDs:VariableDeclarations }; => .K ...</k>
+    <struct>... .Map => X |-> makeMemberMap(VDs) ...</struct>
+    [structural]
 
-
-***(
-Variable declaration
-***)
+  /* Variable declaration */
   rule
-    <k> T X ; => .K ...</k>
-    <env>... .Map => X |-> undef ...</env>
-    <tenv>... .Map =>  X |-> T ...</tenv>
-    <counter> N => sNat N </counter>
-  [structural]
+    <k> T:Type X:Id; => .K ...</k>
+    <env> Env:Map => Env[X <- ObjectPointer(!I:Int)] </env>
+    <heap>... .Map => ObjectPointer(I) |-> undef ...</heap>
+    [structural]
  
-
-***(
-Statements
-***)
-  rule _:TypedValue; => .K    [structural]
+  /*
+   *
+   */
+  rule _:TypeValue; => .K   [structural]
+  rule ; => .K              [structural]
   rule
+    <k> { VDs:VariableDeclarations Ss:Statements } => VDs ~> Ss ~> Env ...</k>
+    <env> Env:Map </env>
+    [structural]
+  rule
+    // TODO: delete locals
+    //<k> Env:Map => deleteLocals() ...</k>
+    <k> Env:Map => .K ...</k>
+    <env> OuterEnv:Map => Env </env>
+    [structural]
+
+
+  /*
+   * If/choice
+   */
+  rule if (E:Expression) S1:Statement else S2:Statement
+    => expression2bool(E) ~> if (HOLE) S1 else S2
+    [heat]
+  rule B:Bool ~> if (HOLE) S1:Statement else S2:Statement
+    => if (B) S1 else S2
+    [cool]
+  rule if( true) S:Statement else _:Statement => S    [structural]
+  rule if(false) _:Statement else S:Statement => S    [structural]
+
+  rule E1:Expression ? E2:Expression : E3:Expression
+    => expression2bool(E1) ~> HOLE ? E2 : E3
+    [heat]
+  rule B:Bool ~> HOLE ? E1:Expression : E2:Expression
+    => B ? E1 : E2
+    [cool]
+  rule  true ? E:Expression : _:Expression => E   [structural]
+  rule false ? _:Expression : E:Expression => E   [structural]
+
+  syntax KItem ::= "expression2bool" "(" Expression ")"           [strict]
+  rule expression2bool(tv(int, I:Int)) => I =/=K 0                [structural]
+  rule expression2bool(tv(T:Type *, P:Pointer)) => P =/=K Null    [structural]
+
+  /*
+   * while
+   */
+  rule while (E:Expression) S:Statement => if (E) { S while(E) S }
+    [structural]
+
+
+  /*
+   * Function call/return
+   */
+  syntax KItem ::= callStackFrame(K, Map, Id)
+  rule
+    <fun>... _:Type Callee(PDs:ParameterDeclarations) |-> S:Statement ...</fun>
     <k>
-        {}
+        Callee:Id(TVs:TypedValues) ~> K
       =>
-        KernelC ~> restoreEnv(keys(Env) SetItem(id("__return__")))
-    ...</k>
-    <env> Env </env>
-  [structural]
-  rule
-    <k> restoreEnv(Set) => .K ...</k>
-    <env> Env => filterMap(Env, Set) </env>
-    <tenv> TEnv => filterMap(TEnv, Set) </tenv>
-  [structural]
-  rule if(tv(_, NzI)) S1 else S2 => S1 [structural]
-  rule if(tv(_, 0)) S1 else S2 => S2 [structural]
-  rule
-    while (E:Expression) S:Statement => if (E) { S while(E) S }
-  [structural]
-
-
-***(
-Function call/return
-***)
-*** function call
-  rule
-    <fun>... T F(ParamList) |-> S ...</fun>
-    <k>
-        _`(_`)(F, ArgList) ~> K
-      =>
-        declParams(ParamList) ~> bindParams(ParamList, ArgList) ~> S
+        // TODO(add append on Statements)
+        { declareParameters(PDs) { bindParameters(PDs, TVs) } S }
     </k>
-    <stack> .List => callContext(FName, K, TEnv, Env) ...</stack>
-    <fname> FName => F </fname>
-    <tenv> TEnv => .Map </tenv>
-    <env> Env => .Map </env>
-
-*** return
+    <stack> .List => ListItem(callStackFrame(K, Env, Caller)) ...</stack>
+    <fun-id> Caller:Id => Callee </fun-id>
+    <env> Env:Map => .Map </env>
   rule
-    <k> return TV ~> _ => TV ~> K </k>
-    <stack> callContext(F, K, TEnv, Env) => .List ...</stack>
-    <fname> _ => F </fname>
-    <tenv> _ => TEnv </tenv>
-    <env> _ => Env </env>
+    <fun>... T Callee(_:ParameterDeclarations) |-> _:Statement ...</fun>
+    <k> return tv(T:Type, V:Value); ~> _ => tv(T, V) ~> K </k>
+    <stack> ListItem(callStackFrame(K, Env:Map, Caller:Id)) => .List ...</stack>
+    <fun-id> Callee:Id => Caller </fun-id>
+    <env> _:Map => Env </env>
 
 
-***(
-Expressions
-***)
-  /* variable lookup */
+  /*
+   * Memory operations
+   */
+  rule X:Id => *&X                      [structural]
+  rule E:Expression->F:Id => *&(E->F)   [structural]
+  rule &*E:Expression => E              [structural]
+
+  /* memory address computation */
   rule
-    <k> X => tv(T, V) ...</k>
-    <env>... X |-> V ...</env>
-  [structural]
-
-*** unary expressions
-  rule -tv(T, I) => tv(T, -Int I) [structural]
-  rule !TV => TV ? tv(int, 0) : tv(int, 1) [structural]
-
-  /* referencing */
-  context &([HOLE]->_)
+    <k> &X:Id => TV </k>
+    <env>... X |-> TV:TypedValue ...</env>
+    [structural]
+  context &(HOLE->_)
   rule
     <k>
-      &(ObjectPointer(struct S:Id, I:Int)->F:Id)
+      &(tv(struct S:Id *, ObjectPointer(I:Int))->F:Id)
     =>
-      MemberPointer(T, I:Int, F)
+      tv(T *, MemberPointer(I, F))
     ...</k>
-    <struct>...
-      S |-> (F |-> T _:Map)
-    ...</struct>
-  [structural]
-  rule
-    <k>
-      &X:Id => ObjectPointer(T, I:Int)
-    </k>
-    <env>... X |-> ObjectPointer(T, I:Int) ...</env>
-  [structural]
+    <struct>... S |-> (F |-> T:Type _:Map) ...</struct>
+    [structural]
 
-*** dereferencing
+  /* memory location read */
   rule
-    <k> *tv(T *, I) => derive(I) ~> load(T, I) ...</k>
-  [structural]
+    <k> *tv(T:Type *, ObjectPointer(I:Int)) => tv(T, V) ...</k>
+    <heap>... ObjectPointer(I) |-> tv(T, V:Value) ...</heap>
+    requires V =/=K undef
+    [transition]
   rule
-    <k> E:Expression->F:Id => *&(E->F) ...</k>
-  [structural]
-  rule *localRef(X) => X [structural]
+    <k> *tv(T:Type *, MemberPointer(I:Int, F:Id)) => tv(T, V) ...</k>
+    <heap>... ObjectPointer(I) |-> (F |-> tv(T, V:Value) _:Map) ...</heap>
+    requires V =/=K undef
+    [transition]
+
+  /* memory location write */
+  rule E1:Expression = E2:Expression; => &E1 ~> HOLE = E2;    [heat]
+  rule TV:TypedValue ~> HOLE = E:Expression; => TV = E;       [cool]
+  rule
+    <k> tv(T:Type *, ObjectPointer(I:Int)) = tv(T, V:Value); => .K ...</k>
+    <heap>... ObjectPointer(I) |-> tv(T, _:Value => V) ...</heap>
+    requires V =/=K undef
+    [transition]
+  rule
+    <k> tv(T:Type *, MemberPointer(I:Int, F:Id)) = tv(T, V:Value); => .K ...</k>
+    <heap>... ObjectPointer(I) |-> (F |-> tv(T, _:Value => V) _:Map) ...</heap>
+    requires V =/=K undef
+    [transition]
   
-*** binary expressions
-  rule tv(T, I1) + tv(T, I2) => tv(T, I1 +Int I2) [structural]
-  rule tv(T *, I1) + tv(int, I2) => tv(T *, I1 +Int I2) [structural]
-  rule tv(int, I1) + tv(T *, I2) => tv(T *, I1 +Int I2) [structural]
-  rule tv(T, I1) - tv(T, I2) => tv(T, I1 -Int I2) [structural]
-  rule tv(T *, I1) - tv(int, I2) => tv(T *, I1 -Int I2) [structural]
-  rule tv(T *, I1) - tv(T *, I2) => tv(int, I1 -Int I2) [structural]  
-  rule tv(T, I1) * tv(T, I2) => tv(T, I1 *Int I2) [structural]
-  rule tv(T, I) / tv(T, NzI) => tv(T, I /Int NzI) [structural]
-  rule tv(T, I1) % tv(T, I2) => tv(T, I1 %Int I2) [structural]
-  rule tv(T, I) << tv(int, N) => tv(T, I <<Int N) [structural]
-  rule tv(T, I) >> tv(int, N) => tv(T, I >>Int N) [structural]
-  rule tv(T, I1) >= tv(T, I2) => tv(int, bool2int(I1 >=Int I2)) [structural]
-  rule tv(T, I1) > tv(T, I2) => tv(int, bool2int(I1 >Int I2)) [structural]
-  rule tv(T, I1) <= tv(T, I2) => tv(int, bool2int(I1 <=Int I2)) [structural]
-  rule tv(T, I1) < tv(T, I2) => tv(int, bool2int(I1 <Int I2)) [structural]
-  rule tv(_, I1) == tv(_, I2) => tv(int, bool2int(I1 ==Int I2)) [structural]
-  rule E1 != E2 => !(E1 == E2) [structural]
-  rule TV && E => (TV ? E : tv(int, 0)) [structural]
-  rule TV || E => (TV ? tv(int, 1) : E) [structural]
-
-*** assignment
+  /*
+   * boolean and arithmetic operations
+   */
+  rule -tv(int, I:Int) => tv(int, -Int I)   [structural]
+  rule ~tv(int, I:Int) => tv(int, ~Int I)   [structural]
   rule
-    <k> X = tv(T, V) => tv(T, V) ...</k>
-    <env>... X |-> (_ => V) ...</env>
-  [structural]
-  context (*[HOLE]) = _
+    tv(int, I1:Int) + tv(int, I2:Int) => tv(int, I1 +Int I2)
+    [structural]
   rule
-    <k> *tv(T *, I) = tv(_, V) => derive(I) ~> store(T, I, V) ...</k>
-  [structural]
-  context ([HOLE]->_) = _
+    tv(int, I1:Int) - tv(int, I2:Int) => tv(int, I1 -Int I2)
+    [structural]
   rule
-    <k> tv(T, I)->F = E => *&(tv(T, I)->F) = E ...</k>
-  [structural]
+    tv(int, I1:Int) * tv(int, I2:Int) => tv(int, I1 *Int I2)
+    [structural]
   rule
-    <k> *localRef(X) = tv(T, V) => tv(T, V) ...</k>
-    <env>... X |-> (_ => V) ...</env>
-  [structural]
+    tv(int, I1:Int) / tv(int, I2:Int) => tv(int, I1 /Int I2)
+    requires I2 =/=K 0
+    [structural]
+  rule
+    tv(int, I1:Int) % tv(int, I2:Int) => tv(int, I1 %Int I2)
+    requires I2 =/=K 0
+    [structural]
+  rule
+    tv(int, I1:Int) << tv(int, I2:Int) => tv(int, I1 <<Int I2)
+    [structural]
+  rule
+    tv(int, I1:Int) >> tv(int, I2:Int) => tv(int, I1 >>Int I2)
+    [structural]
+  rule
+    tv(int, I1:Int) >= tv(int, I2:Int) => tv(int, bool2int(I1 >=Int I2))
+    [structural]
+  rule
+    tv(int, I1:Int) >  tv(int, I2:Int) => tv(int, bool2int(I1 >Int  I2))
+    [structural]
+  rule
+    tv(int, I1:Int) <= tv(int, I2:Int) => tv(int, bool2int(I1 <=Int I2))
+    [structural]
+  rule
+    tv(int, I1:Int) <  tv(int, I2:Int) => tv(int, bool2int(I1 <Int  I2))
+    [structural]
 
-  rule E1 += E2 => E1 = (E1 + E2) [structural]
-  rule E1 -= E2 => E1 = (E1 - E2) [structural]
-  rule E1 *= E2 => E1 = (E1 * E2) [structural]
-  rule E1 /= E2 => E1 = (E1 / E2) [structural]
-  rule E1 %= E2 => E1 = (E1 % E2) [structural]
-  rule E1 <<= E2 => E1 = (E1 << E2) [structural]
-  rule E1 >>= E2 => E1 = (E1 >> E2) [structural]
+  rule
+    tv(T:Type, I1:Int) == tv(T, I2:Int) => tv(int, bool2int(I1 ==K  I2)) 
+    [structural]
+  rule
+    tv(T:Type, I1:Int) != tv(T, I2:Int) => tv(int, bool2int(I1 =/=K I2))
+    [structural]
 
-*** selection
-  rule tv(_, NzI) ? E1 : E2 => E1 [structural]
-  rule tv(_, 0) ? E1 : E2 => E2 [structural]
 
-*** cast
-  rule (T) tv(_, V) => tv(T, V) [structural]
+  /*
+   * cast
+   */
+  // TODO: cast is disabled for now
+  //rule (T) tv(_, V) => tv(T, V) [structural]
 
-  /* sizeof */
+
+  /*
+   * sizeof
+   */
   rule sizeof(int) => tv(int, 1)        [structural]
+  rule sizeof(T:Type *) => tv(int, 1)   [structural]
   rule
-    <k> sizeof(struct X) => tv(int, listLen(KernelCList)) ...</k>
-    <struct>... X |-> fieldList(KernelCList) ...</struct>
-  [structural]
-  rule sizeof(T:Type*) => tv(int, 1)    [structural]
+    <k> sizeof(struct S:Id) => tv(int, size(Members)) ...</k>
+    <struct>... S |-> Members:Map ...</struct>
+    [structural]
 
 
-***(
-Memory load, store and rearrangement
-***)
-*** structure fields
-  rule
-    <k> derive(I) => .K ...</k>
-    <heap>... I |-> _ : _ ...</heap>
-  [structural]
-  rule
-    <k> load(T, I) => tv(T, V) ...</k>
-    <heap>... I |-> V : _ ...</heap>
-  rule
-    <k> store(T, I, V) => tv(T, V) ...</k>
-    <heap>... I |-> (_ => V) : _ ...</heap>
-
-*** pointers to ints and pointers
-  rule
-    <k> derive(I) => .K ...</k>
-    <heap>... I |-> _ ...</heap>
-  [structural]
-  rule
-    <k> load(T, I) => tv(T, V) ...</k>
-    <heap>... I |-> V ...</heap>
-  rule
-    <k> store(T, I, V) => tv(T, V) ...</k>
-    <heap>... I |-> (_ => V) ...</heap>
-
-
-***(
-Memory management
-***)
-*** malloc/free
-  rule id("malloc")(TV) => newObject [structural]
-  rule (T *) newObject => new T [structural]
-  rule id("free")(TV) => delete TV [structural]
-
-*** new
-  rule
-    <k> new struct X => tv(struct X *, FreeInt(N)) ...</k>
-    <heap>... .Map => initObject(FreeInt(N), X, KernelCList) ...</heap>
-    <struct>... X |-> fieldList(KernelCList) ...</struct>
-    <counter> N => sNat N </counter>
-  rule
-    <k> new int => tv(int *, FreeInt(N)) ...</k>
-    <heap>... .Map => FreeInt(N) |-> undef ...</heap>
-    <counter> N => sNat N </counter>
-  rule
-    <k> new (T *) => tv(T **, FreeInt(N)) ...</k>
-    <heap>... .Map => FreeInt(N) |-> undef ...</heap>
-    <counter> N => sNat N </counter>
-
-*** delete
+  /*
+   * Memory management
+   */
+  // TODO: malloc only allocates one structure
   rule
     <k>
-        delete tv(struct X *, I)
-      =>
-        derive(I) ~> deleteObject(I, listLen(KernelCList))
-    ...</k>
-    <struct>... X |-> fieldList(KernelCList) ...</struct>
+      malloc(tv(int, Size:Int)) ~> (struct S:Id *) HOLE
+    =>
+      tv(struct S *, ObjectPointer(!I:Int))
+    ...</k> 
+    <heap>... .Map => ObjectPointer(!I) |-> initializeObject(Members) ...</heap>
+    <struct>... S |-> Members:Map ...</struct>
+    when Size ==K size(Members)
+    [structural]
   rule
-    <k> delete tv(int *, I) => tv(void, unit) ...</k>
-    <heap>... I |-> _ => .Map ...</heap>
-  rule
-    <k> delete tv(T **, I) => tv(void, unit) ...</k>
-    <heap>... I |-> _ => .Map ...</heap>
-  rule
-    <k> deleteObject(I, (sNat N => N)) ...</k>
-    <heap>... I +Int N |-> _ : _ => .Map ...</heap>
-  rule
-    <k> deleteObject(I, 1) => tv(void, unit) ...</k>
-    <heap>... I |-> _ : _ => .Map ...</heap>
+    <k> free(tv(T:Type *, ObjectPointer(I:Int))) => tv(void, undef) ...</k>
+    <heap>... ObjectPointer(I) |-> _ => .Map ...</heap>
 
 
-***(
-I/O
-***)
+  /*
+   * I/O
+   */
+/*
   rule
     <k> read(T) => tv(T, I) ...</k>
     <in> ListItem(I) => .List ...</in>
   [structural]
   rule
     <k>
-        id("scanf")(tv(string, _:String),,, localRef(X))
+        scanf(tv(string, _:String), tv(T:Type * = X))
       =>
         (X = read(int)); ~> tv(void, unit)
     ...</k>
@@ -355,42 +298,22 @@ I/O
     ...</k>
   [structural]
   rule
-    <k> id("printf")(tv(string, _:String),,, tv(_, I)) => tv(void, unit) ...</k>
+    <k> printf(tv(string, _:String), tv(_:Type, )) => tv(void, unit) ...</k>
     <out>... .List => ListItem(I) </out>
   [structural]
   rule id("printf")(tv(string, _:String)) => tv(void, unit) [structural]
+*/
 
 
-***(
-Helpers
-***)
-  syntax K ::= declParams ( List{KernelC} )
-  rule
-    declParams(Param,,, ParamList) => Param ~> declParams(ParamList)
-  [structural]
-  rule declParams(.List{KernelC}) => .K [structural]
+  /*
+   * Helper functions
+   */
+  syntax Map ::= initializeObject(Map)    [function]
+  rule initializeObject(F:Id |-> T:Type M:Map)
+    => F |-> tv(T, undef) initializeObject(M)
+  rule initializeObject(.Map) => .Map
 
-  syntax K ::= bindParams ( List{KernelC} , List{KernelC} )
-  rule
-      bindParams(((_ X;),,, ParamList), (TV,,, ArgList))
-    =>
-      (X = TV); ~> bindParams(ParamList, ArgList)
-  [structural]
-  rule bindParams(.List{KernelC}, .List{KernelC}) => .K [structural]
-
-  syntax Nat ::= listLen ( List{KernelC} )
-  rule listLen(_,,, KernelCList) => sNat listLen(KernelCList)
-  [structural]
-  rule listLen(.List{KernelC}) => 0 [structural]
-
-  syntax Map ::= initObject ( Int++ , Id , List{KernelC} )
-  rule
-      initObject(I, X , (_ F;),,, KernelCList)
-    =>
-      I |-> undef : X.F initObject(I +Int 1, X , KernelCList)
-  [structural]
-  rule initObject(_, _ , .List{KernelC}) => .Map [structural]
-
+  /*
   syntax Map ::= filterMap ( Map , Set )
   rule
       filterMap((K1 |-> K2 Map), Set)
@@ -399,5 +322,25 @@ Helpers
       filterMap(Map, Set)
   [structural]
   rule filterMap(.Map, _) => .Map [structural]
-endkm
+  */
+
+  syntax Map ::= makeMemberMap(VariableDeclarations)    [function]
+  rule makeMemberMap(T:Type X:Id; VDsVariableDeclarations)
+    => X |-> T makeMemberMap(VDs)
+  rule makeMemberMap(.VariableDeclarations) => .Map
+
+  syntax VariableDeclarations ::= declareParameters(ParameterDeclarations)
+    [function]
+  rule declareParameters(T:Type X:Id, PDs:ParameterDeclarations)
+    => T X; declareParameters(PDs) 
+  rule declareParameters(.ParameterDeclarations) => .VariableDeclarations
+
+  syntax Statements ::= bindParameters(ParameterDeclarations, TypedValues)
+    [function]
+  rule bindParameters(
+          (T:Type X:Id, PDs:ParameterDeclarations),
+          (tv(T, V:Value), TVs:TypedValues)) 
+    => X = tv(T, V); bindParameters(PDs, TVs)
+  rule bindParameters(.ParameterDeclarations, .TypedValues) => .Statements
+endmodule
 

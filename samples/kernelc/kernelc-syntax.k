@@ -17,10 +17,11 @@ module KERNELC-SYNTAX
   syntax VariableDeclaration ::= Type Id ";"
   syntax VariableDeclarations ::= List{VariableDeclaration, ""}
 
-  syntax Type ::= "int"
+  syntax Type ::= IntType
                 | "void"
-                | "struct" Id
                 | Type "*"
+                | "struct" Id
+  syntax IntType ::= "int"
 
   syntax Statement ::=
       Expression "=" Expression ";"                         [strict(2)]
