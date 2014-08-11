@@ -129,12 +129,18 @@ public class CheckSyntaxDecl extends BasicVisitor {
             }
         }
 
-        if (eTerminals > 0 && (neTerminals == 0 || sorts < 2))
-            if (!node.containsAttribute("onlyLabel") || !node.containsAttribute("klabel")) {
+        if (eTerminals > 0 && (neTerminals == 0 || sorts < 2)) {
+            // if it is an epsilon transition, it must contain a klabel and one of:
+            // onlyLabel or (notInRules, notInGround)
+            if (!((node.containsAttribute("onlyLabel") ||
+                    (node.containsAttribute("notInRules") && node.containsAttribute("notInGround")))
+                    && node.containsAttribute("klabel"))) {
                 String msg = "Cannot declare empty terminals in the definition.\n";
-                msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
+                msg += "            Use attribute 'onlyLabel' or 'notInRules' and 'notInGround' paired with 'klabel(...)' to limit the use to programs.";
+
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
             }
+        }
         return null;
     }
 
