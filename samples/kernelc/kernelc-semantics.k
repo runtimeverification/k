@@ -6,14 +6,10 @@ module KERNELC-SEMANTICS
   /*
    * Macros
    */
-  rule if (E:Expression) S:Statement => if (E) S else ;     [macro]
   rule return; => return tv(void, undef);                   [macro]
-  rule E1:Expression || E2:Expression => (E1 ? 1 : E2)      [macro]
-  rule E1:Expression && E2:Expression => (E1 ? E2 : 0)      [macro]
-  rule ! E:Expression => E ? 0 : 1                          [macro]
   rule NULL => tv(void *, null)                             [macro]
 
-  /* macro for block without declarations (for use in the semantics only) */
+  /* block without declarations macro (for use in the semantics only) */
   syntax Block ::= "{" Statements "}"
   rule { Ss:Statements } => { .VariableDeclarations Ss }    [macro]
 
@@ -78,17 +74,20 @@ module KERNELC-SEMANTICS
     <heap>... .Map => object(!I) |-> tv(T, undef) ...</heap>
     [structural]
 
+
   /*
    * Structural statements
    */
   rule S:Statement Ss:Statements => S ~> Ss   [structural]
   rule .Statements => .K                      [structural]
 
+
   /*
    * Sequence point
    */
   rule _:TypedValue; => .K    [structural]
   rule ; => .K                [structural]
+
 
   /*
    * Block statement
@@ -108,6 +107,7 @@ module KERNELC-SEMANTICS
     <heap>... P |-> _ => .Map...</heap>
     [structural]
   rule deleteLocals(.List) => .K    [structural]
+
 
   /*
    * If/choice
@@ -133,6 +133,7 @@ module KERNELC-SEMANTICS
   syntax KItem ::= "expression2bool" "(" Expression ")"           [strict]
   rule expression2bool(tv(int, I:Int)) => I =/=K 0                [structural]
   rule expression2bool(tv(T:Type *, P:Pointer)) => P =/=K null    [structural]
+
 
   /*
    * while
@@ -195,7 +196,7 @@ module KERNELC-SEMANTICS
     <struct>... S |-> (F |-> T:Type _:Map) ...</struct>
     [structural]
 
-  /* memory location read */
+  /* memory read */
   rule
     <k> *tv(T:Type *, object(I:Int)) => tv(T, V) ...</k>
     <heap>... object(I) |-> tv(T, V:Value) ...</heap>
@@ -207,7 +208,7 @@ module KERNELC-SEMANTICS
     requires V =/=K undef
     [transition]
 
-  /* memory location write */
+  /* memory write */
   rule E1:Expression = E2:Expression; => &E1 ~> HOLE = E2;    [heat]
   rule TV:TypedValue ~> HOLE = E:Expression; => TV = E;       [cool]
   rule
@@ -222,7 +223,7 @@ module KERNELC-SEMANTICS
     [transition]
 
   /*
-   * boolean and arithmetic operations
+   * Boolean and arithmetic operations
    */
   rule I:Int => tv(int, I)                    [structural]
   // TODO: node unary -Int?
@@ -273,7 +274,7 @@ module KERNELC-SEMANTICS
 
 
   /*
-   * cast
+   * Cast
    */
   // TODO: cast is disabled for now
   //rule (T) tv(_, V) => tv(T, V) [structural]
@@ -300,7 +301,7 @@ module KERNELC-SEMANTICS
 
 
   /*
-   * sizeof
+   * Sizeof
    */
   rule sizeof(int) => tv(int, 1)        [structural]
   rule sizeof(T:Type *) => tv(int, 1)   [structural]

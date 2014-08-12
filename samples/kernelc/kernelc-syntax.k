@@ -89,6 +89,19 @@ module KERNELC-SYNTAX
               | "scanf"
               | "printf"
 
+
+  /*
+   * Macros
+   */
+  rule if (E:Expression) S:Statement => if (E) S else ;     [macro]
+  rule E1:Expression || E2:Expression => (E1 ? 1 : E2)      [macro]
+  rule E1:Expression && E2:Expression => (E1 ? E2 : 0)      [macro]
+  rule ! E:Expression => E ? 0 : 1                          [macro]
+
+
+  /*
+   * Verification specific stuff
+   */
   syntax Statement ::= "breakpoint"
 endmodule
 
