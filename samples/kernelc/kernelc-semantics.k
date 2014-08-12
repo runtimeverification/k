@@ -4,76 +4,93 @@ module KERNELC-SEMANTICS
   /*
    * Macros
    */
-  rule if (E:Expression) S:Statement => if (E) S else ;   [macro]
-  rule E1:Expression || E2:Expression => (E1 ? 1 : E2)    [macro]
-  rule E1:Expression && E2:Expression => (E1 ? E2 : 0)    [macro]
-  rule !E:Expression => (E ? 0 : !)                       [macro]
-  rule return; => return tv(void, undef);                 [macro]
+  rule if (E:Expression) S:Statement => if (E) S else ;     [macro]
+  rule return; => return tv(void, undef);                   [macro]
+  rule E1:Expression || E2:Expression => (E1 ? 1 : E2)      [macro]
+  rule E1:Expression && E2:Expression => (E1 ? E2 : 0)      [macro]
+  rule ! E:Expression => E ? 0 : 1                          [macro]
+  rule NULL => tv(void *, null)                             [macro]
+
+  /* macro for block without declarations (for use in the semantics only) */
+  syntax Block ::= "{" Statements "}"
+  rule { Ss:Statements } => { .VariableDeclarations Ss }    [macro]
 
 
   /*
-   * KernelC configuration 
+   * Typed values
    */
-  configuration
-    <config> 
-      <struct> .Map </struct>
-      <fun> .Map </fun>
+  syntax Expression ::= EvaluatedExpression
+  syntax EvaluatedExpression ::= TypedValue
+                               | Bool
+                               | String
+  syntax EvaluatedExpressions ::= List{EvaluatedExpression, ","}
 
-      <k> $PGM:File ~> main(.Expressions) </k>
-      <env> .Map </env>
-      <fun-id> .K </fun-id>
-      <stack> .List </stack>
-               
-      <heap> .Map </heap>
-
-      <in> .List </in>
-      <out> .List </out>
-    </config>
-
-
-  syntax KResult ::= TypedValue | Bool
-
-
-  syntax Expression ::= TypedValue | Bool
   syntax TypedValue ::= "tv" "(" Type "," Value ")"
-  syntax TypedValues ::= List{TypedValue, ","}
   syntax Value ::= Int
                  | Pointer
                  | "undef"
-  syntax Pointer ::= "ObjectPointer" "(" Int ")"
-                   | "MemberPointer" "(" Int "," Id ")"
-                   | "Null"
+  syntax Pointer ::= "object" "(" Int ")"
+                   | "member" "(" Int "," Id ")"
+                   | "null"
+
+
+  /*
+   * Process global definitions and declarations one at a time
+   */
+  rule G:Global Gs:Globals => G ~> Gs   [structural]
+  rule .Globals => .K                   [structural]
+
+
+  /*
+   * Elide #include directives
+   */
+  rule #include<stdlib.h> => .K   [structural]
+  rule #include<stdio.h>  => .K   [structural] 
 
 
   /*
    * Definitions/declarations
    */
-  /* Function definition/declaration */
+  /* Function definition */
+  syntax KItem ::= functionBody(ParameterDeclarations, Type, Block)
   rule
-    <k> T:Type F:Id(PDs:ParameterDeclarations) S:Statement => .K ...</k>
-    <fun>... .Map => T F(PDs) |-> { S return; } ...</fun>
+    <k> T:Type F:Id(PDs:ParameterDeclarations) B:Block => .K ...</k>
+    <fun>... .Map => F |-> functionBody(PDs, T, { B return; }) ...</fun>
     [structural]
-  /* elide function declarations */
+  /* Elide function declarations */
   rule T:Type F:Id(PDs:ParameterDeclarations); => .K   [structural]
 
   /* Structure declaration */
   rule
     <k> struct S:Id { VDs:VariableDeclarations }; => .K ...</k>
-    <struct>... .Map => X |-> makeMemberMap(VDs) ...</struct>
+    <struct>... .Map => S |-> makeMemberMap(VDs) ...</struct>
     [structural]
 
   /* Variable declaration */
+  rule VD:VariableDeclaration VDs:VariableDeclarations => VD ~> VDs
+    [structural]
+  rule .VariableDeclarations => .K    [structural]
   rule
     <k> T:Type X:Id; => .K ...</k>
-    <env> Env:Map => Env[X <- ObjectPointer(!I:Int)] </env>
-    <heap>... .Map => ObjectPointer(I) |-> undef ...</heap>
+    <env> Env:Map => Env[X <- tv(T *, object(!I:Int))] </env>
+    <heap>... .Map => object(!I) |-> tv(T, undef) ...</heap>
     [structural]
  
   /*
-   *
+   * Structural statements
    */
-  rule _:TypeValue; => .K   [structural]
-  rule ; => .K              [structural]
+  rule S:Statement Ss:Statements => S ~> Ss   [structural]
+  rule .Statements => .K                      [structural]
+
+  /*
+   * Sequence point 
+   */
+  rule _:TypedValue; => .K    [structural]
+  rule ; => .K                [structural]
+
+  /*
+   * Block statement
+   */
   rule
     <k> { VDs:VariableDeclarations Ss:Statements } => VDs ~> Ss ~> Env ...</k>
     <env> Env:Map </env>
@@ -84,7 +101,6 @@ module KERNELC-SEMANTICS
     <k> Env:Map => .K ...</k>
     <env> OuterEnv:Map => Env </env>
     [structural]
-
 
   /*
    * If/choice
@@ -109,7 +125,7 @@ module KERNELC-SEMANTICS
 
   syntax KItem ::= "expression2bool" "(" Expression ")"           [strict]
   rule expression2bool(tv(int, I:Int)) => I =/=K 0                [structural]
-  rule expression2bool(tv(T:Type *, P:Pointer)) => P =/=K Null    [structural]
+  rule expression2bool(tv(T:Type *, P:Pointer)) => P =/=K null    [structural]
 
   /*
    * while
@@ -123,18 +139,21 @@ module KERNELC-SEMANTICS
    */
   syntax KItem ::= callStackFrame(K, Map, Id)
   rule
-    <fun>... _:Type Callee(PDs:ParameterDeclarations) |-> S:Statement ...</fun>
+    <fun>...
+      Callee |-> functionBody(PDs:ParameterDeclarations, _:Type, B:Block)
+    ...</fun>
     <k>
-        Callee:Id(TVs:TypedValues) ~> K
+        Callee:Id(EEs:EvaluatedExpressions) ~> K
       =>
-        // TODO(add append on Statements)
-        { declareParameters(PDs) { bindParameters(PDs, TVs) } S }
+        { declareParameters(PDs) bindParameters(PDs, EEs, B) }
     </k>
     <stack> .List => ListItem(callStackFrame(K, Env, Caller)) ...</stack>
     <fun-id> Caller:Id => Callee </fun-id>
     <env> Env:Map => .Map </env>
   rule
-    <fun>... T Callee(_:ParameterDeclarations) |-> _:Statement ...</fun>
+    <fun>...
+      Callee |-> functionBody(_:ParameterDeclarations, T, _:Block)
+    ...</fun>
     <k> return tv(T:Type, V:Value); ~> _ => tv(T, V) ~> K </k>
     <stack> ListItem(callStackFrame(K, Env:Map, Caller:Id)) => .List ...</stack>
     <fun-id> Callee:Id => Caller </fun-id>
@@ -150,28 +169,28 @@ module KERNELC-SEMANTICS
 
   /* memory address computation */
   rule
-    <k> &X:Id => TV </k>
+    <k> &X:Id => TV ...</k>
     <env>... X |-> TV:TypedValue ...</env>
     [structural]
   context &(HOLE->_)
   rule
     <k>
-      &(tv(struct S:Id *, ObjectPointer(I:Int))->F:Id)
+      &(tv(struct S:Id *, object(I:Int))->F:Id)
     =>
-      tv(T *, MemberPointer(I, F))
+      tv(T *, member(I, F))
     ...</k>
     <struct>... S |-> (F |-> T:Type _:Map) ...</struct>
     [structural]
 
   /* memory location read */
   rule
-    <k> *tv(T:Type *, ObjectPointer(I:Int)) => tv(T, V) ...</k>
-    <heap>... ObjectPointer(I) |-> tv(T, V:Value) ...</heap>
+    <k> *tv(T:Type *, object(I:Int)) => tv(T, V) ...</k>
+    <heap>... object(I) |-> tv(T, V:Value) ...</heap>
     requires V =/=K undef
     [transition]
   rule
-    <k> *tv(T:Type *, MemberPointer(I:Int, F:Id)) => tv(T, V) ...</k>
-    <heap>... ObjectPointer(I) |-> (F |-> tv(T, V:Value) _:Map) ...</heap>
+    <k> *tv(T:Type *, member(I:Int, F:Id)) => tv(T, V) ...</k>
+    <heap>... object(I) |-> (F |-> tv(T, V:Value) _:Map) ...</heap>
     requires V =/=K undef
     [transition]
 
@@ -179,21 +198,23 @@ module KERNELC-SEMANTICS
   rule E1:Expression = E2:Expression; => &E1 ~> HOLE = E2;    [heat]
   rule TV:TypedValue ~> HOLE = E:Expression; => TV = E;       [cool]
   rule
-    <k> tv(T:Type *, ObjectPointer(I:Int)) = tv(T, V:Value); => .K ...</k>
-    <heap>... ObjectPointer(I) |-> tv(T, _:Value => V) ...</heap>
+    <k> tv(T:Type *, object(I:Int)) = tv(T, V:Value); => .K ...</k>
+    <heap>... object(I) |-> tv(T, _:Value => V) ...</heap>
     requires V =/=K undef
     [transition]
   rule
-    <k> tv(T:Type *, MemberPointer(I:Int, F:Id)) = tv(T, V:Value); => .K ...</k>
-    <heap>... ObjectPointer(I) |-> (F |-> tv(T, _:Value => V) _:Map) ...</heap>
+    <k> tv(T:Type *, member(I:Int, F:Id)) = tv(T, V:Value); => .K ...</k>
+    <heap>... object(I) |-> (F |-> tv(T, _:Value => V) _:Map) ...</heap>
     requires V =/=K undef
     [transition]
   
   /*
    * boolean and arithmetic operations
    */
-  rule -tv(int, I:Int) => tv(int, -Int I)   [structural]
-  rule ~tv(int, I:Int) => tv(int, ~Int I)   [structural]
+  rule I:Int => tv(int, I)                    [structural]
+  // TODO: node unary -Int?
+  rule -tv(int, I:Int) => tv(int, 0 -Int I)   [structural]
+  rule ~tv(int, I:Int) => tv(int, ~Int I)     [structural]
   rule
     tv(int, I1:Int) + tv(int, I2:Int) => tv(int, I1 +Int I2)
     [structural]
@@ -231,10 +252,10 @@ module KERNELC-SEMANTICS
     [structural]
 
   rule
-    tv(T:Type, I1:Int) == tv(T, I2:Int) => tv(int, bool2int(I1 ==K  I2)) 
+    tv(T:Type, V1:Value) == tv(T, V2:Value) => tv(int, bool2int(V1 ==K  V2)) 
     [structural]
   rule
-    tv(T:Type, I1:Int) != tv(T, I2:Int) => tv(int, bool2int(I1 =/=K I2))
+    tv(T:Type, V1:Value) != tv(T, V2:Value) => tv(int, bool2int(V1 =/=K  V2)) 
     [structural]
 
 
@@ -243,6 +264,26 @@ module KERNELC-SEMANTICS
    */
   // TODO: cast is disabled for now
   //rule (T) tv(_, V) => tv(T, V) [structural]
+
+
+  /*
+   * Pointer conversions
+   */
+  rule tv(T1:Type **, _:Pointer) = tv((T2:Type * => T1 *), null);
+    requires T1 =/=K T2
+    [structural]
+  rule tv(T1:Type *, _:Pointer) == tv((T2:Type * => T1 *), null)
+    requires T1 =/=K T2
+    [structural]
+  rule tv((T1:Type * => T2 *), null) == tv(T2:Type *, _:Pointer)
+    requires T1 =/=K T2
+    [structural]
+  rule tv(T1:Type *, _:Pointer) != tv((T2:Type * => T1 *), null)
+    requires T1 =/=K T2
+    [structural]
+  rule tv((T1:Type * => T2 *), null) != tv(T2:Type *, _:Pointer)
+    requires T1 =/=K T2
+    [structural]
 
 
   /*
@@ -259,50 +300,51 @@ module KERNELC-SEMANTICS
   /*
    * Memory management
    */
-  // TODO: malloc only allocates one structure
+  /* malloc only allocates one structure */
+  // TODO: check why the HOLE below does not become a freezer
   rule
     <k>
-      malloc(tv(int, Size:Int)) ~> (struct S:Id *) HOLE
+      malloc(tv(int, Size:Int)) ~> (struct S:Id *) HOLE:>Expression
     =>
-      tv(struct S *, ObjectPointer(!I:Int))
+      tv(struct S *, object(!I:Int))
     ...</k> 
-    <heap>... .Map => ObjectPointer(!I) |-> initializeObject(Members) ...</heap>
+    <heap>... .Map => object(!I) |-> initializeObject(Members) ...</heap>
+    <struct>... S |-> Members:Map ...</struct>
+    when Size ==K size(Members)
+    [structural]
+  syntax TypedValue ::= makeNewObject(Int)
+  rule malloc(tv(int, Size:Int)) => makeNewObject(Size)
+  rule
+    <k>
+      (struct S:Id *) makeNewObject(Size)
+    =>
+      tv(struct S *, object(!I:Int))
+    ...</k> 
+    <heap>... .Map => object(!I) |-> initializeObject(Members) ...</heap>
     <struct>... S |-> Members:Map ...</struct>
     when Size ==K size(Members)
     [structural]
   rule
-    <k> free(tv(T:Type *, ObjectPointer(I:Int))) => tv(void, undef) ...</k>
-    <heap>... ObjectPointer(I) |-> _ => .Map ...</heap>
+    <k> free(tv(T:Type *, object(I:Int))) => tv(void, undef) ...</k>
+    <heap>... object(I) |-> _ => .Map ...</heap>
 
 
   /*
    * I/O
    */
-/*
-  rule
-    <k> read(T) => tv(T, I) ...</k>
-    <in> ListItem(I) => .List ...</in>
-  [structural]
   rule
     <k>
-        scanf(tv(string, _:String), tv(T:Type * = X))
-      =>
-        (X = read(int)); ~> tv(void, unit)
+      scanf(_:String, tv(int *, P:Pointer))
+    =>
+      tv(int *, P) = tv(int, I); ~> tv(void, undef)
     ...</k>
-  [structural]
+    <in> ListItem(I:Int) => .List ...</in>
+    [structural]
   rule
-    <k>
-        id("scanf")(tv(string, _:String),,, tv(T *, I))
-      =>
-        (*tv(T *, I) = read(T)); ~> tv(void, unit)
-    ...</k>
-  [structural]
-  rule
-    <k> printf(tv(string, _:String), tv(_:Type, )) => tv(void, unit) ...</k>
+    <k> printf(_:String, tv(int, I:Int)) => tv(void, undef) ...</k>
     <out>... .List => ListItem(I) </out>
-  [structural]
-  rule id("printf")(tv(string, _:String)) => tv(void, unit) [structural]
-*/
+    [structural]
+  rule printf(_:String) => tv(void, undef)   [structural]
 
 
   /*
@@ -325,7 +367,7 @@ module KERNELC-SEMANTICS
   */
 
   syntax Map ::= makeMemberMap(VariableDeclarations)    [function]
-  rule makeMemberMap(T:Type X:Id; VDsVariableDeclarations)
+  rule makeMemberMap(T:Type X:Id; VDs:VariableDeclarations)
     => X |-> T makeMemberMap(VDs)
   rule makeMemberMap(.VariableDeclarations) => .Map
 
@@ -335,12 +377,19 @@ module KERNELC-SEMANTICS
     => T X; declareParameters(PDs) 
   rule declareParameters(.ParameterDeclarations) => .VariableDeclarations
 
-  syntax Statements ::= bindParameters(ParameterDeclarations, TypedValues)
+  syntax Statements ::=
+    bindParameters(ParameterDeclarations, EvaluatedExpressions, Block)
     [function]
   rule bindParameters(
           (T:Type X:Id, PDs:ParameterDeclarations),
-          (tv(T, V:Value), TVs:TypedValues)) 
-    => X = tv(T, V); bindParameters(PDs, TVs)
-  rule bindParameters(.ParameterDeclarations, .TypedValues) => .Statements
+          (tv(T, V:Value), EEs:EvaluatedExpressions),
+          B:Block) 
+    => X = tv(T, V); bindParameters(PDs, EEs, B)
+  rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
+    => B
+
+  syntax Int ::= "bool2int" "(" Bool ")"    [function]
+  rule bool2int( true) => 1
+  rule bool2int(false) => 0
 endmodule
 

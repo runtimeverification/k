@@ -39,7 +39,7 @@ module KERNELC-SYNTAX
   syntax Expression ::= 
       Constant
     | Id 
-    | "(" Expression ")"                                 [bracket]
+    | "(" Expression ")"                                [bracket]
     //| Expression "." Id
     | Expression "->" Id                                [strict(1)]
     | Id "(" Expressions ")"                            [strict(2)]
@@ -78,8 +78,9 @@ module KERNELC-SYNTAX
     > left: Expression "||" Expression                  [strict(1)]
     > right: Expression "?" Expression ":" Expression   [strict(1)]
   syntax Constant ::= Int
+                    | "NULL"
                     | String
-  syntax Expressions ::= List{Expression, ","}
+  syntax Expressions ::= List{Expression, ","}          [strict]
 
   syntax Id ::= "main"
               | "malloc"
