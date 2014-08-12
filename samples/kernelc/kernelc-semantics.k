@@ -1,3 +1,5 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+
 module KERNELC-SEMANTICS
   imports KERNELC-SYNTAX
 
@@ -45,7 +47,7 @@ module KERNELC-SEMANTICS
    * Elide #include directives
    */
   rule #include<stdlib.h> => .K   [structural]
-  rule #include<stdio.h>  => .K   [structural] 
+  rule #include<stdio.h>  => .K   [structural]
 
 
   /*
@@ -75,7 +77,7 @@ module KERNELC-SEMANTICS
     <env> Env:Map => Env[X <- tv(T *, object(!I:Int))] </env>
     <heap>... .Map => object(!I) |-> tv(T, undef) ...</heap>
     [structural]
- 
+
   /*
    * Structural statements
    */
@@ -83,7 +85,7 @@ module KERNELC-SEMANTICS
   rule .Statements => .K                      [structural]
 
   /*
-   * Sequence point 
+   * Sequence point
    */
   rule _:TypedValue; => .K    [structural]
   rule ; => .K                [structural]
@@ -218,7 +220,7 @@ module KERNELC-SEMANTICS
     <heap>... object(I) |-> (F |-> tv(T, _:Value => V) _:Map) ...</heap>
     requires V =/=K undef
     [transition]
-  
+
   /*
    * boolean and arithmetic operations
    */
@@ -263,10 +265,10 @@ module KERNELC-SEMANTICS
     [structural]
 
   rule
-    tv(T:Type, V1:Value) == tv(T, V2:Value) => tv(int, bool2int(V1 ==K  V2)) 
+    tv(T:Type, V1:Value) == tv(T, V2:Value) => tv(int, bool2int(V1 ==K  V2))
     [structural]
   rule
-    tv(T:Type, V1:Value) != tv(T, V2:Value) => tv(int, bool2int(V1 =/=K  V2)) 
+    tv(T:Type, V1:Value) != tv(T, V2:Value) => tv(int, bool2int(V1 =/=K  V2))
     [structural]
 
 
@@ -318,7 +320,7 @@ module KERNELC-SEMANTICS
       malloc(tv(int, Size:Int)) ~> (struct S:Id *) HOLE:>Expression
     =>
       tv(struct S *, object(!I:Int))
-    ...</k> 
+    ...</k>
     <heap>... .Map => object(!I) |-> initializeObject(Members) ...</heap>
     <struct>... S |-> Members:Map ...</struct>
     when Size ==K size(Members)
@@ -330,7 +332,7 @@ module KERNELC-SEMANTICS
       (struct S:Id *) makeNewObject(Size)
     =>
       tv(struct S *, object(!I:Int))
-    ...</k> 
+    ...</k>
     <heap>... .Map => object(!I) |-> initializeObject(Members) ...</heap>
     <struct>... S |-> Members:Map ...</struct>
     when Size ==K size(Members)
@@ -374,7 +376,7 @@ module KERNELC-SEMANTICS
   syntax VariableDeclarations ::= declareParameters(ParameterDeclarations)
     [function]
   rule declareParameters(T:Type X:Id, PDs:ParameterDeclarations)
-    => T X; declareParameters(PDs) 
+    => T X; declareParameters(PDs)
   rule declareParameters(.ParameterDeclarations) => .VariableDeclarations
 
   syntax Statements ::=
@@ -383,7 +385,7 @@ module KERNELC-SEMANTICS
   rule bindParameters(
           (T:Type X:Id, PDs:ParameterDeclarations),
           (tv(T, V:Value), EEs:EvaluatedExpressions),
-          B:Block) 
+          B:Block)
     => X = tv(T, V); bindParameters(PDs, EEs, B)
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
     => B

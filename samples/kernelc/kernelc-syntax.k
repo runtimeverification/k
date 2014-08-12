@@ -1,3 +1,5 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+
 module KERNELC-SYNTAX
   syntax File ::= Globals
 
@@ -8,7 +10,7 @@ module KERNELC-SYNTAX
                   | "#include" "<" "stdio.h" ">"
   syntax Globals ::= List{Global, ""}
 
-  syntax FunctionDefinition ::= Type Id "(" ParameterDeclarations ")" Block 
+  syntax FunctionDefinition ::= Type Id "(" ParameterDeclarations ")" Block
   syntax FunctionDeclaration ::= Type Id "(" ParameterDeclarations ")" ";"
   syntax ParameterDeclaration ::= Type Id
   syntax ParameterDeclarations ::= List{ParameterDeclaration, ","}
@@ -36,9 +38,9 @@ module KERNELC-SYNTAX
   syntax Block ::= "{" VariableDeclarations Statements  "}"
   syntax Statements ::= List{Statement, ""}
 
-  syntax Expression ::= 
+  syntax Expression ::=
       Constant
-    | Id 
+    | Id
     | "(" Expression ")"                                [bracket]
     //| Expression "." Id
     | Expression "->" Id                                [strict(1)]

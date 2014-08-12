@@ -1,3 +1,5 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+
 require "kernelC-syntax.k"
 require "kernelC-semantics.k"
 
@@ -6,10 +8,10 @@ module KERNELC
   imports KERNELC-SEMANTICS
 
   /*
-   * KernelC configuration 
+   * KernelC configuration
    */
   configuration
-    <config> 
+    <config>
       <struct> .Map </struct>
       <fun> .Map </fun>
 
@@ -17,7 +19,7 @@ module KERNELC
       <env> .Map </env>
       <fun-id> String2Id("") </fun-id>
       <stack> .List </stack>
-               
+
       <heap> .Map </heap>
 
       <in> .List </in>
@@ -26,8 +28,8 @@ module KERNELC
 
 
   /*
-   * KernelC results 
+   * KernelC results
    */
-  syntax KResult ::= EvaluatedExpression 
+  syntax KResult ::= EvaluatedExpression
 endmodule
 
