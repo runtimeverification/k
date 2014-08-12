@@ -5,6 +5,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
+import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.ParserType;
@@ -114,13 +115,13 @@ public class RunProcess {
             startSymbol = context.startSymbolPgm;
         }
         byte[] content = value.getBytes();
-        Source source = Source.of("parameters");
+        Source source = Sources.fromCommandLine("parameters");
 
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
                     content = FileUtil.getFileContentAsBytes(value);
-                    source = Source.of(new File(value));
+                    source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
@@ -130,7 +131,7 @@ public class RunProcess {
             case "kast --parser ground":
                 if (!isNotFile) {
                     content = FileUtil.getFileContentAsBytes(value);
-                    source = Source.of(new File(value));
+                    source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
@@ -140,14 +141,14 @@ public class RunProcess {
             case "kast --parser rules":
                 if (!isNotFile) {
                     content = FileUtil.getFileContentAsBytes(value);
-                    source = Source.of(new File(value));
+                    source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
                     content = FileUtil.getFileContentAsBytes(value);
-                    source = Source.of(new File(value));
+                    source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
                 break;

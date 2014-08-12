@@ -12,7 +12,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Require;
-import org.kframework.kil.Source;
+import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
@@ -96,7 +96,7 @@ public class BasicParser {
 
             if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
-            List<DefinitionItem> defItemList = Basic.parse(Source.of(file), FileUtil.getFileContent(file.getAbsolutePath()), context);
+            List<DefinitionItem> defItemList = Basic.parse(Sources.fromFile(file), FileUtil.getFileContent(file.getAbsolutePath()), context);
 
             // go through every required file
             for (ASTNode di : defItemList) {

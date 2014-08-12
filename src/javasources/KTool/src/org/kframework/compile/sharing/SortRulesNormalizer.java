@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -25,8 +24,13 @@ public class SortRulesNormalizer extends CopyOnWriteTransformer {
         Collections.sort(module.getItems(), new Comparator<ModuleItem>() {
             @Override
             public int compare(ModuleItem arg0, ModuleItem arg1) {
-                ComparableComparator<Source> fcc = ComparableComparator.comparableComparator();
-                NullComparator<Source> nullFcc = new NullComparator<>(fcc);
+                Comparator<Source> sourceComparator = new Comparator<Source>() {
+                    @Override
+                    public int compare(Source o1, Source o2) {
+                        return o1.toString().compareTo(o2.toString());
+                    }
+                };
+                NullComparator<Source> nullFcc = new NullComparator<>(sourceComparator);
                 int x;
                 if ((x = nullFcc.compare(arg0.getSource(), arg1.getSource())) != 0) {
                     return x;

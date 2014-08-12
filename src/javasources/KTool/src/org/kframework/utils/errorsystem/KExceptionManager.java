@@ -144,7 +144,7 @@ public class KExceptionManager {
         Collections.sort(exceptions, new Comparator<KException>() {
             @Override
             public int compare(KException arg0, KException arg1) {
-                return arg0.toString().compareTo(arg1.toString());
+                return arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose));
             }
         });
         KException last = null;
@@ -152,10 +152,10 @@ public class KExceptionManager {
             if (!options.warnings.includesExceptionType(e.type))
                 continue;
 
-            if (last != null && last.toString().equals(e.toString())) {
+            if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
                 continue;
             }
-            System.err.println(StringUtil.splitLines(e.toString()));
+            System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
             last = e;
         }
     }

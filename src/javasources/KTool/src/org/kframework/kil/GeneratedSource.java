@@ -1,7 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-public class GeneratedSource extends Source {
+public class GeneratedSource implements Source {
     private Class<?> sourceClass;
 
     public GeneratedSource(Class<?> sourceClass) {

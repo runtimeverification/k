@@ -92,12 +92,15 @@ public class KException {
 
     @Override
     public String toString() {
-        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
-            + trace.toString() + traceTail()
-            + (source == null ? "" : "\n\tSource: " + source)
-            + (location == null ? "" : "\n\tLocation: " + location)
-            + (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
+        return toString(false);
+    }
 
+    public String toString(boolean verbose) {
+        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
+                + trace.toString() + traceTail()
+                + (source == null ? "" : "\n\tSource: " + source)
+                + (location == null ? "" : "\n\tLocation: " + location)
+                + (compilationPhase == null || !verbose ? "" : "\n\tCompilation Phase: " + compilationPhase);
     }
 
     public String getMessage() {

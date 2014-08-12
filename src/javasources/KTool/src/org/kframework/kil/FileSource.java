@@ -3,7 +3,7 @@ package org.kframework.kil;
 
 import java.io.File;
 
-public class FileSource extends Source {
+public class FileSource implements Source {
 
     private File file;
 

@@ -27,7 +27,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.Source;
+import org.kframework.kil.Sources;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -127,7 +127,7 @@ public class KRunFrontEnd extends FrontEnd {
                     String content = FileUtil.getFileContent(
                             proofFile.getAbsoluteFile().toString());
                     Definition parsed = DefinitionLoader.parseString(content,
-                            Source.of(proofFile), context);
+                            Sources.fromFile(proofFile), context);
                     Module mod = parsed.getSingletonModule();
                     result = krun.prove(mod, initialConfiguration);
                     sw.printIntermediate("Proof total");

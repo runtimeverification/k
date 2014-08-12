@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.kframework.kil.Location;
 import org.kframework.kil.Source;
+import org.kframework.kil.Sources;
 
 
 /**
@@ -21,7 +22,7 @@ public class LocationData {
             int startColumn, int endLine, int endColumn) {
         super();
         this.location = new Location(startLine, startColumn, endLine, endColumn);
-        this.source = Source.of(new File(systemId));
+        this.source = Sources.fromFile(systemId);
     }
 
     public LocationData() {

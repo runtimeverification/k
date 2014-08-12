@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.List;
 
 import org.kframework.kil.Source;
+import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
@@ -55,9 +56,9 @@ public final class KastOptions {
      */
     public Source source() {
         if (expression != null) {
-            return Source.of("-e");
+            return Sources.fromCommandLine("-e");
         } else {
-            return Source.of(new File(parameters.get(0)));
+            return Sources.fromFile(parameters.get(0));
         }
     }
 
