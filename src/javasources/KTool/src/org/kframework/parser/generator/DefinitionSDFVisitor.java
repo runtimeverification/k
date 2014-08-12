@@ -23,9 +23,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.Subsort;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class DefinitionSDFVisitor extends BasicVisitor {
@@ -70,7 +67,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                 Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
                 if (prods2.isEmpty()) {
                     String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+                    GlobalSettings.kem.registerCriticalError(msg, this, tag);
                 }
                 pb1.getProductions().addAll(prods2);
             }
@@ -91,7 +88,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
             Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
             if (prods2.isEmpty()) {
                 String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+                GlobalSettings.kem.registerCriticalError(msg, this, tag);
             }
             pb1.getProductions().addAll(prods2);
         }

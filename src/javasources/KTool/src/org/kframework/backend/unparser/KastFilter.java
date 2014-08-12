@@ -97,10 +97,9 @@ public class KastFilter extends BasicVisitor {
                     first = false;
                 }
                 if (term == null) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                            KExceptionGroup.INTERNAL,
+                    GlobalSettings.kem.registerInternalError(
                             "NULL Term encountered when KastFilter ran on collection " + listOfK.getContents() + ".",
-                            listOfK.getFilename(), listOfK.getLocation()));
+                            this, listOfK);
                 }
                 this.visitNode(term);
             }

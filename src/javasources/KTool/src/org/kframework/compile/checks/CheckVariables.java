@@ -64,14 +64,11 @@ public class CheckVariables extends BasicVisitor {
         boolean freshConstant = node.isFreshConstant();
         if (node.isFreshVariable() || freshConstant) {
             if (freshConstant && !context.freshFunctionNames.containsKey(node.getSort())) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "Unsupported sort of fresh variable: " + node.getSort()
                                 + "\nOnly sorts "
                                 + context.freshFunctionNames.keySet()
-                                + " admit fresh variables.", getName(), node
-                                .getFilename(), node.getLocation()));
+                                + " admit fresh variables.", this, node);
             }
 
             if (current == right  && !inCondition) {
@@ -82,11 +79,9 @@ public class CheckVariables extends BasicVisitor {
                  return null;
              }
              //nodes are ok to be found in rhs
-             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
+             GlobalSettings.kem.registerCompilerError(
                     "Fresh variable \"" + node + "\" is bound in the " + "rule pattern.",
-                    getName(), node.getFilename(), node.getLocation()
-            ));
+                    this, node);
         }
 //        System.out.println("Variable: " + node);
         Integer i = current.remove(node);
@@ -125,28 +120,23 @@ public class CheckVariables extends BasicVisitor {
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {
             if (MetaK.isAnonVar(v) && !(v.isFreshVariable() || v.isFreshConstant())) {
-                GlobalSettings.kem.register(new KException(KException
-                        .ExceptionType.ERROR,
-                        KException.KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "Anonymous variable found in the right hand side of a rewrite.",
-                        getName(), v.getFilename(), v.getLocation()));
+                        this, v);
             }
             if (!left.containsKey(v)) {
                 node.addAttribute(UNBOUND_VARS, "");
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "Unbounded variable " + v.toString() + "should start with ? or !.",
-                        getName(), v.getFilename(), v.getLocation()));
+                        this, v);
             }
         }
         for (Map.Entry<Variable,Integer> e : left.entrySet()) {
             final Variable key = e.getKey();
             if (fresh.containsKey(key)) {
-                GlobalSettings.kem.register(new KException(KException
-                        .ExceptionType.ERROR,
-                        KException.KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "Variable " + key + " has the same name as a fresh variable.",
-                        getName(), key.getFilename(), key.getLocation()));
+                        this, key);
             }
             if (MetaK.isAnonVar(key)) continue;
             if (e.getValue().intValue() > 1) continue;
@@ -155,7 +145,7 @@ public class CheckVariables extends BasicVisitor {
                         KException.KExceptionGroup.COMPILER,
                         "Singleton variable " + key.toString() + ".\n" +
                         "    If this is not a spelling mistake, please consider using anonymous variables.",
-                        getName(), key.getFilename(), key.getLocation()));
+                        getName(), key.getSource(), key.getLocation()));
             }
         }
         return null;

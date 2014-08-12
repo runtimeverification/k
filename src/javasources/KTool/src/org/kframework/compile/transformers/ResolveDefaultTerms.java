@@ -8,9 +8,6 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -74,10 +71,9 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
             cell.setEllipses(Ellipses.NONE);
             ConfigurationStructure cellStr = config.get(cell.getId());
             if (cellStr.sons.isEmpty()) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "Cell " + node + " is a leaf in the configuration and it's not closed in the RHS.",
-                        getName(), node.getFilename(), node.getLocation()));
+                        this, node);
 
                 return cell;
             }

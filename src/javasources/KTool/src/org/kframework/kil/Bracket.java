@@ -36,12 +36,12 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = t;
     }
 
-    public Bracket(String location, String filename, Sort sort) {
-        super(location, filename, sort);
+    public Bracket(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
-    public Bracket(String location, String filename, Term t, Context context) {
-        super(location, filename, t.getSort());
+    public Bracket(Location location, Source source, Term t, Context context) {
+        super(location, source, t.getSort());
         this.content = t;
     }
 

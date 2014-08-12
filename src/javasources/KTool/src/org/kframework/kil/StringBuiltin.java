@@ -7,9 +7,6 @@ import java.util.Map;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
@@ -97,7 +94,7 @@ public class StringBuiltin extends Token {
         try {
             value = StringUtil.unquoteKString(s);
         } catch (IllegalArgumentException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, encodingErrorMsg, this.getLocation(), this.getFilename()));
+            GlobalSettings.kem.registerCriticalError(encodingErrorMsg, e, this);
             throw e; //unreachable
         }
     }

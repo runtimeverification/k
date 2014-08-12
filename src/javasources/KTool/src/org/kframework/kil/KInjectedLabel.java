@@ -10,8 +10,8 @@ import org.kframework.kil.visitors.Visitor;
 public class KInjectedLabel extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     protected Term term;
 
-    public KInjectedLabel(String location, String filename) {
-        super(location, filename, Sort.KLABEL);
+    public KInjectedLabel(Location location, Source source) {
+        super(location, source, Sort.KLABEL);
     }
 
     public KInjectedLabel(KInjectedLabel l) {

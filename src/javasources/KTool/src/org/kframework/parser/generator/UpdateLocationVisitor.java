@@ -2,7 +2,7 @@
 package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Sentence;
+import org.kframework.kil.Location;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -22,13 +22,14 @@ public class UpdateLocationVisitor extends BasicVisitor {
     }
 
     public Void visit(ASTNode node, Void _) {
-        String[] str = node.getLocation().split("[\\(,\\)]");
-        if (str.length != 5)
+        Location loc = node.getLocation();
+        if (loc == null) {
             return null;
-        int startLine   = Integer.parseInt(str[0 + 1]);
-        int startColumn = Integer.parseInt(str[1 + 1]);
-        int endLine     = Integer.parseInt(str[2 + 1]);
-        int endColumn   = Integer.parseInt(str[3 + 1]);
+        }
+        int startLine   = loc.lineStart;
+        int startColumn = loc.columnStart;
+        int endLine     = loc.lineEnd;
+        int endColumn   = loc.columnEnd;
 
         int columnOffset = currentStartColumn - cachedStartColumn;
         int lineOffset = currentStartLine - cachedStartLine;
@@ -42,8 +43,7 @@ public class UpdateLocationVisitor extends BasicVisitor {
         startLine += lineOffset;
         endLine   += lineOffset;
 
-        String newLoc = "(" + startLine + "," + startColumn + "," + endLine + "," + endColumn + ")";
-        node.setLocation(newLoc);
+        node.setLocation(new Location(startLine, startColumn, endLine, endColumn));
         return null;
     }
 

@@ -2,13 +2,13 @@
 package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
 import org.kframework.kil.Module;
-import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.utils.CachedSentence;
@@ -16,13 +16,6 @@ import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,10 +49,10 @@ public class CacheLookupFilter extends ParseForestTransformer {
                 CachedSentence cs = cachedDef.get(key);
                 sentence = cs.sentence;
                 if (kept.containsKey(key)) {
-                    String file = ss.getFilename();
-                    String location = ss.getLocation();
+                    Source source = ss.getSource();
+                    Location location = ss.getLocation();
                     String msg = "Duplicate rule found in module " + localModule + " at: " + cachedDef.get(key).sentence.getLocation();
-                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, source, location));
                 }
 
                 // fix the location information

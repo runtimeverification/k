@@ -15,7 +15,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Remove parsing artifacts such as single element ambiguities.
@@ -35,7 +34,7 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         ASTNode vis;
-        if (!tc.getProduction().containsAttribute("klabel"))
+        if (tc.getProduction().getKLabel() == null)
             vis = this.visitNode(tc.getContents().get(0), _);
         else
             vis = super.visit(tc, _);
@@ -63,7 +62,7 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
     public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
         ParseFailedException exception = new ParseFailedException(new KException(
                 ExceptionType.ERROR, KExceptionGroup.INNER_PARSER,
-                "Parse forest contains no trees!", node.getFilename(), node.getLocation()));
+                "Parse forest contains no trees!", node.getSource(), node.getLocation()));
         java.util.Set<Term> terms = new HashSet<>();
         for (Term t : node.getContents()) {
             ASTNode result;

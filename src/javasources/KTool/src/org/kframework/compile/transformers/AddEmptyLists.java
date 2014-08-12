@@ -42,7 +42,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
             if (isAddEmptyList(ul.getSort(), t.getSort())) {
                 if (!isUserListElement(ul.getSort(), t, context)) {
                     String msg = "Found sort '" + t.getSort() + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
+                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
                 } else
                     tc.getContents().set(0, addEmpty(t, ul.getSort()));
             }
@@ -52,7 +52,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
             if (isAddEmptyList(p.getSort(), t.getSort())) {
                 if (!isUserListElement(p.getSort(), t, context)) {
                     String msg = "Found sort '" + t.getSort() + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
+                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
                 } else
                     tc.getContents().set(1, addEmpty(t, tc.getProduction().getSort()));
             }
@@ -69,7 +69,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
                     if (isAddEmptyList(sort, t.getSort())) {
                         if (!isUserListElement(sort, t, context)) {
                             String msg = "Found sort '" + t.getSort() + "' where list sort '" + sort + "' was expected. Moving on.";
-                            GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
+                            GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
                         } else
                             tc.getContents().set(i, addEmpty(t, sort));
                     }

@@ -16,8 +16,8 @@ public class Bag extends Collection {
 
     public static final Bag EMPTY = new Bag(Collections.<Term> emptyList());
 
-    public Bag(String location, String filename) {
-        super(location, filename, Sort.BAG);
+    public Bag(Location location, Source source) {
+        super(location, source, Sort.BAG);
     }
 
     public Bag(Element element) {

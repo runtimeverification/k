@@ -71,15 +71,20 @@ public class IndexingPair implements Serializable {
      * Retrieves {@code IndexingPair} from an input stream pattern based on the
      * first and last elements.
      *
-     * @param instream
+     * @param pattern
      *            the input stream pattern
      * @param definition
      *            the definition
      * @return the indexing pair
      */
-    public static IndexingPair getInstreamIndexingPair(BuiltinList instream, Definition definition) {
+    public static IndexingPair getInstreamIndexingPair(Term pattern, Definition definition) {
         Index fstIndex;
         Index sndIndex;
+
+        if (!(pattern instanceof BuiltinList)) {
+            return IndexingPair.TOP;
+        };
+        BuiltinList instream = (BuiltinList) pattern;
 
         if (instream.hasFrame()) {
             fstIndex = instream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(instream.get(0), definition);
@@ -96,15 +101,20 @@ public class IndexingPair implements Serializable {
      * Retrieves {@code IndexingPair} from an output stream pattern based on the
      * first and second elements.
      *
-     * @param outstream
+     * @param pattern
      *            the output stream pattern
      * @param definition
      *            the definition
      * @return the indexing pair
      */
-    public static IndexingPair getOutstreamIndexingPair(BuiltinList outstream, Definition definition) {
+    public static IndexingPair getOutstreamIndexingPair(Term pattern, Definition definition) {
         Index fstIndex;
         Index sndIndex;
+
+        if (!(pattern instanceof BuiltinList)) {
+            return IndexingPair.TOP;
+        }
+        BuiltinList outstream = (BuiltinList) pattern;
 
         if (outstream.hasFrame()) {
             fstIndex = outstream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(outstream.get(0), definition);

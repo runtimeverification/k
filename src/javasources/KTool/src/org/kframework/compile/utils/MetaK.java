@@ -39,9 +39,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class MetaK {
@@ -135,8 +132,8 @@ public class MetaK {
             }
         }.visitNode(node);
         if (result.size() == 0) {
-            GlobalSettings.kem
-                    .register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Internal compiler error --- Cannot find configuration.", node.getFilename(), node.getLocation()));
+            GlobalSettings.kem.registerInternalError("Internal compiler error --- Cannot find configuration.",
+                    node);
         }
         return result.get(0);
     }
@@ -146,8 +143,7 @@ public class MetaK {
         Sort ksort = sort.getKSort().mainSort();
         if (ksort.isDefaultable())
             return new ListTerminator(Sort.of(ksort.toString()), null);
-        GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
-                .getLocation()));
+        GlobalSettings.kem.registerCompilerWarning("Don't know the default value for term " + v.toString() + ". Assuming .K", v);
         return KSequence.EMPTY;
     }
 
@@ -166,7 +162,7 @@ public class MetaK {
     }
 
     public static Term wrap(Term t, String label, Ellipses ellipses) {
-        Cell cell = new Cell(t.getLocation(),t.getFilename());
+        Cell cell = new Cell(t.getLocation(),t.getSource());
         cell.setLabel(label);
         cell.setEllipses(ellipses);
         cell.setContents(t);
@@ -237,7 +233,7 @@ public class MetaK {
     public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
         if (prod.isSubsort()) {
             final Variable freshVar = Variable.getFreshVar(Sort.of(prod.getItems().get(0).toString()));
-            if (prod.containsAttribute("klabel")) {
+            if (prod.getKLabel() != null) {
                 return KApp.of(KLabelConstant.of(prod.getKLabel(), context), freshVar);
             }
             return freshVar;

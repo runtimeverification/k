@@ -5,9 +5,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -64,10 +61,9 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
         } else {
             col = MetaK.createCollection(node.getContents(), kind);
             if (col == null) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER,
-                        "Expecting a collection item here but got " + node.getContents() + " which is of sort " + kind, getName(),
-                        node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerError(
+                        "Expecting a collection item here but got " + node.getContents() + " which is of sort " + kind,
+                        this, node);
 
             }
         }

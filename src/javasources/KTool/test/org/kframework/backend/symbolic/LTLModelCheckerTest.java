@@ -6,6 +6,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.KApp;
@@ -60,8 +61,8 @@ public class LTLModelCheckerTest {
 
         // attributes
         Attributes inputAttrs = new Attributes();
-        inputAttrs.set("ltl", null);
-        inputAttrs.set("anywhere", null);
+        inputAttrs.add(new Attribute("ltl", null));
+        inputAttrs.add(Attribute.ANYWHERE);
 
         // rule
         Rule rule = new Rule(inputLhs, inputRhs, context);
@@ -89,8 +90,8 @@ public class LTLModelCheckerTest {
 
         // attributes
         Attributes outputAttrs = new Attributes();
-        outputAttrs.set("ltl", null);
-        outputAttrs.set("anywhere", null);
+        outputAttrs.add(new Attribute("ltl", null));
+        outputAttrs.add(Attribute.ANYWHERE);
 
         // rule
         Rule outputRule = new Rule(outpuLhs, outputRhs, context);

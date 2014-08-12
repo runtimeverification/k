@@ -15,7 +15,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.List;
@@ -70,24 +69,18 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                     expectedVariable = ((KApp) expectedVariable).getLabel();
                     expectedVariable = ((KInjectedLabel) expectedVariable).getTerm();
                 } catch (ClassCastException e) {
-                    GlobalSettings.kem.register(new KException(
-                            KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+                    GlobalSettings.kem.registerCriticalError(
                             "could not extract the term representing the " +
                                     "LTL state from left hand side of the rule",
-                            rule.getFilename(),
-                            rule.getLocation()));
+                            this, rule);
                 }
                 // If expectedVariable is not a Variable, then throw an error message.
                 if (!(expectedVariable instanceof Variable)) {
-                    GlobalSettings.kem.register(new KException(
-                            KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+                    GlobalSettings.kem.registerCriticalError(
                             "the 'ltl' attribute can be used only for rules " +
                                     "having only a variable in the left hand side of "
                                     + LTL_SAT,
-                            rule.getFilename(),
-                            rule.getLocation()));
+                            this, rule);
                 } else {
                     // create a variable representing the path condition
                     Variable phi = Variable.getFreshVar(Sort.K);

@@ -4,11 +4,14 @@ package org.kframework.utils.errorsystem;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
+
 public class KException {
     protected final ExceptionType type;
     private final KExceptionGroup exceptionGroup;
-    private final String filename;
-    private final String location;
+    private final Source source;
+    private final Location location;
     private final String message;
     private final Throwable exception;
     private String compilationPhase = null;
@@ -43,18 +46,18 @@ public class KException {
         this(type, label, message, null, null, null, e);
     }
 
-    public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location) {
-        this(type, label, message, null, filename, location, null);
+    public KException(ExceptionType type, KExceptionGroup label, String message, Source source, Location location) {
+        this(type, label, message, null, source, location, null);
     }
 
     public KException(
             ExceptionType type,
             KExceptionGroup label,
             String message,
-            String filename,
-            String location,
+            Source source,
+            Location location,
             Throwable e) {
-        this(type, label, message, null, filename, location, e);
+        this(type, label, message, null, source, location, e);
     }
 
     public KException(
@@ -62,21 +65,21 @@ public class KException {
             KExceptionGroup label,
             String message,
             String compilationPhase,
-            String filename,
-            String location,
+            Source source,
+            Location location,
             Throwable exception) {
         super();
         this.type = type;
         this.exceptionGroup = label;
         this.message = message;
         this.compilationPhase = compilationPhase;
-        this.filename = filename;
+        this.source = source;
         this.location = location;
         this.exception = exception;
     }
 
-    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, String filename, String location) {
-        this(type,label,message,compilationPhase,filename,location, null);
+    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, Location location) {
+        this(type,label,message,compilationPhase,source,location, null);
     }
 
     public enum KExceptionGroup {
@@ -89,12 +92,15 @@ public class KException {
 
     @Override
     public String toString() {
-        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
-            + trace.toString() + traceTail()
-            + (filename == null ? "" : "\n\tFile: " + filename)
-            + (location == null ? "" : "\n\tLocation: " + location)
-            + (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
+        return toString(false);
+    }
 
+    public String toString(boolean verbose) {
+        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
+                + trace.toString() + traceTail()
+                + (source == null ? "" : "\n\tSource: " + source)
+                + (location == null ? "" : "\n\tLocation: " + location)
+                + (compilationPhase == null || !verbose ? "" : "\n\tCompilation Phase: " + compilationPhase);
     }
 
     public String getMessage() {

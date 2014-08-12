@@ -54,12 +54,12 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.content = t;
     }
 
-    public Cast(String location, String filename, Sort sort) {
-        super(location, filename, sort);
+    public Cast(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
-    public Cast(String location, String filename, Term t, org.kframework.kil.loader.Context context) {
-        super(location, filename, t.getSort());
+    public Cast(Location location, Source source, Term t, org.kframework.kil.loader.Context context) {
+        super(location, source, t.getSort());
         this.content = t;
     }
 

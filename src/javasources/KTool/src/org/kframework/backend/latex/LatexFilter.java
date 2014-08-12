@@ -11,7 +11,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.loader.*;
 import org.kframework.utils.StringUtil;
 
 public class LatexFilter extends BackendFilter {
@@ -549,10 +548,6 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Attribute entry, Void _) {
-        if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
-            return null;
-        if (context.isTagGenerated(entry.getKey()))
-            return null;
         if (context.isParsingTag(entry.getKey()))
             return null;
         if (entry.getKey().equals("latex"))
@@ -575,7 +570,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
-        for (Attribute entry : attributes.getContents()) {
+        for (Attribute entry : attributes.values()) {
             this.visitNode(entry);
         }
         return null;

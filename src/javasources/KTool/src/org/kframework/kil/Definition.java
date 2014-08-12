@@ -6,9 +6,6 @@ import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
 
@@ -148,7 +145,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         }
         if (modules.size() != 1) {
             String msg = "Should have been only one module when calling this method.";
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, this.getFilename(), this.getLocation()));
+            GlobalSettings.kem.registerInternalError(msg, this);
         }
         return modules.get(0);
     }

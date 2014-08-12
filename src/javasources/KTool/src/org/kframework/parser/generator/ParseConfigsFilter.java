@@ -66,7 +66,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                     long startTime = System.currentTimeMillis();
                     parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
                     if (globalOptions.verbose)
-                        System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
+                        System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
                 } else
                     parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
                 Document doc = XmlLoader.getXMLDoc(parsed);
@@ -74,7 +74,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 // replace the old xml node with the newly parsed sentence
                 Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
                 XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
-                XmlLoader.addFilename(xmlTerm, ss.getFilename());
+                XmlLoader.addSource(xmlTerm, ss.getSource());
                 XmlLoader.reportErrors(doc, ss.getType());
 
                 Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
@@ -83,6 +83,8 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 st.setLabel(ss.getLabel());
                 //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Outer Parsing
                 st.setAttributes(ss.getAttributes());
+                st.setLocation(ss.getLocation());
+                st.setSource(ss.getSource());
 
                 // disambiguate configs
                 config = new SentenceVariablesFilter(context).visitNode(config);
@@ -110,7 +112,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
 
                 if (globalOptions.debug) {
                     try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
-                        f.format("Parsing config: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime2), ss.getFilename(), ss.getLocation());
+                        f.format("Parsing config: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime2), ss.getSource(), ss.getLocation());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -44,7 +44,7 @@ public class KRunApiDebugger implements KRunDebugger {
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
             ASTNode pattern = DefinitionLoader.parsePattern(
                     KRunOptions.DEFAULT_PATTERN,
-                    "Command line pattern",
+                    null,
                     KSorts.BAG,
                     context);
             defaultPatternInfo = new RuleCompilerSteps(context);
@@ -316,7 +316,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
         @Override
         public ASTNode visit(KApp kapp, Void _)  {
-            if (kapp.getLabel().equals(KLabelConstant.of("#buffer", context))) {
+            if (kapp.getLabel().equals(KLabelConstant.of("'#buffer", context))) {
                 inBuffer = true;
                 ASTNode result = super.visit(kapp, _);
                 inBuffer = false;

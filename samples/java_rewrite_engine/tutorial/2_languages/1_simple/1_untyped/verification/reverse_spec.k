@@ -103,11 +103,10 @@ rule
         _:Set
     </terminated>
     <in>
-        // TODO(AndreiS): inverstigate why I/O is not disabled in prove
-        .List
+        _:List
     </in>
     <out>
-        .List
+        _:List
     </out>
     <nextLoc>
         N1:Int => ?N2:Int
@@ -115,4 +114,3 @@ rule
 </T>
 ensures ?A ==K rev(B) @ C
 endmodule
-

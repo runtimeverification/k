@@ -158,6 +158,7 @@ import org.kframework.kil.Lexical;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
+import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
@@ -170,6 +171,7 @@ import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -197,10 +199,8 @@ import java.util.regex.Pattern;
 // but commends between module items are put between the module items.
 class EndPositionComparator implements Comparator<ModuleItem> {
   public int compare(ModuleItem o1, ModuleItem o2) {
-    String[] s1 = o1.getLocation().split("[\\(,\\)]");
-    int endLine1 = Integer.parseInt(s1[3]), endCol1 = Integer.parseInt(s1[4]);
-    String[] s2 = o2.getLocation().split("[\\(,\\)]");
-    int endLine2 = Integer.parseInt(s2[3]), endCol2 = Integer.parseInt(s2[4]);
+    int endLine1 = o1.getLocation().lineEnd, endCol1 = o1.getLocation().columnEnd;
+    int endLine2 = o2.getLocation().lineEnd, endCol2 = o2.getLocation().columnEnd;
     if (endLine1 < endLine2 || endLine1 == endLine2 && endCol1 < endCol2) return -1;
     if (endLine1 > endLine2 || endLine1 == endLine2 && endCol1 > endCol2) return 1;
     return 0;
@@ -208,38 +208,38 @@ class EndPositionComparator implements Comparator<ModuleItem> {
 }
 
 public class Outer {
-  private String filename;
+  private Source source;
   private List<DefinitionItem> items = new ArrayList<DefinitionItem>();;
   private Module module = null;
   private int beginLine, beginColumn;
   private Context context;
 
-  /** Parses a given string that was read from 'filename'. */
+  /** Parses a given string that was read from 'source'. */
   public static List<DefinitionItem> parse(
-    String filename, String string, Context context) {
+    Source source, String string, Context context) {
     Outer parser = new Outer(new StringReader(string));
-    parser.filename = filename;
+    parser.source = source;
     parser.context = context;
     try {
       return parser.Start();
     } catch (ParseException e) {
       // TODO: report location
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), source, null));
       return new ArrayList<DefinitionItem>();
     } catch (TokenMgrError e) {
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), source, null));
       return new ArrayList<DefinitionItem>();
     }
   }
 
-  /** Parses a given string that was fead from 'filename' as a list of
+  /** Parses a given string that was read from 'source' as a list of
   attributes.  Note that the source position in the returned result is
   relative to the String. */
-  public static Attributes parseAttributes(String string, String filename) throws ParseException {
+  public static Attributes parseAttributes(String string, Source source) throws ParseException {
     Outer parser = new Outer(new StringReader(string));
-    parser.filename = filename;
+    parser.source = source;
     parser.module = null;
     parser.items = new ArrayList<DefinitionItem>();
     StringSentence ss = new StringSentence("", "", "", "");
@@ -253,26 +253,27 @@ public class Outer {
 
   /***** Source Location *****/
   /** Returns the start location of the next token */
-  private String startLoc() {
+  private Location startLoc() {
     Token t = getToken(1);
-    return "("+ (beginLine + t.beginLine) + "," +
-                (beginColumn + t.beginColumn);
+    return new Location(beginLine + t.beginLine,
+                        beginColumn + t.beginColumn, 0, 0);
   }
 
   /** Marks 'node' with the start position in 'locPrefix' and the end
   position of the last token.  Returns 'node' (which simplifies many
   uses of this function).
   */
-  private <T extends ASTNode> T markLoc(String locPrefix, T node) {
-    return markLocExplicit(
-      locPrefix + "," + token.endLine + "," + token.endColumn + ")", node);
+  private <T extends ASTNode> T markLoc(Location locPrefix, T node) {
+    locPrefix.lineEnd = token.endLine;
+    locPrefix.columnEnd = token.endColumn;
+    return markLocExplicit(locPrefix, node);
   }
 
   /** Marks 'node' with the location in 'loc'.Returns 'node' (which
   simplifies many uses of this function).
   */
-  private <T extends ASTNode> T markLocExplicit(String loc, T node) {
-    node.setFilename(filename);
+  private <T extends ASTNode> T markLocExplicit(Location loc, T node) {
+    node.setSource(source);
     node.setLocation(loc);
     return node;
   }
@@ -281,8 +282,8 @@ public class Outer {
   Returns 'node' (which simplifies many uses of this function).
   */
   private <T extends ASTNode> T tokenLoc(T node) {
-    return markLoc("(" + (beginLine + token.beginLine) + "," +
-                         (beginColumn + token.beginColumn), node);
+    return markLoc(new Location(beginLine + token.beginLine, 
+                                beginColumn + token.beginColumn, 0, 0), node);
   }
 
   /***** Token Processing *****/
@@ -333,10 +334,8 @@ public class Outer {
       str = str.substring(1);
     }
 
-    String loc = "("+
-      token.beginLine+","+token.beginColumn+","+
-      token.endLine+","+token.endColumn+")";
-
+    Location loc = new Location(token.beginLine, token.beginColumn,
+                                token.endLine, token.endColumn);
     if (module == null) {
       items.add(markLocExplicit(loc, new LiterateDefinitionComment(str, lcType)));
     } else {
@@ -374,7 +373,7 @@ public class Outer {
          i >= 0;
          i = content.lastIndexOf('[', i - 1)) {
       Outer parser = new Outer(new StringReader(content.substring(i)));
-      parser.filename = this.filename;
+      parser.source = this.source;
       parser.module = this.module;
       parser.items = this.items;
       parser.beginLine = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);
@@ -493,7 +492,7 @@ String String() : {}
 }
 
 /** Parses and returns a NonTerminal but not a List, NeList, Lexer, or Token */
-NonTerminal SimpleSortID() : { String loc = startLoc(); String str; }
+NonTerminal SimpleSortID() : { Location loc = startLoc(); String str; }
 {
   <UPPER_ID> { str = image(); }
   ("{"  { str = str + specialAndImage(); }
@@ -723,7 +722,7 @@ void Attributes(ASTNode node) : {}
 
 /** Parses a single attribute and adds it to 'node' */
 void Tag(ASTNode node) :
-{ String loc = startLoc(); String key; String val = "";
+{ Location loc = startLoc(); String key; String val = "";
   StringBuilder sb = new StringBuilder(); }
 {
   <KEY> { key = image(); }
@@ -755,13 +754,13 @@ List<DefinitionItem> Start() : {}
 
 /** Parses a Require clause and adds it to items */
 void Require(List<DefinitionItem> items) :
-{ String loc = startLoc(); String str; }
+{ Location loc = startLoc(); String str; }
 {
   "require" str = String() { items.add(markLoc(loc, new Require(str))); }
 }
 
 /** Parses a Module and adds it to items */
-void Module(List<DefinitionItem> items) : { String loc = startLoc(); }
+void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 {
   "module" <MODNAME> { module = new Module(image()); }
     (Import(module))*
@@ -774,7 +773,7 @@ void Module(List<DefinitionItem> items) : { String loc = startLoc(); }
 }
 
 /** Parses an Import and adds it to module */
-void Import(Module module): { String loc = startLoc(); }
+void Import(Module module): { Location loc = startLoc(); }
 {
   "imports" <MODNAME>
   { module.appendModuleItem(markLoc(loc, new Import(image()))); }
@@ -782,7 +781,8 @@ void Import(Module module): { String loc = startLoc(); }
 
 /** Parses a Sentence and adds it to 'module' */
 void Sentence(Module module) :
-{ String loc = startLoc(), type, str;
+{ Location loc = startLoc();
+  String type, str;
   StringBuilder sb = new StringBuilder();
   NonTerminal nonTerminal;
   StringSentence ss;
@@ -827,7 +827,7 @@ void Sentence(Module module) :
 
 /** Parses a PriorityBlock and adds it to 'pblocks' */
 void PriorityBlock(List<PriorityBlock> pblocks) :
-{ String loc = startLoc(); String assoc = "";
+{ Location loc = startLoc(); String assoc = "";
   List<Production> prods = new ArrayList<Production>(); }
 {
   (("left" | "right" | "non-assoc") { assoc = image(); } ":")?
@@ -837,7 +837,7 @@ void PriorityBlock(List<PriorityBlock> pblocks) :
 
 /** Parses a Production and adds it to 'prods' */
 void Production(List<Production> prods) :
-{ String loc = startLoc(); NonTerminal nonTerminal;
+{ Location loc = startLoc(); NonTerminal nonTerminal;
   List<ProductionItem> items = new ArrayList<ProductionItem>();
   String klabel = null; }
 {
@@ -867,7 +867,7 @@ void Production(List<Production> prods) :
 
 /** Parses a ProductionItem and adds it to 'items' */
 void ProductionItem(List<ProductionItem> items) :
-{ String loc = startLoc(); String str; String sep; NonTerminal nonTerminal;
+{ Location loc = startLoc(); String str; String sep; NonTerminal nonTerminal;
   StringBuilder follow = new StringBuilder(); boolean isToken = false; }
 {
   str = String() { items.add(tokenLoc(new Terminal(str))); }

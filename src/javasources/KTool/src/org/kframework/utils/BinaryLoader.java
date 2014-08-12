@@ -34,12 +34,14 @@ public class BinaryLoader {
     }
 
     public void save(String fileName, Object o) throws IOException {
-        save(new FileOutputStream(fileName), o);
+        try (OutputStream out = new FileOutputStream(fileName)) {
+            save(out, o);
+        }
     }
 
     public void saveOrDie(String fileName, Object o) {
-        try {
-            saveOrDie(new FileOutputStream(fileName), o, fileName);
+        try (OutputStream out = new FileOutputStream(fileName)) {
+            saveOrDie(out, o, fileName);
         } catch (IOException e) {
             kem.registerCriticalError("Could not write to " + fileName, e);
         }
@@ -68,9 +70,42 @@ public class BinaryLoader {
         return cls.cast(load(fileName));
     }
 
+    public <T> T load(Class<T> cls, InputStream in) throws IOException, ClassNotFoundException {
+        return cls.cast(load(in));
+    }
+
     public <T> T loadOrDie(Class<T> cls, String fileName) {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
+            return loadOrDie(cls, in, fileName);
+        } catch (IOException e) {
+            kem.registerCriticalError("Could not read from " + fileName, e);
+        }
+        return null;
+    }
+
+    public Object load(InputStream in) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream deserializer
+                = new ObjectInputStream(in)) {
+            Object obj = deserializer.readObject();
+            injector.injectMembers(obj);
+            return obj;
+        }
+    }
+
+    public Object load(String fileName) throws IOException, ClassNotFoundException {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
+            return load(in);
+        }
+    }
+
+    public <T> T loadOrDie(Class<T> cls, InputStream in) {
+        return loadOrDie(cls, in, "input stream");
+    }
+
+    public <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
+
         try {
-            return load(cls, fileName);
+            return load(cls, in);
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
@@ -80,14 +115,5 @@ public class BinaryLoader {
             kem.registerCriticalError("Could not read from " + fileName, e);
         }
         return null;
-    }
-
-    public Object load(String fileName) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream deserializer
-                     = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fileName)))) {
-            Object obj = deserializer.readObject();
-            injector.injectMembers(obj);
-            return obj;
-        }
     }
 }

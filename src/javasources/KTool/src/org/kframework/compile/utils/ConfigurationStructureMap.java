@@ -2,7 +2,6 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.Cell;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.Serializable;
@@ -54,10 +53,8 @@ public class ConfigurationStructureMap implements
         ConfigurationStructure cfgStr;
         cfgStr = config.get(o.getId());
         if (cfgStr == null) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.INTERNAL,
-                    "Cell " + o + " not found in configuration"
-                    , this.getClass().getName(), o.getFilename(), o.getLocation()));
+            GlobalSettings.kem.registerInternalError(
+                    "Cell " + o + " not found in configuration", o);
         }
         return cfgStr;
     }
@@ -85,10 +82,9 @@ public class ConfigurationStructureMap implements
     public ConfigurationStructure put(String s, ConfigurationStructure configurationStructure) {
         if (config.containsKey(s)) {
             Cell c = config.get(s).cell;
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.INTERNAL,
-                    "Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").", this.getClass().getName(),
-                    configurationStructure.cell.getFilename(), configurationStructure.cell.getLocation()));
+            GlobalSettings.kem.registerInternalError(
+                    "Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").",
+                    configurationStructure.cell);
         }
         return config.put(s,configurationStructure);
     }

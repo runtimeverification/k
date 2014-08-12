@@ -27,7 +27,7 @@ public class CellEndLabelFilter extends ParseForestTransformer {
         if (!cell.getLabel().equals(cell.getEndLabel())) {
             String msg = "Cell starts with '" + cell.getLabel() + "' but ends with '" + cell.getEndLabel() + "'";
             // String msg = "Variable " + r.getName() + " cannot have sort " + r.getSort() + " at this location. Expected sort " + correctSort + ".";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getFilename(), cell.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cell.getSource(), cell.getLocation());
             throw new ParseFailedException(kex);
         }
         return super.visit(cell, _);

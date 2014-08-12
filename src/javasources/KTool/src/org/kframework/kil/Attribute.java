@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
@@ -32,6 +33,13 @@ public class Attribute extends ASTNode {
     public static final Attribute MACRO = new Attribute(MACRO_KEY, "");
     public static final Attribute ANYWHERE = new Attribute("anywhere", "");
     public static final Attribute EQUALITY = new Attribute("equality", "");
+    public static final Attribute TRANSITION = new Attribute("transition", "");
+    public static final Attribute SYMBOLIC = new Attribute(SymbolicBackend.SYMBOLIC, "");
+    public static final Attribute NOT_IN_RULES = new Attribute("notInRules", "");
+    public static final Attribute VARIABLE = new Attribute("variable", "");
+    public static final Attribute SUPERCOOL = new Attribute("supercool", "");
+    public static final Attribute SUPERHEAT = new Attribute("superheat", "");
+    public static final Attribute HYBRID = new Attribute("hybrid", "");
     public static final String CELL_KEY = "cell";
 
     private String key;

@@ -8,9 +8,14 @@
         extension="simple"
         >
     <kompile-option name="--backend" value="java" />
-    <all-programs>
+    <program name="reverse.simple">
       <krun-option name="--prove" value="verification/reverse_spec.k" />
-    </all-programs>
+    </program>
+    <program name="sum.simple">
+      <krun-option name="--prove" value="verification/sum_spec.k" />
+    </program>
+    <program name="comm_assoc.simple">
+      <krun-option name="--prove" value="verification/comm_assoc_spec.k" />
+    </program>
   </test>
 </tests>
-

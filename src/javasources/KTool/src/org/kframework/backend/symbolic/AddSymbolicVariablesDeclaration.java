@@ -37,8 +37,8 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
             Lexical lexical = new Lexical(terminal, follow);
             org.kframework.kil.Attributes attributes = new Attributes();
 //            attributes.set("onlyLabel", "");
-            attributes.set("notInRules", "");
-            attributes.set("variable", "");
+            attributes.add(Attribute.NOT_IN_RULES);
+            attributes.add(Attribute.VARIABLE);
 
             // adding default Int ::= SymVar
             java.util.List<ModuleItem> itemsS = module.getItems();

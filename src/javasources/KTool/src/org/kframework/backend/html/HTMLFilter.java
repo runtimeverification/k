@@ -487,7 +487,7 @@ public class HTMLFilter extends BackendFilter {
     @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
-        for (Attribute entry : attributes.getContents()) {
+        for (Attribute entry : attributes.values()) {
             this.visitNode(entry);
         }
         if(!firstAttribute)
@@ -498,8 +498,6 @@ public class HTMLFilter extends BackendFilter {
     @Override
     public Void visit(Attribute entry, Void _) {
         if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
-            return null;
-        if (context.isTagGenerated(entry.getKey()))
             return null;
         if (context.isParsingTag(entry.getKey()))
             return null;

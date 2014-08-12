@@ -11,9 +11,6 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.mpfr.BigFloat;
 import org.kframework.mpfr.BinaryMathContext;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
@@ -105,8 +102,8 @@ public class FloatBuiltin extends Token {
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
         Pair<BigFloat, Integer> pair = parseKFloat(s);
         if (pair == null) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                    s + " is not parseable as a valid Float.", this.getLocation(), this.getFilename()));
+            GlobalSettings.kem.registerCriticalError(
+                    s + " is not parseable as a valid Float.", this);
         }
         this.value = pair.getLeft();
         this.exponent = pair.getRight();

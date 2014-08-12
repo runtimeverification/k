@@ -114,12 +114,8 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 if (!(pathCondition instanceof Variable)){
                     cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
                     // add transition attribute
-                  List<Attribute> attrs = node.getAttributes().getContents();
-                  // bad practice
-                  attrs.add(new Attribute("transition", ""));
-
-                  atts = node.getAttributes().shallowCopy();
-                  atts.setContents(attrs);
+                  node.getAttributes().add(Attribute.TRANSITION);
+                  node.setAttributes(node.getAttributes().shallowCopy());
                 }
             }
 

@@ -4,6 +4,8 @@ package org.kframework.kast;
 import java.io.File;
 import java.util.List;
 
+import org.kframework.kil.Source;
+import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
@@ -15,7 +17,6 @@ import org.kframework.utils.options.DefinitionLoadingOptions;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
-import com.google.inject.ProvidedBy;
 
 public final class KastOptions {
 
@@ -53,11 +54,11 @@ public final class KastOptions {
      * {@link #stringToParse()}.
      * @return A textual description of the source of the string to parse.
      */
-    public String source() {
+    public Source source() {
         if (expression != null) {
-            return "Command line";
+            return Sources.fromCommandLine("-e");
         } else {
-            return parameters.get(0);
+            return Sources.fromFile(parameters.get(0));
         }
     }
 

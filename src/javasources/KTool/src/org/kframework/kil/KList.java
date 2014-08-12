@@ -17,8 +17,8 @@ public class KList extends Collection {
         super(Sort.KLIST);
     }
 
-    public KList(String location, String filename) {
-        super(location, filename, Sort.KLIST);
+    public KList(Location location, Source source) {
+        super(location, source, Sort.KLIST);
     }
 
     public KList(Element element) {
