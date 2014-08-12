@@ -1,27 +1,27 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 require "../simple-untyped.k"
 
-module REVERSE-SPEC
+module SUM-SPEC
   imports SIMPLE-UNTYPED
 
-/*
+/* function specification */
 rule
 <T>
     <threads>
         <thread>
             <k>
-               reverse(X:Int) => ?Y:Int
+                sum(X:Int) => (X *Int (X +Int 1)) /Int 2
             </k>
             <control>
                 <fstack>
-                   _:List
+                    _:List
                 </fstack>
                 <xstack>
-                   _:List
+                    _:List
                 </xstack>
             </control>
             <env>
-                reverse |-> 0
+                sum |-> 0
             </env>
             <holds>
                 .Map
@@ -32,18 +32,18 @@ rule
         </thread>
     </threads>
     <genv>
-        reverse |-> 0
+        sum |-> 0
     </genv>
-    <store>...
-        0 |-> lambda ( x , { var y ; (y = 0) ; while ( (x != 0) ) { var t
-          ; (t = (x [ 1 ])) ; ((x [ 1 ]) = y) ; (y = x) ; (x = t) ; } } )
-        (list(X)(A:Seq) => list(?Y)(rev(A)))
-    ...</store>
+    <store>
+        0 |-> lambda ( x , { var y ; (y = 0) ; while ( (x > 0) ) { (y = (y
+           + x)) ; (x = (x - 1)) ; } return y; } )
+        (.Map => ?M:Map)
+    </store>
     <busy>
-        _:Set
+        .Set
     </busy>
     <terminated>
-        _:Set
+        .Set
     </terminated>
     <in>
         _:List
@@ -55,14 +55,15 @@ rule
         N1:Int => ?N2:Int
     </nextLoc>
 </T>
-*/
+requires X >=Int 0
 
+/* loop invariant */
 rule
 <T>
     <threads>
         <thread>
             <k>
-                while ( (x != 0) ) { (t = (x [ 1 ])) ; ((x [ 1 ]) = y) ; (y = x) ; (x = t) ; }
+                while ( (x > 0) ) { (y = y + x) ; (x = x - 1) ; }
               =>
                 .K
             ...</k>
@@ -77,7 +78,6 @@ rule
             <env>...
                 x |-> Lx:Int
                 y |-> Ly:Int
-                t |-> Lt:Int
             ...</env>
             <holds>
                 _:Map
@@ -91,10 +91,8 @@ rule
         _:Map
     </genv>
     <store>...
-        Lx |-> (X1:Val => ?X2:Val)
-        Ly |-> (Y1:Val => ?Y2:Val)
-        Lt |-> (T1:Val => ?T2:Val)
-        (list(X1)(B:Seq) list(Y1)(C:Seq) => list(?Y2)(?A:Seq))
+        Lx |-> (X1:Int => 0)
+        Ly |-> (Y1:Int => Y1 +Int (X1 *Int (X1 +Int 1)) /Int 2)
     ...</store>
     <busy>
         _:Set
@@ -112,5 +110,5 @@ rule
         N1:Int => ?N2:Int
     </nextLoc>
 </T>
-ensures ?A ==K rev(B) @ C
+requires X1 >=Int 0
 endmodule

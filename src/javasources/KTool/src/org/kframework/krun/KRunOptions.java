@@ -160,7 +160,10 @@ public final class KRunOptions {
         if (io != null && io == true && experimental.ltlmc() != null) {
             GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --ltlmc");
         }
-        if (search() || experimental.javaExecution.generateTests || experimental.ltlmc() != null) {
+        if (search()
+                || experimental.prove != null
+                || experimental.javaExecution.generateTests
+                || experimental.ltlmc() != null) {
             return false;
         }
         if (io == null) {

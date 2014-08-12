@@ -1038,7 +1038,6 @@ module SIMPLE-UNTYPED
   imports LIST-PATTERN
 
   // verification stuff
-  syntax Id ::= "x" | "y" | "t" | "reverse"
+  syntax Id ::= "x" | "y" | "t" | "f" | "reverse" | "sum" | "comm_assoc"
   syntax Exp ::= "breakpoint"
 endmodule
-
