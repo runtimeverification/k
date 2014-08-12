@@ -96,11 +96,16 @@ module KERNELC-SEMANTICS
     <env> Env:Map </env>
     [structural]
   rule
-    // TODO: delete locals
-    //<k> Env:Map => deleteLocals() ...</k>
-    <k> Env:Map => .K ...</k>
-    <env> OuterEnv:Map => Env </env>
+    <k> Env:Map => deleteLocals(values(BlockEnv -Map Env)) ...</k>
+    <env> BlockEnv:Map => Env </env>
     [structural]
+
+  syntax KItem ::= deleteLocals(List)
+  rule
+    <k> deleteLocals((ListItem(tv(_:Type, P:Pointer)) => .List) L:List) ...</k>
+    <heap>... P |-> _ => .Map...</heap>
+    [structural]
+  rule deleteLocals(.List) => .K    [structural]
 
   /*
    * If/choice
@@ -154,10 +159,16 @@ module KERNELC-SEMANTICS
     <fun>...
       Callee |-> functionBody(_:ParameterDeclarations, T, _:Block)
     ...</fun>
-    <k> return tv(T:Type, V:Value); ~> _ => tv(T, V) ~> K </k>
-    <stack> ListItem(callStackFrame(K, Env:Map, Caller:Id)) => .List ...</stack>
+    <k>
+      return tv(T:Type, V:Value); ~> _
+    =>
+      deleteLocals(values(CalleeEnv)) ~> tv(T, V) ~> K
+    </k>
+    <stack>
+      ListItem(callStackFrame(K, CallerEnv:Map, Caller:Id)) => .List
+    ...</stack>
     <fun-id> Callee:Id => Caller </fun-id>
-    <env> _:Map => Env </env>
+    <env> CalleeEnv:Map => CallerEnv </env>
 
 
   /*
@@ -354,17 +365,6 @@ module KERNELC-SEMANTICS
   rule initializeObject(F:Id |-> T:Type M:Map)
     => F |-> tv(T, undef) initializeObject(M)
   rule initializeObject(.Map) => .Map
-
-  /*
-  syntax Map ::= filterMap ( Map , Set )
-  rule
-      filterMap((K1 |-> K2 Map), Set)
-    =>
-      if SetItem(K1) in Set then K1 |-> K2 else .Map fi
-      filterMap(Map, Set)
-  [structural]
-  rule filterMap(.Map, _) => .Map [structural]
-  */
 
   syntax Map ::= makeMemberMap(VariableDeclarations)    [function]
   rule makeMemberMap(T:Type X:Id; VDs:VariableDeclarations)
