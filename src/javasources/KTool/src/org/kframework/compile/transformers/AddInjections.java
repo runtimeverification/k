@@ -3,11 +3,11 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KItemProjection;
 import org.kframework.kil.KLabelInjection;
 import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
@@ -20,6 +20,8 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +32,9 @@ import java.util.List;
  */
 public class AddInjections extends CopyOnWriteTransformer{
 
-    private enum TransformationState { TRANSFORM_PRODUCTIONS, TRANSFORM_TERMS, REMOVE_REDUNDANT_INJECTIONS }
+    private enum TransformationState {
+        NORMALIZE_PRODUCTIONS, TRANSFORM_PRODUCTIONS, TRANSFORM_TERMS, REMOVE_REDUNDANT_INJECTIONS
+    }
 
     private TransformationState state;
 
@@ -39,27 +43,16 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
-    public Definition visit(Definition definition, Void _)  {
-        state = TransformationState.TRANSFORM_PRODUCTIONS;
-        definition = (Definition) super.visit(definition, _);
-        state = TransformationState.TRANSFORM_TERMS;
-        definition = (Definition) super.visit(definition, _);
-        state = TransformationState.REMOVE_REDUNDANT_INJECTIONS;
-        definition = (Definition) super.visit(definition, _);
-        return definition;
-    }
-
-    @Override
     public Module visit(Module module, Void _) {
-        if (state == null) {
-            state = TransformationState.TRANSFORM_PRODUCTIONS;
-            module = (Module) super.visit(module, _);
-            state = TransformationState.TRANSFORM_TERMS;
-            module = (Module) super.visit(module, _);
-            return module;
-        } else {
-            return (Module) super.visit(module, _);
-        }
+        state = TransformationState.NORMALIZE_PRODUCTIONS;
+        module = normalizeProductions(module);
+        state = TransformationState.TRANSFORM_PRODUCTIONS;
+        module = (Module) super.visit(module, _);
+        state = TransformationState.TRANSFORM_TERMS;
+        module = (Module) super.visit(module, _);
+        state = TransformationState.REMOVE_REDUNDANT_INJECTIONS;
+        module = (Module) super.visit(module, _);
+        return module;
     }
 
     /* Phase one: transform productions such that each user-defined production has sort subsorted to KItem and each
@@ -67,11 +60,6 @@ public class AddInjections extends CopyOnWriteTransformer{
     @Override
     public Syntax visit(Syntax node, Void _)  {
         if (state != TransformationState.TRANSFORM_PRODUCTIONS) {
-            return node;
-        }
-
-        // TODO(AndreiS): normalize productions
-        if (node.getPriorityBlocks().size() != 1 || node.getPriorityBlocks().get(0).getProductions().size() != 1) {
             return node;
         }
 
@@ -120,7 +108,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     public NonTerminal visit(NonTerminal node, Void _) {
         assert state == TransformationState.TRANSFORM_PRODUCTIONS;
 
-        if (node.getSort().equals(Sort.KLABEL) || node.getSort().equals(Sort.KLIST)) {
+        if (needInjectionFrom(node.getSort())) {
             NonTerminal returnNode = node.shallowCopy();
             returnNode.setSort(Sort.KITEM);
             return returnNode;
@@ -213,6 +201,35 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     /**
+     * Private helper method that flattens productions of a given {@code Module}.
+     *
+     * @param module
+     *            the module
+     * @return the flattened module
+     */
+    private Module normalizeProductions(Module module) {
+        module = module.shallowCopy();
+        List<ModuleItem> newModuleItems = Lists.newArrayList();
+        for (ModuleItem item : module.getItems()) {
+            if (item instanceof Syntax) {
+                Syntax syntax = (Syntax) item;
+                for (PriorityBlock blk : syntax.getPriorityBlocks()) {
+                    for (Production prod : blk.getProductions()) {
+                        newModuleItems.add(
+                            new Syntax(
+                                syntax.getDeclaredSort(),
+                                new PriorityBlock(blk.getAssoc(), prod)));
+                    }
+                }
+            } else {
+                newModuleItems.add(item);
+            }
+        }
+        module.setItems(newModuleItems);
+        return module;
+    }
+
+    /**
      * Private helper method that checks if an argument of a {@code TermCons}
      * with given sort needs to be injected to sort {@code KItem}.
      *
@@ -223,7 +240,8 @@ public class AddInjections extends CopyOnWriteTransformer{
      */
     private boolean needInjectionFrom(Sort sort) {
         return sort.equals(Sort.KLABEL) || sort.equals(Sort.KLIST)
-                || sort.equals(Sort.BAG) || sort.equals(Sort.BAG_ITEM);
+                || sort.equals(Sort.BAG) || sort.equals(Sort.BAG_ITEM)
+                || sort.isCellSort();
     }
 
     /**
@@ -239,7 +257,7 @@ public class AddInjections extends CopyOnWriteTransformer{
     private boolean needProjectionTo(Sort sort) {
         return sort.equals(Sort.KLABEL) || sort.equals(Sort.KLIST)
                 || sort.equals(Sort.K) || sort.equals(Sort.BAG)
-                || sort.equals(Sort.BAG_ITEM);
+                || sort.equals(Sort.BAG_ITEM) || sort.isCellSort();
     }
 
 }
