@@ -50,7 +50,6 @@ module KERNELC-SYNTAX
     | "~" Expression                                    [strict]
     | "*" Expression                                    [strict]
     | "&" Expression
-    //| "sizeof" Expression                               [strict]
     | "sizeof" "(" Type ")"
     > "(" Type ")" Expression                           [strict(2)]
     > left:
@@ -89,6 +88,5 @@ module KERNELC-SYNTAX
               | "printf"
 
   syntax Statement ::= "breakpoint"
-                     | "watch"
 endmodule
 
