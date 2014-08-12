@@ -1,5 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 require "verification/list_pattern.k"
+require "modules/verification_lemmas.k"
 
 /*!
 \title{SIMPLE --- Untyped}
@@ -1036,8 +1037,9 @@ endmodule
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SEMANTICS
   imports LIST-PATTERN
+  imports VERIFICATION_LEMMAS
 
   // verification stuff
-  syntax Id ::= "x" | "y" | "t" | "f" | "reverse" | "sum" | "comm_assoc"
+  syntax Id ::= "x" | "y" | "t" | "f" | "reverse" | "sum" | "comm_assoc" | "head"
   syntax Exp ::= "breakpoint"
 endmodule

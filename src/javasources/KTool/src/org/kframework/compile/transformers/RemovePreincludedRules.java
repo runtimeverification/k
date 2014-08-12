@@ -46,7 +46,7 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
                 || (filename.equals(KPaths.getKBase(false)
                         + File.separator + "include" + File.separator + "modules"
                         + File.separator + "k-functional-visitor.k"))
-                || (node.getFilename().equals(KPaths.getKBase(false)
+                || (filename.equals(KPaths.getKBase(false)
                         + File.separator + "include" + File.separator + "modules"
                         + File.separator + "verification_lemmas.k"))) {
             return node;
