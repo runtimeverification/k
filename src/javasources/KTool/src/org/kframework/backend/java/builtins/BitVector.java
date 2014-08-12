@@ -212,6 +212,10 @@ public abstract class BitVector<T extends Number> extends Token {
         return BitVector.of(value, bitwidth);
     }
 
+    /**
+     * Get the bitwidth of a term of sort MInt assumed to have a bitwidth attribute.
+     * Throws an error if the term does not declare one.
+     */
     public static int getBitwidth(Term t) {
         String bitwidth = t.getAttribute(Attribute.BITWIDTH_KEY);
         if (bitwidth == null) {

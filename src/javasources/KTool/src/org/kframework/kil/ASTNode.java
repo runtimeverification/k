@@ -224,6 +224,12 @@ public abstract class ASTNode implements Serializable {
         attributes = attrs;
     }
 
+    /**
+     * Copies attributes from another node into this node.
+     * Use this in preference to {@link ASTNode#getAttributes} where appropriate because
+     * the latter will create a new object if no attributes exist.
+     * @param node The ASTNode to copy all attributes from.
+     */
     public void copyAttributesFrom(ASTNode node) {
         if (node.attributes == null)
             return;
