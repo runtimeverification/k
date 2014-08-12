@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
@@ -55,6 +57,16 @@ public class BuiltinMapOperations {
                 Collections.singleton(key),
                 Collections.<Term, Term>emptyMap());
         return mapUpdate.evaluateUpdate();
+    }
+
+    public static Term difference(BuiltinMap map1, BuiltinMap map2, TermContext context) {
+        if (!map1.isGround() || !map2.isGround()) {
+            return null;
+        }
+
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.putAll(Maps.difference(map1.getEntries(), map2.getEntries()).entriesOnlyOnLeft());
+        return builder.build();
     }
 
     public static Term updateAll(BuiltinMap map1, BuiltinMap map2, TermContext context) {
