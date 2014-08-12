@@ -17,7 +17,7 @@ module MAP-IMPL
 
   // syntax Map ::= Map "-Map" Map
   // TODO(AndreiS): the rules below do not work properly
-  rule (K1:K |-> K2) M1:Map) -Map M2:Map
+  rule (K1:K |-> K2:K M1:Map) -Map M2:Map
     => #if K2 ==K M2[K1] #then M1 -Map M2 #else K1 |-> K2 (M1 -Map M2) #fi
   rule .Map -Map _:Map => .Map
 
