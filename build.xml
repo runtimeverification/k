@@ -61,6 +61,9 @@
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/outer" includes="*.java" />
 			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
 		</delete>
+		<!-- TODO: Remove after September 2014.
+		Keeping it in order to remove a package that was renamed. -->
+		<delete dir="${javasources}/KTool/src/org/kframework/parser/basic" />
 	</target>
 
 	<target name="makeversion">

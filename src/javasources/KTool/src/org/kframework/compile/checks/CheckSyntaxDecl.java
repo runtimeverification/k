@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import java.util.HashMap;
 import java.util.List;
 
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
@@ -14,6 +15,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -127,12 +129,18 @@ public class CheckSyntaxDecl extends BasicVisitor {
             }
         }
 
-        if (eTerminals > 0 && (neTerminals == 0 || sorts < 2))
-            if (!node.containsAttribute("onlyLabel") || !node.containsAttribute("klabel")) {
+        if (eTerminals > 0 && (neTerminals == 0 || sorts < 2)) {
+            // if it is an epsilon transition, it must contain a klabel and one of:
+            // onlyLabel or (notInRules, notInGround)
+            if (!((node.containsAttribute("onlyLabel") ||
+                    (node.containsAttribute("notInRules") && node.containsAttribute("notInGround")))
+                    && node.containsAttribute("klabel"))) {
                 String msg = "Cannot declare empty terminals in the definition.\n";
-                msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
+                msg += "            Use attribute 'onlyLabel' or 'notInRules' and 'notInGround' paired with 'klabel(...)' to limit the use to programs.";
+
                 GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
+        }
         return null;
     }
 
