@@ -52,7 +52,7 @@ public final class KompileOptions implements Serializable {
         UNPARSE(false, false, false, UnparserBackend.class, null),
         UNFLATTEN(false, false, false, UnflattenBackend.class, null),
         UNFLATTEN_JAVA(false, true, false, UnflattenJavaBackend.class, null),
-        SYMBOLIC(false, false, true, SymbolicBackend.class, JavaSymbolicKRun.class),
+        SYMBOLIC(false, false, true, SymbolicBackend.class, MaudeKRun.class),
         COQ(false, true, false, CoqBackend.class, null);
 
         private Backend(boolean documentation, boolean java, boolean generatesDefinition,
