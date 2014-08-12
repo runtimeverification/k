@@ -2,6 +2,6 @@
 # Copyright (c) 2014 K Team. All Rights Reserved.
 # Usage: ./fix_whitespace <files>
 
-sed -i 's/$//' "$@"
+sed -i $'s/\r$//' "$@"
 sed -i 's/ *$//' "$@"
 sed -i 's/	/    /g' "$@"

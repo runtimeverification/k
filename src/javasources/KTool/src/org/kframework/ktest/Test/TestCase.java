@@ -57,7 +57,7 @@ public class TestCase {
     /**
      * Which tests to skip for this particular test case.
      */
-    private final Set<KTestStep> skips;
+    private Set<KTestStep> skips;
 
     /**
      * Script to be executed before testing, only valid on Posix system
@@ -219,6 +219,10 @@ public class TestCase {
 
     public void setExcludes(String[] excludes) {
         this.excludes = toSet(excludes);
+    }
+
+    public void setSkips(Set<KTestStep> skips) {
+        this.skips = skips;
     }
 
     public void setKrunOpts(ProgramProfile krunOpts) {

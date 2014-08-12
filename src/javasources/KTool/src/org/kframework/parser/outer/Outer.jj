@@ -145,8 +145,8 @@ options {
   // FORCE_LA_CHECK = true; // Useful for development, but causes a warning in Production()
 }
 
-PARSER_BEGIN(Basic)
-package org.kframework.parser.basic;
+PARSER_BEGIN(Outer)
+package org.kframework.parser.outer;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -207,7 +207,7 @@ class EndPositionComparator implements Comparator<ModuleItem> {
   }
 }
 
-public class Basic {
+public class Outer {
   private Source source;
   private List<DefinitionItem> items = new ArrayList<DefinitionItem>();;
   private Module module = null;
@@ -217,7 +217,7 @@ public class Basic {
   /** Parses a given string that was read from 'source'. */
   public static List<DefinitionItem> parse(
     Source source, String string, Context context) {
-    Basic parser = new Basic(new StringReader(string));
+    Outer parser = new Outer(new StringReader(string));
     parser.source = source;
     parser.context = context;
     try {
@@ -238,7 +238,7 @@ public class Basic {
   attributes.  Note that the source position in the returned result is
   relative to the String. */
   public static Attributes parseAttributes(String string, Source source) throws ParseException {
-    Basic parser = new Basic(new StringReader(string));
+    Outer parser = new Outer(new StringReader(string));
     parser.source = source;
     parser.module = null;
     parser.items = new ArrayList<DefinitionItem>();
@@ -372,7 +372,7 @@ public class Basic {
     for (int i = content.lastIndexOf('[');
          i >= 0;
          i = content.lastIndexOf('[', i - 1)) {
-      Basic parser = new Basic(new StringReader(content.substring(i)));
+      Outer parser = new Outer(new StringReader(content.substring(i)));
       parser.source = this.source;
       parser.module = this.module;
       parser.items = this.items;
@@ -412,7 +412,7 @@ public class Basic {
   }
 
 }
-PARSER_END(Basic)
+PARSER_END(Outer)
 
 /***** Default Token Rules *****/
 

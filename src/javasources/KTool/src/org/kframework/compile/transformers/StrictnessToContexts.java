@@ -6,13 +6,11 @@ import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.parser.basic.Basic;
-import org.kframework.parser.basic.ParseException;
+import org.kframework.parser.outer.Outer;
+import org.kframework.parser.outer.ParseException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.*;
-import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -119,7 +117,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             try {
-                strictAttrs = Basic.parseAttributes(attribute, prod.getSource());
+                strictAttrs = Outer.parseAttributes(attribute, prod.getSource());
             } catch (ParseException e) {
                 GlobalSettings.kem.registerCompilerError(
                         "Strictness attributes " + attribute + " could not be parsed." +
@@ -132,7 +130,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 if (strictAttrValue.isEmpty()) strictAttrAttrs = new Attributes();
                 else {
                     try {
-                        strictAttrAttrs = Basic.parseAttributes(strictAttrValue, prod.getSource());
+                        strictAttrAttrs = Outer.parseAttributes(strictAttrValue, prod.getSource());
                     } catch (ParseException e) {
                         GlobalSettings.kem.registerCompilerError(
                                 "Strictness attributes could not be parsed for " + strictAttrValue + "." +
@@ -241,7 +239,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                     String strictContextProdAttribute = strictContextProd.getAttribute(CONTEXT);
                     if (!strictContextProdAttribute.isEmpty()) {
                         try {
-                            Attributes strictContextAttrs = Basic.parseAttributes(
+                            Attributes strictContextAttrs = Outer.parseAttributes(
                                     strictContextProdAttribute, strictContextProd.getSource());
                             ctx.getAttributes().putAll(strictContextAttrs);
                         } catch (ParseException e) {

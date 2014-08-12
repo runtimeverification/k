@@ -58,7 +58,7 @@
                    <fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />  
                 </delete>
 		<delete>
-			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
+			<fileset dir="${javasources}/KTool/src/org/kframework/parser/outer" includes="*.java" />
 			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
 		</delete>
 	</target>
@@ -212,7 +212,7 @@
                 <include name="**/*.java"/>
                 <exclude name="src/org/kframework/parser/concrete/lib/**" />
                 <exclude name="src/org/kframework/utils/kastparser/*.java" />
-                <exclude name="src/org/kframework/parser/basic/*.java" />
+                <exclude name="src/org/kframework/parser/outer/*.java" />
             </fileset>
         </checkstyle>
         <checkstyle config="${javasources}/KTool/checkstyle-k.xml">

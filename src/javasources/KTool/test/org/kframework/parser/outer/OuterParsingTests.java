@@ -1,5 +1,5 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
-package org.kframework.parser.basic;
+package org.kframework.parser.outer;
 
 import java.util.List;
 
@@ -13,14 +13,14 @@ import org.kframework.kil.Sources;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 
-public class BasicParsingTests {
+public class OuterParsingTests {
 
     @Test
     public void testLexicalRules() throws Exception {
         // TODO: remove once the new parser is fully functional
         String def = "module TEST syntax Str ::= Token{((~[\\'\\n\\r\\\\])|([\\\\]~[\\n\\r]))*} endmodule";
 
-        List<DefinitionItem> defItemList = Basic.parse(Sources.generatedBy(BasicParsingTests.class), def, null);
+        List<DefinitionItem> defItemList = Outer.parse(Sources.generatedBy(OuterParsingTests.class), def, null);
 
         Module mod = (Module) defItemList.get(0);
         Syntax syn = (Syntax) mod.getItems().get(0);
@@ -34,8 +34,7 @@ public class BasicParsingTests {
         // TODO: remove once the new parser is fully functional
         String def = "module TEST rule endmodule";
 
-
-        List<DefinitionItem> defItemList = Basic.parse(null, def, null);
+        List<DefinitionItem> defItemList = Outer.parse(Sources.generatedBy(OuterParsingTests.class), def, null);
 
         Module mod = (Module) defItemList.get(0);
         StringSentence sen = (StringSentence) mod.getItems().get(0);

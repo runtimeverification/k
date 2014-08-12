@@ -3,6 +3,8 @@ package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
 
+import com.beust.jcommander.internal.Lists;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +24,10 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
         super();
         this.sort = sort;
         this.priorityBlocks = priorities;
+    }
+
+    public Syntax(NonTerminal sort, PriorityBlock... priorities) {
+        this(sort, Lists.newArrayList(priorities));
     }
 
     public Syntax(NonTerminal sort) {

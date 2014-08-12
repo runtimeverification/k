@@ -4,6 +4,7 @@ package org.kframework.backend.symbolic;
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.FirstStep;
+import org.kframework.backend.LastStep;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.unparser.UnparserFilter;
@@ -123,6 +124,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
         steps.add(new FirstStep(this, context));
         steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
         steps.add(new RemoveBrackets(context));
+        steps.add(new SetVariablesInferredSort(context));
         steps.add(new AddEmptyLists(context));
         steps.add(new RemoveSyntacticCasts(context));
         steps.add(new CheckVisitorStep<Definition>(new CheckVariables(context), context));
@@ -140,8 +142,8 @@ public class SymbolicBackend extends BasicBackend implements Backend {
         steps.add(new TagUserRules(context)); // symbolic step
         steps.add(new ReachabilityRuleToKRule(context)); // symbolic step
         steps.add(new AddKCell(context));
+        steps.add(new AddStreamCells(context));
         steps.add(new AddSymbolicK(context));
-
         steps.add(new AddSemanticEquality(context));
         steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
@@ -149,13 +151,13 @@ public class SymbolicBackend extends BasicBackend implements Backend {
         steps.add(new AddTopCellRules(context));
         steps.add(new ResolveBinder(context));
         steps.add(new ResolveAnonymousVariables(context));
-        steps.add(new FlattenSyntax(context));
-        steps.add(new ResolveBlockingInput(context));
         steps.add(new AddK2SMTLib(context));
         steps.add(new AddPredicates(context));
         steps.add(new ResolveSyntaxPredicates(context));
         steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
+        steps.add(new FlattenSyntax(context));
+        steps.add(new ResolveBlockingInput(context));
         steps.add(new InitializeConfigurationStructure(context));
         steps.add(new AddKStringConversion(context));
         steps.add(new AddKLabelConstant(context));
@@ -164,19 +166,17 @@ public class SymbolicBackend extends BasicBackend implements Backend {
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
         steps.add(new CompileDataStructures(context));
-
-        // steps.add(new LineariseTransformer()); // symbolic step
+        steps.add(new Cell2DataStructure(context));
         steps.add(new ReplaceConstants(context)); // symbolic step
         steps.add(new AddPathCondition(context)); // symbolic step
         steps.add(new AddPathConditionToReachabilityKRule(context)); // symbolic step
         steps.add(new ResolveLtlAttributes(context)); // symbolic step (special case for ltl)
-
         steps.add(new ResolveSupercool(context));
         steps.add(new AddStrictStar(context));
         steps.add(new AddDefaultComputational(context));
         steps.add(new AddOptionalTags(context));
         steps.add(new DeclareCellLabels(context));
-
+        steps.add(new LastStep(this, context));
         return steps;
     }
 }
