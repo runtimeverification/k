@@ -1,17 +1,12 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete.disambiguate;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Bracket;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
-import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.ListTerminator;
-import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
@@ -20,7 +15,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
@@ -77,7 +71,7 @@ public class PreferDotsFilter extends ParseForestTransformer {
             cell.setContents((Term) preferStrict(sort, cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
-            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getSource(), cell.getLocation()));
         }
         return super.visit(cell, _);
     }

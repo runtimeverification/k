@@ -1,16 +1,10 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.maude;
 
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MaudeRun {
 
@@ -70,12 +64,10 @@ public class MaudeRun {
 
         final File maude = new File(maudeExe);
         if (!maude.exists()) {
-            KException exception = new KException(ExceptionType.WARNING, KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalWarning(
                     "Cannot execute Maude from " + maudeExe + ".\n" +
                             "Will assume that Maude is installed by the user such that\n" +
-                            "it can be executed with no warnings using the 'maude' command.",
-                    "top level", "");
-            GlobalSettings.kem.register(exception);
+                            "it can be executed with no warnings using the 'maude' command.");
             // if the maude binaries are not found then consider default `maude`
             internalMaude = false;
             return "maude";

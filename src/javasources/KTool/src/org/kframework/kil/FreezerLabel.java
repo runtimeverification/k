@@ -15,8 +15,8 @@ import org.kframework.kil.visitors.Visitor;
  * Usually only occurs as the label of a {@link KApp} an {@link Empty} as arguments.
  */
 public class FreezerLabel extends KInjectedLabel {
-    public FreezerLabel(String location, String filename) {
-        super(location, filename);
+    public FreezerLabel(Location location, Source source) {
+        super(location, source);
     }
 
     public FreezerLabel(FreezerLabel l) {

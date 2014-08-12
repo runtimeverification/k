@@ -23,8 +23,8 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
         this.contents = new ArrayList<Term>(c.contents);
     }
 
-    public Collection(String location, String filename, Sort sort) {
-        super(location, filename, sort);
+    public Collection(Location location, Source source, Sort sort) {
+        super(location, source, sort);
         contents = new ArrayList<Term>();
     }
 

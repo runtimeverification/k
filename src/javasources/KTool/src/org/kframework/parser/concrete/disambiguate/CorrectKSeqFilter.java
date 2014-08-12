@@ -85,7 +85,7 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
                 return super.visit(ks, _);
             }
             String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 

@@ -69,10 +69,10 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                     Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel(), context);
                     // add all the relations between all the productions annotated with tag1 and tag 2
                     for (Production p1 : prods1) {
-                        if (p1.isSubsort() && !p1.containsAttribute("klabel"))
+                        if (p1.isSubsort() && p1.getKLabel() == null)
                             continue;
                         for (Production p2 : prods2) {
-                            if (p2.isSubsort() && !p2.containsAttribute("klabel"))
+                            if (p2.isSubsort() && p2.getKLabel() == null)
                                 continue;
                             context.addPriority(p1.getKLabel(), p2.getKLabel());
                         }
@@ -94,7 +94,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 
     public void manageAssociativity(Set<Production> prods, String assoc) {
         for (Production p1 : prods) {
-            if (p1.containsAttribute("klabel")) {
+            if (p1.getKLabel() != null) {
                 for (Production p2 : prods) {
                     // collect the associativity for the entire block (production1 to production2)
                     if (p1 != p2) {

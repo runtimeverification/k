@@ -15,8 +15,6 @@ public class SDFHelper {
     public static String getSDFAttributes(Production p, BiMap<String, Production> conses) {
         Attributes attrs = p.getAttributes();
         String str = " {";
-        if (attrs.getContents().size() == 0)
-            return "";
 
         // if (attrs.containsKey("prefer"))
         // str += "prefer, ";

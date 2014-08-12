@@ -34,7 +34,7 @@ public class Error {
     public static void checkIfInputDirectory(String directory) {
         if (!new File(directory).isDirectory()) {
             String msg = "Does not exist or not a directory: " + directory;
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
+            GlobalSettings.kem.registerCriticalError(msg);
         }
     }
 }

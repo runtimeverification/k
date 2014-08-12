@@ -52,7 +52,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
                     "type error: unexpected term '" + trm + "' of sort '" + trm.getSort()
                             + "', expected sort '" + maxSort + "'.",
                     getName(),
-                    trm.getFilename(),
+                    trm.getSource(),
                     trm.getLocation());
             throw new ParseFailedException(kex);
         }

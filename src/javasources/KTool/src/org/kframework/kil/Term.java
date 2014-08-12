@@ -23,8 +23,8 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
         this.sort = t.sort;
     }
 
-    public Term(String location, String filename, Sort sort) {
-        super(location, filename);
+    public Term(Location location, Source source, Sort sort) {
+        super(location, source);
         setSort(sort);
     }
 

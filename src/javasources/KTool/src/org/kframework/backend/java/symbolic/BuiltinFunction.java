@@ -88,7 +88,7 @@ public class BuiltinFunction {
                                 KException.ExceptionType.HIDDENWARNING,
                                 KException.KExceptionGroup.CRITICAL, "missing entry in "
                                         + hookPropertiesFileName + " for hook " + hookAttribute,
-                                production.getFilename(), production.getLocation()));
+                                production.getSource(), production.getLocation()));
                         continue;
                     }
 

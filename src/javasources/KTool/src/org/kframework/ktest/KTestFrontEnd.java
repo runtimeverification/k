@@ -81,7 +81,7 @@ public class KTestFrontEnd extends FrontEnd {
             return false;
         } catch (InvalidConfigError e) {
             LocationData location = e.getLocation();
-            kem.registerCriticalError(e.getMessage(), e, location);
+            kem.registerCriticalError(e.getMessage(), e, location.getLocation(), location.getSource());
             return false;
         }
     }

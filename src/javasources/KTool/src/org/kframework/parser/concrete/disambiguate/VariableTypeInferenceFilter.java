@@ -14,6 +14,7 @@ import com.google.common.collect.Multimap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Location;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
@@ -52,7 +53,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         if (v1 != v2)
                             if (!v1.getSort().equals(v2.getSort())) {
                                 String msg = "Variable '" + v1.getName() + "' declared with two different sorts: " + v1.getSort() + " and " + v2.getSort();
-                                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getFilename(), v1.getLocation()));
+                                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getSource(), v1.getLocation()));
                             }
                     // if there are more than one declaration then prefer the one that is semantically typed
                     if (!v1.isSyntactic()) {
@@ -132,7 +133,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                 if (solutions.size() == 0) {
                     if (fails != null) {
                         String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getSource(), r.getLocation()));
                     } else {
                         // Failure when in the same solution I can't find a unique sort for a specific variable.
                         String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
@@ -140,7 +141,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         for (String vv1 : failsAmb)
                             msg += vv1 + ", ";
                         msg = msg.substring(0, msg.length() - 2);
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getSource(), r.getLocation()));
 
                     }
                 } else if (solutions.size() == 1) {
@@ -171,7 +172,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                             continue;
 
                         // divide into locations
-                        Map<String, java.util.Set<Variable>> varLoc = new HashMap<>();
+                        Map<Location, java.util.Set<Variable>> varLoc = new HashMap<>();
                         for (Variable var : varList) {
                             if (varLoc.containsKey(var.getLocation()))
                                 varLoc.get(var.getLocation()).add(var);
@@ -183,7 +184,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         }
 
                         // choose maximum on each location
-                        for (Map.Entry<String, Set<Variable>> ent : varLoc.entrySet()) {
+                        for (Map.Entry<Location, Set<Variable>> ent : varLoc.entrySet()) {
                             Variable vmax = ent.getValue().iterator().next();
                             for (Variable vv1 : ent.getValue()) {
                                 if (context.isSubsorted(vv1.getSort(), vmax.getSort()))
@@ -195,7 +196,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
 
                         // choose minimum on all locations
                         Variable vmin = varLoc.entrySet().iterator().next().getValue().iterator().next();
-                        for (Map.Entry<String, Set<Variable>> ent : varLoc.entrySet()) {
+                        for (Map.Entry<Location, Set<Variable>> ent : varLoc.entrySet()) {
                             Variable vloc = ent.getValue().iterator().next();
                             if (context.isSubsorted(vmin.getSort(), vloc.getSort()))
                                 vmin = vloc;
@@ -204,7 +205,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         // store the solution for later disambiguation
                         varDeclMap.put(vmin.getName(), vmin);
                         String msg = "Variable '" + vmin.getName() + "' was not declared. Assuming sort " + vmin.getSort() + " and expected sort " + vmin.getExpectedSort() + ".";
-                        GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, vmin.getFilename(), vmin.getLocation()));
+                        GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, vmin.getSource(), vmin.getLocation()));
                     }
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!varDeclMap.isEmpty()) {
@@ -227,7 +228,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                             for (String vv1 : values)
                                 msg += vv1 + ", ";
                             msg = msg.substring(0, msg.length() - 2);
-                            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getSource(), r.getLocation()));
                         }
                     }
                     // The above loop looks for variables that can have multiple sorts, collected from multiple solutions.
@@ -239,7 +240,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     // This makes it that I can't disambiguate properly
                     // I can't think of a quick fix... actually any fix. I will delay it for the new parser.
                     String msg = "Unsolvable ambiguities. Please write the rule in labeled form.\n (Generally because of __ productions mixing with variables).";
-                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getSource(), r.getLocation()));
                     //assert false : "An error message should have been thrown here in the above loop.";
                 }
             }

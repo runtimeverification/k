@@ -5,7 +5,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -57,14 +56,9 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
             }
         }
         if (!(node.getBody() instanceof Rewrite)) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Heating rules should have rewrite at the top.",
-                            getName(),
-                            node.getFilename(),
-                            node.getLocation())
-            );
+                            this, node);
         }
         final Rewrite body = (Rewrite) node.getBody();
         if (!superheat) {

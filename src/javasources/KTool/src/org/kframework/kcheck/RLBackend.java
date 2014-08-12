@@ -210,7 +210,7 @@ public abstract class RLBackend extends BasicBackend implements Backend {
         try {
             pattern = DefinitionLoader.parsePattern(
                     null, //K.pattern,
-                    "Command line pattern",
+                    null,
                     Sort.BAG.name(),
                     context);
             //defaultPatternInfo = new RuleCompilerSteps(javaDef, context);

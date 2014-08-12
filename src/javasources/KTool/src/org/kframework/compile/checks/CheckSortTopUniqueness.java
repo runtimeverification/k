@@ -7,7 +7,6 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -35,7 +34,7 @@ public class CheckSortTopUniqueness extends BasicVisitor {
         }
         if (count > 1) {
             msg = msg.substring(0, msg.length() - 2);
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            GlobalSettings.kem.registerCompilerError(msg, this, node);
         }
         return null;
     }

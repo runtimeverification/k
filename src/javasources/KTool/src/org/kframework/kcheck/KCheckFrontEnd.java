@@ -9,12 +9,8 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
 
 public class KCheckFrontEnd {
     public static String output;
@@ -65,7 +61,7 @@ public class KCheckFrontEnd {
 
 
             //if (!cmd.hasOption("prove")) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
+            //    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
             //} else {
                 //GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
             //}
@@ -77,7 +73,7 @@ public class KCheckFrontEnd {
             //else {
             //    String[] restArgs = cmd.getArgs();
             //    if (restArgs.length < 1)
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file."));
+            //        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file."));
             //    else
             //        def = restArgs[0];
             //}

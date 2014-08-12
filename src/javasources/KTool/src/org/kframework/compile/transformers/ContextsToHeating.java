@@ -6,9 +6,6 @@ import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -84,23 +81,15 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         Term body = (Term) new ResolveAnonymousVariables(context).visitNode(node.getBody());
         int countHoles = MetaK.countHoles(body, context);
         if (countHoles == 0) {
-            GlobalSettings.kem.register(
-                    new KException(ExceptionType.ERROR,
-                            KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Contexts must have at least one HOLE.",
-                            getName(),
-                            node.getLocation(),
-                            node.getFilename()));
+                            this, node);
         }
         Integer countRewrites = MetaK.countRewrites(body, context);
         if (countRewrites > 1) {
-            GlobalSettings.kem.register(
-                    new KException(ExceptionType.ERROR,
-                            KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Contexts can contain at most one rewrite",
-                            getName(),
-                            node.getLocation(),
-                            node.getFilename()));
+                            this, node);
         } else if (countRewrites == 0) {
             body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE, context));
         }
@@ -110,13 +99,9 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         Term left = r.get(2);
         Term right = r.get(3);
         if (!(left instanceof Hole)) {
-            GlobalSettings.kem.register(
-                    new KException(ExceptionType.ERROR,
-                            KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Only the HOLE can be rewritten in a context definition",
-                            getName(),
-                            node.getLocation(),
-                            node.getFilename()));
+                            this, node);
         }
         Term lhsHeat = rewriteContext;
         List<Term> rewriteList = new ArrayList<Term>();
@@ -126,12 +111,16 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         Rule heatingRule = new Rule(lhsHeat, rhsHeat, context);
         heatingRule.setRequires(substituteHole(node.getRequires(), freshVariable));
         heatingRule.setEnsures(substituteHole(node.getEnsures(), freshVariable));
-        heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
+        heatingRule.getAttributes().putAll(node.getAttributes());
+        heatingRule.setLocation(node.getLocation());
+        heatingRule.setSource(node.getSource());
         heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
         rules.add(heatingRule);
 
         Rule coolingRule = new Rule(rhsHeat, lhsHeat, context);
-        coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
+        coolingRule.getAttributes().putAll(node.getAttributes());
+        coolingRule.setLocation(node.getLocation());
+        coolingRule.setSource(node.getSource());
         coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
         rules.add(coolingRule);
 

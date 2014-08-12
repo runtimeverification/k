@@ -11,7 +11,6 @@ import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
-import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.latex.DocumentationBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -46,7 +45,6 @@ public final class KompileOptions implements Serializable {
         LATEX(true, false, false, LatexBackend.class, null),
         DOC(true, false, false, DocumentationBackend.class, null),
         HTML(true, false, false, HtmlBackend.class, null),
-        KORE(false, false, false, KoreBackend.class, null),
         MAUDE(false, false, true, KompileBackend.class, MaudeKRun.class),
         JAVA(false, true, true, JavaSymbolicBackend.class, JavaSymbolicKRun.class),
         UNPARSE(false, false, false, UnparserBackend.class, null),

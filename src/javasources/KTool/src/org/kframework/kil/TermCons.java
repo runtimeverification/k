@@ -15,8 +15,16 @@ import org.w3c.dom.Element;
  * Applications that are not in sort K, or have not yet been flattened.
  */
 public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<?>> {
-    /** A unique identifier corresponding to a production, matching the SDF cons */
     protected java.util.List<Term> contents;
+
+    /**
+     * Since TermCons refers to a production instance rather than a unique identifier,
+     * replacing a production with a different production in the definition is not
+     * intrinsically safe.
+     *
+     * TODO(dwightguth): make TermCons used only in the parser where productions should not
+     * change.
+     */
     protected final Production production;
 
     private int cachedHashCode = 0;

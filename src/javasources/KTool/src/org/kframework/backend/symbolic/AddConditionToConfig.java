@@ -23,9 +23,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -152,19 +149,14 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         if (result == node)
             return node;
         if (result == null) {
-            GlobalSettings.kem
-                    .register(new KException(
-                            ExceptionType.ERROR,
-                            KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerError(
                             "Expecting Module, but got null. Returning the untransformed module.",
-                            getName(), node.getFilename(), node.getLocation()));
+                            this, node);
             return node;
         }
         if (!(result instanceof Module)) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                    KExceptionGroup.INTERNAL, "Expecting Module, but got "
-                    + result.getClass() + " while transforming.", node
-                    .getFilename(), node.getLocation()));
+            GlobalSettings.kem.registerInternalError("Expecting Module, but got "
+                    + result.getClass() + " while transforming.", this, node);
             return node;
         }
         node = (Module) result;

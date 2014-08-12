@@ -7,8 +7,8 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 public class BagItem extends CollectionItem {
-    public BagItem(String location, String filename) {
-        super(location, filename, Sort.BAG_ITEM);
+    public BagItem(Location location, Source source) {
+        super(location, source, Sort.BAG_ITEM);
     }
 
     public BagItem(Element element) {

@@ -1,10 +1,8 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
@@ -39,7 +37,7 @@ public class FileUtil {
         try {
             writeStringToFile(new File(fileName), content);
         } catch (IOException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + fileName, "internal", "FileUtil.java"));
+            GlobalSettings.kem.registerCriticalError("Cannot save file content: " + fileName, e);
         }
     }
 
@@ -55,11 +53,7 @@ public class FileUtil {
                 toWriter(content, writer);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            GlobalSettings.kem.register(
-                new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                    "Cannot save file content: " + fileName + ", " + e.getMessage(),
-                    "internal", "FileUtil.java"));
+            GlobalSettings.kem.registerCriticalError("Cannot save file content: " + fileName, e);
         }
     }
 
@@ -84,11 +78,26 @@ public class FileUtil {
         try {
             return readFileToString(new File(file));
         } catch (FileNotFoundException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. Make sure that file: " + file + " exists.", "internal", "FileUtil.java"));
+            GlobalSettings.kem.registerCriticalError(
+                    "Cannot retrieve file content. Make sure that file: " + file + " exists.", e);
         } catch (IOException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. An IO error occured: " + file, "internal", "FileUtil.java"));
+            GlobalSettings.kem.registerCriticalError(
+                    "Cannot retrieve file content. An IO error occured: " + file, e);
         }
         return "";
+    }
+
+    public static byte[] getFileContentAsBytes(String file) {
+        try {
+            return FileUtils.readFileToByteArray(new File(file));
+        } catch (FileNotFoundException e) {
+            GlobalSettings.kem.registerCriticalError(
+                    "Cannot retrieve file content. Make sure that file: " + file + " exists.", e);
+        } catch (IOException e) {
+            GlobalSettings.kem.registerCriticalError(
+                    "Cannot retrieve file content. An IO error occured: " + file, e);
+        }
+        throw new AssertionError("unreachable");
     }
 
     // create a file with the specified name, create parent directory if it doesn't exist

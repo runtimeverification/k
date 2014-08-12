@@ -29,9 +29,8 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         prodItems.add(new Terminal(")"));
 
         Production funProd = new Production(new NonTerminal(funSort), prodItems);
-        funProd.addAttribute(new Attribute("prefixlabel", funName));
         if (funSort.isComputationSort()) {
-            funProd.addAttribute(new Attribute("klabel", funName));
+            funProd.putAttribute("klabel", funName);
             context.addProduction(funProd);
         }
 
@@ -128,45 +127,29 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         super();
         this.items = items;
         this.sort = sort.getSort();
-        attributes = new Attributes();
     }
 
     public Production(NonTerminal sort, java.util.List<ProductionItem> items, String ownerModule) {
         super();
         this.items = items;
         this.sort = sort.getSort();
-        attributes = new Attributes();
         this.ownerModuleName = ownerModule;
     }
 
-    /**
-     * Use .getKLabel() if you want the klabel
-     */
     @Deprecated
     public String getLabel() {
-        String label = attributes.get("prefixlabel");
-        if (label == null) {
-            label = getPrefixLabel();
-            attributes.set("prefixlabel", label);
-        }
-        return label.replace(" ", "");
+        return getPrefixLabel();
     }
 
     public String getKLabel() {
-        /*
-        assert MetaK.isComputationSort(sort) || sort.equals(KSorts.KLABEL) && isConstant():
-                sort + " ::= " + this + " -> " + getPrefixLabel();
-        */
-
-        String klabel = attributes.get("klabel");
+        String klabel = getAttribute("klabel");
         if (klabel == null && isSubsort()) {
             return null;
         } else if (klabel == null) {
-            if (sort.toString().equals(KSorts.KLABEL))
+            if (sort.toString().equals(KSorts.KLABEL) && getArity() == 0)
                 klabel = getPrefixLabel();
             else
                 klabel = "'" + getPrefixLabel();
-            attributes.set("klabel", klabel);
         }
         return klabel.replace(" ", "");
     }
@@ -238,47 +221,40 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
         if (obj == null)
             return false;
-        if (obj == this)
-            return true;
-        if (!(obj instanceof Production))
+        if (getClass() != obj.getClass())
             return false;
-        Production prd = (Production) obj;
-
-        if (this.sort != null && prd.getSort() != null)
-            if (!this.sort.equals(prd.getSort()))
+        Production other = (Production) obj;
+        if (items == null) {
+            if (other.items != null)
                 return false;
-        if (this.sort == null && prd.getSort() != null)
+        } else if (!items.equals(other.items))
             return false;
-
-        if (prd.getItems().size() != this.items.size())
-            return false;
-
-        for (int i = 0; i < this.items.size(); i++) {
-            if (!prd.getItems().get(i).equals(items.get(i)))
+        if (getKLabel() == null) {
+            if (other.getKLabel() != null)
                 return false;
-        }
-        String klabel1 = prd.getAttributes().get("klabel");
-        String klabel2 = getAttributes().get("klabel");
-        if ((klabel1 == null && klabel2 != null) || (klabel1 != null && klabel2 == null)) {
+        } else if (!getKLabel().equals(other.getKLabel()))
             return false;
-        }
-        if (klabel1 != null && klabel2 != null && klabel1.equals(klabel2)) {
+        if (sort == null) {
+            if (other.sort != null)
+                return false;
+        } else if (!sort.equals(other.sort))
             return false;
-        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        if (sort != null)
-            hash += sort.hashCode();
-
-        for (ProductionItem pi : this.items)
-            hash += pi.hashCode();
-        return hash;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((items == null) ? 0 : items.hashCode());
+        result = prime * result
+                + ((getKLabel() == null) ? 0 : getKLabel().hashCode());
+        result = prime * result + ((sort == null) ? 0 : sort.hashCode());
+        return result;
     }
 
     public String toString() {

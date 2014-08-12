@@ -4,7 +4,6 @@ package org.kframework.compile.checks;
 import java.util.HashMap;
 import java.util.List;
 
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
@@ -15,7 +14,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -37,8 +35,8 @@ public class CheckSyntaxDecl extends BasicVisitor {
 
         if (prods.containsKey(node)) {
             Production oldProd = prods.get(node);
-            String msg = "Production has already been defined at " + oldProd.getLocation() + " in file " + oldProd.getFilename();
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            String msg = "Production has already been defined at " + oldProd.getLocation() + " from source " + oldProd.getSource();
+            GlobalSettings.kem.registerCompilerError(msg, this, node);
         } else
             prods.put(node, node);
 
@@ -53,12 +51,12 @@ public class CheckSyntaxDecl extends BasicVisitor {
                     countSorts++;
                 else if (!(pi instanceof Terminal)) {
                     String msg = "Bracket can be used on productions with Terminals and only one NonTerminal.";
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                    GlobalSettings.kem.registerCompilerError(msg, this, node);
                 }
             }
             if (countSorts != 1) {
                 String msg = "Bracket can be used on productions with Terminals and exactly one NonTerminal.";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
         }
 
@@ -66,23 +64,23 @@ public class CheckSyntaxDecl extends BasicVisitor {
             Sort sort = node.getSubsort().getSort();
             if (sort.isBaseSort() && !context.isSubsorted(node.getSort(), sort)) {
                 String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
         } else if (!node.containsAttribute(Constants.FUNCTION)
                 && (node.getSort().equals(Sort.K) ||
                     node.getSort().equals(Sort.KLIST))) {
             String msg = "Extending sort K or KList is forbidden:\n\t" + node + "\n\tConsider extending KItem instead.";
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            GlobalSettings.kem.registerCompilerError(msg, this, node);
         }
 
         if (node.containsAttribute("reject")) {
             if (node.getItems().size() != 1) {
                 String msg = "Only single Terminals can be rejected.";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
             if (node.getItems().size() == 1 && !(node.getItems().get(0) instanceof Terminal)) {
                 String msg = "Only Terminals can be rejected.";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
         }
 
@@ -93,12 +91,12 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 if (!s.getSort().isCellSort()) {
                     if (!context.definedSorts.contains(s.getSort())) {
                         String msg = "Undefined sort " + s;
-                        GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+                        GlobalSettings.kem.registerCompilerError(msg, this, s);
                     }
                 }
                 if (s.getSort().equals(Sort.KRESULT) && !(node.isSubsort() && node.getSort().equals(Sort.KITEM))) {
                     String msg = "KResult is only allowed in the left hand side of syntax.";
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+                    GlobalSettings.kem.registerCompilerError(msg, this, s);
                 }
             }
             if (pi instanceof UserList) {
@@ -106,11 +104,11 @@ public class CheckSyntaxDecl extends BasicVisitor {
                 UserList s = (UserList) pi;
                 if (!s.getSort().getName().startsWith("#") && !context.definedSorts.contains(s.getSort())) {
                     String msg = "Undefined sort " + s.getSort();
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+                    GlobalSettings.kem.registerCompilerError(msg, this, s);
                 }
                 if (s.getSort().equals(Sort.KRESULT)) {
                     String msg = "KResult is only allowed in the left hand side of syntax declarations.";
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
+                    GlobalSettings.kem.registerCompilerError(msg, this, s);
                 }
             }
             if (pi instanceof Terminal) {
@@ -125,7 +123,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
         if (!isBinaryInfixProd(node)) {
             if (node.containsAttribute(Constants.LEFT) || node.containsAttribute(Constants.RIGHT) || node.containsAttribute(Constants.NON_ASSOC)) {
                 String msg = "Associativity attribute should only be assigned to binary infix production.\n";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerWarning(msg, this, node);
             }
         }
 
@@ -133,7 +131,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
             if (!node.containsAttribute("onlyLabel") || !node.containsAttribute("klabel")) {
                 String msg = "Cannot declare empty terminals in the definition.\n";
                 msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
         return null;
     }

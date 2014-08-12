@@ -3,12 +3,10 @@ package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
-import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
@@ -47,7 +45,7 @@ public class CellTypesFilter extends ParseForestTransformer {
             cell.setContents((Term) new CellTypesFilter2(context, sort, cell.getLabel()).visitNode(cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
-            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getSource(), cell.getLocation()));
         }
         return super.visit(cell, _);
     }
@@ -79,7 +77,7 @@ public class CellTypesFilter extends ParseForestTransformer {
                                 trm.getSort().equals(Sort.KITEM)))) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
-                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
+                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getSource(), trm.getLocation()));
             }
             return trm;
         }

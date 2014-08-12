@@ -9,8 +9,6 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
-import java.util.*;
-
 /**
  * Transformer flattening concrete syntax terms to applications of KLabels
  */
@@ -89,10 +87,10 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 return KApp.of(new KInjectedLabel((Term) trans.visitNode(tc)));
             }
 
-            String l = tc.getLocation();
-            String f = tc.getFilename();
+            Location l = tc.getLocation();
+            Source s = tc.getSource();
             Production ppp = tc.getProduction();
-            KList lok = new KList(l, f);
+            KList lok = new KList(l, s);
             for (Term t : tc.getContents()) {
                 lok.getContents().add((Term) this.visitNode(t));
             }
@@ -101,22 +99,22 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 label = tc.getProduction().getListDecl().getTerminatorKLabel();
             else
                 label = ppp.getKLabel();
-            return new KApp(l, f, KLabelConstant.of(label, context), lok);
+            return new KApp(l, s, KLabelConstant.of(label, context), lok);
         }
 
         @Override
         public ASTNode visit(KLabel kLabel, Void _)  {
             return new KApp(
                     kLabel.getLocation(),
-                    kLabel.getFilename(),
+                    kLabel.getSource(),
                     new KInjectedLabel(kLabel),
                     KList.EMPTY);
         }
 
         @Override
         public ASTNode visit(ListTerminator emp, Void _) {
-            String l = emp.getLocation();
-            String f = emp.getFilename();
+            Location l = emp.getLocation();
+            Source f = emp.getSource();
             if (!emp.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel(emp));
             }

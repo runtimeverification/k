@@ -7,6 +7,7 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
 import org.kframework.backend.unparser.KastFilter;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.main.FrontEnd;
@@ -72,13 +73,13 @@ public class KastFrontEnd extends FrontEnd {
     @Override
     public boolean run() {
         String stringToParse = options.stringToParse();
-        String source = options.source();
+        Source source = options.source();
 
         Context context = contextProvider.get();
         String sort = options.sort(context);
 
         try {
-            ASTNode out = ProgramLoader.processPgm(stringToParse, source, sort, context, options.parser);
+            ASTNode out = ProgramLoader.processPgm(stringToParse.getBytes(), source, sort, context, options.parser);
             StringBuilder kast;
             if (options.experimental.pretty) {
                 IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),

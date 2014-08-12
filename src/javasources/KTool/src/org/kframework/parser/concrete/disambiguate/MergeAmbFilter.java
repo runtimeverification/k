@@ -6,12 +6,14 @@ import java.util.HashSet;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Location;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
+
 
 public class MergeAmbFilter extends ParseForestTransformer {
     public MergeAmbFilter(Context context) {
@@ -63,7 +65,7 @@ public class MergeAmbFilter extends ParseForestTransformer {
                     if (list2.size() > 1) {
                         Ambiguity amb2 = new Ambiguity(Sort.K, new ArrayList<Term>(list2));
                         amb2.setLocation(tcnew.getLocation());
-                        amb2.setFilename(tcnew.getFilename());
+                        amb2.setSource(tcnew.getSource());
                         tcnew.getContents().add(amb2);
                     } else
                         tcnew.getContents().add(list2.iterator().next());
@@ -77,8 +79,6 @@ public class MergeAmbFilter extends ParseForestTransformer {
 
         if (newchildren.size() > 1) {
             Ambiguity amb2 = new Ambiguity(Sort.K, newchildren);
-            amb2.setLocation(amb.getLocation());
-            amb2.setFilename(amb.getFilename());
             return super.visit(amb2, _);
         } else
             return this.visitNode(newchildren.get(0));
@@ -102,10 +102,10 @@ public class MergeAmbFilter extends ParseForestTransformer {
             TermCons tc1 = (TermCons) t1;
             TermCons tc2 = (TermCons) t2;
             for (int i = 0; i < tc1.getContents().size(); i++) {
-                String loc1 = tc1.getContents().get(i).getLocation();
-                String loc2 = tc2.getContents().get(i).getLocation();
+                Location loc1 = tc1.getContents().get(i).getLocation();
+                Location loc2 = tc2.getContents().get(i).getLocation();
 
-                if (!loc1.toString().equals(loc2.toString()))
+                if (!loc1.equals(loc2))
                     return false;
             }
             return true;

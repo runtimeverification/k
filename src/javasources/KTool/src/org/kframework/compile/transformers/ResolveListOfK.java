@@ -3,9 +3,6 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -38,10 +35,9 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
             if (resultAST != t) change = true;
             if (resultAST != null) {
                 if (!(resultAST instanceof Term)) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                            KExceptionGroup.INTERNAL,
+                    GlobalSettings.kem.registerInternalError(
                             "Expecting Term, but got " + resultAST.getClass() + ".",
-                            getName(), t.getFilename(), t.getLocation()));
+                            this, t);
                 }
                 Term result = (Term) resultAST;
                 if (pitem instanceof NonTerminal

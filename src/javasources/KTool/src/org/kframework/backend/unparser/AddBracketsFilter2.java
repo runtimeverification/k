@@ -3,7 +3,6 @@ package org.kframework.backend.unparser;
 
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ColorSetting;
@@ -13,7 +12,6 @@ import org.kframework.parser.DefinitionLoader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class AddBracketsFilter2 extends ParseForestTransformer {
 
@@ -100,7 +98,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         if (reparsed != null) {
             ASTNode result = addBracketsIfNeeded(ast);
             if (atTop && result instanceof Bracket) {
-                return new Cast(result.getLocation(), result.getFilename(), (Term)result, context);
+                return new Cast(result.getLocation(), result.getSource(), (Term)result, context);
             }
             return result;
         }
@@ -110,31 +108,12 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         try {
             ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, context);
             Term reparsed = ((Sentence)rule).getBody();
-            new AdjustLocations(context).visitNode(reparsed);
             if (!reparsed.contains(ast)) {
                 return replaceWithVar(ast);
             }
             return new AddBracketsFilter2(reparsed, context).visitNode(ast);
         } catch (ParseFailedException e) {
             return replaceWithVar(ast);
-        }
-    }
-
-    private class AdjustLocations extends BasicVisitor {
-        public AdjustLocations(Context context) {
-            super("Apply first-line location offset", context);
-        }
-
-        public Void visit(ASTNode ast, Void _) {
-            if (ast.getLocation().equals("generated"))
-                return null;
-            Scanner scanner = new Scanner(ast.getLocation()).useDelimiter("[,)]").skip("\\(");
-            int beginLine = scanner.nextInt();
-            int beginCol = scanner.nextInt();
-            int endLine = scanner.nextInt();
-            int endCol = scanner.nextInt();
-            ast.setLocation("(" + beginLine + "," + beginCol + "," + endLine + "," + endCol + ")");
-            return null;
         }
     }
 
@@ -148,7 +127,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         TraverseForest trans = new TraverseForest(ast, context);
         reparsed = (Term) trans.visitNode(reparsed);
         if (trans.needsParens) {
-            return new Bracket(ast.getLocation(), ast.getFilename(), ast, context);
+            return new Bracket(ast.getLocation(), ast.getSource(), ast, context);
         }
         return ast;
     }
@@ -161,7 +140,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         private Term ast;
         public boolean needsParens;
         private boolean hasTerm;
-        private String realLocation;
+        private Location realLocation;
 
         public ASTNode visit(Ambiguity amb, Void _) throws ParseFailedException {
             realLocation = ast.getLocation();

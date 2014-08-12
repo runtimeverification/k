@@ -22,9 +22,6 @@ import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.options.SMTOptions;
 
@@ -74,11 +71,8 @@ public class Context implements Serializable {
      */
     public Set<Production> productions = new HashSet<>();
     /**
-     * Represents a map from all Klabels in string representation plus "prefixlabel",
+     * Represents a map from all Klabels in string representation
      * to sets of corresponding productions.
-     *
-     * TODO(YilongL): it doesn't contain getKLabel_ in key set?! instead the
-     * production "getKLabel" K is in the values of "prefix".
      * why?
      */
     public SetMultimap<String, Production> klabels = HashMultimap.create();
@@ -189,7 +183,7 @@ public class Context implements Serializable {
         if (p.isListDecl()) {
             listProductions.put(p.getSort(), p);
         }
-        for (Attribute a : p.getAttributes().getContents()) {
+        for (Attribute a : p.getAttributes().values()) {
             tags.put(a.getKey(), p);
         }
     }
@@ -207,7 +201,7 @@ public class Context implements Serializable {
             // AndreiS: this code assumes each list sort has only one production
             listProductions.remove(p.getSort());
         }
-        for (Attribute a : p.getAttributes().getContents()) {
+        for (Attribute a : p.getAttributes().values()) {
             tags.remove(a.getKey(), p);
         }
     }
@@ -451,7 +445,7 @@ public class Context implements Serializable {
             for (Sort sort : circuit)
                 msg += sort + " < ";
             msg += circuit.get(0);
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "Definition files", "File system."));
+            GlobalSettings.kem.registerCriticalError(msg);
         }
         subsorts.transitiveClosure();
         // detect if lists are subsorted (Vals Ids < Exps)
@@ -562,21 +556,15 @@ public class Context implements Serializable {
     public void makeFreshFunctionNamesMap(Set<Production> freshProductions) {
         for (Production production : freshProductions) {
             if (!production.containsAttribute(Attribute.FUNCTION_KEY)) {
-                GlobalSettings.kem.register(new KException(
-                        ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "missing [function] attribute for fresh function " + production,
-                        production.getFilename(),
-                        production.getLocation()));
+                        production);
             }
 
             if (freshFunctionNames.containsKey(production.getSort())) {
-                GlobalSettings.kem.register(new KException(
-                        ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER,
+                GlobalSettings.kem.registerCompilerError(
                         "multiple fresh functions for sort " + production.getSort(),
-                        production.getFilename(),
-                        production.getLocation()));
+                        production);
             }
 
             freshFunctionNames.put(production.getSort(), production.getKLabel());
@@ -602,7 +590,7 @@ public class Context implements Serializable {
                 conses.put(cons2, p);
             } else if (p.isLexical()) {
             } else if (p.isSubsort()) {
-                if (p.containsAttribute("klabel")) {
+                if (p.getKLabel() != null) {
                     conses.put(StringUtil.escapeSortName(p.getSort().getName()) + "1" + StringUtil.getUniqueId() + "Syn", p);
                 }
             } else {

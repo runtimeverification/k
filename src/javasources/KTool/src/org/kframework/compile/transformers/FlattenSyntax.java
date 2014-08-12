@@ -2,7 +2,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.KilProperty;
-import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
@@ -62,19 +61,19 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             return node;
         if (!isComputation)
             return super.visit(node, _);
-        if (node.isSubsort() && !node.containsAttribute("klabel"))
+        if (node.isSubsort() && node.getKLabel() == null)
             return null;
         String arity = String.valueOf(node.getArity());
         Attributes attrs = node.getAttributes().shallowCopy();
         if (node.isListDecl()) {
             listSeparators.add(((UserList) node.getItems().get(0)).getSeparator());
-            attrs.set("hybrid", "");
+            attrs.add(Attribute.HYBRID);
         }
         node = node.shallowCopy();
         List<ProductionItem> pis = new ArrayList<>();
         pis.add(new Terminal(node.getKLabel()));
         node.setItems(pis);
-        attrs.set("arity", arity);
+        attrs.add(new Attribute("arity", arity));
         node.setAttributes(attrs);
         node.setSort(Sort.KLABEL);
         return node;

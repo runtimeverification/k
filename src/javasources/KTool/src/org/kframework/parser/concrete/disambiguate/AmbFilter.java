@@ -33,7 +33,7 @@ public class AmbFilter extends ParseForestTransformer {
             unparserFilter.visitNode(amb.getContents().get(i));
             msg += "\n   " + unparserFilter.getResult().replace("\n", "\n   ");
         }
-        GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, getName(), amb.getFilename(), amb.getLocation()));
+        GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, getName(), amb.getSource(), amb.getLocation()));
 
         return this.visitNode(amb.getContents().get(0));
     }
