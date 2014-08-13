@@ -1,11 +1,12 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
-
 require "kernelC-syntax.k"
 require "kernelC-semantics.k"
+require "patterns/tree_pattern.k"
 
 module KERNELC
   imports KERNELC-SYNTAX
   imports KERNELC-SEMANTICS
+  imports TREE-PATTERN
 
   /*
    * KernelC configuration

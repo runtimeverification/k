@@ -272,6 +272,10 @@ module KERNELC-SEMANTICS
     tv(T:Type, V1:Value) != tv(T, V2:Value) => tv(int, bool2int(V1 =/=K  V2))
     [structural]
 
+  syntax Int ::= "bool2int" "(" Bool ")"
+  rule bool2int( true) => 1   [structural]
+  rule bool2int(false) => 0   [structural]
+
 
   /*
    * Cast
@@ -390,9 +394,5 @@ module KERNELC-SEMANTICS
     => X = tv(T, V); bindParameters(PDs, EEs, B)
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
     => B
-
-  syntax Int ::= "bool2int" "(" Bool ")"    [function]
-  rule bool2int( true) => 1
-  rule bool2int(false) => 0
 endmodule
 
