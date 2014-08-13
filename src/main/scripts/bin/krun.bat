@@ -1,5 +1,5 @@
 @ECHO off
-set PATH=%PATH%;%~dp0..\lib\native
+set PATH=%PATH%;"%~dp0..\lib\native"
 set CYGWIN=nodosfilewarning
 SETLOCAL ENABLEEXTENSIONS
 IF ERRORLEVEL 1 ECHO Unable to enable extensions
