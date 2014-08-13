@@ -27,10 +27,12 @@ module TREE-PATTERN
     [pattern]
   rule tree(null)(leaf) => .Map   [pattern]
 
+  /*
   syntax Bool ::= bst(Tree)   [function]
   rule bst(node(I:Int, TL:Tree, TR:Tree))
     => lt(tree_keys(TL), SetItem(I)) andBool lt(SetItem(I), tree_keys(TR))
        andBool bst(TL) andBool bst(TR)
   rule bst(leaf) => true
+  */
 endmodule
 
