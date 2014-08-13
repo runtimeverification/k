@@ -25,14 +25,13 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode complete(ASTNode node, ASTNode r) {
-        r = super.complete(node, r);
         if (r instanceof Term && !(r instanceof Variable)) {
-            if (r.getAttributes().size() > 0) {
+            if (node.getAttributes().size() > 0) {
                 Cast c = new Cast((Term)r, context);
-                return c;
+                return super.complete(node, c);
             }
         }
-        return r;
+        return super.complete(node, r);
     }
 
     @Override

@@ -371,11 +371,12 @@ public class UnparserFilterNew extends NonCachingVisitor {
         if (!variableList.contains(variable.getName())) {
             indenter.write(":" + variable.getSort());
             variableList.add(variable.getName());
-        }
-        if (variable.getAttributes().size() > 0) {
-            indenter.write("{");
-            this.visitNode(variable.getAttributes());
-            indenter.write("}");
+
+            if (variable.getAttributes().size() > 0) {
+                indenter.write("{");
+                this.visitNode(variable.getAttributes());
+                indenter.write("}");
+            }
         }
         return postpare();
     }
