@@ -33,16 +33,20 @@ module MAP
   /*@ Remove key/value pair associated with the key from map? */
   syntax Map ::= Map "[" K "<-" "undef" "]"     [function, hook(Map:remove)]
 
+  /*@ Get the difference of two maps interpreted as sets of entries
+   ($M_1 \setminus M2$) */
+  syntax Map ::= Map "-Map" Map                 [function, hook(Map:difference), latex({#1}-_{\it Map}{#2})]
+
   /*@ Update the first map by adding all key/value pairs in the second map. If a
    key in the first map exists also in the second map, its associated value will
    be overwritten by the value from the second map. */
   syntax Map ::= updateMap(Map, Map)            [function, hook(Map:updateAll)]
 
   /*@ Get a Set consisting of all keys in the Map:*/
-    syntax Set ::= keys(Map)                      [function, hook(Map:keys)]
+  syntax Set ::= keys(Map)                      [function, hook(Map:keys)]
 
   /*@ Get a List consisting of all values in the Map: */
-    syntax List ::= values(Map)                   [function, hook(Map:values)]
+  syntax List ::= values(Map)                   [function, hook(Map:values)]
 
   /*@ Get the Map size (number of key/value pairs) */
   syntax Int ::= size(Map)                      [function, hook(Map:size), klabel('sizeMap)]
