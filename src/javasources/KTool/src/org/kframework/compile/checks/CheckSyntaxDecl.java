@@ -136,8 +136,8 @@ public class CheckSyntaxDecl extends BasicVisitor {
                     (node.containsAttribute("notInRules") && node.containsAttribute("notInGround")))
                     && node.containsAttribute("klabel"))) {
                 String msg = "Cannot declare empty terminals in the definition.\n";
-                msg += "            Use attribute 'onlyLabel' or 'notInRules' and 'notInGround' paired with 'klabel(...)' to limit the use to programs.";
-
+                msg += "        Use attribute 'onlyLabel', or both 'notInRules' and 'notInGround'\n";
+                msg += "        paired with 'klabel(...)' to limit the use to programs.";
                 GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
         }
