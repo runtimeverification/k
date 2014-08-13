@@ -30,7 +30,6 @@ import org.kframework.utils.options.StringListConverter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
-import com.google.inject.ProvidedBy;
 
 public final class KompileOptions implements Serializable {
 
@@ -69,22 +68,38 @@ public final class KompileOptions implements Serializable {
         private final Class<? extends org.kframework.backend.Backend> backend;
         private final Class<? extends KRun> krun;
 
+        /**
+         * Represents a backend that generates a documented output file containing the definition
+         * in a particular format (e.g. html, pdf, etc)
+         */
         public boolean documentation() {
             return documentation;
         }
 
+        /**
+         * Represents whether the compiler should execute according to the rules of the java backend.
+         */
         public boolean java() {
             return isJava;
         }
 
+        /**
+         * true if the definition creates a -kompiled directory, false otherwise.
+         */
         public boolean generatesDefinition() {
             return generatesDefinition;
         }
 
+        /**
+         * The class used to implement Kompile for this backend
+         */
         public Class<? extends org.kframework.backend.Backend> backend() {
             return backend;
         }
 
+        /**
+         * The class used to implement krun for this backend
+         */
         public Class<? extends KRun> krun() {
             return krun;
         }
