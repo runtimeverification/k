@@ -44,7 +44,7 @@ public abstract class Token extends KLabel {
             return BoolBuiltin.kAppOf(value);
         } else if (sort.equals(Sort.BUILTIN_INT)) {
             return IntBuiltin.kAppOf(value);
-        } else if (sort.equals(Sort.BUILTIN_STRING)) {
+        } else if (sort.equals(Sort.BUILTIN_STRING) || sort.equals(Sort.STRING)) {
             return StringBuiltin.kAppOf(StringUtil.unquoteKString(value));
         } else {
             return GenericToken.kAppOf(sort, value);
