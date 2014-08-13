@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-export ${native.path.variable}=$${native.path.variable}:"$(dirname $0)/../lib/native"
+export ${native.path.variable}=$${native.path.variable}:"$(dirname "$0")/../lib/native"
 export CYGWIN=nodosfilewarning # if running on windows
 ulimit -s `ulimit -H -s`
 if [ -z "$K_OPTS" ];
