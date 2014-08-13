@@ -153,7 +153,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         unificationConstraint.addAll(constrainedTerm.constraint);
         unificationConstraint.simplify();
 
-        unificationConstraint.expandPatterns(unificationConstraint, false);
+        unificationConstraint.expandPatterns(false);
         unificationConstraint.simplify();
 
         Set<Variable> variables = unificationConstraint.variableSet();
@@ -255,7 +255,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             }
 
             // TODO(AndreiS): find a better place for pattern expansion
-            candidate.expandPatterns(candidate, true);
+            candidate.expandPatterns(true);
             candidate.simplify();
 
             if (Tool.instance() != Tool.KOMPILE) {
@@ -291,7 +291,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        // TODO(YilongL): I don't think ConstrainedTerm should derive Term
         hashCode = 1;
         hashCode = hashCode * Utils.HASH_PRIME + data.hashCode();
         return hashCode;

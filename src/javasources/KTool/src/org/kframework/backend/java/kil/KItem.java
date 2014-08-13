@@ -582,13 +582,10 @@ public final class KItem extends Term {
             }
 
             if (narrowing) {
-                SymbolicConstraint globalConstraint = new SymbolicConstraint(context);
-                for (SymbolicConstraint.Equality equality : constraint.equalities()) {
-                    globalConstraint.add(equality.leftHandSide(), equality.rightHandSide());
-                }
-                globalConstraint.addAll(unificationConstraint);
-                globalConstraint.addAll(rule.requires());
-                globalConstraint.simplify();
+                SymbolicConstraint globalConstraint = SymbolicConstraint.simplifiedConstraintFrom(context,
+                                constraint.equalities(),
+                                unificationConstraint,
+                                rule.requires());
                 if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
                     continue;
                 }
@@ -597,10 +594,8 @@ public final class KItem extends Term {
                     continue;
                 }
 
-                SymbolicConstraint requires = new SymbolicConstraint(context);
-                requires.addAll(rule.requires());
-                requires.addAll(unificationConstraint);
-                requires.simplify();
+                SymbolicConstraint requires = SymbolicConstraint
+                        .simplifiedConstraintFrom(context, rule.requires(), unificationConstraint);
                 requires.orientSubstitution(ruleInputKList.variableSet());
                 if (!constraint.implies(requires, ruleInputKList.variableSet())) {
                     continue;
@@ -608,8 +603,7 @@ public final class KItem extends Term {
             }
 
             unificationConstraint.add(outputKList, ruleOutputKList);
-            unificationConstraint.addAll(rule.ensures());
-            unificationConstraint.simplify();
+            unificationConstraint.addAllThenSimplify(rule.ensures());
             if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
                 results.add(SymbolicRewriter.constructNewSubjectTerm(
                         rule,
