@@ -1,0 +1,2 @@
+//Test to ensure attributes propagate through parser, kompile, and java backend
+(V:Int{foo} ~> foo::A{bar} ~> V ~> V:Int{foo})::K{baz}

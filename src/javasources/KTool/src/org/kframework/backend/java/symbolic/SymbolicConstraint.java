@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
@@ -931,10 +932,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         variableSorts[i] = context.MkBoolSort();
                     } else if (variable.sort().equals(IntToken.SORT)) {
                         variableSorts[i] = context.MkIntSort();
-                    //} else if (variable.sort().equals(BitVector.SORT_NAME)) {
-                    //    variableSorts[i] = context.MkBitVecSort(32);
-                    // TODO(AndreiS): need support for parametric type MInt{32}, in order to
-                    // translate to SMT
+                    } else if (variable.sort().equals(BitVector.SORT)) {
+                        variableSorts[i] = context.MkBitVecSort(BitVector.getBitwidth(variable));
                     } else {
                         throw new UnsupportedOperationException(
                                 "unexpected variable sort " + variable.sort());

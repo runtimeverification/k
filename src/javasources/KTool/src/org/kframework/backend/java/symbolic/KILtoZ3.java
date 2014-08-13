@@ -10,7 +10,6 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.kil.ASTNode;
-
 import java.util.Set;
 
 import com.microsoft.z3.ArithExpr;
@@ -249,8 +248,7 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
             } else if (variable.sort().equals(IntToken.SORT)) {
                 return new Z3Term(context.MkIntConst(variable.name()));
             } else if (variable.sort().equals(BitVector.SORT)) {
-                // TODO(AndreiS): allow for bitvector variables of any bitwidth
-                return new Z3Term(context.MkBVConst(variable.name(), Integer.SIZE));
+                return new Z3Term(context.MkBVConst(variable.name(), BitVector.getBitwidth(variable)));
             } else {
                 throw new UnsupportedOperationException("cannot translate term to Z3 format " + variable);
             }

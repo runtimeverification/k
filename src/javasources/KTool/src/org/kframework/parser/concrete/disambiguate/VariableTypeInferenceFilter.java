@@ -49,12 +49,18 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
             // check to see if you have variable declarations with two different sorts
             if (varList.size() > 1) {
                 for (Variable v1 : varList) {
-                    for (Variable v2 : varList)
-                        if (v1 != v2)
+                    for (Variable v2 : varList) {
+                        if (v1 != v2) {
                             if (!v1.getSort().equals(v2.getSort())) {
                                 String msg = "Variable '" + v1.getName() + "' declared with two different sorts: " + v1.getSort() + " and " + v2.getSort();
                                 throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getSource(), v1.getLocation()));
                             }
+                            if (!v1.getAttributes().equals(v2.getAttributes())) {
+                                String msg = "Variable '" + v1.getName() + "' declared with two different attributes: " + v1.getAttributes() + " and " + v2.getAttributes();
+                                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getSource(), v1.getLocation()));
+                            }
+                        }
+                    }
                     // if there are more than one declaration then prefer the one that is semantically typed
                     if (!v1.isSyntactic()) {
                         varDeclMap.put(v1.getName(), v1);

@@ -2,7 +2,9 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 /**
@@ -35,6 +37,12 @@ public class Variable extends Term {
         this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
         this.name = element.getAttribute(Constants.NAME_name_ATTR);
         this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
+
+        java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
+        if (its.size() > 0) {
+            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+        }
+
         if (this.name.startsWith("?")) {
             this.freshVariable = true;
             this.freshConstant = false;
