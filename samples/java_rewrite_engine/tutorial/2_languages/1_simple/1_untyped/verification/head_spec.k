@@ -9,8 +9,8 @@ rule
     <threads>
         <thread>
             <k>
-               head(X:Id) => Y:Int
-            </k>
+               return (x [ 0 ]) ; => return Y:Int ;
+            ...</k>
             <control>
                 <fstack>
                    _:List
@@ -20,8 +20,7 @@ rule
                 </xstack>
             </control>
             <env>...
-                head |-> 0
-                X |-> Lx:Int
+                x |-> Lx:Int
             ...</env>
             <holds>
                 .Map
@@ -32,15 +31,12 @@ rule
         </thread>
     </threads>
     <genv>
-        head |-> 0
-        X |-> Lx
+        _:Map
     </genv>
-    <store>
-        0 |-> lambda ( x , { return (x [ 0 ]) ; } )
+    <store>...
         Lx |-> X1:Val
         list(X1)(Y :: A:Seq)
-        (.Map => ?M:Map)
-    </store>
+    ...</store>
     <busy>
         _:Set
     </busy>
@@ -54,7 +50,7 @@ rule
         _:List
     </out>
     <nextLoc>
-        N1:Int => ?N2:Int
+        _:Int
     </nextLoc>
 </T>
 
