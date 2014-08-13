@@ -24,7 +24,6 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
@@ -803,13 +802,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         Boolean result = false;
         try {
             com.microsoft.z3.Context context = Z3Wrapper.newContext();
-            KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
             Solver solver = context.MkSolver();
             for (Equality equality : data.equalities) {
                 try {
                     solver.Assert(context.MkEq(
-                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+                            KILtoSMTLib.kilToZ3(context, equality.leftHandSide),
+                            KILtoSMTLib.kilToZ3(context, equality.rightHandSide)));
                 } catch (UnsupportedOperationException e) {
                     /* it is sound to skip the equalities that cannot be translated */
                     // TODO(AndreiS): fix this translation and the exceptions
@@ -961,14 +959,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             try {
                 com.microsoft.z3.Context context = Z3Wrapper.newContext();
-                KILtoZ3 transformer = new KILtoZ3(rightHandSideVariables, context);
 
                 Solver solver = context.MkSolver();
 
                 for (Equality equality : left.data.equalities) {
                     solver.Assert(context.MkEq(
-                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+                            KILtoSMTLib.kilToZ3(context, equality.leftHandSide),
+                            KILtoSMTLib.kilToZ3(context, equality.rightHandSide)));
                 }
 
                 //BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
@@ -976,8 +973,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 int i = 0;
                 for (Equality equality : right.data.equalities) {
                     inequalities[i++] = context.MkNot(context.MkEq(
-                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+                            KILtoSMTLib.kilToZ3(context, equality.leftHandSide),
+                            KILtoSMTLib.kilToZ3(context, equality.rightHandSide)));
                 }
                 /* TODO(AndreiS): fix translation to smt
             for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {

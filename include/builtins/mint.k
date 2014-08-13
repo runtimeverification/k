@@ -82,9 +82,9 @@ module MINT
    * Addition, subtraction, and multiplication are the same for signed and
    * unsigned integers represented in 2's complement
    */
-  syntax MInt ::= addMInt(MInt, MInt)   [function, hook(#MINT:add)]
-                | subMInt(MInt, MInt)   [function, hook(#MINT:sub)]
-                | mulMInt(MInt, MInt)   [function, hook(#MINT:mul)]
+  syntax MInt ::= addMInt(MInt, MInt)   [function, hook(#MINT:add), smtlib(bvadd)]
+                | subMInt(MInt, MInt)   [function, hook(#MINT:sub), smtlib(bvsub)]
+                | mulMInt(MInt, MInt)   [function, hook(#MINT:mul), smtlib(bvmul)]
 
   /*
    * Division and reminder
@@ -97,8 +97,8 @@ module MINT
    */
   syntax List ::= sdivMInt(MInt, MInt)    [function, hook(#MINT:sdiv)]
                 | sremMInt(MInt, MInt)    [function, hook(#MINT:srem)]
-  syntax MInt ::= udivMInt(MInt, MInt)    [function, hook(#MINT:udiv)]
-                | uremMInt(MInt, MInt)    [function, hook(#MINT:urem)]
+  syntax MInt ::= udivMInt(MInt, MInt)    [function, hook(#MINT:udiv), smtlib(bvudiv)]
+                | uremMInt(MInt, MInt)    [function, hook(#MINT:urem), smtlib(bvurem)]
 
   /*
    * Addition, subtraction and multiplication with overflow detection; each
@@ -113,28 +113,28 @@ module MINT
                 | umulMInt(MInt, MInt)    [function, hook(#MINT:umul)]
 
   /* Shift operations; the second operand must be non-negative */
-  syntax MInt ::= shlMInt(MInt, Int)    [function, hook(#MINT:shl)]
+  syntax MInt ::= shlMInt(MInt, Int)    [function, hook(#MINT:shl), smtlib(bvshl)]
                 | ashrMInt(MInt, Int)   [function, hook(#MINT:ashr)]
-                | lshrMInt(MInt, Int)   [function, hook(#MINT:lshr)]
+                | lshrMInt(MInt, Int)   [function, hook(#MINT:lshr), smtlib(bvlshr)]
 
   /* Bitwise operations */
-  syntax MInt ::= andMInt(MInt, MInt)   [function, hook(#MINT:and)]
-                | orMInt(MInt, MInt)    [function, hook(#MINT:or)]
-                | xorMInt(MInt, MInt)   [function, hook(#MINT:xor)]
+  syntax MInt ::= andMInt(MInt, MInt)   [function, hook(#MINT:and), smtlib(bvand)]
+                | orMInt(MInt, MInt)    [function, hook(#MINT:or), smtlib(bvor)]
+                | xorMInt(MInt, MInt)   [function, hook(#MINT:xor), smtlib(bvxor)]
 
   syntax MInt ::= negMInt(MInt)   [function]
   rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), 0))
 
   /* Comparison operations */
   syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(#MINT:slt)]
-                | ultMInt(MInt, MInt)   [function, hook(#MINT:ult)]
+                | ultMInt(MInt, MInt)   [function, hook(#MINT:ult), smtlib(bvult)]
                 | sleMInt(MInt, MInt)   [function, hook(#MINT:sle)]
                 | uleMInt(MInt, MInt)   [function, hook(#MINT:ule)]
                 | sgtMInt(MInt, MInt)   [function, hook(#MINT:sgt)]
                 | ugtMInt(MInt, MInt)   [function, hook(#MINT:ugt)]
                 | sgeMInt(MInt, MInt)   [function, hook(#MINT:sge)]
                 | ugeMInt(MInt, MInt)   [function, hook(#MINT:uge)]
-                | eqMInt(MInt, MInt)    [function, hook(#MINT:eq)]
+                | eqMInt(MInt, MInt)    [function, hook(#MINT:eq), smtlib(=)]
                 | neMInt(MInt, MInt)    [function, hook(#MINT:ne)]
 
   /*

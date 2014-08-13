@@ -7,12 +7,9 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.utils.options.SMTSolver;
 
 import java.io.Serializable;
-import java.util.Collections;
-
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.FuncDecl;
@@ -32,10 +29,9 @@ public class UseSMT implements Serializable {
         BuiltinMap.Builder resultBuilder = BuiltinMap.builder();
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
             Solver solver = context.MkSolver();
 
-            BoolExpr query = (BoolExpr) ((Z3Term) term.accept(transformer)).expression();
+            BoolExpr query = KILtoSMTLib.kilToZ3(context, term);
             solver.Assert(query);
 
 

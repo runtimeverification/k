@@ -47,6 +47,8 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
 
     private final boolean isSortPredicate;
 
+    private final String smtlib;
+
     private final Sort predicateSort;
 
     /**
@@ -71,6 +73,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
 
         boolean isFunction = false;
         boolean isPattern = false;
+        String smtlib = null;
         if (!label.startsWith("is")) {
             predicateSort = null;
 
@@ -80,6 +83,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                 isFunction = fstProd.containsAttribute(Attribute.FUNCTION.getKey())
                         || fstProd.containsAttribute(Attribute.PREDICATE.getKey());
                 isPattern = fstProd.containsAttribute(Attribute.PATTERN_KEY);
+                smtlib = fstProd.getAttribute(Attribute.SMTLIB_KEY);
             }
 
             while (iterator.hasNext()) {
@@ -99,6 +103,10 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                         "Cannot determine if the KLabel " + label
                         + " is a pattern symbol because there are multiple productions associated with this KLabel: "
                         + productions;
+                assert smtlib == production.getAttribute(Attribute.SMTLIB_KEY) :
+                        "Cannot determine the smtlib attribute of the KLabel " + label
+                        + " because there are multiple productions associated with this KLabel: "
+                        + productions;
             }
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
@@ -108,6 +116,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
         this.isSortPredicate = predicateSort != null;
         this.isFunction = isFunction;
         this.isPattern = isPattern;
+        this.smtlib = smtlib;
 
         this.listTerminator = buildListTerminator(definition);
         this.isListLabel = listTerminator != null;
@@ -166,6 +175,10 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     @Override
     public boolean isPattern() {
         return isPattern;
+    }
+
+    public String smtlib() {
+        return smtlib;
     }
 
     /**
