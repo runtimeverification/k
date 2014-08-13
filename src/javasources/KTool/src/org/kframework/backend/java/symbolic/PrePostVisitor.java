@@ -47,13 +47,7 @@ public class PrePostVisitor implements Visitor {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
-        for (KItem pattern : builtinMap.collectionPatterns()) {
-            pattern.accept(this);
-        }
-        for (Variable variable : builtinMap.collectionVariables()) {
-            variable.accept(this);
-        }
-        for (Term term : builtinMap.collectionFunctions()) {
+        for (Term term : builtinMap.baseTerms()) {
             term.accept(this);
         }
         builtinMap.accept(postVisitor);
@@ -67,8 +61,8 @@ public class PrePostVisitor implements Visitor {
         for (Term term : builtinSet.elements()) {
             term.accept(this);
         }
-        if (builtinSet.hasFrame()) {
-            builtinSet.frame().accept(this);
+        for (Term term : builtinSet.baseTerms()) {
+            term.accept(this);
         }
         builtinSet.accept(postVisitor);
     }
