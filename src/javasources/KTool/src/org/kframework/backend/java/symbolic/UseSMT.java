@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.Sort;
@@ -28,10 +29,16 @@ public class UseSMT implements Serializable {
 
         BuiltinMap.Builder resultBuilder = BuiltinMap.builder();
         try {
+            SymbolicConstraint constraint = new SymbolicConstraint(termContext);
+            constraint.add(term, BoolToken.TRUE);
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
             Solver solver = context.MkSolver();
-
-            BoolExpr query = KILtoSMTLib.kilToZ3(context, term);
+            BoolExpr query = context.ParseSMTLIB2String(
+                    KILtoSMTLib.translateConstraint(constraint),
+                    null,
+                    null,
+                    null,
+                    null);
             solver.Assert(query);
 
 
