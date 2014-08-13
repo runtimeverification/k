@@ -264,8 +264,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         }
         assert astNode instanceof BuiltinMap : "preTransformer should not modify type";
         builtinMap = (BuiltinMap) astNode;
-        builtinMap = (BuiltinMap) super.transform(builtinMap);
-        return builtinMap.accept(postTransformer);
+        return ((JavaSymbolicObject) super.transform(builtinMap)).accept(postTransformer);
     }
 
     @Override

@@ -778,12 +778,20 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value after including the new equalities
      */
     public TruthValue addAll(SymbolicConstraint constraint) {
-        for (Map.Entry<Variable, Term> entry : constraint.data.substitution.entrySet()) {
-            add(entry.getValue(), entry.getKey());
-        }
-
+        addAll(constraint.data.substitution);
         for (Equality equality : constraint.data.equalities) {
             add(equality.leftHandSide, equality.rightHandSide);
+        }
+
+        return data.truthValue;
+    }
+
+    /**
+     * Adds all bindings in the given substitution map to this symbolic constraint.
+     */
+    public TruthValue addAll(Map<Variable, Term> substitution) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            add(entry.getValue(), entry.getKey());
         }
 
         return data.truthValue;
