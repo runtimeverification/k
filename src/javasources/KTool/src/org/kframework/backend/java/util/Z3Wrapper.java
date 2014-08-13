@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import com.microsoft.z3.Solver;
+import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
 import org.kframework.utils.OS;
@@ -30,5 +32,19 @@ public class Z3Wrapper {
             initialized = true;
         }
         return new com.microsoft.z3.Context();
+    }
+
+    public static boolean checkQuery(String query) {
+        boolean result = false;
+        try {
+            com.microsoft.z3.Context context = newContext();
+            Solver solver = context.MkSolver();
+            solver.Assert(context.ParseSMTLIB2String(query, null, null, null, null));
+            result = solver.Check() == Status.UNSATISFIABLE;
+            context.Dispose();
+        } catch (Z3Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }

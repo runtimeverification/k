@@ -2,9 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -46,12 +44,7 @@ import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.Solver;
-import com.microsoft.z3.Status;
-import com.microsoft.z3.Symbol;
-import com.microsoft.z3.Z3Exception;
+
 
 /**
  * A conjunction of equalities between terms (with variables).
@@ -807,24 +800,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return false;
         }
 
-        Boolean result = false;
+        boolean result = false;
         try {
-            com.microsoft.z3.Context context = Z3Wrapper.newContext();
-            Solver solver = context.MkSolver();
-            for (Equality equality : data.equalities) {
-                try {
-                    solver.Assert(context.MkEq(
-                            KILtoSMTLib.kilToZ3(context, equality.leftHandSide),
-                            KILtoSMTLib.kilToZ3(context, equality.rightHandSide)));
-                } catch (UnsupportedOperationException e) {
-                    /* it is sound to skip the equalities that cannot be translated */
-                    // TODO(AndreiS): fix this translation and the exceptions
-                    e.printStackTrace();
-                }
-                result = solver.Check() == Status.UNSATISFIABLE;
-                context.Dispose();
-            }
-        } catch (Z3Exception e) {
+            result = Z3Wrapper.checkQuery(KILtoSMTLib.translateConstraint(this));
+        } catch (UnsupportedOperationException e) {
             e.printStackTrace();
         }
         return result;
@@ -962,76 +941,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
 //            System.out.println(constraint);
         } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
-            Set<Variable> rightHandSideVariables = new HashSet<Variable>(right.variableSet());
-            rightHandSideVariables.removeAll(left.variableSet());
-
             try {
-                com.microsoft.z3.Context context = Z3Wrapper.newContext();
-
-                Solver solver = context.MkSolver();
-
-                for (Equality equality : left.data.equalities) {
-                    solver.Assert(context.MkEq(
-                            KILtoSMTLib.kilToZ3(context, equality.leftHandSide),
-                            KILtoSMTLib.kilToZ3(context, equality.rightHandSide)));
-                }
-
-                //BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
-                BoolExpr[] inequalities = new BoolExpr[right.data.equalities.size()];
-                int i = 0;
-                for (Equality equality : right.data.equalities) {
-                    inequalities[i++] = context.MkNot(context.MkEq(
-                            KILtoSMTLib.kilToZ3(context, equality.leftHandSide),
-                            KILtoSMTLib.kilToZ3(context, equality.rightHandSide)));
-                }
-                /* TODO(AndreiS): fix translation to smt
-            for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
-                inequalities[i++] = context.MkNot(context.MkEq(
-                        ((Z3Term) entry.getKey().accept(transformer)).expression(),
-                        ((Z3Term) entry.getValue().accept(transformer)).expression()));
-            }
-            */
-
-                com.microsoft.z3.Sort[] variableSorts = new com.microsoft.z3.Sort[rightHandSideVariables.size()];
-                Symbol[] variableNames = new Symbol[rightHandSideVariables.size()];
-                i = 0;
-                for (Variable variable : rightHandSideVariables) {
-                    if (variable.sort().equals(BoolToken.SORT)) {
-                        variableSorts[i] = context.MkBoolSort();
-                    } else if (variable.sort().equals(IntToken.SORT)) {
-                        variableSorts[i] = context.MkIntSort();
-                    } else if (variable.sort().equals(BitVector.SORT)) {
-                        variableSorts[i] = context.MkBitVecSort(BitVector.getBitwidth(variable));
-                    } else {
-                        throw new UnsupportedOperationException(
-                                "unexpected variable sort " + variable.sort());
-                    }
-                    variableNames[i] = context.MkSymbol(variable.name());
-                    ++i;
-                }
-
-                Expr[] boundVariables = new Expr[rightHandSideVariables.size()];
-                i = 0;
-                for (Variable variable : rightHandSideVariables) {
-                    boundVariables[i++] = KILtoZ3.valueOf(variable, context).expression();
-                }
-
-                if (boundVariables.length > 0) {
-                    solver.Assert(context.MkForall(
-                            boundVariables,
-                            context.MkOr(inequalities),
-                            1,
-                            null,
-                            null,
-                            null,
-                            null));
-                } else {
-                    solver.Assert(context.MkOr(inequalities));
-                }
-
-                result = solver.Check() == Status.UNSATISFIABLE;
-                context.Dispose();
-            } catch (UnsupportedOperationException | Z3Exception e) {
+                result = Z3Wrapper.checkQuery(KILtoSMTLib.translateImplication(left, right));
+            } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
             }
         }

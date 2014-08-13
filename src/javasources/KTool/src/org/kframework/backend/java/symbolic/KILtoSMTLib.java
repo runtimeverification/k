@@ -1,7 +1,5 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -10,62 +8,147 @@ import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.SMTLibTerm;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.FuncDecl;
-import com.microsoft.z3.Sort;
-import com.microsoft.z3.Z3Exception;
+import java.math.BigInteger;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+
 
 public class KILtoSMTLib extends CopyOnWriteTransformer {
 
-    private final Context context;
+    public static final ImmutableSet<Sort> supportedSorts = ImmutableSet.of(
+            Sort.BOOL,
+            Sort.INT,
+            Sort.BIT_VECTOR);
+    /**
+     * Flag set to true if it is sounds to skip equalities that cannot be translated.
+     */
+    private final boolean skipEqualities;
+    private final HashSet<Variable> variables;
 
-    public final Set<Sort> sorts = new HashSet<>();
-    public final Set<FuncDecl> funcDecls = new HashSet<>();
-
-    public KILtoSMTLib(Context context) throws Z3Exception {
-        this.context = context;
-        sorts.add(context.BoolSort());
-        sorts.add(context.IntSort());
+    public static String translateConstraint(SymbolicConstraint constraint) {
+        KILtoSMTLib transformer = new KILtoSMTLib(true);
+        String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
+        return getConstantDeclarations(transformer.variables()) + "(assert " + expression + ")";
     }
 
-    public static BoolExpr kilToZ3(Context context, Term t) {
-        KILtoSMTLib transformer = null;
-        SMTLibTerm smtlib = null;
-        try {
-            transformer = new KILtoSMTLib(context);
-            smtlib = (SMTLibTerm) t.accept(transformer);
-            return context.ParseSMTLIB2String(smtlib.expression(), null, null, null, null);
-        } catch (Z3Exception e) {
-            throw new UnsupportedOperationException(e);
+    public static String translateImplication(
+            SymbolicConstraint leftHandSide,
+            SymbolicConstraint rightHandSide) {
+        KILtoSMTLib leftTransformer = new KILtoSMTLib(true);
+        KILtoSMTLib rightTransformer = new KILtoSMTLib(false);
+        String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
+        String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
+        StringBuilder sb = new StringBuilder();
+        sb.append(getConstantDeclarations(leftTransformer.variables()));
+        sb.append("(assert (implies ");
+        sb.append(leftExpression);
+        sb.append(" ");
+        Set<Variable> rightHandSideOnlyVariables = Sets.difference(
+                rightTransformer.variables(),
+                leftTransformer.variables());
+        if (!rightHandSideOnlyVariables.isEmpty()) {
+            sb.append("(forall (");
+            sb.append(getQuantifiedVariables(rightHandSideOnlyVariables));
+            sb.append(") ");
         }
+        sb.append(rightExpression);
+        if (!rightHandSideOnlyVariables.isEmpty()) {
+            sb.append(")");
+        }
+        sb.append("))");
+        return sb.toString();
     }
 
-    public Sort[] getSorts() {
-        return sorts.toArray(new Sort[sorts.size()]);
+    private static String getConstantDeclarations(Set<Variable> variables) {
+        StringBuilder sb = new StringBuilder();
+        for (Variable variable : variables) {
+            sb.append("(declare-fun ");
+            // TODO(AndreiS): make sure variable names are SMTLib compliant
+            sb.append(variable.name());
+            sb.append(" () ");
+            String sortName;
+            sortName = getVariableSortName(variable);
+            sb.append(sortName);
+            sb.append(")\n");
+        }
+        return sb.toString();
     }
 
-    public FuncDecl[] getFuncDecls() {
-        return funcDecls.toArray(new FuncDecl[funcDecls.size()]);
+    private static String getQuantifiedVariables(Set<Variable> variables) {
+        StringBuilder sb = new StringBuilder();
+        for (Variable variable : variables) {
+            sb.append("(");
+            // TODO(AndreiS): make sure variable names are SMTLib compliant
+            sb.append(variable.name());
+            sb.append(" ");
+            String sortName;
+            sortName = getVariableSortName(variable);
+            sb.append(sortName);
+            sb.append(")\n");
+        }
+        return sb.toString();
     }
 
+    private static String getVariableSortName(Variable variable) {
+        return variable.sort() == Sort.BIT_VECTOR ?
+               "(_ BitVec " + BitVector.getBitwidth(variable) + ")" :
+               variable.sort().name();
+    }
+
+    public KILtoSMTLib(boolean skipEqualities) {
+        this.skipEqualities = skipEqualities;
+        variables = new HashSet<>();
+    }
+
+    /**
+     * Returns an unmodifiable view of the sets of variables occurring during the translation.
+     */
+    public Set<Variable> variables() {
+        return Collections.unmodifiableSet(variables);
+    }
+
+    /**
+     * Translates the equalities of the given symbolic constraint into SMTLib format.
+     * Ignores the substitution of the symbolic constraint.
+     */
     @Override
-    public ASTNode transform(BoolToken boolToken) {
-        return new SMTLibTerm(Boolean.toString(boolToken.booleanValue()));
-    }
+    public ASTNode transform(SymbolicConstraint constraint) {
+        if (constraint.data.equalities.isEmpty()) {
+            return new SMTLibTerm("true");
+        }
 
-    @Override
-    public ASTNode transform(IntToken intToken) {
-        return new SMTLibTerm(Integer.toString(intToken.intValue()));
-    }
-
-    @Override
-    public ASTNode transform(BitVector bitVector) {
-        return new SMTLibTerm("(_ bv" + bitVector.signedValue().longValue() + " " + bitVector.bitwidth() + ")");
+        StringBuilder sb = new StringBuilder();
+        sb.append("(and");
+        for (SymbolicConstraint.Equality equality : constraint.data.equalities) {
+            try {
+                sb.append(" (= ");
+                sb.append(((SMTLibTerm) equality.leftHandSide().accept(this)).expression());
+                sb.append(" ");
+                sb.append(((SMTLibTerm) equality.rightHandSide().accept(this)).expression());
+                sb.append(")");
+            } catch (UnsupportedOperationException e) {
+                // TODO(AndreiS): fix this translation and the exceptions
+                if (skipEqualities){
+                    /* it is sound to skip the equalities that cannot be translated */
+                    e.printStackTrace();
+                } else {
+                    throw e;
+                }
+            }
+        }
+        sb.append(")");
+        return new SMTLibTerm(sb.toString());
     }
 
     @Override
@@ -80,63 +163,71 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
         KList kList = (KList) kItem.kList();
 
-        if (kList.hasFrame()) {
+        if (kLabel.smtlib() == null || kList.hasFrame()) {
             throw new UnsupportedOperationException();
         }
 
         String label;
-        Term[] args;
-        // TODO(AndreiS): implement a more general mechanic
-        if (kLabel.label().equals("'extractMInt")) {
-            int beginIndex = ((IntToken) kList.get(1)).intValue();
-            int endIndex = ((IntToken) kList.get(2)).intValue() - 1;
-            label = "(_ extract " + endIndex + " " + beginIndex + ")";
-            args = new Term[] { kList.get(0) };
-        } else if (kLabel.label().equals("'concatenateMInt")) {
-            label = "concat";
-            args = new Term[] { kList.get(1), kList.get(0) };
-        } else {
-            label = kLabel.smtlib();
-            args = kList.getContents().toArray(new Term[kList.size()]);
+        List<Term> arguments;
+        switch (kLabel.label()) {
+            case "'extractMInt":
+                int beginIndex = ((IntToken) kList.get(1)).intValue();
+                int endIndex = ((IntToken) kList.get(2)).intValue() - 1;
+                label = "(_ extract " + endIndex + " " + beginIndex + ")";
+                arguments = ImmutableList.of(kList.get(0));
+                break;
+            case "'concatenateMInt":
+                label = "concat";
+                arguments = ImmutableList.of(kList.get(1), kList.get(0));
+                break;
+            default:
+                label = kLabel.smtlib();
+                arguments = kList.getContents();
         }
-        StringBuilder sb = new StringBuilder();
-        if (args.length == 0) {
+
+        if (!arguments.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("(");
+            sb.append(label);
+            for (Term argument : arguments) {
+                sb.append(" ");
+                sb.append(((SMTLibTerm) argument.accept(this)).expression());
+            }
+            sb.append(")");
+            return new SMTLibTerm(sb.toString());
+        } else {
             return new SMTLibTerm(label);
         }
-        sb.append("(");
-        sb.append(label);
-        for (Term arg : args) {
-            SMTLibTerm smtlib = (SMTLibTerm) arg.accept(this);
-            sb.append(" ");
-            sb.append(smtlib.expression());
+    }
+
+    @Override
+    public ASTNode transform(BoolToken boolToken) {
+        return new SMTLibTerm(Boolean.toString(boolToken.booleanValue()));
+    }
+
+    @Override
+    public ASTNode transform(IntToken intToken) {
+        return new SMTLibTerm(Integer.toString(intToken.intValue()));
+    }
+
+    @Override
+    public ASTNode transform(BitVector bitVector) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("#b");
+        for (int i = bitVector.bitwidth() - 1; i >= 0; --i) {
+            BigInteger value = bitVector.unsignedValue();
+            sb.append(value.testBit(i) ? "1" : "0");
         }
-        sb.append(")");
         return new SMTLibTerm(sb.toString());
     }
 
     @Override
     public ASTNode transform(Variable variable) {
-        return valueOf(variable, context);
+        if (!supportedSorts.contains(variable.sort())) {
+            throw new UnsupportedOperationException();
+        }
+        variables.add(variable);
+        return new SMTLibTerm(variable.name());
     }
 
-    public SMTLibTerm valueOf(Variable variable, Context context) {
-        try {
-            if (variable.sort().equals(BoolToken.SORT)) {
-                funcDecls.add(context.MkConstDecl(variable.name(), context.BoolSort()));
-                return new SMTLibTerm(variable.name());
-            } else if (variable.sort().equals(IntToken.SORT)) {
-                funcDecls.add(context.MkConstDecl(variable.name(), context.IntSort()));
-                return new SMTLibTerm(variable.name());
-            } else if (variable.sort().equals(BitVector.SORT)) {
-                Sort sort = context.MkBitVecSort(BitVector.getBitwidth(variable));
-                sorts.add(sort);
-                funcDecls.add(context.MkConstDecl(variable.name(), sort));
-                return new SMTLibTerm(variable.name());
-            } else {
-                throw new UnsupportedOperationException("cannot translate term to SMTLib format " + variable);
-            }
-        } catch (Z3Exception e) {
-            throw new UnsupportedOperationException(e);
-        }
-    }
 }
