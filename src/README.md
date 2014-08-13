@@ -28,6 +28,13 @@ option to make git accessible in the command line too.
 
 You can test if it works by calling `ant` in a Terminal.
 
+## (On Windows only) Visual C++ 2012 Redistributable Package
+Download here: 
+http://www.microsoft.com/en-us/download/details.aspx?id=30679
+
+Make sure to download the 64-bit version if you are using a 64-bit JRE,
+and the 32-bit version if you are using a 32-bit JRE.
+
 # Install
 Checkout this directory in your desired location and call `ant` from the main
 directory to build the .jar binaries. For convenient usage, you can update
