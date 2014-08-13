@@ -134,7 +134,7 @@ module SYMBOLIC-K
   rule
     isSymbolicK(KL:KLabel(LK:KList))
   =>
-    (isVariable(KL(LK)) ==K true) orElseBool isSymbolicK(LK)
+    (isVariable(KL(LK)) ==K true) orElseBool (isSymbolicK(LK) ==K true)
   when isKLabelConstant(KL)
   [predicate]
 
