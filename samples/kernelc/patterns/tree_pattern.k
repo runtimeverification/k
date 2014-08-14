@@ -21,7 +21,7 @@ module TREE-PATTERN
     => object(P) |-> (
           value |-> tv(int, I)
           left  |-> tv(struct treeNode *, ?PL:Pointer)
-          right |-> tv(struct treeNode *, ?PR:Pointer)) 
+          right |-> tv(struct treeNode *, ?PR:Pointer))
        tree(?PL)(TL)
        tree(?PR)(TR)
     [pattern]
