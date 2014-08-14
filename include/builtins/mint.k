@@ -135,7 +135,7 @@ module MINT
                 | sgeMInt(MInt, MInt)   [function, hook(#MINT:sge)]
                 | ugeMInt(MInt, MInt)   [function, hook(#MINT:uge)]
                 | eqMInt(MInt, MInt)    [function, hook(#MINT:eq), smtlib(=)]
-                | neMInt(MInt, MInt)    [function, hook(#MINT:ne)]
+                | neMInt(MInt, MInt)    [function, hook(#MINT:ne), smtlib(distinct)]
 
   /*
    * Returns a machine integer with the underlying bits the bits of the first
@@ -143,14 +143,14 @@ module MINT
    * The bits of the first machine integer are on the more significant
    * positions.
    */
-  syntax MInt ::= concatenateMInt(MInt, MInt)   [function, hook(#MINT:concatenate)]
+  syntax MInt ::= concatenateMInt(MInt, MInt)   [function, hook(#MINT:concatenate), smtlib(concat)]
 
   /*
    * Returns a machine integer with the underlying bits the bits of the given
    * machine integer in the given range. The bit on position 0 is the most
    * significant bit.
    */
-  syntax MInt ::= extractMInt(MInt, Int, Int)   [function, hook(#MINT:extract)]
+  syntax MInt ::= extractMInt(MInt, Int, Int)   [function, hook(#MINT:extract), smtlib(extract)]
 
   /*
    * Returns a list of the first digits representing the given machine integer,

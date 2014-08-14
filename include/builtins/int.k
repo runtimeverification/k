@@ -18,8 +18,8 @@ module INT-HOOKS
                  Int "*Int" Int                 [function, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(#INT:_*Int_)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
-               | Int "/Int" Int                 [function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
-               | Int "%Int" Int                 [function, left, latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
+               | Int "/Int" Int                 [function, left, smtlib(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
+               | Int "%Int" Int                 [function, left, smtlib(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
                /* divInt and modInt implement e-division */
                | Int "divInt" Int               [function, left, smtlib(div), hook(#INT:_divInt_)]
                | Int "modInt" Int               [function, left, smtlib(mod), hook(#INT:_modInt_)]

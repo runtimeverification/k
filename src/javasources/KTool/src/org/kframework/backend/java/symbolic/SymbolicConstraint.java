@@ -38,12 +38,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
 
 
 /**
@@ -952,17 +952,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private SymbolicConstraint simplifyConstraint(SymbolicConstraint constraint) {
         constraint.normalize();
+
+        SymbolicConstraint simplifiedConstraint = new SymbolicConstraint(constraint.termContext());
+        simplifiedConstraint.addAll(
+                Maps.difference(constraint.substitution(), substitution()).entriesOnlyOnLeft());
         List<Equality> equalities = new LinkedList<>(constraint.equalities());
-        ListIterator<Equality> listIterator = equalities.listIterator();
-        while (listIterator.hasNext()) {
-            Equality e2 = listIterator.next();
-            for (Equality e1 : equalities()) {
-                if (e2.equals(e1)) {
-                    listIterator.remove();
-                    break;
-                }
-            }
+        equalities.removeAll(equalities());
+        for (Equality equality : equalities) {
+            simplifiedConstraint.add(equality.leftHandSide, equality.rightHandSide);
         }
+        simplifiedConstraint.simplify();
+
         Map<Term, Term> substitution = new HashMap<>();
         for (Equality e1:equalities()) {
             if (e1.rightHandSide.isGround()) {
@@ -972,10 +972,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 substitution.put(e1.rightHandSide,e1.leftHandSide);
             }
         }
-        constraint = (SymbolicConstraint) substituteTerms(constraint, substitution);
-        constraint.renormalize();
-        constraint.simplify();
-        return constraint;
+        simplifiedConstraint = (SymbolicConstraint) substituteTerms(simplifiedConstraint, substitution);
+        simplifiedConstraint.renormalize();
+        simplifiedConstraint.simplify();
+        return simplifiedConstraint;
     }
 
     private JavaSymbolicObject substituteTerms(JavaSymbolicObject constraint, Map<Term, Term> substitution) {

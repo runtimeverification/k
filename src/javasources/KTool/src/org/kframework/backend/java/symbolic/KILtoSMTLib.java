@@ -51,9 +51,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
         StringBuilder sb = new StringBuilder();
         sb.append(getConstantDeclarations(leftTransformer.variables()));
-        sb.append("(assert (implies ");
+        sb.append("(assert (and ");
         sb.append(leftExpression);
-        sb.append(" ");
+        sb.append(" (not ");
         Set<Variable> rightHandSideOnlyVariables = Sets.difference(
                 rightTransformer.variables(),
                 leftTransformer.variables());
@@ -66,7 +66,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         if (!rightHandSideOnlyVariables.isEmpty()) {
             sb.append(")");
         }
-        sb.append("))");
+        sb.append(")))");
         return sb.toString();
     }
 
@@ -132,10 +132,12 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         sb.append("(and");
         for (SymbolicConstraint.Equality equality : constraint.data.equalities) {
             try {
+                String left = ((SMTLibTerm) equality.leftHandSide().accept(this)).expression();
+                String right = ((SMTLibTerm) equality.rightHandSide().accept(this)).expression();
                 sb.append(" (= ");
-                sb.append(((SMTLibTerm) equality.leftHandSide().accept(this)).expression());
+                sb.append(left);
                 sb.append(" ");
-                sb.append(((SMTLibTerm) equality.rightHandSide().accept(this)).expression());
+                sb.append(right);
                 sb.append(")");
             } catch (UnsupportedOperationException e) {
                 // TODO(AndreiS): fix this translation and the exceptions
@@ -163,25 +165,27 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
         KList kList = (KList) kItem.kList();
 
-        if (kLabel.smtlib() == null || kList.hasFrame()) {
+        if (kList.hasFrame()) {
             throw new UnsupportedOperationException();
         }
 
-        String label;
+        String label = kLabel.smtlib();
+        if (label == null) {
+            throw new UnsupportedOperationException("missing SMTLib translation for " + kLabel);
+        }
+
         List<Term> arguments;
-        switch (kLabel.label()) {
-            case "'extractMInt":
+        switch (label) {
+            case "extract":
                 int beginIndex = ((IntToken) kList.get(1)).intValue();
                 int endIndex = ((IntToken) kList.get(2)).intValue() - 1;
                 label = "(_ extract " + endIndex + " " + beginIndex + ")";
                 arguments = ImmutableList.of(kList.get(0));
                 break;
-            case "'concatenateMInt":
-                label = "concat";
+            case "concat":
                 arguments = ImmutableList.of(kList.get(1), kList.get(0));
                 break;
             default:
-                label = kLabel.smtlib();
                 arguments = kList.getContents();
         }
 
