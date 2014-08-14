@@ -237,10 +237,11 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.0</version>
+        <version>3.1</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
+          <useIncrementalCompilation>yes</useIncrementalCompilation>
         </configuration>
       </plugin>
       <plugin>
@@ -289,7 +290,7 @@
             <configuration>
               <target>
                 <property name="compile_classpath" refid="maven.compile.classpath" />
-                <copy todir="target/sdf">
+                <copy todir="target/sdf" preservelastmodified="true">
                   <fileset dir="src/main/sdf" />
                 </copy>
                 <ant antfile="buildsig.xml" dir="target/sdf" />
