@@ -23,8 +23,8 @@ module KERNELC
 
       <heap> .Map </heap>
 
-      <in> .List </in>
-      <out> .List </out>
+      <in stream="stdin"> .List </in>
+      <out stream="stdout"> .List </out>
     </config>
 
 

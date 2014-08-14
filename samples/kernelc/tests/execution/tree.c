@@ -3,18 +3,18 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
 
 struct listNode {
-  int val;
+  int value;
   struct listNode *next;
 };
 
 struct stackNode {
-  struct treeNode *val;
+  struct treeNode *value;
   struct stackNode *next;
 };
 
@@ -27,9 +27,9 @@ struct listNode* tree_to_list_recursive(struct treeNode *t, struct listNode *l)
     return l;
 
   ln = (struct listNode *) malloc(sizeof(struct listNode));
-  ln->val = t->val;
+  ln->value = t->value;
   ln->next = tree_to_list_recursive(t->right, l);
-  printf("%d ", t->val);
+  printf("%d ", t->value);
   l = tree_to_list_recursive(t->left, ln);
   free(t);
 
@@ -46,7 +46,7 @@ struct listNode* tree_to_list_iterative(struct treeNode *t)
 
   l = NULL;
   s = (struct stackNode *) malloc(sizeof(struct stackNode));
-  s->val = t;
+  s->value = t;
   s->next = NULL;
   while (s != NULL) {
     struct treeNode *tn;
@@ -55,31 +55,32 @@ struct listNode* tree_to_list_iterative(struct treeNode *t)
 
     sn = s;
     s = s->next ;
-    tn = sn->val;
+    tn = sn->value;
     free(sn) ;
     if (tn->left != NULL) {
       sn = (struct stackNode *) malloc(sizeof(struct stackNode));
-      sn->val = tn->left;
+      sn->value = tn->left;
       sn->next = s;
       s = sn;
     }
     if (tn->right != NULL) {
       sn = (struct stackNode *) malloc(sizeof(struct stackNode));
-      sn->val = tn;
+      sn->value = tn;
       sn->next = s;
       s = sn;
       sn = (struct stackNode *) malloc(sizeof(struct stackNode));
-      sn->val = tn->right;
+      sn->value = tn->right;
       sn->next = s;
       s = sn;
-      tn->left = tn->right = NULL;
+      tn->left = NULL;
+      tn->right = NULL;
     }
     else {
       ln = (struct listNode *) malloc(sizeof(struct listNode));
-      ln->val = tn->val;
+      ln->value = tn->value;
       ln->next = l;
       l = ln;
-      printf("%d ", ln->val);
+      printf("%d ", ln->value);
       free(tn);
     }
   }
@@ -93,27 +94,27 @@ struct treeNode* create()
   struct treeNode* root;
 
   root = (struct treeNode*) malloc(sizeof(struct treeNode));
-  root->val = 4;
+  root->value = 4;
   root->left = (struct treeNode*) malloc(sizeof(struct treeNode));
-  root->left->val = 2;
+  root->left->value = 2;
   root->left->left = (struct treeNode*) malloc(sizeof(struct treeNode));
-  root->left->left->val = 1;
-  root->left->left->left = 0;
-  root->left->left->right = 0;
+  root->left->left->value = 1;
+  root->left->left->left = NULL;
+  root->left->left->right = NULL;
   root->left->right = (struct treeNode*) malloc(sizeof(struct treeNode));
-  root->left->right->val = 3;
-  root->left->right->left = 0;
-  root->left->right->right = 0;
+  root->left->right->value = 3;
+  root->left->right->left = NULL;
+  root->left->right->right = NULL;
   root->right = (struct treeNode*) malloc(sizeof(struct treeNode));
-  root->right->val = 6;
+  root->right->value = 6;
   root->right->left = (struct treeNode*) malloc(sizeof(struct treeNode));
-  root->right->left->val = 5;
-  root->right->left->left = 0;
-  root->right->left->right = 0;
+  root->right->left->value = 5;
+  root->right->left->left = NULL;
+  root->right->left->right = NULL;
   root->right->right = (struct treeNode*) malloc(sizeof(struct treeNode));
-  root->right->right->val = 7;
-  root->right->right->left = 0;
-  root->right->right->right = 0;
+  root->right->right->value = 7;
+  root->right->right->left = NULL;
+  root->right->right->right = NULL;
 
   return root;
 }
@@ -136,11 +137,13 @@ int main()
   struct listNode* l;
 
   t = create();
-  l = tree_to_list_recursive(t, 0);
+  l = tree_to_list_recursive(t, NULL);
   destroy(l);
 
   t = create();
   l = tree_to_list_iterative(t);
   destroy(l);
+
+  return 0;
 }
 

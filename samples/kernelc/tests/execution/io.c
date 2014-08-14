@@ -15,7 +15,7 @@ void read_write(int n)
 
     scanf("%d", &t);
     printf("%d ", t);
-    n -= 1;
+    n = n - 1;
   }
 }
 
@@ -25,7 +25,7 @@ void read_write_buffer(int n)
   struct listNode *x;
 
   i = 0;
-  x = 0;
+  x = NULL;
   while (i < n) {
     struct listNode *y;
 
@@ -33,7 +33,7 @@ void read_write_buffer(int n)
     x = (struct listNode*) malloc(sizeof(struct listNode));
     scanf("%d", &(x->val));
     x->next = y;
-    i += 1;
+    i = i + 1;
   }
 
   while (x) {
@@ -59,5 +59,7 @@ int main()
 
   scanf("%d", &n);
   read_write_buffer(n);
+
+  return 0;
 }
 

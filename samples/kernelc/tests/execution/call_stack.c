@@ -35,5 +35,7 @@ int main()
 {
   trusted(5);
   any(5);
+
+  return 0;
 }
 

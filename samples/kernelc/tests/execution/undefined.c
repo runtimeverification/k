@@ -3,7 +3,7 @@
 
 
 struct listNode {
-  int val;
+  int value;
   struct listNode *next;
 };
 
@@ -13,6 +13,8 @@ int main()
   struct listNode *x;
 
   x = (struct listNode*) malloc(sizeof(struct listNode));
-  printf("%p\n", x->next);
+  printf("%d\n", x->value);
+
+  return 0;
 }
 

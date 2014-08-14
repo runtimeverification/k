@@ -3,7 +3,7 @@
 
 
 struct listNode {
-  int val;
+  int value;
   struct listNode *next;
 };
 
@@ -50,7 +50,7 @@ struct listNode* list_create(int n)
 
     y = x;
     x = (struct listNode*) malloc(sizeof(struct listNode));
-    x->val = n;
+    x->value = n;
     x->next = y;
 
     n = n - 1;
@@ -63,7 +63,7 @@ struct listNode* list_create(int n)
 void list_print(struct listNode* x)
 {
   while(x != NULL) {
-    printf("%d ", x->val);
+    printf("%d ", x->value);
     x = x->next;
   }
   printf("\n"); 
