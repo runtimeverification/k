@@ -265,8 +265,6 @@
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.7</version>
-        <dependencies>
-       </dependencies>
         <executions>
           <execution>
             <id>init-changed-files</id>
@@ -379,9 +377,9 @@
 	<configuration>
           <workingDirectory>src/test/resources</workingDirectory>
           <environmentVariables>
-            <LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}${path.separator}${project.build.directory}/dependency</LD_LIBRARY_PATH>
-            <DYLD_LIBRARY_PATH>${env.DYLD_LIBRARY_PATH}${path.separator}${project.build.directory}/dependency</DYLD_LIBRARY_PATH>
-            <PATH>${env.PATH}${path.separator}${project.build.directory}/dependency</PATH>
+            <LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</LD_LIBRARY_PATH>
+            <DYLD_LIBRARY_PATH>${env.DYLD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</DYLD_LIBRARY_PATH>
+            <PATH>${env.PATH}${path.separator}${project.build.directory}/lib/native</PATH>
           </environmentVariables>
         </configuration>
       </plugin>
@@ -468,6 +466,29 @@
               <stripClassifier>true</stripClassifier>
               <includeTypes>${native.library.type}</includeTypes>
               <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-java-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeTypes>jar</includeTypes>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/lib/java</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>unpack-zip-dependencies</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeTypes>zip</includeTypes>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
             </configuration>
           </execution>
         </executions>

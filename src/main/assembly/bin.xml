@@ -14,27 +14,6 @@
         <outputFileNameMapping>${artifact.artifactId}${native.exe.extension}</outputFileNameMapping>
         <fileMode>775</fileMode>
       </dependencySet>
-      <dependencySet>
-        <outputDirectory>/lib/java</outputDirectory>
-        <useProjectArtifact>true</useProjectArtifact>
-        <includes>
-          <include>*:jar:*</include>
-        </includes>
-      </dependencySet>
-      <dependencySet>
-        <outputDirectory>/lib/native</outputDirectory>
-        <includes>
-          <include>*:${native.library.type}:*</include>
-        </includes>
-        <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
-      </dependencySet>
-      <dependencySet>
-        <outputDirectory>/lib</outputDirectory>
-        <includes>
-          <include>*:zip:*</include>
-        </includes>
-        <unpack>true</unpack>
-      </dependencySet>
     </dependencySets>
   <fileSets>
     <fileSet>
@@ -66,6 +45,10 @@
       <directory>${project.build.scriptSourceDirectory}/lib</directory>
       <outputDirectory>/lib</outputDirectory>
       <fileMode>775</fileMode>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/lib</directory>
+      <outputDirectory>/lib</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
