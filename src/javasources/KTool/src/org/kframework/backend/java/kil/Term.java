@@ -18,6 +18,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -255,6 +256,16 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         CopyOnShareSubstAndEvalTransformer transformer = new CopyOnShareSubstAndEvalTransformer(
                 substitution, variablesToReuse, context);
         return (Term) this.accept(transformer);
+    }
+
+    /**
+     * Similar to {@link Term#copyOnShareSubstAndEval(Map, Set, TermContext)}
+     * except the empty reusable variable set.
+     *
+     * @see {@link Term#copyOnShareSubstAndEval(Map, Set, TermContext)}
+     */
+    public Term copyOnShareSubstAndEval(Map<Variable, ? extends Term> substitution, TermContext context) {
+        return copyOnShareSubstAndEval(substitution, Collections.<Variable>emptySet(), context);
     }
 
      /**

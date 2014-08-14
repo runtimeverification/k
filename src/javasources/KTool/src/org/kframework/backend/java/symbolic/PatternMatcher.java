@@ -203,7 +203,7 @@ public class PatternMatcher extends AbstractMatcher {
                 assert lookupOrChoice instanceof DataStructureLookupOrChoice :
                     "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
-                Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst);
+                Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
 
                 boolean resolved = false;
                 if (evalLookupOrChoice instanceof Bottom
@@ -295,7 +295,7 @@ public class PatternMatcher extends AbstractMatcher {
      *            the substitution map
      * @return the evaluated data structure lookup or choice operation
      */
-    private static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst) {
+    private static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
         Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
 
         Term evalLookupOrChoice = null;
@@ -307,8 +307,8 @@ public class PatternMatcher extends AbstractMatcher {
             }
             key = subst.get(lookup.key());
             Kind kind = lookupOrChoice.kind();
-            base = base == null ? lookup.base() : base;
-            key = key == null ? lookup.key() : key;
+            base = base == null ? lookup.base().copyOnShareSubstAndEval(subst, context) : base;
+            key = key == null ? lookup.key().copyOnShareSubstAndEval(subst, context) : key;
 
             evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(lookup.type(), base, key, kind).evaluateLookup();
         } else {
