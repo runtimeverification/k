@@ -54,13 +54,7 @@ public class TokenSortCollector extends BasicVisitor {
 
     @Override
     public Void visit(Production production, Void _) {
-        if (kompileOptions.backend.java()) {
-            checkIllegalProduction(production);
-        } else {
-            if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
-                tokenSorts.add(production.getSort());
-            }
-        }
+        checkIllegalProduction(production);
         return null;
     }
 

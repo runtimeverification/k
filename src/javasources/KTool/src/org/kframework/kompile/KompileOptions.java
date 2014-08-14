@@ -40,33 +40,34 @@ public final class KompileOptions implements Serializable {
     public KompileOptions(Void v) {}
 
     public static enum Backend {
-        PDF(true, false, false, PdfBackend.class, null),
-        LATEX(true, false, false, LatexBackend.class, null),
-        DOC(true, false, false, DocumentationBackend.class, null),
-        HTML(true, false, false, HtmlBackend.class, null),
-        MAUDE(false, false, true, KompileBackend.class, MaudeKRun.class),
-        JAVA(false, true, true, JavaSymbolicBackend.class, JavaSymbolicKRun.class),
-        UNPARSE(false, false, false, UnparserBackend.class, null),
-        UNFLATTEN(false, false, false, UnflattenBackend.class, null),
-        UNFLATTEN_JAVA(false, true, false, UnflattenJavaBackend.class, null),
-        SYMBOLIC(false, false, true, SymbolicBackend.class, MaudeKRun.class),
-        COQ(false, true, false, CoqBackend.class, null);
+        PDF(true, false, PdfBackend.class, null, "autoinclude.k"),
+        LATEX(true, false, LatexBackend.class, null, "autoinclude.k"),
+        DOC(true, false, DocumentationBackend.class, null, "autoinclude.k"),
+        HTML(true, false, HtmlBackend.class, null, "autoinclude.k"),
+        MAUDE(false, true, KompileBackend.class, MaudeKRun.class, "autoinclude.k"),
+        JAVA(false, true, JavaSymbolicBackend.class, JavaSymbolicKRun.class, "autoinclude-java.k"),
+        UNPARSE(false, false, UnparserBackend.class, null, "autoinclude.k"),
+        UNFLATTEN(false, false, UnflattenBackend.class, null, "autoinclude.k"),
+        UNFLATTEN_JAVA(false, false, UnflattenJavaBackend.class, null, "autoinclude-java.k"),
+        SYMBOLIC(false, true, SymbolicBackend.class, MaudeKRun.class, "autoinclude.k"),
+        COQ(false, false, CoqBackend.class, null, "autoinclude-java.k");
 
-        private Backend(boolean documentation, boolean java, boolean generatesDefinition,
+        private Backend(boolean documentation, boolean generatesDefinition,
                 Class<? extends org.kframework.backend.Backend> backend,
-                Class<? extends KRun> krun) {
+                Class<? extends KRun> krun,
+                String autoinclude) {
             this.documentation = documentation;
-            this.isJava = java;
             this.generatesDefinition = generatesDefinition;
             this.backend = backend;
             this.krun = krun;
+            this.autoinclude = autoinclude;
         }
 
         private final boolean documentation;
-        private final boolean isJava;
         private final boolean generatesDefinition;
         private final Class<? extends org.kframework.backend.Backend> backend;
         private final Class<? extends KRun> krun;
+        private final String autoinclude;
 
         /**
          * Represents a backend that generates a documented output file containing the definition
@@ -74,13 +75,6 @@ public final class KompileOptions implements Serializable {
          */
         public boolean documentation() {
             return documentation;
-        }
-
-        /**
-         * Represents whether the compiler should execute according to the rules of the java backend.
-         */
-        public boolean java() {
-            return isJava;
         }
 
         /**
@@ -102,6 +96,10 @@ public final class KompileOptions implements Serializable {
          */
         public Class<? extends KRun> krun() {
             return krun;
+        }
+
+        public String autoinclude() {
+            return autoinclude;
         }
     }
 

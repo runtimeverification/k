@@ -12,8 +12,6 @@ import org.kframework.kil.CellList;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KItemProjection;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
@@ -194,11 +192,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
-            if (context.kompileOptions.backend.java()) {
-                elementsLeft.add(elementCell);
-            } else {
-                elementsLeft.add(KApp.of(new KInjectedLabel(elementCell)));
-            }
+            elementsLeft.add(elementCell);
         }
 
         int rightIndex;
@@ -210,11 +204,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
-            if (context.kompileOptions.backend.java()) {
-                elementsRight.add(elementCell);
-            } else {
-                elementsRight.add(KApp.of(new KInjectedLabel(elementCell)));
-            }
+            elementsRight.add(elementCell);
         }
 
         List<Term> terms = new ArrayList<>();
@@ -263,11 +253,6 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
                 assert key != null : "there should be exactly one key cell";
                 entries.put(key, value);
-                if (context.kompileOptions.backend.java()) {
-                    entries.put(key, value);
-                } else {
-                    entries.put(key, KApp.of(new KInjectedLabel(value)));
-                }
             } else if (term instanceof Variable) {
                 terms.add(new Variable(((Variable) term).getName(), Sort.of(mapSort.name())));
             } else if (term instanceof KItemProjection) {

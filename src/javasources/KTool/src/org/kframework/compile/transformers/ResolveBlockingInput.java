@@ -212,25 +212,22 @@ public class ResolveBlockingInput extends GetLhsPattern {
     }
 
     /**
-     * This method gets the *concrete* sort of variable var. As the ResolveBlocking input phase is run
+     * This method gets the *concrete* sort of variable var and removes the predicate.
+     * As the ResolveBlocking input phase is run
      * after the syntax is flatten, a rule like
      *   rule <k> read => I ...</k> <in> ListItem(I:Int) => .List ...</in>
      * will become
-     *   rule <k> 'read(.KList) => I ...</k> <in> ListItem(I:KItem) => .List ...</in> when isInt(I)
+     *   rule <k> 'read(.KList) => I ...</k> <in> ListItem(I:Int) => .List ...</in> when isInt(I)
      *
-     * Thus, the sort of the variable is moved into the side condition.  This method retrieves the
-     * sort of the variable from the side condition (stored in the originalCondition field) and removes the
+     * Thus, the sort of the variable is moved into the side condition.  This method removes the
      * corresponding predicate from the side condition to be used for the newly generated rule.
      *
      * @modifies originalCondition field
      * @param var the variable to be looked up
      * @return the original sort of var.
-     * @throws TransformerException
      */
 
     private Sort getSort(final Variable var) {
-        if (!var.getSort().equals(Sort.KITEM)) return var.getSort();
-        final String[] sort = {null};
         CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("find missing variables", context) {
 
             @Override
@@ -243,7 +240,6 @@ public class ResolveBlockingInput extends GetLhsPattern {
                             assert node.getLabel() instanceof KLabelConstant : "label should be a predicate label";
                             KLabelConstant l = (KLabelConstant) node.getLabel();
                             assert l.isPredicate() : "label should be a predicate label";
-                            sort[0] = l.getLabel().substring(2);
                             return null;
                         }
                     }
@@ -251,9 +247,11 @@ public class ResolveBlockingInput extends GetLhsPattern {
                 return super.visit(node, _);
             }
         };
-        originalCondition = (Term) transformer.visitNode(originalCondition);
+        if (originalCondition != null) {
+            originalCondition = (Term) transformer.visitNode(originalCondition);
+        }
 
-        return Sort.of(sort[0]);
+        return var.getSort();
     }
 
     private static final KLabelConstant parseInputLabel = KLabelConstant.of("'#parseInput");

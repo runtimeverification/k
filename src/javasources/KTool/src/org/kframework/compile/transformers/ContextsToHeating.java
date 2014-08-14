@@ -34,12 +34,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
      * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term)  {
         final Variable v;
-        if (kompileOptions.backend.java()) {
-            /* the java rewrite engine only supports heating/cooling on KItem */
-            v = Variable.getFreshVar(Sort.KITEM);
-        } else {
-            v = Variable.getFreshVar(Sort.K);
-        }
+        v = Variable.getFreshVar(Sort.KITEM);
         final List<Term> list = new ArrayList<Term>();
         CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("splitter", context) {
             @Override public ASTNode visit(Rewrite rewrite, Void _) {
