@@ -1,11 +1,12 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
-
-require "kernelC-syntax.k"
-require "kernelC-semantics.k"
+require "kernelc-syntax.k"
+require "kernelc-semantics.k"
+require "patterns/tree_pattern.k"
 
 module KERNELC
   imports KERNELC-SYNTAX
   imports KERNELC-SEMANTICS
+  imports TREE-PATTERN
 
   /*
    * KernelC configuration
@@ -22,8 +23,8 @@ module KERNELC
 
       <heap> .Map </heap>
 
-      <in> .List </in>
-      <out> .List </out>
+      <in stream="stdin"> .List </in>
+      <out stream="stdout"> .List </out>
     </config>
 
 

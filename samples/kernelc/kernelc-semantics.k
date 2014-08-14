@@ -253,24 +253,28 @@ module KERNELC-SEMANTICS
     tv(int, I1:Int) >> tv(int, I2:Int) => tv(int, I1 >>Int I2)
     [structural]
   rule
-    tv(int, I1:Int) >= tv(int, I2:Int) => tv(int, bool2int(I1 >=Int I2))
+    tv(int, I1:Int) >= tv(int, I2:Int) => bool2int(I1 >=Int I2)
     [structural]
   rule
-    tv(int, I1:Int) >  tv(int, I2:Int) => tv(int, bool2int(I1 >Int  I2))
+    tv(int, I1:Int) >  tv(int, I2:Int) => bool2int(I1 >Int  I2)
     [structural]
   rule
-    tv(int, I1:Int) <= tv(int, I2:Int) => tv(int, bool2int(I1 <=Int I2))
+    tv(int, I1:Int) <= tv(int, I2:Int) => bool2int(I1 <=Int I2)
     [structural]
   rule
-    tv(int, I1:Int) <  tv(int, I2:Int) => tv(int, bool2int(I1 <Int  I2))
+    tv(int, I1:Int) <  tv(int, I2:Int) => bool2int(I1 <Int  I2)
     [structural]
 
   rule
-    tv(T:Type, V1:Value) == tv(T, V2:Value) => tv(int, bool2int(V1 ==K  V2))
+    tv(T:Type, V1:Value) == tv(T, V2:Value) => bool2int(V1 ==K  V2)
     [structural]
   rule
-    tv(T:Type, V1:Value) != tv(T, V2:Value) => tv(int, bool2int(V1 =/=K  V2))
+    tv(T:Type, V1:Value) != tv(T, V2:Value) => bool2int(V1 =/=K V2)
     [structural]
+
+  syntax KItem ::= "bool2int" "(" Bool ")"
+  rule bool2int( true) => tv(int, 1)    [structural]
+  rule bool2int(false) => tv(int, 0)    [structural]
 
 
   /*
@@ -384,15 +388,11 @@ module KERNELC-SEMANTICS
     bindParameters(ParameterDeclarations, EvaluatedExpressions, Block)
     [function]
   rule bindParameters(
-          (T:Type X:Id, PDs:ParameterDeclarations),
-          (tv(T, V:Value), EEs:EvaluatedExpressions),
+          (_:Type X:Id, PDs:ParameterDeclarations),
+          (TV:TypedValue, EEs:EvaluatedExpressions),
           B:Block)
-    => X = tv(T, V); bindParameters(PDs, EEs, B)
+    => X = TV; bindParameters(PDs, EEs, B)
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
     => B
-
-  syntax Int ::= "bool2int" "(" Bool ")"    [function]
-  rule bool2int( true) => 1
-  rule bool2int(false) => 0
 endmodule
 
