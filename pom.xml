@@ -376,8 +376,6 @@
         <version>2.17</version>
 	<configuration>
           <workingDirectory>src/test/resources</workingDirectory>
-          <parallel>methods</parallel>
-          <threadCount>1</threadCount>
           <environmentVariables>
             <LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</LD_LIBRARY_PATH>
             <DYLD_LIBRARY_PATH>${env.DYLD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</DYLD_LIBRARY_PATH>
