@@ -50,5 +50,12 @@
       <directory>${project.build.directory}/lib</directory>
       <outputDirectory>/lib</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <outputDirectory>/lib/java</outputDirectory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+    </fileSet>
   </fileSets>
 </assembly>
