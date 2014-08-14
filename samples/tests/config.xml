@@ -9,7 +9,7 @@
 
   <!-- BF -->
   <include file="../bf/tests/config.xml" directory="bf" />
-  
+
   <!-- AGENT -->
   <test
       definition="agent/agent.k"
@@ -78,5 +78,6 @@
 
   <include file="../wcet/tests/config.xml" directory="wcet" />
 
-</tests>
+  <include file="../kernelc/tests/config.xml" directory="kernelc" />
 
+</tests>

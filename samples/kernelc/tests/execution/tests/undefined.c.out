@@ -1,0 +1,36 @@
+<config>
+    <struct>
+        listNode |-> next |-> struct listNode * value |-> int
+    </struct>
+    <fun>
+        main |-> functionBody (  , int , {  { struct listNode * x ; x = (( 
+          struct listNode * ) (malloc ( (sizeof ( struct listNode )) ))) ; (
+          printf ( "%d\n", (x -> value) )) ; return 0 ; } return tv ( void , 
+          undef ) ; } )
+    </fun>
+    <k>
+        (* tv ( int * , member ( 2 , value ) )) ~> HOLE ~> "%d\n", HOLE ~> (
+          printf ( HOLE )) ~> HOLE ; ~> return 0 ; ~> .Map ~> return tv ( void
+           , undef ) ; ~> .Map ~> .Map
+    </k>
+    <env>
+        x |-> tv ( struct listNode * * , object ( 1 ) )
+    </env>
+    <fun-id>
+        main
+    </fun-id>
+    <stack>
+        ListItem ( callStackFrame ( .K , .Map ,  ) )
+    </stack>
+    <heap>
+        object ( 1 ) |-> tv ( struct listNode * , object ( 2 ) ) object ( 2 ) 
+          |-> next |-> tv ( struct listNode * , undef ) value |-> tv ( int , 
+          undef )
+    </heap>
+    <in>
+        ListItem ( #buffer ( "" ) ) ListItem ( #istream ( 0 ) )
+    </in>
+    <out>
+        ListItem ( #ostream ( 1 ) ) ListItem ( #buffer ( "" ) )
+    </out>
+</config>
