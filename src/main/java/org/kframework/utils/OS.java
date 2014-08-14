@@ -14,7 +14,7 @@ public enum OS {
 
     private OS(boolean isPosix) {
         this.isPosix = isPosix;
-        this.binDir = JarInfo.getKBase(false) + "/bin";
+        this.binDir = JarInfo.getKBase(false) + "/lib/native";
     }
 
     public final boolean isPosix;

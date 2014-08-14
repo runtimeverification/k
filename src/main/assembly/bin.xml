@@ -7,7 +7,7 @@
   <baseDirectory>k</baseDirectory>
     <dependencySets>
       <dependencySet>
-        <outputDirectory>/bin</outputDirectory>
+        <outputDirectory>/lib/native</outputDirectory>
         <includes>
           <include>*:${native.exe.type}:*</include>
         </includes>
