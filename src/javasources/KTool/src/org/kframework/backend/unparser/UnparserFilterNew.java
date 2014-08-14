@@ -555,7 +555,14 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 }
                 // TODO(YilongL): not sure I can simply remove the following code
                 if (i != production.getItems().size() - 1) {
-                    indenter.write(" ");
+                    DataStructureSort dsSort = context.dataStructureSortOf(production.getSort());
+                    if (dsSort != null && dsSort.constructorLabel().equals(production.getKLabel())) {
+                        //is a constructor of a data structure
+                        //special case a new line between each item
+                        indenter.endLine();
+                    } else {
+                        indenter.write(" ");
+                    }
                 }
             }
         }
