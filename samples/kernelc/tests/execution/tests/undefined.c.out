@@ -9,7 +9,7 @@
           undef ) ; } )
     </fun>
     <k>
-        (* tv ( int * , member ( 5 , value ) )) ~> HOLE ~> "%d\n", HOLE ~> (
+        (* tv ( int * , member ( 2 , value ) )) ~> HOLE ~> "%d\n", HOLE ~> (
           printf ( HOLE )) ~> HOLE ; ~> return 0 ; ~> .Map ~> return tv ( void
            , undef ) ; ~> .Map ~> .Map
     </k>
@@ -23,7 +23,7 @@
         ListItem ( callStackFrame ( .K , .Map ,  ) )
     </stack>
     <heap>
-        object ( 1 ) |-> tv ( struct listNode * , object ( 5 ) ) object ( 5 ) 
+        object ( 1 ) |-> tv ( struct listNode * , object ( 2 ) ) object ( 2 ) 
           |-> next |-> tv ( struct listNode * , undef ) value |-> tv ( int , 
           undef )
     </heap>
