@@ -150,6 +150,7 @@
       extension="test"
       >
     <kompile-option name="--directory" value="maude_kompiled" />
+    <kompile-option name="--legacy-kast" />
     <all-programs>
       <krun-option name="--directory" value="maude_kompiled" />
     </all-programs>
@@ -161,6 +162,7 @@
       extension="test"
       >
     <kompile-option name="--directory" value="maude_kompiled" />
+    <kompile-option name="--legacy-kast" />
     <all-programs>
       <krun-option name="--directory" value="maude_kompiled" />
     </all-programs>
