@@ -24,8 +24,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kompile.KompileOptions.Backend;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -195,7 +193,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
-            if (context.kompileOptions.backend != Backend.MAUDE) {
+            if (!context.kompileOptions.experimental.legacyKast) {
                 elementsLeft.add(elementCell);
             } else {
                 elementsLeft.add(KApp.of(new KInjectedLabel(elementCell)));
@@ -211,7 +209,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
             Cell elementCell = (Cell) term;
             assert elementCell.getLabel().equals(cellList.elementCellLabel());
-            if (context.kompileOptions.backend != Backend.MAUDE) {
+            if (!context.kompileOptions.experimental.legacyKast) {
                 elementsRight.add(elementCell);
             } else {
                 elementsRight.add(KApp.of(new KInjectedLabel(elementCell)));
@@ -264,7 +262,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
                 assert key != null : "there should be exactly one key cell";
                 entries.put(key, value);
-                if (context.kompileOptions.backend != Backend.MAUDE) {
+                if (!context.kompileOptions.experimental.legacyKast) {
                     entries.put(key, value);
                 } else {
                     entries.put(key, KApp.of(new KInjectedLabel(value)));

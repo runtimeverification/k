@@ -236,5 +236,8 @@ public final class KompileOptions implements Serializable {
                 return IndexingAlgorithm.class;
             }
         }
+
+        @Parameter(names="--legacy-kast", description="Compile with settings based on the old KAST structure")
+        public boolean legacyKast = false;
     }
 }

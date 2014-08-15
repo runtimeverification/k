@@ -205,8 +205,10 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             for (int i = 0; i < newStrictAttrs.size(); i++) {
                 Attribute newStrictAttr = newStrictAttrs.get(i);
                 TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
-                for (int j = 0; j < prod.getArity(); ++j) {
-                    termCons.getContents().get(j).setSort(Sort.KITEM);
+                if (context.kompileOptions.experimental.legacyKast) {
+                    for (int j = 0; j < prod.getArity(); ++j) {
+                        termCons.getContents().get(j).setSort(Sort.KITEM);
+                    }
                 }
 
                 // insert HOLE instead of the term
