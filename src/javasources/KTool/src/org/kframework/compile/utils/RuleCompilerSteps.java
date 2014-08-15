@@ -39,6 +39,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
                 new ResolveContextAbstraction(context);
         this.add(resolveContextAbstraction);
         this.add(new ResolveOpenCells(context));
+        this.add(new Cell2DataStructure(context));
         this.add(new CompileDataStructures(context));
     }
 
