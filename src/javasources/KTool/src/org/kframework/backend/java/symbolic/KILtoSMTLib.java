@@ -29,7 +29,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     public static final ImmutableSet<Sort> supportedSorts = ImmutableSet.of(
             Sort.BOOL,
             Sort.INT,
-            Sort.BIT_VECTOR);
+            Sort.BIT_VECTOR,
+            /* sorts manually added to the smt prelude */
+            // TODO(AndreiS): generate automatically
+            Sort.of("IntSet"),
+            Sort.of("Tree"));
     /**
      * Flag set to true if it is sounds to skip equalities that cannot be translated.
      */
@@ -58,7 +62,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 rightTransformer.variables(),
                 leftTransformer.variables());
         if (!rightHandSideOnlyVariables.isEmpty()) {
-            sb.append("(forall (");
+            sb.append("(exists (");
             sb.append(getQuantifiedVariables(rightHandSideOnlyVariables));
             sb.append(") ");
         }

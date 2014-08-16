@@ -154,7 +154,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         unificationConstraint.addAll(constrainedTerm.constraint);
         unificationConstraint.simplify();
 
-        unificationConstraint.expandPatterns(false);
+        // TODO(AndreiS): fix the infrastructure to get a fixpoint
+        unificationConstraint.expandPatterns(unificationConstraint, false);
+        unificationConstraint.simplify();
+        unificationConstraint.expandPatterns(unificationConstraint, false);
         unificationConstraint.simplify();
 
         Set<Variable> variables = unificationConstraint.variableSet();

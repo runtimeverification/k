@@ -614,6 +614,20 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
+        /* split andBool in multiple equalities */
+        if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel().toString().equals("'_andBool_") && rightHandSide.equals(BoolToken.TRUE)) {
+            add(((KList) ((KItem) leftHandSide).kList()).get(0), BoolToken.TRUE);
+            add(((KList) ((KItem) leftHandSide).kList()).get(1), BoolToken.TRUE);
+            return data.truthValue;
+        }
+
+        /* split andBool in multiple equalities */
+        if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel().toString().equals("'_andBool_") && leftHandSide.equals(BoolToken.TRUE)) {
+            add(((KList) ((KItem) rightHandSide).kList()).get(0), BoolToken.TRUE);
+            add(((KList) ((KItem) rightHandSide).kList()).get(1), BoolToken.TRUE);
+            return data.truthValue;
+        }
+
         if (simplifyingEqualities) {
             Equality equality = new Equality(leftHandSide, rightHandSide);
             if (equality.isFalse()) {
@@ -1232,6 +1246,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (int i = 0; i < data.equalities.size(); ++i) {
             data.equalities.set(i, data.equalities.get(i).expandPatterns(this, narrow));
         }
+
+        /* force normalization to consider the changes made by this method */
+        data.isNormal = false;
     }
 
     /**
