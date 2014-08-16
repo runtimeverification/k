@@ -45,6 +45,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
@@ -575,6 +576,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     private final SymbolicUnifier unifier;
 
+    public static SymbolicConstraint simplifiedConstraintFrom(TermContext context, Object... args) {
+        SymbolicConstraint constraint = new SymbolicConstraint(context);
+        constraint.addAll(args);
+        return constraint;
+    }
+
     public SymbolicConstraint(Data data, TermContext context) {
         this.data = data;
         this.context = context;
@@ -631,6 +638,18 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             checkTruthValBeforePutIntoConstraint(leftHandSide, rightHandSide, false);
         }
         return data.truthValue;
+    }
+
+    /**
+     * Adds a new equality to this symbolic constraint.
+     *
+     * @param equality
+     *            the new equality
+     * @return the truth value of this symbolic constraint after including the
+     *         new equality
+     */
+    public TruthValue add(Equality equality) {
+        return add(equality.leftHandSide, equality.rightHandSide);
     }
 
     private boolean checkKindMisMatch(Term leftHandSide, Term rightHandSide) {
@@ -694,10 +713,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value after including the side condition
      */
     public TruthValue addAll(Collection<Term> condition) {
+        boolean eval = context.definition().context().krunOptions != null
+                && context.definition().context().krunOptions.experimental.prove() != null;
+
         for (Term term : condition) {
             // TODO(AndreiS): remove this condition when function evaluation works properly
-            if (context.definition().context().krunOptions != null
-                    && context.definition().context().krunOptions.experimental.prove() != null) {
+            if (eval) {
                 add(term.evaluate(context), BoolToken.TRUE);
             } else {
                 add(term, BoolToken.TRUE);
@@ -706,6 +727,48 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         return data.truthValue;
+    }
+
+    private TruthValue addAll(List<Equality> equalites) {
+        for (Equality equality : equalites) {
+            add(equality);
+        }
+        return data.truthValue;
+    }
+
+    /**
+     *
+     * @param args
+     *            possible argument types: - {@code SymbolicConstraint} -
+     *            {@code Equality} - {@code List<Equality>} -
+     *            {@code Collection<Term>}
+     * @return
+     */
+    private TruthValue addAll(Object... args) {
+        for (Object arg : args) {
+            if (arg instanceof SymbolicConstraint) {
+                addAll((SymbolicConstraint) arg);
+            } else if (arg instanceof Collection) {
+                if (((Collection<?>) arg).iterator().hasNext()) {
+                    Object element = ((Collection<?>) arg).iterator().next();
+                    if (element instanceof Term) {
+                        addAll((Collection<Term>) arg);
+                    } else {
+                        addAll((List<Equality>) arg);
+                    }
+                }
+            } else if (arg instanceof Equality) {
+                add((Equality) arg);
+            } else {
+                assert false : "invalid argument found: " + arg;
+            }
+        }
+        return data.truthValue;
+    }
+
+    public TruthValue addAllThenSimplify(Object... args) {
+        addAll(args);
+        return simplify();
     }
 
     /**
@@ -1240,17 +1303,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    public void expandPatterns(SymbolicConstraint constraint, boolean narrow) {
-        assert constraint.data.isNormal;
+    public void expandPatterns(boolean narrow) {
+        assert this.data.isNormal;
 
         Set<Variable> keys = new HashSet<>(data.substitution.keySet());
         for (Variable variable : keys) {
             data.substitution.put(
                     variable,
-                    data.substitution.get(variable).expandPatterns(constraint, narrow, context));
+                    data.substitution.get(variable).expandPatterns(this, narrow, context));
         }
         for (int i = 0; i < data.equalities.size(); ++i) {
-            data.equalities.set(i, data.equalities.get(i).expandPatterns(constraint, narrow));
+            data.equalities.set(i, data.equalities.get(i).expandPatterns(this, narrow));
         }
     }
 

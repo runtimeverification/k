@@ -17,5 +17,8 @@
     <program name="comm_assoc.simple">
       <krun-option name="--prove" value="verification/comm_assoc_spec.k" />
     </program>
+    <program name="head.simple">
+      <krun-option name="--prove" value="verification/head_spec.k" />
+    </program>
   </test>
 </tests>

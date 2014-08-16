@@ -1,0 +1,17 @@
+function head(x) {
+  return x[0];
+}
+
+function main() {
+  var n1[2];
+  var n2[2];
+  var n3[2];
+  n1[0] = 1;
+  n1[1] = n2;
+  n2[0] = 2;
+  n2[1] = n3;
+  n3[0] = 3;
+  n3[1] = 0;
+  // breakpoint;
+  print(head(n1));
+}

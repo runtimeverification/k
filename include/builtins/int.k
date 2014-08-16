@@ -70,10 +70,6 @@ module INT-HOOKS
   syntax Nat
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]
 
-  rule 0 +Int I:Int => I [anywhere]
-  rule 0 *Int _:Int => 0 [anywhere]
-
   syntax Int ::= freshInt(Int)    [freshGenerator, function]
   rule freshInt(I:Int) => I
 endmodule
-
