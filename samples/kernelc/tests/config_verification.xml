@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+    <test
+            definition="kernelc.k"
+            programs="verification"
+            results="verification"
+            extension="c"
+            >
+        <kompile-option name="--backend" value="java" />
+        <program name="01 head.c">
+          <krun-option name="--prove" value="tests/verification/head_spec.k" />
+        </program>
+    </test>
+
+</tests>
