@@ -19,4 +19,7 @@
         </program>
     </test>
 
+    <!--<include file="binary_search_tree//config.xml" more-results="." />-->
+    <include file="binary_search_tree/config.xml" />
 </tests>
+
