@@ -24,9 +24,9 @@ import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
 import org.kframework.kil.loader.Constants;
-import org.kframework.utils.general.GlobalSettings;
-
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -111,6 +111,8 @@ public class Rule extends JavaSymbolicObject {
             Set<String> cellsToCopy,
             List<Instruction> instructions,
             Attributes attributes,
+            Location location,
+            Source source,
             Definition definition) {
         this.label = label;
         this.leftHandSide = leftHandSide;
@@ -121,6 +123,8 @@ public class Rule extends JavaSymbolicObject {
         this.lookups = lookups;
 
         super.setAttributes(attributes);
+        setLocation(location);
+        setSource(source);
 
         if (attributes.containsKey(Constants.STDIN)
                 || attributes.containsKey(Constants.STDOUT)
@@ -470,6 +474,7 @@ public class Rule extends JavaSymbolicObject {
         if (ensures != null) {
             string += " ensures " + ensures;
         }
+        string += " [" + "Location: " + getLocation() + ", " + getSource() + "]";
         return string;
     }
 
