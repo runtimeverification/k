@@ -15,6 +15,9 @@
         <program name="02 tail.c">
           <krun-option name="--prove" value="tests/verification/tail_spec.k" />
         </program>
+        <program name="03 add.c">
+          <krun-option name="--prove" value="tests/verification/add_spec.k" />
+        </program>
     </test>
 
 </tests>

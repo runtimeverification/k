@@ -103,8 +103,8 @@ module KERNELC-SYNTAX
    * Verification specific stuff
    */
   syntax Statement ::= "breakpoint"
-  syntax Id ::= "find" | "insert" | "delete" | "new_node" | "find_min" 
-              | "head" | "tail"
+  syntax Id ::= "find" | "insert" | "delete" | "new_node" | "find_min"
+              | "head" | "tail" | "add"
   syntax Id ::= "listNode" | "val" | "next"
   syntax Id ::= "treeNode" | "value" | "left" | "right"
   syntax Id ::= "x" | "y" | "z" | "t" | "u" | "v" | "node" | "temp" | "min"
