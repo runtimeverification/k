@@ -40,9 +40,9 @@ public abstract class Token extends KLabel {
      * @return
      */
     public static KApp kAppOf(Sort sort, String value) {
-        if (sort.equals(Sort.BUILTIN_BOOL)) {
+        if (sort.equals(Sort.BUILTIN_BOOL) || sort.equals(Sort.BOOL)) {
             return BoolBuiltin.kAppOf(value);
-        } else if (sort.equals(Sort.BUILTIN_INT)) {
+        } else if (sort.equals(Sort.BUILTIN_INT) || sort.equals(Sort.INT)) {
             return IntBuiltin.kAppOf(value);
         } else if (sort.equals(Sort.BUILTIN_STRING) || sort.equals(Sort.STRING)) {
             return StringBuiltin.kAppOf(StringUtil.unquoteKString(value));
