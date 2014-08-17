@@ -12,6 +12,9 @@
         <program name="01 head.c">
           <krun-option name="--prove" value="tests/verification/head_spec.k" />
         </program>
+        <program name="02 tail.c">
+          <krun-option name="--prove" value="tests/verification/tail_spec.k" />
+        </program>
     </test>
 
 </tests>
