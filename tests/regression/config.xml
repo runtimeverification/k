@@ -150,7 +150,7 @@
     <all-programs>
       <krun-option name="--color" value="off" />
       <krun-option name="--search" />
-      <krun-option name="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
+      <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
     </all-programs>
   </test>
 
