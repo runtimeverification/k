@@ -1,3 +1,8 @@
+; int extra
+(define-fun int_max ((x Int) (y Int)) (ite (< x y) y x))
+(define-fun int_min ((x Int) (y Int)) (ite (< x y) x y))
+
+; sets as arrays
 (define-sort IntSet () (Array Int Bool))
 (define-fun smt_set_mem ((x Int) (s IntSet)) Bool (select s x))
 (define-fun smt_set_add ((s IntSet) (x Int)) IntSet  (store s x true))
@@ -11,6 +16,7 @@
 (define-fun smt_set_lt  ((s1 IntSet) (s2 IntSet)) Bool (forall ((i Int) (j Int)) (implies (>= i j) (not (and (select s1 i) (select s2 j))))))
 (define-fun smt_set_le  ((s1 IntSet) (s2 IntSet)) Bool (forall ((i Int) (j Int)) (implies (>  i j) (not (and (select s1 i) (select s2 j))))))
 
+; data structures (should be generated automatically from K)
 (declare-datatypes () ((Tree leaf (node (key Int) (left Tree) (right Tree)))))
 (declare-fun smt_tree_keys ((Tree)) IntSet)
 (declare-fun smt_tree_height ((Tree)) Int)

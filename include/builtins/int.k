@@ -35,8 +35,8 @@ module INT-HOOKS
                  Int "xorInt" Int               [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(#INT:_xorInt_)]
                > left:
                  Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
-               > "minInt" "(" Int "," Int ")"   [function]
-               | "maxInt" "(" Int "," Int ")"   [function]
+               > "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(#INT:minInt)]
+               | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(#INT:maxInt)]
                | "absInt" "(" Int ")"           [function, smtlib(abs), klabel(absInt), hook(#INT:absInt)]
 
   rule I1:#Int divInt I2:#Int => (I1 -Int (I1 modInt I2)) /Int I2
@@ -46,13 +46,6 @@ module INT-HOOKS
   =>
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
   when I2 =/=Int 0
-
-  rule minInt(I1:Int, I2:Int) => #if I1 <Int I2 #then I1 #else I2 #fi
-  rule maxInt(I1:Int, I2:Int) => #if I1 >Int I2 #then I1 #else I2 #fi
-
-  // absInt hooked
-  // rule absInt(I:Int) => I when I >=Int 0
-  // rule absInt(I:Int) => 0 -Int I when I <Int 0
 
   syntax Bool ::= Int "<=Int" Int         [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(#INT:_<=Int_)]
                 | Int "<Int" Int          [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(#INT:_<Int_)]
