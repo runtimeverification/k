@@ -156,7 +156,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             }
         }
         if (isEmptyAdd) {
-            sb.append("true");
+            sb.append(" true");
         }
         sb.append(")");
         return new SMTLibTerm(sb.toString());

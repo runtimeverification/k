@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import com.google.common.io.Files;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
@@ -9,30 +10,12 @@ import org.kframework.utils.OS;
 import org.kframework.utils.file.KPaths;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Traian
  */
 public class Z3Wrapper {
-
-    public static final String SMT_PRELUDE =
-            "(define-sort IntSet () (Array Int Bool))\n" +
-            "(define-fun smt_set_mem ((x Int) (s IntSet)) Bool (select s x))\n" +
-            "(define-fun smt_set_add ((s IntSet) (x Int)) IntSet  (store s x true))\n" +
-            "(define-fun smt_set_emp () IntSet ((as const IntSet) false))\n" +
-            "(define-fun smt_set_cup ((s1 IntSet) (s2 IntSet)) IntSet ((_ map or) s1 s2))\n" +
-            "(define-fun smt_set_cap ((s1 IntSet) (s2 IntSet)) IntSet ((_ map and) s1 s2))\n" +
-            "(define-fun smt_set_com ((s IntSet)) IntSet ((_ map not) s))\n" +
-            "(define-fun smt_set_sin ((x Int)) IntSet (smt_set_add smt_set_emp x))\n" +
-            "(define-fun smt_set_dif ((s1 IntSet) (s2 IntSet)) IntSet (smt_set_cap s1 (smt_set_com s2)))\n" +
-            "(define-fun smt_set_sub ((s1 IntSet) (s2 IntSet)) Bool (= smt_set_emp (smt_set_dif s1 s2)))\n" +
-            "(define-fun smt_set_lt  ((s1 IntSet) (s2 IntSet)) Bool (forall ((i Int) (j Int)) (implies (>= i j) (not (and (select s1 i) (select s2 j))))))\n" +
-            "(define-fun smt_set_le  ((s1 IntSet) (s2 IntSet)) Bool (forall ((i Int) (j Int)) (implies (>  i j) (not (and (select s1 i) (select s2 j))))))\n" +
-            "\n" +
-            "(declare-datatypes () ((Tree leaf (node (key Int) (left Tree) (right Tree)))))\n" +
-            "(declare-fun smt_tree_keys ((Tree)) IntSet)\n" +
-            "(declare-fun smt_tree_height ((Tree)) Int)\n" +
-            "(declare-fun smt_bst ((Tree)) Bool)";
 
     public static boolean initialized = false;
     public static com.microsoft.z3.Context newContext() throws Z3Exception {
@@ -54,7 +37,24 @@ public class Z3Wrapper {
         return new com.microsoft.z3.Context();
     }
 
-    public static boolean checkQuery(String query) {
+    public static final Z3Wrapper Z3_WRAPPER = new Z3Wrapper();
+    public static Z3Wrapper instance() {
+        return Z3_WRAPPER;
+    }
+
+    public final String SMT_PRELUDE;
+
+    public Z3Wrapper() {
+        String s = "";
+        try {
+            s = new String(Files.toByteArray(new File(KPaths.getZ3PreludePath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        SMT_PRELUDE = s;
+    }
+
+    public boolean checkQuery(String query) {
         boolean result = false;
         try {
             com.microsoft.z3.Context context = newContext();

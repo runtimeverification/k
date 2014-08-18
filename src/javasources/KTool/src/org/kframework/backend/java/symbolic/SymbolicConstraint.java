@@ -817,7 +817,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         boolean result = false;
         try {
-            result = Z3Wrapper.checkQuery(KILtoSMTLib.translateConstraint(this));
+            result = Z3Wrapper.instance().checkQuery(KILtoSMTLib.translateConstraint(this));
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
         }
@@ -957,7 +957,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //            System.out.println(constraint);
         } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
             try {
-                result = Z3Wrapper.checkQuery(KILtoSMTLib.translateImplication(left, right));
+                result = Z3Wrapper.instance().checkQuery(
+                        KILtoSMTLib.translateImplication(left, right));
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
             }
