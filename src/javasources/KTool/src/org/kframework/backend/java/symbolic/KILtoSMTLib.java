@@ -134,6 +134,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
         StringBuilder sb = new StringBuilder();
         sb.append("(and");
+        boolean isEmptyAdd = true;
         for (SymbolicConstraint.Equality equality : constraint.data.equalities) {
             try {
                 String left = ((SMTLibTerm) equality.leftHandSide().accept(this)).expression();
@@ -143,6 +144,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 sb.append(" ");
                 sb.append(right);
                 sb.append(")");
+                isEmptyAdd = false;
             } catch (UnsupportedOperationException e) {
                 // TODO(AndreiS): fix this translation and the exceptions
                 if (skipEqualities){
@@ -152,6 +154,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                     throw e;
                 }
             }
+        }
+        if (isEmptyAdd) {
+            sb.append("true");
         }
         sb.append(")");
         return new SMTLibTerm(sb.toString());
