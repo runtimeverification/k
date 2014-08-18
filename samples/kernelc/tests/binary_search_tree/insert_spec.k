@@ -24,7 +24,7 @@ rule
               if ( (v < (t -> value)) )
                 (t -> left) = (insert ( v, (t -> left) )) ;
               else if ( (v > (t -> value)) )
-                (t -> right) = (insert ( v, (t -> right) )) ; 
+                (t -> right) = (insert ( v, (t -> right) )) ;
               else ;
               return t ;
             }

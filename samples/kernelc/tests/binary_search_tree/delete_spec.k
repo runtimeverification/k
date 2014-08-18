@@ -53,7 +53,7 @@ rule
             {
               if ( ((t -> left) == tv ( void * , null )) )
                 return (t -> value) ;
-              else 
+              else
                 return (find_min ( (t -> left) )) ;
             }
             return tv ( void , undef ) ;
@@ -135,7 +135,7 @@ rule
             {
               if ( ((t -> left) == tv ( void * , null )) )
                 return (t -> value) ;
-              else 
+              else
                 return (find_min ( (t -> left) )) ;
             }
             return tv ( void , undef ) ;
