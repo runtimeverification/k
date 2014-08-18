@@ -37,7 +37,7 @@ module INT-HOOKS
                  Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
                > "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(#INT:minInt)]
                | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(#INT:maxInt)]
-               | "absInt" "(" Int ")"           [function, smtlib(abs), klabel(absInt), hook(#INT:absInt)]
+               | "absInt" "(" Int ")"           [function, smtlib(int_abs), klabel(absInt), hook(#INT:absInt)]
 
   rule I1:#Int divInt I2:#Int => (I1 -Int (I1 modInt I2)) /Int I2
   when I2 =/=Int 0

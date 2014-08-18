@@ -1,6 +1,7 @@
 ; int extra
 (define-fun int_max ((x Int) (y Int)) Int (ite (< x y) y x))
 (define-fun int_min ((x Int) (y Int)) Int (ite (< x y) x y))
+(define-fun int_abs ((x Int)) Int (ite (< x 0) (- 0 x) x))
 
 ; sets as arrays
 (define-sort IntSet () (Array Int Bool))
@@ -21,4 +22,5 @@
 (declare-fun smt_tree_keys ((Tree)) IntSet)
 (declare-fun smt_tree_height ((Tree)) Int)
 (declare-fun smt_bst ((Tree)) Bool)
+(declare-fun smt_avl ((Tree)) Bool)
 
