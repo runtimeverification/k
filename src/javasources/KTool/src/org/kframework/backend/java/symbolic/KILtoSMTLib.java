@@ -180,6 +180,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
         List<Term> arguments;
         switch (label) {
+            case "exists":
+                Variable variable = (Variable) kList.get(0);
+                label = "exists ((" + variable.name() + " " + variable.sort() + ")) ";
+                arguments = ImmutableList.of(kList.get(1));
+                break;
             case "extract":
                 int beginIndex = ((IntToken) kList.get(1)).intValue();
                 int endIndex = ((IntToken) kList.get(2)).intValue() - 1;

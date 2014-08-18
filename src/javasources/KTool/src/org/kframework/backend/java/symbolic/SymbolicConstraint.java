@@ -763,6 +763,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         addAll((List<Equality>) arg);
                     }
                 }
+            } else if (arg instanceof Map) {
+                addAll((Map<Variable, Term>) arg);
             } else if (arg instanceof Equality) {
                 add((Equality) arg);
             } else {
