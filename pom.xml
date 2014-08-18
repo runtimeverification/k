@@ -257,6 +257,20 @@
         <version>2.5.1</version>
       </plugin>
       <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>src/javasources</directory>
+            </fileset>
+            <fileset>
+              <directory>lib</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>native-maven-plugin</artifactId>
         <version>1.0-alpha-8</version>
