@@ -557,7 +557,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private final ArrayList<Equality> equalityBuffer = new ArrayList<Equality>();
 
-    private boolean simplifyingEqualities = false;
+    private boolean equalitiesWriteProtected = false;
 
     public final Data data;
 
@@ -630,7 +630,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return data.truthValue;
         }
 
-        if (simplifyingEqualities) {
+        if (equalitiesWriteProtected) {
             Equality equality = new Equality(leftHandSide, rightHandSide);
             if (equality.isFalse()) {
                 falsify(equality);
@@ -1093,7 +1093,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             change = false;
             normalize();
 
-            simplifyingEqualities = true;
+            equalitiesWriteProtected = true;
             for (Iterator<Equality> iterator = data.equalities.iterator(); iterator.hasNext();) {
                 Equality equality = iterator.next();
                 if (equality.isSimplifiableByCurrentAlgorithm()) {
@@ -1104,7 +1104,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         falsify(new Equality(
                                 unifier.unificationFailureLeftHandSide(),
                                 unifier.unificationFailureRightHandSide()));
-                        simplifyingEqualities = false;
+                        equalitiesWriteProtected = false;
                         break label;
                     }
 
@@ -1124,14 +1124,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                          falsify(new Equality(
                                 unifier.unificationFailureLeftHandSide(),
                                 unifier.unificationFailureRightHandSide()));
-                        simplifyingEqualities = false;
+                        equalitiesWriteProtected = false;
                         break label;
                     }
                 }
 
             }
 
-            simplifyingEqualities = false;
+            equalitiesWriteProtected = false;
         } while (change);
 
         return data.truthValue;
@@ -1148,7 +1148,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Normalizes the symbolic constraint.
      */
     private void normalize() {
-        assert !simplifyingEqualities : "Do not modify the equalities when they are being simplified";
+        assert !equalitiesWriteProtected : "Do not modify equalities when they are write-protected!";
 
         if (data.isNormal) {
             return;
@@ -1246,21 +1246,36 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    public void expandPatterns(boolean narrow) {
+    public void expandPatternsAndSimplify(boolean narrowing) {
         assert this.data.isNormal;
 
-        Set<Variable> keys = new HashSet<>(data.substitution.keySet());
-        for (Variable variable : keys) {
-            data.substitution.put(
-                    variable,
-                    data.substitution.get(variable).expandPatterns(this, narrow, context));
-        }
-        for (int i = 0; i < data.equalities.size(); ++i) {
-            data.equalities.set(i, data.equalities.get(i).expandPatterns(this, narrow));
-        }
+        boolean changed;
+        do {
+            changed = false;
+            Set<Variable> keys = new HashSet<>(data.substitution.keySet());
+            for (Variable variable : keys) {
+                Term term = data.substitution.get(variable);
+                Term expandedTerm = term.expandPatterns(this, narrowing, context);
+                if (term != expandedTerm) {
+                    data.substitution.put(variable, expandedTerm);
+                    changed = true;
+                }
+            }
 
-        /* force normalization to consider the changes made by this method */
-        data.isNormal = false;
+            // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
+            for (int i = 0; i < data.equalities.size(); ++i) {
+                Equality equality = data.equalities.get(i);
+                Equality expandedEquality = equality.expandPatterns(this, narrowing);
+                if (equality != expandedEquality) {
+                    data.equalities.set(i, expandedEquality);
+                    changed = true;
+                }
+            }
+
+            /* force normalization to consider the changes made by this method */
+            data.isNormal = false;
+            simplify();
+        } while (changed);
     }
 
     /**
