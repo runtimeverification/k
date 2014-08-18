@@ -18,6 +18,9 @@
         <program name="03 add.c">
           <krun-option name="--prove" value="tests/verification/add_spec.k" />
         </program>
+        <program name="04 swap.c">
+          <krun-option name="--prove" value="tests/verification/swap_spec.k" />
+        </program>
     </test>
 
 </tests>
