@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -569,6 +568,8 @@ public class CopyOnWriteTransformer implements Transformer {
                     rule.cellsToCopy(),
                     rule.instructions(),
                     rule.getAttributes(),
+                    rule.getLocation(),
+                    rule.getSource(),
                     definition);
         } else {
             return rule;

@@ -590,6 +590,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 node.getCellsToCopy(),
                 node.getInstructions(),
                 node.getAttributes(),
+                node.getLocation(),
+                node.getSource(),
                 definition);
 
         if (freshRules) {
@@ -747,6 +749,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rule.cellsToCopy(),
                 rule.instructions(),
                 rule.getAttributes(),
+                rule.getLocation(),
+                rule.getSource(),
                 globalContext.def);
         return newRule.equals(rule) ? origRule : newRule;
     }
