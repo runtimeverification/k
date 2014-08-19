@@ -545,20 +545,24 @@ public class UnparserFilterNew extends NonCachingVisitor {
             for (int i = 0; i < production.getItems().size(); ++i) {
                 ProductionItem productionItem = production.getItems().get(i);
                 if (!(productionItem instanceof Terminal)) {
-                    if(!(termCons.getContents().get(where) instanceof ListTerminator) || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))){
-                            this.visitNode(termCons.getContents().get(where++));
-                    } else {
-                        where++;
+                    Term subterm = termCons.getContents().get(where);
+                    if(!(subterm instanceof ListTerminator) || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))){
+                        if (subterm instanceof TermCons && isDataStructure(((TermCons) subterm).getProduction())) {
+                            indenter.endLine();
+                            indenter.indent(TAB);
+                            this.visitNode(subterm);
+                            indenter.unindent();
+                        } else {
+                            this.visitNode(subterm);
+                        }
                     }
+                    where++;
                 } else {
                     indenter.write(((Terminal) productionItem).getTerminal());
                 }
                 // TODO(YilongL): not sure I can simply remove the following code
                 if (i != production.getItems().size() - 1) {
-                    DataStructureSort dsSort = context.dataStructureSortOf(production.getSort());
-                    if (dsSort != null && dsSort.constructorLabel().equals(production.getKLabel())) {
-                        //is a constructor of a data structure
-                        //special case a new line between each item
+                    if (isDataStructure(production)) {
                         indenter.endLine();
                     } else {
                         indenter.write(" ");
@@ -572,6 +576,16 @@ public class UnparserFilterNew extends NonCachingVisitor {
             indenter.write(temp.get(1).getTerminal());
         }
         return null;
+    }
+
+    private boolean isDataStructure(Production production) {
+        DataStructureSort dsSort = context.dataStructureSortOf(production.getSort());
+        if (dsSort != null && dsSort.constructorLabel().equals(production.getKLabel())) {
+            //is a constructor of a data structure
+            //special case a new line between each item and indentation
+            return true;
+        }
+        return false;
     }
 
     @Override
