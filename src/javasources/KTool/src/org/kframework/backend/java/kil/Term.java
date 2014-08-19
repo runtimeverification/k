@@ -273,6 +273,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Returns a list containing the contents of each occurrence of a cell with the given name.
      *
      * Warning: this is slow!
+     * TODO(YilongL): improve performance when better indexing is available
      */
     public List<Term> getCellContentsByName(final String cellName) {
         final List<Term> contents = new ArrayList<>();

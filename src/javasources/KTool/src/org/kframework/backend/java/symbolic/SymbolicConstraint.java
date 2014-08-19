@@ -39,9 +39,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 
 
@@ -966,17 +969,24 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return  result;
     }
 
+    /**
+     * Simplifies the given constraint by eliding the equalities and substitution entries that are
+     * implied by this constraint.
+     */
     private SymbolicConstraint simplifyConstraint(SymbolicConstraint constraint) {
         constraint.normalize();
 
         SymbolicConstraint simplifiedConstraint = new SymbolicConstraint(constraint.termContext());
-        simplifiedConstraint.addAll(
-                Maps.difference(constraint.substitution(), substitution()).entriesOnlyOnLeft());
+        MapDifference<Variable, Term> mapDifference = Maps.difference(
+                constraint.substitution(),
+                substitution());
+        simplifiedConstraint.addAll(mapDifference.entriesOnlyOnLeft());
+        for (Entry<Variable, ValueDifference<Term>> entry : mapDifference.entriesDiffering().entrySet()) {
+            simplifiedConstraint.add(entry.getKey(), entry.getValue().leftValue());
+        }
         List<Equality> equalities = new LinkedList<>(constraint.equalities());
         equalities.removeAll(equalities());
-        for (Equality equality : equalities) {
-            simplifiedConstraint.add(equality.leftHandSide, equality.rightHandSide);
-        }
+        simplifiedConstraint.addAll(equalities);
         simplifiedConstraint.simplify();
 
         Map<Term, Term> substitution = new HashMap<>();
