@@ -242,7 +242,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Variable variable) {
         if (!supportedSorts.contains(variable.sort())) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("unexpected variable " + variable);
         }
         variables.add(variable);
         return new SMTLibTerm(variable.name());
