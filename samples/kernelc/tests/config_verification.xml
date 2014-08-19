@@ -21,6 +21,9 @@
         <program name="04 swap.c">
           <krun-option name="--prove" value="tests/verification/swap_spec.k" />
         </program>
+        <program name="05 deallocate.c">
+          <krun-option name="--prove" value="tests/verification/deallocate_spec.k" />
+        </program>
         <program name="06 length_recursive.c">
           <krun-option name="--prove" value="tests/verification/length_recursive_spec.k" />
         </program>

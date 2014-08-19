@@ -104,7 +104,7 @@ module KERNELC-SYNTAX
    */
   syntax Statement ::= "breakpoint"
   syntax Id ::= "find" | "insert" | "delete" | "new_node" | "find_min"
-              | "head" | "tail" | "add" | "swap" | "length_recursive"
+              | "head" | "tail" | "add" | "swap" | "deallocate" | "length_recursive"
   syntax Id ::= "listNode" | "val" | "next"
   syntax Id ::= "treeNode" | "value" | "left" | "right"
   syntax Id ::= "x" | "y" | "z" | "t" | "u" | "v" | "p" | "node" | "temp" | "min"
