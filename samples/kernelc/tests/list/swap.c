@@ -10,17 +10,17 @@
 #include <stdio.h>
 
 
-struct nodeList {
+struct listNode {
   int val;
-  struct nodeList *next;
+  struct listNode *next;
 };
 
 
-struct nodeList* swap(struct nodeList* x)
+struct listNode* swap(struct listNode* x)
 /*@ rule <k> $ => return ?x; ...</k>
          <heap>... list(x)([v1, v2] @ A) => list(?x)([v2, v1] @ A) ...</heap> */
 {
-  struct nodeList* p;
+  struct listNode* p;
 
   p = x;
   x = x->next;
