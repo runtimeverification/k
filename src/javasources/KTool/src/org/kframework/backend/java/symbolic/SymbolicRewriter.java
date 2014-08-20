@@ -640,6 +640,14 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
         List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
 
+        initialTerm = new ConstrainedTerm(
+                initialTerm.term().expandPatterns(
+                        initialTerm.constraint(),
+                        true,
+                        initialTerm.termContext()),
+                initialTerm.constraint(),
+                initialTerm.termContext());
+
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
