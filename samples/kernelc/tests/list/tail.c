@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function tail returns the tail of a singly linked list. The
  * specification requires the list to have at least one element.
@@ -23,4 +24,3 @@ struct listNode* tail(struct listNode *x)
 
 //@ var v, n : Int
 //@ var A : Seq
-

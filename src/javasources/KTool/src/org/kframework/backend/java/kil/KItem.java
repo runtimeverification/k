@@ -613,6 +613,9 @@ public final class KItem extends Term {
         }
 
         if (results.size() == 1) {
+            /* TODO(YilongL): this seems problematic since it modifies the
+             * outside constraint while SymbolicConstraint#expandPatterns is
+             * still traversing it */
             constraint.addAll(results.get(0).constraint());
             return results.get(0).term().expandPatterns(constraint, narrowing, context);
         } else {

@@ -2,7 +2,10 @@
 package org.kframework.backend.java.builtins;
 
 import com.google.common.collect.MapDifference;
+import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multisets;
+
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
@@ -15,6 +18,7 @@ import org.kframework.backend.java.kil.TermContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 
 
 /**
@@ -60,13 +64,26 @@ public class BuiltinMapOperations {
     }
 
     public static Term difference(BuiltinMap map1, BuiltinMap map2, TermContext context) {
-        if (!map1.isGround() || !map2.isGround()) {
-            return null;
-        }
-
         BuiltinMap.Builder builder = BuiltinMap.builder();
-        builder.putAll(Maps.difference(map1.getEntries(), map2.getEntries()).entriesOnlyOnLeft());
-        return builder.build();
+        if (!map1.isGround() || !map2.isGround()) {
+            if (map1.getEntries().entrySet().containsAll(map2.getEntries().entrySet())
+                    && Multisets.containsOccurrences(map1.baseTerms(), map2.baseTerms())) {
+                builder.putAll(Maps.difference(map1.getEntries(), map2.getEntries()).entriesOnlyOnLeft());
+                builder.concatenate(Multisets.difference(map1.baseTerms(), map2.baseTerms()));
+                return builder.build();
+            } else {
+                return null;
+            }
+        } else {
+            /* Maps.difference breaks down the Venn diagram into four parts, see:
+             * http://code.google.com/p/guava-libraries/wiki/CollectionUtilitiesExplained#difference */
+            MapDifference<Term, Term> mapDiff = Maps.difference(map1.getEntries(), map2.getEntries());
+            builder.putAll(mapDiff.entriesOnlyOnLeft());
+            for (Entry<Term, ValueDifference<Term>> e : mapDiff.entriesDiffering().entrySet()) {
+                builder.put(e.getKey(), e.getValue().leftValue());
+            }
+            return builder.build();
+        }
     }
 
     public static Term updateAll(BuiltinMap map1, BuiltinMap map2, TermContext context) {

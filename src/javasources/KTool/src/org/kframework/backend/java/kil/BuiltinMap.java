@@ -175,32 +175,45 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
             return UnmodifiableMap.unmodifiableMap(entries);
         }
 
+        private void concatenate(Term term) {
+            assert term.sort().equals(Sort.MAP)
+            : "unexpected sort " + term.sort() + " of concatenated term " + term
+            + "; expected " + Sort.MAP;
+
+            if (term instanceof BuiltinMap) {
+                BuiltinMap map = (BuiltinMap) term;
+                entries.putAll(map.entries);
+                patternsBuilder.addAll(map.collectionPatterns);
+                functionsBuilder.addAll(map.collectionFunctions);
+                variablesBuilder.addAll(map.collectionVariables);
+            } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isPattern()) {
+                patternsBuilder.add((KItem) term);
+            } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isFunction()) {
+                functionsBuilder.add(term);
+            } else if (term instanceof MapUpdate) {
+                functionsBuilder.add(term);
+            } else if (term instanceof Variable) {
+                variablesBuilder.add((Variable) term);
+            } else {
+                assert false : "unexpected concatenated term" + term;
+            }
+        }
+
         /**
-         * Concatenates terms of sort Map to this builder
+         * Concatenates terms of sort Map to this builder.
          */
         public void concatenate(Term... terms) {
             for (Term term : terms) {
-                assert term.sort().equals(Sort.MAP)
-                        : "unexpected sort " + term.sort() + " of concatenated term " + term
-                        + "; expected " + Sort.MAP;
+                concatenate(term);
+            }
+        }
 
-                if (term instanceof BuiltinMap) {
-                    BuiltinMap map = (BuiltinMap) term;
-                    entries.putAll(map.entries);
-                    patternsBuilder.addAll(map.collectionPatterns);
-                    functionsBuilder.addAll(map.collectionFunctions);
-                    variablesBuilder.addAll(map.collectionVariables);
-                } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isPattern()) {
-                    patternsBuilder.add((KItem) term);
-                } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isFunction()) {
-                    functionsBuilder.add(term);
-                } else if (term instanceof MapUpdate) {
-                    functionsBuilder.add(term);
-                } else if (term instanceof Variable) {
-                    variablesBuilder.add((Variable) term);
-                } else {
-                    assert false : "unexpected concatenated term" + term;
-                }
+        /**
+         * Concatenates collection of terms of sort Map to this builder.
+         */
+        public void concatenate(java.util.Collection<Term> terms) {
+            for (Term term : terms) {
+                concatenate(term);
             }
         }
 

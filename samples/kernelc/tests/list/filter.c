@@ -1,5 +1,6 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
- * Function filter deletes the nodes of a singly linked list that hold 
+ * Function filter deletes the nodes of a singly linked list that hold
  * the value "v".
  */
 
@@ -54,4 +55,3 @@ struct listNode* filter(int v, struct listNode* x)
 
 /*@ var n : Int */
 /*@ var A, B, C : Seq */
-

@@ -557,7 +557,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private final ArrayList<Equality> equalityBuffer = new ArrayList<Equality>();
 
-    private boolean simplifyingEqualities = false;
+    private boolean equalitiesWriteProtected = false;
 
     public final Data data;
 
@@ -630,7 +630,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return data.truthValue;
         }
 
-        if (simplifyingEqualities) {
+        if (equalitiesWriteProtected) {
             Equality equality = new Equality(leftHandSide, rightHandSide);
             if (equality.isFalse()) {
                 falsify(equality);
@@ -725,6 +725,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 && context.definition().context().krunOptions.experimental.prove() != null;
 
         for (Term term : condition) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
             // TODO(AndreiS): remove this condition when function evaluation works properly
             if (eval) {
                 add(term.evaluate(context), BoolToken.TRUE);
@@ -739,21 +743,56 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private TruthValue addAll(List<Equality> equalites) {
         for (Equality equality : equalites) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
             add(equality);
         }
         return data.truthValue;
     }
 
     /**
+     * Adds all equalities in the given symbolic constraint to this one.
      *
-     * @param args
-     *            possible argument types: - {@code SymbolicConstraint} -
-     *            {@code Equality} - {@code List<Equality>} -
-     *            {@code Collection<Term>}
-     * @return
+     * @param constraint
+     *            the given symbolic constraint
+     * @return the truth value after including the new equalities
      */
+    public TruthValue addAll(SymbolicConstraint constraint) {
+        addAll(constraint.data.substitution);
+        for (Equality equality : constraint.data.equalities) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
+            add(equality.leftHandSide, equality.rightHandSide);
+        }
+
+        return data.truthValue;
+    }
+
+    /**
+     * Adds all bindings in the given substitution map to this symbolic constraint.
+     */
+    public TruthValue addAll(Map<Variable, Term> substitution) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
+            add(entry.getValue(), entry.getKey());
+        }
+
+        return data.truthValue;
+    }
+
     private TruthValue addAll(Object... args) {
         for (Object arg : args) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
             if (arg instanceof SymbolicConstraint) {
                 addAll((SymbolicConstraint) arg);
             } else if (arg instanceof Collection) {
@@ -779,33 +818,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     public TruthValue addAllThenSimplify(Object... args) {
         addAll(args);
         return simplify();
-    }
-
-    /**
-     * Adds all equalities in the given symbolic constraint to this one.
-     *
-     * @param constraint
-     *            the given symbolic constraint
-     * @return the truth value after including the new equalities
-     */
-    public TruthValue addAll(SymbolicConstraint constraint) {
-        addAll(constraint.data.substitution);
-        for (Equality equality : constraint.data.equalities) {
-            add(equality.leftHandSide, equality.rightHandSide);
-        }
-
-        return data.truthValue;
-    }
-
-    /**
-     * Adds all bindings in the given substitution map to this symbolic constraint.
-     */
-    public TruthValue addAll(Map<Variable, Term> substitution) {
-        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            add(entry.getValue(), entry.getKey());
-        }
-
-        return data.truthValue;
     }
 
     public boolean checkUnsat() {
@@ -1093,7 +1105,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             change = false;
             normalize();
 
-            simplifyingEqualities = true;
+            equalitiesWriteProtected = true;
             for (Iterator<Equality> iterator = data.equalities.iterator(); iterator.hasNext();) {
                 Equality equality = iterator.next();
                 if (equality.isSimplifiableByCurrentAlgorithm()) {
@@ -1104,7 +1116,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         falsify(new Equality(
                                 unifier.unificationFailureLeftHandSide(),
                                 unifier.unificationFailureRightHandSide()));
-                        simplifyingEqualities = false;
+                        equalitiesWriteProtected = false;
                         break label;
                     }
 
@@ -1124,14 +1136,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                          falsify(new Equality(
                                 unifier.unificationFailureLeftHandSide(),
                                 unifier.unificationFailureRightHandSide()));
-                        simplifyingEqualities = false;
+                        equalitiesWriteProtected = false;
                         break label;
                     }
                 }
 
             }
 
-            simplifyingEqualities = false;
+            equalitiesWriteProtected = false;
         } while (change);
 
         return data.truthValue;
@@ -1148,7 +1160,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Normalizes the symbolic constraint.
      */
     private void normalize() {
-        assert !simplifyingEqualities : "Do not modify the equalities when they are being simplified";
+        assert !equalitiesWriteProtected : "Do not modify equalities when they are write-protected!";
 
         if (data.isNormal) {
             return;
@@ -1246,21 +1258,36 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    public void expandPatterns(boolean narrow) {
-        assert this.data.isNormal;
+    public void expandPatternsAndSimplify(boolean narrowing) {
+        normalize();
 
-        Set<Variable> keys = new HashSet<>(data.substitution.keySet());
-        for (Variable variable : keys) {
-            data.substitution.put(
-                    variable,
-                    data.substitution.get(variable).expandPatterns(this, narrow, context));
-        }
-        for (int i = 0; i < data.equalities.size(); ++i) {
-            data.equalities.set(i, data.equalities.get(i).expandPatterns(this, narrow));
-        }
+        boolean changed;
+        do {
+            changed = false;
+            Set<Variable> keys = new HashSet<>(data.substitution.keySet());
+            for (Variable variable : keys) {
+                Term term = data.substitution.get(variable);
+                Term expandedTerm = term.expandPatterns(this, narrowing, context);
+                if (term != expandedTerm) {
+                    data.substitution.put(variable, expandedTerm);
+                    changed = true;
+                }
+            }
 
-        /* force normalization to consider the changes made by this method */
-        data.isNormal = false;
+            // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
+            for (int i = 0; i < data.equalities.size(); ++i) {
+                Equality equality = data.equalities.get(i);
+                Equality expandedEquality = equality.expandPatterns(this, narrowing);
+                if (equality != expandedEquality) {
+                    data.equalities.set(i, expandedEquality);
+                    changed = true;
+                }
+            }
+
+            /* force normalization to consider the changes made by this method */
+            data.isNormal = false;
+            simplify();
+        } while (changed);
     }
 
     /**

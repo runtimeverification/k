@@ -1,5 +1,6 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
- * Function append concatenates two singly linked lists and returns the 
+ * Function append concatenates two singly linked lists and returns the
  * first element of the resulting list.
  */
 
@@ -22,7 +23,7 @@ struct listNode* append(struct listNode *x, struct listNode *y)
     return y;
 
   p = x;
-  /*@ inv <heap>... lseg(x, p)(?A1), list(p)(?A2) ...</heap> 
+  /*@ inv <heap>... lseg(x, p)(?A1), list(p)(?A2) ...</heap>
           /\ A = ?A1 @ ?A2 /\ ~(p = 0) */
   while (p->next != NULL)
     p = p->next;
@@ -33,4 +34,3 @@ struct listNode* append(struct listNode *x, struct listNode *y)
 
 
 //@ var A, B : Seq
-

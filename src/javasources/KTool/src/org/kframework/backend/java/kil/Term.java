@@ -297,8 +297,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return (Term) super.substituteWithBinders(variable, term, context);
     }
 
-    public Term expandPatterns(SymbolicConstraint constraint, boolean narrow, TermContext context) {
-        return PatternExpander.expand(this, constraint, narrow, context);
+    public Term expandPatterns(SymbolicConstraint constraint, boolean narrowing, TermContext context) {
+        return PatternExpander.expand(this, constraint, narrowing, context);
     }
 
     @Override

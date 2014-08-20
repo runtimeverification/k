@@ -1,11 +1,13 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 require "kernelc-syntax.k"
 require "kernelc-semantics.k"
+require "patterns/list_pattern.k"
 require "patterns/tree_pattern.k"
 
 module KERNELC
   imports KERNELC-SYNTAX
   imports KERNELC-SEMANTICS
+  imports LIST-PATTERN
   imports TREE-PATTERN
 
   /*
@@ -33,4 +35,3 @@ module KERNELC
    */
   syntax KResult ::= EvaluatedExpression
 endmodule
-
