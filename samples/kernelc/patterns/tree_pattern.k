@@ -64,5 +64,24 @@ module TREE-PATTERN
     => tree_keys(TL) <IntSet { I } andBool { I } <IntSet tree_keys(TR)
        andBool bst(TL) andBool bst(TR)
   rule bst(leaf) => true
+
+  syntax Map ::= "htree" "(" Pointer ")" "(" Tree ")"   [pattern(1)]
+  rule htree(object(P:Int))(node(I:Int, TL:Tree, TR:Tree))
+    => object(P) |-> (
+          value  |-> tv(int, I)
+          height |-> tv(int, tree_height(node(I:Int, TL:Tree, TR:Tree)))
+          left   |-> tv(struct node *, ?PL:Pointer)
+          right  |-> tv(struct node *, ?PR:Pointer))
+       htree(?PL)(TL)
+       htree(?PR)(TR)
+    [pattern]
+  rule htree(null)(leaf) => .Map   [pattern]
+
+  syntax Bool ::= avl(Tree)   [function, smtlib(smt_avl)]
+  rule avl(node(I:Int, TL:Tree, TR:Tree))
+    => tree_keys(TL) <IntSet { I } andBool { I } <IntSet tree_keys(TR)
+       andBool absInt(tree_height(TL) -Int tree_height(TR)) <=Int 1
+       andBool avl(TL) andBool avl(TR)
+  rule avl(leaf) => true
 endmodule
 

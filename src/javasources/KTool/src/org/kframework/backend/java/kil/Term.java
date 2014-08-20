@@ -280,6 +280,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
+                super.visit(cell);
                 if (cell.getLabel().equals(cellName)) {
                     contents.add(cell.getContent());
                 }

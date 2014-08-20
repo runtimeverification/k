@@ -24,3 +24,6 @@
 (declare-fun smt_bst ((Tree)) Bool)
 (declare-fun smt_avl ((Tree)) Bool)
 
+; lemmas as universally quantified formulae
+(assert (forall ((t Tree)) (! (>= (smt_tree_height t) 0) :pattern((smt_tree_height t)))))
+
