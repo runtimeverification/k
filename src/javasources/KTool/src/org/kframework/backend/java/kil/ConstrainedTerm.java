@@ -142,6 +142,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     public SymbolicConstraint matchImplies(ConstrainedTerm constrainedTerm) {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
+        unificationConstraint.addAll(constraint.substitution());
         unificationConstraint.add(data.term, constrainedTerm.data.term);
         unificationConstraint.simplify();
 
@@ -153,6 +154,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         unificationConstraint.addAll(constrainedTerm.constraint);
         unificationConstraint.simplify();
 
+        // TODO(AndreiS): fix the infrastructure to get a fixpoint
+        unificationConstraint.expandPatterns(false);
+        unificationConstraint.simplify();
         unificationConstraint.expandPatterns(false);
         unificationConstraint.simplify();
 

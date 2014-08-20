@@ -15,6 +15,7 @@ import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.util.ArrayList;
@@ -266,6 +267,25 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      */
     public Term copyOnShareSubstAndEval(Map<Variable, ? extends Term> substitution, TermContext context) {
         return copyOnShareSubstAndEval(substitution, Collections.<Variable>emptySet(), context);
+    }
+
+    /**
+     * Returns a list containing the contents of each occurrence of a cell with the given name.
+     *
+     * Warning: this is slow!
+     * TODO(YilongL): improve performance when better indexing is available
+     */
+    public List<Term> getCellContentsByName(final String cellName) {
+        final List<Term> contents = new ArrayList<>();
+        accept(new BottomUpVisitor() {
+            @Override
+            public void visit(Cell cell) {
+                if (cell.getLabel().equals(cellName)) {
+                    contents.add(cell.getContent());
+                }
+            }
+        });
+        return contents;
     }
 
      /**

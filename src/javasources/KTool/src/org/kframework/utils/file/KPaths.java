@@ -72,4 +72,8 @@ public class KPaths {
         }
         return javaLibraryPath;
     }
+
+    public static String getZ3PreludePath() {
+        return getKBase(false) + "/include/z3/prelude.smt2";
+    }
 }

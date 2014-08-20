@@ -2,9 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -24,7 +22,6 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
@@ -41,18 +38,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.Solver;
-import com.microsoft.z3.Status;
-import com.microsoft.z3.Symbol;
-import com.microsoft.z3.Z3Exception;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.MapDifference.ValueDifference;
+import com.google.common.collect.Maps;
+
 
 /**
  * A conjunction of equalities between terms (with variables).
@@ -622,6 +616,20 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
+        /* split andBool in multiple equalities */
+        if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel().toString().equals("'_andBool_") && rightHandSide.equals(BoolToken.TRUE)) {
+            add(((KList) ((KItem) leftHandSide).kList()).get(0), BoolToken.TRUE);
+            add(((KList) ((KItem) leftHandSide).kList()).get(1), BoolToken.TRUE);
+            return data.truthValue;
+        }
+
+        /* split andBool in multiple equalities */
+        if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel().toString().equals("'_andBool_") && leftHandSide.equals(BoolToken.TRUE)) {
+            add(((KList) ((KItem) rightHandSide).kList()).get(0), BoolToken.TRUE);
+            add(((KList) ((KItem) rightHandSide).kList()).get(1), BoolToken.TRUE);
+            return data.truthValue;
+        }
+
         if (simplifyingEqualities) {
             Equality equality = new Equality(leftHandSide, rightHandSide);
             if (equality.isFalse()) {
@@ -757,6 +765,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         addAll((List<Equality>) arg);
                     }
                 }
+            } else if (arg instanceof Map) {
+                addAll((Map<Variable, Term>) arg);
             } else if (arg instanceof Equality) {
                 add((Equality) arg);
             } else {
@@ -779,12 +789,20 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value after including the new equalities
      */
     public TruthValue addAll(SymbolicConstraint constraint) {
-        for (Map.Entry<Variable, Term> entry : constraint.data.substitution.entrySet()) {
-            add(entry.getValue(), entry.getKey());
-        }
-
+        addAll(constraint.data.substitution);
         for (Equality equality : constraint.data.equalities) {
             add(equality.leftHandSide, equality.rightHandSide);
+        }
+
+        return data.truthValue;
+    }
+
+    /**
+     * Adds all bindings in the given substitution map to this symbolic constraint.
+     */
+    public TruthValue addAll(Map<Variable, Term> substitution) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            add(entry.getValue(), entry.getKey());
         }
 
         return data.truthValue;
@@ -800,25 +818,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return false;
         }
 
-        Boolean result = false;
+        boolean result = false;
         try {
-            com.microsoft.z3.Context context = Z3Wrapper.newContext();
-            KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
-            Solver solver = context.MkSolver();
-            for (Equality equality : data.equalities) {
-                try {
-                    solver.Assert(context.MkEq(
-                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
-                } catch (UnsupportedOperationException e) {
-                    /* it is sound to skip the equalities that cannot be translated */
-                    // TODO(AndreiS): fix this translation and the exceptions
-                    e.printStackTrace();
-                }
-                result = solver.Check() == Status.UNSATISFIABLE;
-                context.Dispose();
-            }
-        } catch (Z3Exception e) {
+            result = Z3Wrapper.instance().checkQuery(KILtoSMTLib.translateConstraint(this));
+        } catch (UnsupportedOperationException e) {
             e.printStackTrace();
         }
         return result;
@@ -956,96 +959,36 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
 //            System.out.println(constraint);
         } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
-            Set<Variable> rightHandSideVariables = new HashSet<Variable>(right.variableSet());
-            rightHandSideVariables.removeAll(left.variableSet());
-
             try {
-                com.microsoft.z3.Context context = Z3Wrapper.newContext();
-                KILtoZ3 transformer = new KILtoZ3(rightHandSideVariables, context);
-
-                Solver solver = context.MkSolver();
-
-                for (Equality equality : left.data.equalities) {
-                    solver.Assert(context.MkEq(
-                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
-                }
-
-                //BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
-                BoolExpr[] inequalities = new BoolExpr[right.data.equalities.size()];
-                int i = 0;
-                for (Equality equality : right.data.equalities) {
-                    inequalities[i++] = context.MkNot(context.MkEq(
-                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
-                }
-                /* TODO(AndreiS): fix translation to smt
-            for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
-                inequalities[i++] = context.MkNot(context.MkEq(
-                        ((Z3Term) entry.getKey().accept(transformer)).expression(),
-                        ((Z3Term) entry.getValue().accept(transformer)).expression()));
-            }
-            */
-
-                com.microsoft.z3.Sort[] variableSorts = new com.microsoft.z3.Sort[rightHandSideVariables.size()];
-                Symbol[] variableNames = new Symbol[rightHandSideVariables.size()];
-                i = 0;
-                for (Variable variable : rightHandSideVariables) {
-                    if (variable.sort().equals(BoolToken.SORT)) {
-                        variableSorts[i] = context.MkBoolSort();
-                    } else if (variable.sort().equals(IntToken.SORT)) {
-                        variableSorts[i] = context.MkIntSort();
-                    } else if (variable.sort().equals(BitVector.SORT)) {
-                        variableSorts[i] = context.MkBitVecSort(BitVector.getBitwidth(variable));
-                    } else {
-                        throw new UnsupportedOperationException(
-                                "unexpected variable sort " + variable.sort());
-                    }
-                    variableNames[i] = context.MkSymbol(variable.name());
-                    ++i;
-                }
-
-                Expr[] boundVariables = new Expr[rightHandSideVariables.size()];
-                i = 0;
-                for (Variable variable : rightHandSideVariables) {
-                    boundVariables[i++] = KILtoZ3.valueOf(variable, context).expression();
-                }
-
-                if (boundVariables.length > 0) {
-                    solver.Assert(context.MkForall(
-                            boundVariables,
-                            context.MkOr(inequalities),
-                            1,
-                            null,
-                            null,
-                            null,
-                            null));
-                } else {
-                    solver.Assert(context.MkOr(inequalities));
-                }
-
-                result = solver.Check() == Status.UNSATISFIABLE;
-                context.Dispose();
-            } catch (UnsupportedOperationException | Z3Exception e) {
+                result = Z3Wrapper.instance().checkQuery(
+                        KILtoSMTLib.translateImplication(left, right));
+            } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
             }
         }
         return  result;
     }
 
+    /**
+     * Simplifies the given constraint by eliding the equalities and substitution entries that are
+     * implied by this constraint.
+     */
     private SymbolicConstraint simplifyConstraint(SymbolicConstraint constraint) {
         constraint.normalize();
-        List<Equality> equalities = new LinkedList<>(constraint.equalities());
-        ListIterator<Equality> listIterator = equalities.listIterator();
-        while (listIterator.hasNext()) {
-            Equality e2 = listIterator.next();
-            for (Equality e1 : equalities()) {
-                if (e2.equals(e1)) {
-                    listIterator.remove();
-                    break;
-                }
-            }
+
+        SymbolicConstraint simplifiedConstraint = new SymbolicConstraint(constraint.termContext());
+        MapDifference<Variable, Term> mapDifference = Maps.difference(
+                constraint.substitution(),
+                substitution());
+        simplifiedConstraint.addAll(mapDifference.entriesOnlyOnLeft());
+        for (Entry<Variable, ValueDifference<Term>> entry : mapDifference.entriesDiffering().entrySet()) {
+            simplifiedConstraint.add(entry.getKey(), entry.getValue().leftValue());
         }
+        List<Equality> equalities = new LinkedList<>(constraint.equalities());
+        equalities.removeAll(equalities());
+        simplifiedConstraint.addAll(equalities);
+        simplifiedConstraint.simplify();
+
         Map<Term, Term> substitution = new HashMap<>();
         for (Equality e1:equalities()) {
             if (e1.rightHandSide.isGround()) {
@@ -1055,10 +998,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 substitution.put(e1.rightHandSide,e1.leftHandSide);
             }
         }
-        constraint = (SymbolicConstraint) substituteTerms(constraint, substitution);
-        constraint.renormalize();
-        constraint.simplify();
-        return constraint;
+        simplifiedConstraint = (SymbolicConstraint) substituteTerms(simplifiedConstraint, substitution);
+        simplifiedConstraint.renormalize();
+        simplifiedConstraint.simplify();
+        return simplifiedConstraint;
     }
 
     private JavaSymbolicObject substituteTerms(JavaSymbolicObject constraint, Map<Term, Term> substitution) {
@@ -1315,6 +1258,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (int i = 0; i < data.equalities.size(); ++i) {
             data.equalities.set(i, data.equalities.get(i).expandPatterns(this, narrow));
         }
+
+        /* force normalization to consider the changes made by this method */
+        data.isNormal = false;
     }
 
     /**

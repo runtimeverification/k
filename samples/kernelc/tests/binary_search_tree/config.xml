@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+  <test definition="kernelc.k"
+        programs="."
+        results="."
+        extension="c"
+        >
+    <kompile-option name="--backend" value="java" />
+    <program name="find.c">
+      <krun-option name="--prove" value="tests/binary_search_tree/find_spec.k" />
+    </program>
+    <program name="insert.c">
+      <krun-option name="--prove" value="tests/binary_search_tree/insert_spec.k" />
+    </program>
+    <program name="delete.c">
+      <krun-option name="--prove" value="tests/binary_search_tree/delete_spec.k" />
+    </program>
+  </test>
+</tests>
+

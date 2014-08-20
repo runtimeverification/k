@@ -158,6 +158,9 @@ module KERNELC-SEMANTICS
     <stack> .List => ListItem(callStackFrame(K, Env, Caller)) ...</stack>
     <fun-id> Caller:Id => Callee </fun-id>
     <env> Env:Map => .Map </env>
+    // TODO: handle special function more generically
+    requires Callee =/=K malloc andBool Callee =/=K free
+     andBool Callee =/=K scanf andBool Callee =/=K printf
   rule
     <fun>...
       Callee |-> functionBody(_:ParameterDeclarations, T, _:Block)
@@ -301,6 +304,13 @@ module KERNELC-SEMANTICS
     [structural]
   rule tv((T1:Type * => T2 *), null) != tv(T2:Type *, _:Pointer)
     requires T1 =/=K T2
+    [structural]
+  rule
+    <fun>...
+      Callee |-> functionBody(_:ParameterDeclarations, T2:Type *, _:Block)
+    ...</fun>
+    <k> return tv((T1:Type * => T2 *), null); ...</k>
+    <fun-id> Callee:Id </fun-id>
     [structural]
 
 
