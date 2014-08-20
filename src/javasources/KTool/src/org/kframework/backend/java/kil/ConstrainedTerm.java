@@ -251,16 +251,24 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
             if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.lookups)) continue;
             if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.constraint)) continue;
-            if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constraint)) continue;
+            candidate.simplify();
+            if (candidate.isFalse()) {
+                continue;
+            }
 
+            boolean isMatching = candidate.isMatching(constrainedTerm.variableSet());
+
+            if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constraint)) continue;
             candidate.simplify();
             if (candidate.isFalse()) {
                 continue;
             }
 
             // TODO(AndreiS): find a better place for pattern expansion
-            candidate.expandPatterns(true);
-            candidate.simplify();
+            if (!isMatching) {
+                candidate.expandPatterns(true);
+                candidate.simplify();
+            }
 
             if (Tool.instance() != Tool.KOMPILE) {
                 /*
