@@ -26,11 +26,11 @@ public class MacroExpander extends TermTransformer {
 
     public MacroExpander(TermContext context) {
         super(context);
-        rewriter = new StepRewriter(definition.macros(), definition);
+        rewriter = new StepRewriter(definition.macros(), context.global);
     }
 
     public Definition processDefinition() {
-        Definition processedDefinition = new Definition(definition.context());
+        Definition processedDefinition = new Definition(definition.context(), definition.indexingData);
         processedDefinition.addKLabelCollection(definition.kLabels());
         processedDefinition.addFrozenKLabelCollection(definition.frozenKLabels());
         for (Rule rule : definition.rules()) {

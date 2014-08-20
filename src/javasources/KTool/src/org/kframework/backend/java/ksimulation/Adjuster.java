@@ -10,10 +10,10 @@ import java.util.Set;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
-import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.java.symbolic.KILtoZ3;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Cell;
@@ -28,10 +28,10 @@ import com.microsoft.z3.Z3Exception;
 
 public class Adjuster {
 
-    private JavaSymbolicKRun impl;
-    private JavaSymbolicKRun spec;
+    private SymbolicRewriter impl;
+    private SymbolicRewriter spec;
 
-    public Adjuster(JavaSymbolicKRun impl,JavaSymbolicKRun spec){
+    public Adjuster(SymbolicRewriter impl,SymbolicRewriter spec){
 
         this.impl=impl;
 
@@ -40,14 +40,14 @@ public class Adjuster {
 
     public boolean isSat(ConstrainedTerm implElem,ConstrainedTerm specElem) throws KRunExecutionException, Z3Exception{
 
-        if(impl.getSimulationRewriter().getSimulationMap().isEmpty()
-                || spec.getSimulationRewriter().getSimulationMap().isEmpty()){
+        if(impl.getSimulationMap().isEmpty()
+                || spec.getSimulationMap().isEmpty()){
 
             return true;
         }
 
-        ConstrainedTerm implside = impl.simulationSteps(implElem);
-        ConstrainedTerm specside = spec.simulationSteps(specElem);
+        ConstrainedTerm implside = impl.computeSimulationStep(implElem);
+        ConstrainedTerm specside = spec.computeSimulationStep(specElem);
 
         if(specside == null){
 
@@ -58,7 +58,7 @@ public class Adjuster {
             return false;
         }
 
-        if(impl.getDefinition().context().smtOptions.smt == SMTSolver.NONE){
+        if(implElem.termContext().definition().context().smtOptions.smt == SMTSolver.NONE){
 
             return implside.term().equals(specside.term());
         }

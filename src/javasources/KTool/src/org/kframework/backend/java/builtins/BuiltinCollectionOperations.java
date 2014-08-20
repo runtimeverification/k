@@ -13,8 +13,6 @@ import org.kframework.backend.java.kil.TermContext;
  */
 public final class BuiltinCollectionOperations {
 
-    private BuiltinCollectionOperations() { }
-
     public static IntToken size(Collection collection, TermContext context) {
         if (collection instanceof AssociativeCommutativeCollection) {
             return ((AssociativeCommutativeCollection) collection).isConcreteCollection()

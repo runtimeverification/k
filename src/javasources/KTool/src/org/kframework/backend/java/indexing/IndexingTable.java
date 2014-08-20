@@ -3,6 +3,10 @@ package org.kframework.backend.java.indexing;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
@@ -22,6 +26,7 @@ import java.util.LinkedHashSet;
  * The indexing scheme currently used in the Java Backend
  */
 public class IndexingTable implements Serializable, RuleIndex{
+
     private Map<Index, List<Rule>> ruleTable;
     private Map<Index, List<Rule>> heatingRuleTable;
     private Map<Index, List<Rule>> coolingRuleTable;
@@ -31,8 +36,20 @@ public class IndexingTable implements Serializable, RuleIndex{
     private List<Rule> unindexedRules;
     private final Definition definition;
 
-    public IndexingTable(Definition definition) {
-        this.definition = definition;
+    private final Data data;
+
+    @Singleton
+    public static class Data implements Serializable {
+        public final TopIndex TOP_INDEX = new TopIndex();
+        public final IndexingPair TOP_INDEXING_PAIR = new IndexingPair(TOP_INDEX, TOP_INDEX);
+        public final BottomIndex BOTTOM_INDEX = new BottomIndex();
+        public final IndexingPair BOTTOM_INDEXING_PAIR = new IndexingPair(BOTTOM_INDEX, BOTTOM_INDEX);
+    }
+
+    @Inject
+    public IndexingTable(Provider<Definition> definition, Data data) {
+        this.definition = definition.get();
+        this.data = data;
         buildIndex();
     }
 
@@ -40,8 +57,8 @@ public class IndexingTable implements Serializable, RuleIndex{
     public void buildIndex() {
         /* populate the table of rules rewriting the top configuration */
         List<Index> indices = new ArrayList<Index>();
-        indices.add(TopIndex.TOP);
-        indices.add(BottomIndex.BOTTOM);
+        indices.add(data.TOP_INDEX);
+        indices.add(data.BOTTOM_INDEX);
         for (KLabelConstant kLabel : definition.kLabels()) {
             indices.add(new KLabelIndex(kLabel));
             indices.add(new FreezerIndex(kLabel, -1));

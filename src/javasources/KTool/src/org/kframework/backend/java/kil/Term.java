@@ -6,7 +6,6 @@ import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
-import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.backend.java.symbolic.Matchable;
 import org.kframework.backend.java.symbolic.PatternExpander;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
@@ -15,9 +14,6 @@ import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.IndexingStatistics;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,20 +43,20 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Translates a term from the generic KIL representation ({@link org.kframework.kil.Term}) to
      * Java Rewrite Engine internal representation ({@link org.kframework.backend.java.kil.Term}).
      */
-    public static Term of(org.kframework.kil.Term kilTerm, Definition definition) {
-        if (definition.context().javaExecutionOptions.indexingStats){
-            IndexingStatistics.kilTransformationStopWatch.start();
-        }
-
-        KILtoBackendJavaKILTransformer transformer
-                = new KILtoBackendJavaKILTransformer(definition.context());
-        Term term = transformer.transformTerm(kilTerm, definition);
-
-        if (definition.context().javaExecutionOptions.indexingStats){
-            IndexingStatistics.kilTransformationStopWatch.stop();
-        }
-        return term;
-    }
+//    public static Term of(org.kframework.kil.Term kilTerm, Definition definition) {
+//        if (definition.context().javaExecutionOptions.indexingStats){
+//            IndexingStatistics.kilTransformationStopWatch.start();
+//        }
+//
+//        KILtoBackendJavaKILTransformer transformer
+//                = new KILtoBackendJavaKILTransformer(definition.context());
+//        Term term = transformer.transformTerm(kilTerm, definition);
+//
+//        if (definition.context().javaExecutionOptions.indexingStats){
+//            IndexingStatistics.kilTransformationStopWatch.stop();
+//        }
+//        return term;
+//    }
 
     /**
      * Returns a {@link List} view of the indexing pairs from the {@code k}

@@ -3,6 +3,7 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.BuiltinList;
@@ -49,9 +50,9 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     private static final String EMPTY_K = "EMPTY_K";
     private static final String K_STRING = "K";
     public static final String NO_K_CELL_PSTRING = "@.NO_K_CELL";
-    private final Set<String> pStrings;
+    private final Set<String> pStrings = new LinkedHashSet<>();
     private final Context context;
-    private final boolean indexingStats;
+    private final JavaExecutionOptions options;
 
     private String pString;
     private int currentPosition = 0;
@@ -66,26 +67,21 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     private boolean addInputRules;
     private boolean addOutputRules;
 
-    public TermVisitor(Context context) {
-        pStrings = new LinkedHashSet<>();
+    public TermVisitor(Context context, JavaExecutionOptions options, boolean hasNOKCellRules) {
         this.context = context;
-        this.indexingStats = context.javaExecutionOptions.indexingStats;
-    }
-
-    public TermVisitor(Context context, boolean hasNOKCellRules) {
-        this(context);
+        this.options = options;
         this.defHasNOKCellRules |= hasNOKCellRules;
     }
 
     @Override
     public void visit(Term node) {
         int BASE_IO_CELL_SIZE = 2;
-        if (indexingStats) {
+        if (options.indexingStats) {
             IndexingStatistics.getPStringStopwatch.reset();
             IndexingStatistics.getPStringStopwatch.start();
         }
         //first find all the term's cells of interest in  a single pass
-        CellVisitor cellVisitor = new CellVisitor(context);
+        CellVisitor cellVisitor = new CellVisitor(context, options);
         node.accept(cellVisitor);
         pStrings.addAll(cellVisitor.getkCellPStings());
 
@@ -94,7 +90,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             pStrings.add(NO_K_CELL_PSTRING);
         }
 
-        if (indexingStats) {
+        if (options.indexingStats) {
             IndexingStatistics.getPStringStopwatch.stop();
             IndexingStatistics.getPStringTimes.add(
                     IndexingStatistics.getPStringStopwatch.elapsed(TimeUnit.MICROSECONDS));
@@ -128,7 +124,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             }
         }
 
-        if (indexingStats) {
+        if (options.indexingStats) {
             IndexingStatistics.traverseCellsStopwatch.stop();
             IndexingStatistics.traverseCellsTimes.add(
                     IndexingStatistics.traverseCellsStopwatch.elapsed(TimeUnit.MICROSECONDS));
@@ -234,12 +230,12 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         if (kItem.kLabel() instanceof KLabelFreezer) {
 
             if (pString != null) {
-                TokenVisitor visitor = new TokenVisitor(context, pString);
+                TokenVisitor visitor = new TokenVisitor(context, options, pString);
                 kItem.kLabel().accept(visitor);
                 pStrings.addAll(visitor.getCandidates());
             } else if (pString == null){
                 //this works for bool ~> (# if_then_else). may not always work
-                TokenVisitor visitor = new TokenVisitor(context, "@.KResult");
+                TokenVisitor visitor = new TokenVisitor(context, options, "@.KResult");
                 kItem.kLabel().accept(visitor);
                 pStrings.addAll(visitor.getCandidates());
             }
@@ -281,7 +277,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                                 + USER_LIST_REPLACEMENT);
                         // TODO(Owolabileg): Bad hack to be removed - trying this out for fun where
                         // other kItems apart from kList can have multiple productions
-                        TokenVisitor visitor = new TokenVisitor(context, pString);
+                        TokenVisitor visitor = new TokenVisitor(context, options, pString);
                         kItem.kLabel().accept(visitor);
                         kItem.kList().accept(visitor);
                         pStrings.addAll(visitor.getCandidates());
@@ -377,8 +373,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         private String pString;
         private final List<String> candidates;
 
-        public TokenVisitor(Context context, String string) {
-            super(context);
+        public TokenVisitor(Context context, JavaExecutionOptions options, String string) {
+            super(context, options, false);
             baseString = string;
             candidates = new ArrayList<>();
         }

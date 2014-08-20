@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.krun.KRunModule.MainExecutionContextModule;
 import org.kframework.krun.KRunModule.SimulationModule;
 import org.kframework.main.FrontEnd;
@@ -23,7 +22,6 @@ public class KRunModuleTest extends BaseTestCase {
     @Before
     public void setUp() {
         context.configVarSorts = new HashMap<>();
-        context.javaExecutionOptions = new JavaExecutionOptions();
     }
 
     @Test

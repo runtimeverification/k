@@ -11,14 +11,14 @@ import com.microsoft.z3.Z3Exception;
 
 public class Looper extends Thread {
 
-    private JavaSymbolicKRun impl;
-    private JavaSymbolicKRun spec;
+    private SymbolicRewriter impl;
+    private SymbolicRewriter spec;
     private HashSet<ConstrainedTerm []> memoing;
     private ArrayList<ConstrainedTerm []> currentPairs;
     private Waitor refs;
     private Adjuster decider;
 
-    public Looper(JavaSymbolicKRun implRules,JavaSymbolicKRun specRules,
+    public Looper(SymbolicRewriter implRules,SymbolicRewriter specRules,
             ArrayList<ConstrainedTerm []> pairs,HashSet<ConstrainedTerm []> memo,Adjuster decider,Waitor father){
 
         impl = implRules;
@@ -107,8 +107,8 @@ public class Looper extends Thread {
     private ArrayList<ArrayList<ConstrainedTerm []>> getNextMoves(ConstrainedTerm [] input) throws KRunExecutionException, Z3Exception{
 
 
-        ArrayList<ConstrainedTerm> implResult = impl.steps(input[0]);
-        ArrayList<ConstrainedTerm> specResult = spec.steps(input[1]);
+        ArrayList<ConstrainedTerm> implResult = impl.rewriteAll(input[0]);
+        ArrayList<ConstrainedTerm> specResult = spec.rewriteAll(input[1]);
         ArrayList<ConstrainedTerm> newImpls = new ArrayList<ConstrainedTerm>();
         ArrayList<ArrayList<ConstrainedTerm []>> result = new ArrayList<ArrayList<ConstrainedTerm []>>();
 

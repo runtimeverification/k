@@ -27,8 +27,10 @@ public class BuiltinMgu extends Term {
                 : new SymbolicConstraint(constraint, context);
     }
 
-    public static BuiltinMgu emptyMgu(TermContext context) {
-        return new BuiltinMgu(null, context);
+    public static class BuiltinMguOperations {
+        public static BuiltinMgu emptyMgu(TermContext context) {
+            return new BuiltinMgu(null, context);
+        }
     }
 
     public static BuiltinMgu of(SymbolicConstraint constraint,

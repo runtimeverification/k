@@ -10,6 +10,8 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.inject.Singleton;
+
 import java.io.EOFException;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -20,6 +22,7 @@ import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 
+@Singleton
 public class PortableFileSystem implements FileSystem {
 
     private BidiMap<Long, FileDescriptor> descriptors = new DualHashBidiMap<Long, FileDescriptor>();

@@ -4,6 +4,7 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
@@ -16,6 +17,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -36,6 +38,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import com.google.inject.Inject;
 
 
 /**
@@ -219,25 +222,6 @@ public final class KItem extends Term {
         return new CacheTableValue(sort, isExactSort);
     }
 
-    /**
-     * Evaluates this {@code KItem} if it is a predicate or function; otherwise,
-     * applies [anywhere] rules associated with this {@code KItem}
-     *
-     * @param copyOnShareSubstAndEval
-     *            specifies whether to use
-     *            {@link CopyOnShareSubstAndEvalTransformer} when applying rules
-     *
-     * @param context
-     *            a term context
-     *
-     * @return the reduced result on success, or this {@code KItem} otherwise
-     */
-    public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
-        return isEvaluable(context) ?
-                evaluateFunction(copyOnShareSubstAndEval, context) :
-                applyAnywhereRules(copyOnShareSubstAndEval, context);
-    }
-
     public boolean isEvaluable(TermContext context) {
         if (evaluable != null) {
             return evaluable;
@@ -261,149 +245,193 @@ public final class KItem extends Term {
         return evaluable;
     }
 
-    /**
-     * Evaluates this {@code KItem} if it is a predicate or function
-     *
-     * @param copyOnShareSubstAndEval
-     *            specifies whether to use
-     *            {@link CopyOnShareSubstAndEvalTransformer} when applying
-     *            user-defined function rules
-     *
-     * @param context
-     *            a term context
-     *
-     * @return the evaluated result on success, or this {@code KItem} otherwise
-     */
     public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
-        if (!isEvaluable(context)) {
-            return this;
+        return context.global.kItemOps.evaluateFunction(this, copyOnShareSubstAndEval, context);
+    }
+
+    public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
+        return context.global.kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
+    }
+
+    public static class KItemOperations {
+
+        private final Tool tool;
+        private final JavaExecutionOptions javaOptions;
+        private final GlobalOptions globalOptions;
+
+        @Inject
+        public KItemOperations(
+                Tool tool,
+                JavaExecutionOptions javaOptions,
+                GlobalOptions globalOptions) {
+            this.tool = tool;
+            this.javaOptions = javaOptions;
+            this.globalOptions = globalOptions;
         }
 
-        Definition definition = context.definition();
-        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+        /**
+         * Evaluates this {@code KItem} if it is a predicate or function; otherwise,
+         * applies [anywhere] rules associated with this {@code KItem}
+         *
+         * @param copyOnShareSubstAndEval
+         *            specifies whether to use
+         *            {@link CopyOnShareSubstAndEvalTransformer} when applying rules
+         *
+         * @param context
+         *            a term context
+         *
+         * @return the reduced result on success, or this {@code KItem} otherwise
+         */
+        public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
+            return kItem.isEvaluable(context) ?
+                    evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
+                    kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+        }
 
-        KList kList = (KList) this.kList;
+        /**
+         * Evaluates this {@code KItem} if it is a predicate or function
+         *
+         * @param copyOnShareSubstAndEval
+         *            specifies whether to use
+         *            {@link CopyOnShareSubstAndEvalTransformer} when applying
+         *            user-defined function rules
+         *
+         * @param context
+         *            a term context
+         *
+         * @return the evaluated result on success, or this {@code KItem} otherwise
+         */
+        public Term evaluateFunction(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
+            if (!kItem.isEvaluable(context)) {
+                return kItem;
+            }
 
-        if (context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
-            try {
-                Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                Term result = context.global.builtins.invoke(context, kLabelConstant, arguments);
-                if (result != null) {
-                    assert result.kind() == Kind.KITEM:
-                        "unexpected kind " + result.kind() + " of term " + result + ";"
-                        + "expected kind " + Kind.KITEM + " instead";
-                    return result;
-                }
-            } catch (IllegalAccessException | IllegalArgumentException e) {
-            } catch (InvocationTargetException e) {
-                Throwable t = e.getTargetException();
-                if (t instanceof Error) {
-                    throw (Error)t;
-                }
-                if (t instanceof KExceptionManager.KEMException) {
-                    throw (RuntimeException)t;
-                }
-                if (t instanceof RuntimeException) {
-                    if (context.definition().context().globalOptions.verbose) {
-                        System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
-                        e.printStackTrace();
+            Definition definition = context.definition();
+            KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
+
+            KList kList = (KList) kItem.kList;
+
+            if (context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
+                try {
+                    Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
+                    Term result = context.global.builtins.invoke(context, kLabelConstant, arguments);
+                    if (result != null) {
+                        assert result.kind() == Kind.KITEM:
+                            "unexpected kind " + result.kind() + " of term " + result + ";"
+                            + "expected kind " + Kind.KITEM + " instead";
+                        return result;
                     }
-                } else {
-                    throw new AssertionError("Builtin functions should not throw checked exceptions", e);
+                } catch (IllegalAccessException | IllegalArgumentException e) {
+                } catch (InvocationTargetException e) {
+                    Throwable t = e.getTargetException();
+                    if (t instanceof Error) {
+                        throw (Error)t;
+                    }
+                    if (t instanceof KExceptionManager.KEMException) {
+                        throw (RuntimeException)t;
+                    }
+                    if (t instanceof RuntimeException) {
+                        if (globalOptions.verbose) {
+                            System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
+                            e.printStackTrace();
+                        }
+                    } else {
+                        throw new AssertionError("Builtin functions should not throw checked exceptions", e);
+                    }
                 }
             }
-        }
 
-        /* evaluate a sort membership predicate */
-        // TODO(YilongL): maybe we can move sort membership evaluation after
-        // applying user-defined rules to allow the users to provide their
-        // own rules for checking sort membership
-        if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
-            Term checkResult = SortMembership.check(this, context.definition());
-            if (checkResult != this) {
-                return checkResult;
+            /* evaluate a sort membership predicate */
+            // TODO(YilongL): maybe we can move sort membership evaluation after
+            // applying user-defined rules to allow the users to provide their
+            // own rules for checking sort membership
+            if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
+                Term checkResult = SortMembership.check(kItem, context.definition());
+                if (checkResult != kItem) {
+                    return checkResult;
+                }
             }
-        }
 
-        /* apply rules for user defined functions */
-        if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
-            Term result = null;
+            /* apply rules for user defined functions */
+            if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
+                Term result = null;
 
-            LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
-            for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                /* function rules should be applied by pattern match rather than unification */
-                Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
-                if (solutions.isEmpty()) {
-                    continue;
-                }
+                LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
+                for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                    /* function rules should be applied by pattern match rather than unification */
+                    Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(kItem, rule, context);
+                    if (solutions.isEmpty()) {
+                        continue;
+                    }
 
-                Map<Variable, Term> solution = solutions.iterator().next();
-                if (Tool.instance() == Tool.KOMPILE || definition.context().javaExecutionOptions.concreteExecution()) {
-                    assert solutions.size() <= 1 :
-                        "[non-deterministic function definition]: more than one way to apply the rule\n"
-                        + rule + "\nagainst the function\n" + this;
-                }
+                    Map<Variable, Term> solution = solutions.iterator().next();
+                    if (tool == Tool.KOMPILE || javaOptions.concreteExecution()) {
+                        assert solutions.size() <= 1 :
+                            "[non-deterministic function definition]: more than one way to apply the rule\n"
+                            + rule + "\nagainst the function\n" + kItem;
+                    }
 
-                Term rightHandSide = rule.rightHandSide();
-                if (rule.hasUnboundVariables()) {
-                    // this opt. only makes sense when using pattern matching
-                    // because after unification variables can end up in the
-                    // constraint rather than in the form of substitution
+                    Term rightHandSide = rule.rightHandSide();
+                    if (rule.hasUnboundVariables()) {
+                        // this opt. only makes sense when using pattern matching
+                        // because after unification variables can end up in the
+                        // constraint rather than in the form of substitution
 
-                    /* rename unbound variables */
-                    Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.unboundVariables());
-                    /* rename rule variables in the rule RHS */
-                    rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
-                }
-                if (copyOnShareSubstAndEval) {
-                    rightHandSide = rightHandSide.copyOnShareSubstAndEval(
-                            solution,
-                            rule.reusableVariables().elementSet(),
-                            context);
-                } else {
-                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-                }
+                        /* rename unbound variables */
+                        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.unboundVariables());
+                        /* rename rule variables in the rule RHS */
+                        rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
+                    }
+                    if (copyOnShareSubstAndEval) {
+                        rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                                solution,
+                                rule.reusableVariables().elementSet(),
+                                context);
+                    } else {
+                        rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                    }
 
-                if (rule.containsAttribute("owise")) {
+                    if (rule.containsAttribute("owise")) {
+                        /*
+                         * YilongL: consider applying ``owise'' rule only when the
+                         * function is ground. This is fine because 1) it's OK not
+                         * to fully evaluate non-ground function during kompilation;
+                         * and 2) it's better to get stuck rather than to apply the
+                         * wrong ``owise'' rule during execution.
+                         */
+                        if (kItem.isGround()) {
+                            owiseResults.add(rightHandSide);
+                        }
+                    } else {
+                        if (javaOptions.concreteExecution()) {
+                            assert result == null || result.equals(rightHandSide):
+                                "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                        }
+                        result = rightHandSide;
+                    }
+
                     /*
-                     * YilongL: consider applying ``owise'' rule only when the
-                     * function is ground. This is fine because 1) it's OK not
-                     * to fully evaluate non-ground function during kompilation;
-                     * and 2) it's better to get stuck rather than to apply the
-                     * wrong ``owise'' rule during execution.
+                     * If the function definitions do not need to be deterministic, try them in order
+                     * and apply the first one that matches.
                      */
-                    if (this.isGround()) {
-                        owiseResults.add(rightHandSide);
+                    if (!javaOptions.deterministicFunctions
+                            && result != null) {
+                        return result;
                     }
-                } else {
-                    if (definition.context().javaExecutionOptions.concreteExecution()) {
-                        assert result == null || result.equals(rightHandSide):
-                            "[non-deterministic function definition]: more than one rule can apply to the function\n" + this;
-                    }
-                    result = rightHandSide;
                 }
 
-                /*
-                 * If the function definitions do not need to be deterministic, try them in order
-                 * and apply the first one that matches.
-                 */
-                if (!definition.context().javaExecutionOptions.deterministicFunctions
-                        && result != null) {
+                if (result != null) {
                     return result;
+                } else if (!owiseResults.isEmpty()) {
+                    assert owiseResults.size() == 1 :
+                        "[non-deterministic function definition]: more than one ``owise'' rule for the function\n"
+                        + kItem;
+                    return owiseResults.iterator().next();
                 }
             }
 
-            if (result != null) {
-                return result;
-            } else if (!owiseResults.isEmpty()) {
-                assert owiseResults.size() == 1 :
-                    "[non-deterministic function definition]: more than one ``owise'' rule for the function\n"
-                    + this;
-                return owiseResults.iterator().next();
-            }
+            return kItem;
         }
-
-        return this;
     }
 
     private boolean isAnywhereApplicable(TermContext context) {

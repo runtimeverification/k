@@ -7,13 +7,7 @@ package org.kframework.backend.java.indexing;
  */
 public class BottomIndex implements Index {
 
-    public static final BottomIndex BOTTOM = new BottomIndex();
-
-    private BottomIndex() { }
-
-    private Object readResolve() {
-        return BOTTOM;
-    }
+    BottomIndex() { }
 
     @Override
     public boolean isUnifiable(Index index) {

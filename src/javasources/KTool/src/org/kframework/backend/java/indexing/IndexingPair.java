@@ -12,8 +12,6 @@ import java.io.Serializable;
  */
 public class IndexingPair implements Serializable {
 
-    public static final IndexingPair TOP = new IndexingPair(TopIndex.TOP, TopIndex.TOP);
-
     public static Index getIndex(Term term, Definition definition) {
         if (term instanceof KItem) {
             KItem kItem = (KItem) term;
@@ -33,7 +31,7 @@ public class IndexingPair implements Serializable {
             }
         }
 
-        return TopIndex.TOP;
+        return definition.indexingData.TOP_INDEX;
     }
 
     public static IndexingPair getKCellIndexingPair(Cell cell, Definition definition) {
@@ -45,16 +43,16 @@ public class IndexingPair implements Serializable {
 
             if (kSequence.size() == 0) {
                 if (kSequence.hasFrame()) {
-                    return new IndexingPair(TopIndex.TOP, TopIndex.TOP);
+                    return definition.indexingData.TOP_INDEXING_PAIR;
                 } else {
-                    return new IndexingPair(BottomIndex.BOTTOM, BottomIndex.BOTTOM);
+                    return definition.indexingData.BOTTOM_INDEXING_PAIR;
                 }
             }
             else if (kSequence.size() == 1) {
                 if (kSequence.hasFrame()) {
-                    return new IndexingPair(getIndex(kSequence.get(0), definition), TopIndex.TOP);
+                    return new IndexingPair(getIndex(kSequence.get(0), definition), definition.indexingData.TOP_INDEX);
                 } else {
-                    return new IndexingPair(getIndex(kSequence.get(0), definition), BottomIndex.BOTTOM);
+                    return new IndexingPair(getIndex(kSequence.get(0), definition), definition.indexingData.BOTTOM_INDEX);
                 }
             }
             else {
@@ -63,7 +61,7 @@ public class IndexingPair implements Serializable {
                         getIndex(kSequence.get(1), definition));
             }
         } else {
-            return new IndexingPair(getIndex(term, definition), BottomIndex.BOTTOM);
+            return new IndexingPair(getIndex(term, definition), definition.indexingData.BOTTOM_INDEX);
         }
     }
 
@@ -82,16 +80,16 @@ public class IndexingPair implements Serializable {
         Index sndIndex;
 
         if (!(pattern instanceof BuiltinList)) {
-            return IndexingPair.TOP;
+            return definition.indexingData.TOP_INDEXING_PAIR;
         };
         BuiltinList instream = (BuiltinList) pattern;
 
         if (instream.hasFrame()) {
-            fstIndex = instream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(instream.get(0), definition);
-            sndIndex = instream.elementsRight().isEmpty() ? TopIndex.TOP : getIndex(instream.get(-1), definition);
+            fstIndex = instream.elementsLeft().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(instream.get(0), definition);
+            sndIndex = instream.elementsRight().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(instream.get(-1), definition);
         } else {
-            fstIndex = instream.isEmpty() ? BottomIndex.BOTTOM : getIndex(instream.get(0), definition);
-            sndIndex = instream.size() < 2 ? BottomIndex.BOTTOM : getIndex(instream.get(-1), definition);
+            fstIndex = instream.isEmpty() ? definition.indexingData.BOTTOM_INDEX : getIndex(instream.get(0), definition);
+            sndIndex = instream.size() < 2 ? definition.indexingData.BOTTOM_INDEX : getIndex(instream.get(-1), definition);
         }
 
         return new IndexingPair(fstIndex, sndIndex);
@@ -112,16 +110,16 @@ public class IndexingPair implements Serializable {
         Index sndIndex;
 
         if (!(pattern instanceof BuiltinList)) {
-            return IndexingPair.TOP;
+            return definition.indexingData.TOP_INDEXING_PAIR;
         }
         BuiltinList outstream = (BuiltinList) pattern;
 
         if (outstream.hasFrame()) {
-            fstIndex = outstream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(outstream.get(0), definition);
-            sndIndex = outstream.elementsLeft().size() < 2 ? TopIndex.TOP : getIndex(outstream.get(1), definition);
+            fstIndex = outstream.elementsLeft().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(outstream.get(0), definition);
+            sndIndex = outstream.elementsLeft().size() < 2 ? definition.indexingData.TOP_INDEX : getIndex(outstream.get(1), definition);
         } else {
-            fstIndex = outstream.isEmpty() ? BottomIndex.BOTTOM : getIndex(outstream.get(0), definition);
-            sndIndex = outstream.size() < 2 ? BottomIndex.BOTTOM : getIndex(outstream.get(1), definition);
+            fstIndex = outstream.isEmpty() ? definition.indexingData.BOTTOM_INDEX : getIndex(outstream.get(0), definition);
+            sndIndex = outstream.size() < 2 ? definition.indexingData.BOTTOM_INDEX : getIndex(outstream.get(1), definition);
         }
 
         return new IndexingPair(fstIndex, sndIndex);

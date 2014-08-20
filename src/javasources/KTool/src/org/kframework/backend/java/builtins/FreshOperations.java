@@ -18,8 +18,6 @@ import com.google.common.collect.Lists;
  */
 public class FreshOperations {
 
-    private FreshOperations() { }
-
     public static Term fresh(Sort sort, TermContext context) {
         return fresh(StringToken.of(sort.name()), context);
     }
@@ -31,7 +29,7 @@ public class FreshOperations {
         }
 
         KItem freshFunction = KItem.of(
-                KLabelConstant.of(name, context.definition()),
+                KLabelConstant.of(name, context.definition().context()),
                 new KList(Lists.newArrayList((Term) IntToken.of(context.incrementCounter()))),
                 context);
         return freshFunction.evaluateFunction(false, context);

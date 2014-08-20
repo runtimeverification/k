@@ -16,8 +16,6 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public final class BuiltinBitVectorOperations {
 
-    private BuiltinBitVectorOperations() { }
-
     public static BitVector construct(IntToken bitwidth, IntToken value, TermContext context) {
         try {
             return BitVector.of(value.bigIntegerValue(), bitwidth.intValue());
