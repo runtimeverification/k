@@ -212,7 +212,6 @@ module KERNELC-SEMANTICS
     [transition]
 
   /* memory write */
-  context E:Expression = HOLE;
   rule E1:Expression = E2:EvaluatedExpression; => &E1 ~> HOLE = E2;   [heat]
   rule TV:TypedValue ~> HOLE = E:EvaluatedExpression; => TV = E;      [cool]
   rule
