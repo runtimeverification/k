@@ -212,8 +212,9 @@ module KERNELC-SEMANTICS
     [transition]
 
   /* memory write */
-  rule E1:Expression = E2:Expression; => &E1 ~> HOLE = E2;    [heat]
-  rule TV:TypedValue ~> HOLE = E:Expression; => TV = E;       [cool]
+  context E:Expression = HOLE;
+  rule E1:Expression = E2:EvaluatedExpression; => &E1 ~> HOLE = E2;   [heat]
+  rule TV:TypedValue ~> HOLE = E:EvaluatedExpression; => TV = E;      [cool]
   rule
     <k> tv(T:Type *, object(I:Int)) = tv(T, V:Value); => .K ...</k>
     <heap>... object(I) |-> tv(T, _:Value => V) ...</heap>
