@@ -1,12 +1,1 @@
-Loading serialized context                                   =   184
-Initializing definition paths                                =     3
-Reading configuration from binary                            =   243
-Importing Files                                              =    14
-Parsing Program                                              =   464
-Parse configuration variables                                =     1
-Make configuration                                           =     0
-Plug configuration variables                                 =     3
-Proof total                                                  =  3145
 true
-Cleanup                                                      =     0
-Total                                                        =  4057
