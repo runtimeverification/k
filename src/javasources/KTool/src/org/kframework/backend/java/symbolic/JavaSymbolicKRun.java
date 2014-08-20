@@ -16,7 +16,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.Module;
-import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunExecutionException;
@@ -30,7 +29,6 @@ import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
-import org.kframework.krun.api.TestGenResult;
 import org.kframework.krun.api.TestGenResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.UnsupportedBackendOptionException;
@@ -275,7 +273,7 @@ public class JavaSymbolicKRun implements KRun {
                 org.kframework.kil.Term kilTerm =
                         (org.kframework.kil.Term) map.get(var).accept(
                                 new BackendJavaKILtoKILTransformer(context));
-                substitutionMap.put(var.toString(), kilTerm);
+                substitutionMap.put(var.name(), kilTerm);
             }
 
             // Apply the substitution to the pattern

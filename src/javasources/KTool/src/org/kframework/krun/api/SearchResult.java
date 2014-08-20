@@ -42,7 +42,7 @@ public class SearchResult {
                 // The backend doesn't keep sort information around so we want to
                 // match the variable name only.
                 for (String key : rawSubstitution.keySet()) {
-                    if (key.startsWith(var.getName() + ":")) {
+                    if (key.equals(var.getName())) {
                         varString = key;
                         break;
                     }

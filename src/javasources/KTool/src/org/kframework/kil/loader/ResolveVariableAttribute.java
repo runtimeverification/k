@@ -2,11 +2,9 @@
 package org.kframework.kil.loader;
 
 import org.kframework.compile.transformers.AddSymbolicK;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kompile.KompileOptions;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,7 +27,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             so whenever somebody refactors the backends should split this transformer
             for each backend.
              */
-            if (kompileOptions.backend == KompileOptions.Backend.MAUDE) {
+            if (kompileOptions.experimental.legacyKast) {
                 if (context.variableTokenSorts.contains(node.tokenSort())) {
                     String sort = KSorts.K;
                     String name = node.value();

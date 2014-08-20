@@ -24,8 +24,8 @@ module IMP-SYNTAX
                  > "spawn" Stmt
                  > Stmt Stmt                  [left]
 
-  syntax Ids   ::= List{Id,","}               [strict]
-  syntax AExps ::= List{AExp,","}             [strict]
+  syntax Ids   ::= List{Id,","}
+  syntax AExps ::= List{AExp,","}             [seqstrict]
 endmodule
 
 

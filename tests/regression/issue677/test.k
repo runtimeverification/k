@@ -1,9 +1,15 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-module TEST
+module TEST-SYNTAX
   syntax B ::= Int | B "*" B
    syntax A ::= B [klabel('a), strict]
         | A "+" A [strict]
         | print(A) [strict]
+
+endmodule
+
+module TEST
+  imports TEST-SYNTAX
+  syntax A ::= Int
 
   syntax KResult ::= Int
 

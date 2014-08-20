@@ -17,11 +17,13 @@ evaluates to the new value;
   evaluates all of them, and then prints their values to the output buffer;
   we therefore define a new list syntactic category, `AExps`, which we pass
   as an argument to print; moreover, we declare print `strict`, to evaluate
-  its `AExps`-list argument, and then the `AExps` list construct also `strict`,
-  so lists of arithmetic expressions get evaluated whenever they reach the top
-  of the `<k/>` cell; we also go ahead and add strings as arithmetic
-  expressions, because we intend print to also take strings, in order to print
-  nice messages to the user;
+  its `AExps`-list argument, and then the `AExps` list construct `seqstrict`,
+  so lists of arithmetic expressions get evaluated from left-to-right whenever
+  they reach the top of the `<k/>` cell (replace `seqstrict` with `strict`
+  if you want expressions in a list to evaluate non-deterministically and
+  interleaved); we also go ahead and add strings as arithmetic expressions,
+  because we intend print to also take strings, in order to print nice
+  messages to the user;
 - `halt`, which abruptly terminates the program; and
 - `spawn`, which takes a statement and creates a new concurrent thread
   executing it and sharing its environment with the parent thread.

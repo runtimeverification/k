@@ -448,8 +448,10 @@ public class MaudeFilter extends BackendFilter {
         result.append(":");
         if (context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append(context.dataStructureSortOf(variable.getSort()).type());
-        } else {
+        } else if (variable.getSort().isBuiltinSort() || variable.getSort().isKSort()) {
             result.append(variable.getSort());
+        } else {
+            result.append("KItem");
         }
 
         if (variable.getSort().isBuiltinSort()

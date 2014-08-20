@@ -60,10 +60,7 @@ public class OuterParser {
                 List<DefinitionItem> tempmi = moduleItems;
                 moduleItems = new ArrayList<DefinitionItem>();
 
-                if (context.kompileOptions.backend.java())
-                    file = buildCanonicalPath("autoinclude-java.k", new File(fileName));
-                else
-                    file = buildCanonicalPath("autoinclude.k", new File(fileName));
+                file = buildCanonicalPath(context.kompileOptions.backend.autoinclude(), new File(fileName));
                 if (file == null)
                     GlobalSettings.kem.registerCriticalError(missingFileMsg + fileName + " autoimported for every definition ");
 

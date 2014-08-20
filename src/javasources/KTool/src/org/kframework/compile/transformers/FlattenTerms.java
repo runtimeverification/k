@@ -181,11 +181,6 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             }
 
             node = node.shallowCopy();
-            if (kompileOptions.backend.java()) {
-                /* the Java Rewrite Engine preserves sort information for variables */
-            } else {
-                node.setSort(Sort.KITEM);
-            }
             return node;
         }
     }

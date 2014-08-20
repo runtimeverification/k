@@ -92,11 +92,7 @@ public final class KRunOptions {
         public String parser(Context context) {
             if (parser == null) {
                 if (term()) {
-                    if (context.kompileOptions.backend.java()) {
-                        return "kast --parser rules";
-                    } else {
-                        return "kast --parser ground";
-                    }
+                    return "kast --parser ground";
                 } else {
                     return "kast";
                 }
