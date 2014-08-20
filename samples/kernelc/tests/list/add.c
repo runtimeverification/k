@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function add prepends an integer value to the beginning of a singly
  * linked list.
@@ -14,7 +15,7 @@ struct listNode {
 
 
 struct listNode* add(int v, struct listNode* x)
-/*@ rule <k> $ => return ?x; ...</k> 
+/*@ rule <k> $ => return ?x; ...</k>
          <heap>... list(x)(A) => list(?x)([v] @ A) ...</heap> */
 {
   struct listNode* y;
@@ -28,4 +29,3 @@ struct listNode* add(int v, struct listNode* x)
 
 
 //@ var A : Seq
-

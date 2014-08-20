@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that deallocates a singly linked list.
  * In matchC, "." means "nothing"; technically, "." is the unit
@@ -31,4 +32,3 @@ void deallocate(struct listNode* x)
 
 
 //@ var A : Seq
-

@@ -1,5 +1,6 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
- * Function copy duplicates a singly linked list by allocating memory and 
+ * Function copy duplicates a singly linked list by allocating memory and
  * copying the content of the original list to the newly created one.
  */
 
@@ -50,4 +51,3 @@ struct listNode* copy(struct listNode *x)
 
 /*@ var v: Int */
 /*@ var A, B, C : Seq */
-

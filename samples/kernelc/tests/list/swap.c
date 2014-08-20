@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function swapping the first two elements of a singly linked list.
  * The function specification requires that the list must have at
@@ -16,7 +17,7 @@ struct nodeList {
 
 
 struct nodeList* swap(struct nodeList* x)
-/*@ rule <k> $ => return ?x; ...</k> 
+/*@ rule <k> $ => return ?x; ...</k>
          <heap>... list(x)([v1, v2] @ A) => list(?x)([v2, v1] @ A) ...</heap> */
 {
   struct nodeList* p;
@@ -31,4 +32,3 @@ struct nodeList* swap(struct nodeList* x)
 
 //@ var v : Int
 //@ var A : Seq
-

@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function reverse reverses in-place the nodes of a singly linked list.
  */
@@ -34,4 +35,3 @@ struct listNode* reverse(struct listNode *x)
 
 
 //@ var A, B, C : Seq
-

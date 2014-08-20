@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function head returns the head of a singly linked list. The
  * specification requires the list to have at least one element.
@@ -22,4 +23,3 @@ int head(struct listNode *x)
 
 //@ var v : Int
 //@ var A : Seq
-
