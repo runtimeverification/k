@@ -609,6 +609,7 @@ List<KLabelConstant> KLabels() :
 | "*" { matchedToken.kind = TIMES; }
 | "?" { matchedToken.kind = QUESTION; }
 | "~" { matchedToken.kind = TILDE; }
+| <PIPE: "|">
 }
 
 /** Parses a complete RegEx and returns it as a String */
@@ -618,34 +619,28 @@ String RegEx(StringBuilder follow): { StringBuilder reg = new StringBuilder(); }
 /** Parses a single RegEx Element and appends it to 'sb' */
 void Element(StringBuilder reg, StringBuilder follow) :
 { StringBuilder sb = new StringBuilder(); }
-{ { follow.setLength(0); }
-( <STRING> { sb.append(specialAndImage()); }
-| <ID> { sb.append(specialAndImage()); }
+{
+  { follow.setLength(0); }
+  BasicElement(sb, follow)
+  (<PIPE> { sb.append(specialAndImage()); } BasicElement(sb, follow) { follow.setLength(0); })*
+  { reg.append(sb); }
+}
+
+/** Parses a single RegEx BasicElement and appends it to 'sb' */
+void BasicElement(StringBuilder sb, StringBuilder follow) : {}
+{
+( <STRING>  { sb.append(specialAndImage()); }
+| <ID>      { sb.append(specialAndImage()); }
 | Group(sb)
-| "(" { sb.append(specialAndImage()); }
-  (Element(sb, follow))*
-  ( "|" { sb.append(specialAndImage()); }
-    (Element(sb, follow))*)*
-  ")" { sb.append(specialAndImage()); }
-/*
-| "(" { sb.append(specialAndImage()); }
-  (Element(sb, follow))*
-  ")" { sb.append(specialAndImage()); }
-| "(" { sb.append(specialAndImage()); }
+| "{"       { sb.append(specialAndImage()); }
   Element(sb, follow)
-  "|" { sb.append(specialAndImage()); }
-  Element(sb, follow)
-  ")" { sb.append(specialAndImage()); }
-*/
-| "{" { sb.append(specialAndImage()); }
-  Element(sb, follow)
-  <STRING> { sb.append(specialAndImage()); }
+  <STRING>  { sb.append(specialAndImage()); }
   "}" { sb.append(specialAndImage()); }
   (("+" | "*") { sb.append(specialAndImage()); })
-) ({ follow.setLength(0); }
-   (("+" | "*") { follow.append(sb); } | "?")
-   { sb.append(specialAndImage()); })*
-  { reg.append(sb); }
+| "("       { sb.append(specialAndImage()); }
+  (Element(sb, follow))*
+  ")"       { sb.append(specialAndImage()); }
+) ({ follow.setLength(0); } ("+" | "*" | "?" ) { follow.append(sb); sb.append(specialAndImage()); })*
 }
 
 /*** RegEx Character Groups */
@@ -673,7 +668,7 @@ void Group(StringBuilder sb) : {}
 {
   "~"      { sb.append(specialAndImage()); } Group(sb)
 | "["      { sb.append(specialAndImage()); SwitchTo(GROUP_STATE); }
-  (<GROUP> { sb.append(specialAndImage()); })? { SwitchTo(DEFAULT); }
+  (<GROUP> { sb.append(specialAndImage()); })? { SwitchTo(REGEX_STATE); }
   "]"      { sb.append(specialAndImage()); }
 }
 
