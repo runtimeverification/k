@@ -2,8 +2,8 @@ Search results:
 
 Solution 1:
 V:K -->
-#symType(1) -> (#symType(6) -> (#symType(8) -> (#symType(13) -> (#symType(15) 
-  -> (#symType(23) -> (#symType(25) -> (#symType(30) -> (#symType(32) -> (
-  #symType(43) -> (#symType(45) -> (#symType(50) -> (#symType(52) -> (#symType
-  (60) -> (#symType(62) -> (#symType(67) -> (#symType(69) -> #symType(1)))))))
-  ))))))))))
+(#symType(1) -> (#symType(73) -> (#symType(70) -> (#symType(65) -> (#symType(
+  62) -> (#symType(55) -> (#symType(52) -> (#symType(47) -> (#symType(44) -> (
+  #symType(35) -> (#symType(32) -> (#symType(27) -> (#symType(24) -> (#symType
+  (17) -> (#symType(14) -> (#symType(9) -> (#symType(6) -> #symType(1)))))))))
+  )))))))))
