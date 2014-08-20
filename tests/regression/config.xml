@@ -147,6 +147,7 @@
       results="strictness/tests"
       extension="issue"
       >
+    <kompile-option name="--transition" value="bar" />
     <all-programs>
       <krun-option name="--color" value="off" />
       <krun-option name="--search" />
