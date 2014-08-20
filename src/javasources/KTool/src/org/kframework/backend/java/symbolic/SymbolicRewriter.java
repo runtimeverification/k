@@ -407,8 +407,7 @@ public class SymbolicRewriter {
             if (constraint == null) {
                 continue;
             }
-            constraint.addAll(rule.ensures());
-            constraint.simplify();
+            constraint.addAllThenSimplify(rule.ensures());
 
             /* rename rule variables in the constraints */
             Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
@@ -424,7 +423,6 @@ public class SymbolicRewriter {
             constraint.eliminateAnonymousVariables(constrainedTerm.variableSet());
 
             // TODO(AndreiS): move these some other place
-            constraint.simplify();
             constraint.expandPatternsAndSimplify(true);
             result = result.expandPatterns(constraint, true, constrainedTerm.termContext());
 

@@ -725,6 +725,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 && context.definition().context().krunOptions.experimental.prove() != null;
 
         for (Term term : condition) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
             // TODO(AndreiS): remove this condition when function evaluation works properly
             if (eval) {
                 add(term.evaluate(context), BoolToken.TRUE);
@@ -739,21 +743,56 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private TruthValue addAll(List<Equality> equalites) {
         for (Equality equality : equalites) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
             add(equality);
         }
         return data.truthValue;
     }
 
     /**
+     * Adds all equalities in the given symbolic constraint to this one.
      *
-     * @param args
-     *            possible argument types: - {@code SymbolicConstraint} -
-     *            {@code Equality} - {@code List<Equality>} -
-     *            {@code Collection<Term>}
-     * @return
+     * @param constraint
+     *            the given symbolic constraint
+     * @return the truth value after including the new equalities
      */
+    public TruthValue addAll(SymbolicConstraint constraint) {
+        addAll(constraint.data.substitution);
+        for (Equality equality : constraint.data.equalities) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
+            add(equality.leftHandSide, equality.rightHandSide);
+        }
+
+        return data.truthValue;
+    }
+
+    /**
+     * Adds all bindings in the given substitution map to this symbolic constraint.
+     */
+    public TruthValue addAll(Map<Variable, Term> substitution) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
+            add(entry.getValue(), entry.getKey());
+        }
+
+        return data.truthValue;
+    }
+
     private TruthValue addAll(Object... args) {
         for (Object arg : args) {
+            if (data.truthValue == TruthValue.FALSE) {
+                break;
+            }
+
             if (arg instanceof SymbolicConstraint) {
                 addAll((SymbolicConstraint) arg);
             } else if (arg instanceof Collection) {
@@ -779,33 +818,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     public TruthValue addAllThenSimplify(Object... args) {
         addAll(args);
         return simplify();
-    }
-
-    /**
-     * Adds all equalities in the given symbolic constraint to this one.
-     *
-     * @param constraint
-     *            the given symbolic constraint
-     * @return the truth value after including the new equalities
-     */
-    public TruthValue addAll(SymbolicConstraint constraint) {
-        addAll(constraint.data.substitution);
-        for (Equality equality : constraint.data.equalities) {
-            add(equality.leftHandSide, equality.rightHandSide);
-        }
-
-        return data.truthValue;
-    }
-
-    /**
-     * Adds all bindings in the given substitution map to this symbolic constraint.
-     */
-    public TruthValue addAll(Map<Variable, Term> substitution) {
-        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            add(entry.getValue(), entry.getKey());
-        }
-
-        return data.truthValue;
     }
 
     public boolean checkUnsat() {
@@ -1247,7 +1259,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public void expandPatternsAndSimplify(boolean narrowing) {
-        assert this.data.isNormal;
+        normalize();
 
         boolean changed;
         do {
