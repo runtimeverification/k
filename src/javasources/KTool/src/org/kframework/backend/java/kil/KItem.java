@@ -614,7 +614,7 @@ public final class KItem extends Term {
 
         if (results.size() == 1) {
             constraint.addAll(results.get(0).constraint());
-            return results.get(0).term();
+            return results.get(0).term().expandPatterns(constraint, narrowing, context);
         } else {
             return this;
         }

@@ -26,12 +26,12 @@ module KERNELC-SYNTAX
   syntax IntType ::= "int"
 
   syntax Statement ::=
-      Expression "=" Expression ";"                         [strict(2)]
-    | Expression ";"                                        [strict]
+      Expression "=" Expression ";"                         [seqstrict(2)]
+    | Expression ";"                                        [seqstrict]
     | "if" "(" Expression ")" Statement "else" Statement    [avoid]
-    | "if" "(" Expression ")" Statement                     [strict(1)]
+    | "if" "(" Expression ")" Statement
     | "while" "(" Expression ")" Statement
-    | "return" Expression ";"                               [strict]
+    | "return" Expression ";"                               [seqstrict]
     | "return" ";"
     | ";"
     | Block
@@ -43,45 +43,45 @@ module KERNELC-SYNTAX
     | Id
     | "(" Expression ")"                                [bracket]
     //| Expression "." Id
-    | Expression "->" Id                                [strict(1)]
-    | Id "(" Expressions ")"                            [strict(2)]
+    | Expression "->" Id
+    | Id "(" Expressions ")"                            [seqstrict(2)]
     //| Expression "[" Expression "]"
-    > "-" Expression                                    [strict]
-    | "+" Expression                                    [strict]
-    | "!" Expression                                    [strict]
-    | "~" Expression                                    [strict]
-    | "*" Expression                                    [strict]
+    > "-" Expression                                    [seqstrict]
+    | "+" Expression                                    [seqstrict]
+    | "!" Expression                                    [seqstrict]
+    | "~" Expression                                    [seqstrict]
+    | "*" Expression                                    [seqstrict]
     | "&" Expression
     | "sizeof" "(" Type ")"
-    > "(" Type ")" Expression                           [strict(2)]
+    > "(" Type ")" Expression                           [seqstrict(2)]
     > left:
-      Expression "*" Expression                         [strict]
-    | Expression "/" Expression                         [strict]
-    | Expression "%" Expression                         [strict]
+      Expression "*" Expression                         [seqstrict]
+    | Expression "/" Expression                         [seqstrict]
+    | Expression "%" Expression                         [seqstrict]
     > left:
-      Expression "+" Expression                         [strict]
-    | Expression "-" Expression                         [strict]
+      Expression "+" Expression                         [seqstrict]
+    | Expression "-" Expression                         [seqstrict]
     > left:
-      Expression "<<" Expression                        [strict]
-    | Expression ">>" Expression                        [strict]
+      Expression "<<" Expression                        [seqstrict]
+    | Expression ">>" Expression                        [seqstrict]
     > left:
-      Expression "<"  Expression                        [strict]
-    | Expression "<=" Expression                        [strict]
-    | Expression ">"  Expression                        [strict]
-    | Expression ">=" Expression                        [strict]
+      Expression "<"  Expression                        [seqstrict]
+    | Expression "<=" Expression                        [seqstrict]
+    | Expression ">"  Expression                        [seqstrict]
+    | Expression ">=" Expression                        [seqstrict]
     > left:
-      Expression "==" Expression                        [strict]
-    | Expression "!=" Expression                        [strict]
-    > left: Expression "&" Expression                   [strict]
-    > left: Expression "^" Expression                   [strict]
-    > left: Expression "|" Expression                   [strict]
-    > left: Expression "&&" Expression                  [prefer, strict(1)]
-    > left: Expression "||" Expression                  [strict(1)]
-    > right: Expression "?" Expression ":" Expression   [strict(1)]
+      Expression "==" Expression                        [seqstrict]
+    | Expression "!=" Expression                        [seqstrict]
+    > left: Expression "&" Expression                   [seqstrict]
+    > left: Expression "^" Expression                   [seqstrict]
+    > left: Expression "|" Expression                   [seqstrict]
+    > left: Expression "&&" Expression                  [prefer, seqstrict(1)]
+    > left: Expression "||" Expression                  [seqstrict(1)]
+    > right: Expression "?" Expression ":" Expression
   syntax Constant ::= Int
                     | "NULL"
                     | String
-  syntax Expressions ::= List{Expression, ","}          [strict]
+  syntax Expressions ::= List{Expression, ","}          [seqstrict]
 
   syntax Id ::= "main"
               | "malloc"
@@ -103,8 +103,8 @@ module KERNELC-SYNTAX
    * Verification specific stuff
    */
   syntax Statement ::= "breakpoint"
-  syntax Id ::= "find" | "insert" | "delete" | "new_node" | "find_min"
-  syntax Id ::= "treeNode" | "value" | "left" | "right"
-  syntax Id ::= "x" | "y" | "z" | "t" | "u" | "v" | "node" | "temp" | "min"
+  syntax Id ::= "find" | "insert" | "delete" | "new_node" | "find_min" | "max" | "update_height" | "left_rotate" | "right_rotate" | "balance"
+  syntax Id ::= "treeNode" | "node" | "value" | "height" | "left" | "right"
+  syntax Id ::= "a" | "b" | "c" | "x" | "y" | "z" | "t" | "u" | "v" | "temp" | "min"
 endmodule
 

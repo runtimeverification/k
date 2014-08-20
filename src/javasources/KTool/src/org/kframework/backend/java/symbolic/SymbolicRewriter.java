@@ -408,6 +408,7 @@ public class SymbolicRewriter {
                 continue;
             }
             constraint.addAll(rule.ensures());
+            constraint.simplify();
 
             /* rename rule variables in the constraints */
             Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
@@ -421,6 +422,12 @@ public class SymbolicRewriter {
             result = result.evaluate(constrainedTerm.termContext());
             /* eliminate anonymous variables */
             constraint.eliminateAnonymousVariables(constrainedTerm.variableSet());
+
+            // TODO(AndreiS): move these some other place
+            constraint.simplify();
+            constraint.expandPatterns(true);
+            constraint.simplify();
+            result = result.expandPatterns(constraint, true, constrainedTerm.termContext());
 
             /* return first solution */
             return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());
@@ -632,6 +639,14 @@ public class SymbolicRewriter {
         Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
         List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
         List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
+
+        initialTerm = new ConstrainedTerm(
+                initialTerm.term().expandPatterns(
+                        initialTerm.constraint(),
+                        true,
+                        initialTerm.termContext()),
+                initialTerm.constraint(),
+                initialTerm.termContext());
 
         visited.add(initialTerm);
         queue.add(initialTerm);
