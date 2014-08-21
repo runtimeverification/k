@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function mirrors the structure of a binary tree.
  */
@@ -31,4 +32,3 @@ void mirror(struct treeNode *t)
 
 
 //@ var T : Tree
-

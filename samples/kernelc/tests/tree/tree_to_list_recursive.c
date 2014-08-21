@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that recursively transforms a binary tree into a singly linked list.
  * When freeing each tree node, it also prints its value.
@@ -44,4 +45,3 @@ struct listNode* tree_to_list_recursive(struct treeNode *t, struct listNode *l)
 
 //@ var A : Seq
 //@ var T : Tree
-

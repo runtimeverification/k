@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+    <test
+            definition="kernelc.k"
+            programs="."
+            results="."
+            extension="c"
+            >
+        <kompile-option name="--backend" value="java" />
+        <program name="height.c">
+          <krun-option name="--prove" value="tests/tree/height_spec.k" />
+        </program>
+        <program name="size.c">
+          <krun-option name="--prove" value="tests/tree/size_spec.k" />
+        </program>
+    </test>
+
+</tests>
