@@ -1,21 +1,33 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.base.Joiner;
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.SMTLibTerm;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Production;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Production;
 
 
 public class KILtoSMTLib extends CopyOnWriteTransformer {
@@ -29,6 +41,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.of("Set"),
             Sort.of("Seq"));
     public static final ImmutableSet<String> SMTLIB_BUILTIN_FUNCTIONS = ImmutableSet.of(
+            "forall",
+            "exists",
             /* core theory */
             "not",
             "and",
@@ -89,7 +103,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     public static String translateConstraint(SymbolicConstraint constraint) {
         KILtoSMTLib transformer = new KILtoSMTLib(true);
         String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
-        return getSortAndFunctionDeclarations(constraint.termContext().definition())
+        return getSortAndFunctionDeclarations(constraint.termContext().definition(), transformer.variables())
              + getAxioms(constraint.termContext().definition())
              + getConstantDeclarations(transformer.variables())
              + "(assert " + expression + ")";
@@ -103,7 +117,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
         String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
         StringBuilder sb = new StringBuilder();
-        sb.append(getSortAndFunctionDeclarations(leftHandSide.termContext().definition()));
+        sb.append(getSortAndFunctionDeclarations(
+                leftHandSide.termContext().definition(),
+                Sets.union(leftTransformer.variables(), rightTransformer.variables())));
         sb.append(getAxioms(leftHandSide.termContext().definition()));
         sb.append(getConstantDeclarations(leftTransformer.variables()));
         sb.append("(assert (and ");
@@ -125,7 +141,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getSortAndFunctionDeclarations(Definition definition) {
+    private static String getSortAndFunctionDeclarations(Definition definition, Set<Variable> variables) {
         Set<Sort> sorts = new HashSet<>();
         List<Production> functions = new ArrayList<>();
         for (Production production : definition.context().productions) {
@@ -138,9 +154,13 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 }
             }
         }
-        //if (!Sets.intersection(sorts, RESERVED_Z3_SORTS).isEmpty()) {
-        //
-        //}
+        for (Variable variable : variables) {
+            sorts.add(variable.sort());
+        }
+
+        if (!Sets.intersection(sorts, RESERVED_Z3_SORTS).isEmpty()) {
+            throw new UnsupportedOperationException("do not use sorts " + RESERVED_Z3_SORTS);
+        }
 
         StringBuilder sb = new StringBuilder();
 
@@ -357,9 +377,6 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Variable variable) {
-        //if (.contains(variable.sort())) {
-        //    throw new UnsupportedOperationException("unexpected variable " + variable);
-        //}
         variables.add(variable);
         return new SMTLibTerm(variable.name());
     }
