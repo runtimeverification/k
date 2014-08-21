@@ -15,6 +15,9 @@
         <program name="size.c">
           <krun-option name="--prove" value="tests/tree/size_spec.k" />
         </program>
+        <program name="find.c">
+          <krun-option name="--prove" value="tests/tree/find_spec.k" />
+        </program>
     </test>
 
 </tests>

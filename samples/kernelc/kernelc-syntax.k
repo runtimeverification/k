@@ -106,7 +106,7 @@ module KERNELC-SYNTAX
   syntax Id ::= "find" | "insert" | "delete" | "new_node" | "find_min" | "max" | "update_height"
               | "left_rotate" | "right_rotate" | "balance"
               | "head" | "tail" | "add" | "swap" | "deallocate" | "length_recursive" | "sum_recursive" | "reverse"
-              | "height" | "compute_size"
+              | "height" | "compute_size" | "mirror" | "inorder" | "preorder" | "postorder"
   syntax Id ::= "listNode" | "val" | "next"
   syntax Id ::= "treeNode" | "node" | "value" | "left" | "right"
   syntax Id ::= "a" | "b" | "c" | "x" | "y" | "z" | "t" | "u" | "v" | "p" | "temp" | "min"
