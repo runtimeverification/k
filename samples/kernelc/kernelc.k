@@ -1,4 +1,5 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
+require "modules/verification_lemmas.k"
 require "kernelc-syntax.k"
 require "kernelc-semantics.k"
 require "patterns/list_pattern.k"
@@ -9,6 +10,7 @@ module KERNELC
   imports KERNELC-SEMANTICS
   imports LIST-PATTERN
   imports TREE-PATTERN
+  imports VERIFICATION_LEMMAS
 
   /*
    * KernelC configuration

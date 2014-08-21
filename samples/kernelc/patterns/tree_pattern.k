@@ -47,6 +47,10 @@ module TREE-PATTERN
   rule tree_height(node(I:Int, TL:Tree, TR:Tree))
     => 1 +Int maxInt(tree_height(TL), tree_height(TR))
   rule tree_height(leaf) => 0
+  syntax Int ::= "tree_size" "(" Tree ")"       [function]
+  rule tree_size(node(_:Int, TL:Tree, TR:Tree))
+    => 1 +Int tree_size(TL) +Int tree_size(TR)
+  rule tree_size(leaf) => 0
 
   syntax Map ::= "tree" "(" Pointer ")" "(" Tree ")"    [pattern(1)]
   rule tree(object(P:Int))(node(I:Int, TL:Tree, TR:Tree))
@@ -85,5 +89,12 @@ module TREE-PATTERN
   rule avl(leaf) => true
 
   rule tree_height(T:Tree) >=Int 0 => true    [smt-lemma]
-endmodule
 
+  // TODO(YilongL): should probably go somewhere else; needs a better name...
+  syntax Int ::= bool2Int(Bool)                 [function, smtlib(smt_bool2int)]
+  rule bool2Int(true) => 1
+  rule bool2Int(false) => 0
+  rule bool2Int(B) =/=K 0 => bool2Int(B) ==K 1          [lemma]
+  rule bool2Int(B) =/=K 1 => bool2Int(B) ==K 0          [lemma]
+
+endmodule
