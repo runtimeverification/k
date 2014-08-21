@@ -27,6 +27,9 @@
         <program name="length_recursive.c">
           <krun-option name="--prove" value="tests/list/length_recursive_spec.k" />
         </program>
+        <program name="reverse.c">
+          <krun-option name="--prove" value="tests/list/reverse_spec.k" />
+        </program>
     </test>
 
 </tests>
