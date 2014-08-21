@@ -83,5 +83,7 @@ module TREE-PATTERN
        andBool absInt(tree_height(TL) -Int tree_height(TR)) <=Int 1
        andBool avl(TL) andBool avl(TR)
   rule avl(leaf) => true
+
+  rule tree_height(T:Tree) >=Int 0 => true    [smt-lemma]
 endmodule
 
