@@ -597,7 +597,7 @@ List<KLabelConstant> KLabels() :
 
 <REGEX_STATE> TOKEN:
 {
-  <ID: ["a"-"z", "A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*>
+  <ID: ["A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*>
 | <REGEX_STRING: <STRING>> { matchedToken.kind = STRING; }
 | "(" { matchedToken.kind = LPAREN; }
 | ")" { matchedToken.kind = RPAREN; }
@@ -614,7 +614,11 @@ List<KLabelConstant> KLabels() :
 
 /** Parses a complete RegEx and returns it as a String */
 String RegEx(StringBuilder follow): { StringBuilder reg = new StringBuilder(); }
-{ (Element(reg, follow))+ { return reg.toString(); } }
+{ (Element(reg, follow))+ {
+    String regEx = reg.toString();
+    if (!regEx.endsWith("*") && !regEx.endsWith("+") && !regEx.endsWith("?"))
+        follow.setLength(0);
+    return reg.toString(); } }
 
 /** Parses a single RegEx Element and appends it to 'sb' */
 void Element(StringBuilder reg, StringBuilder follow) :
@@ -629,18 +633,18 @@ void Element(StringBuilder reg, StringBuilder follow) :
 /** Parses a single RegEx BasicElement and appends it to 'sb' */
 void BasicElement(StringBuilder sb, StringBuilder follow) : {}
 {
-( <STRING>  { sb.append(specialAndImage()); }
-| <ID>      { sb.append(specialAndImage()); }
-| Group(sb)
+( <STRING>  { sb.append(specialAndImage()); follow.setLength(0); }
+| <ID>      { sb.append(specialAndImage()+"Dz"); follow.setLength(0); }
+| Group(sb, REGEX_STATE) { follow.append(sb); }
 | "{"       { sb.append(specialAndImage()); }
   Element(sb, follow)
   <STRING>  { sb.append(specialAndImage()); }
   "}" { sb.append(specialAndImage()); }
-  (("+" | "*") { sb.append(specialAndImage()); })
+  (("+" | "*") { sb.append(specialAndImage()); follow.setLength(0); })
 | "("       { sb.append(specialAndImage()); }
   (Element(sb, follow))*
-  ")"       { sb.append(specialAndImage()); }
-) ({ follow.setLength(0); } ("+" | "*" | "?" ) { follow.append(sb); sb.append(specialAndImage()); })*
+  ")"       { sb.append(specialAndImage()); follow.setLength(0); }
+) (("+" | "*" | "?" ) { sb.append(specialAndImage()); })*
 }
 
 /*** RegEx Character Groups */
@@ -664,11 +668,11 @@ void BasicElement(StringBuilder sb, StringBuilder follow) : {}
 }
 
 /** Parses a single character group and appends it to 'sb' */
-void Group(StringBuilder sb) : {}
+void Group(StringBuilder sb, int state) : {}
 {
-  "~"      { sb.append(specialAndImage()); } Group(sb)
+  "~"      { sb.append(specialAndImage()); } Group(sb, state)
 | "["      { sb.append(specialAndImage()); SwitchTo(GROUP_STATE); }
-  (<GROUP> { sb.append(specialAndImage()); })? { SwitchTo(REGEX_STATE); }
+  (<GROUP> { sb.append(specialAndImage()); })? { SwitchTo(state); }
   "]"      { sb.append(specialAndImage()); }
 }
 
@@ -795,7 +799,7 @@ void Sentence(Module module) :
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*
       { syn.setPriorityBlocks(pblocks); }
     | Attributes(syn)
-    | "-/-" Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
+    | "-/-" Group(sb, DEFAULT) ("." { sb.append(specialAndImage()); } Group(sb, DEFAULT))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
           new NonTerminal(syn.getDeclaredSort().getRealSort()), null, sb.toString()))); return; } )?
     { module.appendModuleItem(markLoc(loc, syn)); }
@@ -811,7 +815,7 @@ void Sentence(Module module) :
     { module.appendModuleItem(markLoc(loc, new PriorityExtendedAssoc(type, list))); }
   
   | type = String() "-/-"
-      Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
+      Group(sb, DEFAULT) ("." { sb.append(specialAndImage()); } Group(sb, DEFAULT))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
           null, new Terminal(type), sb.toString()))); }
   )
