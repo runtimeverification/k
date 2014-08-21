@@ -168,7 +168,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                                     else if (t.getTerminal().equals("!"))
                                         sdf.append("ExclamationMarkDz ");
                                     else
-                                        sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
+                                        sdf.append(t.toString() + " ");
                                 } else
                                     sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
                             } else if (itm instanceof NonTerminal) {

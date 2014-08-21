@@ -17,12 +17,15 @@ public class StringUtil {
      * of characters like "\n" into the newline character.
      */
     public static String unquoteCString(String str) {
+        return unquoteCString(str, '"');
+    }
+    public static String unquoteCString(String str, char delimiter) {
         StringBuilder sb = new StringBuilder();
-        if (str.charAt(0) != '"') {
-            throw new IllegalArgumentException("Expected to find double quote at the beginning of string: " + str);
+        if (str.charAt(0) != delimiter) {
+            throw new IllegalArgumentException("Expected to find " + delimiter + " at the beginning of string: " + str);
         }
-        if (str.charAt(str.length() - 1) != '"') {
-            throw new IllegalArgumentException("Expected to find double quote at the end of string: " + str);
+        if (str.charAt(str.length() - 1) != delimiter) {
+            throw new IllegalArgumentException("Expected to find " + delimiter + " at the end of string: " + str);
         }
         for (int i = 1; i < str.length() - 1; i++) {
             if (str.charAt(i) > 0xFF)
@@ -38,8 +41,8 @@ public class StringUtil {
                     sb.append('\t');
                 else if (str.charAt(i + 1) == 'f')
                     sb.append('\f');
-                else if (str.charAt(i + 1) == '"')
-                    sb.append('"');
+                else if (str.charAt(i + 1) == delimiter)
+                    sb.append(delimiter);
                 else if (str.charAt(i + 1) >= '0' && str.charAt(i + 1) <= '9') {
                     // found an octal value
                     int a2 = str.charAt(i + 1) - '0';
@@ -72,15 +75,18 @@ public class StringUtil {
      * the textual representation (ex: newline becomes "\n").
      */
     public static String enquoteCString(String value) {
+        return enquoteCString(value, '"');
+    }
+    public static String enquoteCString(String value, char delimiter) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
-        result.append("\"");
+        result.append(delimiter);
         for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
             codepoint = value.codePointAt(offset);
             if (codepoint > 0xFF) {
                 throw new IllegalArgumentException("Unicode characters not supported here:" + value);
-            } else if (codepoint == '"') {
-                result.append("\\\"");
+            } else if (codepoint == delimiter) {
+                result.append("\\" + delimiter);
             } else if (codepoint == '\\') {
                 result.append("\\\\");
             } else if (codepoint == '\n') {
@@ -98,7 +104,7 @@ public class StringUtil {
                 result.append(String.format("%03o", codepoint));
             }
         }
-        result.append("\"");
+        result.append(delimiter);
         return result.toString();
     }
 

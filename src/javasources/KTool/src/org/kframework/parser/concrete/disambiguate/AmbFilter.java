@@ -4,6 +4,13 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.BoolBuiltin;
+import org.kframework.kil.FloatBuiltin;
+import org.kframework.kil.GenericToken;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KApp;
+import org.kframework.kil.Sort;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
@@ -28,6 +35,22 @@ public class AmbFilter extends ParseForestTransformer {
                 TermCons tc = (TermCons) amb.getContents().get(i);
                 msg += tc.getProduction().getSort() + " ::= ";
                 msg += tc.getProduction().toString();
+            } else if (amb.getContents().get(i) instanceof KApp) {
+                // TODO: RaduM. For the new parser this will be a class called Constant which
+                // points exactly to the production that generates the constant
+                KApp kApp = (KApp) amb.getContents().get(i);
+                if (kApp.getLabel() instanceof GenericToken) {
+                    GenericToken gt = (GenericToken) kApp.getLabel();
+                    msg += "Constant of type " + gt.tokenSort();
+                } else if (kApp.getLabel() instanceof StringBuiltin) {
+                    msg += "Constant of type " + Sort.BUILTIN_STRING;
+                } else if (kApp.getLabel() instanceof BoolBuiltin) {
+                    msg += "Constant of type " + Sort.BUILTIN_BOOL;
+                } else if (kApp.getLabel() instanceof FloatBuiltin) {
+                    msg += "Constant of type " + Sort.BUILTIN_FLOAT;
+                } else if (kApp.getLabel() instanceof IntBuiltin) {
+                    msg += "Constant of type " + Sort.BUILTIN_INT;
+                }
             }
             UnparserFilter unparserFilter = new UnparserFilter(context);
             unparserFilter.visitNode(amb.getContents().get(i));
