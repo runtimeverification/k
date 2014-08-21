@@ -155,7 +155,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                             ProductionItem itm = items.get(i);
                             if (itm instanceof Terminal) {
                                 Terminal t = (Terminal) itm;
-                                sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
+                                sdf.append(t.toString() + " ");
                             } else if (itm instanceof NonTerminal) {
                                 NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort

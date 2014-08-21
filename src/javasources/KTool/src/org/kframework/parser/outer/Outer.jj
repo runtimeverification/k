@@ -444,6 +444,8 @@ PARSER_END(Outer)
 
 | <STRING: "\"" (~["\"", "\\", "\n"] |
                  "\\\"" | "\\n" | "\\r" | "\\t" | "\\\\")* "\"">
+| <STRING_CASE_INSENSITIVE: "\'" (~["\'", "\\", "\n"] |
+                 "\\\'" | "\\n" | "\\r" | "\\t" | "\\\\")* "\'">
 
 | <LPAREN: "(">
 | <RPAREN: ")">
@@ -488,6 +490,14 @@ String String() : {}
   {
     String s = image();
     return StringUtil.unquoteCString(s);
+  }
+}
+String StringCaseInsensitive() : {}
+{
+  <STRING_CASE_INSENSITIVE>
+  {
+    String s = image();
+    return StringUtil.unquoteCString(s, '\'');
   }
 }
 
@@ -870,6 +880,7 @@ void ProductionItem(List<ProductionItem> items) :
   StringBuilder follow = new StringBuilder(); boolean isToken = false; }
 {
   str = String() { items.add(tokenLoc(new Terminal(str))); }
+| str = StringCaseInsensitive() { items.add(tokenLoc(new Terminal(str, true))); }
 | nonTerminal = SimpleSortID() { items.add(nonTerminal); }
 | "List"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"

@@ -2,11 +2,20 @@
 package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.StringUtil;
 
 /** A terminal in a {@link Production}. */
 public class Terminal extends ProductionItem {
 
     private String terminal;
+
+    private boolean caseInsensitive = false;
+
+    public Terminal(String terminal, boolean caseInsensitive) {
+        super();
+        this.terminal = terminal;
+        this.caseInsensitive = caseInsensitive;
+    }
 
     public Terminal(String terminal) {
         super();
@@ -16,6 +25,7 @@ public class Terminal extends ProductionItem {
     public Terminal(Terminal terminal) {
         super(terminal);
         this.terminal = terminal.terminal;
+        this.caseInsensitive = terminal.caseInsensitive;
     }
 
     public void setTerminal(String terminal) {
@@ -28,7 +38,7 @@ public class Terminal extends ProductionItem {
 
     @Override
     public String toString() {
-        return "\"" + terminal + "\"";
+        return StringUtil.enquoteCString(terminal, caseInsensitive ? '\'' : '"');
     }
 
     @Override
@@ -60,5 +70,13 @@ public class Terminal extends ProductionItem {
     @Override
     public Terminal shallowCopy() {
         return new Terminal(this);
+    }
+
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        this.caseInsensitive = caseInsensitive;
     }
 }

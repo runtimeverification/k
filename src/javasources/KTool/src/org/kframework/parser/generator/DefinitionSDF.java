@@ -147,7 +147,7 @@ public class DefinitionSDF {
                         else if (t.getTerminal().equals("!"))
                             sdf.append("ExclamationMarkDz ");
                         else
-                            sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
+                            sdf.append(t.toString() + " ");
                     } else if (itm instanceof NonTerminal) {
                         NonTerminal srt = (NonTerminal) itm;
                         // if we are on the first or last place and this sort is not a list, just print the sort
@@ -242,8 +242,8 @@ public class DefinitionSDF {
         sdf.append("\n\n");
 
         sdf.append("\n%% terminals reject\n");
-        for (String t : terminals.terminals) {
-            if (t.matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
+        for (Terminal t : terminals.terminals) {
+            if (t.getTerminal().matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
                 sdf.append("    \"" + t + "\" -> VARID {reject}\n");
             }
         }
@@ -273,16 +273,16 @@ public class DefinitionSDF {
                 // reject all terminals that match the regular expression of the lexical production
                 if (p.containsAttribute("regex")) {
                     Pattern pat = Pattern.compile(p.getAttribute("regex"));
-                    for (String t : terminals.terminals) {
-                        Matcher m = pat.matcher(t);
+                    for (Terminal t : terminals.terminals) {
+                        Matcher m = pat.matcher(t.getTerminal());
                         if (m.matches())
-                            sdf.append("    " + StringUtil.enquoteCString(t) + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
+                            sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
                     }
                 } else {
                     // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
                     // add rejects for all possible combinations
-                    for (String t : terminals.terminals) {
-                        sdf.append("    " + StringUtil.enquoteCString(t) + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
+                    for (Terminal t : terminals.terminals) {
+                        sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
                     }
                 }
             }
