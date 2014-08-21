@@ -9,17 +9,21 @@ module LIST-PATTERN
   syntax Seq ::= Seq "@" Seq      [function]
                | rev(Seq)         [function]
   syntax Int ::= len(Seq)         [function]
+               | sum(Seq)         [function]
   rule (E::L1) @ L2 => E::(L1 @ L2)
   rule [] @ L => L
   rule rev(E::L) => rev(L) @ E::[]
   rule rev([]) => []
   rule len(E::L) => 1 +Int len(L)
   rule len([]) => 0
+  rule sum(E::L) => E +Int sum(L)
+  rule sum([]) => 0
 
   /* lemmas */
   rule L @ [] => L                                [lemma]
   rule (L1 @ (E :: [])) @ L2 => L1 @ (E :: L2)    [lemma]
 
+  /* list pattern */
   syntax Map ::= "list" "(" Pointer ")" "(" Seq ")"   [pattern(1)]
   rule
     list(object(P:Int))(E:Int::L:Seq)
