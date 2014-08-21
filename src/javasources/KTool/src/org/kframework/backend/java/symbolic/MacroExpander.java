@@ -89,9 +89,7 @@ public class MacroExpander extends TermTransformer {
                 processedRhsOfWriteCell,
                 rule.cellsToCopy(),
                 rule.instructions(),
-                rule.getAttributes(),
-                rule.getLocation(),
-                rule.getSource(),
+                rule,
                 definition);
     }
 

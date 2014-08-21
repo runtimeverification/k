@@ -219,7 +219,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     public Void visit(Attributes attributes, Void _) {
         prepare(attributes);
         if (!attributes.isEmpty()) {
-            Iterator<Attribute> iter = attributes.values().iterator();
+            Iterator<Attribute<?>> iter = attributes.values().iterator();
             for (int i = 0; i < attributes.size(); ++i) {
                 this.visitNode(iter.next());
                 if (i != attributes.size() - 1) {
@@ -233,10 +233,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     @Override
     public Void visit(Attribute attribute, Void _) {
         prepare(attribute);
-        indenter.write(attribute.getKey());
-        if (!attribute.getValue().equals("")) {
-            indenter.write("(" + attribute.getValue() + ")");
-        }
+        indenter.write(attribute.toString());
         return postpare();
     }
 

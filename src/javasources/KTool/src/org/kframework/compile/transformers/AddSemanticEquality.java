@@ -43,7 +43,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-        Set<Production> eqProds = node.getSyntaxByTag(Attribute.EQUALITY.getKey(), context);
+        Set<Production> eqProds = node.getSyntaxByTag(Attribute.EQUALITY_KEY, context);
         for (Production prod : eqProds)
             /*
              * operators tagged with "equality" must have the signature

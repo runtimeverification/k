@@ -141,11 +141,11 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return Associativity.RIGHT;
                 }
             }
-            if (p.getAttributes().containsKey("left"))
+            if (p.containsAttribute("left"))
                 return Associativity.LEFT;
-            if (p.getAttributes().containsKey("right"))
+            if (p.containsAttribute("right"))
                 return Associativity.RIGHT;
-            if (p.getAttributes().containsKey("non-assoc"))
+            if (p.containsAttribute("non-assoc"))
                 return Associativity.NONASSOC;
         /*    if (p.getArity() == 2) {
                 boolean leftAssociate = context.isSubsortedEq(p.getChildSort(0), p.getSort());

@@ -73,7 +73,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
         List<ProductionItem> pis = new ArrayList<>();
         pis.add(new Terminal(node.getKLabel()));
         node.setItems(pis);
-        attrs.add(new Attribute("arity", arity));
+        attrs.add(Attribute.of("arity", arity));
         node.setAttributes(attrs);
         node.setSort(Sort.KLABEL);
         return node;

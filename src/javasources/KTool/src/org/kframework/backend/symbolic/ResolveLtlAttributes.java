@@ -54,7 +54,7 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule rule, Void _)  {
-        if (rule.getAttributes().containsKey(LTL)) {
+        if (rule.containsAttribute(LTL)) {
             Term body = rule.getBody();
             if (body instanceof Rewrite) {
                 // search the LTL state

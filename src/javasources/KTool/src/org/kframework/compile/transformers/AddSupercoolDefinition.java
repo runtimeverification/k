@@ -80,10 +80,7 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
                 KApp.of(KLabelConstant.COOL_KLABEL, rewrite.getRight()),
                 context);
         Rule superCoolNode = node.shallowCopy();
-        final Attributes attrs = new Attributes();
-        attrs.putAll(node.getAttributes());
-        attrs.remove("cool");
-        superCoolNode.setAttributes(attrs);
+        superCoolNode.removeAttribute("cool");
 
         superCoolNode.setBody(rewrite);
         superCools.add(superCoolNode);

@@ -6,8 +6,6 @@ import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.parser.outer.Outer;
-import org.kframework.parser.outer.ParseException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.*;
@@ -80,34 +78,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             final String strictType;
-            Attribute allStrictAttr;
             if (!isSeq) {
                 strictType = STRICT;
-                allStrictAttr = prod.getAttributes().get(strictType);
             } else {
                 strictType = SEQSTRICT;
-                allStrictAttr = prod.getAttributes().get(strictType);
             }
-            String attribute = allStrictAttr.getValue();
-            String allStrictAttrKey = allStrictAttr.getKey();
-            String strictCell;
-            if (allStrictAttrKey.length() == strictType.length()) {
-                strictCell = DEFAULT_STRICTNESS_CELL;
-            } else {
-                if (allStrictAttrKey.charAt(strictType.length()) != '<' ||
-                        allStrictAttrKey.charAt(allStrictAttrKey.length()-1) != '>') {
-                    GlobalSettings.kem.registerCompilerError(
-                            "Expecting attribute " + strictType + "<cell>, but got " + allStrictAttrKey,
-                            this, prod);
-                }
-                strictCell = allStrictAttrKey.substring(1 + strictType.length(), allStrictAttrKey.length() - 1);
-            }
-            Attribute strictCellAttr = new Attribute(Attribute.CELL_KEY, strictCell);
+            String attribute = prod.getAttribute(strictType);
+            String strictCell = DEFAULT_STRICTNESS_CELL;
 
-            Attributes strictAttrs = null;
-            if (attribute.isEmpty()) {
-                attribute = ALL;
-            }
+            String[] strictAttrs = null;
 
             if (prod.getSort().equals(Sort.KLABEL)) {
                 assert attribute.equals(ALL) && strictCell.equals(DEFAULT_STRICTNESS_CELL) :
@@ -116,94 +95,26 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 continue;
             }
 
-            try {
-                strictAttrs = Outer.parseAttributes(attribute, prod.getSource());
-            } catch (ParseException e) {
-                GlobalSettings.kem.registerCompilerError(
-                        "Strictness attributes " + attribute + " could not be parsed." +
-                                "Parse error: " + e.getMessage(),
-                        this, e, prod);
-            }
-            for (Attribute strictAttr : strictAttrs.values()) {
-                Attributes strictAttrAttrs = null;
-                String strictAttrValue = strictAttr.getValue();
-                if (strictAttrValue.isEmpty()) strictAttrAttrs = new Attributes();
-                else {
-                    try {
-                        strictAttrAttrs = Outer.parseAttributes(strictAttrValue, prod.getSource());
-                    } catch (ParseException e) {
-                        GlobalSettings.kem.registerCompilerError(
-                                "Strictness attributes could not be parsed for " + strictAttrValue + "." +
-                                        "Parse error: " + e.getMessage(),
-                                this, e, prod);
-                    }
+            List<Integer> strictnessPositions = new ArrayList<>();
+            if (attribute.isEmpty()) {
+                for (int i = 1; i <= prod.getArity(); i++) {
+                    strictnessPositions.add(i);
                 }
-                strictAttr.setAttributes(strictAttrAttrs);
-            }
-            List<Attribute> newStrictAttrs = new ArrayList<>();
-            java.util.Map<Integer,Integer> strictPositions = new HashMap<>();
-            for (Attribute strictAttr : strictAttrs.values()) {
-                boolean other = false;
-                String strictAttrKey = strictAttr.getKey();
-                String strictAttrValue = strictAttr.getValue();
-                if (strictAttrKey.equals(ALL)) {
-                    for (Attribute newStrictAttr :  newStrictAttrs) {
-                        newStrictAttr.getAttributes().putAll(strictAttr.getAttributes());
-                        newStrictAttr.setSource(strictAttr.getSource());
-                        newStrictAttr.setLocation(strictAttr.getLocation());
-                    }
-                    other = true;
-                } else if (strictAttrKey.equals(OTHER)) {
-                    other = true;
-                } else {
-                    int i = 0;
+            } else {
+                strictAttrs = attribute.split(",");
+                for (String strictAttr : strictAttrs) {
                     try {
-                        i = Integer.parseInt(strictAttrKey);
+                        strictnessPositions.add(Integer.parseInt(strictAttr.trim()));
                     } catch (NumberFormatException e) {
                         GlobalSettings.kem.registerCompilerError(
-                                "Expecting " + ALL + ", " + OTHER + ", or a number, but found " + strictAttrKey + " as a" +
-                                        " strict position in " + strictAttrValue,
-                                this, e, prod);
-                    }
-                    if (i <= 0 || i > prod.getArity()) {
-                        GlobalSettings.kem.registerCompilerError(
-                                "Expecting a number between 1 and " + prod.getArity() + ", but found " + strictAttrKey + " as a" +
-                                        " strict position in " + strictAttrValue,
+                                "Expecting a number between 1 and " + prod.getArity() + ", but found " + strictAttr + " as a" +
+                                        " strict position in " + strictAttrs,
                                 this, prod);
-                    }
-                    if (!strictPositions.containsKey(i)) {
-                        strictPositions.put(i, newStrictAttrs.size());
-                        Attribute newStrictAttr = strictAttr.shallowCopy();
-                        newStrictAttr.setAttributes(new Attributes());
-                        newStrictAttr.getAttributes().add(strictCellAttr);
-                        newStrictAttr.getAttributes().putAll(strictAttr.getAttributes());
-                        newStrictAttr.setSource(strictAttr.getSource());
-                        newStrictAttr.setLocation(strictAttr.getLocation());
-                        newStrictAttrs.add(strictAttr);
-                    } else {
-                        newStrictAttrs.get(strictPositions.get(i)).getAttributes().putAll(strictAttr.getAttributes());
-                        newStrictAttrs.get(strictPositions.get(i)).setSource(strictAttr.getSource());
-                        newStrictAttrs.get(strictPositions.get(i)).setLocation(strictAttr.getLocation());
-                    }
-                }
-                if (other) {
-                    for (int i = 1; i <= prod.getArity(); ++i) {
-                        if (!strictPositions.containsKey(i)) {
-                            strictPositions.put(i,newStrictAttrs.size());
-                            Attribute newStrictAttr = new Attribute(Integer.toString(i), strictAttrValue);
-                            newStrictAttr.setAttributes(new Attributes());
-                            newStrictAttr.getAttributes().add(strictCellAttr);
-                            newStrictAttr.getAttributes().putAll(strictAttr.getAttributes());
-                            newStrictAttr.setSource(strictAttr.getSource());
-                            newStrictAttr.setLocation(strictAttr.getLocation());
-                            newStrictAttrs.add(newStrictAttr);
-                        }
                     }
                 }
             }
 
-            for (int i = 0; i < newStrictAttrs.size(); i++) {
-                Attribute newStrictAttr = newStrictAttrs.get(i);
+            for (int i = 0; i < strictnessPositions.size(); i++) {
                 TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
                 if (context.kompileOptions.experimental.legacyKast) {
                     for (int j = 0; j < prod.getArity(); ++j) {
@@ -212,77 +123,28 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 }
 
                 // insert HOLE instead of the term
-                termCons.getContents().set(-1 + Integer.parseInt(newStrictAttr.getKey()),
-                        getHoleTerm(newStrictAttr.getAttributes(), prod));
+                termCons.getContents().set(-1 + strictnessPositions.get(i),
+                        Hole.KITEM_HOLE);
 
                 // is seqstrict the elements before the argument should be KResult
-                KApp sideCond = null;
                 if (isSeq) {
                     for (int j = 0; j < i; ++j) {
-                        Term arg = termCons.getContents().get(-1 + Integer.parseInt(newStrictAttrs.get(j).getKey()));
+                        Term arg = termCons.getContents().get(-1 + strictnessPositions.get(j));
                         arg.setSort(Sort.KRESULT);
                     }
                 }
 
                 org.kframework.kil.Context ctx = new org.kframework.kil.Context();
                 ctx.setBody(termCons);
-                ctx.setAttributes(new Attributes());
-                ctx.getAttributes().putAll(prod.getAttributes());
+                ctx.copyAttributesFrom(prod);
                 ctx.setLocation(prod.getLocation());
                 ctx.setSource(prod.getSource());
-                String strictContext = newStrictAttr.getAttribute(CONTEXT);
-                if (strictContext != null) {
-                    Set<Production> productions = getStrictContextProductions(strictContext, prod);
-                    assert productions.size()==1 : "Expecting only one production for context " +
-                            strictContext + " but found " + productions.size() + ": " + productions;
-                    Production strictContextProd = productions.iterator().next();
-                    String strictContextProdAttribute = strictContextProd.getAttribute(CONTEXT);
-                    if (!strictContextProdAttribute.isEmpty()) {
-                        try {
-                            Attributes strictContextAttrs = Outer.parseAttributes(
-                                    strictContextProdAttribute, strictContextProd.getSource());
-                            ctx.getAttributes().putAll(strictContextAttrs);
-                        } catch (ParseException e) {
-                            GlobalSettings.kem.registerCompilerError(
-                                "Context attributes could not be parsed for " + strictContextProdAttribute + ".\n" +
-                                        "Parse error: " + e.getMessage(),
-                                this, e, strictContextProd);
-                        }
-                    }
-                }
-                ctx.getAttributes().putAll(newStrictAttr.getAttributes());
-                if (sideCond != null)
-                    ctx.setRequires(sideCond);
+                ctx.addAttribute("cell", "k");
                 items.add(ctx);
             }
         }
 
         return node;
-    }
-
-    private Term getHoleTerm(Attributes strictnessAttributes, Production prod) {
-        Term hole;
-        Attribute strictType = null;
-        if (strictnessAttributes != null) {
-            strictType = strictnessAttributes.get(CONTEXT);
-        }
-        if (null == strictType) {
-            hole = Hole.KITEM_HOLE;
-        } else {
-            getStrictContextProductions(strictType.getValue(), prod);
-            hole = new Rewrite(Hole.KITEM_HOLE, KApp.of(KLabelConstant.of(strictType.getValue()), Hole.KITEM_HOLE),context);
-        }
-        return hole;
-    }
-
-    private Set<Production> getStrictContextProductions(String strictType, Production prod) {
-        Set<Production> productions = context.klabels.get(strictType);
-        if (productions == null) {
-            GlobalSettings.kem.registerCompilerError(
-                        "Strictness context label " + strictType + " does not correspond to any production.",
-                        this, prod);
-        }
-        return productions;
     }
 
     /* Add context KLabel(KList1 ,, HOLE ,, KList2).
@@ -294,23 +156,23 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         Variable variable = Variable.getFreshVar(Sort.KLIST);
         contents.add(variable);
         //second is a HOLE
-        contents.add(getHoleTerm(null, prod));
+        contents.add(Hole.KITEM_HOLE);
         //third argument is a variable of sort KList
         contents.add(Variable.getFreshVar(Sort.KLIST));
         KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
         //make a context from the TermCons
         org.kframework.kil.Context ctx = new org.kframework.kil.Context();
         ctx.setBody(kapp);
-        ctx.setAttributes(prod.getAttributes());
+        ctx.copyAttributesFrom(prod);
         ctx.setLocation(prod.getLocation());
         ctx.setSource(prod.getSource());
         if (isSeq) {
             //set the condition
             KApp condApp = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
             ctx.setRequires(condApp);
-            ctx.getAttributes().remove("seqstrict");
+            ctx.removeAttribute("seqstrict");
         } else {
-            ctx.getAttributes().remove("strict");
+            ctx.removeAttribute("strict");
         }
         //add the context
         items.add(ctx);

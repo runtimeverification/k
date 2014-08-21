@@ -224,7 +224,7 @@ public class XmlUnparseFilter extends BasicVisitor {
         if (!attributes.isEmpty()) {
             buffer.append(" ");
             buffer.append("[");
-            Iterator<Attribute> iter = attributes.values().iterator();
+            Iterator<Attribute<?>> iter = attributes.values().iterator();
             for (int i = 0; i < attributes.size(); ++i) {
                 this.visitNode(iter.next());
                 if (i != attributes.size() - 1) {
@@ -240,11 +240,7 @@ public class XmlUnparseFilter extends BasicVisitor {
     public Void visit(Attribute attribute, Void _) {
 
         prepare(attribute);
-        buffer.append(StringEscapeUtils.escapeXml(attribute.getKey()));
-        if (!attribute.getValue().equals("")) {
-            buffer.append("("
-                    + StringEscapeUtils.escapeXml(attribute.getValue()) + ")");
-        }
+        buffer.append(attribute.toString());
         return postpare();
     }
 

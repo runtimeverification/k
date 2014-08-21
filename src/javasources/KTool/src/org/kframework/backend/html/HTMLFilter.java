@@ -503,9 +503,9 @@ public class HTMLFilter extends BackendFilter {
             return null;
 
         // The latex and/or html attributes are processed in the HTMLPatternVisitor, not here.
-        if (entry.getKey().equals("latex"))
+        if (entry.getKey().equals(Attribute.keyOf("latex")))
             return null;
-        if (entry.getKey().equals("html")) {
+        if (entry.getKey().equals(Attribute.keyOf("html"))) {
             return null;
         }
 
@@ -516,8 +516,8 @@ public class HTMLFilter extends BackendFilter {
         } else {
             result.append(", ");
         }
-        result.append(makeGreek(entry.getKey()));
-        String value = makeGreek(entry.getValue());
+        result.append(makeGreek(Attribute.toString(entry.getKey())));
+        String value = makeGreek(entry.getValue().toString());
 
         if (!value.isEmpty())
             result.append("(" + value + ")");

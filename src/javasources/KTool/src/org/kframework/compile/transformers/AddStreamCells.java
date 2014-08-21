@@ -56,15 +56,15 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rule node, Void _)  {
         boolean isStream = false;
-        if (node.getAttributes().containsKey("stdin")) {
+        if (node.containsAttribute("stdin")) {
             isStream = true;
             addRules(node, "stdin");
         }
-        if (node.getAttributes().containsKey("stdout")) {
+        if (node.containsAttribute("stdout")) {
             isStream = true;
             addRules(node, "stdout");
         }
-        if (node.getAttributes().containsKey("stderr")) {
+        if (node.containsAttribute("stderr")) {
             isStream = true;
             addRules(node, "stderr");
         }
@@ -90,10 +90,8 @@ public class AddStreamCells extends CopyOnWriteTransformer {
         }
         for (Cell cell : cells) {
             Rule newRule = rule.shallowCopy();
-            Attributes newAttrs = newRule.getAttributes().shallowCopy();
-            newAttrs.remove("function");
-            newRule.setAttributes(newAttrs);
             newRule.setBody(MetaK.wrap(rule.getBody(), cell.getLabel(), Ellipses.NONE));
+            newRule.removeAttribute("function");
             generated.add(newRule);
         }
     }

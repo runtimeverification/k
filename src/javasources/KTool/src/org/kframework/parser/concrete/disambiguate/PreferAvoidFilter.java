@@ -26,9 +26,9 @@ public class PreferAvoidFilter extends ParseForestTransformer {
         for (ASTNode variant : amb.getContents()) {
             if (variant instanceof TermCons) {
                 TermCons tc = (TermCons) variant;
-                if (tc.getProduction().getAttributes().containsKey("prefer"))
+                if (tc.getProduction().containsAttribute("prefer"))
                     prefer.add(tc);
-                if (tc.getProduction().getAttributes().containsKey("avoid"))
+                if (tc.getProduction().containsAttribute("avoid"))
                     avoid.add(tc);
             } else if (variant instanceof KApp) {
                 // Adding int tokens to the prefer container in order to disambiguate between

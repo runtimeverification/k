@@ -1,10 +1,19 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
-import org.w3c.dom.Element;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 /**
  * Represents either an explicit attribute on a {@link Rule} or {@link Production},
@@ -12,7 +21,7 @@ import org.w3c.dom.Element;
  * The inherited member attributes is used for location information
  * if this represents an explicitly written attribute.
  */
-public class Attribute extends ASTNode {
+public class Attribute<T> extends ASTNode {
 
     public static final String BUILTIN_KEY = "builtin";
     public static final String FUNCTION_KEY = "function";
@@ -27,41 +36,41 @@ public class Attribute extends ASTNode {
     public static final String BITWIDTH_KEY = "bitwidth";
     public static final String SMTLIB_KEY = "smtlib";
     public static final String SMT_LEMMA_KEY = "smt-lemma";
-
-
-    public static final Attribute BRACKET = new Attribute("bracket", "");
-    public static final Attribute FUNCTION = new Attribute(FUNCTION_KEY, "");
-    public static final Attribute PREDICATE = new Attribute(PREDICATE_KEY, "");
-    public static final Attribute PATTERN = new Attribute(PATTERN_KEY, "");
-    public static final Attribute MACRO = new Attribute(MACRO_KEY, "");
-    public static final Attribute ANYWHERE = new Attribute("anywhere", "");
-    public static final Attribute EQUALITY = new Attribute("equality", "");
-    public static final Attribute TRANSITION = new Attribute("transition", "");
-    public static final Attribute SYMBOLIC = new Attribute(SymbolicBackend.SYMBOLIC, "");
-    public static final Attribute NOT_IN_RULES = new Attribute("notInRules", "");
-    public static final Attribute VARIABLE = new Attribute("variable", "");
-    public static final Attribute SUPERCOOL = new Attribute("supercool", "");
-    public static final Attribute SUPERHEAT = new Attribute("superheat", "");
-    public static final Attribute HYBRID = new Attribute("hybrid", "");
     public static final String CELL_KEY = "cell";
+    public static final String EQUALITY_KEY = "equality";
 
-    private String key;
-    private String value;
+    public static final Attribute<String> BRACKET = Attribute.of("bracket", "");
+    public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");
+    public static final Attribute<String> PREDICATE = Attribute.of(PREDICATE_KEY, "");
+    public static final Attribute<String> PATTERN = Attribute.of(PATTERN_KEY, "");
+    public static final Attribute<String> MACRO = Attribute.of(MACRO_KEY, "");
+    public static final Attribute<String> ANYWHERE = Attribute.of("anywhere", "");
+    public static final Attribute<String> TRANSITION = Attribute.of("transition", "");
+    public static final Attribute<String> SYMBOLIC = Attribute.of(SymbolicBackend.SYMBOLIC, "");
+    public static final Attribute<String> NOT_IN_RULES = Attribute.of("notInRules", "");
+    public static final Attribute<String> VARIABLE = Attribute.of("variable", "");
+    public static final Attribute<String> SUPERCOOL = Attribute.of("supercool", "");
+    public static final Attribute<String> SUPERHEAT = Attribute.of("superheat", "");
+    public static final Attribute<String> HYBRID = Attribute.of("hybrid", "");
 
-    public Attribute(String key, String value) {
+    private transient Key<T> key;
+    private T value;
+
+    public static Attribute<String> of(String key, String value) {
+        return new Attribute<String>(keyOf(key), value);
+    }
+
+    public static Key<String> keyOf(String key) {
+        return Key.get(String.class, Names.named(key));
+    }
+
+    public Attribute(Key<T> key, T value) {
         super();
         this.key = key;
         this.value = value;
     }
 
-    public Attribute(Element elm) {
-        super(elm);
-
-        key = elm.getAttribute(Constants.KEY_key_ATTR);
-        value = elm.getAttribute(Constants.VALUE_value_ATTR);
-    }
-
-    public Attribute(Attribute attribute) {
+    public Attribute(Attribute<T> attribute) {
         super(attribute);
         key = attribute.key;
         value = attribute.value;
@@ -72,25 +81,45 @@ public class Attribute extends ASTNode {
         return " " + this.getKey() + "(" + this.getValue() + ")";
     }
 
-    public void setValue(String value) {
+    public void setValue(T value) {
         this.value = value;
     }
 
-    public String getValue() {
+    public T getValue() {
         return value;
     }
 
-    public void setKey(String key) {
+    public void setKey(Key<T> key) {
         this.key = key;
     }
 
-    public String getKey() {
+    public Key<T> getKey() {
         return key;
     }
 
     @Override
-    public Attribute shallowCopy() {
-        return new Attribute(this);
+    public Attribute<T> shallowCopy() {
+        return new Attribute<T>(this);
+    }
+
+    public static String toString(Key<?> key) {
+        if (key.getTypeLiteral().equals(TypeLiteral.get(String.class))) {
+            return toString(key.getAnnotation());
+        }
+        String annotation = toString(key.getAnnotation());
+        if (annotation != null) {
+            return "@" + key.getTypeLiteral().toString() + "." + annotation;
+        } else {
+            return "@" + key.getTypeLiteral().toString();
+        }
+    }
+
+    public static String toString(Annotation annotation) {
+        if (annotation == null) return null;
+        if (annotation instanceof Named) {
+            return ((Named)annotation).value();
+        }
+        return annotation.toString();
     }
 
     @Override
@@ -115,7 +144,7 @@ public class Attribute extends ASTNode {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Attribute other = (Attribute) obj;
+        Attribute<?> other = (Attribute<?>) obj;
         if (key == null) {
             if (other.key != null)
                 return false;
@@ -127,5 +156,23 @@ public class Attribute extends ASTNode {
         } else if (!value.equals(other.value))
             return false;
         return true;
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        stream.writeObject(key.getTypeLiteral().getType());
+        stream.writeObject(key.getAnnotation());
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        Type type = (Type) stream.readObject();
+        TypeLiteral tl = TypeLiteral.get(type);
+        Annotation annotation = (Annotation) stream.readObject();
+        if (annotation == null) {
+            key = Key.get(tl);
+        } else {
+            key = Key.get(tl, annotation);
+        }
     }
 }

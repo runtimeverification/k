@@ -3,7 +3,6 @@ package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kompile.KompileOptions;
@@ -18,17 +17,17 @@ public class AddOptionalTags extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Attributes node, Void _) {
+    public ASTNode visit(ASTNode node, Void _) {
 
         for (String tag : options.transition)
-            if (node.containsKey(tag))
-                node.add(Attribute.TRANSITION);
+            if (node.containsAttribute(tag))
+                node.addAttribute(Attribute.TRANSITION);
         for (String tag : options.supercool)
-            if (node.containsKey(tag))
-                node.add(Attribute.SUPERCOOL);
+            if (node.containsAttribute(tag))
+                node.addAttribute(Attribute.SUPERCOOL);
         for (String tag : options.superheat)
-            if (node.containsKey(tag))
-                node.add(Attribute.SUPERHEAT);
+            if (node.containsAttribute(tag))
+                node.addAttribute(Attribute.SUPERHEAT);
 
         return node;
     }

@@ -41,6 +41,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -50,10 +51,10 @@ public class Context implements Serializable {
             "kgeneratedlabel",
             "prefixlabel");
 
-    public static final Set<String> parsingTags = ImmutableSet.of(
-        "left",
-        "right",
-        "non-assoc");
+    public static final Set<Key<String>> parsingTags = ImmutableSet.of(
+        Attribute.keyOf("left"),
+        Attribute.keyOf("right"),
+        Attribute.keyOf("non-assoc"));
 
     public static final Set<String> specialTerminals = ImmutableSet.of(
         "(",
@@ -180,7 +181,7 @@ public class Context implements Serializable {
             listProductions.put(p.getSort(), p);
         }
         for (Attribute a : p.getAttributes().values()) {
-            tags.put(a.getKey(), p);
+            tags.put(Attribute.toString(a.getKey()), p);
         }
     }
 
@@ -198,7 +199,7 @@ public class Context implements Serializable {
             listProductions.remove(p.getSort());
         }
         for (Attribute a : p.getAttributes().values()) {
-            tags.remove(a.getKey(), p);
+            tags.remove(Attribute.toString(a.getKey()), p);
         }
     }
 
@@ -489,7 +490,7 @@ public class Context implements Serializable {
         return specialTerminals.contains(terminal);
     }
 
-    public boolean isParsingTag(String key) {
+    public boolean isParsingTag(Key<?> key) {
         return parsingTags.contains(key);
     }
 

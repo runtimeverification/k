@@ -61,7 +61,7 @@ public class LTLModelCheckerTest {
 
         // attributes
         Attributes inputAttrs = new Attributes();
-        inputAttrs.add(new Attribute("ltl", null));
+        inputAttrs.add(Attribute.of("ltl", null));
         inputAttrs.add(Attribute.ANYWHERE);
 
         // rule
@@ -90,7 +90,7 @@ public class LTLModelCheckerTest {
 
         // attributes
         Attributes outputAttrs = new Attributes();
-        outputAttrs.add(new Attribute("ltl", null));
+        outputAttrs.add(Attribute.of("ltl", null));
         outputAttrs.add(Attribute.ANYWHERE);
 
         // rule

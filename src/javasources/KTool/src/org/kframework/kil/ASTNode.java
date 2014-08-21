@@ -11,6 +11,8 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
+import com.google.inject.Key;
+
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
  */
@@ -142,7 +144,11 @@ public abstract class ASTNode implements Serializable {
      * @param val
      */
     public void addAttribute(String key, String val) {
-        addAttribute(new Attribute(key, val));
+        addAttribute(Attribute.of(key, val));
+    }
+
+    public <T> void addAttribute(Key<T> key, T val) {
+        addAttribute(new Attribute<>(key, val));
     }
 
     /**
@@ -150,7 +156,7 @@ public abstract class ASTNode implements Serializable {
      *
      * @param attr
      */
-    public void addAttribute(Attribute attr) {
+    public void addAttribute(Attribute<?> attr) {
         if (attributes == null)
             attributes = new Attributes();
 
@@ -165,6 +171,18 @@ public abstract class ASTNode implements Serializable {
         if (attributes == null)
             return false;
 
+        return attributes.containsKey(Attribute.keyOf(key));
+    }
+
+
+    /**
+     * @param key
+     * @return whether the attribute key occurs in the list of attributes.
+     */
+    public boolean containsAttribute(Key<?> key) {
+        if (attributes == null)
+            return false;
+
         return attributes.containsKey(key);
     }
 
@@ -175,33 +193,38 @@ public abstract class ASTNode implements Serializable {
      * @return a value for key in the list of attributes or the default value.
      */
     public String getAttribute(String key) {
-        final String defaultValue = Constants.defaultAttributeValues.get(key);
-        if (attributes == null)
-            return defaultValue;
-        final Attribute value = attributes.get(key);
-        if (value == null)
-            return defaultValue;
-        return value.getValue();
+        return getAttribute(Attribute.keyOf(key));
     }
 
     /**
+     * Retrieves the attribute by key from the list of attributes
+     *
+     * @param key
+     * @return a value for key in the list of attributes or the default value.
+     */
+    public <T> T getAttribute(Key<T> key) {
+        if (attributes == null)
+            return null;
+        final Attribute<T> value = (Attribute<T>) attributes.get(key);
+        if (value == null)
+            return null;
+        return value.getValue();
+    }
+
+    public <T> T getAttribute(Class<T> cls) {
+        return getAttribute(Key.get(cls));
+    }  /**
      * Updates the value of an attribute in the list of attributes.
      *
      * @param key
      * @param val
      */
     public void putAttribute(String key, String val) {
-        final String defaultValue = Constants.defaultAttributeValues.get(key);
-        if (val.equals(defaultValue)) {
-            if (getAttribute(key).equals(defaultValue))
-                return;
-            attributes.remove(key);
-            return;
-        }
-        if (attributes == null)
-            attributes = new Attributes();
+        addAttribute(key, val);
+    }
 
-        attributes.put(key, new Attribute(key, val));
+    public void removeAttribute(String key) {
+        getAttributes().remove(Attribute.keyOf(key));
     }
 
     /**
