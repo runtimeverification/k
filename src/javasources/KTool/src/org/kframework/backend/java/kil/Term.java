@@ -40,25 +40,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Translates a term from the generic KIL representation ({@link org.kframework.kil.Term}) to
-     * Java Rewrite Engine internal representation ({@link org.kframework.backend.java.kil.Term}).
-     */
-//    public static Term of(org.kframework.kil.Term kilTerm, Definition definition) {
-//        if (definition.context().javaExecutionOptions.indexingStats){
-//            IndexingStatistics.kilTransformationStopWatch.start();
-//        }
-//
-//        KILtoBackendJavaKILTransformer transformer
-//                = new KILtoBackendJavaKILTransformer(definition.context());
-//        Term term = transformer.transformTerm(kilTerm, definition);
-//
-//        if (definition.context().javaExecutionOptions.indexingStats){
-//            IndexingStatistics.kilTransformationStopWatch.stop();
-//        }
-//        return term;
-//    }
-
-    /**
      * Returns a {@link List} view of the indexing pairs from the {@code k}
      * cells of this {@code Term}.
      */

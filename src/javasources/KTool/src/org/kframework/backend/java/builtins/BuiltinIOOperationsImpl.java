@@ -25,7 +25,7 @@ import java.nio.charset.CharacterCodingException;
 /**
  * Table of {@code public static} methods for builtin IO operations.
  */
-public class RealBuiltinIOOperations implements BuiltinIOOperations {
+public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
 
     private final Definition def;
     private final FileSystem fs;
@@ -34,7 +34,7 @@ public class RealBuiltinIOOperations implements BuiltinIOOperations {
     private final KilFactory kilFactory;
 
     @Inject
-    public RealBuiltinIOOperations(
+    public BuiltinIOOperationsImpl(
             Definition def,
             FileSystem fs,
             Context context,

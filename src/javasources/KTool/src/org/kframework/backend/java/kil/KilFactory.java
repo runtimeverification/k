@@ -23,6 +23,10 @@ public class KilFactory {
         this.transformer = transformer;
     }
 
+    /**
+     * Translates a term from the generic KIL representation ({@link org.kframework.kil.Term}) to
+     * Java Rewrite Engine internal representation ({@link org.kframework.backend.java.kil.Term}).
+     */
     public Term term(org.kframework.kil.Term kilTerm) {
       if (options.indexingStats){
           IndexingStatistics.kilTransformationStopWatch.start();

@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.Map;
 
 import org.kframework.backend.java.builtins.BuiltinIOOperations;
-import org.kframework.backend.java.builtins.RealBuiltinIOOperations;
+import org.kframework.backend.java.builtins.BuiltinIOOperationsImpl;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KilFactory;
@@ -79,7 +79,7 @@ public class KRunModule extends AbstractModule {
             }
 
             bind(Term.class).toProvider(InitialConfigurationProvider.class);
-            bind(BuiltinIOOperations.class).to(RealBuiltinIOOperations.class);
+            bind(BuiltinIOOperations.class).to(BuiltinIOOperationsImpl.class);
         }
 
         @Provides
