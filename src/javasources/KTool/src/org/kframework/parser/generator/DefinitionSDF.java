@@ -244,7 +244,7 @@ public class DefinitionSDF {
         sdf.append("\n%% terminals reject\n");
         for (Terminal t : terminals.terminals) {
             if (t.getTerminal().matches("$?[A-Z][^\\:\\;\\(\\)\\<\\>\\~\\n\\r\\t\\,\\ \\[\\]\\=\\+\\-\\*\\/\\|\\{\\}\\.]*")) {
-                sdf.append("    \"" + t + "\" -> VARID {reject}\n");
+                sdf.append("    " + t + " -> VARID {reject}\n");
             }
         }
 
@@ -299,7 +299,7 @@ public class DefinitionSDF {
         sdf.append("context-free restrictions\n");
         for (Restrictions r : psdfv.restrictions) {
             if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
-                sdf.append("    " + StringUtil.enquoteCString(r.getTerminal().getTerminal()) + " -/- " + r.getPattern() + "\n");
+                sdf.append("    " + r.getTerminal().toString() + " -/- " + r.getPattern() + "\n");
             else
                 sdf.append("    " + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
         }
