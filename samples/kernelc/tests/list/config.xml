@@ -27,8 +27,14 @@
         <program name="length_recursive.c">
           <krun-option name="--prove" value="tests/list/length_recursive_spec.k" />
         </program>
+        <program name="length_iterative.c">
+          <krun-option name="--prove" value="tests/list/length_iterative_spec.k" />
+        </program>
         <program name="sum_recursive.c">
           <krun-option name="--prove" value="tests/list/sum_recursive_spec.k" />
+        </program>
+        <program name="sum_iterative.c">
+          <krun-option name="--prove" value="tests/list/sum_iterative_spec.k" />
         </program>
         <program name="reverse.c">
           <krun-option name="--prove" value="tests/list/reverse_spec.k" />

@@ -26,7 +26,7 @@ rule [loop-inv]:
   <heap>...
     object(P1) |-> tv (struct listNode *, LP1:Pointer => null)
     object(P2) |-> tv (struct listNode *, LP2:Pointer => ?LP2:Pointer)
-    (list(LP1)(B:Seq) list(LP2)(C:Seq) => list(?LP2)(?A:Seq))
+    (list(LP1)(B:IntSeq) list(LP2)(C:IntSeq) => list(?LP2)(?A:IntSeq))
   ...</heap>
 ensures ?A ==K rev(B) @ C
 
@@ -39,7 +39,7 @@ rule [func-spec]:
     tv(struct listNode *, ?LP:Pointer)
   ...</k>
   <heap>...
-    list(LP)(A:Seq) => list(?LP)(rev(A))
+    list(LP)(A:IntSeq) => list(?LP)(rev(A))
   ...</heap>
 
 endmodule

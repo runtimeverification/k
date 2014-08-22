@@ -4,12 +4,12 @@ module LIST-PATTERN
   imports MAP
   imports KERNELC-SEMANTICS
 
-  syntax Seq ::= Int "::" Seq
-               | "[]"
-  syntax Seq ::= Seq "@" Seq      [function]
-               | rev(Seq)         [function]
-  syntax Int ::= len(Seq)         [function]
-               | sum(Seq)         [function]
+  syntax IntSeq ::= Int "::" IntSeq
+                  | "[]"
+  syntax IntSeq ::= IntSeq "@" IntSeq   [function]
+                  | rev(IntSeq)         [function]
+  syntax Int ::= len(IntSeq)            [function, smtlib(smt_list_len)]
+               | sum(IntSeq)            [function, smtlib(smt_list_sum)]
   rule (E::L1) @ L2 => E::(L1 @ L2)
   rule [] @ L => L
   rule rev(E::L) => rev(L) @ E::[]
@@ -24,9 +24,9 @@ module LIST-PATTERN
   rule (L1 @ (E :: [])) @ L2 => L1 @ (E :: L2)    [lemma]
 
   /* list pattern */
-  syntax Map ::= "list" "(" Pointer ")" "(" Seq ")"   [pattern(1)]
+  syntax Map ::= "list" "(" Pointer ")" "(" IntSeq ")"   [pattern(1)]
   rule
-    list(object(P:Int))(E:Int::L:Seq)
+    list(object(P:Int))(E:Int::L:IntSeq)
   =>
     object(P) |-> (
         val  |-> tv(int, E)
