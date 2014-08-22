@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function comm_assoc checks that function f is commutative and associative.
  */

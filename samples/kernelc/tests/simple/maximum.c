@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function maximum computes the maximum value between two natural numbers.
  */
