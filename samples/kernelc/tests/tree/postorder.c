@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that prints the contents of a binary tree in postorder traversal.
  */
@@ -28,4 +29,3 @@ void postorder(struct treeNode *t)
 
 
 //@ var T : Tree
-

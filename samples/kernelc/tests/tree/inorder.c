@@ -1,5 +1,6 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
- * Function that prints the contents of a binary tree in preorder traversal.
+ * Function that prints the contents of a binary tree in inorder traversal.
  */
 
 
@@ -14,18 +15,17 @@ struct treeNode {
 };
 
 
-void preorder(struct treeNode *t)
+void inorder(struct treeNode *t)
 /*@ rule <k> $ => return; ...</k> <heap>... tree(t)(T) ...</heap>
-         <out>... . => tree2preorder(T) </out> */
+         <out>... . => tree2list(T) </out> */
 {
   if (t == NULL)
     return;
 
+  inorder(t->left);
   printf("%d ", t->val);
-  preorder(t->left);
-  preorder(t->right);
+  inorder(t->right);
 }
 
 
 //@ var T : Tree
-

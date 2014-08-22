@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that iteratively transforms a binary tree into a singly linked list,
  * at the same time printing the list of elements in reverse order.
@@ -86,4 +87,3 @@ struct listNode* tree_to_list_iterative(struct treeNode *t)
 
 //@ var A, TS : Seq
 //@ var T : Tree
-

@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that computes the height of a binary tree.
  */
@@ -7,7 +8,7 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
@@ -18,13 +19,8 @@ int max(int a, int b)
   return a > b ? a : b;
 }
 
-int tree_height(struct treeNode *t)
-//@ rule <k> $ => return height(T); ...</k> <heap>... tree(t)(T) ...</heap>
+int height(struct treeNode *t)
 {
   if (t == NULL) return 0;
-  return 1 + max(tree_height(t->left), tree_height(t->right));
+  return 1 + max(height(t->left), height(t->right));
 }
-
-
-//@ var T : Tree
-

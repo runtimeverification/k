@@ -47,6 +47,18 @@ module TREE-PATTERN
   rule tree_height(node(I:Int, TL:Tree, TR:Tree))
     => 1 +Int maxInt(tree_height(TL), tree_height(TR))
   rule tree_height(leaf) => 0
+  syntax Int ::= "tree_size" "(" Tree ")"       [function, smtlib(smt_tree_size)]
+  rule tree_size(node(_:Int, TL:Tree, TR:Tree))
+    => 1 +Int tree_size(TL) +Int tree_size(TR)
+  rule tree_size(leaf) => 0
+  syntax Tree ::= "tree_mirror" "(" Tree ")"    [function, smtlib(smt_tree_mirror)]
+  rule tree_mirror(node(I:Int, TL:Tree, TR:Tree))
+    => node(I, tree_mirror(TR), tree_mirror(TL))
+  rule tree_mirror(leaf) => leaf
+  syntax List ::= "tree2list" "(" Tree ")"      [function]//, smtlib(smt_tree2list)] // YilongL: sort List is reserved in Z3
+  rule tree2list(node(I:Int, TL:Tree, TR:Tree))
+    => tree2list(TL) ListItem(I) tree2list(TR)
+  rule tree2list(leaf) => .List
 
   syntax Map ::= "tree" "(" Pointer ")" "(" Tree ")"    [pattern(1)]
   rule tree(object(P:Int))(node(I:Int, TL:Tree, TR:Tree))
@@ -85,5 +97,9 @@ module TREE-PATTERN
   rule avl(leaf) => true
 
   rule tree_height(T:Tree) >=Int 0 => true    [smt-lemma]
-endmodule
 
+  // TODO(YilongL): should probably go somewhere else; needs a better name...
+  syntax Int ::= bool2Int(Bool)                 [function, smtlib(smt_bool2int)]
+  rule bool2Int(true) => 1
+  rule bool2Int(false) => 0
+endmodule

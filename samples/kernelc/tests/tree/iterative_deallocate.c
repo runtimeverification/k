@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Program that traverses a list of disjoint trees and deallocates each tree.
  * The heap pattern tlist specifies the existence of a list of disjoint trees
@@ -45,4 +46,3 @@ void iter_deallocate(struct listNode *l)
 
 //@ var A, TS : Seq
 //@ var T : Tree
-

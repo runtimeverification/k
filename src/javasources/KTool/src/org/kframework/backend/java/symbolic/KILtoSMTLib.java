@@ -38,7 +38,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.BIT_VECTOR,
             Sort.of("IntSet"));
     public static final ImmutableSet<Sort> RESERVED_Z3_SORTS = ImmutableSet.of(
-            Sort.of("Set"),
+            Sort.LIST,
+            Sort.SET,
             Sort.of("Seq"));
     public static final ImmutableSet<String> SMTLIB_BUILTIN_FUNCTIONS = ImmutableSet.of(
             "forall",
@@ -92,7 +93,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "smt_set_dif",
             "smt_set_sub",
             "smt_set_lt",
-            "smt_set_le");
+            "smt_set_le",
+            /* bool2int */
+            "smt_bool2int");
 
     /**
      * Flag set to true if it is sounds to skip equalities that cannot be translated.

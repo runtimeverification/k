@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that searches a binary tree for a node with a certain value.
  */
@@ -7,7 +8,7 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
@@ -20,10 +21,9 @@ int find(int v, struct treeNode *t)
   if (t == NULL)
     return 0;
 
-  return v == t->val || find(v, t->left) || find(v, t->right);
+  return v == t->value || find(v, t->left) || find(v, t->right);
 }
 
 
 //@ var r : Int
 //@ var T : Tree
-
