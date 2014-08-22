@@ -55,7 +55,7 @@ module TREE-PATTERN
   rule tree_mirror(node(I:Int, TL:Tree, TR:Tree))
     => node(I, tree_mirror(TR), tree_mirror(TL))
   rule tree_mirror(leaf) => leaf
-  syntax List ::= "tree2list" "(" Tree ")"      [function, smtlib(smt_tree2list)]
+  syntax List ::= "tree2list" "(" Tree ")"      [function]//, smtlib(smt_tree2list)] // YilongL: sort List is reserved in Z3
   rule tree2list(node(I:Int, TL:Tree, TR:Tree))
     => tree2list(TL) ListItem(I) tree2list(TR)
   rule tree2list(leaf) => .List

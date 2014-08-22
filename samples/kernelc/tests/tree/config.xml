@@ -18,6 +18,9 @@
         <program name="find.c">
           <krun-option name="--prove" value="tests/tree/find_spec.k" />
         </program>
+        <program name="mirror.c">
+          <krun-option name="--prove" value="tests/tree/mirror_spec.k" />
+        </program>
     </test>
 
 </tests>

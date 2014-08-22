@@ -38,7 +38,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.BIT_VECTOR,
             Sort.of("IntSet"));
     public static final ImmutableSet<Sort> RESERVED_Z3_SORTS = ImmutableSet.of(
-            Sort.of("Set"),
+            Sort.LIST,
+            Sort.SET,
             Sort.of("Seq"));
     public static final ImmutableSet<String> SMTLIB_BUILTIN_FUNCTIONS = ImmutableSet.of(
             "forall",
