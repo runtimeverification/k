@@ -8,15 +8,13 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
 
 
 void mirror(struct treeNode *t)
-/*@ rule <k> $ => return; ...</k>
-         <heap>... tree(t)(T) => tree(t)(mirror(T)) ...</heap> */
 {
   struct treeNode *tmp;
 
@@ -29,6 +27,3 @@ void mirror(struct treeNode *t)
   mirror(t->left);
   mirror(t->right);
 }
-
-
-//@ var T : Tree

@@ -47,10 +47,18 @@ module TREE-PATTERN
   rule tree_height(node(I:Int, TL:Tree, TR:Tree))
     => 1 +Int maxInt(tree_height(TL), tree_height(TR))
   rule tree_height(leaf) => 0
-  syntax Int ::= "tree_size" "(" Tree ")"       [function]
+  syntax Int ::= "tree_size" "(" Tree ")"       [function, smtlib(smt_tree_size)]
   rule tree_size(node(_:Int, TL:Tree, TR:Tree))
     => 1 +Int tree_size(TL) +Int tree_size(TR)
   rule tree_size(leaf) => 0
+  syntax Tree ::= "tree_mirror" "(" Tree ")"    [function, smtlib(smt_tree_mirror)]
+  rule tree_mirror(node(I:Int, TL:Tree, TR:Tree))
+    => node(I, tree_mirror(TR), tree_mirror(TL))
+  rule tree_mirror(leaf) => leaf
+  syntax List ::= "tree2list" "(" Tree ")"      [function, smtlib(smt_tree2list)]
+  rule tree2list(node(I:Int, TL:Tree, TR:Tree))
+    => tree2list(TL) ListItem(I) tree2list(TR)
+  rule tree2list(leaf) => .List
 
   syntax Map ::= "tree" "(" Pointer ")" "(" Tree ")"    [pattern(1)]
   rule tree(object(P:Int))(node(I:Int, TL:Tree, TR:Tree))
