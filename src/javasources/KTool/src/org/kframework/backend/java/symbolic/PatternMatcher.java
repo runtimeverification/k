@@ -661,6 +661,8 @@ public class PatternMatcher extends AbstractMatcher {
         CellCollection otherCellCollection = (CellCollection) pattern;
 
         if (cellCollection.hasFrame()) {
+        // TODO(dwightguth): put this assertion back in once this class is constructed by
+        // the injector
 //            assert !termContext.definition().context().javaExecutionOption/*s.concreteExecution() :
 //                "the subject term should be ground in concrete execution";*/
             if (!otherCellCollection.hasFrame()) {

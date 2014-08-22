@@ -24,6 +24,8 @@ public class CopyOnShareSubstAndEvalTransformer extends SubstituteAndEvaluateTra
             Map<Variable, ? extends Term> substitution,
             Set<Variable> reusableVariables, TermContext context) {
         super(substitution, context);
+        // TODO(dwightguth): put this assertion back in once this class is constructed by
+        // the injector
 //        assert context.definition().context().javaExecutionOptions.fastExecution(
 //                context.definition().context().krunOptions.search());
         this.reusableVariables = Sets.newHashSet(reusableVariables);
