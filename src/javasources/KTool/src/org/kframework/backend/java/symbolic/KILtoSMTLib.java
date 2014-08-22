@@ -92,7 +92,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "smt_set_dif",
             "smt_set_sub",
             "smt_set_lt",
-            "smt_set_le");
+            "smt_set_le",
+            /* bool2int */
+            "smt_bool2int");
 
     /**
      * Flag set to true if it is sounds to skip equalities that cannot be translated.

@@ -94,7 +94,4 @@ module TREE-PATTERN
   syntax Int ::= bool2Int(Bool)                 [function, smtlib(smt_bool2int)]
   rule bool2Int(true) => 1
   rule bool2Int(false) => 0
-  rule bool2Int(B) =/=K 0 => bool2Int(B) ==K 1          [lemma]
-  rule bool2Int(B) =/=K 1 => bool2Int(B) ==K 0          [lemma]
-
 endmodule

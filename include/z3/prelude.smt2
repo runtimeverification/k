@@ -18,4 +18,4 @@
 (define-fun smt_set_le  ((s1 IntSet) (s2 IntSet)) Bool (forall ((i Int) (j Int)) (implies (>  i j) (not (and (select s1 i) (select s2 j))))))
 
 ; bool to int
-(declare-fun smt_bool2int ((Bool)) Int)
+(define-fun smt_bool2int ((b Bool)) Int (ite b 1 0))
