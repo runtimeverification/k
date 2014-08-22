@@ -13,7 +13,7 @@ rule
     tv(int, len(A))
   ...</k>
   <heap>...
-    list(LP)(A:Seq)
+    list(LP)(A:IntSeq)
   ...</heap>
 
 endmodule
