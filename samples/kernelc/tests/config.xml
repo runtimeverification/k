@@ -19,6 +19,8 @@
         </program>
     </test>
 
+    <include file="simple/config.xml" />
+
     <include file="list/config.xml" />
 
     <!--<include file="binary_search_tree//config.xml" more-results="." />-->
