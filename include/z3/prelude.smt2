@@ -17,13 +17,4 @@
 (define-fun smt_set_lt  ((s1 IntSet) (s2 IntSet)) Bool (forall ((i Int) (j Int)) (implies (>= i j) (not (and (select s1 i) (select s2 j))))))
 (define-fun smt_set_le  ((s1 IntSet) (s2 IntSet)) Bool (forall ((i Int) (j Int)) (implies (>  i j) (not (and (select s1 i) (select s2 j))))))
 
-; data structures (should be generated automatically from K)
-(declare-datatypes () ((Tree leaf (node (key Int) (left Tree) (right Tree)))))
-(declare-fun smt_tree_keys ((Tree)) IntSet)
-(declare-fun smt_tree_height ((Tree)) Int)
-(declare-fun smt_bst ((Tree)) Bool)
-(declare-fun smt_avl ((Tree)) Bool)
-
-; lemmas as universally quantified formulae
-(assert (forall ((t Tree)) (! (>= (smt_tree_height t) 0) :pattern((smt_tree_height t)))))
 
