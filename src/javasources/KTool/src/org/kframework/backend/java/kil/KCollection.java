@@ -60,6 +60,11 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         return getContents().size();
     }
 
+    @Override
+    public final boolean isConcreteCollection() {
+        return !hasFrame();
+    }
+
     /**
      * {@code KCollection} is guaranteed to have only one frame; thus, they can
      * always be used in the left-hand side of a rule.

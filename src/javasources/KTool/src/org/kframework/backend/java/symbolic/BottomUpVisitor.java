@@ -31,8 +31,8 @@ public class BottomUpVisitor implements Visitor {
 
     @Override
     public void visit(BuiltinList node) {
-        if (node.hasFrame()) node.frame().accept(this);
         for (Term t : node.elementsLeft()) t.accept(this);
+        for (Term t : node.baseTerms()) t.accept(this);
         for (Term t : node.elementsRight()) t.accept(this);
     }
 
@@ -78,9 +78,6 @@ public class BottomUpVisitor implements Visitor {
 
     @Override
     public void visit(Collection collection) {
-        if (collection.hasFrame()) {
-            collection.frame().accept(this);
-        }
         visit((Term) collection);
     }
 
@@ -134,6 +131,9 @@ public class BottomUpVisitor implements Visitor {
         for (Term term : kCollection) {
             term.accept(this);
         }
+        if (kCollection.hasFrame()) {
+            kCollection.frame().accept(this);
+        }
         visit((Collection) kCollection);
     }
 
@@ -156,6 +156,11 @@ public class BottomUpVisitor implements Visitor {
     public void visit(ListLookup listLookup) {
         listLookup.list().accept(this);
         listLookup.key().accept(this);
+    }
+
+    @Override
+    public void visit(ListUpdate listUpdate) {
+        listUpdate.list().accept(this);
     }
 
     @Override

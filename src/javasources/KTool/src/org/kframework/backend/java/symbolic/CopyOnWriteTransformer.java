@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -296,28 +297,34 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(BuiltinList builtinList) {
-        Term frame = null;
-        boolean change = false;
-        if (builtinList.hasFrame()) {
-            frame = (Term) builtinList.frame().accept(this);
-            if (frame != builtinList.frame()) change = true;
+    public ASTNode transform(ListUpdate listUpdate) {
+        Term list = (Term) listUpdate.list().accept(this);
+        if (list != listUpdate.list()) {
+            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
         }
+        return listUpdate;
+    }
 
-        ArrayList<Term> elementsLeft = new ArrayList<Term>(builtinList.elementsLeft().size());
-        for (Term entry : builtinList.elementsLeft()) {
-            ASTNode newEntry = entry.accept(this);
-            if (newEntry != entry) change = true;
-            if (newEntry != null) elementsLeft.add((Term) newEntry);
+    @Override
+    public ASTNode transform(BuiltinList builtinList) {
+        boolean changed = false;
+        BuiltinList.Builder builder = BuiltinList.builder();
+        for (Term term : builtinList.elementsLeft()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.addItem(transformedTerm);
         }
-        ArrayList<Term> elementsRight = new ArrayList<Term>(builtinList.elementsRight().size());
-        for (Term entry : builtinList.elementsRight()) {
-            ASTNode newEntry = entry.accept(this);
-            if (newEntry != entry) change = true;
-            if (newEntry != null) elementsRight.add((Term) newEntry);
+        for (Term term : builtinList.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
         }
-        if (! change) return  builtinList;
-        return BuiltinList.of(frame, builtinList.removeLeft(), builtinList.removeRight(), elementsLeft, elementsRight);
+        for (Term term : builtinList.elementsRight()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.addItem(transformedTerm);
+        }
+        return changed ? builder.build() : builtinList;
     }
 
     @Override

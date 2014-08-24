@@ -1,17 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
-import com.google.common.collect.Lists;
-import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Term;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -277,9 +270,10 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     }
 
     private BuiltinList getBuiltinList(BigInteger result, boolean overflow) {
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(overflow)));
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItem(BitVector.of(result, bitwidth));
+        builder.addItem(BoolToken.of(overflow));
+        return (BuiltinList) builder.build();
     }
 
 }

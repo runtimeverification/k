@@ -20,6 +20,9 @@ public abstract class AssociativeCommutativeCollection extends Collection {
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
             ImmutableMultiset<Variable> collectionVariables) {
+        /* YilongL: setting Collection#frame to null doesn't break
+         * SymbolicUnifier or PatternMatcher because List/Set/Map patterns have
+         * been compiled to data structure lookup/update already */
         super(null, Kind.KITEM);
         this.collectionPatterns = collectionPatterns;
         this.collectionVariables = collectionVariables;
@@ -49,10 +52,7 @@ public abstract class AssociativeCommutativeCollection extends Collection {
         return collectionVariables;
     }
 
-    /**
-     * Returns true if this collection contains elements or entries, but does not contain patterns,
-     * functions or variables.
-     */
+    @Override
     public final boolean isConcreteCollection() {
         return collectionPatterns.isEmpty()
                 && collectionVariables.isEmpty()

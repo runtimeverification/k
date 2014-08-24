@@ -279,9 +279,6 @@ public class PatternMatcher extends AbstractMatcher {
         return results;
     }
 
-    private static final Stopwatch sw = new Stopwatch();
-    private static final Stopwatch sw2 = new Stopwatch();
-
     /**
      * Private helper method to substitute and evaluate a
      * {@link DataStructureLookupOrChoice} operation efficiently.

@@ -28,6 +28,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapKeyChoice;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
@@ -64,7 +65,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -278,8 +278,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<KList>(node.getLabel(), (KList) content);
             } else if (content instanceof BuiltinList) {
                 return new Cell<BuiltinList>(node.getLabel(), (BuiltinList) content);
-//            } else if (content instanceof ListUpdate) {
-//                return new Cell<ListUpdate>(node.getLabel(), (ListUpdate) content);
+            } else if (content instanceof ListUpdate) {
+                return new Cell<ListUpdate>(node.getLabel(), (ListUpdate) content);
             } else if (content instanceof BuiltinSet) {
                 return new Cell<BuiltinSet>(node.getLabel(), (BuiltinSet) content);
             } else if (content instanceof SetUpdate) {
@@ -328,55 +328,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.ListBuiltin node, Void _)  {
-        ArrayList<Term> elementsLeft = new ArrayList<Term>(node.elementsLeft().size());
-        for (org.kframework.kil.Term entry : node.elementsLeft()) {
-            Term newEntry = (Term) this.visitNode(entry);
-            elementsLeft.add(newEntry);
+        BuiltinList.Builder builder = BuiltinList.builder();
+        for (org.kframework.kil.Term element : node.elementsLeft()) {
+            builder.addItem((Term) this.visitNode(element));
         }
-
-        ArrayList<Term> elementsRight = new ArrayList<Term>(node.elementsRight().size());
-        for (org.kframework.kil.Term entry : node.elementsRight()) {
-            Term newEntry = (Term) this.visitNode(entry);
-            elementsRight.add(newEntry);
-        }
-
-        ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
         for (org.kframework.kil.Term term : node.baseTerms()) {
-            baseTerms.add((Term) this.visitNode(term));
+            builder.concatenate((Term) this.visitNode(term));
         }
-
-        Term base = null;
-        if (node.hasViewBase()) {
-            base = (Variable) this.visitNode(node.viewBase());
-        } else {
-            if (!node.baseTerms().isEmpty()) {
-                if (node.baseTerms().size() == 1
-                        && !( this.visitNode(node.baseTerms().iterator().next()) instanceof KItem)) {
-                    base = (Term) this.visitNode(node.baseTerms().iterator().next());
-                } else {
-                    Term result = BuiltinList.of(
-                            null,
-                            0,
-                            0,
-                            elementsLeft,
-                            new ArrayList<Term>());
-                    baseTerms.add(BuiltinList.of(
-                            null,
-                            0,
-                            0,
-                            new ArrayList<Term>(),
-                            elementsRight));
-                    for (Term baseTerm : baseTerms) {
-                        result = KItem.of(
-                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, definition),
-                                new KList(ImmutableList.of(result, baseTerm)),
-                                TermContext.of(globalContext));
-                    }
-                    return result;
-                }
-            }
+        for (org.kframework.kil.Term element : node.elementsRight()) {
+            builder.addItem((Term) this.visitNode(element));
         }
-        return BuiltinList.of(base, 0, 0, elementsLeft, elementsRight);
+        return builder.build();
     }
 
     @Override
@@ -410,8 +372,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.ListUpdate node, Void _)  {
         Variable base = (Variable) this.visitNode(node.base());
 
-        return BuiltinList.of(base, node.removeLeft().size(), node.removeRight().size(),
-                Collections.<Term>emptyList(), Collections.<Term>emptyList());
+        return new ListUpdate(base, node.removeLeft().size(), node.removeRight().size());
     }
 
     @Override

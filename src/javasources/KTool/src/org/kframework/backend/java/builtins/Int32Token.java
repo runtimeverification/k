@@ -4,14 +4,10 @@ package org.kframework.backend.java.builtins;
 import org.kframework.backend.java.builtins.primitives.Ints;
 import org.kframework.backend.java.builtins.primitives.OverflowArithmeticResult;
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Term;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedInts;
 
 
@@ -244,9 +240,10 @@ public class Int32Token extends BitVector<Integer> {
 
     private static BuiltinList makeBuiltinListOfOverflowArithmeticResult(
             OverflowArithmeticResult<Integer> result) {
-        return new BuiltinList(ImmutableList.<Term>of(
-                Int32Token.of(result.value),
-                BoolToken.of(result.overflow)));
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItem(Int32Token.of(result.value));
+        builder.addItem( BoolToken.of(result.overflow));
+        return (BuiltinList) builder.build();
     }
 
 }

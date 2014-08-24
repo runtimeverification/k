@@ -125,6 +125,11 @@ public class CellCollection extends Collection {
         return super.hasFrame();
     }
 
+    @Override
+    public final boolean isConcreteCollection() {
+        return baseTerms.isEmpty();
+    }
+
     /**
      * Checks if this {@code CellCollection} contains at most one
      * {@code Variable} as its frame variable.

@@ -86,7 +86,7 @@ public class IndexingPair implements Serializable {
         };
         BuiltinList instream = (BuiltinList) pattern;
 
-        if (instream.hasFrame()) {
+        if (!instream.isConcreteCollection()) {
             fstIndex = instream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(instream.get(0), definition);
             sndIndex = instream.elementsRight().isEmpty() ? TopIndex.TOP : getIndex(instream.get(-1), definition);
         } else {
@@ -116,7 +116,7 @@ public class IndexingPair implements Serializable {
         }
         BuiltinList outstream = (BuiltinList) pattern;
 
-        if (outstream.hasFrame()) {
+        if (!outstream.isConcreteCollection()) {
             fstIndex = outstream.elementsLeft().isEmpty() ? TopIndex.TOP : getIndex(outstream.get(0), definition);
             sndIndex = outstream.elementsLeft().size() < 2 ? TopIndex.TOP : getIndex(outstream.get(1), definition);
         } else {

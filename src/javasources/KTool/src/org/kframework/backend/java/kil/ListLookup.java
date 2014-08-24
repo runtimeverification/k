@@ -31,10 +31,17 @@ public class ListLookup extends Term implements DataStructureLookup {
         if (!(key instanceof IntToken)) {
             return this;
         }
+        BuiltinList builtinList = (BuiltinList) list;
         int index = ((IntToken) key).intValue();
 
-        Term value = ((BuiltinList) list).get(index);
-        return value;
+        Term value = builtinList.get(index);
+        if (value != null) {
+            return value;
+        } else if (builtinList.isConcreteCollection()) {
+            return Bottom.of(kind);
+        } else {
+            return this;
+        }
     }
 
     public Term key() {

@@ -201,8 +201,8 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
         for (Term entry : builtinList.elementsLeft()) {
             elementsLeft.add((org.kframework.kil.Term)entry.accept(this));
         }
-        if (builtinList.hasFrame()) {
-            baseTerms.add((org.kframework.kil.Term) builtinList.frame().accept(this));
+        for (Term term : builtinList.baseTerms()) {
+            baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
         for (Term entry : builtinList.elementsRight()) {
             elementsRight.add((org.kframework.kil.Term)entry.accept(this));
@@ -298,6 +298,11 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(ListLookup listLookup) {
         return transformJavaBackendSpecificTerm(listLookup);
+    }
+
+    @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return transformJavaBackendSpecificTerm(listUpdate);
     }
 
     @Override
