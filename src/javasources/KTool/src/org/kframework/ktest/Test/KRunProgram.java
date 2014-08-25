@@ -2,6 +2,7 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.ExecNames;
 import org.kframework.ktest.PgmArg;
 import org.kframework.utils.OS;
@@ -45,14 +46,23 @@ public class KRunProgram {
         for (int i = 0; i < args.size(); i++) {
             stringArgs.addAll(args.get(i).toStringList());
         }
-        String[] argsArr = new String[stringArgs.size()];
-        return stringArgs.toArray(argsArr);
+        String[] argsArr = stringArgs.toArray(new String[stringArgs.size()]);
+        if (OS.current() == OS.WIN) {
+            for (int i = 0; i < argsArr.length; i++) {
+                argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
+            }
+        }
+        return argsArr;
     }
 
     /**
      * @return String to be used in logging.
      */
     public String toLogString() {
+        if (OS.current() == OS.WIN) {
+            // OS is WIN, getKrunCmd will return args escaped
+            return StringUtils.join(getKrunCmd(), ' ');
+        }
         return StringUtil.escapeShell(getKrunCmd(), OS.current());
     }
 }
