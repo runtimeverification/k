@@ -242,7 +242,7 @@ public class Int32Token extends BitVector<Integer> {
             OverflowArithmeticResult<Integer> result) {
         BuiltinList.Builder builder = BuiltinList.builder();
         builder.addItem(Int32Token.of(result.value));
-        builder.addItem( BoolToken.of(result.overflow));
+        builder.addItem(BoolToken.of(result.overflow));
         return (BuiltinList) builder.build();
     }
 

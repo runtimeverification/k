@@ -9,29 +9,26 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
-
 
 public class BuiltinListTest {
 
     @Test
     public void testOf() throws Exception {
-//        BuiltinList baseBuiltinList = BuiltinList.of(
-//                new Variable("L", Sort.LIST),
-//                1,
-//                1,
-//                new ArrayList<>(ImmutableList.<Term>of(IntToken.of(0))),
-//                new ArrayList<>(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10))));
-//        BuiltinList builtinList = BuiltinList.of(
-//                baseBuiltinList,
-//                2,
-//                1,
-//                new ArrayList<>(ImmutableList.<Term>of(IntToken.of(0), IntToken.of(1))),
-//                new ArrayList<>(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10))));
-//
-//        Assert.assertEquals(builtinList.elementsLeft().size(), 2);
-//        Assert.assertEquals(builtinList.removeLeft(), 2);
-//        Assert.assertEquals(builtinList.elementsRight().size(), 3);
-//        Assert.assertEquals(builtinList.removeRight(), 1);
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItem(IntToken.of(0));
+        builder.concatenate(new Variable("L", Sort.LIST));
+        builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
+        BuiltinList baseBuiltinList = (BuiltinList) new ListUpdate(builder.build(), 1, 1).evaluateUpdate();
+
+        builder = BuiltinList.builder();
+        builder.addItems(ImmutableList.<Term>of(IntToken.of(0), IntToken.of(1)));
+        builder.concatenate(baseBuiltinList);
+        builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
+        BuiltinList builtinList = (BuiltinList) new ListUpdate(builder.build(), 2, 1).evaluateUpdate();
+
+        Assert.assertEquals(new Variable("L", Sort.LIST), builtinList.frame());
+        Assert.assertEquals(2, builtinList.size());
+        Assert.assertEquals(IntToken.of(9), builtinList.get(-1));
+        Assert.assertEquals(IntToken.of(9), builtinList.get(-2));
     }
 }

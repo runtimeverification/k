@@ -45,11 +45,19 @@ public class BuiltinList extends Collection {
             ImmutableList<Term> elementsRight,
             ImmutableList<BaseTermType> baseTermTypes
             ) {
-        super(null, Kind.KITEM);
+        super(computeFrame(baseTerms), Kind.KITEM);
         this.elementsLeft = elementsLeft;
         this.elementsRight = elementsRight;
         this.baseTerms = baseTerms;
         this.baseTermTypes = baseTermTypes;
+    }
+
+    private static Variable computeFrame(List<Term> baseTerms) {
+        if (baseTerms.size() == 1 && baseTerms.get(0) instanceof Variable) {
+            return (Variable) baseTerms.get(0);
+        } else {
+            return null;
+        }
     }
 
     private BuiltinList(ImmutableList<Term> elementsLeft) {
@@ -220,12 +228,35 @@ public class BuiltinList extends Collection {
     }
 
     private enum BuilderStatus {
-        ELEMENTS_LEFT, BASE_TERMS, ELEMENTS_RIGHT;
+        /**
+         * No base term has been added to the builder.
+         */
+        ELEMENTS_LEFT,
+
+        /**
+         * At least one base term (i.e., function, variable, pattern, or list)
+         * has been added to the builder and no list item has been added since
+         * then.
+         */
+        BASE_TERMS,
+
+        /**
+         * At least one list item has been added to the builder after some base
+         * term.
+         */
+        ELEMENTS_RIGHT;
     }
 
     public static class Builder {
 
         private BuilderStatus status = BuilderStatus.ELEMENTS_LEFT;
+
+        /**
+         * List of pending elements that are yet to be decided where to go in
+         * the {@code BuiltinList} to be built. This field is only valid in
+         * {@code BuilderStatus#BASE_TERMS}.
+         */
+        private List<Term> pendingElements = Lists.newArrayList();
 
         private ImmutableList.Builder<Term> elementsLeftBuilder = new ImmutableList.Builder<>();
         private ImmutableList.Builder<Term> baseTermsBuilder = new ImmutableList.Builder<>();
@@ -233,23 +264,25 @@ public class BuiltinList extends Collection {
         private ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
 
         /**
-         * Adds new list item to this builder.
+         * Appends the specified term as a list item, namely
+         * {@code ListItem(term)}, to the end of the list.
+         *
+         * @param term
+         *            the specified term
          */
         public void addItem(Term term) {
-            if (status == BuilderStatus.BASE_TERMS) {
-                status = BuilderStatus.ELEMENTS_RIGHT;
-            }
-
             if (status == BuilderStatus.ELEMENTS_LEFT) {
                 elementsLeftBuilder.add(term);
+            } else if (status == BuilderStatus.BASE_TERMS) {
+                status = BuilderStatus.ELEMENTS_RIGHT;
+                elementsRightBuilder.addAll(pendingElements);
+                pendingElements.clear();
+                elementsRightBuilder.add(term);
             } else {
                 elementsRightBuilder.add(term);
             }
         }
 
-        /**
-         * Adds new list items to this builder.
-         */
         public void addItems(List<Term> terms) {
             for (Term term : terms) {
                 addItem(term);
@@ -257,12 +290,6 @@ public class BuiltinList extends Collection {
         }
 
         private void addConcatTerm(Term term) {
-            if (status == BuilderStatus.ELEMENTS_LEFT) {
-                status = BuilderStatus.BASE_TERMS;
-            } else if (status == BuilderStatus.ELEMENTS_RIGHT) {
-                assert false : "builder only allowed to concatencate list terms in: " + BuilderStatus.BASE_TERMS;
-            }
-
             baseTermsBuilder.add(term);
             if (term instanceof BuiltinList) {
                 baseTermTypesBuilder.add(BaseTermType.LIST);
@@ -275,7 +302,7 @@ public class BuiltinList extends Collection {
             } else if (term instanceof Variable) {
                 baseTermTypesBuilder.add(BaseTermType.VARIABLE);
             } else {
-                assert false : "unexpected concatenated term" + term;
+                assert false : "unexpected concatenated term " + term;
             }
         }
 
@@ -293,19 +320,45 @@ public class BuiltinList extends Collection {
                 : "unexpected sort " + term.sort() + " of concatenated term " + term
                 + "; expected " + Sort.LIST;
 
-            if (term instanceof BuiltinList && status == BuilderStatus.ELEMENTS_LEFT) {
-                BuiltinList list = (BuiltinList) term;
-                addItems(list.elementsLeft);
-                addConcatTerms(list.baseTerms);
-                if (status == BuilderStatus.BASE_TERMS) {
-                    if (!list.elementsRight.isEmpty()) {
-                        addItem(new BuiltinList(list.elementsRight));
-                    }
+            if (status == BuilderStatus.ELEMENTS_LEFT) {
+                if (!(term instanceof BuiltinList)) {
+                    status = BuilderStatus.BASE_TERMS;
+                    addConcatTerm(term);
                 } else {
-                    addItems(list.elementsRight());
+                    BuiltinList list = (BuiltinList) term;
+                    if (list.isConcreteCollection()) {
+                        addItems(list.elementsLeft);
+                    } else {
+                        addItems(list.elementsLeft);
+                        status = BuilderStatus.BASE_TERMS;
+                        addConcatTerms(list.baseTerms);
+                        pendingElements.addAll(list.elementsRight);
+                    }
+                }
+            } else if (status == BuilderStatus.BASE_TERMS) {
+                if (!(term instanceof BuiltinList)) {
+                    if (!pendingElements.isEmpty()) {
+                        addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
+                        pendingElements.clear();
+                    }
+                    addConcatTerm(term);
+                } else {
+                    BuiltinList list = (BuiltinList) term;
+                    if (list.isConcreteCollection()) {
+                        pendingElements.addAll(list.elementsLeft);
+                    } else {
+                        pendingElements.addAll(list.elementsLeft);
+                        if (!pendingElements.isEmpty()) {
+                            addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
+                            pendingElements.clear();
+                        }
+                        addConcatTerms(list.baseTerms);
+                        pendingElements.addAll(list.elementsRight);
+                    }
                 }
             } else {
-                addConcatTerm(term);
+                assert false : "the builder is not allowed to concatencate list terms in "
+                        + BuilderStatus.ELEMENTS_RIGHT;
             }
         }
 
@@ -327,8 +380,11 @@ public class BuiltinList extends Collection {
             }
         }
 
-
         public Term build() {
+            if (!pendingElements.isEmpty()) {
+                addItems(pendingElements);
+            }
+
             BuiltinList builtinList = new BuiltinList(
                     elementsLeftBuilder.build(),
                     baseTermsBuilder.build(),

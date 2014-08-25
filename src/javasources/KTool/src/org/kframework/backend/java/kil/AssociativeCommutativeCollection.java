@@ -20,13 +20,21 @@ public abstract class AssociativeCommutativeCollection extends Collection {
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
             ImmutableMultiset<Variable> collectionVariables) {
-        /* YilongL: setting Collection#frame to null doesn't break
-         * SymbolicUnifier or PatternMatcher because List/Set/Map patterns have
-         * been compiled to data structure lookup/update already */
-        super(null, Kind.KITEM);
+        super(computeFrame(collectionPatterns, collectionFunctions, collectionVariables), Kind.KITEM);
         this.collectionPatterns = collectionPatterns;
         this.collectionVariables = collectionVariables;
         this.collectionFunctions = collectionFunctions;
+    }
+
+    private static Variable computeFrame(
+            ImmutableMultiset<KItem> collectionPatterns,
+            ImmutableMultiset<Term> collectionFunctions,
+            ImmutableMultiset<Variable> collectionVariables) {
+        if (collectionPatterns.isEmpty() && collectionFunctions.isEmpty() && collectionVariables.size() == 1) {
+            return collectionVariables.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     /**
