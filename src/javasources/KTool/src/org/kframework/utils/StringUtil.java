@@ -1,14 +1,9 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterDescription;
 
 public class StringUtil {
     public static String unescape(String str) {
@@ -522,26 +517,20 @@ public class StringUtil {
         return new String[] {mainOptions.toString(), experimentalOptions.toString()};
     }
     
-    public static String escapeShell(String[] args, OS os) {
+    public static String escapeShell(String arg, OS os) {
         if (os.isPosix) {
-            StringBuilder sb = new StringBuilder();
-            for (String arg : args) {
-                sb.append("'");
-                sb.append(StringUtils.replace(arg, "'", "'\\''"));
-                sb.append("' ");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-            return sb.toString();
+            return "'" + StringUtils.replace(arg, "'", "'\\''") + "'";
         } else if (os == OS.WIN) {
-            StringBuilder sb = new StringBuilder();
-            for (String arg : args) {
-                sb.append('"');
-                sb.append(StringUtils.replace(arg, "\"", "\\\""));
-                sb.append("\" ");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-            return sb.toString();
+            return '"' + StringUtils.replace(arg, "\"", "\\\"") + '"';
         }
         throw new IllegalArgumentException("unsupported OS");
+    }
+
+    public static String escapeShell(String[] args, OS os) {
+        String[] args1 = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            args1[i] = StringUtil.escapeShell(args[i], os);
+        }
+        return StringUtils.join(args1, ' ');
     }
 }
