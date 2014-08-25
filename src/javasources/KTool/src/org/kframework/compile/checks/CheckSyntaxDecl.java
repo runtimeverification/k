@@ -122,11 +122,14 @@ public class CheckSyntaxDecl extends BasicVisitor {
             }
         }
 
-        if (!isBinaryInfixProd(node)) {
-            if (node.containsAttribute(Constants.LEFT) || node.containsAttribute(Constants.RIGHT) || node.containsAttribute(Constants.NON_ASSOC)) {
-                String msg = "Associativity attribute should only be assigned to binary infix production.\n";
-                GlobalSettings.kem.registerCompilerWarning(msg, this, node);
-            }
+        if (!(node.getItems().get(0) instanceof NonTerminal) && node.containsAttribute(Constants.RIGHT)) {
+            String msg = "'" + Constants.RIGHT + "' should be used only on productions which start with a NonTerminal.\n";
+            GlobalSettings.kem.registerCompilerWarning(msg, this, node);
+        }
+
+        if (!(node.getItems().get(node.getItems().size() - 1) instanceof NonTerminal) && node.containsAttribute(Constants.LEFT)) {
+            String msg = "'" + Constants.LEFT + "' should be used only on productions which end with a NonTerminal.\n";
+            GlobalSettings.kem.registerCompilerWarning(msg, this, node);
         }
 
         if (eTerminals > 0 && (neTerminals == 0 || sorts < 2)) {
@@ -148,24 +151,5 @@ public class CheckSyntaxDecl extends BasicVisitor {
     public Void visit(Sentence node, Void _) {
         // optimization to not visit the entire tree
         return null;
-    }
-
-    private boolean isBinaryInfixProd(Production node) {
-        if (node.getArity() != 2) {
-            return false;
-        }
-        List<ProductionItem> prodItems = node.getItems();
-        if (prodItems.size() == 2) {
-            ProductionItem oprnd1 = node.getItems().get(0);
-            ProductionItem oprnd2 = node.getItems().get(1);
-            return (oprnd1 instanceof NonTerminal) && (oprnd2 instanceof NonTerminal);
-        } else if (prodItems.size() == 3) {
-            ProductionItem oprnd1 = node.getItems().get(0);
-            ProductionItem op = node.getItems().get(1);
-            ProductionItem oprnd2 = node.getItems().get(2);
-            return (oprnd1 instanceof NonTerminal) && (oprnd2 instanceof NonTerminal) && (op instanceof Terminal);
-        } else {
-            return false;
-        }
     }
 }

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KSorts;
@@ -28,6 +29,7 @@ import org.kframework.parser.concrete2.Rule.AddLocationRule;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.parser.concrete2.Rule.WrapLabelRule;
 import org.kframework.parser.generator.CollectTerminalsVisitor;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * A simple visitor that goes through every accessible production and creates the NFA states for the
@@ -185,13 +187,24 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             // T ::= Token{regex}
             // these kind of productions create KApps which contain token elements
             Lexical lx = prd.getLexical();
-            String pattern = prd.containsAttribute(Constants.REGEX) ?
-                                prd.getAttribute(Constants.REGEX) :
-                                lx.getLexicalRule();
+            Pattern p;
+            if (!prd.containsAttribute(Constants.REGEX)) {
+                // try to use the regular expression from SDF.
+                // If it's not compatible give a warning
+                try {
+                    p = Pattern.compile(lx.getLexicalRule());
+                } catch (PatternSyntaxException ex) {
+                    p = Pattern.compile("NoMatch");
+                    String msg = "Lexical pattern not compatible with the new parser.";
+                    GlobalSettings.kem.registerCompilerWarning(msg, ex, lx);
+                }
+            } else {
+                p = Pattern.compile(prd.getAttribute(Constants.REGEX));
+            }
+
             // check to see which terminals match the current regular expression and send it to
             // the PrimitiveState for rejection
             Set<String> rejects = new HashSet<>();
-            Pattern p = Pattern.compile(pattern);
             if (!prd.containsAttribute("noAutoReject")) {
                 for (Terminal keyword : ctv.terminals) {
                     Matcher m = p.matcher(keyword.getTerminal());
@@ -205,7 +218,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 }
             }
             PrimitiveState pstate = new RegExState(prd.getSort().getName() + "-T",
-                nt, Pattern.compile(pattern), prd.getSort().getName(), rejects);
+                nt, p, prd.getSort().getName(), rejects);
             previous.next.add(pstate);
             previous = pstate;
         } else if (prd.isConstant(context)) { // TODO(Radu): properly determine if a production is a constant or not
