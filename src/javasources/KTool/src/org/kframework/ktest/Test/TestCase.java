@@ -2,6 +2,7 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.Config.InvalidConfigError;
@@ -158,14 +159,22 @@ public class TestCase {
         for (int i = 0; i < kompileOpts.size(); i++) {
             stringArgs.addAll(kompileOpts.get(i).toStringList());
         }
-        String[] argsArr = new String[stringArgs.size()];
-        return stringArgs.toArray(argsArr);
+        String[] argsArr = stringArgs.toArray(new String[stringArgs.size()]);
+        if (OS.current() == OS.WIN) {
+            for (int i = 0; i < argsArr.length; i++) {
+                argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
+            }
+        }
+        return argsArr;
     }
 
     /**
      * @return String representation of kompile command to be used in logging.
      */
     public String toKompileLogString() {
+        if (OS.current() == OS.WIN) {
+            return StringUtils.join(getKompileCmd(), ' ');
+        }
         return StringUtil.escapeShell(getKompileCmd(), OS.current());
     }
 
@@ -203,13 +212,23 @@ public class TestCase {
      */
     public String[] getPdfCmd() {
         assert new File(getDefinition()).isFile();
-        return new String[] { ExecNames.getKompile(), "--backend", "pdf", getDefinition() };
+        String[] argsArr =
+                new String[] { ExecNames.getKompile(), "--backend", "pdf", getDefinition() };
+        if (OS.current() == OS.WIN) {
+            for (int i = 0; i < argsArr.length; i++) {
+                argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
+            }
+        }
+        return argsArr;
     }
 
     /**
      * @return String representation of PDF command to be used in logging.
      */
     public String toPdfLogString() {
+        if (OS.current() == OS.WIN) {
+            return StringUtils.join(getPdfCmd(), ' ');
+        }
         return StringUtil.escapeShell(getPdfCmd(), OS.current());
     }
 
