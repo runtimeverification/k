@@ -196,7 +196,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 } catch (PatternSyntaxException ex) {
                     p = Pattern.compile("NoMatch");
                     String msg = "Lexical pattern not compatible with the new parser.";
-                    GlobalSettings.kem.registerCompilerWarning(msg, lx);
+                    GlobalSettings.kem.registerCompilerWarning(msg, ex, lx);
                 }
             } else {
                 p = Pattern.compile(prd.getAttribute(Constants.REGEX));
