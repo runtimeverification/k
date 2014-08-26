@@ -186,7 +186,7 @@ public class Rule extends JavaSymbolicObject {
 
             if (leftHandSide instanceof KItem
                     && rightHandSide.equals(BoolToken.TRUE)
-                    && ((KList) ((KItem) leftHandSide).kList()).size() == 1) {
+                    && ((KList) ((KItem) leftHandSide).kList()).concreteSize() == 1) {
                 Term arg = ((KList) ((KItem) leftHandSide).kList()).get(0);
                 sortPredArg = arg instanceof KItem ? (KItem) arg : null;
             } else {

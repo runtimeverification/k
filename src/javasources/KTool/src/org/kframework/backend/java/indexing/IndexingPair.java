@@ -43,14 +43,14 @@ public class IndexingPair implements Serializable {
         if (term instanceof KSequence) {
             KSequence kSequence = (KSequence) term;
 
-            if (kSequence.size() == 0) {
+            if (kSequence.concreteSize() == 0) {
                 if (kSequence.hasFrame()) {
                     return new IndexingPair(TopIndex.TOP, TopIndex.TOP);
                 } else {
                     return new IndexingPair(BottomIndex.BOTTOM, BottomIndex.BOTTOM);
                 }
             }
-            else if (kSequence.size() == 1) {
+            else if (kSequence.concreteSize() == 1) {
                 if (kSequence.hasFrame()) {
                     return new IndexingPair(getIndex(kSequence.get(0), definition), TopIndex.TOP);
                 } else {
@@ -91,7 +91,7 @@ public class IndexingPair implements Serializable {
             sndIndex = instream.elementsRight().isEmpty() ? TopIndex.TOP : getIndex(instream.get(-1), definition);
         } else {
             fstIndex = instream.isEmpty() ? BottomIndex.BOTTOM : getIndex(instream.get(0), definition);
-            sndIndex = instream.size() < 2 ? BottomIndex.BOTTOM : getIndex(instream.get(-1), definition);
+            sndIndex = instream.concreteSize() < 2 ? BottomIndex.BOTTOM : getIndex(instream.get(-1), definition);
         }
 
         return new IndexingPair(fstIndex, sndIndex);
@@ -121,7 +121,7 @@ public class IndexingPair implements Serializable {
             sndIndex = outstream.elementsLeft().size() < 2 ? TopIndex.TOP : getIndex(outstream.get(1), definition);
         } else {
             fstIndex = outstream.isEmpty() ? BottomIndex.BOTTOM : getIndex(outstream.get(0), definition);
-            sndIndex = outstream.size() < 2 ? BottomIndex.BOTTOM : getIndex(outstream.get(1), definition);
+            sndIndex = outstream.concreteSize() < 2 ? BottomIndex.BOTTOM : getIndex(outstream.get(1), definition);
         }
 
         return new IndexingPair(fstIndex, sndIndex);

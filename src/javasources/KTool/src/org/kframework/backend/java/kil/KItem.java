@@ -166,7 +166,7 @@ public final class KItem extends Term {
             boolean mustMatch = true;
             boolean mayMatch = true;
 
-            if (kList.size() == production.getArity()) {
+            if (kList.concreteSize() == production.getArity()) {
                 /* check if the production can match this KItem */
                 int idx = 0;
                 for (Term term : kList) {
@@ -652,8 +652,8 @@ public final class KItem extends Term {
 
         public CacheTableColKey(KLabelConstant kLabelConstant, KList kList) {
             this.kLabelConstant = kLabelConstant;
-            sorts = new Sort[kList.size()];
-            bools = new boolean[kList.size()];
+            sorts = new Sort[kList.concreteSize()];
+            bools = new boolean[kList.concreteSize()];
             int idx = 0;
             for (Term term : kList) {
                 if (term instanceof KItem){

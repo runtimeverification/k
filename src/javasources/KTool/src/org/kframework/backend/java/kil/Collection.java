@@ -62,17 +62,13 @@ public abstract class Collection extends Term {
      * Returns true if this {@code Collection} does not contain any content.
      */
     public boolean isEmpty() {
-        return size() == 0 && isConcreteCollection();
+        return concreteSize() == 0 && isConcreteCollection();
     }
 
     /**
-     * Returns the size of the contents of this {@code Collection}.
-     *
-     * TODO(YilongL): rename to concreteSize?
-     *
-     * @return the size of the contents
+     * Returns the number of elements or entries of this {@code Collection}.
      */
-    public abstract int size();
+    public abstract int concreteSize();
 
     /**
      * Returns true if this collection contains elements or entries, but does not contain patterns,

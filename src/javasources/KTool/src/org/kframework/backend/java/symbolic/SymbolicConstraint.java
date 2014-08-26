@@ -341,13 +341,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide instanceof Variable
                     && rightHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) rightHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).size() != 0
+                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).concreteSize() != 0
                     && leftHandSide.equals(((org.kframework.backend.java.kil.Collection) rightHandSide).frame())) {
                 return true;
             } else if (rightHandSide instanceof Variable
                     && leftHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) leftHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).size() != 0
+                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).concreteSize() != 0
                     && rightHandSide.equals(((org.kframework.backend.java.kil.Collection) leftHandSide).frame())) {
                 return true;
             }
@@ -355,12 +355,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide instanceof Variable
                     && rightHandSide instanceof AssociativeCommutativeCollection
                     && ((AssociativeCommutativeCollection) rightHandSide).collectionVariables().contains(leftHandSide)
-                    && ((AssociativeCommutativeCollection) rightHandSide).size() != 0) {
+                    && ((AssociativeCommutativeCollection) rightHandSide).concreteSize() != 0) {
                 return true;
             } else if (rightHandSide instanceof Variable
                     && leftHandSide instanceof AssociativeCommutativeCollection
                     && ((AssociativeCommutativeCollection) leftHandSide).collectionVariables().contains(rightHandSide)
-                    && ((AssociativeCommutativeCollection) leftHandSide).size() != 0) {
+                    && ((AssociativeCommutativeCollection) leftHandSide).concreteSize() != 0) {
                 return true;
             }
 
@@ -449,13 +449,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             Term leftHandSide = this.leftHandSide;
             if (leftHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) leftHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).size() == 0) {
+                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).concreteSize() == 0) {
                 leftHandSide = ((org.kframework.backend.java.kil.Collection) leftHandSide).frame();
             }
             Term rightHandSide = this.rightHandSide;
             if (rightHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) rightHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).size() == 0) {
+                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).concreteSize() == 0) {
                 rightHandSide = ((org.kframework.backend.java.kil.Collection) rightHandSide).frame();
             }
 
@@ -1451,7 +1451,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             if (entry.getKey() instanceof ConcreteCollectionVariable
                     && !(entry.getValue() instanceof ConcreteCollectionVariable && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((ConcreteCollectionVariable) entry.getValue()).concreteCollectionSize())
-                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).size())) {
+                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).concreteSize())) {
                 return false;
             }
         }

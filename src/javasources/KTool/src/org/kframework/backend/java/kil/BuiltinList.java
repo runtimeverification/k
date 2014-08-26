@@ -105,7 +105,7 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public int size() {
+    public int concreteSize() {
         return elementsLeft.size() + elementsRight.size();
     }
 
@@ -441,7 +441,7 @@ public class BuiltinList extends Collection {
                     baseTermTypesBuilder.build());
 
             /* special case: only one List variable */
-            if (builtinList.size() == 0 && builtinList.baseTerms.size() == 1) {
+            if (builtinList.concreteSize() == 0 && builtinList.baseTerms.size() == 1) {
                 Term base = builtinList.baseTerms.get(0);
                 if (base instanceof Variable && base.sort().equals(Sort.LIST)) {
                     return base;

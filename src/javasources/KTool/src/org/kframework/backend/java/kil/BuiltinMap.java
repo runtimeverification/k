@@ -58,7 +58,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public int size() {
+    public int concreteSize() {
         return entries.size();
     }
 

@@ -606,8 +606,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 assert unifiableCellLabels.size() == 1;
             }
 
-            if (cellCollection.size() < otherCellCollection.size()
-                    || cellCollection.size() > otherCellCollection.size()
+            if (cellCollection.concreteSize() < otherCellCollection.concreteSize()
+                    || cellCollection.concreteSize() > otherCellCollection.concreteSize()
                     && !otherCellCollection.hasFrame()) {
                 fail(cellCollection, otherCellCollection);
             }
@@ -978,17 +978,17 @@ public class SymbolicUnifier extends AbstractUnifier {
     private void matchKCollection(KCollection kCollection, KCollection otherKCollection) {
         assert kCollection.getClass().equals(otherKCollection.getClass());
 
-        int length = Math.min(kCollection.size(), otherKCollection.size());
+        int length = Math.min(kCollection.concreteSize(), otherKCollection.concreteSize());
         for(int index = 0; index < length; ++index) {
             unify(kCollection.get(index), otherKCollection.get(index));
         }
 
-        if (kCollection.size() < otherKCollection.size()) {
+        if (kCollection.concreteSize() < otherKCollection.concreteSize()) {
             if (!kCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
             }
             fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
-        } else if (otherKCollection.size() < kCollection.size()) {
+        } else if (otherKCollection.concreteSize() < kCollection.concreteSize()) {
             if (!otherKCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
             }

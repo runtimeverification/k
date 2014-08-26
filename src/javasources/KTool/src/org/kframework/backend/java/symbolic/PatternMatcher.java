@@ -1053,11 +1053,11 @@ public class PatternMatcher extends AbstractMatcher {
     private void matchKCollection(KCollection kCollection, KCollection pattern) {
         assert kCollection.getClass().equals(pattern.getClass());
 
-        int length = pattern.size();
-        if (kCollection.size() >= length) {
+        int length = pattern.concreteSize();
+        if (kCollection.concreteSize() >= length) {
             if (pattern.hasFrame()) {
                 addSubstitution(pattern.frame(), kCollection.fragment(length));
-            } else if (kCollection.hasFrame() || kCollection.size() > length) {
+            } else if (kCollection.hasFrame() || kCollection.concreteSize() > length) {
                 fail(kCollection, pattern);
             }
 

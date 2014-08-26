@@ -56,7 +56,7 @@ public class HeatingRuleVisitor extends RuleVisitor {
 
     @Override
     public void visit(KList kList) {
-        for (int i = 0; i < kList.size(); i++) {
+        for (int i = 0; i < kList.concreteSize(); i++) {
             counter = i + 1;
             kList.get(i).accept(this);
         }

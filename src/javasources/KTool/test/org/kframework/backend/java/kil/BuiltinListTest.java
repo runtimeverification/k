@@ -27,7 +27,7 @@ public class BuiltinListTest {
         BuiltinList builtinList = (BuiltinList) new ListUpdate(builder.build(), 2, 1).evaluateUpdate();
 
         Assert.assertEquals(new Variable("L", Sort.LIST), builtinList.frame());
-        Assert.assertEquals(2, builtinList.size());
+        Assert.assertEquals(2, builtinList.concreteSize());
         Assert.assertEquals(IntToken.of(9), builtinList.get(-1));
         Assert.assertEquals(IntToken.of(9), builtinList.get(-2));
     }

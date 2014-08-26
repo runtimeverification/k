@@ -115,7 +115,7 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public int size() {
+    public int concreteSize() {
         return cells.size();
     }
 
@@ -298,7 +298,7 @@ public class CellCollection extends Collection {
 
         if (term instanceof CellCollection
                 && !((CellCollection) term).baseTerms().isEmpty()
-                && ((CellCollection) term).size() == 1) {
+                && ((CellCollection) term).concreteSize() == 1) {
             term = ((CellCollection) term).cells().iterator().next();
         }
 
