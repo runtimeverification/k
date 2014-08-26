@@ -56,8 +56,13 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      * @return the size of the contents
      */
     @Override
-    public final int size() {
+    public final int concreteSize() {
         return getContents().size();
+    }
+
+    @Override
+    public final boolean isConcreteCollection() {
+        return !hasFrame();
     }
 
     /**
@@ -71,7 +76,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     @Override
     public final boolean isExactSort() {
-        if (size() == 1) {
+        if (concreteSize() == 1) {
             return !hasFrame() && this.get(0).isExactSort();
         } else {
             /* 2 elements make a proper K collection */
@@ -173,11 +178,11 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public static Term downKind(Term term) {
         assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
 
-        if (term instanceof KList && !((KList) term).hasFrame() && ((KList) term).size() == 1) {
+        if (term instanceof KList && !((KList) term).hasFrame() && ((KList) term).concreteSize() == 1) {
             term = ((KList) term).get(0);
         }
 
-        if (term instanceof KSequence && !((KSequence) term).hasFrame() && ((KSequence) term).size() == 1) {
+        if (term instanceof KSequence && !((KSequence) term).hasFrame() && ((KSequence) term).concreteSize() == 1) {
             term = ((KSequence) term).get(0);
         }
 

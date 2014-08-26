@@ -18,7 +18,7 @@ public final class BuiltinCollectionOperations {
     public static IntToken size(Collection collection, TermContext context) {
         if (collection instanceof AssociativeCommutativeCollection) {
             return ((AssociativeCommutativeCollection) collection).isConcreteCollection()
-                    ? IntToken.of(collection.size()) : null;
+                    ? IntToken.of(collection.concreteSize()) : null;
         } else {
             // TODO(AndreiS): support List
             return null;

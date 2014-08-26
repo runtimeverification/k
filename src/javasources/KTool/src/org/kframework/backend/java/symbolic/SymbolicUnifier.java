@@ -21,6 +21,7 @@ import java.util.Set;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
@@ -172,6 +173,12 @@ public class SymbolicUnifier extends AbstractUnifier {
             unifyMap((BuiltinMap) term, (BuiltinMap) otherTerm, true);
             return;
         }
+        // TODO(YilongL): how should I implement BuiltinList#isUnifiableByCurrentAlgorithm?
+        if (term instanceof BuiltinList && ((BuiltinList) term).isUnifiableByCurrentAlgorithm()
+                && otherTerm instanceof BuiltinList && ((BuiltinList) term).isUnifiableByCurrentAlgorithm()) {
+            unifyList((BuiltinList) term, (BuiltinList) otherTerm, true);
+            return;
+        }
 
         if (term.isSymbolic() || otherTerm.isSymbolic()) {
             // TODO(YilongL): can we move this adhoc code to another place?
@@ -203,6 +210,96 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (!term.equals(otherTerm)) {
                 term.accept(this, otherTerm);
             }
+        }
+    }
+
+    public boolean unifyList(BuiltinList list, BuiltinList otherList, boolean addUnchanged) {
+        boolean changed = false;
+
+        int size = Math.min(list.elementsLeft().size(), otherList.elementsLeft().size());
+        for (int i = 0; i < size; i++) {
+            changed = true;
+            unify(list.get(i), otherList.get(i));
+        }
+        List<Term> remainingElementsLeft = list.elementsLeft().subList(size, list.elementsLeft().size());
+        List<Term> otherRemainingElementsLeft = otherList.elementsLeft().subList(size, otherList.elementsLeft().size());
+
+        size = Math.min(list.elementsRight().size(), otherList.elementsRight().size());
+        for (int i = 1; i <= size; i++) {
+            changed = true;
+            unify(list.get(-i), otherList.get(-i));
+        }
+        List<Term> remainingElementsRight = list.elementsRight().subList(0, size);
+        List<Term> otherRemainingElementsRight = otherList.elementsRight().subList(0, size);
+
+        List<Term> remainingBaseTerms = list.baseTerms();
+        List<Term> otherRemainingBaseTerms = otherList.baseTerms();
+        if (remainingElementsLeft.isEmpty() && otherRemainingElementsLeft.isEmpty()) {
+            size = Math.min(remainingBaseTerms.size(), otherRemainingBaseTerms.size());
+            int left = 0;
+            while (left < size) {
+                // TODO(YilongL): is it too naive to just check equality between base terms?
+                if (list.getBaseTerm(left).equals(otherList.getBaseTerm(left))) {
+                    changed = true;
+                    left++;
+                } else {
+                    break;
+                }
+            }
+
+            remainingBaseTerms = remainingBaseTerms.subList(left, remainingBaseTerms.size());
+            otherRemainingBaseTerms = otherRemainingBaseTerms.subList(left, otherRemainingBaseTerms.size());
+        }
+        if (remainingElementsRight.isEmpty() && otherRemainingElementsRight.isEmpty()) {
+            size = Math.min(remainingBaseTerms.size(), otherRemainingBaseTerms.size());
+            int right = 1;
+            while (right <= size) {
+                if (list.getBaseTerm(-right).equals(otherList.getBaseTerm(-right))) {
+                    changed = true;
+                    right++;
+                } else {
+                    break;
+                }
+            }
+
+            remainingBaseTerms = remainingBaseTerms.subList(0, remainingBaseTerms.size() - right + 1);
+            otherRemainingBaseTerms = otherRemainingBaseTerms.subList(0, otherRemainingBaseTerms.size() - right + 1);
+        }
+
+        if (remainingElementsLeft.isEmpty()
+                && remainingBaseTerms.isEmpty()
+                && remainingElementsRight.isEmpty()
+                && (!otherRemainingElementsLeft.isEmpty() || !otherRemainingElementsRight.isEmpty())) {
+            fail(list, otherList);
+        }
+
+        if (otherRemainingElementsLeft.isEmpty()
+                && otherRemainingBaseTerms.isEmpty()
+                && otherRemainingElementsRight.isEmpty()
+                && (!remainingElementsLeft.isEmpty() || !remainingElementsRight.isEmpty())) {
+            fail(list, otherList);
+        }
+
+        if (changed || addUnchanged) {
+            BuiltinList.Builder builder = BuiltinList.builder();
+            builder.addItems(remainingElementsLeft);
+            builder.concatenate(remainingBaseTerms);
+            builder.addItems(remainingElementsRight);
+            Term remainingList = builder.build();
+
+            BuiltinList.Builder otherBuilder = BuiltinList.builder();
+            otherBuilder.addItems(otherRemainingElementsLeft);
+            otherBuilder.concatenate(otherRemainingBaseTerms);
+            otherBuilder.addItems(otherRemainingElementsRight);
+            Term otherRemainingList = otherBuilder.build();
+
+            if (!(remainingList instanceof BuiltinList && ((BuiltinList) remainingList).isEmpty())
+                    || !(otherRemainingList instanceof BuiltinList && ((BuiltinList) otherRemainingList).isEmpty())) {
+                fConstraint.add(remainingList, otherRemainingList);
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -509,8 +606,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 assert unifiableCellLabels.size() == 1;
             }
 
-            if (cellCollection.size() < otherCellCollection.size()
-                    || cellCollection.size() > otherCellCollection.size()
+            if (cellCollection.concreteSize() < otherCellCollection.concreteSize()
+                    || cellCollection.concreteSize() > otherCellCollection.concreteSize()
                     && !otherCellCollection.hasFrame()) {
                 fail(cellCollection, otherCellCollection);
             }
@@ -881,17 +978,17 @@ public class SymbolicUnifier extends AbstractUnifier {
     private void matchKCollection(KCollection kCollection, KCollection otherKCollection) {
         assert kCollection.getClass().equals(otherKCollection.getClass());
 
-        int length = Math.min(kCollection.size(), otherKCollection.size());
+        int length = Math.min(kCollection.concreteSize(), otherKCollection.concreteSize());
         for(int index = 0; index < length; ++index) {
             unify(kCollection.get(index), otherKCollection.get(index));
         }
 
-        if (kCollection.size() < otherKCollection.size()) {
+        if (kCollection.concreteSize() < otherKCollection.concreteSize()) {
             if (!kCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
             }
             fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
-        } else if (otherKCollection.size() < kCollection.size()) {
+        } else if (otherKCollection.concreteSize() < kCollection.concreteSize()) {
             if (!otherKCollection.hasFrame()) {
                 fail(kCollection, otherKCollection);
             }

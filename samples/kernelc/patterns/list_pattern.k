@@ -6,7 +6,7 @@ module LIST-PATTERN
 
   syntax IntSeq ::= Int "::" IntSeq
                   | "[]"
-  syntax IntSeq ::= IntSeq "@" IntSeq   [function]
+                  > IntSeq "@" IntSeq   [function, left]
                   | rev(IntSeq)         [function]
   syntax Int ::= len(IntSeq)            [function, smtlib(smt_list_len)]
                | sum(IntSeq)            [function, smtlib(smt_list_sum)]
@@ -20,8 +20,23 @@ module LIST-PATTERN
   rule sum([]) => 0
 
   /* lemmas */
-  rule L @ [] => L                                [lemma]
-  rule (L1 @ (E :: [])) @ L2 => L1 @ (E :: L2)    [lemma]
+  rule L @ [] => L                                      [lemma]
+  rule (L1 @ (E :: L0)) @ L2 => L1 @ (E :: (L0 @ L2))   [lemma]
+  rule rev(L1 @ L2) => rev(L2) @ rev(L1)                [lemma]
+
+  /* conversion between IntSeq and List */
+  syntax List ::= "intseq2list" "(" IntSeq ")"  [function]
+  rule intseq2list(E:Int :: L:IntSeq)
+    => ListItem(E) intseq2list(L)
+  rule intseq2list([]) => .List
+  rule intseq2list(L1 @ L2)
+    => intseq2list(L1) intseq2list(L2)
+  [lemma]
+
+  syntax IntSeq ::= "list2intseq" "(" List ")"  [function]
+  rule list2intseq(ListItem(H) L:List)
+    => H :: list2intseq(L)
+  rule list2intseq(.List) => []
 
   /* list pattern */
   syntax Map ::= "list" "(" Pointer ")" "(" IntSeq ")"   [pattern(1)]

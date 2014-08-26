@@ -108,7 +108,9 @@ public class BuiltinMapOperations {
         }
 
         List<Term> elements = new ArrayList<>(map.getEntries().values());
-        return new BuiltinList(elements);
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItems(elements);
+        return (BuiltinList) builder.build();
     }
 
     public static BoolToken inclusion(BuiltinMap map1, BuiltinMap map2, TermContext context) {

@@ -145,7 +145,7 @@ public class KSequence extends KCollection {
             return sort;
         }
 
-        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KSEQUENCE;
+        sort = concreteSize() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KSEQUENCE;
         return sort;
     }
 

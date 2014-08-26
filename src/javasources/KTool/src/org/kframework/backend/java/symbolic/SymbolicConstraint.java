@@ -5,6 +5,7 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
@@ -340,13 +341,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide instanceof Variable
                     && rightHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) rightHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).size() != 0
+                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).concreteSize() != 0
                     && leftHandSide.equals(((org.kframework.backend.java.kil.Collection) rightHandSide).frame())) {
                 return true;
             } else if (rightHandSide instanceof Variable
                     && leftHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) leftHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).size() != 0
+                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).concreteSize() != 0
                     && rightHandSide.equals(((org.kframework.backend.java.kil.Collection) leftHandSide).frame())) {
                 return true;
             }
@@ -354,12 +355,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide instanceof Variable
                     && rightHandSide instanceof AssociativeCommutativeCollection
                     && ((AssociativeCommutativeCollection) rightHandSide).collectionVariables().contains(leftHandSide)
-                    && ((AssociativeCommutativeCollection) rightHandSide).size() != 0) {
+                    && ((AssociativeCommutativeCollection) rightHandSide).concreteSize() != 0) {
                 return true;
             } else if (rightHandSide instanceof Variable
                     && leftHandSide instanceof AssociativeCommutativeCollection
                     && ((AssociativeCommutativeCollection) leftHandSide).collectionVariables().contains(rightHandSide)
-                    && ((AssociativeCommutativeCollection) leftHandSide).size() != 0) {
+                    && ((AssociativeCommutativeCollection) leftHandSide).concreteSize() != 0) {
                 return true;
             }
 
@@ -448,13 +449,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             Term leftHandSide = this.leftHandSide;
             if (leftHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) leftHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).size() == 0) {
+                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).concreteSize() == 0) {
                 leftHandSide = ((org.kframework.backend.java.kil.Collection) leftHandSide).frame();
             }
             Term rightHandSide = this.rightHandSide;
             if (rightHandSide instanceof org.kframework.backend.java.kil.Collection
                     && ((org.kframework.backend.java.kil.Collection) rightHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).size() == 0) {
+                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).concreteSize() == 0) {
                 rightHandSide = ((org.kframework.backend.java.kil.Collection) rightHandSide).frame();
             }
 
@@ -545,7 +546,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         public boolean isSimplifiableByCurrentAlgorithm() {
             return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic()
-                    && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap);
+                    && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap)
+                    && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList);
         }
     }
 
@@ -1094,16 +1096,19 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value of this symbolic constraint after simplification
      */
     public TruthValue simplify() {
-        if (data.truthValue == TruthValue.FALSE) {
+        if (data.truthValue != TruthValue.UNKNOWN) {
             return data.truthValue;
         }
 
         boolean change; // specifies if the equalities have been further
-                         // simplified in the last iteration
+                        // simplified in the last iteration
 
         label: do {
             change = false;
             normalize();
+            if (data.truthValue != TruthValue.UNKNOWN) {
+                return data.truthValue;
+            }
 
             equalitiesWriteProtected = true;
             for (Iterator<Equality> iterator = data.equalities.iterator(); iterator.hasNext();) {
@@ -1139,8 +1144,25 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         equalitiesWriteProtected = false;
                         break label;
                     }
+                } else if (equality.leftHandSide instanceof BuiltinList
+                        && ((BuiltinList) equality.leftHandSide).isUnifiableByCurrentAlgorithm()
+                        && equality.rightHandSide instanceof BuiltinList
+                        && ((BuiltinList) equality.rightHandSide).isUnifiableByCurrentAlgorithm()) {
+                    try {
+                        if (unifier.unifyList(
+                                (BuiltinList) equality.leftHandSide,
+                                (BuiltinList) equality.rightHandSide, false)) {
+                            iterator.remove();
+                            change = true;
+                        }
+                    } catch (UnificationFailure e) {
+                         falsify(new Equality(
+                                unifier.unificationFailureLeftHandSide(),
+                                unifier.unificationFailureRightHandSide()));
+                        equalitiesWriteProtected = false;
+                        break label;
+                    }
                 }
-
             }
 
             equalitiesWriteProtected = false;
@@ -1429,7 +1451,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             if (entry.getKey() instanceof ConcreteCollectionVariable
                     && !(entry.getValue() instanceof ConcreteCollectionVariable && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((ConcreteCollectionVariable) entry.getValue()).concreteCollectionSize())
-                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).size())) {
+                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).concreteSize())) {
                 return false;
             }
         }

@@ -9,23 +9,18 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
 
 
 void preorder(struct treeNode *t)
-/*@ rule <k> $ => return; ...</k> <heap>... tree(t)(T) ...</heap>
-         <out>... . => tree2preorder(T) </out> */
 {
   if (t == NULL)
     return;
 
-  printf("%d ", t->val);
+  printf("%d ", t->value);
   preorder(t->left);
   preorder(t->right);
 }
-
-
-//@ var T : Tree

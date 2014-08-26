@@ -11,7 +11,7 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
@@ -23,9 +23,6 @@ struct listNode {
 
 
 struct listNode* tree_to_list_recursive(struct treeNode *t, struct listNode *l)
-/*@ rule <k> $ => return ?l; ...</k>
-         <heap>... tree(t)(T),list(l)(A) => list(?l)(tree2list(T) @ A) ...</heap>
-         <out>... . => rev(tree2list(T)) </out> */
 {
   struct listNode *ln;
 
@@ -33,15 +30,11 @@ struct listNode* tree_to_list_recursive(struct treeNode *t, struct listNode *l)
     return l;
 
   ln = (struct listNode *) malloc(sizeof(struct listNode));
-  ln->val = t->val;
+  ln->val = t->value;
   ln->next = tree_to_list_recursive(t->right, l);
-  printf("%d ", t->val);
+  printf("%d ", t->value);
   l = tree_to_list_recursive(t->left, ln);
   free(t);
 
   return l;
 }
-
-
-//@ var A : Seq
-//@ var T : Tree
