@@ -63,6 +63,7 @@ public class Z3Wrapper {
             result = solver.Check() == Status.UNSATISFIABLE;
             context.Dispose();
         } catch (Z3Exception e) {
+            System.err.println("failed to translate smtlib expression:\n" + SMT_PRELUDE + query);
             e.printStackTrace();
         }
         return result;

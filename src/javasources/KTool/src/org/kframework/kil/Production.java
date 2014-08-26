@@ -200,23 +200,35 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         this.sort = sort;
     }
 
-    public Sort getChildSort(int idx) {
+    public ASTNode getChildNode(int idx) {
         int arity = -1;
         if (items.get(0) instanceof UserList) {
             if (idx == 0) {
-                return ((UserList) items.get(0)).getSort();
+                return items.get(0);
             } else {
-                return this.getSort();
+                return this;
             }
         }
         for (ProductionItem i : items) {
             if (!(i instanceof Terminal))
                 arity++;
             if (arity == idx) {
-                return ((NonTerminal) i).getSort();
+                return i;
             }
         }
         return null;
+    }
+
+    public Sort getChildSort(int idx) {
+        ASTNode node = getChildNode(idx);
+        if (node instanceof UserList) {
+            return ((UserList) node).getSort();
+        } else if (node instanceof Production) {
+            return ((Production) node).getSort();
+        } else if (node instanceof NonTerminal) {
+            return ((NonTerminal) node).getSort();
+        }
+        throw new AssertionError("unreachable");
     }
 
     @Override

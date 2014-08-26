@@ -126,16 +126,19 @@ module MINT
   rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), 0))
 
   /* Comparison operations */
-  syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(#MINT:slt)]
+  syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(#MINT:slt), smtlib(bvslt)]
                 | ultMInt(MInt, MInt)   [function, hook(#MINT:ult), smtlib(bvult)]
-                | sleMInt(MInt, MInt)   [function, hook(#MINT:sle)]
-                | uleMInt(MInt, MInt)   [function, hook(#MINT:ule)]
-                | sgtMInt(MInt, MInt)   [function, hook(#MINT:sgt)]
-                | ugtMInt(MInt, MInt)   [function, hook(#MINT:ugt)]
-                | sgeMInt(MInt, MInt)   [function, hook(#MINT:sge)]
-                | ugeMInt(MInt, MInt)   [function, hook(#MINT:uge)]
+                | sleMInt(MInt, MInt)   [function, hook(#MINT:sle), smtlib(bvsle)]
+                | uleMInt(MInt, MInt)   [function, hook(#MINT:ule), smtlib(bvule)]
+                | sgtMInt(MInt, MInt)   [function, hook(#MINT:sgt), smtlib(bvsgt)]
+                | ugtMInt(MInt, MInt)   [function, hook(#MINT:ugt), smtlib(bvugt)]
+                | sgeMInt(MInt, MInt)   [function, hook(#MINT:sge), smtlib(bvsge)]
+                | ugeMInt(MInt, MInt)   [function, hook(#MINT:uge), smtlib(bvuge)]
                 | eqMInt(MInt, MInt)    [function, hook(#MINT:eq), smtlib(=)]
                 | neMInt(MInt, MInt)    [function, hook(#MINT:ne), smtlib(distinct)]
+
+  syntax MInt ::= sMaxMInt(MInt, MInt) [function, smtlib((ite (bvslt #1 #2) #2 #1))]
+                | sMinMInt(MInt, MInt) [function, smtlib((ite (bvslt #1 #2) #1 #2))]
 
   /*
    * Returns a machine integer with the underlying bits the bits of the first
@@ -143,7 +146,7 @@ module MINT
    * The bits of the first machine integer are on the more significant
    * positions.
    */
-  syntax MInt ::= concatenateMInt(MInt, MInt)   [function, hook(#MINT:concatenate), smtlib(concat)]
+  syntax MInt ::= concatenateMInt(MInt, MInt)   [function, hook(#MINT:concatenate), smtlib((concat #2 #1))]
 
   /*
    * Returns a machine integer with the underlying bits the bits of the given

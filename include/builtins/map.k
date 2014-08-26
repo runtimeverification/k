@@ -49,7 +49,7 @@ module MAP
   syntax List ::= values(Map)                   [function, hook(Map:values)]
 
   /*@ Get the Map size (number of key/value pairs) */
-  syntax Int ::= size(Map)                      [function, hook(Map:size), klabel('sizeMap)]
+  syntax Int ::= size(Map)                      [function, hook(Collection:size), klabel('sizeMap)]
 
   /*@ Check map inclusion */
   syntax Bool ::= Map "<=Map" Map               [function, hook(Map:inclusion)]

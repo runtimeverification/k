@@ -248,7 +248,7 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
             } else if (variable.sort().equals(IntToken.SORT)) {
                 return new Z3Term(context.MkIntConst(variable.name()));
             } else if (variable.sort().equals(BitVector.SORT)) {
-                return new Z3Term(context.MkBVConst(variable.name(), BitVector.getBitwidth(variable)));
+                return new Z3Term(context.MkBVConst(variable.name(), BitVector.getBitwidthOrDie(variable)));
             } else {
                 throw new UnsupportedOperationException("cannot translate term to Z3 format " + variable);
             }

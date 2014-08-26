@@ -17,7 +17,6 @@ import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.*;
-import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.general.IndexingStatistics;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.krun.api.SearchType;
@@ -649,6 +648,7 @@ public class SymbolicRewriter {
         queue.add(initialTerm);
         boolean guarded = false;
         while (!queue.isEmpty()) {
+            step++;
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
                     continue;

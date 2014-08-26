@@ -21,7 +21,18 @@ module BOOLEAN_LEMMAS
   rule _ andBool false => false
 endmodule
 
+module BIT_VECTOR_LEMMAS
+  imports MINT
+
+  rule addMInt(X:MInt, Y:MInt) => X requires zeroMInt(Y)
+  rule addMInt(X:MInt, Y:MInt) => Y requires zeroMInt(X)
+
+  rule mulMInt(X:MInt, Y:MInt) => X requires zeroMInt(X)
+  rule mulMInt(X:MInt, Y:MInt) => Y requires zeroMInt(Y)
+endmodule
+
 module VERIFICATION_LEMMAS
   imports INTEGER_LEMMAS
   imports BOOLEAN_LEMMAS
+  imports BIT_VECTOR_LEMMAS
 endmodule

@@ -15,7 +15,9 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Production;
+import org.kframework.kil.UserList;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -82,6 +84,19 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "bvshl",
             "bvlshr",
             "bvult",
+            /* z3-specific bit vector theory */
+            "bvsub",
+            "bvxor",
+            "bvslt",
+            "bvule",
+            "bvsle",
+            "bvugt",
+            "bvsgt",
+            "bvuge",
+            "bvsge",
+            "bv2int",
+            /* bit vector extras */
+            "mint_signed_of_unsigned",
             /* set theory */
             "smt_set_mem",
             "smt_set_add",
@@ -149,7 +164,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         List<Production> functions = new ArrayList<>();
         for (Production production : definition.context().productions) {
             String smtlib = production.getAttribute(Attribute.SMTLIB_KEY);
-            if (smtlib != null && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib)) {
+            if (smtlib != null && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
                 functions.add(production);
                 sorts.add(production.getSort().toBackendJava());
                 for (int i = 0; i < production.getArity(); ++i) {
@@ -177,13 +192,13 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             sb.append("(declare-fun ");
             sb.append(production.getAttribute(Attribute.SMTLIB_KEY));
             sb.append(" (");
-            List<Sort> childrenSorts = new ArrayList<>();
+            List<String> childrenSorts = new ArrayList<>();
             for (int i = 0; i < production.getArity(); ++i) {
-                childrenSorts.add(production.getChildSort(i).toBackendJava());
+                childrenSorts.add(getSortName(production.getChildNode(i)));
             }
             Joiner.on(" ").appendTo(sb, childrenSorts);
             sb.append(") ");
-            sb.append(production.getSort().toBackendJava());
+            sb.append(getSortName(production));
             sb.append(")\n");
         }
 
@@ -221,7 +236,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             sb.append(variable.name());
             sb.append(" () ");
             String sortName;
-            sortName = getVariableSortName(variable);
+            sortName = getSortName(variable);
             sb.append(sortName);
             sb.append(")\n");
         }
@@ -236,17 +251,30 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             sb.append(variable.name());
             sb.append(" ");
             String sortName;
-            sortName = getVariableSortName(variable);
+            sortName = getSortName(variable);
             sb.append(sortName);
             sb.append(")\n");
         }
         return sb.toString();
     }
 
-    private static String getVariableSortName(Variable variable) {
-        return variable.sort() == Sort.BIT_VECTOR ?
-               "(_ BitVec " + BitVector.getBitwidth(variable) + ")" :
-               variable.sort().name();
+    private static String getSortName(ASTNode node) {
+        Sort s;
+        if (node instanceof NonTerminal) {
+            s = ((NonTerminal) node).getSort().toBackendJava();
+        } else if (node instanceof UserList) {
+            s = ((UserList) node).getSort().toBackendJava();
+        } else if (node instanceof Production) {
+            s = ((Production) node).getSort().toBackendJava();
+        } else if (node instanceof Variable) {
+            s = ((Variable) node).sort();
+        } else {
+            assert false : "getSortName should be called with a sorted node";
+            return null;
+        }
+        return s == Sort.BIT_VECTOR ?
+                "(_ BitVec " + BitVector.getBitwidthOrDie(node) + ")" :
+                s.name();
     }
 
     public KILtoSMTLib(boolean skipEqualities) {
@@ -322,6 +350,15 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             throw new UnsupportedOperationException("missing SMTLib translation for " + kLabel);
         }
 
+        if (label.startsWith("(")) {
+            // smtlib expression instead of operator
+            String expression = label;
+            for (int i = 0; i < kList.getContents().size(); i++) {
+                expression = expression.replaceAll("\\#" + (i + 1) + "(?![0-9])", ((SMTLibTerm) kList.get(i).accept(this)).expression());
+            }
+            return new SMTLibTerm(expression);
+        }
+
         List<Term> arguments;
         switch (label) {
             case "exists":
@@ -334,9 +371,6 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 int endIndex = ((IntToken) kList.get(2)).intValue() - 1;
                 label = "(_ extract " + endIndex + " " + beginIndex + ")";
                 arguments = ImmutableList.of(kList.get(0));
-                break;
-            case "concat":
-                arguments = ImmutableList.of(kList.get(1), kList.get(0));
                 break;
             default:
                 arguments = kList.getContents();
@@ -364,7 +398,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(IntToken intToken) {
-        return new SMTLibTerm(Integer.toString(intToken.intValue()));
+        return new SMTLibTerm(Long.toString(intToken.longValue()));
     }
 
     @Override
