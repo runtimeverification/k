@@ -4,7 +4,6 @@ package org.kframework.backend.java.builtins;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
-
 import java.util.List;
 
 
@@ -26,8 +25,16 @@ public final class BuiltinBitVectorOperations {
         }
     }
 
-    public static IntToken bitwidth(BitVector term, TermContext context) {
-        return IntToken.of(term.bitwidth());
+    public static IntToken bitwidth(Term term, TermContext context) {
+        if (term instanceof BitVector) {
+            return IntToken.of(((BitVector)term).bitwidth());
+        } else {
+            Integer bitwidth = BitVector.getBitwidth(term);
+            if (bitwidth == null) {
+                return null;
+            }
+            return IntToken.of(bitwidth);
+        }
     }
 
     public static BoolToken zero(BitVector term, TermContext context) {

@@ -3,7 +3,6 @@ package org.kframework.kil.loader;
 
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -12,7 +11,7 @@ public class UpdateReferencesVisitor extends BasicVisitor {
         super(context);
     }
 
-    private Sort prodSort;
+    private Syntax prodRoot;
     private String moduleName;
 
     @Override
@@ -26,14 +25,15 @@ public class UpdateReferencesVisitor extends BasicVisitor {
      */
     @Override
     public Void visit(Syntax syn, Void _) {
-        prodSort = syn.getDeclaredSort().getSort();
-        context.definedSorts.add(prodSort);
+        prodRoot = syn;
+        context.definedSorts.add(prodRoot.getDeclaredSort().getSort());
         return super.visit(syn, _);
     }
 
     @Override
     public Void visit(Production node, Void _) {
-        node.setSort(prodSort);
+        node.setSort(prodRoot.getDeclaredSort().getSort());
+        node.copyAttributesFrom(prodRoot);
         node.setOwnerModuleName(moduleName);
         return null;
     }
