@@ -34,7 +34,6 @@ public class BuiltinList extends Collection {
     private final ImmutableList<Term> elementsLeft;
     private final ImmutableList<Term> elementsRight;
     private final ImmutableList<Term> baseTerms;
-    // TODO(YilongL): combine baseTermTypes and baseTerms to ImmutableList<BaseTerm>?
     private final ImmutableList<BaseTermType> baseTermTypes;
 
     /**
@@ -89,6 +88,20 @@ public class BuiltinList extends Collection {
 
     public List<Term> baseTerms() {
         return baseTerms;
+    }
+
+    public BaseTerm getBaseTerm(int index) {
+        if (index < 0) {
+            index += baseTerms.size();
+        }
+        return BaseTerm.of(baseTerms.get(index), baseTermTypes.get(index));
+    }
+
+    /**
+     * TODO(YilongL): implement it properly!
+     */
+    public boolean isUnifiableByCurrentAlgorithm() {
+        return true;
     }
 
     @Override
@@ -226,6 +239,40 @@ public class BuiltinList extends Collection {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public static class BaseTerm {
+        private final Term term;
+        private final BaseTermType type;
+
+        public static BaseTerm of(Term term, BaseTermType type) {
+            return new BaseTerm(term, type);
+        }
+
+        private BaseTerm(Term term, BaseTermType type) {
+            this.term = term;
+            this.type = type;
+        }
+
+        public Term term() {
+            return term;
+        }
+
+        public boolean isVariable() {
+            return type == BaseTermType.VARIABLE;
+        }
+
+        public boolean isFunction() {
+            return type == BaseTermType.FUNCTION;
+        }
+
+        public boolean isPattern() {
+            return type == BaseTermType.PATTERN;
+        }
+
+        public boolean isList() {
+            return type == BaseTermType.LIST;
+        }
     }
 
     private enum BuilderStatus {

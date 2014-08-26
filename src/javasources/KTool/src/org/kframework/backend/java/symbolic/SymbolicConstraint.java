@@ -5,6 +5,7 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
@@ -545,7 +546,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         public boolean isSimplifiableByCurrentAlgorithm() {
             return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic()
-                    && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap);
+                    && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap)
+                    && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList);
         }
     }
 
@@ -1094,16 +1096,19 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value of this symbolic constraint after simplification
      */
     public TruthValue simplify() {
-        if (data.truthValue == TruthValue.FALSE) {
+        if (data.truthValue != TruthValue.UNKNOWN) {
             return data.truthValue;
         }
 
         boolean change; // specifies if the equalities have been further
-                         // simplified in the last iteration
+                        // simplified in the last iteration
 
         label: do {
             change = false;
             normalize();
+            if (data.truthValue != TruthValue.UNKNOWN) {
+                return data.truthValue;
+            }
 
             equalitiesWriteProtected = true;
             for (Iterator<Equality> iterator = data.equalities.iterator(); iterator.hasNext();) {
@@ -1139,8 +1144,25 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         equalitiesWriteProtected = false;
                         break label;
                     }
+                } else if (equality.leftHandSide instanceof BuiltinList
+                        && ((BuiltinList) equality.leftHandSide).isUnifiableByCurrentAlgorithm()
+                        && equality.rightHandSide instanceof BuiltinList
+                        && ((BuiltinList) equality.rightHandSide).isUnifiableByCurrentAlgorithm()) {
+                    try {
+                        if (unifier.unifyList(
+                                (BuiltinList) equality.leftHandSide,
+                                (BuiltinList) equality.rightHandSide, false)) {
+                            iterator.remove();
+                            change = true;
+                        }
+                    } catch (UnificationFailure e) {
+                         falsify(new Equality(
+                                unifier.unificationFailureLeftHandSide(),
+                                unifier.unificationFailureRightHandSide()));
+                        equalitiesWriteProtected = false;
+                        break label;
+                    }
                 }
-
             }
 
             equalitiesWriteProtected = false;
