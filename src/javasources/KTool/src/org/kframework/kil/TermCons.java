@@ -14,7 +14,7 @@ import org.w3c.dom.Element;
 /**
  * Applications that are not in sort K, or have not yet been flattened.
  */
-public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<?>> {
+public class TermCons extends ProductionReference implements Interfaces.MutableList<Term, Enum<?>> {
     protected java.util.List<Term> contents;
 
     /**
@@ -25,15 +25,13 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
      * TODO(dwightguth): make TermCons used only in the parser where productions should not
      * change.
      */
-    protected final Production production;
 
     private int cachedHashCode = 0;
     private boolean upToDateHash = false;
 
     public TermCons(Element element, Map<String, Production> conses){
-        super(element);
+        super(element, conses);
         this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
-        this.production = conses.get(element.getAttribute(Constants.CONS_cons_ATTR));
         assert this.production != null;
 
         contents = new ArrayList<Term>();
@@ -49,18 +47,12 @@ public class TermCons extends Term implements Interfaces.MutableList<Term, Enum<
     public TermCons(TermCons node) {
         super(node);
         this.contents = new ArrayList<Term>(node.contents);
-        this.production = node.production;
         assert this.production != null;
     }
 
     public TermCons(Sort psort, List<Term> contents, Production production) {
-        super(psort);
+        super(psort, production);
         this.contents = contents;
-        this.production = production;
-    }
-
-    public Production getProduction() {
-        return production;
     }
 
     @Override

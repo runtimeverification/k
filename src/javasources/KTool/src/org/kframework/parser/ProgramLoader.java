@@ -131,16 +131,16 @@ public class ProgramLoader {
             Parser parser = new Parser(contentString);
             out = parser.parse(grammar.get(startSymbol), 0);
             if (context.globalOptions.debug)
-                System.out.println("Raw: " + out + "\n");
+                System.err.println("Raw: " + out + "\n");
             try {
                 out = new TreeCleanerVisitor(context).visitNode(out);
                 out = new MakeConsList(context).visitNode(out);
                 if (context.globalOptions.debug)
-                    System.out.println("Clean: " + out + "\n");
+                    System.err.println("Clean: " + out + "\n");
                 out = new PriorityFilter(context).visitNode(out);
                 out = new PreferAvoidFilter(context).visitNode(out);
                 if (context.globalOptions.debug)
-                    System.out.println("Filtered: " + out + "\n");
+                    System.err.println("Filtered: " + out + "\n");
                 out = new AmbFilter(context).visitNode(out);
                 out = new RemoveBrackets(context).visitNode(out);
                 out = new FlattenTerms(context).visitNode(out);

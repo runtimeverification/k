@@ -4,9 +4,11 @@ package org.kframework.parser.concrete2;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
@@ -536,11 +538,11 @@ public class Parser {
          * 'string' of sort 'sort' to the end of the mapping in that.
          * @param that      The function from which
          * @param string    The token value
-         * @param sort      The sort of the token
+         * @param prd      The production of the token. 'null' if intermediate token
          * @return 'true' iff the mappings in this function changed.
          */
-        boolean addToken(Function that, String string, String sort) {
-            final KApp token = Token.kAppOf(Sort.of(sort), string);
+        boolean addToken(Function that, String string, Production prd) {
+            final Constant token = new Constant(prd != null ? prd.getSort() : Sort.K, string, prd);
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
                     Set<KList> result = new HashSet<>();
@@ -688,11 +690,11 @@ public class Parser {
             if (key.state instanceof PrimitiveState)
                 current = Math.max(current, key.stateBegin);
         }
-        Set<Pair<String, Pattern>> tokens = new HashSet<>();
+        Set<Pair<Production, Pattern>> tokens = new HashSet<>();
         for (StateCall.Key key : s.stateCalls.keySet()) {
             if (key.state instanceof RegExState && key.stateBegin == current) {
                 tokens.add(new ImmutablePair<>(
-                    ((RegExState) key.state).sort, ((RegExState) key.state).pattern));
+                    ((RegExState) key.state).prd, ((RegExState) key.state).pattern));
             }
         }
         return new ParseError(current, s.lines[current], s.columns[current], tokens);
@@ -710,9 +712,9 @@ public class Parser {
         /// The line of the error
         public final int line;
         /// Pairs of Sorts and RegEx patterns that the parsed expected to occur next
-        public final Set<Pair<String, Pattern>> tokens;
+        public final Set<Pair<Production, Pattern>> tokens;
 
-        public ParseError(int position, int line, int column, Set<Pair<String, Pattern>> tokens) {
+        public ParseError(int position, int line, int column, Set<Pair<Production, Pattern>> tokens) {
             assert tokens != null;
             this.position = position;
             this.tokens = tokens;
@@ -754,7 +756,7 @@ public class Parser {
             return stateReturn.function.addToken(stateReturn.key.stateCall.function,
                 s.input.subSequence(stateReturn.key.stateCall.key.stateBegin,
                     stateReturn.key.stateEnd).toString(),
-                ((PrimitiveState) stateReturn.key.stateCall.key.state).sort);
+                ((PrimitiveState) stateReturn.key.stateCall.key.state).prd);
         } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
             int startPosition = stateReturn.key.stateCall.key.ntCall.key.ntBegin;
             int endPosition = stateReturn.key.stateEnd;

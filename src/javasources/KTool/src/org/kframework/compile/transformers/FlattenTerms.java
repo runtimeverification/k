@@ -6,6 +6,7 @@ import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -47,13 +48,29 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
     /**
      * Flattens this TermCons if it has sort K, KItem, or any sort other than
-     * those defined in {@link org.kframework.kil.KSort}.
+     * those defined in {@link org.kframework.kil.Sort}.
      */
     @Override
-    public ASTNode visit(TermCons tc, Void _)  {
+    public ASTNode visit(TermCons tc, Void _) {
         if (tc.getSort().isComputationSort())
             return kTrans.visitNode(tc);
         return super.visit(tc, _);
+    }
+
+    @Override
+    public ASTNode visit(Constant constant, Void _) {
+        Term rez;
+        if (constant.getSort().equals(Sort.KLIST)) {
+            rez = new KLabelConstant(constant.getValue());
+        } else {
+            // builtin token or lexical token
+            rez =  Token.kAppOf(constant.getSort(), constant.getValue());
+        }
+        rez.setLocation(constant.getLocation());
+        rez.setSource(constant.getSource());
+        rez.copyAttributesFrom(constant);
+
+        return this.visitNode(rez);
     }
 
     class FlattenKSyntax extends CopyOnWriteTransformer {

@@ -72,15 +72,14 @@ public abstract class Rule implements Serializable {
      */
     public static class WrapLabelRule extends KListRule {
         private final Production label;
-        private final Sort sort;
-        public WrapLabelRule(Production label, Sort sort) {
-            assert label != null; assert sort != null;
-            this.label = label; this.sort = sort;
+        public WrapLabelRule(Production label) {
+            assert label != null;
+            this.label = label;
         }
         protected KList apply(KList klist, MetaData metaData) {
             //Term term = new KApp(label, klist);
-            Term term = new TermCons(this.sort, klist.getContents(), label);
-            term.setSort(this.sort);
+            Term term = new TermCons(label.getSort(), klist.getContents(), label);
+            term.setSort(label.getSort());
             return new KList(Arrays.asList(term));
         }
     }

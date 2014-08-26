@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.kframework.kil.KSorts;
+import org.kframework.kil.Production;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.utils.algorithms.SCCTarjan;
 
@@ -149,7 +150,7 @@ public class Grammar implements Serializable {
      */
     private NextableState addWhitespace(NextableState start) {
         PrimitiveState whitespace = new RegExState(
-            "whitespace", start.nt, pattern, KSorts.KITEM);
+            "whitespace", start.nt, pattern, null);
         RuleState deleteToken = new RuleState(
             "whitespace-D", start.nt, new DeleteRule(1, true));
         whitespace.next.add(deleteToken);
@@ -464,8 +465,8 @@ public class Grammar implements Serializable {
      * TODO: revisit this description once we get the new KORE
      */
     public abstract static class PrimitiveState extends NextableState {
-        /** The sort of the KApp */
-        public final String sort;
+        /** The production of the Constant. Used as a reference for trace back */
+        public final Production prd;
         public static class MatchResult {
             final public int matchEnd;
             public MatchResult(int matchEnd) {
@@ -479,10 +480,9 @@ public class Grammar implements Serializable {
          */
         abstract Set<MatchResult> matches(CharSequence text, int startPosition);
 
-        public PrimitiveState(String name, NonTerminal nt, String sort) {
+        public PrimitiveState(String name, NonTerminal nt, Production prd) {
             super(name, nt, true);
-            assert sort != null;
-            this.sort = sort;
+            this.prd = prd;
         }
 
         /**
@@ -505,15 +505,15 @@ public class Grammar implements Serializable {
         /** The set of terminals (keywords) that shouldn't be parsed as this regular expression. */
         public final Set<String> rejects;
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern, String sort) {
-            super(name, nt, sort);
+        public RegExState(String name, NonTerminal nt, Pattern pattern, Production prd) {
+            super(name, nt, prd);
             assert pattern != null;
             this.pattern = pattern;
             this.rejects = new HashSet<>();
         }
 
-        public RegExState(String name, NonTerminal nt, Pattern pattern, String sort, Set<String> rejects) {
-            super(name, nt, sort);
+        public RegExState(String name, NonTerminal nt, Pattern pattern, Production prd, Set<String> rejects) {
+            super(name, nt, prd);
             assert pattern != null;
             this.pattern = pattern;
             this.rejects = rejects;

@@ -84,7 +84,9 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(KLabelConstant node, P p) throws E;
     public R visit(KLabelInjection node, P p) throws E;
     public R visit(Rewrite node, P p) throws E;
+    public R visit(ProductionReference node, P p) throws E;
     public R visit(TermCons node, P p) throws E;
+    public R visit(Constant node, P p) throws E;
     public R visit(Bracket node, P p) throws E;
     public R visit(Cast node, P p) throws E;
     public R visit(Variable node, P p) throws E;
