@@ -34,6 +34,7 @@ public class BuiltinList extends Collection {
     private final ImmutableList<Term> elementsLeft;
     private final ImmutableList<Term> elementsRight;
     private final ImmutableList<Term> baseTerms;
+    // TODO(YilongL): combine baseTermTypes and baseTerms to ImmutableList<BaseTerm>?
     private final ImmutableList<BaseTermType> baseTermTypes;
 
     /**
@@ -256,12 +257,12 @@ public class BuiltinList extends Collection {
          * the {@code BuiltinList} to be built. This field is only valid in
          * {@code BuilderStatus#BASE_TERMS}.
          */
-        private List<Term> pendingElements = Lists.newArrayList();
+        private final List<Term> pendingElements = Lists.newArrayList();
 
-        private ImmutableList.Builder<Term> elementsLeftBuilder = new ImmutableList.Builder<>();
-        private ImmutableList.Builder<Term> baseTermsBuilder = new ImmutableList.Builder<>();
-        private ImmutableList.Builder<Term> elementsRightBuilder = new ImmutableList.Builder<>();
-        private ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<Term> elementsLeftBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<Term> baseTermsBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<Term> elementsRightBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
 
         /**
          * Appends the specified term as a list item, namely
@@ -382,7 +383,8 @@ public class BuiltinList extends Collection {
 
         public Term build() {
             if (!pendingElements.isEmpty()) {
-                addItems(pendingElements);
+                elementsRightBuilder.addAll(pendingElements);
+                pendingElements.clear();
             }
 
             BuiltinList builtinList = new BuiltinList(
