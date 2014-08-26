@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Production;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 
@@ -49,17 +50,17 @@ public class SDFHelper {
         return context.tags.get(tag);
     }
 
-    public static String getFollowRestrictionsForTerminals(Set<String> terminals) {
+    public static String getFollowRestrictionsForTerminals(Set<Terminal> terminals) {
         Set<Ttuple> mytuples = new HashSet<Ttuple>();
         String varid = "[A-Z][a-zA-Z0-9\\']*";
 
-        for (String t1 : terminals) {
-            for (String t2 : terminals) {
+        for (Terminal t1 : terminals) {
+            for (Terminal t2 : terminals) {
                 if (!t1.equals(t2)) {
-                    if (t1.startsWith(t2)) {
+                    if (t1.getTerminal().startsWith(t2.getTerminal())) {
                         Ttuple tt = new Ttuple();
-                        tt.key = t1;
-                        tt.value = t2;
+                        tt.key = t1.getTerminal();
+                        tt.value = t2.getTerminal();
                         String ending = tt.key.substring(tt.value.length());
                         if (ending.matches(varid))
                             mytuples.add(tt);

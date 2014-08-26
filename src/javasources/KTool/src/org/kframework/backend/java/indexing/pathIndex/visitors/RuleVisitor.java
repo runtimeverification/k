@@ -79,15 +79,15 @@ public class RuleVisitor extends LocalVisitor {
     public void visit(KSequence kSequence) {
         isKSequence = true;
         //taking care of .K
-        if (kSequence.size() > 0) {
+        if (kSequence.concreteSize() > 0) {
             //needed for env rule in fun
-            if (kSequence.size() > 1){
+            if (kSequence.concreteSize() > 1){
                 kSequence.get(0).accept(this);
                 kSequence.get(1).accept(this);
             } else{
                 kSequence.get(0).accept(this);
             }
-        } else if (kSequence.size() == 0) {
+        } else if (kSequence.concreteSize() == 0) {
             //there may be more than one k cell in the rule and one of them may be empty e.g. the
             // join rule in IMP++, SIMPLE. The correct solution is to get pStrings from all kCells.
             pStrings.add(START_STRING + EMPTY_K);
@@ -113,10 +113,10 @@ public class RuleVisitor extends LocalVisitor {
     @Override
     public void visit(KList kList) {
         String base = pString;
-        if (kList.size() == 0) {
+        if (kList.concreteSize() == 0) {
             pStrings.add(pString);
         }
-        for (int i = 0; i < kList.size(); i++) {
+        for (int i = 0; i < kList.concreteSize(); i++) {
             int position = i + 1;
             if (!isKSequence) {
                 String pending = pString + SEPARATOR + (position);

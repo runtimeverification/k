@@ -11,6 +11,17 @@ module INTEGER_LEMMAS
   rule I:Int *Int 1 => I
 endmodule
 
+module BOOLEAN_LEMMAS
+  imports BOOL-HOOKS
+
+  /* YilongL: already in bool.k but excluded by Java backend */
+  rule true orBool _ => true
+  rule _ orBool true => true
+  rule false andBool _ => false
+  rule _ andBool false => false
+endmodule
+
 module VERIFICATION_LEMMAS
   imports INTEGER_LEMMAS
+  imports BOOLEAN_LEMMAS
 endmodule

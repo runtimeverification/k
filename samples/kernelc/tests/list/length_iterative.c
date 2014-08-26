@@ -15,20 +15,14 @@ struct listNode {
 
 
 int length_iterative(struct listNode* x)
-//@ rule <k> $ => return len(A); ...</k> <heap>... list(x)(A) ...</heap>
 {
-  int l;
+  int y;
 
-  l = 0;
-  /*@ inv <heap>... lseg(old(x), x)(?A1), list(x)(?A2) ...</heap>
-          /\ A = ?A1 @ ?A2 /\ l = len(?A1) */
+  y = 0;
   while (x != NULL) {
-    l = l + 1;
+    y = y + 1;
     x = x->next;
   }
 
-  return l;
+  return y;
 }
-
-
-//@ var A : Seq

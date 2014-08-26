@@ -31,7 +31,7 @@ public class KItemProjection extends Term {
         }
 
         if (!(((KItem) term).kList() instanceof KList)
-                || ((KList) ((KItem) term).kList()).size() != 0
+                || ((KList) ((KItem) term).kList()).concreteSize() != 0
                 || ((KList) ((KItem) term).kList()).hasFrame()) {
             return this;
         }

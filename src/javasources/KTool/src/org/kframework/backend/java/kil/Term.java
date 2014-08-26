@@ -75,13 +75,13 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
                     Term instream = cell.getContent();
                     instreamIndexingPairs.add(IndexingPair.getInstreamIndexingPair(instream, definition));
                     if (instream instanceof BuiltinList) {
-                        maxInputBufLen.setValue(Math.max(maxInputBufLen.intValue(), ((BuiltinList) instream).size()));
+                        maxInputBufLen.setValue(Math.max(maxInputBufLen.intValue(), ((BuiltinList) instream).concreteSize()));
                     }
                 } else if (Constants.STDOUT.equals(streamCellAttr) || Constants.STDERR.equals(streamCellAttr)) {
                     Term outstream = cell.getContent();
                     outstreamIndexingPairs.add(IndexingPair.getOutstreamIndexingPair(outstream, definition));
                     if (outstream instanceof BuiltinList) {
-                        maxOutputBufLen.setValue(Math.max(maxOutputBufLen.intValue(), ((BuiltinList) outstream).size()));
+                        maxOutputBufLen.setValue(Math.max(maxOutputBufLen.intValue(), ((BuiltinList) outstream).concreteSize()));
                     }
                 } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
                     super.visit(cell);
@@ -257,6 +257,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
+                super.visit(cell);
                 if (cell.getLabel().equals(cellName)) {
                     contents.add(cell.getContent());
                 }

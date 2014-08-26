@@ -134,7 +134,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
 
     @Override
     public void visit(KSequence kSequence) {
-        if (kSequence.size() > 0) {
+        if (kSequence.concreteSize() > 0) {
             //TODO (OwolabiL): This is too messy. Restructure the conditionals
             if (kSequence.get(0) instanceof KItem) {
                 boolean isKResult = context.isSubsorted(Sort.KRESULT, org.kframework.kil.Sort.of((kSequence.get(0)).sort().name()));
@@ -153,7 +153,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                     kSequence.get(1).accept(this);
                 }
             }
-        } else if (kSequence.size() == 0) {
+        } else if (kSequence.concreteSize() == 0) {
             //there are cases (e.g., in SIMPLE's join rule) where we need to
             // know that one of the K cells in the configuration is empty.
             pStrings.add(START_STRING + EMPTY_K);
@@ -244,7 +244,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 inner = true;
                 currentLabel = kItem.kLabel().toString();
                 //needed for simple typed static
-                if (context.isSubsortedEq(Sort.KRESULT, Sort.of(kItem.sort().name())) && ((KList)kItem.kList()).size() == 0){
+                if (context.isSubsortedEq(Sort.KRESULT, Sort.of(kItem.sort().name())) && ((KList)kItem.kList()).concreteSize() == 0){
                     String kItemSort = kItem.sort().name();
                     pStrings.add(START_STRING+kItemSort);
                 }
@@ -255,7 +255,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 //      <k>
                 //        (void) ~> discard ~> 'class(theMain) ~> HOLE ;
                 //        </k>
-                if (!context.isSubsortedEq(Sort.KRESULT, Sort.of(kItem.sort().name())) && ((KList)kItem.kList()).size() == 0){
+                if (!context.isSubsortedEq(Sort.KRESULT, Sort.of(kItem.sort().name())) && ((KList)kItem.kList()).concreteSize() == 0){
                     if (pString != null) {
                         pStrings.add(pString);
                     }
@@ -264,7 +264,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 kItem.kLabel().accept(this);
                 kItem.kList().accept(this);
             } else {
-                int kListSize = ((KList) kItem.kList()).size();
+                int kListSize = ((KList) kItem.kList()).concreteSize();
                 if (kListSize == 0 && currentLabel.equals(LIST_LABEL)) {
                     pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                             + EMPTY_LIST_LABEL);
@@ -329,10 +329,10 @@ public class TermVisitor extends LocalVisitor implements Serializable {
 
     @Override
     public void visit(KList kList) {
-        if (kList.size() == 0) {
+        if (kList.concreteSize() == 0) {
             pStrings.add(pString);
         } else {
-            for (int i = 0; i < kList.size(); i++) {
+            for (int i = 0; i < kList.concreteSize(); i++) {
                 currentPosition = i + 1;
                 kList.get(i).accept(this);
             }
@@ -399,7 +399,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
 
         @Override
         public void visit(KList kList) {
-            for (int i = 0; i < kList.size(); i++) {
+            for (int i = 0; i < kList.concreteSize(); i++) {
                 currentPosition = i + 1;
                 kList.get(i).accept(this);
             }

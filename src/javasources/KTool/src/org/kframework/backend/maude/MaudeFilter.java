@@ -137,7 +137,7 @@ public class MaudeFilter extends BackendFilter {
                         result.append(" .\n");
                     }
                 } else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
-                    String operation = p.toString();
+                    String operation = ((Terminal) p.getItems().get(0)).getTerminal();
                     if (operation.startsWith("\"")) {
                         operation = operation.substring(1, operation.length() - 2);
                     }

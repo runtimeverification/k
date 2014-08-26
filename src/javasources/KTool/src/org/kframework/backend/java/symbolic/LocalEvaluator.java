@@ -70,6 +70,11 @@ public class LocalEvaluator extends LocalTransformer {
     }
 
     @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return listUpdate.evaluateUpdate();
+    }
+
+    @Override
     public ASTNode transform(SetElementChoice setElementChoice) {
         return setElementChoice.evaluateChoice();
     }

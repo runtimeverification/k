@@ -17,7 +17,7 @@ rule [loop-inv]:
   ...</env>
   <heap>...
     object(B) |-> tv (struct listNode *, LP:Pointer => null)
-    (list(LP)(_:Seq) => .Map)
+    (list(LP)(_:IntSeq) => .Map)
   ...</heap>
 
 rule [func-spec]:
@@ -29,7 +29,7 @@ rule [func-spec]:
     tv(void, undef)
   ...</k>
   <heap>...
-    list(LP)(_:Seq) => .Map
+    list(LP)(_:IntSeq) => .Map
   ...</heap>
 
 endmodule

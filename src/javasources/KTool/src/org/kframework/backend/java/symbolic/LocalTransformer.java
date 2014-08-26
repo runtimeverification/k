@@ -136,6 +136,11 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return transform((Term) listUpdate);
+    }
+
+    @Override
     public ASTNode transform(MapKeyChoice mapKeyChoice) {
         return transform((Term) mapKeyChoice);
     }

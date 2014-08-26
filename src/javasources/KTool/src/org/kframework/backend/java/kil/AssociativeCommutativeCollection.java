@@ -20,10 +20,21 @@ public abstract class AssociativeCommutativeCollection extends Collection {
             ImmutableMultiset<KItem> collectionPatterns,
             ImmutableMultiset<Term> collectionFunctions,
             ImmutableMultiset<Variable> collectionVariables) {
-        super(null, Kind.KITEM);
+        super(computeFrame(collectionPatterns, collectionFunctions, collectionVariables), Kind.KITEM);
         this.collectionPatterns = collectionPatterns;
         this.collectionVariables = collectionVariables;
         this.collectionFunctions = collectionFunctions;
+    }
+
+    private static Variable computeFrame(
+            ImmutableMultiset<KItem> collectionPatterns,
+            ImmutableMultiset<Term> collectionFunctions,
+            ImmutableMultiset<Variable> collectionVariables) {
+        if (collectionPatterns.isEmpty() && collectionFunctions.isEmpty() && collectionVariables.size() == 1) {
+            return collectionVariables.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -49,10 +60,7 @@ public abstract class AssociativeCommutativeCollection extends Collection {
         return collectionVariables;
     }
 
-    /**
-     * Returns true if this collection contains elements or entries, but does not contain patterns,
-     * functions or variables.
-     */
+    @Override
     public final boolean isConcreteCollection() {
         return collectionPatterns.isEmpty()
                 && collectionVariables.isEmpty()
@@ -61,7 +69,7 @@ public abstract class AssociativeCommutativeCollection extends Collection {
 
     @Override
     public final boolean isEmpty() {
-        return size() == 0 && isConcreteCollection();
+        return concreteSize() == 0 && isConcreteCollection();
     }
 
     @Override

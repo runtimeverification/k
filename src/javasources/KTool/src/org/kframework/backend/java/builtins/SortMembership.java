@@ -36,7 +36,7 @@ public class SortMembership {
     public static Term check(KItem kItem, Definition definition) {
         assert kItem.kLabel() instanceof KLabelConstant;
         assert kItem.kList() instanceof KList
-                && ((KList) kItem.kList()).size() == 1
+                && ((KList) kItem.kList()).concreteSize() == 1
                 && !((KList) kItem.kList()).hasFrame();
 
         Sort predicateSort = ((KLabelConstant) kItem.kLabel()).getPredicateSort();

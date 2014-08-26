@@ -171,6 +171,11 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return proceed(listUpdate) ? ((ListUpdate) super.transform(listUpdate)).evaluateUpdate() : listUpdate;
+    }
+
+    @Override
     public ASTNode transform(MapKeyChoice mapKeyChoice) {
         return proceed(mapKeyChoice) ? ((MapKeyChoice) super.transform(mapKeyChoice)).evaluateChoice() : mapKeyChoice;
     }

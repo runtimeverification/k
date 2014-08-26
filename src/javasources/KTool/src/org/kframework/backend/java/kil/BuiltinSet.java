@@ -56,7 +56,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     }
 
     @Override
-    public int size() {
+    public int concreteSize() {
         return elements.size();
     }
 

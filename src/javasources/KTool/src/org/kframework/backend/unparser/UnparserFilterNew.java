@@ -547,7 +547,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 if (!(productionItem instanceof Terminal)) {
                     Term subterm = termCons.getContents().get(where);
                     if(!(subterm instanceof ListTerminator) || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))){
-                        if (subterm instanceof TermCons && isDataStructure(((TermCons) subterm).getProduction())) {
+                        if (subterm instanceof TermCons && !isDataStructure(termCons.getProduction()) && isDataStructure(((TermCons) subterm).getProduction())) {
                             indenter.endLine();
                             indenter.indent(TAB);
                             this.visitNode(subterm);

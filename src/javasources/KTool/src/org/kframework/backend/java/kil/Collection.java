@@ -62,19 +62,19 @@ public abstract class Collection extends Term {
      * Returns true if this {@code Collection} does not contain any content.
      */
     public boolean isEmpty() {
-        /*
-         * TODO(YilongL): I think this method should be made abstract; this
-         * frame stuff becomes out-dated now
-         */
-        return size() == 0 && !hasFrame();
+        return concreteSize() == 0 && isConcreteCollection();
     }
 
     /**
-     * Returns the size of the contents of this {@code Collection}.
-     *
-     * @return the size of the contents
+     * Returns the number of elements or entries of this {@code Collection}.
      */
-    public abstract int size();
+    public abstract int concreteSize();
+
+    /**
+     * Returns true if this collection contains elements or entries, but does not contain patterns,
+     * functions or variables.
+     */
+    public abstract boolean isConcreteCollection();
 
     /**
      * Checks if this {@code Collection} term is a proper left-hand side view.

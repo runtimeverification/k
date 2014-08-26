@@ -26,6 +26,7 @@ public class Attribute extends ASTNode {
     public static final String FRESH_GENERATOR = "freshGenerator";
     public static final String BITWIDTH_KEY = "bitwidth";
     public static final String SMTLIB_KEY = "smtlib";
+    public static final String SMT_LEMMA_KEY = "smt-lemma";
 
 
     public static final Attribute BRACKET = new Attribute("bracket", "");
