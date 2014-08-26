@@ -20,8 +20,9 @@ module LIST-PATTERN
   rule sum([]) => 0
 
   /* lemmas */
-  rule L @ [] => L                                [lemma]
-  rule (L1 @ (E :: [])) @ L2 => L1 @ (E :: L2)    [lemma]
+  rule L @ [] => L                                      [lemma]
+  rule (L1 @ (E :: L0)) @ L2 => L1 @ (E :: (L0 @ L2))   [lemma]
+  rule rev(L1 @ L2) => rev(L2) @ rev(L1)                [lemma]
 
   /* conversion between IntSeq and List */
   syntax List ::= "intseq2list" "(" IntSeq ")"  [function]
