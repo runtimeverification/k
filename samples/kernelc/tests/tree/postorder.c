@@ -9,23 +9,18 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
 
 
 void postorder(struct treeNode *t)
-/*@ rule <k> $ => return; ...</k> <heap>... tree(t)(T) ...</heap>
-         <out>... . => tree2postorder(T) </out> */
 {
   if (t == NULL)
     return;
 
   postorder(t->left);
   postorder(t->right);
-  printf("%d ", t->val);
+  printf("%d ", t->value);
 }
-
-
-//@ var T : Tree

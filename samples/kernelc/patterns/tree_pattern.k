@@ -3,6 +3,7 @@
 module TREE-PATTERN
   imports MAP
   imports KERNELC-SEMANTICS
+  imports LIST-PATTERN
 
   syntax IntSet ::= IntSet "U" IntSet           [function, smtlib(smt_set_cup)]
                   | ".IntSet"                   [function, smtlib(smt_set_emp)]
@@ -55,10 +56,27 @@ module TREE-PATTERN
   rule tree_mirror(node(I:Int, TL:Tree, TR:Tree))
     => node(I, tree_mirror(TR), tree_mirror(TL))
   rule tree_mirror(leaf) => leaf
-  syntax List ::= "tree2list" "(" Tree ")"      [function]//, smtlib(smt_tree2list)] // YilongL: sort List is reserved in Z3
-  rule tree2list(node(I:Int, TL:Tree, TR:Tree))
-    => tree2list(TL) ListItem(I) tree2list(TR)
-  rule tree2list(leaf) => .List
+
+  syntax IntSeq ::= "tree2inorder" "(" Tree ")"     [function, smtlib(smt_tree2inorder)]
+  rule tree2inorder(node(I:Int, TL:Tree, TR:Tree))
+    => tree2inorder(TL) @ (I :: tree2inorder(TR))
+  rule tree2inorder(leaf) => []
+  syntax IntSeq ::= "tree2preorder" "(" Tree ")"    [function, smtlib(smt_tree2preorder)]
+  rule tree2preorder(node(I:Int, TL:Tree, TR:Tree))
+    => I :: tree2preorder(TL) @ tree2preorder(TR)
+  rule tree2preorder(leaf) => []
+  syntax IntSeq ::= "tree2postorder" "(" Tree ")"   [function, smtlib(smt_tree2postorder)]
+  rule tree2postorder(node(I:Int, TL:Tree, TR:Tree))
+    => tree2postorder(TL) @ tree2postorder(TR) @ (I :: [])
+  rule tree2postorder(leaf) => []
+
+  syntax List ::= "intseq2list" "(" IntSeq ")"  [function]
+  rule intseq2list(E:Int :: L:IntSeq)
+    => ListItem(E) intseq2list(L)
+  rule intseq2list([]) => .List
+  rule intseq2list(L1 @ L2)
+    => intseq2list(L1) intseq2list(L2)
+  [lemma]
 
   syntax Map ::= "tree" "(" Pointer ")" "(" Tree ")"    [pattern(1)]
   rule tree(object(P:Int))(node(I:Int, TL:Tree, TR:Tree))

@@ -6,7 +6,7 @@ module LIST-PATTERN
 
   syntax IntSeq ::= Int "::" IntSeq
                   | "[]"
-  syntax IntSeq ::= IntSeq "@" IntSeq   [function]
+                  > IntSeq "@" IntSeq   [function, left]
                   | rev(IntSeq)         [function]
   syntax Int ::= len(IntSeq)            [function, smtlib(smt_list_len)]
                | sum(IntSeq)            [function, smtlib(smt_list_sum)]
