@@ -7,7 +7,7 @@ public enum IndexingAlgorithm {
     /**
      * Represents an index backed by {@link IndexingTable}
      */
-    RULE_TABLE,
+    RULE_TABLE(IndexingTable.class),
 
     /**
      * Represents an index backed by {@link PathIndex}
@@ -15,5 +15,11 @@ public enum IndexingAlgorithm {
      *              the future
      */
     @Deprecated
-    PATH
+    PATH(PathIndex.class);
+
+    IndexingAlgorithm(Class<? extends RuleIndex> clazz) {
+        this.clazz = clazz;
+    }
+
+    public final Class<? extends RuleIndex> clazz;
 }

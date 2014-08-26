@@ -151,7 +151,7 @@ public class Rule extends JavaSymbolicObject {
             if (indexingPairs.size() == 1) {
                 this.indexingPair = indexingPairs.iterator().next();
             } else {
-                this.indexingPair = IndexingPair.TOP;
+                this.indexingPair = definition.indexingData.TOP_INDEXING_PAIR;
             }
         }
 

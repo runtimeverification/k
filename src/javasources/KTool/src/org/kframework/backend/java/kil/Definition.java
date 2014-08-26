@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -54,9 +55,12 @@ public class Definition extends JavaSymbolicObject {
     private final Set<Sort> tokenSorts;
     private final Set<Sort> builtinSorts;
     private RuleIndex index;
+    public final IndexingTable.Data indexingData;
 
-    public Definition(Context context) {
+    @Inject
+    public Definition(Context context, IndexingTable.Data indexingData) {
         this.context = context;
+        this.indexingData = indexingData;
         rules = new ArrayList<>();
         macros = new ArrayList<>();
         kLabels = new HashSet<>();
@@ -153,7 +157,6 @@ public class Definition extends JavaSymbolicObject {
 
     @Inject
     public void setContext(Context context) {
-        assert this.context == null : "can only set the context once";
         this.context = context;
     }
 

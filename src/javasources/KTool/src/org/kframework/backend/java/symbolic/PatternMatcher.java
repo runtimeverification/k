@@ -220,7 +220,7 @@ public class PatternMatcher extends AbstractMatcher {
                         if (checkOrderedSortedCondition(variable, evalLookupOrChoice, context)) {
                             Term term = crntSubst.put(variable, evalLookupOrChoice);
                             resolved = term == null || BoolToken.TRUE.equals(
-                                    TermEquality.eq(term, evalLookupOrChoice, context));
+                                    new TermEquality().eq(term, evalLookupOrChoice, context));
                         }
                     } else {
                         // the non-lookup term is not a variable and thus requires further pattern matching
@@ -658,8 +658,10 @@ public class PatternMatcher extends AbstractMatcher {
         CellCollection otherCellCollection = (CellCollection) pattern;
 
         if (cellCollection.hasFrame()) {
-            assert !termContext.definition().context().javaExecutionOptions.concreteExecution() :
-                "the subject term should be ground in concrete execution";
+        // TODO(dwightguth): put this assertion back in once this class is constructed by
+        // the injector
+//            assert !termContext.definition().context().javaExecutionOption/*s.concreteExecution() :
+//                "the subject term should be ground in concrete execution";*/
             if (!otherCellCollection.hasFrame()) {
                 fail(cellCollection, otherCellCollection);
             }

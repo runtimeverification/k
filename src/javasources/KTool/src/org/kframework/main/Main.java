@@ -86,7 +86,7 @@ public class Main {
                 boolean succeeded = injector.getInstance(FrontEnd.class).main();
                 System.exit(succeeded ? 0 : 1);
             } catch (ProvisionException e) {
-                kem.print();
+                kem.print(e);
                 System.exit(1);
             }
         }

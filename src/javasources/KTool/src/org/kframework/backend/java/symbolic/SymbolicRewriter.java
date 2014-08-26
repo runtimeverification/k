@@ -19,10 +19,12 @@ import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.*;
 import org.kframework.utils.general.IndexingStatistics;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.io.FileSystem;
 
 import com.google.common.base.Stopwatch;
+import com.google.inject.Inject;
 
 /**
  *
@@ -47,12 +49,13 @@ public class SymbolicRewriter {
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
      * the indication that the rule will be used as simulation
      */
-    public SymbolicRewriter(Definition definition) {
+    @Inject
+    public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions) {
         this.definition = definition;
-        this.indexingStats = definition.context().javaExecutionOptions.indexingStats;
+        this.indexingStats = javaOptions.indexingStats;
         ruleIndex = definition.getIndex();
 
-        this.strategy = new TransitionCompositeStrategy(definition.context().kompileOptions.transition);
+        this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
     }
 
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
@@ -710,6 +713,10 @@ public class SymbolicRewriter {
         }
 
         return proofResults;
+    }
+
+    public Definition getDefinition() {
+        return definition;
     }
 
 }

@@ -4,6 +4,7 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
@@ -23,14 +24,17 @@ import java.util.List;
  */
 @Deprecated
 class CellVisitor extends BottomUpVisitor {
-    private Context context;
+    private final Context context;
     private Cell inCell;
     private Cell outCell;
 
+    private final JavaExecutionOptions options;
+
     private List<String> kCellPStings = new ArrayList<>();
 
-    CellVisitor(Context context) {
+    CellVisitor(Context context, JavaExecutionOptions options) {
         this.context = context;
+        this.options = options;
     }
 
     @Override
@@ -38,7 +42,7 @@ class CellVisitor extends BottomUpVisitor {
         if (cell.getLabel().equals("k")) {
             // get the pString from each k cell using a new visitor each time,
             // but accumulate the pStrings
-            TermVisitor visitor = new TermVisitor(this.context);
+            TermVisitor visitor = new TermVisitor(this.context, options, false);
             cell.getContent().accept(visitor);
             kCellPStings.addAll(visitor.getpStrings());
         } else if (cell.getLabel().equals("out")) {

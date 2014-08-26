@@ -6,10 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -24,17 +21,15 @@ import com.google.common.base.Stopwatch;
  */
 public class StepRewriter {
 
-    private final Definition definition;
     private final Collection<Rule> rules;
     private final Stopwatch stopwatch = new Stopwatch();
     private Collection<ConstrainedTerm> constrainedTermResults = new ArrayList<ConstrainedTerm>();
     private Collection<Term> termResults = new ArrayList<Term>();
     private GlobalContext globalContext;
 
-    public StepRewriter(Collection<Rule> rules, Definition definition) {
+    public StepRewriter(Collection<Rule> rules, GlobalContext globalContext) {
         this.rules = new ArrayList<Rule>(rules);
-        this.definition = definition;
-        this.globalContext = new GlobalContext(definition, null);
+        this.globalContext = globalContext;
     }
 
     public Collection<Term> getAllSuccessors(Term term) {

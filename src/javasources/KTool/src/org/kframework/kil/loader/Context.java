@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -18,7 +17,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.ColorOptions;
 import org.kframework.krun.KRunOptions;
-import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
@@ -159,13 +157,11 @@ public class Context implements Serializable {
     }
 
     // TODO(dwightguth): remove these fields and replace with injected dependencies
-    @Inject public transient GlobalOptions globalOptions;
-    public KompileOptions kompileOptions;
-    @Inject(optional=true) public transient SMTOptions smtOptions;
-    @Inject(optional=true) public KRunOptions krunOptions;
-    @Inject(optional=true) public ConfigurationCreationOptions ccOptions;
-    @Inject(optional=true) public ColorOptions colorOptions;
-    @Inject(optional=true) public transient JavaExecutionOptions javaExecutionOptions;
+    @Deprecated @Inject public transient GlobalOptions globalOptions;
+    @Deprecated public KompileOptions kompileOptions;
+    @Deprecated @Inject(optional=true) public transient SMTOptions smtOptions;
+    @Deprecated @Inject(optional=true) public KRunOptions krunOptions;
+    @Deprecated @Inject(optional=true) public ColorOptions colorOptions;
 
     public Context() {
         initSubsorts();

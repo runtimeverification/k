@@ -141,6 +141,13 @@ public class KExceptionManager {
     }
 
     public void print() {
+        print(null);
+    }
+
+    public void print(Throwable t) {
+        if (t != null && options.debug) {
+            t.printStackTrace();
+        }
         Collections.sort(exceptions, new Comparator<KException>() {
             @Override
             public int compare(KException arg0, KException arg1) {

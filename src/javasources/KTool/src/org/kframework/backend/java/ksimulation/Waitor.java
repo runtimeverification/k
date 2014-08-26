@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Spec;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
@@ -21,10 +21,10 @@ import com.google.inject.Provider;
 
 public class Waitor extends Thread{
 
-    private final JavaSymbolicKRun impl;
-    private final JavaSymbolicKRun spec;
-    private final Provider<org.kframework.kil.Term> implTerm;
-    private final Provider<org.kframework.kil.Term> specTerm;
+    private final SymbolicRewriter impl, spec;
+    private final Provider<org.kframework.kil.Term> implTerm, specTerm;
+    private final Provider<GlobalContext> implGlobalContext, specGlobalContext;
+    private final KilFactory implFactory, specFactory;
     private Looper child;
     private Adjuster decider;
     static boolean result = false;
@@ -60,34 +60,37 @@ public class Waitor extends Thread{
 
     @Inject
     Waitor(
-            @Main JavaSymbolicKRun impl,
-            @Spec JavaSymbolicKRun spec,
+            @Main SymbolicRewriter impl,
+            @Spec SymbolicRewriter spec,
             @Main Provider<org.kframework.kil.Term> implTerm,
-            @Spec Provider<org.kframework.kil.Term> specTerm) throws KRunExecutionException{
+            @Spec Provider<org.kframework.kil.Term> specTerm,
+            @Main Provider<GlobalContext> implGlobalContext,
+            @Spec Provider<GlobalContext> specGlobalContext,
+            @Main KilFactory implFactory,
+            @Spec KilFactory specFactory) throws KRunExecutionException{
 
         this.impl = impl;
         this.spec = spec;
         this.implTerm = implTerm;
         this.specTerm = specTerm;
+        this.implFactory = implFactory;
+        this.specFactory = specFactory;
+        this.implGlobalContext = implGlobalContext;
+        this.specGlobalContext = specGlobalContext;
     }
 
     public void init() {
 
-        this.impl.initialSimulationRewriter();
-        this.spec.initialSimulationRewriter();
         decider = new Adjuster(impl,this.spec);
         ConstrainedTerm [] pair = new ConstrainedTerm[2];
 
 
-        Term term = Term.of(implTerm.get(), impl.getDefinition());
-        GlobalContext globalContext = new GlobalContext(impl.getDefinition(), new PortableFileSystem());
-        TermContext termContext0 = TermContext.of(globalContext);
-        ConstrainedTerm implConstraint = new ConstrainedTerm(term, termContext0);
+        Term term = implFactory.term(implTerm.get());
+        ConstrainedTerm implConstraint = new ConstrainedTerm(term, TermContext.of(implGlobalContext.get()));
         pair[0] = implConstraint;
 
-        term = Term.of(specTerm.get(), this.spec.getDefinition());
-        TermContext termContext1 = TermContext.of(globalContext);
-        ConstrainedTerm specConstraint = new ConstrainedTerm(term, termContext1);
+        term = specFactory.term(specTerm.get());
+        ConstrainedTerm specConstraint = new ConstrainedTerm(term, TermContext.of(specGlobalContext.get()));
         pair[1] = specConstraint;
 
 

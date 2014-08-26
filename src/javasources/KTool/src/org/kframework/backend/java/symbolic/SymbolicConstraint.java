@@ -48,6 +48,8 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * A conjunction of equalities between terms (with variables).
@@ -243,76 +245,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    /**
-     * An equality between two terms (with variables).
-     */
-    public class Equality {
+    public static class EqualityOperations {
 
-        public static final String SEPARATOR = " =? ";
+        private final Provider<Definition> definitionProvider;
+        private final JavaExecutionOptions options;
 
-        private final Term leftHandSide;
-        private final Term rightHandSide;
-
-        private Equality(Term leftHandSide, Term rightHandSide) {
-            if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
-            if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
-
-            assert checkKindMisMatch(leftHandSide, rightHandSide):
-                    "kind mismatch between "
-                    + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
-                    + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
-
-            if (leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) {
-                leftHandSide = KCollection.downKind(leftHandSide);
-            }
-            if (leftHandSide.kind() == Kind.CELL_COLLECTION) {
-                leftHandSide = CellCollection.downKind(leftHandSide);
-            }
-            if (rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST) {
-                rightHandSide = KCollection.downKind(rightHandSide);
-            }
-            if (rightHandSide.kind() == Kind.CELL_COLLECTION) {
-                rightHandSide = CellCollection.downKind(rightHandSide);
-            }
-
-            // YilongL: we can not do the following here for now because builtin
-            // lookups maynot have the correct, or concrete, kind/sort
-            // e.g., currently, node ListLookup (always) has Kind.K
-            // Besides, it is better leave the complex decision in one place,
-            // which is the SymbolicUnifier, the assertion at the beginning is
-            // merely a simple sanity check
-            // assert leftHandSide.kind() == rightHandSide.kind();
-
-            /* eliminate */
-            if (isTermEquality(leftHandSide) && rightHandSide == BoolToken.TRUE) {
-                KList kList = (KList) (((KItem) leftHandSide).kList());
-                leftHandSide = kList.get(0);
-                rightHandSide = kList.get(1);
-
-            }
-            if (isTermEquality(rightHandSide) && leftHandSide == BoolToken.TRUE) {
-                KList kList = (KList) (((KItem) rightHandSide).kList());
-                leftHandSide = kList.get(0);
-                rightHandSide = kList.get(1);
-
-            }
-
-            this.leftHandSide = leftHandSide;
-            this.rightHandSide = rightHandSide;
-        }
-
-        public boolean isTermEquality(Term term) {
-            return term instanceof KItem
-                    && ((KItem) term).kLabel() instanceof KLabelConstant
-                    && ((KLabelConstant) ((KItem) term).kLabel()).label().equals("'_==K_");
-        }
-
-        public Term leftHandSide() {
-            return leftHandSide;
-        }
-
-        public Term rightHandSide() {
-            return rightHandSide;
+        @Inject
+        public EqualityOperations(Provider<Definition> definitionProvider, JavaExecutionOptions options) {
+            this.definitionProvider = definitionProvider;
+            this.options = options;
         }
 
         /**
@@ -320,7 +261,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          *
          * @return true if this equality is definitely false; otherwise, false
          */
-        public boolean isFalse() {
+        public boolean isFalse(Equality equality) {
+            Definition definition = definitionProvider.get();
+            Term leftHandSide = equality.leftHandSide;
+            Term rightHandSide = equality.rightHandSide;
             if (leftHandSide instanceof Bottom || rightHandSide instanceof Bottom) {
                 return true;
             }
@@ -364,7 +308,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
-            if (!termContext().definition().context().javaExecutionOptions.generateTests) {
+            if (!options.generateTests) {
                 if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
                     return !leftHandSide.sort().equals(rightHandSide.sort());
                 } else if (leftHandSide.isExactSort()) {
@@ -436,6 +380,80 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 }
             }
         }
+    }
+
+    /**
+     * An equality between two terms (with variables).
+     */
+    public class Equality {
+
+        public static final String SEPARATOR = " =? ";
+
+
+        private final Term leftHandSide;
+        private final Term rightHandSide;
+
+        private Equality(Term leftHandSide, Term rightHandSide) {
+            if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
+            if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
+
+            assert checkKindMisMatch(leftHandSide, rightHandSide):
+                    "kind mismatch between "
+                    + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
+                    + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
+
+            if (leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) {
+                leftHandSide = KCollection.downKind(leftHandSide);
+            }
+            if (leftHandSide.kind() == Kind.CELL_COLLECTION) {
+                leftHandSide = CellCollection.downKind(leftHandSide);
+            }
+            if (rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST) {
+                rightHandSide = KCollection.downKind(rightHandSide);
+            }
+            if (rightHandSide.kind() == Kind.CELL_COLLECTION) {
+                rightHandSide = CellCollection.downKind(rightHandSide);
+            }
+
+            // YilongL: we can not do the following here for now because builtin
+            // lookups maynot have the correct, or concrete, kind/sort
+            // e.g., currently, node ListLookup (always) has Kind.K
+            // Besides, it is better leave the complex decision in one place,
+            // which is the SymbolicUnifier, the assertion at the beginning is
+            // merely a simple sanity check
+            // assert leftHandSide.kind() == rightHandSide.kind();
+
+            /* eliminate */
+            if (isTermEquality(leftHandSide) && rightHandSide == BoolToken.TRUE) {
+                KList kList = (KList) (((KItem) leftHandSide).kList());
+                leftHandSide = kList.get(0);
+                rightHandSide = kList.get(1);
+
+            }
+            if (isTermEquality(rightHandSide) && leftHandSide == BoolToken.TRUE) {
+                KList kList = (KList) (((KItem) rightHandSide).kList());
+                leftHandSide = kList.get(0);
+                rightHandSide = kList.get(1);
+
+            }
+
+            this.leftHandSide = leftHandSide;
+            this.rightHandSide = rightHandSide;
+        }
+
+        public boolean isTermEquality(Term term) {
+            return term instanceof KItem
+                    && ((KItem) term).kLabel() instanceof KLabelConstant
+                    && ((KLabelConstant) ((KItem) term).kLabel()).label().equals("'_==K_");
+        }
+
+        public Term leftHandSide() {
+            return leftHandSide;
+        }
+
+        public Term rightHandSide() {
+            return rightHandSide;
+        }
 
         /**
          * Checks if this equality is true.
@@ -460,6 +478,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
 
             return leftHandSide.equals(rightHandSide);
+        }
+
+        public boolean isFalse() {
+            return context.global.equalityOps.isFalse(this);
         }
 
         /**
@@ -789,6 +811,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return data.truthValue;
     }
 
+    @SuppressWarnings("unchecked")
     private TruthValue addAll(Object... args) {
         for (Object arg : args) {
             if (data.truthValue == TruthValue.FALSE) {

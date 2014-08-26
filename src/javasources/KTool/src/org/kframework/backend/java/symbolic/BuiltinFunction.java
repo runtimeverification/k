@@ -1,17 +1,18 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
+import org.kframework.kil.loader.Context;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.Builtins;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -22,6 +23,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Utility class that handles the builtin (hooked) operations and their Java
@@ -55,7 +58,16 @@ public class BuiltinFunction {
      */
     private Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
 
-    public BuiltinFunction(Definition definition) {
+    private final Map<Class<?>, Provider<Object>> builtinFunctionProviders;
+
+    /**
+     *
+     * @param definition
+     * @param injector
+     */
+    @Inject
+    public BuiltinFunction(Context context, @Builtins Map<Class<?>, Provider<Object>> builtinFunctionProviders, KExceptionManager kem, Tool tool) {
+        this.builtinFunctionProviders = builtinFunctionProviders;
         /* initialize {@code table} */
         String separator = System.getProperty("file.separator");
         String path = KPaths.getKBase(false) + separator + "include" + separator + "java";
@@ -65,11 +77,11 @@ public class BuiltinFunction {
         try {
             FileUtil.loadProperties(properties, propertyFile);
         } catch (IOException e) {
-            GlobalSettings.kem.registerInternalError("Could not read from " + propertyFile, e);
+            kem.registerInternalError("Could not read from " + propertyFile, e);
         }
 
-        for (String label : definition.context().klabels.keySet()) {
-            for (Production production : definition.context().productionsOf(label)) {
+        for (String label : context.klabels.keySet()) {
+            for (Production production : context.productionsOf(label)) {
                 if (production.getKLabel().equals(label) // make sure the label is a Klabel
                         && production.containsAttribute(Attribute.HOOK_KEY)) {
                     String hookAttribute = production.getAttribute(Attribute.HOOK_KEY);
@@ -78,13 +90,13 @@ public class BuiltinFunction {
                      * exclude hook from evaluation during compilation if the hook is dynamic
                      * in nature (is related to I/O or to meta properties).
                      * */
-                    if (Tool.instance() == Tool.KOMPILE && hookMetaModules.contains(hookPrefix)) {
+                    if (tool == Tool.KOMPILE && hookMetaModules.contains(hookPrefix)) {
                         continue;
                     }
 
                     String hook = properties.getProperty(hookAttribute);
                     if (hook == null) {
-                        GlobalSettings.kem.register(new KException(
+                        kem.register(new KException(
                                 KException.ExceptionType.HIDDENWARNING,
                                 KException.KExceptionGroup.CRITICAL, "missing entry in "
                                         + hookPropertiesFileName + " for hook " + hookAttribute,
@@ -98,12 +110,12 @@ public class BuiltinFunction {
                         Class<?> c = Class.forName(className);
                         for (Method method : c.getDeclaredMethods()) {
                             if (method.getName().equals(methodName)) {
-                                table.put(KLabelConstant.of(label, definition), method);
+                                table.put(KLabelConstant.of(label, context), method);
                                 break;
                             }
                         }
                     } catch (ClassNotFoundException | SecurityException e) {
-                        GlobalSettings.kem.registerCriticalWarning("missing implementation for hook "
+                        kem.registerCriticalWarning("missing implementation for hook "
                                 + hookAttribute + ":\n" + hook, e, production);
                     }
                 }
@@ -132,7 +144,7 @@ public class BuiltinFunction {
         // deal with builtin functions? builtin functions are supposed to be
         // super-fast...
         Method method = table.get(label);
-        Term t = (Term) method.invoke(null, args);
+        Term t = (Term) method.invoke(builtinFunctionProviders.get(method.getDeclaringClass()).get(), args);
         return t;
     }
 

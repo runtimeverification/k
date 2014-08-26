@@ -4,11 +4,17 @@ package org.kframework.krun;
 import java.io.File;
 import java.util.Map;
 
+import org.kframework.backend.java.builtins.BuiltinIOOperations;
+import org.kframework.backend.java.builtins.BuiltinIOOperationsImpl;
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.ksimulation.Waitor;
+import org.kframework.backend.java.symbolic.FreshRules;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
-import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -54,6 +60,7 @@ public class KRunModule extends AbstractModule {
         bind(GlobalOptions.class).toInstance(options.global);
         bind(ColorOptions.class).toInstance(options.color);
         bind(JavaExecutionOptions.class).toInstance(options.experimental.javaExecution);
+        bind(Boolean.class).annotatedWith(FreshRules.class).toInstance(false);
     }
 
     public static class CommonModule extends AbstractModule {
@@ -61,15 +68,18 @@ public class KRunModule extends AbstractModule {
         @Override
         protected void configure() {
             install(new DefinitionLoadingModule());
-            MapBinder<KompileOptions.Backend, KRun> mapBinder = MapBinder.newMapBinder(
+            install(new JavaSymbolicCommonModule());
+
+            MapBinder<KompileOptions.Backend, KRun> krunBinder = MapBinder.newMapBinder(
                     binder(), KompileOptions.Backend.class, KRun.class);
             for (KompileOptions.Backend enumVal : KompileOptions.Backend.values()) {
                 if (enumVal.generatesDefinition()) {
-                    mapBinder.addBinding(enumVal).to(enumVal.krun());
+                    krunBinder.addBinding(enumVal).to(enumVal.krun());
                 }
             }
 
             bind(Term.class).toProvider(InitialConfigurationProvider.class);
+            bind(BuiltinIOOperations.class).to(BuiltinIOOperationsImpl.class);
         }
 
         @Provides
@@ -113,12 +123,16 @@ public class KRunModule extends AbstractModule {
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
 
             bind(Term.class).annotatedWith(Main.class).to(Term.class);
-            bind(JavaSymbolicKRun.class).annotatedWith(Main.class).to(JavaSymbolicKRun.class);
+            bind(SymbolicRewriter.class).annotatedWith(Main.class).to(SymbolicRewriter.class);
+            bind(GlobalContext.class).annotatedWith(Main.class).to(GlobalContext.class);
+            bind(KilFactory.class).annotatedWith(Main.class).to(KilFactory.class);
             bind(KRun.class).annotatedWith(Main.class).to(KRun.class);
             bind(Context.class).annotatedWith(Main.class).to(Context.class);
 
             expose(Term.class).annotatedWith(Main.class);
-            expose(JavaSymbolicKRun.class).annotatedWith(Main.class);
+            expose(SymbolicRewriter.class).annotatedWith(Main.class);
+            expose(GlobalContext.class).annotatedWith(Main.class);
+            expose(KilFactory.class).annotatedWith(Main.class);
             expose(KRun.class).annotatedWith(Main.class);
             expose(Context.class).annotatedWith(Main.class);
         }
@@ -131,10 +145,14 @@ public class KRunModule extends AbstractModule {
             install(new CommonModule());
 
             bind(Term.class).annotatedWith(Spec.class).to(Term.class);
-            bind(JavaSymbolicKRun.class).annotatedWith(Spec.class).to(JavaSymbolicKRun.class);
+            bind(SymbolicRewriter.class).annotatedWith(Spec.class).to(SymbolicRewriter.class);
+            bind(GlobalContext.class).annotatedWith(Spec.class).to(GlobalContext.class);
+            bind(KilFactory.class).annotatedWith(Spec.class).to(KilFactory.class);
             bind(Context.class).annotatedWith(Spec.class).to(Context.class);
 
-            expose(JavaSymbolicKRun.class).annotatedWith(Spec.class);
+            expose(SymbolicRewriter.class).annotatedWith(Spec.class);
+            expose(GlobalContext.class).annotatedWith(Spec.class);
+            expose(KilFactory.class).annotatedWith(Spec.class);
             expose(Term.class).annotatedWith(Spec.class);
             expose(Context.class).annotatedWith(Spec.class);
 

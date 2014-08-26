@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
+import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
@@ -47,7 +48,8 @@ public class KompileFrontEnd extends FrontEnd {
             return new Module[] {
                     new KompileModule(context, options),
                     new JCommanderModule(jc),
-                    new CommonModule() };
+                    new CommonModule(),
+                    new JavaSymbolicCommonModule() };
         } catch (ParameterException ex) {
             printBootError(ex.getMessage());
             return null;

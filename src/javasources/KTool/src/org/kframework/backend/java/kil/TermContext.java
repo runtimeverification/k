@@ -47,7 +47,7 @@ public class TermContext extends JavaSymbolicObject {
     }
 
     public Definition definition() {
-        return global.def;
+        return global.getDefinition();
     }
 
     public FileSystem fileSystem() {

@@ -17,70 +17,72 @@ import java.util.List;
  *
  * @author Traian
  */
-public class BuiltinVisitorOperations extends PrePostTransformer {
+public class BuiltinVisitorOperations {
 
-    /**
-     * KLabel of the guard controlling whether a node is visited.
-     */
-    private final KLabel ifLabel;
-    /**
-     * List of arguments passed to the guard KLabel.
-     */
-    private final List<Term> ifParams;
-    /**
-     * KLabel of the visitation performed on a node.
-     */
-    private final KLabel visitLabel;
-    /**
-     * List of arguments passed the visitation KLabel.
-     */
-    private final List<Term> visitParams;
+    public static class BuiltinVisitor extends PrePostTransformer {
+        /**
+         * KLabel of the guard controlling whether a node is visited.
+         */
+        private final KLabel ifLabel;
+        /**
+         * List of arguments passed to the guard KLabel.
+         */
+        private final List<Term> ifParams;
+        /**
+         * KLabel of the visitation performed on a node.
+         */
+        private final KLabel visitLabel;
+        /**
+         * List of arguments passed the visitation KLabel.
+         */
+        private final List<Term> visitParams;
 
-    BuiltinVisitorOperations(
-            KLabel ifLabel,
-            List<Term> ifParams,
-            KLabel visitLabel,
-            List<Term> visitParams,
-            TermContext context) {
-        super(context);
-        this.ifLabel = ifLabel;
-        this.ifParams = ifParams;
-        this.visitLabel = visitLabel;
-        this.visitParams = visitParams;
+        BuiltinVisitor(
+                KLabel ifLabel,
+                List<Term> ifParams,
+                KLabel visitLabel,
+                List<Term> visitParams,
+                TermContext context) {
+            super(context);
+            this.ifLabel = ifLabel;
+            this.ifParams = ifParams;
+            this.visitLabel = visitLabel;
+            this.visitParams = visitParams;
 
-        preTransformer.addTransformer(new LocalTransformer(context) {
-            @Override
-            public ASTNode transform(Term term) {
-                if (term instanceof KLabel) {
-                    return new DoneTransforming(term);
+            preTransformer.addTransformer(new LocalTransformer(context) {
+                @Override
+                public ASTNode transform(Term term) {
+                    if (term instanceof KLabel) {
+                        return new DoneTransforming(term);
+                    }
+
+                    if (evaluateGuard(term)) {
+                        return new DoneTransforming(visitNode(term));
+                    } else {
+                        return term;
+                    }
                 }
+            });
+        }
 
-                if (evaluateGuard(term)) {
-                    return new DoneTransforming(visitNode(term));
-                } else {
-                    return term;
-                }
-            }
-        });
-    }
+        private Term visitNode(Term term) {
+            visitParams.set(0, term);
+            term = KItem.of(
+                    visitLabel,
+                    new KList(visitParams),
+                    context);
+            return term.evaluate(context);
+        }
 
-    private Term visitNode(Term term) {
-        visitParams.set(0, term);
-        term = KItem.of(
-                visitLabel,
-                new KList(visitParams),
-                context);
-        return term.evaluate(context);
-    }
-
-    private boolean evaluateGuard(Term term) {
-        ifParams.set(0, term);
-        KItem test = KItem.of(
-                ifLabel,
-                new KList(ifParams),
-                context);
-        // TODO: Think about what happens when test has symbolic values in it.
-        return test.evaluate(context) == BoolToken.TRUE;
+        private boolean evaluateGuard(Term term) {
+            ifParams.set(0, term);
+            KItem test = KItem.of(
+                    ifLabel,
+                    new KList(ifParams),
+                    context);
+            // TODO: Think about what happens when test has symbolic values in it.
+            return test.evaluate(context) == BoolToken.TRUE;
+        }
     }
 
     private static Term getInjectedTerm(KItem kItem) {
@@ -126,7 +128,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
         visitParams.add(term);
         visitParams.addAll(visitList.getContents());
         return (Term) term.accept(
-                new BuiltinVisitorOperations(ifLabel, ifParams, visitLabel, visitParams, context));
+                new BuiltinVisitor(ifLabel, ifParams, visitLabel, visitParams, context));
     }
 
 }
