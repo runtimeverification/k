@@ -70,14 +70,6 @@ module TREE-PATTERN
     => tree2postorder(TL) @ tree2postorder(TR) @ (I :: [])
   rule tree2postorder(leaf) => []
 
-  syntax List ::= "intseq2list" "(" IntSeq ")"  [function]
-  rule intseq2list(E:Int :: L:IntSeq)
-    => ListItem(E) intseq2list(L)
-  rule intseq2list([]) => .List
-  rule intseq2list(L1 @ L2)
-    => intseq2list(L1) intseq2list(L2)
-  [lemma]
-
   syntax Map ::= "tree" "(" Pointer ")" "(" Tree ")"    [pattern(1)]
   rule tree(object(P:Int))(node(I:Int, TL:Tree, TR:Tree))
     => object(P) |-> (
