@@ -78,7 +78,7 @@ public class Attribute<T> extends ASTNode {
 
     @Override
     public String toString() {
-        return " " + this.getKey() + "(" + this.getValue() + ")";
+        return " " + toString(this.getKey()) + "(" + this.getValue() + ")";
     }
 
     public void setValue(T value) {

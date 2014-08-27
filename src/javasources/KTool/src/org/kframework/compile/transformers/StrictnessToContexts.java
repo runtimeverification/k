@@ -16,12 +16,9 @@ import java.util.*;
  */
 public class StrictnessToContexts extends CopyOnWriteTransformer {
 
-    public static final String ALL = "all";
-    public static final String OTHER = "other";
     public static final String DEFAULT_STRICTNESS_CELL = "k";
     public static final String STRICT = "strict";
     public static final String SEQSTRICT = "seqstrict";
-    public static final String CONTEXT = "context";
     private List<ModuleItem> items = new ArrayList<>();
 
     public StrictnessToContexts(Context context) {
@@ -89,7 +86,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             String[] strictAttrs = null;
 
             if (prod.getSort().equals(Sort.KLABEL)) {
-                assert attribute.equals(ALL) && strictCell.equals(DEFAULT_STRICTNESS_CELL) :
+                assert attribute.isEmpty() && strictCell.equals(DEFAULT_STRICTNESS_CELL) :
                         "Customized strictness for K labels not currently implemented";
                 kLabelStrictness(prod, isSeq);
                 continue;
