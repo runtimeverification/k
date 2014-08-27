@@ -59,18 +59,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Constant constant, Void _) {
-        Term rez;
-        if (constant.getSort().equals(Sort.KLIST)) {
-            rez = new KLabelConstant(constant.getValue());
-        } else {
-            // builtin token or lexical token
-            rez =  Token.kAppOf(constant.getSort(), constant.getValue());
-        }
-        rez.setLocation(constant.getLocation());
-        rez.setSource(constant.getSource());
-        rez.copyAttributesFrom(constant);
-
-        return this.visitNode(rez);
+        return kTrans.visitNode(constant);
     }
 
     class FlattenKSyntax extends CopyOnWriteTransformer {
@@ -96,6 +85,22 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         @Override
         public ASTNode visit(Freezer node, Void _)  {
             return KApp.of(new FreezerLabel((Term) this.visitNode(node.getTerm())));
+        }
+
+        @Override
+        public ASTNode visit(Constant constant, Void _) {
+            Term rez;
+            if (constant.getSort().equals(Sort.KLIST)) {
+                rez = new KLabelConstant(constant.getValue());
+            } else {
+                // builtin token or lexical token
+                rez =  Token.kAppOf(constant.getSort(), constant.getValue());
+            }
+            rez.setLocation(constant.getLocation());
+            rez.setSource(constant.getSource());
+            rez.copyAttributesFrom(constant);
+
+            return this.visitNode(rez);
         }
 
         @Override
