@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
@@ -65,7 +66,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
                 || rule.containsAttribute(Attribute.MACRO_KEY)
                 || rule.containsAttribute(Attribute.ANYWHERE_KEY)
                 || rule.containsAttribute(Attribute.PATTERN_KEY)) {
-            rule.setCompiledForFastRewriting(false);
+            rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false);
             return rule;
         }
 
@@ -77,11 +78,11 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         rule = (Rule) super.visit(rule, _);
 
         rule = rule.shallowCopy();
-        rule.setCompiledForFastRewriting(compiledForFastRewriting);
+        rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(compiledForFastRewriting);
         if (compiledForFastRewriting) {
-            rule.setCellsOfInterest(cellsOfInterest);
-            rule.setLhsOfReadCell(readCell2LHS);
-            rule.setRhsOfWriteCell(writeCell2RHS);
+            rule.getAttribute(JavaBackendRuleData.class).setCellsOfInterest(cellsOfInterest);
+            rule.getAttribute(JavaBackendRuleData.class).setLhsOfReadCell(readCell2LHS);
+            rule.getAttribute(JavaBackendRuleData.class).setRhsOfWriteCell(writeCell2RHS);
         }
 
         return rule;

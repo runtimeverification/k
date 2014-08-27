@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -77,22 +78,22 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule rule, Void _)  {
-        if (!rule.isCompiledForFastRewriting()) {
+        if (!rule.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
             if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
                 Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
                 rule = rule.shallowCopy();
                 if (hasGroundCell(rhs)) {
-                    rule.setCellsToCopy(Collections.singleton(rhs.getLabel()));
+                    rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(Collections.singleton(rhs.getLabel()));
                 } else {
-                    rule.setCellsToCopy(Collections.<String>emptySet());
+                    rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(Collections.<String>emptySet());
                 }
             }
             return rule;
         }
 
         hasAssocCommMatching = false;
-        lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
-        rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
+        lhsOfReadCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getLhsOfReadCell());
+        rhsOfWriteCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getRhsOfWriteCell());
         cellsToCopy.clear();
 
         crntRule = rule;
@@ -100,7 +101,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
         if (hasAssocCommMatching) {
             rule = rule.shallowCopy();
-            rule.setCompiledForFastRewriting(false);
+            rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false);
             return rule;
         }
 
@@ -110,9 +111,9 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         crntRule = null;
 
         rule = rule.shallowCopy();
-        rule.setLhsOfReadCell(lhsOfReadCell);
-        rule.setRhsOfWriteCell(rhsOfWriteCell);
-        rule.setCellsToCopy(cellsToCopy);
+        rule.getAttribute(JavaBackendRuleData.class).setLhsOfReadCell(lhsOfReadCell);
+        rule.getAttribute(JavaBackendRuleData.class).setRhsOfWriteCell(rhsOfWriteCell);
+        rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(cellsToCopy);
 
         return rule;
     }
@@ -122,13 +123,13 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         if (crntRule == null) {
             return super.visit(cell, _);
         }
-        if (!crntRule.getCellsOfInterest().contains(cell.getLabel())
+        if (!crntRule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest().contains(cell.getLabel())
                 && outerWriteCell == null) {
             return super.visit(cell, _);
         }
 
         if (status == Status.LHS) {
-            if (crntRule.getReadCells().contains(cell.getLabel())) {
+            if (crntRule.getAttribute(JavaBackendRuleData.class).getReadCells().contains(cell.getLabel())) {
                 if (hasAssocCommMatching(cell)) {
                     hasAssocCommMatching = true;
                 }
@@ -142,7 +143,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
                     super.visit(cell, _);
                 }
             } else {
-                if (crntRule.getWriteCells().contains(cell.getLabel())) {
+                if (crntRule.getAttribute(JavaBackendRuleData.class).getWriteCells().contains(cell.getLabel())) {
                     rhsOfWriteCell.put(cell.getLabel(), cell.getContents());
 
                     outerWriteCell = cell.getLabel();

@@ -77,6 +77,14 @@ public class Attribute<T> extends ASTNode {
             return new Key<T>(TypeToken.of(cls), null);
         }
 
+        public static <T> Key<T> get(TypeToken<T> type) {
+            return new Key<T>(type, null);
+        }
+
+        public static <T> Key<T> get(TypeToken<T> type, Annotation annotation) {
+            return new Key<T>(type, annotation);
+        }
+
         @Override
         public String toString() {
             if (getTypeToken().equals(TypeToken.of(String.class))) {
