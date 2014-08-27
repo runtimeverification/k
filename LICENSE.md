@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
 ==============================================================================
 The K Release License
 ==============================================================================
@@ -24,14 +25,14 @@ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 of the Software, and to permit persons to whom the Software is furnished to do
 so, subject to the following conditions:
 
-    * Redistributions of source code must retain the above copyright notice,
+* Redistributions of source code must retain the above copyright notice,
       this list of conditions and the following disclaimers.
 
-    * Redistributions in binary form must reproduce the above copyright notice,
+* Redistributions in binary form must reproduce the above copyright notice,
       this list of conditions and the following disclaimers in the
       documentation and/or other materials provided with the distribution.
 
-    * Neither the names of the K Team, the University of Illinois at
+* Neither the names of the K Team, the University of Illinois at
       Urbana-Champaign, the University Alexandru-Ioan Cuza, nor the names of
       its contributors may be used to endorse or promote products derived from
       this Software without specific prior written permission.
@@ -63,11 +64,17 @@ licenses, and/or restrictions:
 
 ---------------------------------------
 Maude (http://maude.cs.uiuc.edu) is licensed under the GPL license.
+
 Stratego (http://strategoxt.org) is licensed under the LGPL license.
+
 Xstream (http://xstream.codehaus.org/) is licensed under the BSD license.
+
 XML Pull (http://www.xmlpull.org) API is free.
+
 Xpp3 (http://www.extreme.indiana.edu/xgws/xsoap/xpp) is licensed under Indiana
 University Extreme! Lab Software License.
+
 KXML2 (http://kxml.sourceforge.net/kxml2/) is licensed under the BSD license.
+
 SSCTarjan (https://github.com/indy256/codelibrary) is licensed under the Unlicense.
 Alphanum (http://www.davekoelle.com/alphanum.html) is licensed under the LGPL license.
