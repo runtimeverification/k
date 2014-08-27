@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Visitor;
+import org.kframework.kil.visitors.Visitor; 
 import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableList;

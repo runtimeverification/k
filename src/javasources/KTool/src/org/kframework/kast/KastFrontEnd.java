@@ -20,9 +20,6 @@ import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.Main;
-import org.kframework.utils.options.SortedParameterDescriptions;
-
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
 import com.google.inject.Module;
@@ -34,13 +31,9 @@ public class KastFrontEnd extends FrontEnd {
         try {
             KastOptions options = new KastOptions();
 
-            JCommander jc = new JCommander(options, args);
-            jc.setProgramName("kast");
-            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KastOptions.Experimental.class));
-
             return new Module[] {
                     new KastModule(options),
-                    new JCommanderModule(jc),
+                    new JCommanderModule(args),
                     new CommonModule() };
         } catch (ParameterException ex) {
             printBootError(ex.getMessage());

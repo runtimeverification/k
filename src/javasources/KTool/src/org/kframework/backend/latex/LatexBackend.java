@@ -100,4 +100,14 @@ public class LatexBackend extends BasicBackend {
         return !makeDocument;
         //return true;
     }
+
+    @Override
+    public boolean documentation() {
+        return true;
+    }
+
+    @Override
+    public boolean generatesDefinition() {
+        return false;
+    }
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
@@ -150,15 +149,11 @@ public final class KRunOptions {
         if (io != null && io == true && search()) {
             GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --search");
         }
-        if (io != null && io == true && experimental.javaExecution.generateTests) {
-            GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --generate-tests");
-        }
         if (io != null && io == true && experimental.ltlmc() != null) {
             GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --ltlmc");
         }
         if (search()
                 || experimental.prove != null
-                || experimental.javaExecution.generateTests
                 || experimental.ltlmc() != null) {
             return false;
         }
@@ -350,9 +345,6 @@ public final class KRunOptions {
 
         @ParametersDelegate
         public SMTOptions smt = new SMTOptions();
-
-        @ParametersDelegate
-        public JavaExecutionOptions javaExecution = new JavaExecutionOptions();
 
         @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
         public File outputFile;

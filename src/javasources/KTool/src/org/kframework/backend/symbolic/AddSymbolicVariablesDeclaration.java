@@ -1,11 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.symbolic;
 
+import org.kframework.backend.Backends;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kompile.KompileOptions;
-
 import java.util.*;
 
 /**
@@ -31,7 +30,8 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
     @Override
     public Void visit(Module module, Void _) {
 
-        if (module.getName().equals(syntaxModule) && context.kompileOptions.backend == KompileOptions.Backend.SYMBOLIC) {
+        //TODO(dwightguth): remove for modularization
+        if (module.getName().equals(syntaxModule) && context.kompileOptions.backend.equals(Backends.SYMBOLIC)) {
 
             // adding lexical construct
             Lexical lexical = new Lexical(terminal, follow);

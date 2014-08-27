@@ -112,7 +112,7 @@ public class KagregFrontEnd extends FrontEnd {
         context1.globalOptions = globalOptions;
         context1.dotk = new File(firstDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context1.dotk.mkdirs();
-        Definition firstDef = loader.loadDefinition(firstDefinitionFile, firstLang, true,
+        Definition firstDef = loader.loadDefinition(firstDefinitionFile, firstLang,
                 context1);
         firstDef = (Definition) new AddKCell(context1).visitNode(firstDef);
         firstDef = (Definition) new RenameCellsTransformer(new AppendRenameStrategy("1"), context1).visitNode(firstDef);
@@ -132,7 +132,7 @@ public class KagregFrontEnd extends FrontEnd {
         assert context2 != null;
         context2.dotk = new File(secondDefinitionFile.getAbsoluteFile().getParent() + File.separator + ".k");
         context2.dotk.mkdirs();
-        Definition secondDef = loader.loadDefinition(secondDefinitionFile, secondLang, true,
+        Definition secondDef = loader.loadDefinition(secondDefinitionFile, secondLang,
                 context2);
         secondDef = (Definition) new AddKCell(context2).visitNode(secondDef);
         secondDef = (Definition) new RenameCellsTransformer(new AppendRenameStrategy("2"), context2).visitNode(secondDef);

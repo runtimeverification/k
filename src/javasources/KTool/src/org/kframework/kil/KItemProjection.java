@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.visitors.Visitor;
 
 /**
@@ -41,8 +40,8 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = hash * Utils.HASH_PRIME + getSort().hashCode();
-        hash = hash * Utils.HASH_PRIME + term.hashCode();
+        hash = hash * 47 + getSort().hashCode();
+        hash = hash * 47 + term.hashCode();
         return hash;
     }
 

@@ -8,23 +8,22 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.Set;
 
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
+import com.google.inject.Provides;
 
 public class JCommanderModule extends AbstractModule  {
 
-    private final String usage;
-    private final String experimentalUsage;
+    private final String[] args;
 
-    public JCommanderModule(JCommander jc) {
-        StringBuilder sb = new StringBuilder();
-        jc.usage(sb);
-        this.usage = StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0];
-        this.experimentalUsage = StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1];
+    public JCommanderModule(String[] args) {
+        this.args = args;
     }
 
     @BindingAnnotation @Target({FIELD, PARAMETER, METHOD}) @Retention(RUNTIME)
@@ -33,8 +32,27 @@ public class JCommanderModule extends AbstractModule  {
     public @interface ExperimentalUsage {}
 
     @Override
-    protected void configure() {
-        bind(String.class).annotatedWith(Usage.class).toInstance(usage);
-        bind(String.class).annotatedWith(ExperimentalUsage.class).toInstance(experimentalUsage);
+    protected void configure() {}
+
+    @Provides
+    JCommander jcommander(@Options Set<Object> options, @Options Set<Class<?>> experimentalOptions) {
+        JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
+        jc.setProgramName("kompile");
+        jc.setParameterDescriptionComparator(new SortedParameterDescriptions(experimentalOptions.toArray(new Class<?>[experimentalOptions.size()])));
+        return jc;
+    }
+
+    @Provides @Usage
+    String usage(JCommander jc) {
+        StringBuilder sb = new StringBuilder();
+        jc.usage(sb);
+        return StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0];
+    }
+
+    @Provides @ExperimentalUsage
+    String experimentalUsage(JCommander jc) {
+        StringBuilder sb = new StringBuilder();
+        jc.usage(sb);
+        return StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1];
     }
 }

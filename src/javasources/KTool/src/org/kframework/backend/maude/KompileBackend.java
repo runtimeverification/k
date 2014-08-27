@@ -75,4 +75,14 @@ public class KompileBackend extends BasicBackend {
         return "LastStep";
     }
 
+    @Override
+    public boolean documentation() {
+        return false;
+    }
+
+    @Override
+    public boolean generatesDefinition() {
+        return true;
+    }
+
 }

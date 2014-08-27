@@ -18,8 +18,8 @@ import jline.MultiCompletor;
 import jline.SimpleCompletor;
 
 import org.fusesource.jansi.AnsiString;
-import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
+import org.kframework.backend.java.symbolic.JavaSymbolicKRunModule;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -54,12 +54,8 @@ import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.Main;
-import org.kframework.utils.options.SMTOptions;
-import org.kframework.utils.options.SortedParameterDescriptions;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -96,21 +92,12 @@ public class KRunFrontEnd extends FrontEnd {
                 }
                 if (options.search()) {
 
-                    if(options.experimental.javaExecution.generateTests){
-                        result = krun.generate(
+                    result = krun.search(
                                 options.bound,
                                 options.depth,
                                 options.searchType(),
                                 patternRule,
                                 initialConfiguration, steps);
-                    } else{
-                        result = krun.search(
-                                options.bound,
-                                options.depth,
-                                options.searchType(),
-                                patternRule,
-                                initialConfiguration, steps);
-                    }
 
                     sw.printIntermediate("Search total");
                 } else if (options.experimental.ltlmc() != null) {
@@ -156,7 +143,7 @@ public class KRunFrontEnd extends FrontEnd {
                 e.report();
             } catch (UnsupportedBackendOptionException e) {
                 kem.registerCriticalError("Backend \""
-                                + context.kompileOptions.backend.name().toLowerCase()
+                                + context.kompileOptions.backend
                                 + "\" does not support option " + e.getMessage(), e);
             }
 
@@ -277,7 +264,7 @@ public class KRunFrontEnd extends FrontEnd {
                 }
             } catch (UnsupportedBackendOptionException e) {
                 kem.registerCriticalError("Backend \""
-                        + context.kompileOptions.backend.name().toLowerCase()
+                        + context.kompileOptions.backend
                         + "\" does not support option " + e.getMessage(), e);
                 return false; //unreachable
             }
@@ -406,10 +393,7 @@ public class KRunFrontEnd extends FrontEnd {
     public static com.google.inject.Module[] getModules(String[] args) {
         try {
             KRunOptions options = new KRunOptions();
-
-            JCommander jc = new JCommander(options, args);
-            jc.setProgramName("krun");
-            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KRunOptions.Experimental.class, SMTOptions.class, JavaExecutionOptions.class));
+            JavaExecutionOptions javaOptions = new JavaExecutionOptions();
 
             if (options.experimental.debuggerGui()) {
                 System.setProperty("java.awt.headless", "false");
@@ -419,14 +403,15 @@ public class KRunFrontEnd extends FrontEnd {
                 return new com.google.inject.Module[] {
                         new KRunModule(options),
                         new CommonModule(),
-                        new JCommanderModule(jc),
-                        new KRunModule.SimulationModule(),
-                        new KRunModule.MainExecutionContextModule(options) };
+                        new JCommanderModule(args),
+                        new JavaSymbolicKRunModule.SimulationModule(),
+                        new JavaSymbolicKRunModule.MainExecutionContextModule(options),
+                        new JavaSymbolicKRunModule(javaOptions)};
             } else {
                 return new com.google.inject.Module[] {
                         new KRunModule(options),
                         new CommonModule(),
-                        new JCommanderModule(jc),
+                        new JCommanderModule(args),
                         new KRunModule.NoSimulationModule(options) };
             }
         } catch (ParameterException ex) {
@@ -439,7 +424,6 @@ public class KRunFrontEnd extends FrontEnd {
     private final Provider<KRun> krunProvider;
     private final Provider<Context> contextProvider;
     private final Provider<Term> initialConfigurationProvider;
-    private final Provider<Optional<Waitor>> waitorProvider;
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
@@ -452,7 +436,6 @@ public class KRunFrontEnd extends FrontEnd {
             @Main Provider<KRun> krunProvider,
             @Main Provider<Context> contextProvider,
             @Main Provider<Term> initialConfigurationProvider,
-            Provider<Optional<Waitor>> waitorProvider,
             Stopwatch sw,
             KExceptionManager kem,
             BinaryLoader loader) {
@@ -461,7 +444,6 @@ public class KRunFrontEnd extends FrontEnd {
         this.krunProvider = krunProvider;
         this.contextProvider = contextProvider;
         this.initialConfigurationProvider = initialConfigurationProvider;
-        this.waitorProvider = waitorProvider;
         this.sw = sw;
         this.kem = kem;
         this.loader = loader;
@@ -472,16 +454,6 @@ public class KRunFrontEnd extends FrontEnd {
      * @return true if the application completed normally; false otherwise
      */
     public boolean run() {
-        if (options.experimental.simulation != null) {
-            Waitor runSimulation = waitorProvider.get().get();
-            runSimulation.start();
-            try {
-                runSimulation.join();
-            } catch (InterruptedException e) {
-                return false;
-            }
-            return true;
-        }
 
         KRun krun = krunProvider.get();
         Term initialConfiguration = initialConfigurationProvider.get();
