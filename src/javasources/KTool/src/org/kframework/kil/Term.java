@@ -35,6 +35,7 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
 
     public Term(Sort sort) {
         super();
+        assert sort != null;
         this.sort = sort;
     }
 

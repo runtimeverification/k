@@ -17,15 +17,32 @@ import java.util.Map;
  * and should be flattened into KIL classes after FlattenSyntax.
  */
 public class Constant extends ProductionReference {
+
     protected String value;
 
+    /**
+     * Represents a lexical production from the parser.
+     * Should be used only in the 'parser' package.
+     * @param sort Sort of the production.
+     * @param value String representation of the constant.
+     */
     public Constant(Sort sort, String value) {
         super(sort, null);
+        assert value != null;
         this.value = value;
     }
 
+    /**
+     * Represents a lexical production from the parser.
+     * Should be used only in the 'parser' package.
+     * @param sort Sort of the production.
+     * @param value String representation of the constant.
+     * @param p Reference to the production from which this node comes from. This is viewed as
+     *          metadata.
+     */
     public Constant(Sort sort, String value, Production p) {
         super(sort, p);
+        assert value != null;
         this.value = value;
     }
 

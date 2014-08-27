@@ -90,7 +90,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         @Override
         public ASTNode visit(Constant constant, Void _) {
             Term rez;
-            if (constant.getSort().equals(Sort.KLIST)) {
+            if (constant.getSort().equals(Sort.KLABEL)) {
                 rez = new KLabelConstant(constant.getValue());
             } else {
                 // builtin token or lexical token
