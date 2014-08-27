@@ -339,7 +339,11 @@ public class Rule extends JavaSymbolicObject {
     }
 
     public boolean isPattern() {
-        return super.containsAttribute(Attribute.PATTERN_KEY);
+        return containsAttribute(Attribute.PATTERN_KEY);
+    }
+
+    public boolean isLemma() {
+        return containsAttribute(Attribute.LEMMA_KEY);
     }
 
     /**
