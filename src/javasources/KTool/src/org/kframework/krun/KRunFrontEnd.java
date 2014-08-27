@@ -406,13 +406,14 @@ public class KRunFrontEnd extends FrontEnd {
                         new JCommanderModule(args),
                         new JavaSymbolicKRunModule.SimulationModule(),
                         new JavaSymbolicKRunModule.MainExecutionContextModule(options),
-                        new JavaSymbolicKRunModule(javaOptions)};
+                        new JavaSymbolicKRunModule(javaOptions) };
             } else {
                 return new com.google.inject.Module[] {
                         new KRunModule(options),
                         new CommonModule(),
                         new JCommanderModule(args),
-                        new KRunModule.NoSimulationModule(options) };
+                        new KRunModule.NoSimulationModule(options),
+                        new JavaSymbolicKRunModule(javaOptions) };
             }
         } catch (ParameterException ex) {
             printBootError(ex.getMessage());

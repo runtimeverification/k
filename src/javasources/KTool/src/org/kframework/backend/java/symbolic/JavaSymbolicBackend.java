@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.Backends;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.FirstStep;
 import org.kframework.backend.LastStep;
@@ -169,5 +170,10 @@ public class JavaSymbolicBackend extends BasicBackend {
     @Override
     public boolean generatesDefinition() {
         return true;
+    }
+
+    @Override
+    public String autoincludedFile() {
+        return Backends.AUTOINCLUDE_JAVA;
     }
 }

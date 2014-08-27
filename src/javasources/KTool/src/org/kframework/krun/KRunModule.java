@@ -4,6 +4,7 @@ package org.kframework.krun;
 import java.io.File;
 import java.util.Map;
 
+import org.kframework.backend.Backends;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Term;
@@ -63,8 +64,8 @@ public class KRunModule extends AbstractModule {
 
             MapBinder<String, KRun> krunBinder = MapBinder.newMapBinder(
                     binder(), String.class, KRun.class);
-            krunBinder.addBinding("maude").to(MaudeKRun.class);
-            krunBinder.addBinding("symbolic").to(MaudeKRun.class);
+            krunBinder.addBinding(Backends.MAUDE).to(MaudeKRun.class);
+            krunBinder.addBinding(Backends.SYMBOLIC).to(MaudeKRun.class);
 
             bind(Term.class).toProvider(InitialConfigurationProvider.class);
         }

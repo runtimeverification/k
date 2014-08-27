@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 
 import java.util.Map;
 
+import org.kframework.backend.Backend;
 import org.kframework.backend.java.builtins.BuiltinIOOperations;
 import org.kframework.backend.java.builtins.DummyBuiltinIOOperations;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
@@ -27,6 +28,10 @@ public class JavaSymbolicKompileModule extends AbstractModule {
         for (IndexingAlgorithm enumVal : IndexingAlgorithm.values()) {
             indexBinder.addBinding(enumVal).to(enumVal.clazz);
         }
+
+        MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
+                binder(), String.class, Backend.class);
+        mapBinder.addBinding("java").to(JavaSymbolicBackend.class);
     }
 
     @Provides

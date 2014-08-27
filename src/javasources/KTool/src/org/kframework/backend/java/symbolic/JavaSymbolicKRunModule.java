@@ -26,6 +26,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 
 public class JavaSymbolicKRunModule extends AbstractModule {
@@ -43,6 +44,10 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         bind(JavaExecutionOptions.class).toInstance(options);
         bind(Boolean.class).annotatedWith(FreshRules.class).toInstance(false);
         bind(BuiltinIOOperations.class).to(BuiltinIOOperationsImpl.class);
+
+        MapBinder<String, KRun> krunBinder = MapBinder.newMapBinder(
+                binder(), String.class, KRun.class);
+        krunBinder.addBinding("java").to(JavaSymbolicKRun.class);
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().toInstance(options);
