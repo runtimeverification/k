@@ -30,6 +30,9 @@
         <program name="postorder.c">
           <krun-option name="--prove" value="tests/tree/postorder_spec.k" />
         </program>
+        <program name="tree_to_list_iterative.c">
+          <krun-option name="--prove" value="tests/tree/tree_to_list_iterative_spec.k" />
+        </program>
         <program name="tree_to_list_recursive.c">
           <krun-option name="--prove" value="tests/tree/tree_to_list_recursive_spec.k" />
         </program>

@@ -112,4 +112,26 @@ module TREE-PATTERN
   syntax Int ::= bool2Int(Bool)                 [function, smtlib(smt_bool2int)]
   rule bool2Int(true) => 1
   rule bool2Int(false) => 0
+
+  // TreeSeq datatype, treeList pattern, and treeseq2intseq function
+  syntax TreeSeq ::= Tree "::TS" TreeSeq
+                   | ".TreeSeq"
+                   > TreeSeq "@TS" TreeSeq      [function, left]
+  rule (T ::TS TS1) @TS TS2 => T ::TS (TS1 @TS TS2)
+  rule .TreeSeq @TS TS => TS
+
+  syntax Map ::= "treeList" "(" Pointer ")" "(" TreeSeq ")"    [pattern(1)]
+  rule treeList(object(P:Int))(T:Tree ::TS TS:TreeSeq)
+    => object(P) |-> (
+          val   |-> tv(struct treeNode *, ?TP:Pointer)
+          next  |-> tv(struct stackNode *, ?PNext:Pointer))
+       tree(?TP)(T)
+       treeList(?PNext)(TS)
+    [pattern]
+  rule treeList(null)(.TreeSeq) => .Map   [pattern]
+
+  syntax IntSeq ::= "treeseq2intseq" "(" TreeSeq ")"    [function, smtlib(smt_treeseq2intseq)]
+  rule treeseq2intseq(T ::TS TS)
+    => treeseq2intseq(TS) @ tree2inorder(T)
+  rule treeseq2intseq(.TreeSeq) => []
 endmodule

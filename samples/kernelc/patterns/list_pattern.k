@@ -21,7 +21,7 @@ module LIST-PATTERN
 
   /* lemmas */
   rule L @ [] => L                                      [lemma]
-  rule (L1 @ (E :: L0)) @ L2 => L1 @ (E :: (L0 @ L2))   [lemma]
+  rule (L1 @ L2) @ L3 => L1 @ (L2 @ L3)                 [lemma]
   rule rev(L1 @ L2) => rev(L2) @ rev(L1)                [lemma]
 
   /* conversion between IntSeq and List */
@@ -39,7 +39,7 @@ module LIST-PATTERN
   rule list2intseq(.List) => []
 
   /* list pattern */
-  syntax Map ::= "list" "(" Pointer ")" "(" IntSeq ")"   [pattern(1)]
+  syntax Map ::= "list" "(" Pointer ")" "(" IntSeq ")"      [pattern(1)]
   rule
     list(object(P:Int))(E:Int::L:IntSeq)
   =>
