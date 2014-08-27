@@ -108,7 +108,7 @@ module KERNELC-SYNTAX
               | "left_rotate" | "right_rotate" | "balance"
               | "head" | "tail" | "add" | "swap" | "deallocate" | "length_recursive" | "length_iterative" | "sum_recursive" | "sum_iterative" | "reverse"
               | "height" | "compute_size" | "mirror" | "inorder" | "preorder" | "postorder" | "iter_deallocate" | "tree_to_list_iterative" | "tree_to_list_recursive"
-  syntax Id ::= "listNode" | "val" | "next"
+  syntax Id ::= "listNode" | "stackNode" | "val" | "next"
   syntax Id ::= "treeNode" | "node" | "value" | "left" | "right"
-  syntax Id ::= "a" | "b" | "c" | "x" | "y" | "z" | "t" | "u" | "v" | "p" | "n" | "s" | "temp" | "min"
+  syntax Id ::= "a" | "b" | "c" | "x" | "y" | "z" | "t" | "u" | "v" | "p" | "n" | "s" | "l" | "ln" | "tn" | "sn" | "temp" | "min"
 endmodule

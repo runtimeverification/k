@@ -10,7 +10,7 @@
 
 
 struct treeNode {
-  int val;
+  int value;
   struct treeNode *left;
   struct treeNode *right;
 };
@@ -27,9 +27,6 @@ struct stackNode {
 
 
 struct listNode* tree_to_list_iterative(struct treeNode *t)
-/*@ rule <k> $ => return ?l; ...</k>
-         <heap>... tree(t)(T) => list(?l)(tree2list(T)) ...</heap>
-         <out>... . => rev(tree2list(T)) </out> */
 {
   struct listNode *l;
   struct stackNode *s;
@@ -41,9 +38,6 @@ struct listNode* tree_to_list_iterative(struct treeNode *t)
   s = (struct stackNode *) malloc(sizeof(struct stackNode));
   s->val = t;
   s->next = NULL;
-  /*@ inv <heap>... treeList(s)(?TS), list(l)(?A) ...</heap>
-          <out>... rev(?A) </out>
-          /\ tree2list(T) = treeList2list(rev(?TS)) @ ?A */
   while (s != NULL) {
     struct treeNode *tn;
     struct listNode *ln;
@@ -73,7 +67,7 @@ struct listNode* tree_to_list_iterative(struct treeNode *t)
     }
     else {
       ln = (struct listNode *) malloc(sizeof(struct listNode));
-      ln->val = tn->val;
+      ln->val = tn->value;
       ln->next = l;
       l = ln;
       printf("%d ", ln->val);
@@ -83,7 +77,3 @@ struct listNode* tree_to_list_iterative(struct treeNode *t)
 
   return l;
 }
-
-
-//@ var A, TS : Seq
-//@ var T : Tree
