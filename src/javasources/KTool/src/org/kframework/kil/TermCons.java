@@ -142,6 +142,15 @@ public class TermCons extends ProductionReference implements Interfaces.MutableL
         return cachedHashCode;
     }
 
+    /**
+     * TODO: (Radu) Make TermCons immutable
+     * At the moment TermCons is mutable, so I am hacking it this way to invalidate the cache
+     * but I will have to implement it correctly and make TermCons immutable.
+     */
+    public void invalidateHashCode() {
+        upToDateHash = false;
+    }
+
     @Override
     public boolean contains(Object obj) {
         if (obj == null)

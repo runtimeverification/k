@@ -771,7 +771,7 @@ public class ParserTest {
         Term mexp = new TermCons(EXP_SORT, Arrays.asList(one), p1);
         Term expected = new TermCons(Sort.of("Exps"), Arrays.<Term>asList(amb(mexp, mone)), p2);
 
-        Assert.assertEquals("The error: ", expected.toString(), result2.toString());
+        Assert.assertEquals("The error: ", expected, result2);
     }
     public static Ambiguity amb(Term ... terms) {
         return new Ambiguity(Sort.K, Arrays.asList(terms));

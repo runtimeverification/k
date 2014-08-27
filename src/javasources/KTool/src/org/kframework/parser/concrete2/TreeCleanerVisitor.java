@@ -36,8 +36,11 @@ public class TreeCleanerVisitor extends ParseForestTransformer {
         ASTNode vis;
         if (tc.getProduction().getKLabel() == null)
             vis = this.visitNode(tc.getContents().get(0), _);
-        else
+        else {
+            // invalidate the hashCode cache
+            tc.invalidateHashCode();
             vis = super.visit(tc, _);
+        }
         return vis;
     }
 
