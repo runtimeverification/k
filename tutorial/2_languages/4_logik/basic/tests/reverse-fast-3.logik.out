@@ -1,1 +1,1 @@
-\Q"L" |-> cons ( c (  ), cons ( X, cons ( a (  ), nil (  ) ) ) )\E\n\Q"T" |-> cons ( a (  ), cons ( X, cons ( c (  ), nil (  ) ) ) )\E\n\Q"X" |-> X\E
+\Q"L" |-> cons ( c (  ), cons ( X, cons ( a (  ), nil (  ) ) ) )\E\s+\Q"T" |-> cons ( a (  ), cons ( X, cons ( c (  ), nil (  ) ) ) )\E\s+\Q"X" |-> X\E

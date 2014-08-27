@@ -111,9 +111,10 @@
 
 		<copy todir="release/k">
 			<fileset dir=".">
-				<include name="INSTALL" />
-				<include name="LICENSE" />
-				<include name="README" />
+				<include name="INSTALL.md" />
+				<include name="CHANGELOG.md" />
+				<include name="LICENSE.md" />
+				<include name="README.md" />
 				<include name="bin/**" />
 				<include name="documentation/**" />
 				<include name="include/**" />
