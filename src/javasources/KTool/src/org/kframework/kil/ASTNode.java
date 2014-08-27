@@ -74,7 +74,7 @@ public abstract class ASTNode implements Serializable {
      * @param astNode
      */
     public ASTNode(ASTNode astNode) {
-        attributes = astNode.attributes;
+        copyAttributesFrom(astNode);
         location = astNode.location;
         source = astNode.source;
     }
