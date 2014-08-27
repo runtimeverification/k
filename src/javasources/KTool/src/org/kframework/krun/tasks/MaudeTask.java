@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.tasks;
 
-import org.kframework.krun.K;
 import org.kframework.utils.maude.MaudeRun;
 
 import java.io.*;
@@ -14,15 +13,17 @@ public class MaudeTask extends Thread {
     private String _command;
     private String _outputFile;
     private String _errorFile;
+    private String _xmlOutFile;
     private Process _maudeProcess;
     public int returnValue;
-    
+
     public static String maudeExe = MaudeRun.initializeMaudeExecutable();
-    
-    public MaudeTask(String command, String outputFile, String errorFile) {
+
+    public MaudeTask(String command, String outputFile, String errorFile, String xmlOutFile) {
         _command = command;
         _outputFile = outputFile;
         _errorFile = errorFile;
+        _xmlOutFile = xmlOutFile;
     }
 
     @Override
@@ -51,7 +52,7 @@ public class MaudeTask extends Thread {
         //}
         commands.add("-no-wrap");
         commands.add("-no-banner");
-        commands.add("-xml-log=" + K.maude_output);
+        commands.add("-xml-log=" + _xmlOutFile);
         maude.command(commands);
         maude.redirectOutput(new File(_outputFile));
         maude.redirectError(new File(_errorFile));
@@ -62,7 +63,7 @@ public class MaudeTask extends Thread {
 
     private void runCommand() throws IOException {
         BufferedWriter maudeInput = new BufferedWriter(new OutputStreamWriter(_maudeProcess.getOutputStream()));
-        maudeInput.write(_command + K.lineSeparator);
+        maudeInput.write(_command + "\n");
         maudeInput.close();
     }
 }

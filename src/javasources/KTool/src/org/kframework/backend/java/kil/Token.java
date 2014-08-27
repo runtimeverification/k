@@ -1,11 +1,13 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.Collections;
@@ -17,7 +19,17 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Token extends Term {
+public abstract class Token extends Term implements Immutable {
+
+    public static Token of(Sort sort, String value) {
+        if (sort.equals(BoolToken.SORT)) {
+            return BoolToken.of(Boolean.parseBoolean(value));
+        } else if (sort.equals(IntToken.SORT)) {
+            return IntToken.of(value);
+        } else {
+            return UninterpretedToken.of(sort, value);
+        }
+    }
 
     public Token() {
         super(Kind.KITEM);
@@ -28,11 +40,8 @@ public abstract class Token extends Term {
         return true;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this token.
-     */
     @Override
-    public abstract String sort();
+    public abstract Sort sort();
 
     /**
      * Returns a {@code String} representation of the (uninterpreted) value of this token.
@@ -40,12 +49,12 @@ public abstract class Token extends Term {
     public abstract String value();
 
     @Override
-    public boolean isGround() {
+    public final boolean isGround() {
         return true;
     }
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return false;
     }
 
@@ -55,27 +64,8 @@ public abstract class Token extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + sort().hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + value().hashCode();
-        }
-        return hashCode;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof Token)) {
-            return false;
-        }
-
-        Token token = (Token) object;
-        return sort().equals(token.sort()) && value().equals(token.value());
+    protected final boolean computeHasCell() {
+        return false;
     }
 
     @Override

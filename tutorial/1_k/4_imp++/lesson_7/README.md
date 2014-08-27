@@ -1,10 +1,10 @@
-### Everything Changes: Syntax, Configuration, Semantics
+<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE []]()
+### Everything Changes: Syntax, Configuration, Semantics
 
 In this lesson we add thread joining, one of the simplest thread
 synchronization mechanisms.  In doing so, we need to add unique ids
-to threads in the configuration, and to modify the syntax to allow spawn
+to threads in the configuration, and to modify the syntax to allow `spawn`
 to return the id of the newly created thread.  This gives us an opportunity
 to make several other small syntactic and semantics changes to the language,
 which make it more powerful or more compact at a rather low cost.

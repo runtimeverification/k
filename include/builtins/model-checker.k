@@ -31,7 +31,7 @@ module LTL-HOOKS
                                                        latex({#1}\mathrel{\mathsf{U}_{\scriptstyle\it Ltl}}{#2})]
                      |  LtlFormula "RLtl" LtlFormula  [function, left,
                                                        latex({#1}\mathrel{\mathsf{R}_{\scriptstyle\it Ltl}}{#2})]
-                     |  LtlFormula "WLtl" LtlFormula  [function, left, 
+                     |  LtlFormula "WLtl" LtlFormula  [function, left,
                                                        latex({#1}\mathrel{\mathsf{W}_{\scriptstyle\it Ltl}}{#2})]
                      |  LtlFormula "|->Ltl" LtlFormula [function, left,
                                                         latex({#1}\mathrel{\mapsto_{\scriptstyle\it Ltl}}{#2})]
@@ -49,7 +49,7 @@ endmodule
 module MODEL-CHECKER-SYNTAX-HOOKS
   imports LTL-SYNTAX-HOOKS
   syntax #ModelCheckerState
-  syntax ModelCheckerState ::= #ModelCheckerState 
+  syntax ModelCheckerState ::= #ModelCheckerState
   syntax #Prop
   syntax Prop ::= #Prop
   syntax #ModelCheckResult
@@ -70,7 +70,7 @@ module MODEL-CHECKER-HOOKS
   imports MODEL-CHECKER-SYNTAX-HOOKS
   imports BOOL-HOOKS
 
-  syntax ModelCheckResult ::= "modelCheck" "(" ModelCheckerState "," LtlFormula ")" 
+  syntax ModelCheckResult ::= "modelCheck" "(" ModelCheckerState "," LtlFormula ")"
 
 
 endmodule

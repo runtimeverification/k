@@ -14,17 +14,17 @@ public abstract class Token extends KLabel {
     /**
      * Returns a {@link Token} of the given sort with the given value. The {@link Token} object is an instance of {@link BoolBuiltin}, {@link IntBuiltin},
      * {@link StringBuiltin}, or {@link GenericToken}.
-     * 
+     *
      * @param sort
      * @param value
      * @return
      */
-    public static Token of(String sort, String value) {
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
+    public static Token of(Sort sort, String value) {
+        if (sort.equals(Sort.BUILTIN_BOOL)) {
             return BoolBuiltin.of(value);
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
+        } else if (sort.equals(Sort.BUILTIN_INT)) {
             return IntBuiltin.of(value);
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
+        } else if (sort.equals(Sort.BUILTIN_STRING)) {
             /* TODO(andreis): unescape string */
             return StringBuiltin.of(value);
         } else {
@@ -34,18 +34,18 @@ public abstract class Token extends KLabel {
 
     /**
      * Returns a {@link KApp} representing a {@link Token} of the given sort with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param sort
      * @param value
      * @return
      */
-    public static KApp kAppOf(String sort, String value) {
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
+    public static KApp kAppOf(Sort sort, String value) {
+        if (sort.equals(Sort.BUILTIN_BOOL) || sort.equals(Sort.BOOL)) {
             return BoolBuiltin.kAppOf(value);
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
+        } else if (sort.equals(Sort.BUILTIN_INT) || sort.equals(Sort.INT)) {
             return IntBuiltin.kAppOf(value);
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            return StringBuiltin.kAppOf(StringUtil.unquoteString(value));
+        } else if (sort.equals(Sort.BUILTIN_STRING) || sort.equals(Sort.STRING)) {
+            return StringBuiltin.kAppOf(StringUtil.unquoteKString(value));
         } else {
             return GenericToken.kAppOf(sort, value);
         }
@@ -53,18 +53,20 @@ public abstract class Token extends KLabel {
 
     /**
      * Returns a {@link KApp} representing a {@link Token} with the sort and value specified by the given {@link Element} applied to an empty {@link KList}.
-     * 
+     *
      * @param element
      * @return
      */
     public static KApp kAppOf(Element element) {
-        String sort = element.getAttribute(Constants.SORT_sort_ATTR);
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
+        Sort sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
+        if (sort.equals(Sort.BUILTIN_BOOL)) {
             return KApp.of(new BoolBuiltin(element));
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
+        } else if (sort.equals(Sort.BUILTIN_INT)) {
             return KApp.of(new IntBuiltin(element));
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
+        } else if (sort.equals(Sort.BUILTIN_STRING)) {
             return KApp.of(new StringBuiltin(element));
+        } else if (sort.equals(Sort.BUILTIN_FLOAT)) {
+            return KApp.of(new FloatBuiltin(element));
         } else {
             return KApp.of(new GenericToken(element));
         }
@@ -77,16 +79,11 @@ public abstract class Token extends KLabel {
         super(element);
     }
 
-    /**
-     * Returns a {@link String} representing the sort of the token.
-     * 
-     * @return
-     */
-    public abstract String tokenSort();
+    public abstract Sort tokenSort();
 
     /**
      * Returns a {@link String} representing the (uninterpreted) value of the token.
-     * 
+     *
      * @return
      */
     public abstract String value();
@@ -122,7 +119,7 @@ public abstract class Token extends KLabel {
     @Override
     public String toString() {
         // TODO (BUG): has extra quotations when #Sort string
-        return "#token(\"" + tokenSort() + "\", " + StringUtil.enquoteString(value()) + ")";
+        return "#token(\"" + tokenSort() + "\", " + StringUtil.enquoteKString(value()) + ")";
     }
 
 }

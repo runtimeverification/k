@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 /**
  * Configuration declaration.
  * The term {@code body} is the intial configuration as a bag of cells,
- * also allowing cell attributes and variables such as {@code $PGM}. 
+ * also allowing cell attributes and variables such as {@code $PGM}.
  * May not have a non-null {@code condition}.
  */
 public class Configuration extends Sentence {
@@ -38,7 +38,7 @@ public class Configuration extends Sentence {
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public Configuration shallowCopy() {
         return new Configuration(this);

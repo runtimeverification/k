@@ -1,14 +1,12 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -18,7 +16,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -56,28 +53,19 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 if (prod.getArity() == 2)
                     if (prod.getChildSort(0).equals(prod.getChildSort(1)))
                         if (!equalities.containsKey(prod.getChildSort(0)))
-                            equalities.put(prod.getChildSort(0), prod.getKLabel());
+                            equalities.put(prod.getChildSort(0).getName(), prod.getKLabel());
                         else
-                            GlobalSettings.kem.register(new KException(
-                                    KException.ExceptionType.ERROR,
-                                    KException.KExceptionGroup.CRITICAL,
+                            GlobalSettings.kem.registerCriticalError(
                                     "redeclaration of equality for sort " + prod.getChildSort(0),
-                                    prod.getFilename(),
-                                    prod.getLocation()));
+                                    this, prod);
                     else
-                        GlobalSettings.kem.register(new KException(
-                                KException.ExceptionType.ERROR,
-                                KException.KExceptionGroup.CRITICAL,
+                        GlobalSettings.kem.registerCriticalError(
                                 "arguments for equality expected to be of the same sort",
-                                prod.getFilename(),
-                                prod.getLocation()));
+                                this, prod);
                 else
-                    GlobalSettings.kem.register(new KException(
-                            KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+                    GlobalSettings.kem.registerCriticalError(
                             "unexpected number of arguments for equality, expected 2",
-                            prod.getFilename(),
-                            prod.getLocation()));
+                            this, prod);
             /* TOOD(AndreiS): cink fails this check; either fix cink or remove the check
             else
                 GlobalSettings.kem.register(new KException(
@@ -93,10 +81,10 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
 
         /* defer =K to =Sort for sorts with equality */
         for(Map.Entry<String, String> item : equalities.entrySet()) {
-            String sort = item.getKey();
+            Sort sort = Sort.of(item.getKey());
             KLabelConstant sortEq = KLabelConstant.of(item.getValue(), context);
-            if (MetaK.isComputationSort(sort)) {
-                retNode.addSubsort(EQUALITY_SORT, sort, context);
+            if (sort.isComputationSort()) {
+                retNode.addSubsort(Sort.of(EQUALITY_SORT), sort, context);
 
                 KList kList = new KList();
                 kList.add(Variable.getFreshVar(sort));
@@ -116,9 +104,9 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                     && !prod.containsAttribute(Attribute.BRACKET.getKey())
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
                     && !prod.containsAttribute(Attribute.PREDICATE.getKey())
-                    && (!MetaK.isKSort(prod.getSort()) || prod.getSort().equals(KSorts.K))) {
-                Variable KListVar1 = Variable.getFreshVar(KSorts.KLIST);
-                Variable KListVar2 = Variable.getFreshVar(KSorts.KLIST);
+                    && (!prod.getSort().isKSort() || prod.getSort().equals(Sort.K))) {
+                Variable KListVar1 = Variable.getFreshVar(Sort.KLIST);
+                Variable KListVar2 = Variable.getFreshVar(Sort.KLIST);
 
                 KList lhsList = new KList();
                 lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel(), context), KListVar1));
@@ -137,7 +125,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
         }
 
         /* defer =K to ==K for lexical tokens */
-        for (String sort : context.getTokenSorts()) {
+        for (Sort sort : context.getTokenSorts()) {
             KList kList = new KList();
             kList.add(Variable.getFreshVar(sort));
             kList.add(Variable.getFreshVar(sort));

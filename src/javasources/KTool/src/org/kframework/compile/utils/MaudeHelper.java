@@ -1,10 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.Sort;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,54 +11,54 @@ import java.util.Set;
 public class MaudeHelper {
 
     public static List<String> separators = new ArrayList<String>();
-    public static Set<String> declaredSorts = new HashSet<String>();
+    public static Set<Sort> declaredSorts = new HashSet<>();
     public static Set<String> kLabels = new HashSet<String>();
 
-    public static Set<String> basicSorts = new HashSet<String>();
+    public static Set<Sort> basicSorts = new HashSet<>();
     static {
-        basicSorts.add(KSorts.K);
-        basicSorts.add(KSorts.KITEM);
-        basicSorts.add(KSorts.KLABEL);
-        basicSorts.add(KSorts.KLIST);
-        basicSorts.add(KSorts.KRESULT);
+        basicSorts.add(Sort.K);
+        basicSorts.add(Sort.KITEM);
+        basicSorts.add(Sort.KLABEL);
+        basicSorts.add(Sort.KLIST);
+        basicSorts.add(Sort.KRESULT);
 
-        basicSorts.add(KSorts.CELL_LABEL);
+        basicSorts.add(Sort.CELL_LABEL);
 
-        basicSorts.add(BoolBuiltin.SORT_NAME);
-        basicSorts.add(IntBuiltin.SORT_NAME);
-        basicSorts.add(StringBuiltin.SORT_NAME);
+        basicSorts.add(Sort.BUILTIN_BOOL);
+        basicSorts.add(Sort.BUILTIN_INT);
+        basicSorts.add(Sort.BUILTIN_STRING);
+        basicSorts.add(Sort.BUILTIN_FLOAT);
 
-        basicSorts.add(KSorts.BAG);
-        basicSorts.add(KSorts.BAG_ITEM);
-        basicSorts.add(KSorts.LIST);
-        basicSorts.add(KSorts.LIST_ITEM);
-        basicSorts.add(KSorts.MAP);
-        basicSorts.add(KSorts.MAP_ITEM);
-        basicSorts.add(KSorts.SET);
-        basicSorts.add(KSorts.SET_ITEM);
+        basicSorts.add(Sort.BAG);
+        basicSorts.add(Sort.BAG_ITEM);
+        basicSorts.add(Sort.LIST);
+        basicSorts.add(Sort.LIST_ITEM);
+        basicSorts.add(Sort.MAP);
+        basicSorts.add(Sort.MAP_ITEM);
+        basicSorts.add(Sort.SET);
+        basicSorts.add(Sort.SET_ITEM);
 
-        basicSorts.add("#Id");
-        basicSorts.add("#Rat");
-        basicSorts.add("#Float");
-        basicSorts.add("#ModelCheckerState");
-        basicSorts.add("#ModelCheckResult");
-        basicSorts.add("#LTLFormula");
-        basicSorts.add("#Prop");
+        basicSorts.add(Sort.BUILTIN_ID);
+        basicSorts.add(Sort.BUILTIN_RAT);
+        basicSorts.add(Sort.BUILTIN_MODEL_CHECKER_STATE);
+        basicSorts.add(Sort.BUILTIN_MODEL_CHECK_RESULT);
+        basicSorts.add(Sort.BUILTIN_LTL_FORMULA);
+        basicSorts.add(Sort.BUILTIN_PROP);
     }
 
-    public static Set<String> constantSorts = new HashSet<String>();
+    public static Set<Sort> constantSorts = new HashSet<>();
     static {
-        constantSorts.add(BoolBuiltin.SORT_NAME);
-        constantSorts.add(IntBuiltin.SORT_NAME);
-        constantSorts.add(StringBuiltin.SORT_NAME);
+        constantSorts.add(Sort.BUILTIN_BOOL);
+        constantSorts.add(Sort.BUILTIN_INT);
+        constantSorts.add(Sort.BUILTIN_STRING);
+        constantSorts.add(Sort.BUILTIN_FLOAT);
 
-        constantSorts.add(KSorts.KLABEL);
+        constantSorts.add(Sort.KLABEL);
 
-        constantSorts.add(KSorts.CELL_LABEL);
+        constantSorts.add(Sort.CELL_LABEL);
 
         /* andreis: not sure if this two are needed */
-        constantSorts.add("#Id");
-        constantSorts.add("#Rat");
-        constantSorts.add("#Float");
+        constantSorts.add(Sort.BUILTIN_ID);
+        constantSorts.add(Sort.BUILTIN_RAT);
     }
 }

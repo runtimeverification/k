@@ -21,7 +21,7 @@ public class AddKCell extends CopyOnWriteTransformer {
      * Used to remember for each module the rules that need to be added.
      */
     protected java.util.List<ModuleItem> newRules;
-    
+
     public AddKCell(Context context) {
         super("Add K cell", context);
         this.komputationCells = new ArrayList<String>();
@@ -41,7 +41,7 @@ public class AddKCell extends CopyOnWriteTransformer {
         if (newRules.isEmpty()) {
             returnModule = newModule;
         } else {
-            returnModule = newModule.shallowCopy();        
+            returnModule = newModule.shallowCopy();
             returnModule = returnModule.addModuleItems(newRules);
         }
         return returnModule;
@@ -53,7 +53,7 @@ public class AddKCell extends CopyOnWriteTransformer {
             return node;
         }
 
-        if (!MetaK.isComputationSort(node.getBody().getSort())) {
+        if (!node.getBody().getSort().isComputationSort()) {
             return node;
         }
         node = node.shallowCopy();
@@ -73,7 +73,7 @@ public class AddKCell extends CopyOnWriteTransformer {
         }
         assert !computationCells.isEmpty();
         node.setBody(MetaK.kWrap(node.getBody(), computationCells.get(0))); // then first rule replaces older rule
-        
+
         return node;
     }
 
@@ -97,7 +97,7 @@ public class AddKCell extends CopyOnWriteTransformer {
                 bag.getContents().add(k);
             }
         }
-        
+
         return cfg;
     }
 

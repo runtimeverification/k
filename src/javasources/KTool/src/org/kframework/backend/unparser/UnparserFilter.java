@@ -1,16 +1,15 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
-import org.kframework.krun.K;
+import org.kframework.krun.KRunOptions;
+import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.utils.ColorUtil;
-import org.kframework.utils.StringUtil;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.awt.Color;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 public class UnparserFilter extends NonCachingVisitor {
@@ -19,8 +18,10 @@ public class UnparserFilter extends NonCachingVisitor {
     private boolean firstProduction = false;
     private boolean inConfiguration = false;
     private boolean addParentheses;
+    private final KRunOptions.OutputMode outputMode;
     private int inTerm = 0;
     private ColorSetting color = ColorSetting.OFF;
+    private Color terminalColor = Color.black;
     private boolean annotateLocation;
     public static int TAB = 4;
     private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
@@ -35,7 +36,7 @@ public class UnparserFilter extends NonCachingVisitor {
     public void setIndenter(Indenter indenter) {
         this.indenter = indenter;
     }
-    
+
     public UnparserFilter(org.kframework.kil.loader.Context context) {
         this(false, context);
     }
@@ -45,20 +46,25 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     public UnparserFilter(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, true, context);
+        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, OutputMode.PRETTY, context);
     }
 
-    public UnparserFilter(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color, addParentheses, false, context);
+    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputMode outputMode, org.kframework.kil.loader.Context context) {
+        this(inConfiguration, color, outputMode, false, context);
     }
 
-    public UnparserFilter(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context) {
+    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputMode outputMode, boolean annotateLocation, org.kframework.kil.loader.Context context) {
         super(context);
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
-        this.addParentheses = addParentheses;
+        this.addParentheses = outputMode != OutputMode.SMART;
         this.annotateLocation = annotateLocation;
+        this.outputMode = outputMode;
+        //TODO(dwightguth): clean up pretty printing so we don't need this ugly hack
+        if (context.colorOptions != null) {
+            terminalColor = context.colorOptions.terminalColor();
+        }
     }
 
     public String getResult() {
@@ -107,7 +113,7 @@ public class UnparserFilter extends NonCachingVisitor {
     public Void visit(Syntax syn, Void _) {
         prepare(syn);
         firstPriorityBlock = true;
-        indenter.write("syntax " + syn.getSort().getName());
+        indenter.write("syntax " + syn.getDeclaredSort().getName());
         indenter.indentToCurrent();
         if (syn.getPriorityBlocks() != null)
             for (PriorityBlock pb : syn.getPriorityBlocks()) {
@@ -148,13 +154,18 @@ public class UnparserFilter extends NonCachingVisitor {
                 indenter.write(" ");
             }
         }
-        this.visitNode(prod.getAttributes());
+        if (!prod.getAttributes().isEmpty()) {
+            indenter.write(" ");
+            indenter.write("[");
+            this.visitNode(prod.getAttributes());
+            indenter.write("]");
+        }
         indenter.endLine();
         return postpare();
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         prepare(sort);
         indenter.write(sort.getName());
         super.visit(sort, _);
@@ -196,31 +207,14 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Attributes attributes, Void _) {
         prepare(attributes);
-        java.util.List<String> reject = new LinkedList<String>();
-        reject.add("cons");
-        reject.add("kgeneratedlabel");
-        reject.add("prefixlabel");
-        reject.add("filename");
-        reject.add("location");
-
-        List<Attribute> attributeList = new LinkedList<Attribute>();
-        List<Attribute> oldAttributeList = attributes.getContents();
-        for (int i = 0; i < oldAttributeList.size(); ++i) {
-            if (!reject.contains(oldAttributeList.get(i).getKey())) {
-                attributeList.add(oldAttributeList.get(i));
-            }
-        }
-
-        if (!attributeList.isEmpty()) {
-            indenter.write(" ");
-            indenter.write("[");
-            for (int i = 0; i < attributeList.size(); ++i) {
-                this.visitNode(attributeList.get(i));
-                if (i != attributeList.size() - 1) {
+        if (!attributes.isEmpty()) {
+            Iterator<Attribute> iter = attributes.values().iterator();
+            for (int i = 0; i < attributes.size(); ++i) {
+                this.visitNode(iter.next());
+                if (i != attributes.size() - 1) {
                     indenter.write(", ");
                 }
             }
-            indenter.write("]");
         }
         return postpare();
     }
@@ -266,7 +260,7 @@ public class UnparserFilter extends NonCachingVisitor {
         if (declaredCell != null) {
             String declaredColor = declaredCell.getCellAttributes().get("color");
             if (declaredColor != null) {
-                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color);
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors().get(declaredColor), color, terminalColor);
                 indenter.write(colorCode);
             }
         }
@@ -307,12 +301,20 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Variable variable, Void _) {
         prepare(variable);
-        if (variable.isFresh())
+        if (variable.isFreshVariable())
             indenter.write("?");
+        else if (variable.isFreshConstant())
+            indenter.write("!");
         indenter.write(variable.getName());
         if (!variableList.contains(variable.getName())) {
             indenter.write(":" + variable.getSort());
             variableList.add(variable.getName());
+
+            if (variable.getAttributes().size() > 0) {
+                indenter.write("{");
+                this.visitNode(variable.getAttributes());
+                indenter.write("}");
+            }
         }
         return postpare();
     }
@@ -341,7 +343,12 @@ public class UnparserFilter extends NonCachingVisitor {
             indenter.write(" ensures ");
             this.visitNode(rule.getEnsures());
         }
-        this.visitNode(rule.getAttributes());
+        if (!rule.getAttributes().isEmpty()) {
+            indenter.write(" ");
+            indenter.write("[");
+            this.visitNode(rule.getAttributes());
+            indenter.write("]");
+        }
         indenter.endLine();
         indenter.endLine();
         return postpare();
@@ -356,8 +363,9 @@ public class UnparserFilter extends NonCachingVisitor {
             assert child instanceof KList : "child of KApp with Token is not KList";
             assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
             indenter.write(((Token) label).value());
-        } else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
-            
+        } else if ((outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP)
+                && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
+
             String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";
 
             if (child instanceof KList) {
@@ -504,33 +512,6 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(ListItem listItem, Void _) {
-        prepare(listItem);
-        indenter.write("ListItem(");
-        super.visit(listItem, _);
-        indenter.write(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(SetItem setItem, Void _) {
-        prepare(setItem);
-        indenter.write("SetItem(");
-        super.visit(setItem, _);
-        indenter.write(")");
-        return postpare();
-    }
-
-    @Override
-    public Void visit(MapItem mapItem, Void _) {
-        prepare(mapItem);
-        this.visitNode(mapItem.getKey());
-        indenter.write(" |-> ");
-        this.visitNode(mapItem.getValue());
-        return postpare();
-    }
-
-    @Override
     public Void visit(Hole hole, Void _) {
         prepare(hole);
         indenter.write("HOLE");
@@ -555,8 +536,8 @@ public class UnparserFilter extends NonCachingVisitor {
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         prepare(kInjectedLabel);
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort())) {
-            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()));
+        if (term.getSort().isKSort()) {
+            indenter.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
             indenter.write("2KLabel ");
         } else {
             indenter.write("# ");
@@ -584,30 +565,9 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.List list, Void _) {
-        prepare(list);
-        super.visit(list, _);
-        return postpare();
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Map map, Void _) {
-        prepare(map);
-        super.visit(map, _);
-        return postpare();
-    }
-
-    @Override
     public Void visit(Bag bag, Void _) {
         prepare(bag);
         super.visit(bag, _);
-        return postpare();
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Set set, Void _) {
-        prepare(set);
-        super.visit(set, _);
         return postpare();
     }
 
@@ -645,7 +605,12 @@ public class UnparserFilter extends NonCachingVisitor {
             indenter.write(" ensures ");
             this.visitNode(context.getEnsures());
         }
-        this.visitNode(context.getAttributes());
+        if (!context.getAttributes().isEmpty()) {
+            indenter.write(" ");
+            indenter.write("[");
+            this.visitNode(context.getAttributes());
+            indenter.write("]");
+        }
         indenter.endLine();
         indenter.endLine();
         return postpare();
@@ -693,7 +658,12 @@ public class UnparserFilter extends NonCachingVisitor {
         if (c.isSyntactic()) {
             indenter.write(":");
         }
-        indenter.write(c.getSort());
+        indenter.write(c.getSort().getName());
+        if (c.getAttributes().size() > 0) {
+            indenter.write("{");
+            this.visitNode(c.getAttributes());
+            indenter.write("}");
+        }
         return postpare();
     }
 
@@ -712,7 +682,12 @@ public class UnparserFilter extends NonCachingVisitor {
         }
         stack.push(astNode);
         if (annotateLocation) {
-            astNode.setLocation("(" + indenter.getLineNo() + "," + indenter.getColNo());
+            if (astNode.getLocation() == null) {
+                astNode.setLocation(new Location(indenter.getLineNo(), indenter.getColNo(), 0, 0));
+            } else {
+                astNode.getLocation().lineStart = indenter.getLineNo();
+                astNode.getLocation().columnStart = indenter.getColNo();
+            }
         }
     }
 
@@ -724,10 +699,8 @@ public class UnparserFilter extends NonCachingVisitor {
             }
         }
         if (annotateLocation) {
-            String loc = astNode.getLocation();
-            if (!loc.substring(loc.length() - 1).equals(")")) {
-                astNode.setLocation(loc + "," + indenter.getLineNo() + "," + indenter.getColNo() + ")");
-            }
+            astNode.getLocation().lineEnd = indenter.getLineNo();
+            astNode.getLocation().columnEnd = indenter.getColNo();
         }
         return null;
     }

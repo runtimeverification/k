@@ -4,24 +4,35 @@ package org.kframework.backend.java.kil;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.rewritemachine.Instruction;
+import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint.Equality;
+import org.kframework.backend.java.symbolic.VariableOccurrencesCounter;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
-
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
+import org.kframework.kil.loader.Constants;
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -41,7 +52,37 @@ public class Rule extends JavaSymbolicObject {
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
     private final boolean hasUnboundVars;
-    
+
+    /**
+     * Specifies whether this rule has been compiled to generate instructions
+     * for the {@link KAbstractRewriteMachine}.
+     */
+    private boolean compiledForFastRewriting;
+    /**
+     * Left-hand sides of the local rewrite operations under read cells; such
+     * left-hand sides are used as patterns to match against the subject term.
+     */
+    private final Map<String, Term> lhsOfReadCells;
+    /**
+     * Right-hand sides of the local rewrite operations under write cells.
+     */
+    private final Map<String, Term> rhsOfWriteCells;
+    /**
+     * @see Rule#computeReusableBoundVars()
+     */
+    private final Multiset<Variable> reusableVariables;
+    /**
+     * Ground cells inside the right-hand side of this rule. Since cells are
+     * mutable, they must be copied when the RHS is instantiated to avoid
+     * undesired sharing.
+     */
+    private final Set<String> groundCells;
+    /**
+     * Instructions generated from this rule to be executed by the
+     * {@link KAbstractRewriteMachine}.
+     */
+    private final List<Instruction> instructions;
+
     /**
      * Unbound variables in the rule before kompilation; that is, all variables
      * on the rhs which do not appear in either lhs or fresh condition(s).
@@ -50,8 +91,9 @@ public class Rule extends JavaSymbolicObject {
      * checking algorithm used in the {@link CheckVariables} pass.
      */
     private final ImmutableSet<Variable> unboundVars;
-    private final boolean isSortPredicate;
-    private final String predSort;
+    // TODO(YilongL): make it final
+    private boolean isSortPredicate;
+    private final Sort predSort;
     private final KItem sortPredArg;
 
     public Rule(
@@ -62,7 +104,14 @@ public class Rule extends JavaSymbolicObject {
             Collection<Term> ensures,
             Collection<Variable> freshVariables,
             UninterpretedConstraint lookups,
+            boolean compiledForFastRewriting,
+            Map<String, Term> lhsOfReadCells,
+            Map<String, Term> rhsOfWriteCells,
+            Set<String> cellsToCopy,
+            List<Instruction> instructions,
             Attributes attributes,
+            Location location,
+            Source source,
             Definition definition) {
         this.label = label;
         this.leftHandSide = leftHandSide;
@@ -71,17 +120,39 @@ public class Rule extends JavaSymbolicObject {
         this.ensures = ImmutableList.copyOf(ensures);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
-        super.setAttributes(attributes);
 
-        Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs(definition);
-        /*
-         * Compute indexing information only if the left-hand side of this rule has precisely one
-         * k cell; set indexing to top otherwise (this rule could rewrite any term).
-         */
-        if (indexingPairs.size() == 1) {
-            this.indexingPair = indexingPairs.iterator().next();
+        super.setAttributes(attributes);
+        setLocation(location);
+        setSource(source);
+
+        if (attributes.containsKey(Constants.STDIN)
+                || attributes.containsKey(Constants.STDOUT)
+                || attributes.containsKey(Constants.STDERR)) {
+            Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
+            BuiltinList.Builder streamListBuilder = BuiltinList.builder();
+            for (Equality eq : lookups.equalities()) {
+                streamListBuilder.addItem(eq.rightHandSide());
+            }
+            if (!(listVar instanceof ConcreteCollectionVariable)) {
+                streamListBuilder.concatenate(Variable.getFreshVariable(Sort.LIST));
+            }
+
+            Term streamList = streamListBuilder.build();
+            this.indexingPair = attributes.containsKey(Constants.STDIN) ?
+                    IndexingPair.getInstreamIndexingPair(streamList, definition) :
+                    IndexingPair.getOutstreamIndexingPair(streamList, definition);
         } else {
-            this.indexingPair = IndexingPair.TOP;
+            Collection<IndexingPair> indexingPairs = leftHandSide.getKCellIndexingPairs(definition);
+
+            /*
+             * Compute indexing information only if the left-hand side of this rule has precisely one
+             * k cell; set indexing to top otherwise (this rule could rewrite any term).
+             */
+            if (indexingPairs.size() == 1) {
+                this.indexingPair = indexingPairs.iterator().next();
+            } else {
+                this.indexingPair = definition.indexingData.TOP_INDEXING_PAIR;
+            }
         }
 
         leftHandSide.accept(new BottomUpVisitor() {
@@ -95,7 +166,7 @@ public class Rule extends JavaSymbolicObject {
             }
         });
         containsKCell = tempContainsKCell;
-               
+
         hasUnboundVars = super.containsAttribute(CheckVariables.UNBOUND_VARS);
         if (hasUnboundVars) {
             // TODO(YilongL): maybe compute unbound variables in the generic KIL instead
@@ -108,41 +179,107 @@ public class Rule extends JavaSymbolicObject {
         } else {
             unboundVars = null;
         }
-        
-        isSortPredicate = isFunction()
-                && functionKLabel().toString().startsWith("is");
+
+        isSortPredicate = isFunction() && definedKLabel().isSortPredicate();
         if (isSortPredicate) {
-            predSort = functionKLabel().toString().substring(2);
-            
-            assert leftHandSide instanceof KItem
+            predSort = definedKLabel().getPredicateSort();
+
+            if (leftHandSide instanceof KItem
                     && rightHandSide.equals(BoolToken.TRUE)
-                    && ((KList) ((KItem) leftHandSide).kList()).size() == 1 : 
-                        "unexpected sort predicate rule: " + this;
-            Term arg = ((KList) ((KItem) leftHandSide).kList()).get(0);
-            assert arg instanceof KItem : "unexpected sort predicate rule: " + this;
-            sortPredArg = (KItem) arg;
+                    && ((KList) ((KItem) leftHandSide).kList()).concreteSize() == 1) {
+                Term arg = ((KList) ((KItem) leftHandSide).kList()).get(0);
+                sortPredArg = arg instanceof KItem ? (KItem) arg : null;
+            } else {
+                sortPredArg = null;
+            }
+
+            if (sortPredArg == null) {
+                isSortPredicate = false;
+
+                /*
+                 * YilongL: the right-hand side of the sort predicate rule
+                 * is not necessarily {@code BoolToken#True}? for example:
+                 *     rule isNat(I:Int) => '_>=Int_(I:Int,, Int(#"0"))
+                 */
+                // TODO(YilongL): properly re-implement support for sort predicate rules
+//                GlobalSettings.kem.registerCriticalWarning("Unexpected sort predicate rule: " + this, null, this);
+            }
         } else {
             predSort = null;
             sortPredArg = null;
         }
+
+        // setting fields related to fast rewriting
+        this.compiledForFastRewriting = compiledForFastRewriting;
+        this.lhsOfReadCells     = compiledForFastRewriting ? ImmutableMap.copyOf(lhsOfReadCells) : null;
+        this.rhsOfWriteCells    = compiledForFastRewriting ? ImmutableMap.copyOf(rhsOfWriteCells) : null;
+        this.reusableVariables  = computeReusableBoundVars();
+        this.groundCells        = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
+        this.instructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
+    }
+
+    /**
+     * Private helper method that computes bound variables that can be reused to
+     * instantiate the right-hand sides of the local rewrite operations.
+     * <p>
+     * Essentially, reusable bound variables are
+     * <li>variables that occur in the left-hand sides of the rewrite operations
+     * under read-write cells, plus
+     * <li>variables in the key and value positions of data structure operations
+     * (they are initially in the left-hand sides but moved to side conditions
+     * during compilation)
+     *
+     * @return a multi-set representing reusable bound variables
+     */
+    private Multiset<Variable> computeReusableBoundVars() {
+        Multiset<Variable> lhsVariablesToReuse = HashMultiset.create();
+        if (compiledForFastRewriting) {
+            Set<Term> lhsOfReadOnlyCell = Sets.newHashSet();
+            /* add all variables that occur in the left-hand sides of read-write cells */
+            for (Map.Entry<String, Term> entry : lhsOfReadCells.entrySet()) {
+                String cellLabel = entry.getKey();
+                Term lhs = entry.getValue();
+                if (rhsOfWriteCells.containsKey(cellLabel)) {
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(lhs));
+                } else {
+                    lhsOfReadOnlyCell.add(lhs);
+                }
+            }
+            /* add variables that occur in the key and value positions of data
+             * structure lookup operations under read-write cells */
+            for (Equality eq : lookups.equalities()) {
+                assert eq.leftHandSide() instanceof DataStructureLookupOrChoice;
+                if (eq.leftHandSide() instanceof DataStructureLookup) {
+                    DataStructureLookup lookup = (DataStructureLookup) eq.leftHandSide();
+                    Term value = eq.rightHandSide();
+
+                    if (!lhsOfReadOnlyCell.contains(lookup.base())) {
+                        // do not double count base variable again
+                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(lookup.key()));
+                        lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(value));
+                    }
+                }
+            }
+        } else {
+            lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(leftHandSide));
+            for (Equality eq : lookups.equalities()) {
+                assert eq.leftHandSide() instanceof DataStructureLookupOrChoice;
+                if (eq.leftHandSide() instanceof DataStructureLookup) {
+                    DataStructureLookup lookup = (DataStructureLookup) eq.leftHandSide();
+                    Term value = eq.rightHandSide();
+
+                    // do not double count base variable again
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(lookup.key()));
+                    lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(value));
+                }
+            }
+        }
+
+        return lhsVariablesToReuse;
     }
 
     private boolean tempContainsKCell = false;
-    
-    /*
-    public Rule(Term leftHandSide, Term rightHandSide, Term requires) {
-        this(leftHandSide, rightHandSide, requires, null);
-    }
 
-    public Rule(Term leftHandSide, Term rightHandSide, Attributes attributes) {
-        this(leftHandSide, rightHandSide, null, attributes);
-    }
-
-    public Rule(Term leftHandSide, Term rightHandSide) {
-        this(leftHandSide, rightHandSide, null, null);
-    }
-    */
-    
     public String label() {
         return label;
     }
@@ -158,15 +295,15 @@ public class Rule extends JavaSymbolicObject {
     public ImmutableSet<Variable> freshVariables() {
         return freshVariables;
     }
-    
+
     public boolean hasUnboundVariables() {
         return hasUnboundVars;
     }
-    
+
     public ImmutableSet<Variable> unboundVariables() {
         return unboundVars == null ? ImmutableSet.<Variable>of() : unboundVars;
     }
-    
+
     /**
      * @return {@code true} if this rule is a sort predicate rule; otherwise,
      *         {@code false}
@@ -174,31 +311,48 @@ public class Rule extends JavaSymbolicObject {
     public boolean isSortPredicate() {
         return isSortPredicate;
     }
-    
+
     /**
      * Gets the predicate sort if this rule is a sort predicate rule.
      */
-    public String getPredSort() {
+    public Sort predicateSort() {
         assert isSortPredicate;
-        
+
         return predSort;
     }
-    
+
     /**
-     * Gets the argument of the sort predicate if this rule is a sort predicate rule. 
+     * Gets the argument of the sort predicate if this rule is a sort predicate rule.
      */
-    public KItem getSortPredArgument() {
+    public KItem sortPredicateArgument() {
         assert isSortPredicate;
 
         return sortPredArg;
     }
-    
+
     public boolean isFunction() {
-        return super.containsAttribute(Attribute.FUNCTION_KEY);
+        return containsAttribute(Attribute.FUNCTION_KEY);
     }
 
-    public KLabelConstant functionKLabel() {
-        assert isFunction();
+    public boolean isAnywhere() {
+        return containsAttribute(Attribute.ANYWHERE_KEY);
+    }
+
+    public boolean isPattern() {
+        return super.containsAttribute(Attribute.PATTERN_KEY);
+    }
+
+    /**
+     * Returns the KLabel constant defined by this rule (either a function or a pattern).
+     */
+    public KLabelConstant definedKLabel() {
+        assert isFunction() || isPattern();
+
+        return (KLabelConstant) ((KItem) leftHandSide).kLabel();
+    }
+
+    public KLabelConstant anywhereKLabel() {
+        assert isAnywhere();
 
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }
@@ -228,6 +382,30 @@ public class Rule extends JavaSymbolicObject {
 
     public Term rightHandSide() {
         return rightHandSide;
+    }
+
+    public boolean isCompiledForFastRewriting() {
+        return compiledForFastRewriting;
+    }
+
+    public Map<String, Term> lhsOfReadCell() {
+        return lhsOfReadCells;
+    }
+
+    public Map<String, Term> rhsOfWriteCell() {
+        return rhsOfWriteCells;
+    }
+
+    public Multiset<Variable> reusableVariables() {
+        return reusableVariables;
+    }
+
+    public Set<String> cellsToCopy() {
+        return groundCells;
+    }
+
+    public List<Instruction> instructions() {
+        return instructions;
     }
 
     @Override
@@ -299,6 +477,7 @@ public class Rule extends JavaSymbolicObject {
         if (ensures != null) {
             string += " ensures " + ensures;
         }
+        string += " [" + "Location: " + getLocation() + ", " + getSource() + "]";
         return string;
     }
 

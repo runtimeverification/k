@@ -7,19 +7,19 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.MapUpdate;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * Transformer class compiling collection (bag, list, map and set) terms into K internal
@@ -36,53 +36,67 @@ import java.util.Collections;
  */
 public class CompileDataStructures extends CopyOnWriteTransformer {
 
-    private enum Status { LHS, RHS, CONDITION }
+    private ASTNode location;
 
-    private Status status;
-    private String location;
-    private String filename;
-
+    /**
+     * Simplified constructor for the common case
+     * @param context The context of the rules being compiled
+     */
     public CompileDataStructures(Context context) {
         super("Compile collections to internal K representation", context);
     }
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
+        location = node;
+        boolean change = false;
 
-        location = node.getLocation();
-        filename = node.getFilename();
+        Term body;
+        if (node.getBody() instanceof Rewrite) {
+            Rewrite rewrite = (Rewrite) node.getBody();
+            Term lhs = (Term) this.visitNode(rewrite.getLeft());
+            Term rhs = (Term) this.visitNode(rewrite.getRight());
+            if (lhs != rewrite.getLeft() || rhs != rewrite.getRight()) {
+                rewrite = rewrite.shallowCopy();
+                rewrite.setLeft(lhs, context);
+                rewrite.setRight(rhs, context);
+            }
+            body = rewrite;
+        } else {
+            body = (Term) this.visitNode(node.getBody());
+        }
+        if (body != node.getBody()) {
+            change = true;
+        }
 
-        assert node.getBody() instanceof Rewrite :
-                "expected rewrite at the top of rule\n" + node + "\n"
-                + "CompileDataStructures pass should be applied after ResolveRewrite pass";
-
-        Rewrite rewrite = (Rewrite) node.getBody();
-        status = Status.LHS;
-        Term lhs = (Term) this.visitNode(rewrite.getLeft());
-        status = Status.RHS;
-        Term rhs = (Term) this.visitNode(rewrite.getRight());
         Term requires;
         if (node.getRequires() != null) {
-            status = Status.CONDITION;
             requires = (Term) this.visitNode(node.getRequires());
+            if (requires != node.getRequires()) {
+                change = true;
+            }
         } else {
             requires = null;
         }
-        
-        //TODO: handle ensures, too.
 
-        if (lhs == rewrite.getLeft()
-            && rhs == rewrite.getRight()
-            && requires == node.getRequires()) {
+        Term ensures;
+        if (node.getEnsures() != null) {
+            ensures = (Term) this.visitNode(node.getEnsures());
+            if (ensures != node.getEnsures()) {
+                change = true;
+            }
+        } else {
+            ensures = null;
+        }
+
+        if (!change) {
             return node;
         }
 
         node = node.shallowCopy();
-        rewrite = rewrite.shallowCopy();
-        node.setBody(rewrite);
-        rewrite.setLeft(lhs, context);
-        rewrite.setRight(rhs, context);
+        node.setBody(body);
         node.setRequires(requires);
+        node.setEnsures(ensures);
         return node;
     }
 
@@ -94,34 +108,28 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(KApp node, Void _)  {
+        node = (KApp) super.visit(node, _);
         if (!(node.getLabel() instanceof KLabelConstant)) {
             /* only consider KLabel constants */
-            return super.visit(node, _);
+            return node;
         }
         KLabelConstant kLabelConstant = (KLabelConstant) node.getLabel();
 
         if (!(node.getChild() instanceof KList)) {
             /* only consider KList constants */
-            return super.visit(node, _);
+            return node;
         }
         KList kList = (KList) node.getChild();
 
-        // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
-        //if (kLabelConstant.productions().size() != 1) {
-        //    /* ignore KLabels associated with multiple productions */
-        //    return super.transform(node);
-        //}
-        //Production production = kLabelConstant.productions().iterator().next();
-
-        if (context.productionsOf(kLabelConstant.getLabel()).size() != 1) {
-            /* ignore KLabels associated with multiple productions */
-            return super.visit(node, _);
+        Set<Production> productions = context.productionsOf(kLabelConstant.getLabel());
+        if (productions.isEmpty()) {
+            return node;
         }
-        Production production = context.productionsOf(kLabelConstant.getLabel()).iterator().next();
+        Production production = productions.iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
-            return super.visit(node, _);
+            return node;
         }
 
         Term[] arguments = new Term[kList.getContents().size()];
@@ -129,21 +137,23 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             arguments[i] = (Term) this.visitNode(kList.getContents().get(i));
         }
 
-        if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
-            DataStructureBuiltin dataStructure = DataStructureBuiltin.of(sort, arguments);
-            if (status == Status.LHS && !dataStructure.isLHSView()) {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
-                        "unexpected left-hand side data structure format; "
-                        + "expected elements and at most one variable\n"
-                        + node,
-                        getName(),
-                        filename,
-                        location));
-                return null;
+        if (sort.constructorLabel().equals(kLabelConstant.getLabel())
+                || sort.elementLabel().equals(kLabelConstant.getLabel())
+                || sort.unitLabel().equals(kLabelConstant.getLabel())
+                || sort.sort().equals(Sort.MAP)) {
+            // TODO(AndreiS): the lines below should work once KLabelConstant are properly created
+            if (productions.size() > 1) {
+                GlobalSettings.kem.registerCompilerWarning(
+                        "unable to transform the KApp: " + node
+                        + "\nbecause of multiple productions associated:\n"
+                        + productions,
+                        this,
+                        location);
             }
-            return dataStructure;
+        }
+
+        if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
+            return DataStructureBuiltin.of(sort, arguments);
         } else if (sort.elementLabel().equals(kLabelConstant.getLabel())) {
             /* TODO(AndreiS): check sort restrictions */
             return DataStructureBuiltin.element(sort, arguments);
@@ -151,19 +161,17 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             if (kList.isEmpty()) {
                 return DataStructureBuiltin.empty(sort);
             } else {
-                GlobalSettings.kem.register(new KException(
-                        KException.ExceptionType.ERROR,
-                        KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                         "unexpected non-empty KList applied to constant KLabel " + kLabelConstant,
-                        getName(),
-                        filename,
-                        location));
-                return super.visit(node, _);
+                        this,
+                        location);
+                return node;
             }
-        } else if (sort.type().equals(KSorts.MAP)) {
+        } else if (sort.sort().equals(Sort.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */
-            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update")) 
-                    && kList.getContents().size() >= 3) {
+            if (kLabelConstant.getLabel().equals(sort.operatorLabels().get("update"))
+                    && kList.getContents().size() == 3
+                    && kList.getContents().get(0) instanceof Variable) {
                 return new MapUpdate(
                         (Variable) kList.getContents().get(0),
                         Collections.<Term, Term>emptyMap(),
@@ -171,10 +179,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                                 kList.getContents().get(1),
                                 kList.getContents().get(2)));
             }
-            return super.visit(node, _);
+            return node;
         } else {
             /* custom function */
-            return super.visit(node, _);
+            return node;
         }
     }
 

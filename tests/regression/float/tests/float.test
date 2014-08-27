@@ -1,0 +1,1 @@
+eqMInt(significandFloat(5.0f), mi(24, 10485760))

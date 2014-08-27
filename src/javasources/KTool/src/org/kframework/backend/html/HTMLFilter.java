@@ -27,51 +27,51 @@ public class HTMLFilter extends BackendFilter {
     private String title = "";
     private String author = "";
     private String organization = "";
-    
+
     // this set indicates which color classes have already been added to the css string
     private HashSet<String> usedColors = new HashSet<String>();
-    
+
     // keys : name of a cell -> values : color of that cell
     private Map<String, String> cellColors = new HashMap<String,String>();
-    
+
     // keys : name of a standard HTML5 color -> values : java.awt.Color representation of that color
     // this is created in the constructor of the HTMLFilter class
     private Map<String,Color> HTMLColors = new HashMap<String,Color>();
-    
+
     private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor(context);
-    
+
     private boolean firstAttribute;
     private boolean firstProduction = false;
-    
+
     private Properties Latex2HTMLzero = new Properties();
     private Properties Latex2HTMLone = new Properties();
     private String includePath = new String();
-    
+
     public HTMLFilter(String includePath, org.kframework.kil.loader.Context context) {
         super(context);
         this.includePath = includePath;
         createHTMLColors();
         loadProperties();
     }
-    
+
     public String getHTML() {
         // adds the headers and the css to the result to create the complete HTML code for the page
         String preamble = parsePreamble();
-        String html = 
-            "<!DOCTYPE html>" + endl + 
-            "<html lang=\"en\">" + endl + 
-            "<head>" + endl + 
-            "    <title>" + title + "</title>" + endl + 
+        String html =
+            "<!DOCTYPE html>" + endl +
+            "<html lang=\"en\">" + endl +
+            "<head>" + endl +
+            "    <title>" + title + "</title>" + endl +
             "    <link rel=\"stylesheet\" type=\"text/css\" href=\"" + cssFile + "\">" + endl +
             "   <style>" + endl + css + endl + "   </style>" +
             // this file is maybe not encoded in utf-8...
-            "    <meta charset=\"utf-8\" />" + endl + 
+            "    <meta charset=\"utf-8\" />" + endl +
             // MathJax->
             "<script type=\"text/javascript\" " + endl +
             "src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\">" + endl +
             "</script>" + endl +
             // <-MathJax
-            "</head>" + endl + 
+            "</head>" + endl +
             "<body>" + endl;
         html +=
             preamble +
@@ -84,7 +84,7 @@ public class HTMLFilter extends BackendFilter {
     public void setResult(String result) {
         this.result = new StringBuilder(result);
     }
-    
+
     public void setPreamble(String preamble) {
         this.preamble = preamble;
     }
@@ -92,7 +92,7 @@ public class HTMLFilter extends BackendFilter {
     public String getPreamble() {
         return preamble;
     }
-    
+
     @Override
     public Void visit(Definition def, Void _) {
         patternsVisitor.visitNode(def);
@@ -122,7 +122,7 @@ public class HTMLFilter extends BackendFilter {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         result.append("<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>");
         return _;
     }
@@ -135,17 +135,17 @@ public class HTMLFilter extends BackendFilter {
         } else {
             result.append("<tr> <td> </td> <td class = \"textCentered\"> |  </td> <td>");
         }
-        
-        if (!(p.getItems().get(0) instanceof UserList) && p.containsAttribute(Constants.CONS_cons_ATTR)
-                && patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))
-                && patternsVisitor.getPatternType(p.getAttribute(Constants.CONS_cons_ATTR)) != HTMLPatternType.DEFAULT) {
+
+        if (!(p.getItems().get(0) instanceof UserList)
+                && patternsVisitor.getPatterns().containsKey(p)
+                && patternsVisitor.getPatternType(p) != HTMLPatternType.DEFAULT) {
         /* This condition pretty much is : "Does this production have a Latex or HTML attribute?"
-         * If yes, use the attribute to print it. 
+         * If yes, use the attribute to print it.
          * The information about the attribute is in HTMLPatternVisitor.
          * If no, just process it normally, that is super.visit(p) and process each element normally.*/
-            
-            String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
-            boolean isLatex = patternsVisitor.getPatternType(p.getAttribute(Constants.CONS_cons_ATTR)) == HTMLPatternType.LATEX;
+
+            String pattern = patternsVisitor.getPatterns().get(p);
+            boolean isLatex = patternsVisitor.getPatternType(p) == HTMLPatternType.LATEX;
             int n = 1;
             HTMLFilter termFilter = new HTMLFilter(includePath, context);
             for (ProductionItem pi : p.getItems()) {
@@ -155,7 +155,7 @@ public class HTMLFilter extends BackendFilter {
                     pattern = pattern.replace("{#" + n++ + "}", isLatex ? "\\)" + termFilter.getResult() + "\\(" : termFilter.getResult());
                 }
             }
-            /* The \( and \) symbols are used to indicate which portions of the code should be 
+            /* The \( and \) symbols are used to indicate which portions of the code should be
              * treated by MathJax. */
             result.append(isLatex ? "\\(" + pattern + "\\)" : pattern);
         } else {
@@ -190,7 +190,7 @@ public class HTMLFilter extends BackendFilter {
     public Void visit(Cell c, Void _) {
         String blockClasses = "block";
         String tabClasses = "tab";
-        
+
         //this condition checks how the edges of the cell should be.
         Ellipses ellipses = c.getEllipses();
         if (ellipses == Ellipses.LEFT) {
@@ -205,7 +205,7 @@ public class HTMLFilter extends BackendFilter {
         } else {
             tabClasses += " curvedEdge";
         }
-        
+
         // This condition checks the color of the cell.
         if (c.getCellAttributes().containsKey("color") && HTMLColors.containsKey(c.getCellAttributes().get("color").toLowerCase())) {
             cellColors.put(c.getLabel(), c.getCellAttributes().get("color").toLowerCase());
@@ -214,23 +214,23 @@ public class HTMLFilter extends BackendFilter {
          * getCellColor() returns "default" -> (black and white). */
         String cellName = makeGreek(htmlify(c.getLabel()));
         String color = getCellColor(cellName);
-        
+
         // If the color has not been used yet, the css string has to be updated.
         if(usedColors.add(color))
             addToCss(color);
-        
+
         result.append("<div class=\"cell\"> <div class=\"" + tabClasses + " " + color + "\">");
         result.append("<span class = \"bold\">" + cellName + "</span> </div>");
         result.append("<br />");
         result.append("<div class=\"" + blockClasses + " " + color + "\" ");
-        
-        /* This condition makes sure the cell and the tag of the cell 
+
+        /* This condition makes sure the cell and the tag of the cell
         are not too small for their content */
         if(cellName.length() > 5) {
             double mw = Math.floor(cellName.length() * 0.7 *10 +0.5 )/10.0;
             result.append("style=\"min-width:"+mw+"em\"");
         }
-            
+
         result.append("> <div class=\"center\">");
         super.visit(c, _);
         result.append("</div> </div> </div>" + endl);
@@ -239,7 +239,7 @@ public class HTMLFilter extends BackendFilter {
 
     public Void visit(Collection col, Void _) {
         if (col.isEmpty()) {
-            printEmpty(col.getSort());
+            printEmpty(col.getSort().getName());
             return _;
         }
         List<Term> contents = col.getContents();
@@ -262,7 +262,7 @@ public class HTMLFilter extends BackendFilter {
             this.visitNode(trm);
         }
     }
-    
+
     public Void visit(TermComment tc, Void _) {
         result.append("<br />");
         return super.visit(tc, _);
@@ -333,7 +333,7 @@ public class HTMLFilter extends BackendFilter {
 
     @Override
     public Void visit(Rewrite rew, Void _) {
-        
+
         result.append("<table class=\"rewrite\"> <tr class='rewriteLeft'> <td> <em>");
         this.visitNode(rew.getLeft());
         result.append("</em></td></tr> <tr class='rewriteRight'> <td><em>");
@@ -363,19 +363,19 @@ public class HTMLFilter extends BackendFilter {
 
     @Override
     public Void visit(TermCons trm, Void _) {
-        HTMLPatternType type = patternsVisitor.getPatternType(trm.getCons());
+        HTMLPatternType type = patternsVisitor.getPatternType(trm.getProduction());
         if(type == null)
         {
-            Production pr = context.conses.get(trm.getCons());
+            Production pr = trm.getProduction();
             patternsVisitor.visitNode(pr);
-            type = patternsVisitor.getPatternType(trm.getCons());
+            type = patternsVisitor.getPatternType(pr);
         }
         /* This condition pretty much is : "Does this term have a Latex or HTML attribute?" */
         if(type != HTMLPatternType.DEFAULT) {
-            
-        /* If yes, use the attribute to print it. 
+
+        /* If yes, use the attribute to print it.
          * The information about the attribute is in HTMLPatternVisitor. */
-            String pattern = patternsVisitor.getPatterns().get(trm.getCons());
+            String pattern = patternsVisitor.getPatterns().get(trm.getProduction());
             int n = 1;
             HTMLFilter termFilter = new HTMLFilter(includePath, context);
             for (Term t : trm.getContents()) {
@@ -386,20 +386,20 @@ public class HTMLFilter extends BackendFilter {
                 else
                     pattern = pattern.replace("{#" + n++ + "}", termFilter.getResult());
             }
-            /* The \( and \) symbols are used to indicate which portions of the code should be 
+            /* The \( and \) symbols are used to indicate which portions of the code should be
              * treated by MathJax.*/
             if(type == HTMLPatternType.LATEX)
                 result.append("\\("+pattern+"\\)");
             else
                 result.append(pattern);
-            
+
         } else {
-            /* If the termCons does not have a Latex or HTML attribute, 
+            /* If the termCons does not have a Latex or HTML attribute,
              * the term is printed by using the informations in the termCons's
              * production and in its list of terms (contents). */
             boolean empty = true;
             Production pr = trm.getProduction();
-    
+
             if (pr.getItems().size() > 0) {
                 if (pr.getItems().get(0) instanceof UserList) {
                     String separator = ((UserList) pr.getItems().get(0)).getSeparator();
@@ -414,9 +414,9 @@ public class HTMLFilter extends BackendFilter {
                         if (pi instanceof Terminal) {
                             this.visitNode(pi);
                             empty = false;
-                        } else if (pi instanceof Sort) {
+                        } else if (pi instanceof NonTerminal) {
                             Term t = trm.getContents().get(j++);
-                            this.visitNode(t);    
+                            this.visitNode(t);
                             empty = false;
                         }
                     }
@@ -425,13 +425,6 @@ public class HTMLFilter extends BackendFilter {
                 result.append("&nbsp; &nbsp; &middot; &nbsp; &nbsp;");
         }
         return _;
-    }
-
-    @Override
-    public Void visit(MapItem mi, Void _) {
-        this.visitNode(mi.getKey());
-        result.append("<span text-size=\"large\"> &#x21a6; </span>");
-        return this.visitNode(mi.getItem());
     }
 
     @Override
@@ -465,7 +458,7 @@ public class HTMLFilter extends BackendFilter {
 
     @Override
     public Void visit(LiterateDefinitionComment comment, Void _) {
-        /*MathJax does not render these comments correctly. 
+        /*MathJax does not render these comments correctly.
          * It's told explicitly to ignore them with the tex2jax_ignore class. */
         if (comment.getType() == LiterateCommentType.LATEX) {
             result.append("<div class=\"commentBlock definitionComment tex2jax_ignore\">" + endl);
@@ -479,7 +472,7 @@ public class HTMLFilter extends BackendFilter {
 
     @Override
     public Void visit(LiterateModuleComment comment, Void _) {
-        /*MathJax does not render these comments correctly. 
+        /*MathJax does not render these comments correctly.
          * It's told explicitly to ignore them with the tex2jax_ignore class. */
         if (comment.getType() == LiterateCommentType.LATEX) {
             result.append("<div class=\"commentBlock moduleComment tex2jax_ignore\">" + endl);
@@ -490,11 +483,11 @@ public class HTMLFilter extends BackendFilter {
         }
         return _;
     }
-    
+
     @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
-        for (Attribute entry : attributes.getContents()) {
+        for (Attribute entry : attributes.values()) {
             this.visitNode(entry);
         }
         if(!firstAttribute)
@@ -506,19 +499,17 @@ public class HTMLFilter extends BackendFilter {
     public Void visit(Attribute entry, Void _) {
         if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
             return null;
-        if (context.isTagGenerated(entry.getKey()))
-            return null;
         if (context.isParsingTag(entry.getKey()))
             return null;
-        
+
         // The latex and/or html attributes are processed in the HTMLPatternVisitor, not here.
         if (entry.getKey().equals("latex"))
             return null;
         if (entry.getKey().equals("html")) {
             return null;
         }
-            
-        
+
+
         if (firstAttribute) {
             result.append(" [ <span class =\"attribute\"> ");
             firstAttribute = false;
@@ -527,12 +518,12 @@ public class HTMLFilter extends BackendFilter {
         }
         result.append(makeGreek(entry.getKey()));
         String value = makeGreek(entry.getValue());
-        
+
         if (!value.isEmpty())
             result.append("(" + value + ")");
         return null;
     }
-    
+
     private String makeGreek(String name) {
         /* Replaces Greek characters by their HTML representation */
         return name.replace("Alpha", "&alpha;").replace("Beta", "&beta;").replace("Gamma", "&gamma;").replace("Delta", "&delta;").replace("VarEpsilon", "&vepsilon;").replace("Epsilon", "&epsilon;").replace("Zeta", "&zeta;").replace("Eta", "&eta;")
@@ -540,16 +531,16 @@ public class HTMLFilter extends BackendFilter {
                 .replace("VarSigma", "&vsigma;").replace("Sigma", "&sigma;").replace("GAMMA", "&Gamma;").replace("DELTA", "&Delta;").replace("THETA", "&Theta;").replace("LAMBDA", "&Lambda;").replace("XI", "&Xi;").replace("PI", "&Pi;")
                 .replace("SIGMA", "&Sigma;").replace("UPSILON", "&Upsilon;").replace("PHI", "&Phi;");
     }
-    
+
     private String htmlify(String name) {
         return name.replace("<", "&lt;");
     }
-    
+
     private String HTMLColorToString(Color a) {
         // This function is used to output a Color in the html #RRGGBB format.
         return "#" + toHex(a.getRed()) + toHex(a.getGreen()) + toHex(a.getBlue());
     }
-    
+
     private String toHex(int c) {
         /* This function expects an integer between 0-255.
          * It returns it's hexadecimal representation.
@@ -561,22 +552,22 @@ public class HTMLFilter extends BackendFilter {
         else
             return "ERROR in String toHex(int c), c = "+c;
     }
-    
+
     private String parseComment(String comment) {
         /* This function parses the comments and transforms their Latex instructions to html
          * using the config files loaded in the Latex2HTMLone and Latex2HTMLzero Properties.
-         * 
+         *
          * These config files are in /dist/include/html for now.
          * */
-        
+
         /* This loop takes care of the latex instructions that contain arguments.
-         * These arguments are found by multipleLatexExtracts(). They can then be used to replace 
+         * These arguments are found by multipleLatexExtracts(). They can then be used to replace
          * the latex instruction by the corresponding html representation.  */
         for (@SuppressWarnings("rawtypes")
         Enumeration e = Latex2HTMLone.keys() ; e.hasMoreElements() ;) {
             String key = (String) e.nextElement();
             if(key != null) {
-                
+
                 Vector<Integer> startIndexs = findStartIndexs(key);
                 int numberOfIndexs = startIndexs.size();
                 Vector<Vector<String>> contents = multipleLatexExtracts(comment,regexify(key),startIndexs);
@@ -590,29 +581,29 @@ public class HTMLFilter extends BackendFilter {
                     comment = comment.replace(copyKey,property);
                 }
             }
-                
+
          }
-        
+
         /* This loop takes care of the latex instructions take can be transformed to HTML by a direct replacement.  */
         for (@SuppressWarnings("rawtypes")
         Enumeration e = Latex2HTMLzero.keys() ; e.hasMoreElements() ;) {
             String key = (String) e.nextElement();
-            
+
             if(key != null)
-                comment = comment.replace(key,Latex2HTMLzero.getProperty(key));    
+                comment = comment.replace(key,Latex2HTMLzero.getProperty(key));
          }
         return comment;
     }
-    
+
     private Vector<Vector<String>> multipleLatexExtracts(String from, String regex, Vector<Integer> startIndexs) {
         /* This function uses regex to match the begin of each latex instruction
-         * in the text contained in the String from. It then extracts the argument(s) of 
+         * in the text contained in the String from. It then extracts the argument(s) of
          * each instruction found by matching opening and closing curly braces by a linear
          * search in the string. The startIndexs are the places where it should start it's search
          * for each argument.
          *  */
-        /* The return argument means : 
-         * outside Vector -> each extract 
+        /* The return argument means :
+         * outside Vector -> each extract
          * inside Vector  -> the different strings of an extract
          * */
         Vector<Vector<String>> results = new Vector<Vector<String>>();
@@ -620,12 +611,12 @@ public class HTMLFilter extends BackendFilter {
         Matcher m = p.matcher(from);
         while(m.find()) {
             /* The offset is used in extracts where there is more than one
-             * argument. It takes into account the length of the previous arguments. */ 
+             * argument. It takes into account the length of the previous arguments. */
             int offset = 0;
             if(!m.group().isEmpty()) {
                 Vector<String> contents = new Vector<String>();
                 for(int start : startIndexs) {
-                    
+
                     int a = m.start()+start+offset;
                     int i = a;
                     for(int braceCount = 1; braceCount > 0 && i < from.length(); i++) {
@@ -642,7 +633,7 @@ public class HTMLFilter extends BackendFilter {
         }
         return results;
     }
-    
+
     private Vector<Integer> findStartIndexs(String from) {
         // The startIndexs are the positions of the different #1, #2, ... in the string.
         Vector<Integer> result = new Vector<Integer>();
@@ -651,16 +642,16 @@ public class HTMLFilter extends BackendFilter {
         }
         return result;
     }
-    
-    
+
+
     private String regexify(String regex) {
         String a = regex;
         for(int i = 1; a.contains("#" + i); i++)
             a = a.replace("#"+i, ".*?");
-        
+
         return a.replace("\\", "\\\\").replace("{","\\{").replace("}", "\\}");
     }
-    
+
     private Color alter(Color a ) {
         // This makes the color lighter to make it a suitable background for a cell.
         float hsb[] = Color.RGBtoHSB(a.getRed(), a.getGreen(), a.getBlue(), null);
@@ -668,21 +659,21 @@ public class HTMLFilter extends BackendFilter {
         hsb[2] = (float) (240.0/255.0);
         return new Color( Color.HSBtoRGB( hsb[0], hsb[1], hsb[2] ) );
     }
-    
+
     private void loadProperties() {
         try {
             FileUtil.loadProperties(Latex2HTMLzero, includePath + "Latex2HTMLzero.properties");
         } catch (IOException e) {
             System.out.println("error loading " + includePath + "Latex2HTMLzero.properties");
         }
-        
+
         try {
             FileUtil.loadProperties(Latex2HTMLone, includePath + "Latex2HTMLone.properties");
         } catch (IOException e) {
             System.out.println("error loading Latex2HTMLone.properties");
         }
     }
-    
+
     private void addToCss(String color) {
         css += "." + color + endl
                 + "{" + endl
@@ -690,12 +681,12 @@ public class HTMLFilter extends BackendFilter {
                 + "background-color: " + HTMLColorToString( alter(HTMLColors.get(color)) ) + ";" + endl
                 + "}" + endl;
     }
-    
+
     private String getCellColor(String cellName) {
         if(cellColors.get(cellName) != null)
             return cellColors.get(cellName);
         else
-            return "defaultColor";        
+            return "defaultColor";
     }
 
     private String parsePreamble() {
@@ -707,7 +698,7 @@ public class HTMLFilter extends BackendFilter {
             title = parseComment(latexExtract(preamble,"\\title{"));
         organization = latexExtract(preamble,"\\organization{");
         author = latexExtract(preamble,"\\author{");
-        
+
         if(organization != null) {
             result = "<div> <br /> </div>" + endl + result;
             result = "<span>" + parseComment(organization) + " </span> " + endl + result;
@@ -716,13 +707,13 @@ public class HTMLFilter extends BackendFilter {
             result = "<div> <br /> </div>" + endl + result;
             result = "<span>" + parseComment(author) + "</span> " + endl + result;
         }
-        
+
         result = "<div> <br /> </div>" + endl + result;
         result = "<h1>" + title + " </h1> " + endl + result;
         return result;
-        
+
     }
-    
+
     // a simple version of multipleLatexExtracts that does not use regex
     private String latexExtract(String from, String instruction)
     {
@@ -740,10 +731,10 @@ public class HTMLFilter extends BackendFilter {
         }
         return null;
     }
-    
+
     private void createHTMLColors() {
         usedColors.add("defaultColor");
-        
+
         HTMLColors.put("aliceblue" , new Color(240, 248, 255));
         HTMLColors.put("antiquewhite" , new Color(250, 235, 215));
         HTMLColors.put("aqua" , new Color(0, 255, 255));

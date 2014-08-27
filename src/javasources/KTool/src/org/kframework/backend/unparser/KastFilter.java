@@ -13,13 +13,13 @@ import org.kframework.utils.general.GlobalSettings;
 public class KastFilter extends BasicVisitor {
     protected Indenter result;
     private boolean nextline;
-    
+
     public KastFilter(org.kframework.kil.loader.Context context) {
         super(context);
         result = new Indenter();
         result.setWidth(Integer.MAX_VALUE);
     }
-    
+
     public KastFilter(IndentationOptions indentationOptions, boolean nextline, org.kframework.kil.loader.Context context) {
         super(context);
         result = new Indenter(indentationOptions);
@@ -61,7 +61,7 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {        
+    public Void visit(NonTerminal sort, Void _) {
         throw new RuntimeException("don't know how to kast Sort");
     }
 
@@ -97,11 +97,10 @@ public class KastFilter extends BasicVisitor {
                     first = false;
                 }
                 if (term == null) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
-                            KExceptionGroup.INTERNAL, 
-                            "NULL Term encountered when KastFilter ran on collection " + listOfK.getContents() + ".", 
-                            listOfK.getFilename(), listOfK.getLocation()));                
-                }    
+                    GlobalSettings.kem.registerInternalError(
+                            "NULL Term encountered when KastFilter ran on collection " + listOfK.getContents() + ".",
+                            this, listOfK);
+                }
                 this.visitNode(term);
             }
         }
@@ -135,12 +134,12 @@ public class KastFilter extends BasicVisitor {
 
     @Override
     public Void visit(ListTerminator empty, Void _) {
-        String sort = empty.getSort();
+        Sort sort = empty.getSort();
         if (MaudeHelper.basicSorts.contains(sort)) {
             result.write(".");
-            result.write(sort);
+            result.write(sort.getName());
         } else {
-            Production prd = context.listConses.get(sort);
+            Production prd = context.listProductions.get(sort);
             UserList ul = (UserList) prd.getItems().get(0);
             result.write(".List`{\"");
             result.write(ul.getSeparator());
@@ -150,7 +149,7 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(Rule rule, Void _) {        
+    public Void visit(Rule rule, Void _) {
         throw new RuntimeException("don't know how to kast Rule");
     }
 
@@ -158,13 +157,13 @@ public class KastFilter extends BasicVisitor {
     public Void visit(KApp kapp, Void _) {
         if (kapp.getLabel() instanceof Token) {
             Token token = (Token)kapp.getLabel();
-            if (token.tokenSort().equals("#Id")) {
+            if (token.tokenSort().equals(Sort.BUILTIN_ID)) {
                 result.write("#id \"");
             }
             result.write(token.value());
-            if (token.tokenSort().equals("#Id")) {
+            if (token.tokenSort().equals(Sort.BUILTIN_ID)) {
                 result.write("\"");
-            } 
+            }
             result.write(token.toString());
         } else {
             this.visitNode(kapp.getLabel());
@@ -205,12 +204,12 @@ public class KastFilter extends BasicVisitor {
     public Void visit(TermCons termCons, Void _) {
         throw new RuntimeException("don't know how to kast TermCons");
     }
-    
+
     @Override
     public Void visit(Sentence sentence, Void _) {
         throw new RuntimeException("don't know how to kast Sentence");
     }
-    
+
     @Override
     public Void visit(Rewrite rewrite, Void _) {
         throw new RuntimeException("don't know how to kast Rewrite");
@@ -231,8 +230,8 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(Collection collection, Void _) {
         throw new RuntimeException("don't know how to kast Collection");
-    }    
-    
+    }
+
     @Override
     public Void visit(CollectionItem collectionItem, Void _) {
         throw new RuntimeException("don't know how to kast CollectionItem");
@@ -244,21 +243,6 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(ListItem listItem, Void _) {
-        throw new RuntimeException("don't know how to kast ListItem");
-    }
-
-    @Override
-    public Void visit(SetItem setItem, Void _) {
-        throw new RuntimeException("don't know how to kast SetItem");
-    }
-
-    @Override
-    public Void visit(MapItem mapItem, Void _) {
-        throw new RuntimeException("don't know how to kast MapItem");
-    }
-
-    @Override
     public Void visit(Hole hole, Void _) {
         throw new RuntimeException("don't know how to kast Hole");
     }
@@ -266,9 +250,9 @@ public class KastFilter extends BasicVisitor {
     @Override
     public Void visit(KInjectedLabel kInjectedLabel, Void _) {
         Term term = kInjectedLabel.getTerm();
-        if (MetaK.isKSort(term.getSort())) {
-            result.write(KInjectedLabel.getInjectedSort(term.getSort()));
-            result.write("2KLabel_("); 
+        if (term.getSort().isKSort()) {
+            result.write(KInjectedLabel.getInjectedSort(term.getSort()).getName());
+            result.write("2KLabel_(");
         } else {
             result.write("#_(");
         }
@@ -288,23 +272,8 @@ public class KastFilter extends BasicVisitor {
     }
 
     @Override
-    public Void visit(org.kframework.kil.List list, Void _) {
-        throw new RuntimeException("don't know how to kast List");
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Map map, Void _) {
-        throw new RuntimeException("don't know how to kast Map");
-    }
-
-    @Override
     public Void visit(Bag bag, Void _) {
         throw new RuntimeException("don't know how to kast Bag");
-    }
-    
-    @Override
-    public Void visit(org.kframework.kil.Set set, Void _) {
-        throw new RuntimeException("don't know how to kast Set");
     }
 
     @Override
@@ -326,7 +295,7 @@ public class KastFilter extends BasicVisitor {
     public Void visit(LiterateModuleComment literateModuleComment, Void _) {
         throw new RuntimeException("don't know how to kast LiterateModuleComment");
     }
-    
+
     @Override
     public Void visit(org.kframework.kil.Require require, Void _) {
         throw new RuntimeException("don't know how to kast Require");

@@ -13,19 +13,16 @@ import org.kframework.kil.CollectionItem;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Set;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 
 /*
  * Class used to check for semantic equality
- * The need for semantic equality comes from the fact that when using 
- * debugger step-all command multiples time on same node each time the 
- * symbolic stuffs will have new value in results. 
- * Here, for now, we take in consideration just cases where symbolic is used 
- * to generate fresh values for IntBuiltin      
+ * The need for semantic equality comes from the fact that when using
+ * debugger step-all command multiples time on same node each time the
+ * symbolic stuffs will have new value in results.
+ * Here, for now, we take in consideration just cases where symbolic is used
+ * to generate fresh values for IntBuiltin
  */
 public class SemanticEqual {
 
@@ -82,8 +79,6 @@ public class SemanticEqual {
             return areEqual((IntBuiltin) t1, (IntBuiltin) t2);
         } else if (t1 instanceof KApp) {
             return areEqual((KApp) t1, (KApp) t2);
-        } else if (t1 instanceof MapItem) {
-            return areEqual((MapItem) t1, (MapItem) t2);
         } else if (t1 instanceof CollectionItem) {
             return areEqual((CollectionItem) t1, (CollectionItem) t2);
         } else if (t1 instanceof Collection) {
@@ -107,21 +102,6 @@ public class SemanticEqual {
             return false;
         }
         return areEqual(c1.getItem(), c2.getItem());
-    }
-
-    /*
-     * Checks equals for two MapItem terms. Here we check if the keys and values
-     * are equal
-     */
-    private static boolean areEqual(MapItem m1, MapItem m2) {
-        if (!checkForNull(m1, m2)) {
-            return false;
-        }
-        if (areEqual(m1.getKey(), m2.getKey())) {
-            return areEqual(m1.getValue(), m2.getValue());
-        } else {
-            return false;
-        }
     }
 
     /*
@@ -169,17 +149,17 @@ public class SemanticEqual {
     }
 
     /*
-     * Checks if a collection is comutative 
+     * Checks if a collection is comutative
      * BAG,SET,MAP are comuatative
      */
     private static boolean isComutative(Collection c){
-        if(c instanceof Bag || c instanceof Set || c instanceof Map)
+        if(c instanceof Bag)
             return true;
         else {
             return false;
         }
     }
-    
+
     /*
      * Checks equality for Collection terms. Check if sorts are equal and if
      * content lists are equal
@@ -237,7 +217,7 @@ public class SemanticEqual {
         }
         return areMultisetsEqual(t1.getContents(), t2.getContents());
     }
-    
+
     /*
      * Check if both terms are null or not
      */
@@ -272,7 +252,7 @@ public class SemanticEqual {
         // for equality we should have removed all items
         return clone.isEmpty();
     }
-    
+
     private static boolean areSetsEqual(List<Term> l1, List<Term> l2) {
         if (!checkForNull(l1, l2)) {
             return false;

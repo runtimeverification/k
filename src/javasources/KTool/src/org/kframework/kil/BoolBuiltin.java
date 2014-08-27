@@ -10,8 +10,6 @@ import org.w3c.dom.Element;
  */
 public class BoolBuiltin extends Token {
 
-    public static final String SORT_NAME = "#Bool";
-
     public static final String TRUE_STRING = "true";
     public static final String FALSE_STRING = "false";
 
@@ -35,7 +33,7 @@ public class BoolBuiltin extends Token {
 
     /**
      * Returns a {@link BoolBuiltin} representing a {@link boolean} value with the given {@link String} representation.
-     * 
+     *
      * @param value
      * @return
      */
@@ -51,7 +49,7 @@ public class BoolBuiltin extends Token {
 
     /**
      * Returns a {@link KApp} representing a {@link BoolBuiltin} with the given value applied to an empty {@link KList}.
-     * 
+     *
      * @param value
      * @return
      */
@@ -94,17 +92,17 @@ public class BoolBuiltin extends Token {
 
     /**
      * Returns a {@link String} representing the sort name of a boolean token.
-     * 
+     *
      * @return
      */
     @Override
-    public String tokenSort() {
-        return BoolBuiltin.SORT_NAME;
+    public Sort tokenSort() {
+        return Sort.BUILTIN_BOOL;
     }
 
     /**
      * Returns a {@link String} representing the (uninterpreted) value of the boolean token.
-     * 
+     *
      * @return
      */
     @Override

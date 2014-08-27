@@ -85,7 +85,7 @@ The action and the predicate can be regarded as curried functions, taking the
   rule isKResult(#visited(_:KList)) => true
 
 /*@ The rules above make the visitor apply top-down.
-The next rules propagate the visited status bottom-up.  
+The next rules propagate the visited status bottom-up.
 For example, \texttt{\#visiting.kapp} takes a \texttt{KLabel}
 represented as a \texttt{KItem} and a visited \texttt{KList}, and
 yields the visited \texttt{KItem} obtained by applying the

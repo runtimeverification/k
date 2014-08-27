@@ -11,7 +11,7 @@ import org.kframework.kil.visitors.BasicVisitor;
 public class VariablesVisitor extends BasicVisitor {
 
     List<Variable> variables;
-    
+
     public VariablesVisitor(Context context) {
         super(context);
         variables = new ArrayList<Variable>();
@@ -22,7 +22,7 @@ public class VariablesVisitor extends BasicVisitor {
         variables.add(node);
         return super.visit(node, _);
     }
-    
+
     public List<Variable> getVariables() {
         return variables;
     }

@@ -3,39 +3,31 @@ package org.kframework.utils;
 
 import org.kframework.main.GlobalOptions;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import java.util.Formatter;
 
 /**
  * To use, access {@link #instance()} after calling {@link #init(GlobalOptions) init()}.
  */
+@Singleton
 public class Stopwatch {
+    @Inject
     private static Stopwatch sw;
     private long start;
     private long lastIntermediate;
     Formatter f = new Formatter(System.out);
-    private GlobalOptions options;
+    private final GlobalOptions options;
 
-    /**
-     * Must be called before attempting to call 
-     * {@link #printIntermediate(String) printIntermediate} or {@link #printTotal(String) printTotal}.
-     * @param options a {@link GlobalOptions} instance instantiated with the correct value of the 
-     * {@link GlobalOptions#verbose verbose} field.
-     */
-    public void init(GlobalOptions options) {
-        this.options = options;
-    }
-    
+    @Deprecated
     public static Stopwatch instance() {
-        if (sw == null) {
-            sw = new Stopwatch();
-        }
         return sw;
     }
 
-    /**
-     * This is a singleton.
-     */
-    private Stopwatch() {
+    @Inject
+    Stopwatch(GlobalOptions options) {
+        this.options = options;
         start = System.currentTimeMillis();
         lastIntermediate = start;
     }
@@ -45,7 +37,6 @@ public class Stopwatch {
     }
 
     public void printIntermediate(String message) {
-        assert options != null;
         long current = System.currentTimeMillis();
         if (options.verbose)
             f.format("%-60s = %5d%n", message, current - lastIntermediate);
@@ -53,7 +44,6 @@ public class Stopwatch {
     }
 
     public void printTotal(String message) {
-        assert options != null;
         printIntermediate("Cleanup");
         if (options.verbose)
             f.format("%-60s = %5d%n", message, lastIntermediate - start);

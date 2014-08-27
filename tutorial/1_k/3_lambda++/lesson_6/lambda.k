@@ -102,10 +102,10 @@ then switch back to caller's environment.  */
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
        <env> Rho </env>
-  rule <k> closure(Rho,X,E) V:Val => E ~> env(Rho') ...</k>
-       <env> Rho' => Rho[N/X] </env>
-       <store>... . => (N |-> V) ...</store>
-    when fresh(N:Nat)
+    [structural]
+  rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
+       <env> Rho' => Rho[X <- !N] </env>
+       <store>... .Map => (!N:Int |-> V) ...</store>
   rule <k> X => V ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> V ...</store>
@@ -115,9 +115,8 @@ The environment-recovery computation item defined below is useful in many
 semantics, like it was above.  It is so useful, that there are discussions
 in the \K team to add it to the set of pre-defined \K features. */
 
-  syntax K ::= env(Map)
-  rule <k> _:Val ~> (env(Rho) => .) ...</k>
-       <env> _ => Rho </env>    [structural]
+  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
+    [structural]
 
 /*@ \subsection{Arithmetic Constructs}
 Not much to say here.  They have exactly the same semantics as in LAMBDA and
@@ -130,10 +129,10 @@ If you want to catch division-by-zero in the semantics, instead of letting
 the back-end do whatever it wants, you should add a side condition to the
 division rule. */
 
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2
+  rule I1 + I2 => I1 +Int I2
+  rule I1 <= I2 => I1 <=Int I2
 
 //@ \subsection{Conditional}
 
@@ -157,11 +156,11 @@ back to the fixed-point. */
 
   syntax Exp ::= muclosure(Map,Exp)
     [latex(\textsf{closure}_\mu({#1},{#2}))]
-  rule <k> mu X . E => muclosure(Rho[N/X],E) ...</k>
+  rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
        <env> Rho </env>
-       <store>... . => (N |-> muclosure(Rho[N/X],E)) ...</store>
-    when fresh(N:Nat)  [structural]
-  rule <k> muclosure(Rho,E) => E ~> env(Rho') ...</k>
+       <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
+    [structural]
+  rule <k> muclosure(Rho,E) => E ~> Rho' ...</k>
        <env> Rho' => Rho </env>
 
 /*@ \subsection{Callcc}

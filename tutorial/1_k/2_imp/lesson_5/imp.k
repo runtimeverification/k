@@ -1,8 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
-//
-// WARNING
-//
-// This is a heavily commented K definition, part of the K tutorial.
+// Copyright (c) 2010-2014 K Team. All Rights Reserved.
 
 /*!
 \setlength{\parindent}{1em}
@@ -48,7 +44,7 @@ argument, because we want to give it a short-circuit semantics. */
 
 /*@ An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
-to 0.  \K provides builtin support for generic syntactic lists: 
+to 0.  \K provides builtin support for generic syntactic lists:
 $\textit{List}\{\textit{Nonterminal},\textit{terminal}\}$ stands for
 \textit{terminal}-separated lists of \textit{Nonterminal} elements. */
 
@@ -63,7 +59,7 @@ semantics.  */
 module IMP
   imports IMP-SYNTAX
 /*@ \section{Semantics}
-This module defines the semantics of IMP\@.  
+This module defines the semantics of IMP\@.
 Before you start adding semantic rules to a \K definition, you need to
 define the basic semantic infrastructure consisting of definitions for
 {\em results} and the {\em configuration}.  */
@@ -115,8 +111,8 @@ There is nothing special about these, but recall that \K's configuration
 abstraction mechanism is at work here!  That means that the rewrites in the
 rules below all happen at the beginning of the \textsf{k} cell.  */
 
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
 
 /*@ \subsection{Boolean expressions}
 The rules below are straightforward.  Note the short-circuited semantics
@@ -124,8 +120,8 @@ of \texttt{\&\&}; this is the reason we annotated the syntax of
 \texttt{\&\&} with the \K attribute \texttt{strict(1)} instead of
 \texttt{strict}. */
 
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule ! T:Bool => notBool T
+  rule I1 <= I2 => I1 <=Int I2
+  rule ! T => notBool T
   rule true && B => B
   rule false && _ => false
 
@@ -137,7 +133,7 @@ which needs two rules. */
 The empty block \texttt{\{\}} is simply dissolved.  The $\kdot$ below is the
 unit of the computation list structure $K$, that is, the empty task.
 Similarly, the non-empty blocks are dissolved and replaced by their statement
-contents, thus effectively giving them a bracket semantics; we can afford to 
+contents, thus effectively giving them a bracket semantics; we can afford to
 do this only because we have no block-local variable declarations yet in IMP.
 Since we tagged the rules below as "structural", the \K tool structurally
 erases the block constructs from the computation structure, without
@@ -166,7 +162,7 @@ and counting only the steps corresponding to computational rules as
 transitions (i.e., hiding the structural rules as unobservable, or
 internal steps). */
 
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -190,14 +186,14 @@ in a state initializing all its global variables to 0.  Since \K's
 syntactic lists are internally interpreted as cons-lists (i.e., lists
 constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list has at least one element and
-another when the list is empty.  In the first case we initialize the 
+another when the list is empty.  In the first case we initialize the
 variable to 0 in the state, but only when the variable is not already
 declared (all variables are global and distinct in IMP).  We prefer to
 make the second rule structural, thinking of dissolving the residual
 empty \texttt{int;} declaration as a structural cleanup rather than as
 a computational step. */
 
-  rule <k> int (X:Id,Xs:Ids => Xs);_ </k> <state> Rho:Map (. => X|->0) </state>
+  rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule

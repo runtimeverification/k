@@ -4,7 +4,7 @@
 This is the symbolic semantics of IMP enriched with reachability logic.
 
 This semantics receives as input programs generated from reachability formulas.
-Additionally, the semantics contains the circularities also generated from 
+Additionally, the semantics contains the circularities also generated from
 reachability formulas.
 */
 
@@ -13,9 +13,9 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
                  > left:
-		   AExp "+" AExp              [left, strict]
+           AExp "+" AExp              [left, strict]
                  | AExp "-" AExp              [left, strict]
-                 | "(" AExp ")"               [bracket]
+                 > "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
                  | "!" BExp                   [strict]
@@ -41,9 +41,8 @@ module IMP-SYNTAX
   syntax Int ::= "(" Int ")" [bracket]
   syntax X ::= "symInt"  [dummySymInt]
 //  syntax Y ::= "symFreezeLabel"
-  syntax priorities builtinWrapper > dummySymInt
 
-  
+
 endmodule
 
 module IMP
@@ -54,19 +53,19 @@ module IMP
 The configuration of IMP is enriched with cells <frozen> and <goal>.
 Cell <ruleConstraints> will store some labels which are meant to block
 the first application of the circularity rule.
-The cell <goal> contains the current goal. Whenever multiple rules can be 
+The cell <goal> contains the current goal. Whenever multiple rules can be
 applied to the same configuration, the current goal will be splitted into
-multiple goals. 
+multiple goals.
 */
   configuration <T color="yellow" multiplicity="?">
-//		 <goal multiplicity="*">
-		  <k color="green"> #ps($PGM:Bag) </k>
+//         <goal multiplicity="*">
+          <k color="green"> #ps($PGM:Bag) </k>
                   <state color="blue"> .Map </state>
-		  <condition color="red"> true </condition>
-//		  <ruleConstraints> none </ruleConstraints>
-//		 </goal>
+          <condition color="red"> true </condition>
+//          <ruleConstraints> none </ruleConstraints>
+//         </goal>
                 </T>
-		<success> false </success>
+        <success> false </success>
 
 
 /*@
@@ -87,30 +86,30 @@ The initial semantics of IMP.
   rule {S} => S  [structural]
 // Stmt
   rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 //  rule if (true)  S else _ => S
 //  rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [transition]
 // Pgm
-  rule <k> int (X:Id,Xs:Ids => Xs);_ </k> <state> Rho:Map (. => X|->0) </state>
+  rule <k> int (X:Id,Xs:Ids => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 
 //@ Symbolic semantics - the transformed rules
   rule <k> I1:Int / I2:Int => I1 /Int I2 ...</k>
-       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition> 
+       <condition> Phi:Bool => Phi andBool I2 =/=Int 0 </condition>
        when checkSat(Phi andBool (I2 =/=Int 0)) =/=K "unsat" [transition]
 
   rule <k> B1:Bool && B2:BExp => B2 ...</k>
-       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition> 
+       <condition> Phi:Bool => Phi andBool B1 ==Bool true </condition>
        when checkSat(Phi andBool B1) =/=K "unsat" [transition]
-  
+
   rule <k> B1:Bool && B2:Bool => false ...</k>
-       <condition> Phi:Bool => Phi andBool notBool B1 </condition> 
+       <condition> Phi:Bool => Phi andBool notBool B1 </condition>
        when checkSat(Phi andBool notBool B1) =/=K "unsat" [transition]
 
   rule <k> if (B:Bool) S else _ => S ...</k>
-       <condition> Phi:Bool => Phi andBool B </condition> 
+       <condition> Phi:Bool => Phi andBool B </condition>
        when checkSat(Phi andBool B) =/=K "unsat" [transition, computational]
 
   rule <k> if (B:Bool) _ else S => S ...</k>
@@ -140,10 +139,9 @@ For each reachability formula given as input we have two corresponding generated
        <condition> Psi:Bool  </condition>
        =>
        <k> K </k>
-       <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
+       <state> a |-> !A':Int b |-> !B':Int x |-> X:Int y |-> Y:Int </state>
        <condition> Psi andBool 0 <=Int X andBool 0 <Int Y </condition>)
-       when fresh(B':Int) andBool fresh(A':Int)
-            andBool checkSat(Psi andBool notBool(0 <=Int X andBool 0 <Int Y)) ==K "unsat"
+       when checkSat(Psi andBool notBool(0 <=Int X andBool 0 <Int Y)) ==K "unsat"
       [transition]
 
   rule (<T>
@@ -151,10 +149,10 @@ For each reachability formula given as input we have two corresponding generated
          <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
          <condition> Psi:Bool </condition>
        </T>
-       => 
+       =>
        .)
        <success> _ => true </success>
-       when checkSat(Psi andBool 
+       when checkSat(Psi andBool
                      notBool ((X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y)))
             ==K "unsat"
        [transition]
@@ -164,13 +162,12 @@ For each reachability formula given as input we have two corresponding generated
        <condition> Psi:Bool  </condition>
        =>
        <k> K </k>
-       <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
+       <state> a |-> !A':Int b |-> !B':Int x |-> X:Int y |-> Y:Int </state>
        <condition>
          Psi andBool
-         X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y
+         X ==Int !A' *Int Y +Int !B' andBool !B' >=Int 0 andBool !B' <Int Y
        </condition>)
-       when fresh(B':Int) andBool fresh(A':Int)
-            andBool checkSat(Psi andBool notBool(X ==Int A *Int Y +Int B andBool B >=Int 0))
+       when checkSat(Psi andBool notBool(X ==Int A *Int Y +Int B andBool B >=Int 0))
                     ==K "unsat"
       [transition]
 
@@ -180,7 +177,7 @@ For each reachability formula given as input we have two corresponding generated
          <condition> Psi:Bool </condition>
        </T>
        =>
-	.) 
+    .)
        <success> _ => true </success>
        when checkSat(Psi andBool
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y))
@@ -192,13 +189,12 @@ For each reachability formula given as input we have two corresponding generated
        <condition> Psi:Bool  </condition>
        =>
        <k> K </k>
-       <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
+       <state> a |-> !A':Int b |-> !B':Int x |-> X:Int y |-> Y:Int </state>
        <condition>
-         Psi andBool 
-         (X ==Int A' *Int Y +Int B' andBool B' >=Int 0)
+         Psi andBool
+         (X ==Int !A' *Int Y +Int !B' andBool !B' >=Int 0)
        </condition>)
-       when fresh(B':Int) andBool fresh(A':Int)
-            andBool checkSat(Psi andBool 
+       when checkSat(Psi andBool
                              notBool (X ==Int A *Int Y +Int B andBool B >=Int 0 andBool Y <=Int B))
                     ==K "unsat"
        [transition]
@@ -209,16 +205,16 @@ For each reachability formula given as input we have two corresponding generated
          <condition> Psi:Bool </condition>
        </T>
        =>
-	.) 
+    .)
        <success> _ => true </success>
-       when checkSat(Psi andBool 
+       when checkSat(Psi andBool
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0))
             ==K "unsat"
        [transition]
 
 //@ Utils
    rule (<k> #ps(B:Bag) </k>
-   	<state> _ </state>
-	<condition> _ </condition>) => B [structural]
+       <state> _ </state>
+    <condition> _ </condition>) => B [structural]
 
 endmodule

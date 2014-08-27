@@ -123,7 +123,7 @@ syn Term ::=
   // ListUpdate.java:public class ListUpdate extends Term {
   // MapUpdate.java:public class MapUpdate extends Term {
   // SetUpdate.java:public class SetUpdate extends Term {
-    
+
 /*******************************
 **** EXTRA CODE FOR CLASSES ****
 *******************************/
@@ -138,26 +138,26 @@ code ModuleItem {{{
 //  public void appendModuleItem(ModuleItem item) {
 //    this.items.add(item);
 //  }
-//	public List<String> getModuleKLabels() {
-//		List<String> mkl = new LinkedList<String>();
+//    public List<String> getModuleKLabels() {
+//        List<String> mkl = new LinkedList<String>();
 //
-//		for (ModuleItem mi : items) {
-//			List<String> list = mi.getKLabels();
-//			if (list != null)
-//				mkl.addAll(list);
-//		}
+//        for (ModuleItem mi : items) {
+//            List<String> list = mi.getKLabels();
+//            if (list != null)
+//                mkl.addAll(list);
+//        }
 //
-//		return mkl;
-//	}
+//        return mkl;
+//    }
 //
-//	public java.util.Set<String> getAllSorts() {
-//		java.util.Set<String> sorts = new HashSet<String>();
+//    public java.util.Set<String> getAllSorts() {
+//        java.util.Set<String> sorts = new HashSet<String>();
 //
-//		for (ModuleItem mi : items) {
-//			List<String> list = mi.getAllSorts();
-//			if (list != null)
-//				sorts.addAll(list);
-//		}
+//        for (ModuleItem mi : items) {
+//            List<String> list = mi.getAllSorts();
+//            if (list != null)
+//                sorts.addAll(list);
+//        }
 //
 //        // Andrei S: bad, bad practice ...
 //        // ... but it is 11:55pm and I do not see another way to get them
@@ -167,24 +167,24 @@ code ModuleItem {{{
 //        sorts.add('#String');
 //        sorts.add('#Id');
 //
-//		return sorts;
-//	}
-//	public Module addModuleItems(List<ModuleItem> rules) {
-//		Module result = new Module(this);
-//		List<ModuleItem> items = new ArrayList<ModuleItem>(this.items);
-//		items.addAll(rules);
-//		result.setItems(items);
-//		return result;
-//	}
+//        return sorts;
+//    }
+//    public Module addModuleItems(List<ModuleItem> rules) {
+//        Module result = new Module(this);
+//        List<ModuleItem> items = new ArrayList<ModuleItem>(this.items);
+//        items.addAll(rules);
+//        result.setItems(items);
+//        return result;
+//    }
 //
-//	public void addSubsort(String sort, String subsort, Context context) {
-//		this.addProduction(sort, new Sort(subsort));
+//    public void addSubsort(String sort, String subsort, Context context) {
+//        this.addProduction(sort, new Sort(subsort));
 //        context.addSubsort(sort, subsort);
-//	}
+//    }
 //
-//	public void addConstant(String ctSort, String ctName) {
-//		this.addProduction(ctSort, new Terminal(ctName));
-//	}
+//    public void addConstant(String ctSort, String ctName) {
+//        this.addProduction(ctSort, new Terminal(ctName));
+//    }
 //
 //    public void addConstant(Constant ct) {
 //        this.addProduction(ct.getSort(), new Terminal(ct.getValue()));
@@ -194,24 +194,24 @@ code ModuleItem {{{
 //        this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
 //    }
 //
-//	public void addProduction(String sort, ProductionItem prodItem) {
-//		List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
-//		prodItems.add(prodItem);
-//		this.addProduction(sort, new Production(new Sort(sort), prodItems));
-//	}
+//    public void addProduction(String sort, ProductionItem prodItem) {
+//        List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
+//        prodItems.add(prodItem);
+//        this.addProduction(sort, new Production(new Sort(sort), prodItems));
+//    }
 //
-//	public void addProduction(String sort, Production prod) {
-//		List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
-//		PriorityBlock pb = new PriorityBlock();
-//		pbs.add(pb);
+//    public void addProduction(String sort, Production prod) {
+//        List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
+//        PriorityBlock pb = new PriorityBlock();
+//        pbs.add(pb);
 //
-//		List<Production> prods = new LinkedList<Production>();
-//		pb.setProductions(prods);
+//        List<Production> prods = new LinkedList<Production>();
+//        pb.setProductions(prods);
 //
-//		prods.add(prod);
+//        prods.add(prod);
 //
-//		this.items.add(new Syntax(new Sort(sort), pbs));
-//	}
+//        this.items.add(new Syntax(new Sort(sort), pbs));
+//    }
 //
 //    public List<Rule> getRules() {
 //        List<Rule> list = new LinkedList<Rule>();
@@ -246,269 +246,269 @@ code ModuleItem {{{
 //}}}
 //
 //code LiterateModuleComment {{{
-//	public LiterateModuleComment(LiterateDefinitionComment ldc) {
-//		setFilename(ldc.getFilename());
-//		setLocation(ldc.getLocation());
-//		value = ldc.getValue();
-//		type = ldc.getType();
-//	}
+//    public LiterateModuleComment(LiterateDefinitionComment ldc) {
+//        setFilename(ldc.getFilename());
+//        setLocation(ldc.getLocation());
+//        value = ldc.getValue();
+//        type = ldc.getType();
+//    }
 //}}}
 //
 //code Syntax {{{
 //
-//	@Override
-//	public List<String> getLabels() {
-//		List<String> lbls = new LinkedList<String>();
-//		for (PriorityBlock pb : priorityBlocks) {
-//			for (Production prod : pb.getProductions()) {
-//				lbls.add(prod.getLabel());
-//			}
-//		}
-//		return lbls;
-//	}
+//    @Override
+//    public List<String> getLabels() {
+//        List<String> lbls = new LinkedList<String>();
+//        for (PriorityBlock pb : priorityBlocks) {
+//            for (Production prod : pb.getProductions()) {
+//                lbls.add(prod.getLabel());
+//            }
+//        }
+//        return lbls;
+//    }
 //
-//	@Override
-//	public List<String> getKLabels() {
-//		List<String> lbls = new LinkedList<String>();
-//		if (priorityBlocks == null)
-//			return lbls;
-//		for (PriorityBlock pb : priorityBlocks) {
-//			for (Production prod : pb.getProductions()) {
-//				if (MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
-//					lbls.add(prod.getKLabel());
-//			}
-//		}
-//		return lbls;
-//	}
+//    @Override
+//    public List<String> getKLabels() {
+//        List<String> lbls = new LinkedList<String>();
+//        if (priorityBlocks == null)
+//            return lbls;
+//        for (PriorityBlock pb : priorityBlocks) {
+//            for (Production prod : pb.getProductions()) {
+//                if (MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
+//                    lbls.add(prod.getKLabel());
+//            }
+//        }
+//        return lbls;
+//    }
 //
-//	@Override
-//	public List<String> getAllSorts() {
-//		List<String> sorts = new ArrayList<String>();
-//		sorts.add(sort.toString());
-//		return sorts;
-//	}
+//    @Override
+//    public List<String> getAllSorts() {
+//        List<String> sorts = new ArrayList<String>();
+//        sorts.add(sort.toString());
+//        return sorts;
+//    }
 //}}}
 //
 //code Production {{{
-//	/*
-//	 * Andrei S: It appears that the cons attribute is mandatory for all new production added during compilation, otherwise a null pointer exception can be thrown in one of the later compilation
-//	 * steps.
-//	 */
+//    /*
+//     * Andrei S: It appears that the cons attribute is mandatory for all new production added during compilation, otherwise a null pointer exception can be thrown in one of the later compilation
+//     * steps.
+//     */
 //
-//	public static Production makeFunction(String funSort, String funName, String argSort, org.kframework.kil.loader.Context context) {
-//		List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
-//		prodItems.add(new Terminal(funName));
-//		prodItems.add(new Terminal("("));
-//		prodItems.add(new Sort(argSort));
-//		prodItems.add(new Terminal(")"));
+//    public static Production makeFunction(String funSort, String funName, String argSort, org.kframework.kil.loader.Context context) {
+//        List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
+//        prodItems.add(new Terminal(funName));
+//        prodItems.add(new Terminal("("));
+//        prodItems.add(new Sort(argSort));
+//        prodItems.add(new Terminal(")"));
 //
-//		Production funProd = new Production(new Sort(funSort), prodItems);
-//		funProd.addAttribute(new Attribute("prefixlabel", funName));
-//		if (MetaK.isComputationSort(funSort)) {
-//			funProd.addAttribute(new Attribute("klabel", funName));
-//			String consAttr = funSort + "1" + funName + "Syn";
-//			funProd.addAttribute(new Attribute("cons", consAttr));
-//			context.conses.put(consAttr, funProd);
-//			context.putLabel(funProd, consAttr);
-//		}
+//        Production funProd = new Production(new Sort(funSort), prodItems);
+//        funProd.addAttribute(new Attribute("prefixlabel", funName));
+//        if (MetaK.isComputationSort(funSort)) {
+//            funProd.addAttribute(new Attribute("klabel", funName));
+//            String consAttr = funSort + "1" + funName + "Syn";
+//            funProd.addAttribute(new Attribute("cons", consAttr));
+//            context.conses.put(consAttr, funProd);
+//            context.putLabel(funProd, consAttr);
+//        }
 //
-//		return funProd;
-//	}
+//        return funProd;
+//    }
 //
-//	public boolean isListDecl() {
-//		return items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST;
-//	}
+//    public boolean isListDecl() {
+//        return items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST;
+//    }
 //
-//	public boolean isSubsort() {
-//		return items.size() == 1 && items.get(0).getType() == ProductionType.SORT;
-//	}
+//    public boolean isSubsort() {
+//        return items.size() == 1 && items.get(0).getType() == ProductionType.SORT;
+//    }
 //
-//	public boolean isLexical() {
-//		return items.size() == 1 && items.get(0).getType() == ProductionType.LEXICAL;
-//	}
+//    public boolean isLexical() {
+//        return items.size() == 1 && items.get(0).getType() == ProductionType.LEXICAL;
+//    }
 //
-//	public boolean isConstant() {
-//		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
-//	}
+//    public boolean isConstant() {
+//        return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
+//    }
 //
 //    public String getCons() {
 //        return attributes.get("cons");
 //    }
 //
-//	public String getLabel() {
-//		String label = attributes.get("prefixlabel");
-//		if (label == null) {
-//			label = getPrefixLabel();
-//			attributes.set("prefixlabel", label);
-//		}
-//	    return label.replace(" ", "");
+//    public String getLabel() {
+//        String label = attributes.get("prefixlabel");
+//        if (label == null) {
+//            label = getPrefixLabel();
+//            attributes.set("prefixlabel", label);
+//        }
+//        return label.replace(" ", "");
 //    }
 //
-//	public String getKLabel() {
+//    public String getKLabel() {
 //        /*
-//		assert MetaK.isComputationSort(sort) || sort.equals(KSorts.KLABEL) && isConstant():
+//        assert MetaK.isComputationSort(sort) || sort.equals(KSorts.KLABEL) && isConstant():
 //                sort + " ::= " + this + " -> " + getPrefixLabel();
 //        */
 //
-//		String klabel = attributes.get("klabel");
-//		if (klabel == null) {
-//			if (sort.toString().equals(KSorts.KLABEL))
-//				klabel = getPrefixLabel();
-//			else
-//				klabel = "'" + getPrefixLabel();
-//			attributes.set("klabel", klabel);
-//		}
+//        String klabel = attributes.get("klabel");
+//        if (klabel == null) {
+//            if (sort.toString().equals(KSorts.KLABEL))
+//                klabel = getPrefixLabel();
+//            else
+//                klabel = "'" + getPrefixLabel();
+//            attributes.set("klabel", klabel);
+//        }
 //        return klabel.replace(" ", "");
-//	}
+//    }
 //
-//	private String getPrefixLabel() {
-//		String label = "";
-//		for (ProductionItem pi : items) {
-//			switch (pi.getType()) {
-//			case SORT:
-//				label += "_";
-//				break;
-//			case TERMINAL:
-//				label += ((Terminal) pi).getTerminal();
-//				break;
-//			case USERLIST:
-//				label += "_" + ((UserList) pi).separator + "_";
-//				break;
-//			}
-//		}
-//		return label;
-//	}
+//    private String getPrefixLabel() {
+//        String label = "";
+//        for (ProductionItem pi : items) {
+//            switch (pi.getType()) {
+//            case SORT:
+//                label += "_";
+//                break;
+//            case TERMINAL:
+//                label += ((Terminal) pi).getTerminal();
+//                break;
+//            case USERLIST:
+//                label += "_" + ((UserList) pi).separator + "_";
+//                break;
+//            }
+//        }
+//        return label;
+//    }
 //
-//	public java.util.List<ProductionItem> getItems() {
-//		return items;
-//	}
+//    public java.util.List<ProductionItem> getItems() {
+//        return items;
+//    }
 //
-//	public void setItems(java.util.List<ProductionItem> items) {
-//		this.items = items;
-//	}
+//    public void setItems(java.util.List<ProductionItem> items) {
+//        this.items = items;
+//    }
 //
-//	public int getArity() {
-//		int arity = 0;
-//		for (ProductionItem i : items) {
-//			if (i.getType() == ProductionType.USERLIST)
-//				arity += 2;
-//			if (i.getType() == ProductionType.SORT)
-//				arity++;
-//		}
-//		return arity;
-//	}
+//    public int getArity() {
+//        int arity = 0;
+//        for (ProductionItem i : items) {
+//            if (i.getType() == ProductionType.USERLIST)
+//                arity += 2;
+//            if (i.getType() == ProductionType.SORT)
+//                arity++;
+//        }
+//        return arity;
+//    }
 //
-//	public String getChildSort(int idx) {
-//		int arity = -1;
-//		if (items.get(0).getType() == ProductionType.USERLIST) {
-//			if (idx == 0) {
-//				return ((UserList) items.get(0)).getSort();
-//			} else {
-//				return this.getSort();
-//			}
-//		}
-//		for (ProductionItem i : items) {
-//			if (i.getType() != ProductionType.TERMINAL)
-//				arity++;
-//			if (arity == idx) {
-//				return ((Sort) i).getName();
-//			}
-//		}
-//		return null;
-//	}
+//    public String getChildSort(int idx) {
+//        int arity = -1;
+//        if (items.get(0).getType() == ProductionType.USERLIST) {
+//            if (idx == 0) {
+//                return ((UserList) items.get(0)).getSort();
+//            } else {
+//                return this.getSort();
+//            }
+//        }
+//        for (ProductionItem i : items) {
+//            if (i.getType() != ProductionType.TERMINAL)
+//                arity++;
+//            if (arity == idx) {
+//                return ((Sort) i).getName();
+//            }
+//        }
+//        return null;
+//    }
 //
-//	public boolean hasTerminalToRight(int idx) {
-//		int arity = 0;
-//		for (int i = 0; i < items.size(); i++) {
-//			ProductionItem item = items.get(i);
-//			if (item.getType() == ProductionType.USERLIST) {
-//				if (idx == arity)
-//					return !((UserList) item).getSeparator().equals("");
-//				if (idx == arity + 1)
-//					return false;
-//				arity += 2;
-//			} else if (item.getType() == ProductionType.SORT) {
-//				if (idx == arity)
-//					return i != items.size() - 1 && items.get(i + 1).getType() == ProductionType.TERMINAL;
-//				arity++;
-//			}
-//		}
-//		throw new IllegalArgumentException("Index not found in production");
-//	}
+//    public boolean hasTerminalToRight(int idx) {
+//        int arity = 0;
+//        for (int i = 0; i < items.size(); i++) {
+//            ProductionItem item = items.get(i);
+//            if (item.getType() == ProductionType.USERLIST) {
+//                if (idx == arity)
+//                    return !((UserList) item).getSeparator().equals("");
+//                if (idx == arity + 1)
+//                    return false;
+//                arity += 2;
+//            } else if (item.getType() == ProductionType.SORT) {
+//                if (idx == arity)
+//                    return i != items.size() - 1 && items.get(i + 1).getType() == ProductionType.TERMINAL;
+//                arity++;
+//            }
+//        }
+//        throw new IllegalArgumentException("Index not found in production");
+//    }
 //
-//	public boolean hasTerminalToLeft(int idx) {
-//		int arity = 0;
-//		for (int i = 0; i < items.size(); i++) {
-//			ProductionItem item = items.get(i);
-//			if (item.getType() == ProductionType.USERLIST) {
-//				if (idx == arity)
-//					return false;
-//				if (idx == arity + 1)
-//					return !((UserList) item).getSeparator().equals("");
-//				arity += 2;
-//			} else if (item.getType() == ProductionType.SORT) {
-//				if (idx == arity)
-//					return i != 0 && items.get(i - 1).getType() == ProductionType.TERMINAL;
-//				arity++;
-//			}
-//		}
-//		throw new IllegalArgumentException("Index not found in production");
-//	}
+//    public boolean hasTerminalToLeft(int idx) {
+//        int arity = 0;
+//        for (int i = 0; i < items.size(); i++) {
+//            ProductionItem item = items.get(i);
+//            if (item.getType() == ProductionType.USERLIST) {
+//                if (idx == arity)
+//                    return false;
+//                if (idx == arity + 1)
+//                    return !((UserList) item).getSeparator().equals("");
+//                arity += 2;
+//            } else if (item.getType() == ProductionType.SORT) {
+//                if (idx == arity)
+//                    return i != 0 && items.get(i - 1).getType() == ProductionType.TERMINAL;
+//                arity++;
+//            }
+//        }
+//        throw new IllegalArgumentException("Index not found in production");
+//    }
 //
 //}}}
 //
 //code ProductionItem {{{
-//	public enum ProductionType {
-//		TERMINAL, SORT, USERLIST, LEXICAL
-//	}
+//    public enum ProductionType {
+//        TERMINAL, SORT, USERLIST, LEXICAL
+//    }
 //
-//	public abstract ProductionType getType();
+//    public abstract ProductionType getType();
 //}}}
 //
 //code Sort {{{
 //
 //    public static final String BOOL = "Bool";
 //
-//	private String name;
-//	private static Set<String> baseSorts = new HashSet<String>();
-//	static {
-//		baseSorts.add("K");
-//		baseSorts.add("KResult");
-//		baseSorts.add(KSorts.KITEM);
-//		baseSorts.add(KSorts.KLIST);
-//		baseSorts.add("Map");
-//		baseSorts.add("MapItem");
-//		baseSorts.add("List");
-//		baseSorts.add("ListItem");
-//		baseSorts.add("Set");
-//		baseSorts.add("SetItem");
-//		baseSorts.add("Bag");
-//		baseSorts.add("BagItem");
-//		baseSorts.add(KSorts.KLABEL);
-//		baseSorts.add("CellLabel");
-//	}
+//    private String name;
+//    private static Set<String> baseSorts = new HashSet<String>();
+//    static {
+//        baseSorts.add("K");
+//        baseSorts.add("KResult");
+//        baseSorts.add(KSorts.KITEM);
+//        baseSorts.add(KSorts.KLIST);
+//        baseSorts.add("Map");
+//        baseSorts.add("MapItem");
+//        baseSorts.add("List");
+//        baseSorts.add("ListItem");
+//        baseSorts.add("Set");
+//        baseSorts.add("SetItem");
+//        baseSorts.add("Bag");
+//        baseSorts.add("BagItem");
+//        baseSorts.add(KSorts.KLABEL);
+//        baseSorts.add("CellLabel");
+//    }
 //
-//	public static boolean isBasesort(String sort) {
-//		return baseSorts.contains(sort);
-//	}
+//    public static boolean isBasesort(String sort) {
+//        return baseSorts.contains(sort);
+//    }
 //
-//	public static Set<String> getBaseSorts() {
-//		return new HashSet<String>(baseSorts);
-//	}
+//    public static Set<String> getBaseSorts() {
+//        return new HashSet<String>(baseSorts);
+//    }
 //
-//	public boolean isBaseSort() {
-//		return Sort.isBasesort(getName());
-//	}
+//    public boolean isBaseSort() {
+//        return Sort.isBasesort(getName());
+//    }
 //
 // // TODO: what is this?
-//	public String getName() {
-//		if (MetaK.isCellSort(name))
-//			return KSort.Bag.name();
-//		return name;
-//	}
+//    public String getName() {
+//        if (MetaK.isCellSort(name))
+//            return KSort.Bag.name();
+//        return name;
+//    }
 //
-//	public String getRealName() {
-//		return name;
-//	}
+//    public String getRealName() {
+//        return name;
+//    }
 //
 //}}}

@@ -37,7 +37,7 @@ public class DocumentationFilter extends LatexFilter {
     @Override
     public Void visit(Rule rule, Void _) {
         // termComment = false;
-        Attributes atts = rule.getAttributes(); 
+        Attributes atts = rule.getAttributes();
         boolean process = false;
         for(String tag : options.experimental.documentation) {
             if(atts.containsKey(tag)) {

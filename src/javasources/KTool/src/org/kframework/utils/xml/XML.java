@@ -37,16 +37,16 @@ public class XML {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         return null;
     }
-    
+
     // probably, in the future I'll use some callback functions
     public static List<Element> getChildrenElements(Element element)
     {
         NodeList children = element.getChildNodes();
         List<Element> elements = new LinkedList<Element>();
-        
+
         for(int i = 0; i < children.getLength(); i++)
         {
             if (children.item(i).getNodeType() == Node.ELEMENT_NODE)
@@ -55,11 +55,11 @@ public class XML {
                 elements.add(child);
             }
         }
-        
+
         return elements;
     }
-    
-    
+
+
     public static List<Element> getChildrenElementsByTagName(Element element, List<String> tagNames)
     {
         List<Element> elements = getChildrenElements(element);
@@ -67,15 +67,15 @@ public class XML {
         for (Element e : elements)
             if (tagNames.contains(e.getNodeName()))
                 filteredElements.add(e);
-        
+
         return filteredElements;
     }
-    
+
     public static List<Element> getChildrenElementsByTagName(Element element, String tag)
     {
         List<String> strings = new LinkedList<String>();
         strings.add(tag);
-        
+
         return getChildrenElementsByTagName(element, strings);
     }
 }

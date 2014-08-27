@@ -346,9 +346,9 @@ variable. */
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
        <gtenv> Rho (.Map => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
-  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
+  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[X <- T] </tenv>
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
@@ -379,7 +379,7 @@ entire code of the function body needs to type anyway. */
 
   rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F;...</k> </task>
        (. => <task>
-               <k> mkDecls(Ps) S </k> <tenv> . </tenv> <return> T </return>
+               <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <return> T </return>
              </task>)
     [structural]
 
@@ -393,7 +393,7 @@ generate a function task executing \texttt{main()} to ensure that it
 types (remove this task creation if you do not want your type system
 to reject programs without a \texttt{main} function). */
 
-  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> . </tenv>) </task>
+  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> .Map </tenv>) </task>
     [structural]
 
 /*@ \subsection{Collecting the terminated tasks}
@@ -583,7 +583,7 @@ exceptions which are not caught. */
 /*@ The function \texttt{mkDecls} turns a list of parameters into a
 list of variable declarations. */
 
-  syntax Decl ::= mkDecls(Params)  [function]
+  syntax Stmts ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 

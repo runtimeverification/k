@@ -1,3 +1,4 @@
+%% Copyright (c) 2011-2014 K Team. All Rights Reserved.
 %% Grammar for the K language
 module KTechnique
 imports Common %% For Comments and whitespace
@@ -9,6 +10,7 @@ context-free priorities
 	".K"				-> K {cons("K12Empty"), prefer}
 	DotDz				-> K {cons("K1Empty")}
 	K "~>" K			-> K {left, cons("K1Seq")}
+	".List{K}"			-> KList {cons("ListDlKDr12Empty")}
 	".KList"			-> KList {cons("KList12Empty")}
 	KList   ",," KList	-> KList {left, cons("KList1List")}
 } > { non-assoc:
@@ -26,19 +28,6 @@ context-free syntax
 
 context-free priorities
 {
-	".List"					-> List {cons("List12Empty"), prefer}
-	DotDz					-> List {cons("List1Empty")}
-	"ListItem" "(" K ")"	-> ListItem {cons("ListItem1LIKItem")}
-	ListItem				-> List
-	List List				-> List {left, cons("List1List")}
-} > {
-	List "=>" List			-> List {non-assoc, cons("List1Rewrite")}
-}
-context-free syntax
-	"(" List ")"			-> List {cons("List1Bracket")}
-
-context-free priorities
-{
 	".Bag"				-> Bag {cons("Bag12Empty"), prefer}
 	DotDz				-> Bag {cons("Bag1Empty")}
 	BagItem				-> Bag
@@ -52,36 +41,9 @@ context-free syntax
 	%%"(" BagItem ")"	-> BagItem {bracket}
 	"(" Bag ")"			-> Bag {cons("Bag1Bracket")}
 
-context-free priorities
-{
-	".Set"				-> Set {cons("Set12Empty"), prefer}
-	DotDz				-> Set {cons("Set1Empty")}
-	"SetItem" "(" K ")" -> SetItem {cons("SetItem1SIKItem")}
-	%%SetItem+			-> Set {cons("SetList")}
-	SetItem				-> Set %%{cons("Set3SetItem")}
-	Set Set				-> Set {left, cons("Set1List")}
-} > {
-	Set "=>" Set		-> Set {non-assoc, cons("Set1Rewrite")}
-}
-context-free syntax
-	%%"(" SetItem ")"	-> SetItem {bracket}
-	"(" Set ")"			-> Set {cons("Set1Bracket")}
-
-context-free priorities
-{
-	".Map"			-> Map {cons("Map12Empty"), prefer}
-	DotDz			-> Map {cons("Map1Empty")}
-	MapItem			-> Map %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
-	"MapItem" "(" K "," K ")"	-> MapItem {cons("MapItem1KKItem")}
-	K "|->" K					-> MapItem {cons("MapItem1LKLKItem")}
-	Map   Map					-> Map {left, cons("Map1List")}
-	%%Map "[" K "/" K "]"		-> Map {cons("Map1MapReplaceK")}
-} > {
-	Map "=>" Map				-> Map {non-assoc, cons("Map1Rewrite")}
-}
-context-free syntax
-	%%"(" MapItem ")"			-> MapItem {bracket}
-	"(" Map ")"					-> Map {cons("Map1Bracket")}
+	DotDz				-> Map  {cons("Map1Empty")}
+	DotDz				-> Set  {cons("Set1Empty")}
+	DotDz				-> List {cons("List1Empty")}
 
 	"." -> DotDz
 
@@ -89,25 +51,15 @@ context-free restrictions
 	DotDz		-/- [a-zA-Z\.]
 
 lexical restrictions
-	".List"		-/- [a-zA-Z0-9]
-	".ListItem"	-/- [a-zA-Z0-9]
-	".Map"		-/- [a-zA-Z0-9]
-	".MapItem"	-/- [a-zA-Z0-9]
-	".Set"		-/- [a-zA-Z0-9]
-	".SetItem"	-/- [a-zA-Z0-9]
 	".Bag"		-/- [a-zA-Z0-9]
 	".BagItem"	-/- [a-zA-Z0-9]
 	".K"		-/- [a-zA-Z0-9]
+	".List{K}"	-/- [a-zA-Z0-9]
 	".KList"	-/- [a-zA-Z0-9]
 
-	"List"		-/- [a-zA-Z0-9]
-	"ListItem"	-/- [a-zA-Z0-9]
-	"Map"		-/- [a-zA-Z0-9]
-	"MapItem"	-/- [a-zA-Z0-9]
-	"Set"		-/- [a-zA-Z0-9]
-	"SetItem"	-/- [a-zA-Z0-9]
 	"Bag"		-/- [a-zA-Z0-9]
 	"BagItem"	-/- [a-zA-Z0-9]
 	"K"			-/- [a-zA-Z0-9]
+	"List{K}"	-/- [a-zA-Z0-9]
 	"KList"		-/- [a-zA-Z0-9]
 

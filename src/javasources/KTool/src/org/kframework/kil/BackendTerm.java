@@ -15,11 +15,12 @@ public class BackendTerm extends Term {
 
     String value;
 
-    public BackendTerm(String sort, String value) {
+    public BackendTerm(Sort sort, String value) {
         super(sort);
         this.value = value;
     }
 
+    @Override
     public String toString() {
         return this.value;
     }
@@ -31,7 +32,7 @@ public class BackendTerm extends Term {
     public void setValue(String value) {
         this.value = value;
     }
-    
+
     @Override
     public BackendTerm shallowCopy() {
         return new BackendTerm(this);

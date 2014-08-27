@@ -1,6 +1,1 @@
-Search results:
-
-Solution 1:
-Solution:K -->
-Y:Term |-> Y:Term
-Z:Term |-> cons ( a, Y )
+Y:Term \|-> (.*?)\s+Z:Term |-> cons \( a \(  \), \1 \)

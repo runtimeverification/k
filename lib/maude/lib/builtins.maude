@@ -1,7 +1,7 @@
+--- Copyright (c) 2009-2014 K Team. All Rights Reserved.
 ***(
     This file is part of the K-Maude tool
 
-    Copyright (C) 2009-2011 Grigore Rosu
     Portions Copyright (C) 1997-2009 SRI International, Menlo Park, CA 94025, USA.
 
     This file is free software; you can redistribute it and/or modify
@@ -553,6 +553,7 @@ endm
 
 mod #FLOAT is
   protecting #BOOL .
+  protecting #INT .
   protecting #FLOAT-INTERFACE .
   op -Float_ : #Float -> #Float
         [prec 15 metadata "latex=(renameTo \\ensuremath{-{}}\\subscript{{\\scriptstyle\\it{}Float}}_)"
@@ -692,6 +693,18 @@ mod #FLOAT is
   op _==Float_ : #Float #Float -> #Bool .
   eq F1:#Float ==Float F2:#Float = F1:#Float ==Universal F2:#Float .
 
+  op precisionFloat : #Float -> #Int .
+  eq precisionFloat(F:#Float) = 53 .
+
+  op exponentBitsFloat : #Float -> #Int .
+  eq exponentBitsFloat(F:#Float) = 11 .
+
+  op signFloat : #Float -> #Bool .
+  eq signFloat(F:#Float) = F:#Float <Float 0.0 .
+
+  op rootFloat : #Float #Int -> #Float .
+  eq rootFloat(F:#Float, 2) = sqrtFloat(F:#Float) .
+
 endm
 
 mod #STRING is
@@ -795,8 +808,8 @@ mod #CONVERSION is
                   op-hook minusSymbol (--Int_ : #NzNat ~> #Int)
                   op-hook divisionSymbol (_/Rat_ : #NzInt #NzNat ~> #NzRat))] .
   
-  op int2Float : #Int -> #Float [metadata "latex=(renameTo {\\it{}int2Float})"] .
-  eq int2Float(I:#Int) = Rat2Float(I:#Int) .
+  op int2Float : #Int #Int #Int -> #Float [metadata "latex=(renameTo {\\it{}int2Float})"] .
+  eq int2Float(I:#Int, 53, 11) = Rat2Float(I:#Int) .
 
   op Float2Rat : #Float -> #Rat
         [special (id-hook FloatOpSymbol (rat)

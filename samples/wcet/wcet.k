@@ -126,10 +126,15 @@ module WCET
 
   syntax KResult ::= Int
   syntax Exp ::= Int
+
+  syntax Map ::= Map "<-" Map [function]
+  rule M1 <- (K1:K |-> K2:K M2:Map) => M1[K1 <- K2] <- M2
+  rule M1 <- .Map => M1
+
   //@ The values of the language are integers once an immediate or register index is evaluated.
 
-  syntax K ::= load(K)
-             | jumpTo(Id)
+  syntax KItem ::= load(K)
+                 | jumpTo(Id)
   /*@ Here we define additional auxiliary operators. load takes a program and puts it in the
   \texttt{pgm} cell for use by jump instructions later on. jumpTo takes an identifier and jumps
   immediately to  it. We define this instruction because we want to use it in places where using
@@ -141,7 +146,7 @@ module WCET
 
   rule load(B:Block Bs:Blocks) => load(B) ~> load(Bs)
   rule <k> load(X:Id : Is:Insts) => . ...</k>
-       <pgm>... . => X |-> (Is) ...</pgm>
+       <pgm>... .Map => X |-> (Is) ...</pgm>
   /*@ Note here that the \texttt{pgm} cell is only loaded with the contents of the current block.
   We will see the significance of this momentarily.*/
 
@@ -160,19 +165,19 @@ module WCET
   //@ And an immediate evaluates to its own declared value.
 
   rule <k> add r I:Int , I2:Int , I3:Int => time(add) ...</k>
-       <reg> R:Map => R[I2 +Int I3 / I] </reg>
+       <reg> R:Map => R[I2 +Int I3 <- I] </reg>
   rule <k> sub r I:Int , I2:Int , I3:Int => time(sub) ...</k>
-       <reg> R:Map => R[I2 -Int I3 / I] </reg>
+       <reg> R:Map => R[I2 -Int I3 <- I] </reg>
   rule <k> mul r I:Int , I2:Int , I3:Int => time(mul) ...</k>
-       <reg> R:Map => R[I2 *Int I3 / I] </reg>
+       <reg> R:Map => R[I2 *Int I3 <- I] </reg>
   rule <k> div r I:Int , I2:Int , I3:Int => time(div) ...</k>
-       <reg> R:Map => R[I2 /Int I3 / I] </reg>
+       <reg> R:Map => R[I2 /Int I3 <- I] </reg>
   rule <k> or r I:Int , I2:Int , I3:Int => time(or) ...</k>
-       <reg> R:Map => R[I2 |Int I3 / I] </reg>
+       <reg> R:Map => R[I2 |Int I3 <- I] </reg>
   rule <k> and r I:Int , I2:Int , I3:Int => time(and) ...</k>
-       <reg> R:Map => R[I2 &Int I3 / I] </reg>
+       <reg> R:Map => R[I2 &Int I3 <- I] </reg>
   rule <k> not r I:Int , I2:Int => time(not) ...</k>
-       <reg> R:Map => R[~Int I2 / I] </reg>
+       <reg> R:Map => R[~Int I2 <- I] </reg>
   /*@ The first instructions of the language are defined above. Once the arguments are evaluated,
   the arithmetic operation is performed and the result is stored in the target register. Then the
   time of the instruction is made to elapse. The auxiliary operation \texttt{time} elapses time
@@ -180,13 +185,13 @@ module WCET
 
   rule <k> load r I:Int , I2:Int => time(load) ...</k>
        <mem>... I2 |-> I3:Int ...</mem>
-       <reg> R:Map => R[I3 / I] </reg>
+       <reg> R:Map => R[I3 <- I] </reg>
   /*@ The \texttt{mem} cell contains memory. An integer location in memory is evaluated, indexed in
   memory, and the value found there is put in a register.*/
 
   rule <k> store I:Int , I2:Int => time(store) ...</k>
-       <mem> M:Map => M[I2 / I] </mem>
-  /*@ \texttt{store} evaluates two arguments. The first expresses the location in memory to write 
+       <mem> M:Map => M[I2 <- I] </mem>
+  /*@ \texttt{store} evaluates two arguments. The first expresses the location in memory to write
   to, and the second expresses the value to write there. Once evaluated, we update the \texttt{mem}
   cell with the value in memory.*/
 
@@ -199,10 +204,10 @@ module WCET
   rule <k> blt X:Id , I:Int , I2:Int => time(blt) ~> branch(I <Int I2, X) ...</k>
   rule <k> ble X:Id , I:Int , I2:Int => time(ble) ~> branch(I <=Int I2, X) ...</k>
 
-  syntax K ::= branch(Bool, Id)
+  syntax KItem ::= branch(Bool, Id)
   rule branch(true, X:Id) => jumpTo(X)
   rule branch(false, _) => .
-  /*@ Conditional jump evaluates a boolean condition. If the condition is true, we jump to the 
+  /*@ Conditional jump evaluates a boolean condition. If the condition is true, we jump to the
   target. If it is false, we fall through to the next instruction.*/
 
   rule halt ~> _ => time(halt)
@@ -214,30 +219,30 @@ module WCET
 
   rule <k> read r I:Int , X:Id => time(read) ...</k>
        <status>... X |-> I2:Int ...</status>
-       <reg> Reg:Map => Reg[I2 / I] </reg>
+       <reg> Reg:Map => Reg[I2 <- I] </reg>
   /*@ An I/O read looks up the current value of the data in the \texttt{status} cell, then
   writes it to a register.*/
 
   rule <k> write X:Id , I:Int => time(write) ...</k>
-       <status> Status:Map => Status[I / X] </status>
+       <status> Status:Map => Status[I <- X] </status>
   //@ \texttt{write} evaluates a value, then writes it to the \texttt{status} cell.
 
   rule <k> rw r I:Int , X:Id , I3:Int => time(rw) ...</k>
        <status>... X |-> (I2:Int => I3) ...</status>
-       <reg> Reg:Map => Reg[I2 / I] </reg>
+       <reg> Reg:Map => Reg[I2 <- I] </reg>
   //@ \texttt{rw} simply combines these two instructions together.
 
-  syntax K ::= (Id, Int, Int)
+  syntax KItem ::= (Id, Int, Int)
   rule <k> int X:Id , I:Int , I2:Int => time(int) ...</k>
-       <timers>... . => ListItem((X, I +Int Time, I2)) </timers>
+       <timers>... .List => ListItem((X, I +Int Time, I2)) </timers>
        <wcet> Time:Int </wcet>
   /*@ \texttt{int} schedules an interrupt $I$ cycles after executing, to execute periodically every
   $I2$ cycles thereafter. The \texttt{timers} cell stores the currently activated interrupts in a
   list of tuples.*/
 
-  syntax K ::= (K, Int)
+  syntax KItem ::= (K, Int)
   rule <k> rfi ~> _ => time(rfi) ~> K </k>
-       <stack> ListItem((K:K, Priority:Int)) => . ...</stack>
+       <stack> ListItem((K:K, Priority:Int)) => .List ...</stack>
        <priority> _ => Priority </priority>
   /*@ To return from an interrupt, we restore the previously executing code from the \texttt{stack}
   cell, which also contains the previously-executing priority to restore to the \texttt{priority}
@@ -245,30 +250,30 @@ module WCET
   and can interrupt only code running at a lower priority. Recall the program begins executing at
   priority 0.*/
 
-  syntax K ::= time(OpCode)
-  rule <k> time(O:OpCode) => waitFor(Timing(O)) ...</k>
-       <timing> Timing:Map </timing>
+  syntax KItem ::= time(OpCode)
+  rule <k> time(O:OpCode) => waitFor(I) ...</k>
+       <timing>... O |-> I:Int ...</timing>
   /*@ For modularity, we allow the time each instruction executes for to be specified dynamically
   in the \texttt{timing} cell.*/
 
-  syntax K ::= waitFor(Int)
-  rule <k> waitFor(I:Int) => updateStatus(I2) ~> updateTimers(L) ~> interrupt(L, lengthList L) ...</k>
+  syntax KItem ::= waitFor(Int)
+  rule <k> waitFor(I:Int) => updateStatus(I2) ~> updateTimers(L) ~> interrupt(L, size(L)) ...</k>
        <br/>
        <wcet> I2:Int => I2 +Int I </wcet>
-       <timers> L:List => . </timers>
+       <timers> L:List => .List </timers>
   /*@ The \texttt{wcet} cell stores the length of time the program has already been running for, in
   total. When time passes, two types of asynchronous events can occur. The first is a write on an
-  I/O line, provided in advance in the \texttt{input} cell. The second is the firing of a timer 
+  I/O line, provided in advance in the \texttt{input} cell. The second is the firing of a timer
   interrupt.*/
 
-  syntax K ::= updateStatus(Int)
-  syntax K ::= (Int, Map)
+  syntax KItem ::= updateStatus(Int)
+  syntax KItem ::= (Int, Map) [klabel('status)]
   rule <k> updateStatus(Start:Int) ...</k>
-       <input> ListItem((I2:Int, M:Map)) => . ...</input>
+       <input> ListItem((I2:Int, M:Map)) => .List ...</input>
        <wcet> I:Int </wcet>
-       <status> Status:Map => Status[M] </status> when I >=Int I2 andBool I2 >=Int Start
+       <status> Status:Map => Status <- M </status> when I >=Int I2 andBool I2 >=Int Start
   rule <k> updateStatus(Start:Int) => . ...</k>
-       <input> ListItem((I2:Int, _)) ...</input>
+       <input> ListItem((I2:Int, _:Map)) ...</input>
        <wcet> I:Int </wcet> when notBool(I >=Int I2 andBool I >=Int Start)
   rule <k> updateStatus(_) => . ...</k>
        <input> .List </input>
@@ -276,22 +281,22 @@ module WCET
   Each event contains a map of associated I/O writes, which is merged with the status cell. Events
   ocurring before or after the time window of the instruction are ignored.*/
 
-  syntax K ::= updateTimers(List)
-  rule <k> updateTimers((ListItem((X:Id, Expires:Int, Interval:Int)) => .) _) ...</k>
+  syntax KItem ::= updateTimers(List)
+  rule <k> updateTimers((ListItem((X:Id, Expires:Int, Interval:Int)) => .List) _) ...</k>
        <br/>
        <wcet> I:Int </wcet>
-       <timers>... . => ListItem((X, Expires, Interval)) </timers> when I <Int Expires orBool Interval ==Int 0
+       <timers>... .List => ListItem((X, Expires, Interval)) </timers> when I <Int Expires orBool Interval ==Int 0
   rule <k> updateTimers(ListItem((X:Id, (Expires:Int => Expires +Int Interval), Interval:Int)) _) ...</k>
        <br/>
        <wcet> I:Int </wcet>
-       <interrupts>... . => SetItem(X) </interrupts> when I >=Int Expires andBool Interval =/=Int 0
+       <interrupts>... .Set => SetItem(X) </interrupts> when I >=Int Expires andBool Interval =/=Int 0
   rule updateTimers(.List) => .
   /*@ Essentially, updateTimers updates the \texttt{interrupts} cell with all the interrupts that
   have been triggered by the previous instruction. When an interrupt is triggered, the tuple
   containing info on the interrupt is updated with a new expiration time.*/
 
-  syntax K ::= interrupt(List, Int)
-  rule <k> interrupt((ListItem((X:Id, _, _)) => .) _, (N:Int => N -Int 1)) ...</k>
+  syntax KItem ::= interrupt(List, Int)
+  rule <k> interrupt((ListItem((X:Id, _, _)) => .List) _, (N:Int => N -Int 1)) ...</k>
        <br/>
        <interrupts> S:Set </interrupts>
        <priority> Priority:Int </priority> when notBool(X in S) orBool N <=Int Priority
@@ -299,7 +304,7 @@ module WCET
        <priority> Priority:Int => N </priority>
        <br/>
        <interrupts> S:Set => S -Set SetItem(X) </interrupts>
-       <stack> . => ListItem((K, Priority)) ...</stack> when N >Int Priority andBool X in S
+       <stack> .List => ListItem((K, Priority)) ...</stack> when N >Int Priority andBool X in S
   rule <k> interrupt(.List, _) => . ...</k>
   /*@ Essentially, interrupt fires exactly one pending interrupt, removing it from the
   \texttt{interrupts} cell. This only occurs if there is a pending interrupt to fire and its

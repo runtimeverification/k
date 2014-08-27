@@ -20,7 +20,7 @@ public class ListUpdate extends Term implements Interfaces.Collection<Term, List
     /** {@code List} of entries to be removed from the list */
     private final Collection<Term> removeLeft;
     private final Collection<Term> removeRight;
-    
+
     public static enum ListChildren {
         REMOVE_LEFT,
         REMOVE_RIGHT

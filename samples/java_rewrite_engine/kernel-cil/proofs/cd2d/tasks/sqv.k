@@ -8,9 +8,9 @@
 module SQV-RULE
   rule <threads>
            <thread>...
-	     <k> sqv(Vx:Float, Vy:Float) => V:Float </k>
+         <k> sqv(Vx:Float, Vy:Float) => V:Float </k>
              <env> GENV </env>
-	   ...</thread>
+       ...</thread>
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>

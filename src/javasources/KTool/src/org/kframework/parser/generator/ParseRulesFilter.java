@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
@@ -61,7 +63,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
                 long koreStartTime = System.currentTimeMillis();
                 parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
                 if (globalOptions.verbose)
-                    System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
+                    System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
             } else
                 parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
             Document doc = XmlLoader.getXMLDoc(parsed);
@@ -69,13 +71,15 @@ public class ParseRulesFilter extends ParseForestTransformer {
             // replace the old xml node with the newly parsed sentence
             Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
             XmlLoader.updateLocation(xmlTerm, startLine, startColumn);
-            XmlLoader.addFilename(xmlTerm, ss.getFilename());
+            XmlLoader.addSource(xmlTerm, ss.getSource());
             XmlLoader.reportErrors(doc, ss.getType());
 
             Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
-            assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+            assert st.getLabel().equals(""); // labels should have been parsed in Outer Parsing
             st.setLabel(ss.getLabel());
             st.setAttributes(ss.getAttributes());
+            st.setLocation(ss.getLocation());
+            st.setSource(ss.getSource());
 
             if (Constants.CONTEXT.equals(ss.getType()))
                 sentence = new org.kframework.kil.Context(st);
@@ -88,16 +92,16 @@ public class ParseRulesFilter extends ParseForestTransformer {
 
             String key = localModule + ss.getContent();
             if (cachedDef.containsKey(key)) {
-                String file = ss.getFilename();
-                String location = ss.getLocation();
+                Source source= ss.getSource();
+                Location location = ss.getLocation();
                 String msg = "Duplicate rule found in module " + localModule + " at: " + cachedDef.get(key).sentence.getLocation();
-                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
+                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, source, location));
             }
             cachedDef.put(key, new CachedSentence(sentence, startLine, startColumn));
 
             if (globalOptions.debug) {
                 try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
-                    f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getFilename(), ss.getLocation());
+                    f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getSource(), ss.getLocation());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

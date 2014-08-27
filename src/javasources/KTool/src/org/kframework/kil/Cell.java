@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,14 +76,14 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
     Term contents;
     Map<String, String> cellAttributes;
 
-    public Cell(String location, String filename) {
-        super(location, filename, "BagItem");
+    public Cell(Location location, Source source) {
+        super(location, source, Sort.BAG_ITEM);
         cellAttributes = new HashMap<String, String>();
     }
 
     public Cell(Element element) {
         super(element);
-        this.sort = "BagItem";
+        this.sort = Sort.BAG_ITEM;
         this.label = element.getAttribute(Constants.LABEL_label_ATTR);
         this.endLabel = element.getAttribute(Constants.ENDLABEL_label_ATTR);
         this.contents = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
@@ -97,7 +98,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
                                                                                     // !its.item(i).getNodeName().equals(Constants.ELLIPSES_ellipses_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.SORT_sort_ATTR) && !its.item(i).getNodeName().equals(Constants.LABEL_label_ATTR)
                     && !its.item(i).getNodeName().equals(Constants.ENDLABEL_label_ATTR)) {
-                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteString("\"" + its.item(i).getNodeValue() + "\""));
+                cellAttributes.put(its.item(i).getNodeName(), StringUtil.unquoteKString("\"" + its.item(i).getNodeValue() + "\""));
             }
         }
     }
@@ -110,8 +111,16 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.contents = node.contents;
     }
 
+    public Cell(String label, Term contents) {
+        super(Sort.BAG_ITEM);
+        this.label = label;
+        this.endLabel = label;
+        this.cellAttributes = new HashMap<String, String>();
+        this.contents = contents;
+    }
+
     public Cell() {
-        super("BagItem");
+        super(Sort.BAG_ITEM);
         cellAttributes = new HashMap<String, String>();
     }
 
@@ -154,11 +163,11 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.contents = contents;
     }
 
-    public String getSort() {
+    public Sort getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Sort sort) {
         this.sort = sort;
     }
 
@@ -173,8 +182,8 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
                 return Multiplicity.SOME;
             if ("1".equals(attr))
                 return Multiplicity.ONE;
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Unknown multiplicity in configuration for cell " + this.getLabel() + ".",
-                    this.getFilename(), this.getLocation()));
+            GlobalSettings.kem.registerCompilerWarning("Unknown multiplicity in configuration for cell " + this.getLabel() + ".",
+                    this);
         }
         return Multiplicity.ONE;
     }
@@ -187,7 +196,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
             }
         } catch (IllegalArgumentException e) {
             String msg = "Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.";
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, this.getFilename(), this.getLocation()));
+            GlobalSettings.kem.registerCompilerWarning(msg, e, this);
         }
         return Ellipses.NONE;
     }

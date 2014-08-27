@@ -1,17 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
-import com.google.common.collect.Lists;
-import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Term;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -102,7 +95,6 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     public BuiltinList srem(BitVector<BigInteger> bitVector) {
         if (!bitVector.signedValue().equals(BigInteger.ZERO)) {
             /* the overflow flag for srem is set if the associated sdiv overflows */
-            BigInteger result = signedValue().remainder(bitVector.signedValue());
             return getBuiltinList(
                     signedValue().remainder(bitVector.signedValue()),
                     checkSignedOverflow(signedValue().divide(bitVector.signedValue())));
@@ -253,25 +245,35 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     }
 
     @Override
-    public List<BitVector> toDigits(int digitBase) {
-        assert digitBase > 0;
+    public BitVector extract(int beginIndex, int endIndex) {
+        int resultBitwidth = endIndex - beginIndex;
+        BigInteger mask = BigInteger.ONE.shiftLeft(resultBitwidth).subtract(BigInteger.ONE);
+        return BitVector.of(
+                value.shiftRight(bitwidth - endIndex).and(mask),
+                resultBitwidth);
+    }
+
+    @Override
+    public List<BitVector> toDigits(int digitBitWidth, int count) {
+        assert digitBitWidth > 0;
+        assert digitBitWidth * count <= bitwidth;
 
         List<BitVector> digits = new ArrayList<>();
         BigInteger unsignedValue = unsignedValue();
-        for (int i = 0; i * digitBase < bitwidth; ++i) {
-            digits.add(BitVector.of(
-                    unsignedValue.remainder(BigInteger.ONE.shiftLeft(digitBase)),
-                    digitBase));
-            unsignedValue = unsignedValue.shiftRight(digitBase);
+
+        BigInteger mask = BigInteger.ONE.shiftLeft(digitBitWidth).subtract(BigInteger.ONE);
+        for (int i = 0, j = bitwidth - digitBitWidth; i < count;  ++i, j -= digitBitWidth) {
+            digits.add(BitVector.of(unsignedValue.shiftRight(j).and(mask), digitBitWidth));
         }
 
-        return Lists.reverse(digits);
+        return digits;
     }
 
     private BuiltinList getBuiltinList(BigInteger result, boolean overflow) {
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(overflow)));
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItem(BitVector.of(result, bitwidth));
+        builder.addItem(BoolToken.of(overflow));
+        return (BuiltinList) builder.build();
     }
 
 }

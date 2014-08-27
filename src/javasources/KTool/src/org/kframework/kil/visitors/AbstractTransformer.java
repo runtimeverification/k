@@ -6,9 +6,9 @@ import org.kframework.kil.AbstractVisitor;
 import org.kframework.kil.loader.Context;
 
 /**
- * A helper class designed to encapsulate functionality shared between 
+ * A helper class designed to encapsulate functionality shared between
  * {@link LocalTransformer}, {@link ParseForestTransformer}, and {@link CopyOnWriteTransformer}.
- * 
+ *
  * This class serves to replace the Transformable interface that existed before, and implements
  * functionality specific to visitors which transform terms.
  * @author dwightguth
@@ -19,7 +19,7 @@ public abstract class AbstractTransformer<E extends Throwable> extends AbstractV
     public AbstractTransformer(String name, Context context) {
         super(name, context);
     }
-    
+
     public AbstractTransformer(Context context) {
         super(context);
     }
@@ -43,6 +43,17 @@ public abstract class AbstractTransformer<E extends Throwable> extends AbstractV
     @Override
     public <T extends ASTNode> boolean changed(T o, T n) {
         return o != n;
+    }
+
+    @Override
+    public ASTNode complete(ASTNode node, ASTNode r) {
+        ASTNode result = super.complete(node, r);
+        if (result != null) {
+            result.copyAttributesFrom(node);
+            result.setLocation(node.getLocation());
+            result.setSource(node.getSource());
+        }
+        return result;
     }
 
 }

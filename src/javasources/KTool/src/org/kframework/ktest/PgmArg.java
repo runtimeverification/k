@@ -25,7 +25,7 @@ public class PgmArg {
         this.key = key;
         this.val = val;
     }
-    
+
     public List<String> toStringList() {
         String arg = this.arg;
         String val = this.val;
@@ -37,7 +37,7 @@ public class PgmArg {
             return Arrays.asList(arg, val);
         }
     }
-    
+
     @Override
     public String toString() {
         return StringUtils.join(toStringList(), " ");

@@ -1,19 +1,19 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module FUNCONS-SYNTAX
-  syntax K ::= deref(K)                       [strict]
-             | boundValue(Id)
-             | intDivide(K,K)                 [strict]
-             | intPlus(K,K)                   [strict]
-             | intLeq(K,K)                    [strict]
-             | not(K)                         [strict]
-             | ifTrue(K,K,K)                  [strict(1)]
-             | "skip"
-             | asgn(K,K)                      [strict]
-             | whileTrue(K,K)
-             | seq(K,K)                       [strict(1)]
-             | scope(K,K)
-             | bind(Id,K)                     [strict(2)]
-             | alloc(K)                       [strict]
+  syntax KItem ::= deref(K)                       [strict]
+                 | boundValue(Id)
+                 | intDivide(K,K)                 [strict]
+                 | intPlus(K,K)                   [strict]
+                 | intLeq(K,K)                    [strict]
+                 | not(K)                         [strict]
+                 | ifTrue(K,K,K)                  [strict(1)]
+                 | "skip"
+                 | asgn(K,K)                      [strict]
+                 | whileTrue(K,K)
+                 | seq(K,K)                       [strict(1)]
+                 | scope(K,K)
+                 | bind(Id,K)                     [strict(2)]
+                 | alloc(K)                       [strict]
 endmodule
 
 module FUNCONS
@@ -24,10 +24,10 @@ module FUNCONS
                   <store color="blue"> .Map </store>
                 </T>
   syntax KResult ::= Int | Bool | "skip"
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
 
   rule <k> alloc(I:Int) => L ...</k>
-       <store>... . => L |-> I ...</store>  when fresh(L:Int)
+       <store>... . => !L:Int |-> I ...</store>
   rule <k> bind(X,L:Int) => skip ...</k>  <env> Rho => Rho[L/X] </env>
   rule <k> boundValue(X) => L ...</k>  <env>... X |-> L </env>
   rule <k> scope(B,S) => seq(B,S) ~> env(Rho) ...</k> <env> Rho </env>

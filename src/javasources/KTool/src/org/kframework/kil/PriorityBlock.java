@@ -3,6 +3,8 @@ package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,10 @@ public class PriorityBlock extends ASTNode implements Interfaces.MutableList<Pro
         super();
         this.assoc = assoc;
         this.productions = productions;
+    }
+
+    public PriorityBlock(String assoc, Production... productions) {
+        this(assoc, Lists.newArrayList(productions));
     }
 
     public PriorityBlock(PriorityBlock node) {
@@ -111,7 +117,7 @@ public class PriorityBlock extends ASTNode implements Interfaces.MutableList<Pro
     public List<Production> getChildren(Enum<?> _) {
         return productions;
     }
-    
+
     @Override
     public void setChildren(List<Production> children, Enum<?> _) {
         this.productions = children;

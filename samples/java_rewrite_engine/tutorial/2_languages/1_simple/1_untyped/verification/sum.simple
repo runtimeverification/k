@@ -1,0 +1,13 @@
+function sum(x) {
+  var y = 0;
+  while (x > 0) {
+    y = y + x;
+    x = x - 1;
+  }
+  return y;
+}
+
+function main() {
+  // breakpoint;
+  print(sum(10));
+}

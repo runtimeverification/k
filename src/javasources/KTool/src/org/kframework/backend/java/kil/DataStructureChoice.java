@@ -3,11 +3,16 @@
 package org.kframework.backend.java.kil;
 
 /**
- * The tag interface for data structure choice operations.
- * 
+ * Interface for data structure choice operations.
+ *
  * @author YilongL
  *
  */
 public interface DataStructureChoice extends DataStructureLookupOrChoice {
 
+    enum Type { MAP_KEY_CHOICE, SET_ELEMENT_CHOICE }
+
+    Term base();
+    Term evaluateChoice();
+    Type type();
 }

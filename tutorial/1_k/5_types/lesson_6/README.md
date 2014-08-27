@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### Parallel Type Checkers/Inferencers
 
 [MOVIE []]()
@@ -62,7 +63,7 @@ type them and then generate the type constraint like before.  This can
 be done very easily by just extending the equality construct to
 expressions and declaring it `strict`:
 
-    syntax K ::= Exp "=" Exp  [strict]
+    syntax KItem ::= Exp "=" Exp  [strict]
 
 Unlike before, where we only passed types to the equality construct,
 we now need a runtime check that its arguments are indeed types before

@@ -31,11 +31,11 @@ public class VariableReplaceTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Variable node, Void _)  {
-        if (MetaK.isBuiltinSort(node.getSort()))
+        if (node.getSort().isBuiltinSort())
             return node;
 
         Variable newVar = node;
-        if (vars.contains(node.getName()) && !node.isFresh()) {
+        if (vars.contains(node.getName()) && !node.isFreshVariable()) {
             newVar = Variable.getFreshVar(node.getSort());
             generatedVariables.put(node, newVar);
         }

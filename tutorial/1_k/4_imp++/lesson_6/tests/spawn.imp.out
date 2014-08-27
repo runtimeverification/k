@@ -2,192 +2,192 @@ Search results:
 
 Solution 1:
 <T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 11
+    </store>
     <in>
         ListItem(#buffer ( "" ))
     </in>
     <out>
         ListItem(#buffer ( "x = 11\n" ))
     </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 11
-    </store>
 </T>
 
 Solution 2:
 <T>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 11\n" ))
-    </out>
     <threads>
         .Bag
     </threads>
     <store>
-        #symNat(1) |-> 21
+        1 |-> 11
     </store>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 23\n" ))
+    </out>
 </T>
 
 Solution 3:
 <T>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 11\n" ))
-    </out>
     <threads>
         .Bag
     </threads>
     <store>
-        #symNat(1) |-> 33
+        1 |-> 11
     </store>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 33\n" ))
+    </out>
 </T>
 
 Solution 4:
 <T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 16
+    </store>
     <in>
         ListItem(#buffer ( "" ))
     </in>
     <out>
         ListItem(#buffer ( "x = 16\n" ))
     </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 16
-    </store>
 </T>
 
 Solution 5:
 <T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 16
+    </store>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 23\n" ))
+    </out>
+</T>
+
+Solution 6:
+<T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 16
+    </store>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 33\n" ))
+    </out>
+</T>
+
+Solution 7:
+<T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 21
+    </store>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 11\n" ))
+    </out>
+</T>
+
+Solution 8:
+<T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 21
+    </store>
     <in>
         ListItem(#buffer ( "" ))
     </in>
     <out>
         ListItem(#buffer ( "x = 21\n" ))
     </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 21
-    </store>
-</T>
-
-Solution 6:
-<T>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 23\n" ))
-    </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 11
-    </store>
-</T>
-
-Solution 7:
-<T>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 23\n" ))
-    </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 16
-    </store>
-</T>
-
-Solution 8:
-<T>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 23\n" ))
-    </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 21
-    </store>
 </T>
 
 Solution 9:
 <T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 21
+    </store>
     <in>
         ListItem(#buffer ( "" ))
     </in>
     <out>
         ListItem(#buffer ( "x = 23\n" ))
     </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 33
-    </store>
 </T>
 
 Solution 10:
 <T>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 33\n" ))
-    </out>
     <threads>
         .Bag
     </threads>
     <store>
-        #symNat(1) |-> 11
+        1 |-> 33
     </store>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 11\n" ))
+    </out>
 </T>
 
 Solution 11:
 <T>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 33\n" ))
-    </out>
     <threads>
         .Bag
     </threads>
     <store>
-        #symNat(1) |-> 16
+        1 |-> 33
     </store>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 23\n" ))
+    </out>
 </T>
 
 Solution 12:
 <T>
+    <threads>
+        .Bag
+    </threads>
+    <store>
+        1 |-> 33
+    </store>
     <in>
         ListItem(#buffer ( "" ))
     </in>
     <out>
         ListItem(#buffer ( "x = 33\n" ))
     </out>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        #symNat(1) |-> 33
-    </store>
 </T>

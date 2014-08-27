@@ -2,13 +2,13 @@
 module MY-PATTERN-MATCHING
 
 // adapted from k-prelude.k
-  syntax KItem ::= #myMap(MyMap)
+  syntax KItem ::= #myMap(Map)
   syntax Bool ::= #myIsMapInK(K)      [function]
-  syntax MyMap ::= #myGetMapFromK(K)  [function]
+  syntax Map ::= #myGetMapFromK(K)  [function]
 
   rule #myIsMapInK(#myMap(_)) => true
   rule #myIsMapInK(_) => false  [owise]  // YilongL: avoid partial function that gets stuck and fails the Java rewrite engine assertion
-  rule #myGetMapFromK(#myMap(M:MyMap)) => M
+  rule #myGetMapFromK(#myMap(M:Map)) => M
 
 /***********
   VISIBLE
@@ -19,8 +19,7 @@ module MY-PATTERN-MATCHING
     => #myIsMapInK(#myPatternMatch(Ps,Ks)) ==K true
 
 // Gets the matching; call myIsMatching first, for safety
-  syntax MyMap ::= myGetMatching(KList, KList)          [function]
-  syntax KItem ::= #myPatternMatch(KList, KList)        [function]
+  syntax Map ::= myGetMatching(KList, KList)          [function]
   rule myGetMatching(Ps:KList, Ks:KList)
     => #myGetMapFromK(#myPatternMatch(Ps,Ks))
 
@@ -41,12 +40,10 @@ module MY-PATTERN-MATCHING
     when notBool emptyKList(Ps)
   // rule myDecomposeMatching(.KList, .KList) => .KList
   // TODO(YilongL): builtins in Java rewrite engine may not be represented as KItem's
+  rule myDecomposeMatching(Ps:KList, Ps:KList)
+    => .KList
   rule myDecomposeMatching(Ps:KList, Ks:KList)
-    => #if Ps ==KList Ks
-       #then .KList
-       #else #unmatchableError(Ps,Ks)
-       #fi
-    [owise]
+    => #unmatchableError(Ps,Ks) requires Ps =/=KList Ks [owise]
 
 // For example, one may add rules like the following in one's language
 //  rule myDecomposeMatching(([P:Exp|T:Exp] => P,T),([V:Val,Vs:Vals] => V,[Vs]))
@@ -63,21 +60,21 @@ module MY-PATTERN-MATCHING
 
   syntax KItem ::= #myPatternMatch(KList, KList)   [function]
   rule #myPatternMatch(Ps:KList, Ks:KList)
-    => #myPatternMatch1(myDecomposeMatching(Ps,Ks), .MyMap)
+    => #myPatternMatch1(myDecomposeMatching(Ps,Ks), .Map)
 
-  syntax KItem ::= #myPatternMatch1(KList, MyMap)  [function]
+  syntax KItem ::= #myPatternMatch1(KList, Map)  [function]
   syntax KItem ::= "#nonlinearPatternError"
 //  rule #myPatternMatch1((myDecomposeMatching(X:Variable,K:K) => .KList),,_,
-//                      (M:MyMap, (.MyMap => X |-> K)))
-  rule #myPatternMatch1(myDoneDecomposeMatching(X:Variable,K:K),,Ps, M:MyMap) // YilongL: use myDoneDecomposeMatching
-    => #myPatternMatch1(.KList,,Ps, (M:MyMap, X |-> K))
+//                      (M:Map, (.Map => X |-> K)))
+  rule #myPatternMatch1(myDoneDecomposeMatching(X:Variable,K:K),,Ps, M:Map) // YilongL: use myDoneDecomposeMatching
+    => #myPatternMatch1(.KList,,Ps, (X |-> K M:Map))
     when notBool (X in keys(M))  // only linear patterns allowed for now
-  rule #myPatternMatch1(#unmatchableError(P,K),,_, _:MyMap)
+  rule #myPatternMatch1(#unmatchableError(P,K),,_, _:Map)
     => #unmatchableError(P,K)
-  rule #myPatternMatch1(myDoneDecomposeMatching(X:Variable,K:K),,Ps, M:MyMap)
+  rule #myPatternMatch1(myDoneDecomposeMatching(X:Variable,K:K),,Ps, M:Map)
     => #nonlinearPatternError
     when X in keys(M)  // TODO(YilongL): this side condition contains two function calls which can be combined into one instead
-  rule #myPatternMatch1(.KList, M:MyMap) => #myMap(M)
+  rule #myPatternMatch1(.KList, M:Map) => #myMap(M)
 
 
 endmodule

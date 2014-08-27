@@ -2,18 +2,18 @@
     <k>
         .K
     </k>
-    <store>
-        #symNat(1) |-> 2
-        #symNat(2) |-> 1
-        #symNat(3) |-> 1
-        #symNat(4) |-> 3
-        #symNat(5) |-> 66
-    </store>
     <env>
-        m |-> #symNat(1)
-        n |-> #symNat(2)
-        q |-> #symNat(3)
-        r |-> #symNat(4)
-        s |-> #symNat(5)
+        m |-> 1
+        n |-> 2
+        q |-> 3
+        r |-> 4
+        s |-> 5
     </env>
+    <store>
+        1 |-> 2
+        2 |-> 1
+        3 |-> 1
+        4 |-> 3
+        5 |-> 66
+    </store>
 </T>

@@ -15,11 +15,11 @@ public class CollectTerminalsVisitor extends BasicVisitor {
         super(context);
     }
 
-    public Set<String> terminals = new HashSet<>();
+    public Set<Terminal> terminals = new HashSet<>();
     public Set<Production> rejects = new HashSet<>();
 
-    private void addTerminal(String terminal) {
-        if (terminal.equals(""))
+    private void addTerminal(Terminal terminal) {
+        if (terminal.getTerminal().equals(""))
             return;
         terminals.add(terminal);
     }
@@ -33,12 +33,12 @@ public class CollectTerminalsVisitor extends BasicVisitor {
     }
 
     public Void visit(Terminal t, Void _) {
-        addTerminal(t.getTerminal());
+        addTerminal(t);
         return null;
     }
 
     public Void visit(UserList ul, Void _) {
-        addTerminal(ul.getSeparator());
+        addTerminal(new Terminal(ul.getSeparator()));
         return null;
     }
 }

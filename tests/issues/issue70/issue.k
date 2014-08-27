@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 module ISSUE
 
-syntax K ::= "toFloat" "(" String ")"
+syntax KItem ::= "toFloat" "(" String ")"
 
 rule toFloat(Str:String) => #if (lastChar(Str) ==String "F")
                               #then Str

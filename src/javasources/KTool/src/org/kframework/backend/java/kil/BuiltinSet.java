@@ -1,127 +1,68 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.base.Joiner;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
-import java.util.ArrayDeque;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
 
 
 /**
- * Class representing a set. It only has one frame (which is a variable), and concrete elements.
- * A set composed of multiple set variables or terms (in addition to the elements) is represented
- * using concatenation (and can only occur in the right-hand side or in the condition).
+ * Class representing a set.
  *
  * @author AndreiS
  */
-public class BuiltinSet extends Collection {
+public class BuiltinSet extends AssociativeCommutativeCollection {
 
-//    public abstract class Operation {
-//
-//        private final Term element;
-//
-//        protected Operation(Term element) {
-//            this.element = element;
-//        }
-//
-//        public Term element() {
-//            return element;
-//        }
-//
-//    }
-//
-//    public class Insertion extends Operation {
-//
-//        private Insertion(Term element) {
-//            super(element);
-//        }
-//
-//    }
-//
-//    public class Deletion extends Operation {
-//
-//        private Deletion(Term element) {
-//            super(element);
-//        }
-//
-//    }
+    public static final BuiltinSet EMPTY_SET = new BuiltinSet(
+            ImmutableSet.<Term>of(),
+            ImmutableMultiset.<KItem>of(),
+            ImmutableMultiset.<Term>of(),
+            ImmutableMultiset.<Variable>of());
 
-    private final Set<Term> elements;
-//    private final Queue<Operation> operations;
+    private final ImmutableSet<Term> elements;
 
-    public BuiltinSet(Set<? extends Term> elements) {
-        this(elements, null);
+    private BuiltinSet(
+            ImmutableSet<Term> elements,
+            ImmutableMultiset<KItem> collectionPatterns,
+            ImmutableMultiset<Term> collectionFunctions,
+            ImmutableMultiset<Variable> collectionVariables) {
+        super(collectionPatterns, collectionFunctions, collectionVariables);
+        this.elements = elements;
     }
 
-    public BuiltinSet(Set<? extends Term> elements, Variable frame) {
-        super(frame, Kind.KITEM);
-        this.elements = new HashSet<Term>(elements);
-//        operations = new ArrayDeque<Operation>();
+    public static Term concatenate(Term... sets) {
+        Builder builder = new Builder();
+        builder.concatenate(sets);
+        return builder.build();
     }
 
-    public BuiltinSet(Variable frame) {
-        super(frame, Kind.KITEM);
-        this.elements = new HashSet<Term>();
-//        operations = new ArrayDeque<Operation>();
-    }
-
-    public BuiltinSet() {
-        super(null, Kind.KITEM);
-        elements = new HashSet<Term>();
-//        operations = new ArrayDeque<Operation>();
-    }
-
-    public boolean contains(Term key) {
-        return elements.contains(key);
-    }
-
-    public void add(Term element) {
-        elements.add(element);
-//        if (!(operations.isEmpty() && elements.contains(element))) {
-//            operations.add(new Insertion(element));
-//        }
+    public boolean contains(Term element) {
+        return elements.contains(element);
     }
 
     public Set<Term> elements() {
-        return Collections.unmodifiableSet(elements);
+        return elements;
     }
 
-//    public Queue<Operation> operations() {
-//        return operations;
-//    }
-
-//    public void remove(Term element) {
-//        if (!(operations.isEmpty() && elements.contains(element))) {
-//            operations.add(new Deletion(element));
-//        } else {
-//            elements.remove(element);
-//        }
-//    }
-
     @Override
-    public int size() {
+    public int concreteSize() {
         return elements.size();
     }
 
     @Override
-    public boolean isExactSort() {
-        return true;
-    }
-
-    @Override
-    public String sort() {
-        return KSorts.SET;
+    public Sort sort() {
+        return Sort.SET;
     }
 
     @Override
@@ -135,20 +76,32 @@ public class BuiltinSet extends Collection {
         }
 
         BuiltinSet set = (BuiltinSet) object;
-        return (frame == null ? set.frame == null : frame.equals(set.frame))
-                && elements.equals(set.elements);
-        //               && operations.equals(set.operations);
+        return elements.equals(set.elements)
+                && collectionPatterns.equals(set.collectionPatterns)
+                && collectionFunctions.equals(set.collectionFunctions)
+                && collectionVariables.equals(set.collectionVariables);
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
-            hashCode = hashCode * Utils.HASH_PRIME + elements.hashCode();
-//        hashCode = hashCode * Utils.HASH_PRIME + operations.hashCode();
-        }
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + elements.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + collectionPatterns.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + collectionFunctions.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Term term : elements) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -181,32 +134,81 @@ public class BuiltinSet extends Collection {
         Joiner joiner = Joiner.on(operator);
         StringBuilder stringBuilder = new StringBuilder();
         joiner.appendTo(stringBuilder, elements);
-        if (super.frame != null) {
-            if (stringBuilder.length() != 0) {
-                stringBuilder.append(operator);
-            }
-            stringBuilder.append(super.frame);
-        }
+        joiner.appendTo(stringBuilder, baseTerms());
         if (stringBuilder.length() == 0) {
             stringBuilder.append(identity);
         }
         return stringBuilder.toString();
     }
 
-    public static BuiltinSet of(Set<Term> elements, Term frame) {
-        if (frame == null) {
-            return new BuiltinSet(elements);
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Set<Term> elements = new HashSet<>();
+        private ImmutableMultiset.Builder<KItem> patternsBuilder = new ImmutableMultiset.Builder<>();
+        private ImmutableMultiset.Builder<Term> functionsBuilder = new ImmutableMultiset.Builder<>();
+        private ImmutableMultiset.Builder<Variable> variablesBuilder = new ImmutableMultiset.Builder<>();
+
+        public boolean add(Term element) {
+            return elements.add(element);
         }
-        if (frame instanceof Variable)
-            return new BuiltinSet(elements, (Variable) frame);
-        if (frame instanceof BuiltinSet) {
-            BuiltinSet builtinSet = (BuiltinSet) frame;
-            builtinSet = new BuiltinSet(builtinSet.elements, builtinSet.frame);
-            builtinSet.elements.addAll(elements);
-            return builtinSet;
+
+        public <T extends Term> boolean addAll(Collection<T> elements) {
+            // elements refers to the one in the outer class
+            return this.elements.<T>addAll(elements);
         }
-        assert false : "Frame can only be substituted by a Variable or a BuiltinSet, or deleted.";
-        return null;
+
+        public boolean remove(Term element) {
+            return elements.remove(element);
+        }
+
+        /**
+         * Concatenates terms of sort Set to this builder
+         */
+        public void concatenate(Term... terms) {
+            for (Term term : terms) {
+                assert term.sort().equals(Sort.SET)
+                        : "unexpected sort " + term.sort() + " of concatenated term " + term
+                        + "; expected " + Sort.SET;
+
+                if (term instanceof BuiltinSet) {
+                    BuiltinSet set = (BuiltinSet) term;
+                    elements.addAll(set.elements);
+                    patternsBuilder.addAll(set.collectionPatterns);
+                    functionsBuilder.addAll(set.collectionFunctions);
+                    variablesBuilder.addAll(set.collectionVariables);
+                } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isPattern()) {
+                    patternsBuilder.add((KItem) term);
+                } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isFunction()) {
+                    functionsBuilder.add(term);
+                } else if (term instanceof SetUpdate) {
+                    functionsBuilder.add(term);
+                } else if (term instanceof Variable) {
+                    variablesBuilder.add((Variable) term);
+                } else {
+                    assert false : "unexpected concatenated term" + term;
+                }
+            }
+        }
+
+        public Term build() {
+            BuiltinSet builtinSet = new BuiltinSet(
+                    ImmutableSet.copyOf(elements),
+                    patternsBuilder.build(),
+                    functionsBuilder.build(),
+                    variablesBuilder.build());
+            if (builtinSet.collectionVariables.size() == 1
+                    && builtinSet.elements.isEmpty()
+                    && builtinSet.collectionPatterns.isEmpty()
+                    && builtinSet.collectionFunctions.isEmpty()) {
+                return builtinSet.collectionVariables.iterator().next();
+            } else {
+                return builtinSet;
+            }
+        }
     }
 
 }

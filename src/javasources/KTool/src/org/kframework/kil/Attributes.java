@@ -7,8 +7,11 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * class for AST Attributes.
@@ -20,31 +23,31 @@ import java.util.List;
  *
  * @see ASTNode
  */
-public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute, Enum<?>> {
+public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute, Enum<?>>, Map<String, Attribute> {
 
-    protected java.util.List<Attribute> contents;
+    protected LinkedHashMap<String, Attribute> contents;
 
     public Attributes(Attributes c) {
         super(c);
         this.contents = c.contents;
     }
 
-    public Attributes(String location, String filename) {
-        super(location, filename);
-        contents = new ArrayList<Attribute>();
+    public Attributes(Location location, Source source) {
+        super(location, source);
+        contents = new LinkedHashMap<String, Attribute>();
     }
 
     public Attributes(Element element) {
         super(element);
 
-        contents = new ArrayList<Attribute>();
+        contents = new LinkedHashMap<String, Attribute>();
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
-            contents.add((Attribute) JavaClassesFactory.getTerm(e));
+            add((Attribute) JavaClassesFactory.getTerm(e));
     }
 
     public Attributes() {
-        contents = new ArrayList<Attribute>();
+        contents = new LinkedHashMap<String, Attribute>();
     }
 
     @Override
@@ -52,106 +55,43 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
         if (isEmpty())
             return "";
         String content = "[";
-        for (Attribute t : contents)
+        for (Attribute t : contents.values())
             content += t + ", ";
         return content.substring(0, content.length() - 2) + "]";
-    }
-
-    public boolean containsKey(String key) {
-        return containsKey(key, false);
-    }
-
-    public boolean containsKey(String key, boolean prefix) {
-        if (contents == null)
-            return false;
-        for (Attribute attr : contents) {
-            if (prefix) {
-                if (attr.getKey().startsWith(key))
-                    return true;
-            } else if (attr.getKey().equals(key))
-                return true;
-        }
-        return false;
-    }
-    public Attribute getAttributeByKey(String key) {
-        return getAttributeByKey(key, false);
-    }
-
-    public Attribute getAttributeByKey(String key, boolean prefix) {
-        for (Attribute attr : contents)
-            if (prefix) {
-                if (attr.getKey().startsWith(key))
-                    return attr;
-            } else if (attr.getKey().equals(key))
-                return attr;
-        return null;
-    }
-
-    public String get(String key) {
-        return get(key, false);
-    }
-
-    public String get(String key, boolean prefix) {
-        for (Attribute attr : contents)
-            if (prefix) {
-                if (attr.getKey().startsWith(key))
-                    return attr.getValue();
-            } else if (attr.getKey().equals(key))
-                return attr.getValue();
-        return null;
-    }
-
-    public void set(String key, String value) {
-        for (Attribute attr : contents) {
-            if (attr.getKey().equals(key)) {
-                attr.setValue(value);
-                return;
-            }
-        }
-        contents.add(new Attribute(key, value));
-    }
-
-    public void setAll(Attributes attrs) {
-        for (Attribute attr : attrs.contents)
-            set(attr);
-    }
-
-    public void set(Attribute attr) {
-        Attribute oldAttr = getAttributeByKey(attr.getKey());
-        if (oldAttr != null) {
-            oldAttr.setValue(attr.getValue());
-        } else {
-            contents.add(attr.shallowCopy());
-        }
-
-    }
-
-    public void remove(String key) {
-        Iterator<Attribute> it = contents.iterator();
-        while(it.hasNext()){
-            Attribute a = (Attribute) it.next();
-            if(a.getKey().equals(key))
-                it.remove();
-        }
-    }
-
-    public boolean isEmpty() {
-        return this.contents.isEmpty();
-    }
-
-    public java.util.List<Attribute> getContents() {
-        return contents;
-    }
-
-    public void setContents(java.util.List<Attribute> contents) {
-        this.contents = contents;
     }
 
     @Override
     public Attributes shallowCopy() {
         Attributes result = new Attributes();
-        result.contents.addAll(contents);
+        result.contents.putAll(contents);
         return result;
+    }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((contents == null) ? 0 : contents.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Attributes other = (Attributes) obj;
+        if (contents == null) {
+            if (other.contents != null)
+                return false;
+        } else if (!contents.equals(other.contents))
+            return false;
+        return true;
     }
 
     @Override
@@ -161,11 +101,78 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
 
     @Override
     public List<Attribute> getChildren(Enum<?> _) {
-        return contents;
+        return new ArrayList<Attribute>(contents.values());
     }
 
     @Override
     public void setChildren(List<Attribute> children, Enum<?> _) {
-        this.contents = children;
+        contents.clear();
+        for (Attribute attr : children) {
+            add(attr);
+        }
+    }
+
+    public void add(Attribute e) {
+        contents.put(e.getKey(), e);
+    }
+
+    @Override
+    public void clear() {
+        contents.clear();
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return contents.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return contents.containsValue(value);
+    }
+
+    @Override
+    public Set<java.util.Map.Entry<String, Attribute>> entrySet() {
+        return contents.entrySet();
+    }
+
+    @Override
+    public Attribute get(Object key) {
+        return contents.get(key);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return contents.isEmpty();
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return contents.keySet();
+    }
+
+    @Override
+    public Attribute put(String key, Attribute value) {
+        return contents.put(key, value);
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends Attribute> m) {
+        contents.putAll(m);
+    }
+
+    @Override
+    public Attribute remove(Object key) {
+        return contents.remove(key);
+    }
+
+    @Override
+    public int size() {
+        return contents.size();
+    }
+
+    @Override
+    public Collection<Attribute> values() {
+        return contents.values();
     }
 }

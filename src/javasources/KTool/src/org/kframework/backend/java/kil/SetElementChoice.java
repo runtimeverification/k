@@ -41,13 +41,18 @@ public class SetElementChoice extends Term implements DataStructureChoice {
         if (!((BuiltinSet) set).elements().isEmpty()) {
             return ((BuiltinSet) set).elements().iterator().next();
         } else if (((BuiltinSet) set).isEmpty()) {
-            return new Bottom(kind);
+            return Bottom.of(kind);
         } else {
             return this;
         }
     }
 
     public Term set() {
+        return base();
+    }
+
+    @Override
+    public Term base() {
         return set;
     }
 
@@ -62,13 +67,23 @@ public class SetElementChoice extends Term implements DataStructureChoice {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override
-    public int hashCode() {
+    public Type type() {
+        return Type.SET_ELEMENT_CHOICE;
+    }
+
+    @Override
+    protected int computeHash() {
         return set.hashCode();
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

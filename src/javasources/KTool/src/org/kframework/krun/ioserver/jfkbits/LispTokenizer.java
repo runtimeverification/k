@@ -3,13 +3,13 @@ package org.kframework.krun.ioserver.jfkbits;
 
 import java.io.*;
 import java.util.Iterator;
- 
+
 public class LispTokenizer implements Iterator<Token>
 {
     // Instance variables have default access to allow unit tests access.
     StreamTokenizer m_tokenizer;
     IOException m_ioexn;
- 
+
     /** Constructs a tokenizer that scans input from the given string.
      * @param src A string containing S-expressions.
      */
@@ -17,7 +17,7 @@ public class LispTokenizer implements Iterator<Token>
     {
         this(new StringReader(src));
     }
- 
+
     /** Constructs a tokenizer that scans input from the given Reader.
      * @param r Reader for the character input source
      */
@@ -28,7 +28,7 @@ public class LispTokenizer implements Iterator<Token>
         BufferedReader buffrdr = new BufferedReader(r);
         m_tokenizer = new StreamTokenizer(buffrdr);
         m_tokenizer.resetSyntax(); // We don't like the default settings
- 
+
         m_tokenizer.whitespaceChars(0, ' ');
         m_tokenizer.wordChars(' '+1,255);
         m_tokenizer.ordinaryChar('(');
@@ -37,9 +37,9 @@ public class LispTokenizer implements Iterator<Token>
         m_tokenizer.commentChar(';');
         m_tokenizer.quoteChar('"');
     }
- 
+
     public Token peekToken()
-    {    
+    {
         if(m_ioexn != null)
             return null;
         try
@@ -57,7 +57,7 @@ public class LispTokenizer implements Iterator<Token>
         m_tokenizer.pushBack();
         return token;
     }
- 
+
     public boolean hasNext()
     {
         if(m_ioexn != null)
@@ -76,16 +76,16 @@ public class LispTokenizer implements Iterator<Token>
         m_tokenizer.pushBack();
         return true;
     }
- 
+
     /** Return the most recently caught IOException, if any,
-     * 
+     *
      * @return
      */
     public IOException getIOException()
     {
         return m_ioexn;
     }
- 
+
     public Token next()
     {
         try
@@ -97,11 +97,11 @@ public class LispTokenizer implements Iterator<Token>
             m_ioexn = e;
             return null;
         }
- 
+
         Token token = new Token(m_tokenizer);
         return token;
     }
- 
+
     public void remove()
     {
     }

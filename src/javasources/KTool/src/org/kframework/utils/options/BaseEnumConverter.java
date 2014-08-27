@@ -31,9 +31,9 @@ public abstract class BaseEnumConverter<T extends Enum<T>> implements IStringCon
                     validValues);
         }
     }
-    
+
     public abstract Class<T> enumClass();
-    
+
     public static String friendlyName(Enum<?> arg) {
         return arg.name().toLowerCase().replaceAll("_", "-");
     }

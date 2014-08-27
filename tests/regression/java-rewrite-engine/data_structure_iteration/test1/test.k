@@ -6,24 +6,24 @@ module TEST
   imports SET
   imports MAP
 
-  syntax Int ::= size(MySet)    [function]
-  rule size(MySetItem(_), S:MySet) => 1 +Int size(S)
-  rule size(.MySet) => 0
+  syntax Int ::= size(Set)    [function]
+  rule size(SetItem(_) S:Set) => 1 +Int size(S)
+  rule size(.Set) => 0
 
-  syntax MySet ::= setRange(Int)   [function]
-  rule setRange(N) => MySetItem(N), setRange(N -Int 1)
+  syntax Set ::= setRange(Int)   [function]
+  rule setRange(N) => SetItem(N) setRange(N -Int 1)
   when N >Int 0
-  rule setRange(N) => .MySet
+  rule setRange(N) => .Set
   when N <=Int 0
 
-  syntax Int ::= size(MyMap)    [function]
-  rule size(_ |-> _, M:MyMap) => 1 +Int size(M)
-  rule size(.MyMap) => 0
+  syntax Int ::= size(Map)    [function]
+  rule size(_ |-> _ M:Map) => 1 +Int size(M)
+  rule size(.Map) => 0
 
-  syntax MyMap ::= mapRange(Int)   [function]
-  rule mapRange(N) => N |-> 0, mapRange(N -Int 1)
+  syntax Map ::= mapRange(Int)   [function]
+  rule mapRange(N) => N |-> 0 mapRange(N -Int 1)
   when N >Int 0
-  rule mapRange(N) => .MyMap
+  rule mapRange(N) => .Map
   when N <=Int 0
 endmodule
 

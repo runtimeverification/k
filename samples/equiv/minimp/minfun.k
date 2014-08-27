@@ -2,19 +2,19 @@
 module MINFUN-SYNTAX
 
 syntax FExp ::= Id
-	     | FExp "f+" FExp [strict]
-	     | FExp "f-" FExp [strict]
-	     | FExp "f==" FExp [strict]
-	     | FExp "f<" FExp [strict]
-	     | "if" FExp "then" FExp "else" FExp [strict(1)]
-	     | Val
-	     | "fix" Id FExp [binder]
-	     > FExp FExp [seqstrict]
-	     | "(" FExp ")" [bracket]
+         | FExp "f+" FExp [strict]
+         | FExp "f-" FExp [strict]
+         | FExp "f==" FExp [strict]
+         | FExp "f<" FExp [strict]
+         | "if" FExp "then" FExp "else" FExp [strict(1)]
+         | Val
+         | "fix" Id FExp [binder]
+         > FExp FExp [seqstrict]
+         | "(" FExp ")" [bracket]
 
 syntax Val ::= "lambda" Id "." FExp [binder]
              | Int
-	     | Bool
+         | Bool
 
 endmodule
 

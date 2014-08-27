@@ -10,13 +10,13 @@ import org.strategoxt.lang.Strategy;
 
 /**
  * Example Java strategy implementation.
- * 
+ *
  * This strategy can be used by editor services and can be called in Stratego modules by declaring it as an external strategy as follows:
- * 
+ *
  * <code>
  *  external string-trim-last-one(|)
  * </code>
- * 
+ *
  * @see InteropRegisterer This class registers string_trim_last_one_0_0 for use.
  */
 public class string_unescape_sort_0_0 extends Strategy {

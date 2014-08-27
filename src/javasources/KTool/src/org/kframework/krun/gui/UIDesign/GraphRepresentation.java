@@ -1,13 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.UIDesign;
 
-import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.ConcretizeSyntax;
-import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
@@ -16,15 +12,7 @@ import org.kframework.krun.gui.Controller.XmlUnparseFilter;
 import org.kframework.krun.gui.UIDesign.xmlEditor.XMLEditorKit;
 import org.kframework.krun.gui.diff.DiffFrame;
 import org.kframework.krun.gui.helper.HelpFrame;
-import org.kframework.parser.concrete.disambiguate.BestFitFilter;
-import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,11 +25,9 @@ import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashSet;
@@ -239,9 +225,9 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
         else{
             Object[] successors = vvd.getLayout().getGraph().getSuccessors(vertex).toArray();
-            if(++step == totalSteps){               
-                vvd.getVv().getPickedVertexState().pick(successors[0], true);   
-                return;         
+            if(++step == totalSteps){
+                vvd.getVv().getPickedVertexState().pick(successors[0], true);
+                return;
             }
             else{
                 selectActionStepResults((KRunState)successors[0], step, totalSteps);
@@ -298,14 +284,14 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
         else{
             Object[] successors = vvd.getLayout().getGraph().getSuccessors(vertex).toArray();
-            if(++step == totalSteps){       
-                for(int i = 0; i < successors.length; i++){     
-                    vvd.getVv().getPickedVertexState().pick(successors[i], true);   
+            if(++step == totalSteps){
+                for(int i = 0; i < successors.length; i++){
+                    vvd.getVv().getPickedVertexState().pick(successors[i], true);
                 }
-                return;         
+                return;
             }
             else{
-                for(int i = 0; i < successors.length; i++){     
+                for(int i = 0; i < successors.length; i++){
 
                     selectActionStepAllResults((KRunState)successors[0], step, totalSteps);
                 }
@@ -704,8 +690,8 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         }
     }
 
-    private KRunState loadConf(File f) throws IOException {
-        return BinaryLoader.load(KRunState.class, f.getAbsolutePath());
+    private KRunState loadConf(File f) {
+        return BinaryLoader.instance().loadOrDie(KRunState.class, f.getAbsolutePath());
     }
 
     public void loadConf() {
@@ -721,9 +707,10 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                 KRunState conf = loadConf(file);
                 // addConfToTabbed(conf);
                 MainWindow.addDebugTab(new GraphRepresentation(new RunKRunCommand(conf,
-                        commandProcessor.getLang(),commandProcessor.getKrun() ,definitionHelper)),
+                        commandProcessor.getKrun(),
+                        definitionHelper)),
                         "Tab resulted from loading :" + file.getName());
-            } catch (IOException | ClassCastException e) {
+            } catch (ClassCastException e) {
                 showMessage("Unable to load configuration from file");
             }
         }

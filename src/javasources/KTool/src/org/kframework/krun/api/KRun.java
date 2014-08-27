@@ -31,7 +31,7 @@ public interface KRun {
     Perform a breadth-first search of the transition system starting at a particular term.
     @param bound The maximum number of search results to return; null if unbounded
     @param depth The maximum number of transitions to make before terminating; null if
-    unbounded  
+    unbounded
     @param searchType Represents the types of result states to return
     @param pattern A kompiled rule without rewrites (i.e. a pattern and a side condition) to
     use to determine whether a particular state is a search result
@@ -48,7 +48,6 @@ public interface KRun {
     public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
 
     /**
-     Piggyback on the "search" method for test generation
      @param bound The maximum number of search results to return; null if unbounded
      @param depth The maximum number of transitions to make before terminating; null if
      unbounded

@@ -25,7 +25,7 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
             initialModules.add(Constants.AUTO_INCLUDED_MODULE);
             initialModules.add(Constants.AUTO_INCLUDED_SYNTAX_MODULE);
         }
-        
+
         initialModules.add(def.getMainModule());
         CollectReachableModulesVisitor fm = new CollectReachableModulesVisitor(context, initialModules);
         fm.visitNode(def);

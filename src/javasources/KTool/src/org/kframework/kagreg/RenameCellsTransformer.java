@@ -14,7 +14,7 @@ public class RenameCellsTransformer extends CopyOnWriteTransformer {
         this.renameStrategy = renameStrategy;
         assert this.renameStrategy != null;
     }
-    
+
     @Override
     public ASTNode visit(Cell cell, Void _)  {
         //assert cell.getLabel().equals(cell.getEndLabel());

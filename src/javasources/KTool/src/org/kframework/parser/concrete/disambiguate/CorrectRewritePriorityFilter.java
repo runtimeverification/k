@@ -9,9 +9,8 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -50,9 +49,9 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
         Term krw = null;
         for (Term t : amb.getContents()) {
             if (t instanceof Rewrite) {
-                if (t.getSort().equals(KSorts.KLIST))
+                if (t.getSort().equals(Sort.KLIST))
                     klist = true;
-                if (t.getSort().equals(KSorts.K))
+                if (t.getSort().equals(Sort.K))
                     krw = t;
                 children.add(t);
             }
@@ -91,23 +90,14 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(MapItem mi, Void _) throws ParseFailedException {
-        mi.setKey((Term) secondFilter.visitNode(mi.getKey()));
-        mi.setValue((Term) secondFilter.visitNode(mi.getValue()));
-
-        return super.visit(mi, _);
-    }
-
-    @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
-        if (tc.getProduction() == null)
-            System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
+        assert tc.getProduction() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.getProduction().isListDecl()) {
             tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
             tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
-                if (tc.getProduction().getItems().get(i) instanceof Sort) {
+                if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
                     // look for the outermost element
                     if (i == 0 || i == tc.getProduction().getItems().size() - 1) {
                         tc.getContents().set(j, (Term) secondFilter.visitNode(tc.getContents().get(j)));
@@ -122,11 +112,11 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
 
     /**
      * A new class (nested) that goes down one level (jumps over Ambiguity) and checks to see if there is a KSequence
-     * 
+     *
      * if found, throw an exception and until an Ambiguity node catches it
-     * 
+     *
      * @author Radu
-     * 
+     *
      */
     public class CorrectRewriteFilter2 extends LocalTransformer {
         public CorrectRewriteFilter2(Context context) {
@@ -136,7 +126,7 @@ public class CorrectRewritePriorityFilter extends ParseForestTransformer {
         @Override
         public ASTNode visit(Rewrite ks, Void _) throws ParseFailedException {
             String msg = "Due to typing errors, => is not greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 

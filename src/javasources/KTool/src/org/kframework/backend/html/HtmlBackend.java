@@ -9,17 +9,19 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
+import com.google.inject.Inject;
+
 import java.io.File;
-import java.io.IOException;
 
 public class HtmlBackend extends BasicBackend {
 
-    public HtmlBackend(Stopwatch sw, Context context) {
+    @Inject
+    HtmlBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         String fileSep = System.getProperty("file.separator");
         String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
         HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath, context);

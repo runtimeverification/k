@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * Substitutes variables with terms according to a given substitution map using binders.
- * 
+ *
  * @author TraianSF
  */
 public class BinderSubstitutionTransformer extends SubstitutionTransformer {
@@ -32,18 +32,23 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 
         @Override
         public ASTNode transform(KItem kItem) {
-            // TODO(AndreiS): fix binder when dealing with KLabel variables and non-concrete KLists
-            if (!(kItem.kLabel() instanceof KLabel) || !(kItem.kList() instanceof KList)) {
-                return super.transform(kItem);
-            }
-            assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
-            assert kItem.kList() instanceof KList : "KList must be concrete";
+            kItem = binderSensitiveSubstitute(kItem, context);
+            return super.transform(kItem);
+        }
+
+    }
+
+    public static KItem binderSensitiveSubstitute(KItem kItem, TermContext context) {
+        // TODO(AndreiS): fix binder when dealing with KLabel variables and non-concrete KLists
+        if (kItem.kLabel() instanceof KLabel && kItem.kList() instanceof KList) {
+//            assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
+//            assert kItem.kList() instanceof KList : "KList must be concrete";
 
             KLabel kLabel = (KLabel) kItem.kLabel();
             KList kList = (KList) kItem.kList();
             if (kLabel instanceof KLabelConstant) {
                 KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-                if (kLabelConstant.isBinder()) {
+                if (kLabelConstant.isMetaBinder()) {
                     assert kList.getContents().size()==2 && !kList.hasFrame() :
                             "Only supporting binders of the form lambda x. e for now";
                     Term boundVars = kList.get(0);
@@ -56,11 +61,12 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
                         Term freshBoundVars = boundVars.substitute(freshSubstitution, context);
                         Term freshbindingExp = bindingExp.substitute(freshSubstitution, context);
                         kList = new KList(ImmutableList.<Term>of(freshBoundVars,freshbindingExp));
-                        kItem = new KItem(kLabel, kList, context);
+                        kItem = KItem.of(kLabel, kList, context);
 //                    }
                 }
             }
-            return super.transform(kItem);
         }
+        return kItem;
     }
+
 }

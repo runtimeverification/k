@@ -4,7 +4,6 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -21,7 +20,7 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = content;
     }
 
-    public String getSort() {
+    public Sort getSort() {
         if (content instanceof Ambiguity)
             return super.getSort();
         return content.getSort();
@@ -37,12 +36,12 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = t;
     }
 
-    public Bracket(String location, String filename, String sort) {
-        super(location, filename, sort);
+    public Bracket(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
-    public Bracket(String location, String filename, Term t, Context context) {
-        super(location, filename, t.getSort());
+    public Bracket(Location location, Source source, Term t, Context context) {
+        super(location, source, t.getSort());
         this.content = t;
     }
 
@@ -51,7 +50,7 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
-    public Bracket(String sort) {
+    public Bracket(Sort sort) {
         super(sort);
     }
 

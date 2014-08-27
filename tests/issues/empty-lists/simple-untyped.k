@@ -12,7 +12,7 @@ module SIMPLE-UNTYPED-SYNTAX
                  > Exp "=" Exp    [strict(2), right, cons("Exp1AssignSyn")]
 
   syntax Stmt ::=  Exp ";"        [strict, cons("Stmt1Stmt2ExpSyn")]
-          
+
   syntax Stmts ::= Decl | Stmt
                  | Stmts Stmts    [right, cons("Stmts1LstStmtsSyn")]
 
@@ -28,4 +28,4 @@ module SIMPLE-UNTYPED
 
   rule var X:Id = E:Exp; => var X; X = E;
 
-endmodule 
+endmodule

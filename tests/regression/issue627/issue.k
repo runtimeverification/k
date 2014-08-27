@@ -19,5 +19,5 @@ configuration <k> $PGM:K </k>
 syntax Id ::= "x"
 rule 5 => isExp(x)
 rule <k> true => . </k>
-     <out>... . => ListItem("Correct") </out>
+     <out>... .List => ListItem("Correct") </out>
 endmodule

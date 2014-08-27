@@ -6,7 +6,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 import java.util.Set;
-import java.util.List;
 
 /**
  * Initially created by: Traian Florin Serbanuta
@@ -32,16 +31,16 @@ public class DeleteFunctionRules extends CopyOnWriteTransformer {
         }
         Production prod = null;
         if (body instanceof TermCons) {
-            prod = context.conses.get(((TermCons) body).getCons());
+            prod = ((TermCons) body).getProduction();
         } else if (body instanceof KApp) {
             Term l = ((KApp) body).getLabel();
             if (!(l instanceof KLabelConstant)) return node;
             String label = ((KLabelConstant) l).getLabel();
-            List<Production> prods = context.productionsOf(label);
+            Set<Production> prods = context.productionsOf(label);
             if (prods.size() != 1) {
                 return node;
             } // Hooked functions should not be overloaded
-            prod = prods.get(0);
+            prod = prods.iterator().next();
         }
         if (prod == null || !prod.containsAttribute(Attribute.HOOK_KEY)) {
             return node;

@@ -8,7 +8,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
 
 /**
 A transitition in the transition system of a semantics. Used to represent edges in the search graph
@@ -121,7 +120,7 @@ public class Transition implements Serializable{
     public String toString() {
         if (type == TransitionType.RULE) {
             Attributes a = rule.getAttributes();
-            UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+            UnparserFilter unparser = new UnparserFilter(true, context.colorOptions.color(), context.krunOptions.output, context);
             unparser.visitNode(a);
             return "\nRule tagged " + unparser.getResult() + " ";
         } else if (type == TransitionType.LABEL) {

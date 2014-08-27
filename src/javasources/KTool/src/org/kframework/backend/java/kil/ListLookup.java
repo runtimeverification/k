@@ -31,10 +31,17 @@ public class ListLookup extends Term implements DataStructureLookup {
         if (!(key instanceof IntToken)) {
             return this;
         }
+        BuiltinList builtinList = (BuiltinList) list;
         int index = ((IntToken) key).intValue();
 
-        Term value = ((BuiltinList) list).get(index);
-        return value;
+        Term value = builtinList.get(index);
+        if (value != null) {
+            return value;
+        } else if (builtinList.isConcreteCollection()) {
+            return Bottom.of(kind);
+        } else {
+            return this;
+        }
     }
 
     public Term key() {
@@ -42,6 +49,11 @@ public class ListLookup extends Term implements DataStructureLookup {
     }
 
     public Term list() {
+        return base();
+    }
+
+    @Override
+    public Term base() {
         return list;
     }
 
@@ -58,18 +70,26 @@ public class ListLookup extends Term implements DataStructureLookup {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + list.hashCode();
-        }
+    public Type type() {
+        return Type.LIST_LOOKUP;
+    }
+
+    @Override
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + list.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

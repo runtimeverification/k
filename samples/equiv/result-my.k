@@ -68,10 +68,10 @@ rule I1:Int i== I2:Int => I1 ==Int I2
 
 rule I1:Int i< I2:Int => I1 <Int I2
 
-rule <k2> I:Id := I1:Int => .K ... </k2> <env> ... I |-> ((_:K => I1)) ... 
+rule <k2> I:Id := I1:Int => .K ... </k2> <env> ... I |-> ((_:K => I1)) ...
   </env>
 
-rule <k2> I:Id := I1:Int => .K ... </k2> <env> Rho:Map ((.Map => I |-> I1)) 
+rule <k2> I:Id := I1:Int => .K ... </k2> <env> Rho:Map ((.Map => I |-> I1))
   </env> when notBool (I in (keys (Rho)))
 
 rule S1:Stmt ; S2:Stmt => S1 ~> S2

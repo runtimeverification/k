@@ -14,6 +14,7 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -22,9 +23,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.Subsort;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class DefinitionSDFVisitor extends BasicVisitor {
@@ -32,10 +30,10 @@ public class DefinitionSDFVisitor extends BasicVisitor {
     public Set<Production> outsides = new HashSet<Production>();
     public Set<Production> constants = new HashSet<Production>();
     public Set<String> constantSorts = new HashSet<String>();
-    public Set<Sort> insertSorts = new HashSet<Sort>(); // list of inserted sorts that need to avoid the priority filter
+    public Set<NonTerminal> insertSorts = new HashSet<NonTerminal>(); // list of inserted sorts that need to avoid the priority filter
     public Set<Subsort> subsorts = new HashSet<Subsort>();
     public Set<Production> listProds = new HashSet<Production>(); // list of sorts declared as being list
-    public Set<Sort> userSorts = new HashSet<Sort>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
+    public Set<NonTerminal> userSorts = new HashSet<NonTerminal>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
     public StringBuilder sdf = new StringBuilder();
     public List<Production> lexical = new ArrayList<Production>();
     public List<Restrictions> restrictions = new ArrayList<Restrictions>();
@@ -53,7 +51,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 
     public Void visit(Syntax syn, Void _) {
 
-        userSorts.add(syn.getSort());
+        userSorts.add(syn.getDeclaredSort());
         processPriorities(syn.getPriorityBlocks());
         return null;
     }
@@ -69,7 +67,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                 Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
                 if (prods2.isEmpty()) {
                     String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+                    GlobalSettings.kem.registerCriticalError(msg, this, tag);
                 }
                 pb1.getProductions().addAll(prods2);
             }
@@ -90,7 +88,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
             Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
             if (prods2.isEmpty()) {
                 String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+                GlobalSettings.kem.registerCriticalError(msg, this, tag);
             }
             pb1.getProductions().addAll(prods2);
         }
@@ -117,21 +115,21 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                 } else if (prd.isLexical()) {
                     lexical.add(prd);
                 } else if (prd.isSubsort()) {
-                    if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
+                    if (!prd.getSort().equals(Sort.KRESULT)) { // avoid KResult because it breaks subsortings in SDF
                         p.getProductions().add(prd);
-                        subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
+                        subsorts.add(new Subsort(prd.getSort().getName(), ((NonTerminal) prd.getItems().get(0)).getName()));
                         // add the small sort to the user sorts to add it to the variable declarations
-                        userSorts.add((Sort) prd.getItems().get(0));
+                        userSorts.add((NonTerminal) prd.getItems().get(0));
                     }
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().size() == 1 && prd.isConstant()) {
                     constants.add(prd);
-                    constantSorts.add(prd.getSort());
+                    constantSorts.add(prd.getSort().getName());
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
                     outsides.add(prd);
                 } else if (prd.isListDecl()) {
                     outsides.add(prd);
                     listProds.add(prd);
-                    subsorts.add(new Subsort(prd.getSort(), ((UserList) prd.getItems().get(0)).getSort()));
+                    subsorts.add(new Subsort(prd.getSort().getName(), ((UserList) prd.getItems().get(0)).getSort().getName()));
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -167,12 +165,14 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                                         sdf.append("ColonDz ");
                                     else if (t.getTerminal().equals("?"))
                                         sdf.append("QuestionMarkDz ");
+                                    else if (t.getTerminal().equals("!"))
+                                        sdf.append("ExclamationMarkDz ");
                                     else
-                                        sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
+                                        sdf.append(t.toString() + " ");
                                 } else
-                                    sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-                            } else if (itm instanceof Sort) {
-                                Sort srt = (Sort) itm;
+                                    sdf.append(StringUtil.enquoteCString(t.getTerminal()) + " ");
+                            } else if (itm instanceof NonTerminal) {
+                                NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
                                     sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
@@ -186,8 +186,8 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
-                        sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
+                        sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
                     }
                     sdf.append("} > ");
                 }

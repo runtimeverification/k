@@ -17,9 +17,9 @@ module LOGIK-DESIRED2
                 </T>
                 <solution> .K </solution>
 
-  
+
   syntax HornClause ::=  "forall" K "." Implication         [binder]
-  syntax Implication ::= Terms "->" Term 
+  syntax Implication ::= Terms "->" Term
 
   rule <k> L:-Ls. Pgm => Pgm </k>
        (. => <clause> forall variables(L,Ls) . Ls -> L </clause>)

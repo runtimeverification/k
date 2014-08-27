@@ -16,7 +16,7 @@ module UNIFICATION
   syntax K ::= applyMgu(Mgu,K)       [function, hook(Unification:applyMgu), latex({#1}({#2}))]  // applies Mgu to any term
   rule applyMgu(Theta:Mgu,K) => applySubst(Theta,K)
 
-  syntax Set ::= applyMgu(Mgu,Set)  [function, latex({#1}({#2}))]
+//  syntax Set ::= applyMgu(Mgu,Set)  [function, latex({#1}({#2}))]
   rule applyMgu(_, .Set) => .Set
   rule applyMgu(Theta:Mgu, SetItem(K:K) S:Set)
     => SetItem(applyMgu(Theta,K)) applyMgu(Theta,S)
@@ -25,7 +25,7 @@ module UNIFICATION
     (e.g. _ in Prolog), they should declare some syntax like the following:
 syntax ThingThatCanBeUnified ::= "_" [onlyLabel, klabel($dontcare)]
 */
-  syntax K ::= "$dontcare" [klabel($dontcare), latex(\AnyVar[K])]
+  syntax KItem ::= "$dontcare" [klabel($dontcare), latex(\AnyVar[K])]
 
 // Traian: I would remove applySubst all together and only keep applyMgu
 //         Mgu gives a nicer, more intuitive user interface than Subst
@@ -110,7 +110,24 @@ Note that ~> is not handled  and neither are binding operations.
   rule substitute(X:K,,K:K,,L:KLabel(Ks:KList))
     => L:KLabel(substitute(X,,K,,Ks))
     when X =/=K L:KLabel(Ks)
+     andBool (isCollection(L(Ks)) =/=K true)
    [structural, anywhere]
+
+  //TODO:  Consider implementing substitute for other collections, too
+  rule substitute(X:K,, K:K,, L:List,,Ks:KList)
+    => substituteList(X, K, L),, substitute(X,, K,, Ks)
+  rule substitute(X:K,, K:K,, S:Set,,Ks:KList)
+    => substituteSet(X, K, S),, substitute(X,, K,, Ks)
+
+  syntax Set ::= substituteSet(K,K,Set) [function]
+  rule substituteSet(X:K, K:K, .Set) => .Set
+  rule substituteSet(X:K, K:K, SetItem(K1:K) S:Set)
+    => SetItem(substitute(X,,K,, K1)) substituteSet(X,K,S)
+
+  syntax List ::= substituteList(K,K,List) [function]
+  rule substituteList(X:K, K:K, .List) => .List
+  rule substituteList(X:K, K:K, ListItem(K1:K) L:List)
+    => ListItem(substitute(X,,K,, K1)) substituteList(X,K,L)
 
   syntax K ::= "unify" "(" K "," K ")" [function]
   rule unify(K1, K2) => unifyEqs(subst(.KList),,eqns(eqn(K1,,K2)))
@@ -154,19 +171,19 @@ constraint.
   rule accumulateVars(#vars(Xs:KList)) => #vars(Xs)   [structural, anywhere]
 
 
-  syntax Map ::= applyMgu(Mgu, Map) [function]
+//  syntax Map ::= applyMgu(Mgu, Map) [function]
   rule applyMgu(Mgu, ((X |-> V) M:Map))
     => (X |-> applyMgu(Mgu,V)) applyMgu(Mgu, M)
   rule applyMgu(_,.Map) => .Map
 
 
   syntax Map ::= #metaVariablesMap(K) [function]
-  rule #metaVariablesMap(K:K) => #metaVarsMap(getVars(K))
+  rule #metaVariablesMap(K:K) => #metaVarsMap(getVars(K), .Map)
 
-  syntax Map ::= #metaVarsMap(K) [function]
-  rule #metaVarsMap(#vars((X:K => .KList),,_))
-       (.Map => #tokenToString(X) |-> X)
-  rule #metaVarsMap(#vars(.KList)) => .Map
+  syntax Map ::= #metaVarsMap(K, Map) [function]
+  rule #metaVarsMap(#vars((X:K => .KList),,_),
+       M:Map (.Map => #tokenToString(X) |-> X))
+  rule #metaVarsMap(#vars(.KList), M:Map) => M:Map
 
 //  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
@@ -187,7 +204,7 @@ constraint.
 
 // alpha conversion moved here by grigore
  syntax K ::= renameVariables(K)  [function, hook(MetaK:renameVariables)]
-            | applyAlpha(K)
+//            | applyAlpha(K)
 
 // rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
 // rule subst(Eqns:KList) ~> applyAlpha(K) => applySubst(subst(Eqns),K)
@@ -195,11 +212,14 @@ constraint.
 
 // Turns an Mgu into a Map, ignoring the symbolic bindings
   syntax Map ::= Mgu2Map(K) [function]
+  rule Mgu2Map(K) => Mgu2MapHelper(K, .Map)
 
-  rule Mgu2Map(subst((eqn(K1:K,,_:K) => .KList),,_))
+  syntax Map ::= Mgu2MapHelper(K, Map) [function]
+
+  rule Mgu2MapHelper(subst((eqn(K1:K,,_:K) => .KList),,_), _)
     when isSymbolicK(K1)   // ignore symbolic bindings
-  rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
-       (. => K1 |-> K2)
+  rule Mgu2MapHelper(subst((eqn(K1:K,,K2:K) => .KList),,_), M:Map
+       (.Map => K1 |-> K2))
     when isSymbolicK(K1) =/=K true
 
 /*
@@ -223,7 +243,7 @@ constraint.
 */
 
 
-  rule Mgu2Map(subst(.KList)) => .Map
+  rule Mgu2MapHelper(subst(.KList), M:Map) => M
 
 
 

@@ -7,10 +7,11 @@ import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+
+import com.google.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,8 @@ public class LatexBackend extends BasicBackend {
     private File latexStyleFile;
     private boolean makeDocument = false;
 
-    public LatexBackend(Stopwatch sw, Context context) {
+    @Inject
+    LatexBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 
@@ -30,7 +32,7 @@ public class LatexBackend extends BasicBackend {
         makeDocument = doc;
     }
 
-    public void compile(Definition javaDef) throws IOException {
+    public void compile(Definition javaDef) {
         String fileSep = System.getProperty("file.separator");
         String endl = System.getProperty("line.separator");
 
@@ -41,7 +43,11 @@ public class LatexBackend extends BasicBackend {
 
         String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
         latexStyleFile = new File(context.dotk.getAbsolutePath() + fileSep + "k.sty");
-        FileUtils.writeStringToFile(latexStyleFile, FileUtil.getFileContent(kLatexStyle));
+        try {
+            FileUtils.writeStringToFile(latexStyleFile, FileUtil.getFileContent(kLatexStyle));
+        } catch (IOException e) {
+            GlobalSettings.kem.registerCriticalError("Could not write to " + latexStyleFile.getAbsolutePath(), e);
+        }
 
         String latexified = "\\nonstopmode" + endl +
                 "\\PassOptionsToPackage{pdftex,usenames,dvipsnames,svgnames,x11names}{xcolor}"+ endl +
@@ -55,7 +61,11 @@ public class LatexBackend extends BasicBackend {
         if(makeDocument) latexFilePath= context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + "-doc.tex";
         else latexFilePath = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
         latexFile = new File(latexFilePath);
-        FileUtils.writeStringToFile(latexFile, latexified);
+        try {
+            FileUtils.writeStringToFile(latexFile, latexified);
+        } catch (IOException e) {
+            GlobalSettings.kem.registerCriticalError("Could not write to " + latexFile.getAbsolutePath(), e);
+        }
 
         sw.printIntermediate("Latex Generation");
     }
@@ -71,8 +81,7 @@ public class LatexBackend extends BasicBackend {
             compile(javaDef);
             copyFiles();
         } catch (IOException e) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, e.getMessage(), "", ""));
+            GlobalSettings.kem.registerCriticalError(e.getMessage(), e);
         }
     }
 
@@ -84,10 +93,10 @@ public class LatexBackend extends BasicBackend {
     public String getDefaultStep() {
         return "FirstStep";
     }
-    
+
     @Override
     public boolean autoinclude(){
-        //When the autoinclude stuff gets worked out, uncomment this next line.        
+        //When the autoinclude stuff gets worked out, uncomment this next line.
         return !makeDocument;
         //return true;
     }

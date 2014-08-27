@@ -9,7 +9,7 @@ import org.kframework.backend.java.kil.*;
  * adapter class: method {@code visit} simply recurs with its argument being
  * casted to a super-class until that argument becomes a
  * {@code JavaSymbolicObject}.
- * 
+ *
  * @author Traian
  */
 public class LocalVisitor implements Visitor {
@@ -76,7 +76,7 @@ public class LocalVisitor implements Visitor {
 
     @Override
     public void visit(ConstrainedTerm node) {
-        visit((Term) node);
+        visit((JavaSymbolicObject) node);
     }
 
     @Override
@@ -123,11 +123,6 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(KCollectionFragment kCollectionFragment) {
-        visit((Collection) kCollectionFragment);
-    }
-
-    @Override
     public void visit(KLabel kLabel) {
         visit((Term) kLabel);
     }
@@ -143,8 +138,13 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListLookup node) {
-        visit((Term) node);
+    public void visit(ListLookup listLookup) {
+        visit((Term) listLookup);
+    }
+
+    @Override
+    public void visit(ListUpdate listUpdate) {
+        visit((Term) listUpdate);
     }
 
     @Override
@@ -196,7 +196,7 @@ public class LocalVisitor implements Visitor {
     public void visit(Term node) {
         visit((JavaSymbolicObject) node);
     }
-    
+
     @Override
     public void visit(Token token) {
         visit((Term) token);
@@ -216,7 +216,7 @@ public class LocalVisitor implements Visitor {
     public void visit(Variable variable) {
         visit((Term) variable);
     }
-    
+
     @Override
     public void visit(BuiltinMgu mgu) {
         visit((Term) mgu);

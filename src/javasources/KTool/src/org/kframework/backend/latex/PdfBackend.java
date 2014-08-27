@@ -12,12 +12,16 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.inject.Inject;
+
 import java.io.*;
 
 import static org.apache.commons.io.FileUtils.copyFile;
 
 public class PdfBackend extends BasicBackend {
-    public PdfBackend(Stopwatch sw, Context context) {
+
+    @Inject
+    PdfBackend(Stopwatch sw, Context context) {
         super(sw, context);
     }
 
@@ -56,18 +60,17 @@ public class PdfBackend extends BasicBackend {
 
             return new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf");
         } catch (IOException | InterruptedException e) {
-            GlobalSettings.kem.register(
-                    new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCriticalError(
                             "Cannot generate the pdf version of the definition. " +
                             "It seems that `pdflatex` is not installed or is not in your path. " +
                             "To generate the pdf version you can run `pdflatex` having as " +
-                            "argument the latex version of the definition.", "", ""));
+                            "argument the latex version of the definition.", e);
         }
         return null; // unreachable code
     }
 
     @Override
-    public void run(Definition definition) throws IOException {
+    public void run(Definition definition) {
         LatexBackend latexBackend = new LatexBackend(sw, context);
         latexBackend.compile(definition);
         File latexFile = latexBackend.getLatexFile();
@@ -75,7 +78,12 @@ public class PdfBackend extends BasicBackend {
         if (pdfFile.exists()) {
             String newPdfFile = FilenameUtils.removeExtension(
                     new File(definition.getMainFile()).getName()) + ".pdf";
-            copyFile(pdfFile, new File(options.directory, newPdfFile));
+            File output = new File(options.directory, newPdfFile);
+            try {
+                copyFile(pdfFile, output);
+            } catch (IOException e) {
+                GlobalSettings.kem.registerCriticalError("Could not write to " + output.getAbsolutePath(), e);
+            }
         }
     }
 

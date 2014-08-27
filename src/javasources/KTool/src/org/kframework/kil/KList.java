@@ -14,11 +14,11 @@ public class KList extends Collection {
     public static final KList EMPTY = new KList(Collections.<Term> emptyList());
 
     public KList() {
-        super(KSorts.KLIST);
+        super(Sort.KLIST);
     }
 
-    public KList(String location, String filename) {
-        super(location, filename, KSorts.KLIST);
+    public KList(Location location, Source source) {
+        super(location, source, Sort.KLIST);
     }
 
     public KList(Element element) {
@@ -30,7 +30,7 @@ public class KList extends Collection {
     }
 
     public KList(List<Term> col) {
-        super(KSorts.KLIST, col);
+        super(Sort.KLIST, col);
     }
 
     public KList(Term ... terms) { this(Arrays.asList(terms)); }

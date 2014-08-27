@@ -20,7 +20,7 @@
 		<antcall target="makeversion" />	
 	</target>
 
-    <target name="test-build">
+    <target name="test-build" depends="build">
         <ant antfile="${javasources}/KTool/buildjava.xml" target="test-build" dir="${javasources}/KTool" />
     </target>
 
@@ -58,9 +58,12 @@
                    <fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />  
                 </delete>
 		<delete>
-			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
+			<fileset dir="${javasources}/KTool/src/org/kframework/parser/outer" includes="*.java" />
 			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
 		</delete>
+		<!-- TODO: Remove after September 2014.
+		Keeping it in order to remove a package that was renamed. -->
+		<delete dir="${javasources}/KTool/src/org/kframework/parser/basic" />
 	</target>
 
 	<target name="makeversion">
@@ -171,15 +174,15 @@
           <java jar="${javasources}/../../lib/java/k3.jar" fork="true" failonerror="true">
 	     <arg value="-ktest"/>
 	     <arg value="${config}"/>
-	     <arg value="-programs"/>
+	     <arg value="--programs"/>
 	     <arg value="."/>
-	     <arg value="-results"/>
+	     <arg value="--results"/>
 	     <arg value="."/>
 	   </java>
 	</target>
 
     <target name="junit" depends="test-build">
-       <junit haltonfailure="true" fork="true" dir="${javasources}/KTool">
+       <junit fork="true" dir="${javasources}/KTool" forkmode="once" failureproperty="junit.failed">
          <formatter type="plain" usefile="false" />
          <classpath>
            <pathelement location="${javasources}/KTool/bin/" />
@@ -191,9 +194,15 @@
            </fileset>
          </classpath>
          <batchtest>
-           <fileset dir="${javasources}/KTool/test" includes="**/*.java" />
+           <fileset dir="${javasources}/KTool/test">
+             <include name="**/*Test.java" />
+             <include name="**/Test*.java" />
+             <exclude name="org/kframework/utils/BaseTestCase.java" />
+           </fileset>
          </batchtest>
+         <jvmarg value="-ea" />
        </junit>
+       <fail message="JUnit tests failed!" if="junit.failed" />
     </target>
 
     <taskdef resource="checkstyletask.properties"
@@ -202,12 +211,17 @@
     <property name="checkstyle.suppress.file" location="${javasources}/KTool/checkstyle-suppress.xml" />
 
     <target name="checkstyle">
-        <checkstyle config="${javasources}/KTool/checkstyle.xml">
+        <checkstyle config="${javasources}/KTool/checkstyle-java.xml">
             <fileset dir="${javasources}/KTool">
                 <include name="**/*.java"/>
                 <exclude name="src/org/kframework/parser/concrete/lib/**" />
                 <exclude name="src/org/kframework/utils/kastparser/*.java" />
-                <exclude name="src/org/kframework/parser/basic/*.java" />
+                <exclude name="src/org/kframework/parser/outer/*.java" />
+            </fileset>
+        </checkstyle>
+        <checkstyle config="${javasources}/KTool/checkstyle-k.xml">
+            <fileset dir=".">
+                <include name="**/*.k"/>
             </fileset>
         </checkstyle>
     </target>
@@ -228,6 +242,7 @@
         <checkstyle config="${javasources}/KTool/checkstyle-copyright.xml">
             <fileset dir="/" includes="${checkstyle.files}">
                 <!-- TODO: exclude files here which should not be given copyright notices -->
+                <exclude name="**/src/com/davekoelle/**" />
             </fileset>
         </checkstyle>
     </target>

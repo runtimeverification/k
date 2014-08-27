@@ -1,7 +1,1 @@
-Search results:
-
-Solution 1:
-Solution:K -->
-L:Term |-> cons ( c, cons ( X:Term, cons (  a, nil  ) ) )
-T:Term |-> cons ( a, cons ( X, cons (  c, nil  ) ) )
-X:Term |-> X
+\QL:Term |-> cons ( c, cons ( X:Term, cons ( a, nil ) ) )\E\s+\QT:Term |-> cons ( a,\E\s*\Qcons ( X, cons ( c, nil ) ) )\E\s+\QX:Term |-> X\E

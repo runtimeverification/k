@@ -3,6 +3,9 @@ package org.kframework.krun;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Source;
+import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.ParserType;
@@ -12,6 +15,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +48,7 @@ public class RunProcess {
             realEnvironment.putAll(environment);
 
             // set execution directory to current user dir
-            pb.directory(new File(K.userdir));
+            pb.directory(new File("."));
 
             // start process
             Process process = pb.start();
@@ -109,41 +113,51 @@ public class RunProcess {
 
         if (startSymbol == null) {
             startSymbol = context.startSymbolPgm;
-        }        
-        String content = value;
+        }
+        byte[] content = value.getBytes();
+        Source source = Sources.fromCommandLine("parameters");
 
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = FileUtil.getFileContentAsBytes(value);
+                    source = Sources.fromFile(value);
                 }
-
-                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast -e":
-                term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.PROGRAM);
+                term = ProgramLoader.processPgm(value.getBytes(), source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = FileUtil.getFileContentAsBytes(value);
+                    source = Sources.fromFile(value);
                 }
-                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser ground -e":
-                term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.GROUND);
+                term = ProgramLoader.processPgm(value.getBytes(), source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = FileUtil.getFileContentAsBytes(value);
+                    source = Sources.fromFile(value);
                 }
-                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.RULES);
+                break;
+            case "kast --parser binary":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContentAsBytes(value);
+                    source = Sources.fromFile(value);
+                }
+                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
                 break;
             default: //external parser
                 List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
                 tokens.add(value);
                 Map<String, String> environment = new HashMap<>();
                 environment.put("KRUN_SORT", startSymbol);
-                environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
+                environment.put("KRUN_COMPILED_DEF", context.kompiled.getParentFile().getAbsolutePath());
                 if (isNotFile) {
                     environment.put("KRUN_IS_NOT_FILE", "true");
                 }
@@ -157,42 +171,23 @@ public class RunProcess {
 
                 //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
                 //TODO(dwightguth): parse the output of the external parser into real kil classes
-                term = new BackendTerm("", kast);
+                term = new BackendTerm(Sort.of(""), kast);
         }
 
         return term;
     }
 
     // check if the execution of Maude process produced some errors
-    public void printError(String content, String lang, Context context) {
-        try {
-            if (content.contains("GLIBC")) {
-                System.out.println("\nError: A known bug in the current version of the Maude rewrite engine\n" + "prohibits running K with I/O on certain architectures.\n"
-                        + "If non I/O programs and definitions work but I/O ones fail, \n" + "please let us know and we'll try helping you fix it.\n");
-                return;
-
-            }
-            System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "syntax_module=" + K.syntax_module
-                    + K.lineSeparator + "main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
-            String compiledDefName = context.kompiled.getName();
-            int index = compiledDefName.indexOf("-kompiled");
-            compiledDefName = compiledDefName.substring(0, index);
-            if (lang != null && !lang.equals(compiledDefName)) {
-                org.kframework.utils.Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. "
-                        + "Maybe you should use --syntax-module or --main-module options of krun");
-            }
-
-            // Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-            /*
-             * String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName(); Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
-             */
-
-            // get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-            String fileName = new File(K.maude_err).getName();
-            String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
-            org.kframework.utils.Error.silentReport("Maude produced warnings or errors.\n" + content);
-        } catch (IOException e) {
-            org.kframework.utils.Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
+    public void printError(String content) {
+        if (content.contains("GLIBC")) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    "Error: A known bug in the current version of the Maude rewrite engine\n"
+                            + "prohibits running K with I/O on certain architectures.\n"
+                            + "If non I/O programs and definitions work but I/O ones fail, \n"
+                            + "please let us know and we'll try helping you fix it.\n"));
+        } else {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    content));
         }
     }
 

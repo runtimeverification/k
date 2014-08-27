@@ -14,11 +14,11 @@ public class Substitution extends CopyOnWriteTransformer {
         super("Substitution", context);
         this.substitution = substitution;
     }
-    
+
     @Override
     public ASTNode visit(Term node, Void _)  {
         Term substitute = substitution.get(node);
-        if (!(null ==substitute)) 
+        if (!(null ==substitute))
             node = substitute;
         return super.visit(node, _);
     }

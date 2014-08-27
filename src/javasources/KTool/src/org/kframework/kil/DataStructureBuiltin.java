@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,18 +42,18 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         ELEMENTS,
         ELEMENTS_RIGHT
     }
-    
+
     public static DataStructureBuiltin empty(DataStructureSort sort) {
-        if (sort.type().equals(KSorts.BAG)
-                || sort.type().equals(KSorts.SET)) {
+        if (sort.type().equals(Sort.BAG)
+                || sort.type().equals(Sort.SET)) {
             return new SetBuiltin(sort,
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList());
-        } else if (sort.type().equals(KSorts.LIST)) {
-            return new ListBuiltin(sort,
+        } else if (sort.type().equals(Sort.LIST)) {
+            return ListBuiltin.of(sort,
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList(), Collections.<Term>emptyList());
-        } else if (sort.type().equals(KSorts.MAP)) {
+        } else if (sort.type().equals(Sort.MAP)) {
             return new MapBuiltin(
                     sort,
                     Collections.<Term>emptyList(),
@@ -64,15 +65,15 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     }
 
     public static DataStructureBuiltin element(DataStructureSort sort, Term ... argument) {
-        if (sort.type().equals(KSorts.BAG)
-                || sort.type().equals(KSorts.LIST)
-                || sort.type().equals(KSorts.SET)) {
+        if (sort.type().equals(Sort.BAG)
+                || sort.type().equals(Sort.LIST)
+                || sort.type().equals(Sort.SET)) {
             assert argument.length == 1:
                     "unexpected number of collection item arguments; expected 1, found "
                     + argument.length;
 
-            if (sort.type().equals(KSorts.LIST)) {
-                ListBuiltin l = new ListBuiltin(
+            if (sort.type().equals(Sort.LIST)) {
+                ListBuiltin l = ListBuiltin.of(
                         sort,
                         Collections.<Term>emptyList(),
                         Collections.singletonList(argument[0]),
@@ -83,7 +84,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                         Collections.<Term>emptyList(),
                         Collections.singletonList(argument[0]));
             }
-        } else if (sort.type().equals(KSorts.MAP)) {
+        } else if (sort.type().equals(Sort.MAP)) {
             assert argument.length == 2:
                    "unexpected number of map item arguments; expected 2, found " + argument.length;
 
@@ -108,8 +109,8 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         }
         */
 
-        if (sort.type().equals(KSorts.BAG)
-                || sort.type().equals(KSorts.SET)) {
+        if (sort.type().equals(Sort.BAG)
+                || sort.type().equals(Sort.SET)) {
             Collection<Term> elements = new ArrayList<Term>();
             Collection<Term> terms = new ArrayList<Term>();
             for (Term term : argument) {
@@ -123,10 +124,12 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
             }
 
             return new SetBuiltin(sort, terms, elements);
-        } else if (sort.type().equals(KSorts.LIST)) {
-            ArrayList<Term> elementsLeft = new ArrayList<Term>();
-            ArrayList<Term> elementsRight = new ArrayList<Term>();
-            ArrayList<Term> terms = new ArrayList<Term>();
+        } else if (sort.type().equals(Sort.LIST)) {
+            List<Term> elementsLeft = new ArrayList<>();
+            List<Term> elementsRight = new ArrayList<>();
+            List<Term> terms = new ArrayList<>();
+            ListBuiltin leftSentinel = (ListBuiltin)DataStructureBuiltin.empty(sort);
+            ListBuiltin rightSentinel = (ListBuiltin)DataStructureBuiltin.empty(sort);
 
             int leftIndex;
             for (leftIndex = 0; leftIndex < argument.length; ++leftIndex) {
@@ -135,44 +138,53 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
                 }
                 ListBuiltin listBuiltin = (ListBuiltin) argument[leftIndex];
 
+                elementsLeft.addAll(listBuiltin.elementsLeft());
                 if (!listBuiltin.baseTerms().isEmpty()) {
+                    leftSentinel = listBuiltin;
+                    leftIndex++;
                     break;
                 }
-                elementsLeft.addAll(listBuiltin.elementsLeft());
                 elementsLeft.addAll(listBuiltin.elementsRight());
             }
 
             int rightIndex;
-            for (rightIndex = argument.length - 1; rightIndex > leftIndex; --rightIndex) {
+            for (rightIndex = argument.length - 1; rightIndex >= leftIndex; --rightIndex) {
                 if (!(argument[rightIndex] instanceof ListBuiltin)) {
                     break;
                 }
                 ListBuiltin listBuiltin = (ListBuiltin) argument[rightIndex];
 
+                elementsRight.addAll(0, listBuiltin.elementsRight());
                 if (!listBuiltin.baseTerms().isEmpty()) {
+                    rightSentinel = listBuiltin;
+                    rightIndex--;
                     break;
                 }
-
-                for (Term element : listBuiltin.elementsRight()) {
-                    elementsRight.add(0, element);
-                }
-                for (Term element : listBuiltin.elementsLeft()) {
-                    elementsRight.add(0, element);
-                }
+                elementsRight.addAll(0, listBuiltin.elementsLeft());
             }
-
-            if (leftIndex == rightIndex && argument[rightIndex] instanceof ListBuiltin) {
-                ListBuiltin listBuiltin = (ListBuiltin) argument[leftIndex];
-                elementsLeft.addAll(listBuiltin.elementsLeft());
-                for (Term element : listBuiltin.elementsRight()) {
-                    elementsRight.add(0, element);
-                }
+            terms.addAll(leftSentinel.baseTerms());
+            List<Term> innerBaseTerms = Arrays.asList(argument).subList(leftIndex, rightIndex + 1);
+            if (leftSentinel.elementsRight().isEmpty() && rightSentinel.elementsLeft().isEmpty()) {
+                terms.addAll(innerBaseTerms);
+            } else if (leftSentinel.elementsRight().isEmpty()) {
+                terms.addAll(innerBaseTerms);
+                ListBuiltin inner = ListBuiltin.of(sort, Collections.<Term>emptyList(),
+                        Collections.<Term>emptyList(), rightSentinel.elementsLeft());
+                terms.add(inner);
+            } else if (rightSentinel.elementsLeft().isEmpty()) {
+                ListBuiltin inner = ListBuiltin.of(sort, Collections.<Term>emptyList(),
+                        leftSentinel.elementsRight(), Collections.<Term>emptyList());
+                terms.add(inner);
+                terms.addAll(innerBaseTerms);
             } else {
-                terms.addAll(Arrays.asList(argument).subList(leftIndex, rightIndex + 1));
+                ListBuiltin inner = ListBuiltin.of(sort, innerBaseTerms,
+                        leftSentinel.elementsRight(), rightSentinel.elementsLeft());
+                terms.add(inner);
             }
+            terms.addAll(rightSentinel.baseTerms());
 
-            return ListBuiltin.of(sort, elementsLeft, elementsRight, terms);
-        } else if (sort.type().equals(KSorts.MAP)) {
+            return ListBuiltin.of(sort, terms, elementsLeft, elementsRight);
+        } else if (sort.type().equals(Sort.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
             Collection<Term> terms = new ArrayList<Term>();
             for (Term term : argument) {
@@ -198,25 +210,25 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
      * left-hand side of a rule. Set to {@code null} if this data structure can
      * not occur in the left-hand side or is a collection of elements or
      * entries; otherwise, it must be the only element in {@code baseTerms}.
-     * 
+     *
      * @see DataStructureBuiltin
      */
     protected final Variable viewBase;
     /**
      * {@code Collection} of {@link KApp} AST nodes (representing data structure
      * operations) and {@link Variable} AST nodes.
-     * 
+     *
      * @see DataStructureBuiltin
      */
     protected final Collection<Term> baseTerms;
 
     protected DataStructureBuiltin(DataStructureSort sort, Collection<Term> baseTerms) {
-        super(sort.name());
+        super(Sort.of(sort.name()));
         this.dataStructureSort = sort;
         this.baseTerms = baseTerms;
         if (baseTerms.size() == 1) {
             Term term = baseTerms.iterator().next();
-            if (term instanceof Variable && term.getSort().equals(sort.name())) {
+            if (term instanceof Variable && term.getSort().equals(sort.sort())) {
                 viewBase = (Variable) term;
             } else {
                 viewBase = null;
@@ -267,7 +279,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
     public Term shallowCopy() {
         throw new UnsupportedOperationException();
     }
-    
+
     public abstract DataStructureBuiltin shallowCopy(Collection<Term> baseTerms);
 
     @Override
@@ -292,7 +304,7 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         return sort.equals(dataStructureBuiltin.sort)
                && baseTerms.equals(dataStructureBuiltin.baseTerms);
     }
-    
+
     @Override
     public Collection<Term> getChildren(ListChildren type) {
         switch (type) {
@@ -301,5 +313,21 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
         default:
             throw new AssertionError("unexpected child type " + type.name());
         }
+    }
+
+    public abstract Term toKApp(Context context);
+
+    public Term toKApp(List<Term> items) {
+        if(items.isEmpty()){
+            return KApp.of(sort().unitLabel());
+        }
+
+        Term current = items.get(items.size() - 1);
+
+        for(int i = items.size() - 2; i >= 0; --i){
+            current = KApp.of(sort().constructorLabel(), items.get(i), current);
+        }
+
+        return current;
     }
 }

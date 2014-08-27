@@ -1,3 +1,5 @@
+%% Copyright (c) 2012-2014 K Team. All Rights Reserved.
+
 %% Grammar for the K language
 module Variables
 imports Common %% For Comments and whitespace
@@ -5,43 +7,27 @@ imports KBuiltinsBasic
 
 exports
 context-free syntax
-	VARID ":List"		-> ListVarDz {cons("List12Var")}
-	VARIDz				-> List {cons("List1Var")}
-	VARID ":ListItem"	-> ListItemVarDz {cons("ListItem12Var")}
-	VARIDz				-> ListItem {cons("ListItem1Var")}
-	VARID ":Set"		-> SetVarDz {cons("Set12Var")}
-	VARIDz				-> Set {cons("Set1Var")}
-	VARID ":SetItem"	-> SetItemVarDz {cons("SetItem12Var")}
-	VARIDz				-> SetItem {cons("SetItem1Var")}
 	VARID ":Bag"		-> BagVarDz {cons("Bag12Var")}
 	VARIDz				-> Bag {cons("Bag1Var")}
 	VARID ":BagItem"	-> BagItemVarDz {cons("BagItem12Var")}
 	VARIDz				-> BagItem {cons("BagItem1Var")}
-	VARID ":Map"		-> MapVarDz {cons("Map12Var")}
-	VARIDz				-> Map {cons("Map1Var")}
-	VARID ":MapItem"	-> MapItemVarDz {cons("MapItem12Var")}
-	VARIDz				-> MapItem {cons("MapItem1Var")}
 	VARID ":K"			-> KVarDz {cons("K12Var")}
 	VARID ":KItem"		-> KVarDz {cons("KItem12Var")}
 	VARIDz				-> K {cons("K1Var")}
+	VARID ":List{K}"	-> KListVarDz {cons("ListDlKDr12Var")}
 	VARID ":KList"		-> KListVarDz {cons("KList12Var")}
 	VARIDz				-> KList {cons("KList1Var")}
 	VARID ":KLabel"		-> KLabelVarDz {cons("KLabel12Var")}
 	VARIDz				-> KLabel {cons("KLabel1Var")}
 	VARID ":KResult"	-> KVarDz {cons("KResult12Var")}
-
+	
 	"HOLE"			-> K {cons("K1Hole")}
 
 	":" -> ColonDz {cons("Colon")}
-	"?" -> QuestionMarkDz {cons("QuestionMark")} 
+	"?" -> QuestionMarkDz {cons("QuestionMark")}
+	"!" -> ExclamationMarkDz {cons("ExclamationMarkDz")}
 	VARID -> VARIDz %% in order to put the follow restriction
 
-	ListVarDz		-> List
-	ListItemVarDz	-> ListItem
-	MapVarDz		-> Map
-	MapItemVarDz	-> MapItem
-	SetVarDz		-> Set
-	SetItemVarDz	-> SetItem
 	KVarDz			-> K
 	KListVarDz		-> KList
 	KLabelVarDz		-> KLabel
@@ -50,31 +36,23 @@ context-free syntax
 
 lexical syntax
 	%% Variables and the Anonymous Variable
-	("$"|"?")?[A-Z] [a-zA-Z0-9\']*  -> VARID
-	"?"?"_" -> VARID
+	("$"|"?"|"!")?[A-Z] [a-zA-Z0-9\']*  -> VARID
+	("?"|"!")?"_" -> VARID
 	"HOLE" -> VARID {reject}
 
 	%% because of the constructors SetItem, BagItem... that can be confused with KApp
-	"ListItem"		-> VARID {reject}
 	"BagItem"		-> VARID {reject}
-	"SetItem"		-> VARID {reject}
-	"MapItem"		-> VARID {reject}
 
 context-free restrictions
-	ColonDz			-/- [A-Z] 
-	QuestionMarkDz	-/- [A-Z]
-	VARIDz			-/- [\:].[\#A-Z]
+	ColonDz -/- [A-Z] 
+	QuestionMarkDz -/- [A-Z]
+	ExclamationMarkDz -/- [A-Z]
+	VARIDz -/- [\:].[\#A-Z]
 
-	ListVarDz		-/- [a-zA-Z0-9\{]
-	ListItemVarDz	-/- [a-zA-Z0-9\{]
 	KVarDz			-/- [a-zA-Z0-9\{]
 	KListVarDz		-/- [a-zA-Z0-9\{]
 	BagVarDz		-/- [a-zA-Z0-9\{]
 	BagItemVarDz	-/- [a-zA-Z0-9\{]
-	SetVarDz		-/- [a-zA-Z0-9\{]
-	SetItemVarDz	-/- [a-zA-Z0-9\{]
-	MapVarDz		-/- [a-zA-Z0-9\{]
-	MapItemVarDz	-/- [a-zA-Z0-9\{]
 	KLabelVarDz		-/- [a-zA-Z0-9\{]
 
 lexical restrictions

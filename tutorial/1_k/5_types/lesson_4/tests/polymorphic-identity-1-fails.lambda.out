@@ -2,5 +2,5 @@ Search results:
 
 Solution 1:
 V:K -->
-#symType(1) = (int -> #symType(4)) ~> #symType(4) ~> if #symType(2) then 
-  #symType(3) else HOLE ~> ( #symType(1)->HOLE ) ~> HOLE (lambda x . x)
+#symType(5) = (bool) ~> #symType(4) = #symType(3) ~> #symType(4) ~> (#symType(
+  2) -> HOLE) ~> (HOLE (#symType(1) -> #symType(1)))

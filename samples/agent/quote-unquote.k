@@ -49,7 +49,7 @@ generic visitors. */
 
 /*@ Define a visitor parametric in a natural number \texttt{N} that applies
 \texttt{quoteit} (defined below) with first argument \texttt{N} to \texttt{quote}
-and \texttt{unquote} nodes; these nodes are recognized with the predicate 
+and \texttt{unquote} nodes; these nodes are recognized with the predicate
 \texttt{isQuote} (also defined below).  We define this visitor as a macro: */
 
   syntax KItem ::= qVisitor(Int)

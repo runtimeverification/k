@@ -1,105 +1,178 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.visitors.Visitor;
+import com.google.common.collect.ImmutableSet;
 
-/** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
-public class Sort extends ProductionItem {
+public class Sort implements Serializable {
 
-    public static final String BOOL = "Bool";
+    public static final Sort K = Sort.of("K");
+    public static final Sort KITEM = Sort.of("KItem");
+    public static final Sort KLABEL = Sort.of("KLabel");
+    public static final Sort KLIST = Sort.of("KList");
+    public static final Sort KRESULT = Sort.of("KResult");
 
-    private String name;
-    private static Set<String> baseSorts = new HashSet<String>();
-    static {
-        baseSorts.add("K");
-        baseSorts.add("KResult");
-        baseSorts.add(KSorts.KITEM);
-        baseSorts.add(KSorts.KLIST);
-        baseSorts.add("Map");
-        baseSorts.add("MapItem");
-        baseSorts.add("List");
-        baseSorts.add("ListItem");
-        baseSorts.add("Set");
-        baseSorts.add("SetItem");
-        baseSorts.add("Bag");
-        baseSorts.add("BagItem");
-        baseSorts.add(KSorts.KLABEL);
-        baseSorts.add("CellLabel");
+    public static final Sort CELL_LABEL = Sort.of("CellLabel");
+
+    public static final Sort BAG = Sort.of("Bag");
+    public static final Sort BAG_ITEM = Sort.of("BagItem");
+    public static final Sort LIST = Sort.of("List");
+    public static final Sort LIST_ITEM = Sort.of("ListItem");
+    public static final Sort MAP = Sort.of("Map");
+    public static final Sort MAP_ITEM = Sort.of("MapItem");
+    public static final Sort SET = Sort.of("Set");
+    public static final Sort SET_ITEM = Sort.of("SetItem");
+
+    public static final Sort ID = Sort.of("Id");
+    public static final Sort INT = Sort.of("Int");
+    public static final Sort BOOL = Sort.of("Bool");
+    public static final Sort STRING = Sort.of("String");
+
+    public static final Sort BUILTIN_ID = Sort.of("#Id");
+    public static final Sort BUILTIN_RAT = Sort.of("#Rat");
+    public static final Sort BUILTIN_BOOL = Sort.of("#Bool");
+    public static final Sort BUILTIN_INT = Sort.of("#Int");
+    public static final Sort BUILTIN_FLOAT = Sort.of("#Float");
+    public static final Sort BUILTIN_STRING = Sort.of("#String");
+    public static final Sort BUILTIN_BOT = Sort.of("#Bot");
+
+    /* IO */
+    public static final Sort STREAM = Sort.of("Stream");
+
+    /* tokens */
+    public static final Sort BUILTIN_INT32 = Sort.of("#Int32");
+
+    /* LTL builtin sorts */
+    public static final Sort BUILTIN_LTL_FORMULA = Sort.of("#LtlFormula");
+    public static final Sort BUILTIN_PROP = Sort.of("#Prop");
+    public static final Sort BUILTIN_MODEL_CHECKER_STATE = Sort.of("#ModelCheckerState");
+    public static final Sort BUILTIN_MODEL_CHECK_RESULT = Sort.of("#ModelCheckResult");
+
+    private final String name;
+
+    public static Sort of(String name) {
+        return new Sort(name);
     }
 
-    public Sort(String name) {
-        super();
+    private Sort(String name) {
         this.name = name;
     }
 
-    public Sort(Sort sort) {
-        super(sort);
-        this.name = sort.getName();
-    }
-
-    public static boolean isBasesort(String sort) {
-        return baseSorts.contains(sort);
-    }
-
-    public static Set<String> getBaseSorts() {
-        return new HashSet<String>(baseSorts);
-    }
-
-    public boolean isBaseSort() {
-        return Sort.isBasesort(getName());
-    }
-
-    public void setName(String sort) {
-        this.name = sort;
-    }
-
     public String getName() {
-        if (MetaK.isCellSort(name))
-            return KSort.Bag.name();
         return name;
     }
 
-    public String getRealName() {
-        return name;
-    }
-
-    @Override
-    public String toString() {
-        return getName();
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
+    public org.kframework.backend.java.kil.Sort toBackendJava() {
+        return org.kframework.backend.java.kil.Sort.of(name);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (obj == this)
+        if (this == obj) {
             return true;
-        if (!(obj instanceof Sort))
+        }
+        if (!(obj instanceof Sort)) {
             return false;
-
-        Sort srt = (Sort) obj;
-
-        if (!getName().equals(srt.getName()))
-            return false;
-        return true;
+        }
+        Sort other = (Sort) obj;
+        return name.equals(other.name);
     }
 
     @Override
     public int hashCode() {
-        return this.getName().hashCode();
+        return name.hashCode();
     }
 
     @Override
-    public Sort shallowCopy() {
-        return new Sort(this);
+    public String toString() {
+        return name;
     }
+
+    private static Set<Sort> K_SORTS = ImmutableSet.of(K, BAG, BAG_ITEM, KITEM,
+            KLIST, CELL_LABEL, KLABEL);
+
+    private static Set<Sort> BASE_SORTS = ImmutableSet.of(K, KRESULT, KITEM,
+            KLIST, BAG, BAG_ITEM, KLABEL, CELL_LABEL);
+
+    public boolean isKSort() {
+        return K_SORTS.contains(this);
+    }
+
+    public boolean isBaseSort() {
+        return BASE_SORTS.contains(this);
+    }
+
+    public static Set<Sort> getBaseSorts() {
+        return new HashSet<Sort>(BASE_SORTS);
+    }
+
+    /**
+     * TODO(traiansf)
+     * @param sort
+     * @return
+     */
+    public Sort getKSort() {
+        return K_SORTS.contains(this) ? this : K;
+    }
+
+    public boolean isComputationSort() {
+        return equals(K) || equals(KITEM) || !isKSort();
+    }
+
+    public boolean isBuiltinSort() {
+        /* TODO: replace with a proper table of builtins */
+        return equals(Sort.BUILTIN_BOOL)
+               || equals(Sort.BUILTIN_INT)
+               || equals(Sort.BUILTIN_STRING)
+               || equals(Sort.BUILTIN_FLOAT)
+               /* LTL builtin sorts */
+//               || sort.equals(Sort.SHARP_LTL_FORMULA)
+               || equals(Sort.BUILTIN_PROP)
+               || equals(Sort.BUILTIN_MODEL_CHECKER_STATE)
+               || equals(Sort.BUILTIN_MODEL_CHECK_RESULT);
+    }
+
+    public boolean isDataSort() {
+        return equals(Sort.BUILTIN_BOOL)
+                || equals(Sort.BUILTIN_INT)
+                || equals(Sort.BUILTIN_STRING);
+    }
+
+    public static final String CELL_SORT_NAME = "CellSort";
+    public static final String CELL_FRAGMENT_NAME = "CellFragment";
+    public static final String LIST_OF_BOTTOM_PREFIX = "#ListOf";
+
+    public boolean isCellSort() {
+        return name.endsWith(CELL_SORT_NAME) || name.endsWith(CELL_FRAGMENT_NAME);
+    }
+
+    public boolean isCellFragment() {
+        return name.endsWith(CELL_FRAGMENT_NAME);
+    }
+
+    public Sort getUserListSort(String separator) {
+        return Sort.of(LIST_OF_BOTTOM_PREFIX + name + "{\"" + separator + "\"}");
+    }
+
+    /**
+     * TODO(traiansf)
+     * @return
+     */
+    public Sort mainSort() {
+        if (equals(BAG) || equals(BAG_ITEM)) {
+            return BAG;
+        } else if (equals(KITEM)) {
+            return K;
+        } else {
+            return this;
+        }
+    }
+
+    public boolean isDefaultable() {
+        return equals(K) || equals(BAG);
+    }
+
 }

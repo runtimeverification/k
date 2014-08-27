@@ -9,7 +9,7 @@ syntax AExp ::= Int
               // > AExp "+" AExp [left, seqstrict]
               // | AExp "-" AExp [left, seqstrict]
               // > "~" AExp [strict]
-              // > AExp "^" AExp [left, seqstrict]      
+              // > AExp "^" AExp [left, seqstrict]
               // > AExp "&" AExp [left, seqstrict]
               // > AExp "|" AExp [left, seqstrict]
 

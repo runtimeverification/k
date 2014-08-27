@@ -8,10 +8,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.krun.K;
-import org.kframework.utils.StringUtil;
-
-import java.util.*;
 
 /**
  * Transformer flattening concrete syntax terms to applications of KLabels
@@ -37,14 +33,14 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Variable node, Void _)  {
-        if (MetaK.isComputationSort(node.getSort()))
+        if (node.getSort().isComputationSort() && !node.isFreshConstant())
             return kTrans.visitNode(node);
         return node;
     }
 
     @Override
     public ASTNode visit(ListTerminator node, Void _)  {
-        if (MetaK.isComputationSort(node.getSort()))
+        if (node.getSort().isComputationSort())
             return kTrans.visitNode(node);
         return node;
     }
@@ -55,7 +51,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
      */
     @Override
     public ASTNode visit(TermCons tc, Void _)  {
-        if (MetaK.isComputationSort(tc.getSort()))
+        if (tc.getSort().isComputationSort())
             return kTrans.visitNode(tc);
         return super.visit(tc, _);
     }
@@ -87,14 +83,14 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(TermCons tc, Void _)  {
-            if (!MetaK.isComputationSort(tc.getSort())) {
+            if (!tc.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel((Term) trans.visitNode(tc)));
             }
 
-            String l = tc.getLocation();
-            String f = tc.getFilename();
+            Location l = tc.getLocation();
+            Source s = tc.getSource();
             Production ppp = tc.getProduction();
-            KList lok = new KList(l, f);
+            KList lok = new KList(l, s);
             for (Term t : tc.getContents()) {
                 lok.getContents().add((Term) this.visitNode(t));
             }
@@ -103,28 +99,28 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 label = tc.getProduction().getListDecl().getTerminatorKLabel();
             else
                 label = ppp.getKLabel();
-            return new KApp(l, f, KLabelConstant.of(label, context), lok);
+            return new KApp(l, s, KLabelConstant.of(label, context), lok);
         }
 
         @Override
         public ASTNode visit(KLabel kLabel, Void _)  {
             return new KApp(
                     kLabel.getLocation(),
-                    kLabel.getFilename(),
+                    kLabel.getSource(),
                     new KInjectedLabel(kLabel),
                     KList.EMPTY);
         }
 
         @Override
         public ASTNode visit(ListTerminator emp, Void _) {
-            String l = emp.getLocation();
-            String f = emp.getFilename();
-            if (!MetaK.isComputationSort(emp.getSort())) {
+            Location l = emp.getLocation();
+            Source f = emp.getSource();
+            if (!emp.getSort().isComputationSort()) {
                 return KApp.of(new KInjectedLabel(emp));
             }
             // if this is a list sort
             if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
-                Production listProd = context.listConses.get(emp.getSort());
+                Production listProd = context.listProductions.get(emp.getSort());
                 String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
                 return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), context), KList.EMPTY);
                 // Constant cst = new Constant(l, f, KSorts.KLABEL, "'." + emp.getSort() + "");
@@ -146,57 +142,13 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode visit(MapItem node, Void _)  {
-            return KApp.of(new KInjectedLabel((Term) trans.visitNode(node)));
-        }
-
-        @Override
         public ASTNode visit(CollectionBuiltin node, Void _)  {
-            /* just for LHS for now */
-            assert (node.isLHSView() || node.isElementCollection());
-
-            LinkedHashSet<Term> elements = new LinkedHashSet<>(node.elements().size());
-            for (Term term : node.elements()) {
-                Term transformedTerm = (Term) trans.visitNode(term);
-                elements.add(transformedTerm);
-            }
-
-            ArrayList<Term> terms = new ArrayList<>(node.baseTerms().size());
-            if (node.isLHSView()) {
-                Variable frame = node.viewBase();
-                frame.setSort(node.sort().type());
-                terms.add(frame);
-            }
-
-            return KApp.of(new KInjectedLabel(CollectionBuiltin.of(
-                    node.sort(),
-                    terms,
-                    elements)));
+            throw new AssertionError("should always flatten before compiling data structures");
         }
 
         @Override
         public ASTNode visit(MapBuiltin node, Void _)  {
-            /* just for LHS for now */
-            assert (node.isLHSView() || node.isElementCollection());
-
-            LinkedHashMap<Term, Term> elements = new LinkedHashMap<>(node.elements().size());
-            for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-                Term transformedKey = (Term) trans.visitNode(entry.getKey());
-                Term transformedValue = (Term) trans.visitNode(entry.getValue());
-                elements.put(transformedKey, transformedValue);
-            }
-
-            ArrayList<Term> terms = new ArrayList<>(node.baseTerms().size());
-            if (node.isLHSView()) {
-                Variable frame = node.viewBase();
-                frame.setSort(node.sort().type());
-                terms.add(frame);
-            }
-
-            return KApp.of(new KInjectedLabel(new MapBuiltin(
-                    node.sort(),
-                    terms,
-                    elements)));
+            throw new AssertionError("should always flatten before compiling data structures");
         }
 
         @Override
@@ -206,17 +158,18 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
         @Override
         public ASTNode visit(Variable node, Void _)  {
-            if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
+            if (node.isFreshConstant()) return node;
+            if (node.getSort().equals(Sort.KITEM) || node.getSort().equals(Sort.K)) {
                 return node;
             }
-            if (MetaK.isKSort(node.getSort())) {
+            if (node.getSort().isKSort()) {
                 return KApp.of(new KInjectedLabel(node));
             }
 
-            if (node.getSort().equals(BoolBuiltin.SORT_NAME)
-                    || node.getSort().equals(IntBuiltin.SORT_NAME)
-                    || node.getSort().equals("#Float")
-                    || node.getSort().equals(StringBuiltin.SORT_NAME)) {
+            if (node.getSort().equals(Sort.BUILTIN_BOOL)
+                    || node.getSort().equals(Sort.BUILTIN_INT)
+                    || node.getSort().equals(Sort.BUILTIN_FLOAT)
+                    || node.getSort().equals(Sort.BUILTIN_STRING)) {
                 return node;
             }
 
@@ -228,11 +181,6 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             }
 
             node = node.shallowCopy();
-            if (kompileOptions.backend.java() || K.backend.equals("java")) {
-                /* the Java Rewrite Engine preserves sort information for variables */
-            } else {
-                node.setSort(KSorts.KITEM);
-            }
             return node;
         }
     }

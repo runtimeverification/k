@@ -7,18 +7,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
- 
+
 public class ExprList extends ArrayList<Expr> implements Expr
 {
     String kif = "";
-    
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
     ExprList parent = null;
     int indent =1;
- 
+
     public int getIndent()
     {
         if (parent != null)
@@ -27,19 +27,19 @@ public class ExprList extends ArrayList<Expr> implements Expr
         }
         else return 0;
     }
- 
+
     public void setIndent(int indent)
     {
         this.indent = indent;
     }
- 
- 
- 
+
+
+
     public void setParent(ExprList parent)
     {
         this.parent = parent;
     }
- 
+
     public String toString()
     {
         String indent = "";
@@ -48,11 +48,11 @@ public class ExprList extends ArrayList<Expr> implements Expr
             indent = "\n";
             char[] chars = new char[getIndent()];
             Arrays.fill(chars, ' ');
-            indent += new String(chars);        
+            indent += new String(chars);
         }
- 
+
         String output = indent+"(";
-        for(Iterator<Expr> it=this.iterator(); it.hasNext(); ) 
+        for(Iterator<Expr> it=this.iterator(); it.hasNext(); )
         {
             Expr expr = it.next();
             output += expr.toString();
@@ -62,7 +62,7 @@ public class ExprList extends ArrayList<Expr> implements Expr
         output += ")";
         return output;
     }
- 
+
     @Override
     public synchronized boolean add(Expr e)
     {
@@ -74,11 +74,11 @@ public class ExprList extends ArrayList<Expr> implements Expr
         }
         return super.add(e);
     }
-    
+
     public String getKIF()
     {
         String internal = "";
-        for(Iterator<Expr> it=this.iterator(); it.hasNext(); ) 
+        for(Iterator<Expr> it=this.iterator(); it.hasNext(); )
         {
             Expr expr = it.next();
             if (expr.toString().equals("define-fun"))

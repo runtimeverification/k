@@ -14,20 +14,17 @@ public class LatexPatternsVisitor extends BasicVisitor {
         super(context);
     }
 
-    private Map<String, String> patterns = new HashMap<String, String>();
+    private Map<Production, String> patterns = new HashMap<Production, String>();
     private String pattern = "";
     private int nonTerm;
     private boolean prevNonTerm;
 
-    public Map<String, String> getPatterns() {
+    public Map<Production, String> getPatterns() {
         return patterns;
     }
 
     @Override
     public Void visit(Production p, Void _) {
-        if (!p.containsAttribute("cons")) {
-            return null;
-        }
         if (p.containsAttribute("latex")) {
             pattern = p.getAttribute("latex");
         } else {
@@ -36,12 +33,12 @@ public class LatexPatternsVisitor extends BasicVisitor {
             prevNonTerm = false;
             super.visit(p, _);
         }
-        patterns.put(p.getAttribute("cons"), pattern);
+        patterns.put(p, pattern);
         return null;
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         if (prevNonTerm)
             pattern += "\\mathrel{}";
         pattern += "{#" + nonTerm++ + "}";

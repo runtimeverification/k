@@ -1,10 +1,15 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.kframework.backend.unparser.UnparserFilterNew;
+import org.kframework.backend.unparser.UnparserLexicalComparator;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 
@@ -35,7 +40,7 @@ public class MapBuiltin extends DataStructureBuiltin {
     public Term shallowCopy() {
         return new MapBuiltin(dataStructureSort, baseTerms, elements);
     }
-    
+
     @Override
     public DataStructureBuiltin shallowCopy(java.util.Collection<Term> baseTerms) {
         return new MapBuiltin(dataStructureSort, baseTerms, elements);
@@ -66,5 +71,26 @@ public class MapBuiltin extends DataStructureBuiltin {
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public Term toKApp(Context context) {
+        List<Term> items = new ArrayList<>();
+        Map<Term, String> unparsed = new HashMap<>();
+
+        for (java.util.Map.Entry<Term, Term> entry : elements().entrySet()) {
+            Term item = KApp.of(sort().elementLabel(),
+                    entry.getKey(), entry.getValue());
+            items.add(item);
+            UnparserFilterNew unparser = new UnparserFilterNew(context);
+            unparser.visitNode(item);
+            String s = unparser.getResult();
+            unparsed.put(item, s);
+        }
+        Collections.sort(items, new UnparserLexicalComparator(unparsed));
+        for (Term base : baseTerms()) {
+            items.add(base);
+        }
+        return toKApp(items);
     }
 }

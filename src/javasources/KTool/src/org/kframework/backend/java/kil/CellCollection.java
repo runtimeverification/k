@@ -1,18 +1,22 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
 
@@ -20,15 +24,20 @@ import com.google.common.collect.Multimap;
  * Represents a collection of {@link Cell}s. The ordering of the internal cells
  * is fixed and agrees with the ordering of the cells used to construct this
  * cell collection.
- * 
+ *
  * @author AndreiS
- * 
+ *
  */
 @SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
     private final Multimap<String, Cell> cells;
-    
+
+    /**
+     * Only allow {@code Variable}s as base terms for now.
+     */
+    private final List<Variable> baseTerms;
+
     /**
      * Contains {@code true} if the explicitly specified part of this cell
      * collection contains one or more types of cells whose multiplicity
@@ -40,21 +49,19 @@ public class CellCollection extends Collection {
     public CellCollection(Multimap<String, Cell> cells, Variable frame, Context context) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
-        
-        int numOfStarredCellTypes = 0;
-        for (String cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
-                numOfStarredCellTypes++;
-            } else {
-                assert cells.get(cellLabel).size() == 1:
-                        "cell label " + cellLabel + " does not have multiplicity='*', "
-                        + "but multiple cells found " + cells;
-            }
-        }
+        this.baseTerms = frame != null ?
+                Collections.<Variable>singletonList(frame) :
+                Collections.<Variable>emptyList();
 
-        assert numOfStarredCellTypes <= 1 : 
-            "Multiple types of starred cells in one cell collection not supported at present";
-        hasStar = numOfStarredCellTypes > 0;
+        this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
+    }
+
+    public CellCollection(Multimap<String, Cell> cells, List<Variable> baseTerms, Context context) {
+        super(getFrame(baseTerms), Kind.CELL_COLLECTION);
+        this.cells = ArrayListMultimap.create(cells);
+        this.baseTerms = ImmutableList.copyOf(baseTerms);
+
+        this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
     }
 
     public CellCollection(Variable frame) {
@@ -62,11 +69,11 @@ public class CellCollection extends Collection {
     }
 
     public CellCollection(Multimap<String, Cell> cells, Context context) {
-        this(cells, null, context);
+        this(cells, (Variable) null, context);
     }
 
     public CellCollection() {
-        this(ArrayListMultimap.<String, Cell>create(), null, null);
+        this(ArrayListMultimap.<String, Cell>create(), (Variable) null, null);
     }
 
     public java.util.Collection<Cell> cells() {
@@ -75,6 +82,10 @@ public class CellCollection extends Collection {
 
     public Multimap<String, Cell> cellMap() {
         return cells;
+    }
+
+    public List<Variable> baseTerms() {
+        return baseTerms;
     }
 
     public boolean containsKey(String label) {
@@ -99,8 +110,33 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public int size() {
+    public boolean isEmpty() {
+        return cells.isEmpty() && baseTerms.isEmpty();
+    }
+
+    @Override
+    public int concreteSize() {
         return cells.size();
+    }
+
+    @Override
+    public boolean hasFrame() {
+        assert isLHSView() : "This CellCollection cannot be used in the left-hand side of a rule";
+        return super.hasFrame();
+    }
+
+    @Override
+    public final boolean isConcreteCollection() {
+        return baseTerms.isEmpty();
+    }
+
+    /**
+     * Checks if this {@code CellCollection} contains at most one
+     * {@code Variable} as its frame variable.
+     */
+    @Override
+    public boolean isLHSView() {
+        return baseTerms.size() <= 1;
     }
 
     @Override
@@ -109,8 +145,8 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public String sort() {
-        return kind.toString();
+    public Sort sort() {
+        return kind.asSort();
     }
 
     @Override
@@ -129,25 +165,35 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
-            hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
-        }
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+        hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
         return hashCode;
     }
 
     @Override
+    protected boolean computeHasCell() {
+        return true;
+    }
+
+    @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Cell cell : cells.values()) {
-            stringBuilder.append(cell);
+        if (isEmpty()) {
+            return DataStructureSort.LABELS.get(org.kframework.kil.Sort.BAG).get(Label.UNIT);
+        } else {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Cell cell : cells.values()) {
+                stringBuilder.append(cell);
+            }
+            for (int i = 0; i < baseTerms.size(); i++) {
+                stringBuilder.append(baseTerms.get(i));
+                if (i < baseTerms.size() - 1) {
+                    stringBuilder.append(" ");
+                }
+            }
+            return stringBuilder.toString();
         }
-        if (super.hasFrame()) {
-            stringBuilder.append(super.frame());
-        }
-        return stringBuilder.toString();
     }
 
     @Override
@@ -170,6 +216,35 @@ public class CellCollection extends Collection {
         return transformer.transform(this);
     }
 
+    private static int numOfTypesOfStarredSubcells(Multimap<String, Cell> cells, Context context) {
+        int count = 0;
+        for (String cellLabel : cells.keySet()) {
+            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
+                count++;
+            } else {
+                assert cells.get(cellLabel).size() == 1:
+                        "cell label " + cellLabel + " does not have multiplicity='*', "
+                        + "but multiple cells found " + cells;
+            }
+        }
+
+        assert count <= 1 :
+            "Multiple types of starred cells in one cell collection not supported at present";
+        return count;
+    }
+
+    /**
+     * Private helper method that gets the frame variable from a list of base
+     * terms.
+     *
+     * @param baseTerms
+     * @return the frame if there is only one variable in the base terms;
+     *         otherwise, {@code null}
+     */
+    private static Variable getFrame(List<Variable> baseTerms) {
+        return (baseTerms.size() == 1) ? baseTerms.get(0) : null;
+    }
+
     /**
      * Promotes a given {@link Term} to a given {@link Kind}. The {@code Kind}s
      * involved in this method can only be {@code Kind#CELL} or
@@ -178,7 +253,7 @@ public class CellCollection extends Collection {
      * <p>
      * To be more specific, a {@code Cell} can be promoted to a single-element
      * {@code CellCollection}.
-     * 
+     *
      * @param term
      *            the given term to be promoted
      * @param kind
@@ -204,7 +279,7 @@ public class CellCollection extends Collection {
 
         return term;
     }
-    
+
     /**
      * Degrades a given {@link Term} to a given {@link Kind}. The {@code Kind}s
      * involved in this method can only be {@code Kind#CELL} or
@@ -213,7 +288,7 @@ public class CellCollection extends Collection {
      * <p>
      * To be more specific, a single-element {@code CellCollection} can be
      * degraded to a {@code Cell}.
-     * 
+     *
      * @param term
      *            the given term to be degraded
      * @return the resulting term after kind degradation
@@ -222,11 +297,11 @@ public class CellCollection extends Collection {
         assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
 
         if (term instanceof CellCollection
-                && !((CellCollection) term).hasFrame()
-                && ((CellCollection) term).size() == 1) {
+                && !((CellCollection) term).baseTerms().isEmpty()
+                && ((CellCollection) term).concreteSize() == 1) {
             term = ((CellCollection) term).cells().iterator().next();
-        } 
-        
+        }
+
         // YilongL: do not degrade the kind of a Variable since you cannot
         // upgrade it later
 

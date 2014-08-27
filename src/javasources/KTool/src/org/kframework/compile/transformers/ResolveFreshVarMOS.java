@@ -34,10 +34,10 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
 
         return bodyNode;
     }
-    
+
     @Override
     public ASTNode visit(Variable node, Void _)  {
-        if (node.isFresh()) {
+        if (node.isFreshVariable()) {
             this.vars.add(node);
             return node;
         }

@@ -3,13 +3,13 @@ package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest.Annotated;
-import org.kframework.ktest.CmdArgs.CmdArg;
-import org.kframework.ktest.KTest;
+import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
+import org.kframework.utils.file.KPaths;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -35,9 +35,9 @@ import java.util.*;
 public class ConfigFileParser {
 
     private final Document doc;
-    private final CmdArg cmdArgs;
+    private final KTestOptions cmdArgs;
 
-    public ConfigFileParser(File configFile, CmdArg cmdArgs) throws IOException, SAXException,
+    public ConfigFileParser(File configFile, KTestOptions cmdArgs) throws IOException, SAXException,
             ParserConfigurationException, TransformerException {
         this.cmdArgs = cmdArgs;
 
@@ -154,7 +154,7 @@ public class ConfigFileParser {
         String results = concat(cmdArgs.getResults(),
                 getAttributeWDefault(includeAttrs, "results", FilenameUtils.getFullPath(file)));
 
-        CmdArg cmdArgs1 = new CmdArg(cmdArgs)
+        KTestOptions cmdArgs1 = new KTestOptions(cmdArgs)
                 .setDirectory(directory)
                 .setPrograms(programs)
                 .setResults(results)
@@ -170,11 +170,14 @@ public class ConfigFileParser {
         }
 
         List<TestCase> ret = configFileParser.parse();
+        Set<KTestStep> skips = parseSkips(includeAttrs.getNamedItem("skip"), location);
 
         // handle overridden attributes
         NodeList childNodes = includeNode.getChildNodes();
         if (includeAttrs.getNamedItem("exclude") != null)
             overrideExcludes(ret, splitNodeValue(includeAttrs.getNamedItem("exclude")));
+        if (includeAttrs.getNamedItem("skip") != null)
+            overrideSkips(ret, skips);
         // note that we need to run `hasElement' because parse* methods will return containers
         // with 0 element when relevant elements are not found.
         if (hasElement(childNodes, "kompile-option"))
@@ -195,6 +198,12 @@ public class ConfigFileParser {
         for (TestCase tc : ret)
             tc.validate();
         return ret;
+    }
+
+    private void overrideSkips(List<TestCase> tests, Set<KTestStep> skips) {
+        for (TestCase tc : tests) {
+            tc.setSkips(skips);
+        }
     }
 
     private void overrideExcludes(List<TestCase> tests, String[] excludes) {
@@ -431,13 +440,7 @@ public class ConfigFileParser {
     }
 
     private String getSchema() {
-        return concat(getKHome(), concat("lib", "ktest.xsd"));
-    }
-
-    private String getKHome() {
-        return new File(KTest.class.getProtectionDomain().getCodeSource()
-                .getLocation().getPath()).getParentFile().getParentFile()
-                .getParentFile().getPath();
+        return concat(KPaths.getKBase(false), concat("lib", "ktest.xsd"));
     }
 
     private String concat(String s1, String s2) {

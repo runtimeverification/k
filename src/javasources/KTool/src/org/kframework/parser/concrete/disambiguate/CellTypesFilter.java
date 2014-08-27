@@ -3,13 +3,13 @@ package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -39,54 +39,45 @@ public class CellTypesFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _) throws ParseFailedException {
-        String sort = context.cellKinds.get(cell.getLabel());
-
-        if (sort == null) {
-            if (cell.getLabel().equals("k"))
-                sort = "K";
-            else if (cell.getLabel().equals("T"))
-                sort = "Bag";
-            else if (cell.getLabel().equals("generatedTop"))
-                sort = "Bag";
-            else if (cell.getLabel().equals("freshCounter"))
-                sort = "K";
-            else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
-                sort = "K";
-        }
+        Sort sort = context.getCellSort(cell);
 
         if (sort != null) {
             cell.setContents((Term) new CellTypesFilter2(context, sort, cell.getLabel()).visitNode(cell.getContents()));
         } else {
             String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
-            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
+            throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getSource(), cell.getLocation()));
         }
         return super.visit(cell, _);
     }
 
     /**
      * A new class (nested) that goes down one level (jumps over Ambiguity) and checks to see if there is a KSequence
-     * 
+     *
      * if found, throw an exception and until an Ambiguity node catches it
-     * 
+     *
      * @author Radu
-     * 
+     *
      */
     public class CellTypesFilter2 extends LocalTransformer {
-        String expectedSort;
+        Sort expectedSort;
         String cellLabel;
 
-        public CellTypesFilter2(Context context, String expectedSort, String cellLabel) {
-            super("org.kframework.parser.concrete.disambiguate.CellTypesFilter2", context);
+        public CellTypesFilter2(Context context, Sort expectedSort, String cellLabel) {
+            super(CellTypesFilter2.class.getName(), context);
             this.expectedSort = expectedSort;
             this.cellLabel = cellLabel;
         }
 
         @Override
         public ASTNode visit(Term trm, Void _) throws ParseFailedException {
-            if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
+            if (!context.isSubsortedEq(expectedSort, trm.getSort()) &&
+                !(context.isSubsortedEq(Sort.KLIST, expectedSort) &&
+                                (trm.getSort().equals(Sort.KLIST) ||
+                                trm.getSort().equals(Sort.K) ||
+                                trm.getSort().equals(Sort.KITEM)))) {
                 // if the found sort is not a subsort of what I was expecting
                 String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
-                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
+                throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getSource(), trm.getLocation()));
             }
             return trm;
         }
@@ -100,6 +91,7 @@ public class CellTypesFilter extends ParseForestTransformer {
         @Override
         public ASTNode visit(Rewrite node, Void _) throws ParseFailedException {
             Rewrite result = new Rewrite(node);
+            result.setSort(expectedSort);
             result.replaceChildren((Term) this.visitNode(node.getLeft()), (Term) this.visitNode(node.getRight()), context);
             return result;
         }

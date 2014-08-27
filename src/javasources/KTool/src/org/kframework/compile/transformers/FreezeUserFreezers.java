@@ -5,7 +5,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.*;
@@ -40,52 +39,32 @@ public class FreezeUserFreezers extends CopyOnWriteTransformer {
         if (!(heating || cooling))
             return node;
         if (!(node.getBody() instanceof  Rewrite)) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Heating/Cooling rules should have rewrite at the top.",
-                            getName(),
-                            node.getFilename(),
-                            node.getLocation())
-            );
+                            this, node);
         }
         KSequence kSequence;
         Rewrite rewrite = (Rewrite) node.getBody();
         if (heating) {
             if (!(rewrite.getRight() instanceof KSequence)) {
-                GlobalSettings.kem.register(
-                        new KException(KException.ExceptionType.ERROR,
-                                KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                                 "Heating rules should have a K sequence in the rhs.",
-                                getName(),
-                                node.getFilename(),
-                                node.getLocation())
-                );
+                                this, node);
             }
             kSequence = (KSequence) rewrite.getRight();
         } else {
             if (!(rewrite.getLeft() instanceof KSequence)) {
-                GlobalSettings.kem.register(
-                        new KException(KException.ExceptionType.ERROR,
-                                KException.KExceptionGroup.CRITICAL,
+                GlobalSettings.kem.registerCriticalError(
                                 "Cooling rules should have a K sequence in the lhs.",
-                                getName(),
-                                node.getFilename(),
-                                node.getLocation())
-                );
+                                this, node);
             }
             kSequence = (KSequence) rewrite.getLeft();
         }
         List<Term> kSequenceContents = kSequence.getContents();
         if (kSequenceContents.size() != 2 ) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+            GlobalSettings.kem.registerCriticalError(
                             "Heating/Cooling rules should have exactly 2 items in their K Sequence.",
-                                getName(),
-                                node.getFilename(),
-                                node.getLocation())
-                );
+                                this, node);
         }
         final Term freezer = kSequenceContents.get(1);
         if (!(freezer instanceof  Freezer)) {

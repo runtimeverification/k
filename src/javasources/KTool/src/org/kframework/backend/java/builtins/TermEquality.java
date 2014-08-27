@@ -1,8 +1,12 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
+
 
 /**
  * @author: AndreiS
@@ -10,28 +14,63 @@ import org.kframework.backend.java.kil.TermContext;
 public class TermEquality {
 
     public static BoolToken eq(Term term1, Term term2, TermContext context) {
-        checkArguments(term1, term2);
-        return term1.equals(term2) ? BoolToken.TRUE : BoolToken.FALSE;
+        if (hasKLabelVariables(term1) || hasKLabelVariables(term2)) {
+            return null;
+        }
+
+        switch (getEqualityTruthValue(term1, term2, context)) {
+            case TRUE:
+                return BoolToken.TRUE;
+            case FALSE:
+                return BoolToken.FALSE;
+            default:
+                return null;
+        }
     }
 
     public static BoolToken ne(Term term1, Term term2, TermContext context) {
-        checkArguments(term1, term2);
-        return term1.equals(term2) ? BoolToken.FALSE : BoolToken.TRUE;
+        if (hasKLabelVariables(term1) || hasKLabelVariables(term2)) {
+            return null;
+        }
+
+        switch (getEqualityTruthValue(term1, term2, context)) {
+            case FALSE:
+                return BoolToken.TRUE;
+            case TRUE:
+                return BoolToken.FALSE;
+            default:
+                return null;
+        }
     }
-    
-    private static void checkArguments(Term term1, Term term2) {
-        if (!term1.isGround()) {
-            throw new IllegalArgumentException("first argument " + term1 + " is not ground");
+
+    /**
+     * Establishes the truth value of an equality between the two given terms by creating a
+     * {@link org.kframework.backend.java.symbolic.SymbolicConstraint} with one equality and
+     * simplifying it.
+     */
+    private static SymbolicConstraint.TruthValue getEqualityTruthValue(
+            Term term1,
+            Term term2,
+            TermContext context) {
+        SymbolicConstraint constraint = new SymbolicConstraint(context);
+        constraint.add(term1, term2);
+        constraint.simplify();
+        return constraint.getTruthValue();
+    }
+
+    private static boolean hasKLabelVariables(Term term) {
+        for (Variable variable : term.variableSet()) {
+            if (variable.kind() == Kind.KLABEL) {
+                return true;
+            }
         }
-        if (!term2.isGround()) {
-            throw new IllegalArgumentException("second argument " + term2 + " is not ground");
-        }
+        return false;
     }
 
     /**
      * Returns the first or the second {@link Term} according to the value of
      * the {@link BoolToken}.
-     * 
+     *
      * @param boolToken
      *            the boolean token
      * @param t

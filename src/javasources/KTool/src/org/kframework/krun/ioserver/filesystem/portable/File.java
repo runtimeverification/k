@@ -13,4 +13,4 @@ public abstract class File implements org.kframework.krun.api.io.File {
     public abstract void write(byte[] b) throws IOException;
 
     abstract void close() throws IOException;
-} 
+}

@@ -6,14 +6,16 @@ import java.util.Set;
 
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Production;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 
+import com.google.common.collect.BiMap;
+
 public class SDFHelper {
-    public static String getSDFAttributes(Attributes attrs) {
+    public static String getSDFAttributes(Production p, BiMap<String, Production> conses) {
+        Attributes attrs = p.getAttributes();
         String str = " {";
-        if (attrs.getContents().size() == 0)
-            return "";
 
         // if (attrs.containsKey("prefer"))
         // str += "prefer, ";
@@ -29,8 +31,8 @@ public class SDFHelper {
             str += "non-assoc, ";
         // if (attrs.containsKey("bracket")) // should not need this since we use the Bracket class
         // str += "bracket, ";
-        if (attrs.containsKey("cons"))
-            str += "cons(\"" + attrs.get("cons") + "\"), ";
+        if (conses.containsValue(p))
+            str += "cons(\"" + conses.inverse().get(p) + "\"), ";
 
         if (str.endsWith(", "))
             return str.substring(0, str.length() - 2) + "}";
@@ -40,28 +42,25 @@ public class SDFHelper {
 
     /**
      * Search for all the productions that have either 'klabel(tag)' or the 'tag' attribute
-     * 
+     *
      * @param tag
      * @return
      */
     public static Set<Production> getProductionsForTag(String tag, Context context) {
-        if (context.productions.containsKey(tag))
-            return context.productions.get(tag);
-        else
-            return new HashSet<Production>();
+        return context.tags.get(tag);
     }
 
-    public static String getFollowRestrictionsForTerminals(Set<String> terminals) {
+    public static String getFollowRestrictionsForTerminals(Set<Terminal> terminals) {
         Set<Ttuple> mytuples = new HashSet<Ttuple>();
         String varid = "[A-Z][a-zA-Z0-9\\']*";
 
-        for (String t1 : terminals) {
-            for (String t2 : terminals) {
+        for (Terminal t1 : terminals) {
+            for (Terminal t2 : terminals) {
                 if (!t1.equals(t2)) {
-                    if (t1.startsWith(t2)) {
+                    if (t1.getTerminal().startsWith(t2.getTerminal())) {
                         Ttuple tt = new Ttuple();
-                        tt.key = t1;
-                        tt.value = t2;
+                        tt.key = t1.getTerminal();
+                        tt.value = t2.getTerminal();
                         String ending = tt.key.substring(tt.value.length());
                         if (ending.matches(varid))
                             mytuples.add(tt);
@@ -73,7 +72,7 @@ public class SDFHelper {
         String sdf = "lexical restrictions\n";
         sdf += "    %% follow restrictions\n";
         for (Ttuple tt : mytuples) {
-            sdf += "    \"" + StringUtil.escape(tt.value) + "\" -/- ";
+            sdf += "    " + StringUtil.enquoteCString(tt.value) + " -/- ";
             String ending = tt.key.substring(tt.value.length());
             for (int i = 0; i < ending.length(); i++) {
                 String ch = "" + ending.charAt(i);
@@ -90,9 +89,9 @@ public class SDFHelper {
 
     /**
      * Using this class to collect the prefixes amongst terminals
-     * 
+     *
      * @author RaduFmse
-     * 
+     *
      */
     private static class Ttuple {
         public String key;

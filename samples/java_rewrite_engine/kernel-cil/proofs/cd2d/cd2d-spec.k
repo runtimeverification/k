@@ -33,7 +33,7 @@ module CD2D-SPEC
 
   syntax Float ::= "VE_MAX" [function]
   rule VE_MAX => 1200.0
-  
+
   syntax Float ::= "DS_MAX" [function]
   rule DS_MAX => 100.0
 
@@ -48,15 +48,15 @@ module CD2D-SPEC
 
   syntax Float ::= sqR(Float,Float) [function]
   rule sqR(X:Float, Y:Float) => X *Float X +Float Y *Float Y
-  
+
   syntax Float ::= dotR(Float,Float,Float,Float) [function]
-  rule dotR(Ax:Float, Ay:Float, Bx:Float, By:Float) 
+  rule dotR(Ax:Float, Ay:Float, Bx:Float, By:Float)
     => Ax *Float Bx +Float Ay *Float By
 
   syntax Float ::= tauR(Float, Float, Float, Float, Float, Float) [function]
   rule tauR(Ux:Float, Uy:Float, Vx:Float, Vy:Float, B:Float, T:Float) =>
-    dmin(dmax(B *Float sqR(Vx,Vy), --Float dotR(Ux,Uy, Vx, Vy)), T *Float sqR(Vx, Vy)) 
+    dmin(dmax(B *Float sqR(Vx,Vy), --Float dotR(Ux,Uy, Vx, Vy)), T *Float sqR(Vx, Vy))
 
   syntax Bool ::= horizontalLosR(Float, Float, Float) [function]
-  rule horizontalLosR(Sx,Sy,D) => sqR(Sx,Sy) <=Float D *Float D 
+  rule horizontalLosR(Sx,Sy,D) => sqR(Sx,Sy) <=Float D *Float D
 endmodule

@@ -1,15 +1,14 @@
 <T>
     <k>
-        "Line  3: x = " ~> ( HOLE,x, "\n" ) ~> print ( HOLE ) ; ~> { (((((
-          int x ;) (x = 2 ;)) (print ( ("Line  7: x = ", (x, "\n")) ) ;)) ({ (
-          ((int x ;) (x = 3 ;)) (print ( ("Line 11: x = ", (x, "\n")) ) ;)) })
-          ) (print ( ("Line 13: x = ", (x, "\n")) ) ;)) } ~> print ( (
-          "Line 15: x = ", (x, "\n")) ) ;
+        "Line  3: x = " ~> HOLE, x, "\n" ~> print ( HOLE ) ; ~> { int x ; 
+          x = 2 ; print ( "Line  7: x = ", x, "\n" ) ; { int x ; x = 3 ; print
+           ( "Line 11: x = ", x, "\n" ) ; } print ( "Line 13: x = ", x, "\n" )
+           ; } ~> print ( "Line 15: x = ", x, "\n" ) ;
     </k>
-    <store>
-        #symNat(1) |-> 1
-    </store>
     <env>
-        x |-> #symNat(1)
+        x |-> 1
     </env>
+    <store>
+        1 |-> 1
+    </store>
 </T>

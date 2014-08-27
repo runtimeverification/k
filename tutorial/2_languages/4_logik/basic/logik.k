@@ -18,7 +18,7 @@ Those are covered in the LOGIK++ extension under
 \texttt{examples/logik++}.
 
 Specifically, a LOGIK program consists of a sequence of {\em Horn clauses}
-of the form 
+of the form
 \begin{quote}
 \texttt{P :- P1, P2, ..., Pn .}
 \end{quote}
@@ -128,9 +128,9 @@ terms without variables).  Let us now consider the following query:
 \noindent
 There are obviously infinitely many ground solutions for the query
 above, e.g.,
-\texttt{Y = nil} and \texttt{Z = cons(a,nil)}, 
-\texttt{Y = cons(a,nil)} and \texttt{Z = cons(a,cons(a,nil))}, 
-\texttt{Y = cons(b,nil)} and \texttt{Z = cons(a,cons(b,nil))}, 
+\texttt{Y = nil} and \texttt{Z = cons(a,nil)},
+\texttt{Y = cons(a,nil)} and \texttt{Z = cons(a,cons(a,nil))},
+\texttt{Y = cons(b,nil)} and \texttt{Z = cons(a,cons(b,nil))},
 \texttt{Y = cons(c,cons(b,nil))} and \texttt{Z = cons(a,cons(c,cons(b,nil)))},
 etc.  However, all the ground solutions for the query above can be
 elegantly characterized by the property that \texttt{Z} is bound to a list
@@ -215,18 +215,18 @@ Horn clauses followed by a query: */
   syntax Query ::= "?-" Terms "."
   syntax Pgm ::= Query | Clause Pgm
 
-  
 
-/*@ Variables and literals are defined as tokens following the conventions 
+
+/*@ Variables and literals are defined as tokens following the conventions
 used in Prolog (variables start with \_ or capital letter, while literals
-start with lower case letters): */  
+start with lower case letters): */
 
 
   syntax Variable ::= Token{[\_A-Z][a-zA-Z0-9\_]*}               [onlyLabel]
   syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel]
 
 
-  
+
 /*@ \subsection{Normalizing the definition}
 
 The following simple macros ensure that all clauses will have both a

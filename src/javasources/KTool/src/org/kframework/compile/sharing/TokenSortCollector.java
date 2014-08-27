@@ -5,21 +5,15 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
-import org.kframework.kil.Terminal;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
-import org.kframework.krun.K;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.HashSet;
 import java.util.Set;
-
 
 /**
  * Visitor collecting the names of the sorts with lexical productions (i.e.,
@@ -29,28 +23,28 @@ import java.util.Set;
  */
 public class TokenSortCollector extends BasicVisitor {
 
-    private final Set<String> tokenSorts = new HashSet<String>();
-    
-    private final Set<String> nonTokenSorts = new HashSet<String>();
-    
+    private final Set<Sort> tokenSorts = new HashSet<>();
+
+    private final Set<Sort> nonTokenSorts = new HashSet<>();
+
     /**
      * Collects the names of all token sorts within a specified
      * {@code Definition}.
-     * 
+     *
      * @param definition
      *            the specified definition
      * @param context
      *            the context
      * @return a set representing the names of all token sorts
-     * 
+     *
      * @see TokenSortCollector
      */
-    public static Set<String> collectTokenSorts(Definition definition, Context context) {
+    public static Set<Sort> collectTokenSorts(Definition definition, Context context) {
         TokenSortCollector collector = new TokenSortCollector(context);
         collector.visitNode(definition);
         return collector.tokenSorts;
     }
-    
+
     private KompileOptions kompileOptions;
 
     private TokenSortCollector(Context context) {
@@ -60,7 +54,7 @@ public class TokenSortCollector extends BasicVisitor {
 
     @Override
     public Void visit(Production production, Void _) {
-        if (kompileOptions.backend.java() || K.backend.equals("java")) {
+        if (!kompileOptions.experimental.legacyKast) {
             checkIllegalProduction(production);
         } else {
             if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
@@ -69,29 +63,28 @@ public class TokenSortCollector extends BasicVisitor {
         }
         return null;
     }
-    
+
     /**
      * Checks if a specified production is valid w.r.t. its sort: namely, a
      * lexical production should have a token sort and a non-lexical production
      * should have a non-token sort. Throws a K exception when one of the two
      * restrictions is violated. Currently, this check is only enabled in the
      * Java backend.
-     * 
+     *
      * @param production
      *            the specified production
      */
     private void checkIllegalProduction(Production production) {
-        String sort = production.getSort();
-        
+        Sort sort = production.getSort();
+
         if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {
             if (nonTokenSorts.contains(sort)) {
                 String msg = "Cannot subsort a lexical production to a non-token sort:\nsyntax "
                         + sort + " ::= " + production;
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER, msg,
-                        production.getFilename(), production.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg,
+                        this, production);
             }
-            
+
             tokenSorts.add(sort);
         }
 
@@ -105,27 +98,25 @@ public class TokenSortCollector extends BasicVisitor {
             if (tokenSorts.contains(sort)) {
                 String msg = "Cannot subsort a non-lexical production to a token sort:\nsyntax "
                         + sort + " ::= " + production;
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER, msg,
-                        production.getFilename(), production.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, production);
             }
-            
+
             nonTokenSorts.add(sort);
         }
     }
 
     @Override
-    public Void visit(Rule node, Void _) { 
+    public Void visit(Rule node, Void _) {
         return null;
     }
 
     @Override
-    public Void visit(org.kframework.kil.Context node, Void _) { 
+    public Void visit(org.kframework.kil.Context node, Void _) {
         return null;
     }
 
     @Override
-    public Void visit(Configuration node, Void _) { 
+    public Void visit(Configuration node, Void _) {
         return null;
     }
 

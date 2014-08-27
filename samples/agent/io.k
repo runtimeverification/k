@@ -8,15 +8,15 @@ module IO-SYNTAX imports SEQ-SYNTAX
                | "print" Exp [prnt, strict]
 endmodule
 
-  
-module IO 
+
+module IO
   imports IO-SYNTAX
   imports SEQ
-  imports INT-EXP 
-  configuration <k> $PGM:Exp </k>  
+  imports INT-EXP
+  configuration <k> $PGM:Exp </k>
                 <in stream="stdin"> .List </in> <out stream="stdout"> .List </out>
-   rule <k> read => I:Int ...</k> 
-        <in> ListItem(I) => . ...</in>
-   rule <k> print V:Val => skip ...</k> 
-        <out>... . => ListItem(V) </out>
+   rule <k> read => I:Int ...</k>
+        <in> ListItem(I) => .List ...</in>
+   rule <k> print V:Val => skip ...</k>
+        <out>... .List => ListItem(V) </out>
 endmodule

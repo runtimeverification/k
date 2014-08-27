@@ -6,9 +6,8 @@ import java.util.ArrayList;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Rewrite;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -32,7 +31,7 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
     public ASTNode visit(Rewrite rw, Void _) throws ParseFailedException {
         if (parent != null || parentks != null || parentmi != null) {
             String msg = "Due to typing errors, rewrite is not greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, rw.getFilename(), rw.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, rw.getSource(), rw.getLocation());
             throw new PriorityException(kex);
         }
 
@@ -43,29 +42,10 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
     }
 
     @Override
-    public ASTNode visit(MapItem mi, Void _) throws ParseFailedException {
-        parent = null;
-        parentks = null;
-
-        Term t = mi.getKey();
-        parentmi = t instanceof Rewrite || t instanceof Ambiguity ? mi : null;
-        mi.setKey((Term) this.visitNode(t));
-
-        t = mi.getValue();
-        parentmi = t instanceof Rewrite || t instanceof Ambiguity ? mi : null;
-        mi.setValue((Term) this.visitNode(t));
-
-        parentks = null;
-        parent = null;
-        parentmi = null;
-        return visit((Term) mi, _);
-    }
-
-    @Override
     public ASTNode visit(KSequence ks, Void _) throws ParseFailedException {
         if (parent != null || parentks != null) {
             String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
-            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
+            KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getSource(), ks.getLocation());
             throw new PriorityException(kex);
         }
 
@@ -101,7 +81,7 @@ public class CheckBinaryPrecedenceFilter extends ParseForestTransformer {
             tc.getContents().set(1, (Term) this.visitNode(t));
         } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
-                if (tc.getProduction().getItems().get(i) instanceof Sort) {
+                if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
                     // look for the outermost element
                     Term t = tc.getContents().get(j);
                     if ((i == 0 || i == tc.getProduction().getItems().size() - 1) && (t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence)) {

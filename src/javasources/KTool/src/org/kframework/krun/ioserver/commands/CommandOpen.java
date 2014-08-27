@@ -12,7 +12,7 @@ public class CommandOpen extends Command {
 
     private String path;
     private String mode;
-    
+
     public CommandOpen(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
         super(args, socket, logger, fs); //, maudeId);
 

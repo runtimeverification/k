@@ -10,8 +10,8 @@ import org.kframework.kil.visitors.Visitor;
 public class KInjectedLabel extends Term implements Interfaces.MutableParent<Term, Enum<?>> {
     protected Term term;
 
-    public KInjectedLabel(String location, String filename) {
-        super(location, filename, KSorts.KLABEL);
+    public KInjectedLabel(Location location, Source source) {
+        super(location, source, Sort.KLABEL);
     }
 
     public KInjectedLabel(KInjectedLabel l) {
@@ -20,7 +20,7 @@ public class KInjectedLabel extends Term implements Interfaces.MutableParent<Ter
     }
 
     public KInjectedLabel(Term t) {
-        super(KSorts.KLABEL);
+        super(Sort.KLABEL);
         term = t;
     }
 
@@ -32,19 +32,20 @@ public class KInjectedLabel extends Term implements Interfaces.MutableParent<Ter
         this.term = term;
     }
 
+    @Override
     public String toString() {
         return "# " + term;
     }
 
-    public static String getInjectedSort(String sort) {
-        if (sort.equals("BagItem"))
-            return "Bag";
-        if (sort.equals("SetItem"))
-            return "Set";
-        if (sort.equals("MapItem"))
-            return "Map";
-        if (sort.equals("ListItem"))
-            return "List";
+    public static Sort getInjectedSort(Sort sort) {
+        if (sort.equals(Sort.BAG_ITEM))
+            return Sort.BAG;
+        if (sort.equals(Sort.SET_ITEM))
+            return Sort.SET;
+        if (sort.equals(Sort.MAP_ITEM))
+            return Sort.MAP;
+        if (sort.equals(Sort.LIST_ITEM))
+            return Sort.LIST;
         return sort;
     }
 

@@ -10,7 +10,7 @@ import org.kframework.kil.ASTNode;
  * class serves as an adapter class: method {@code transform} simply recurs with
  * its argument being casted to a super-class until that argument becomes a
  * {@code JavaSymbolicObject}.
- * 
+ *
  * @author Traian
  */
 public class LocalTransformer implements Transformer {
@@ -72,7 +72,7 @@ public class LocalTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ConstrainedTerm constrainedTerm) {
-        return transform((Term) constrainedTerm);
+        return transform((JavaSymbolicObject) constrainedTerm);
     }
 
     @Override
@@ -133,6 +133,11 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(ListLookup listLookup) {
         return transform((Term) listLookup);
+    }
+
+    @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return transform((Term) listUpdate);
     }
 
     @Override
@@ -213,7 +218,7 @@ public class LocalTransformer implements Transformer {
     public ASTNode transform(Variable variable) {
         return transform((Term) variable);
     }
-    
+
     @Override
     public ASTNode transform(BuiltinMgu mgu) {
         return transform((Term) mgu);

@@ -15,8 +15,8 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
     public ResolveHybrid(Context context) {
         super("Resolve Hybrid", context);
     }
-    
-    
+
+
     @Override
     public ASTNode visit(Module node, Void _)  {
         hybrids.clear();
@@ -27,7 +27,7 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
         node.setItems(hybrids);
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Production node, Void _)  {
         if (!node.containsAttribute("hybrid")) return node;
@@ -36,34 +36,34 @@ public class ResolveHybrid extends CopyOnWriteTransformer {
                 KApp.of(KLabelConstant.KRESULT_PREDICATE,
                         new KApp(KLabelConstant.of(((Terminal) node.getItems().get(0)).getTerminal(),
                                 context),
-                                 new Variable("Ks", KSorts.KLIST))),
+                                 new Variable("Ks", Sort.KLIST))),
                 BoolBuiltin.TRUE, context));
         rule.setRequires(new KApp(
                 KLabelConstant.KRESULT_PREDICATE,
-                new Variable("Ks", KSorts.KLIST)));
+                new Variable("Ks", Sort.KLIST)));
 
         rule.addAttribute(Attribute.PREDICATE);
         hybrids.add(rule);
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Configuration node, Void _)  {
-        
+
         return node;
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _)  {
-        
+
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Rule node, Void _)  {
-        
+
         return node;
     }
-    
- 
+
+
 }

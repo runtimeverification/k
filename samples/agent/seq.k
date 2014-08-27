@@ -4,7 +4,7 @@ module SEQ-SYNTAX
   syntax Exp ::= "skip"
              >  Exp ";" Exp                  [seq,left, strict(1)]
 endmodule
-  
+
 module SEQ
   imports SEQ-SYNTAX
   imports VAL

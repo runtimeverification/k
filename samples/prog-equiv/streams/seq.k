@@ -38,12 +38,12 @@ module STREAM-SYNTAX
                 > Id "(" IExps ")" [strict(2)]
                 > IExp "<|" BExp "|>" IExp [strict(2)]
                 | IExp "+" IExp [strict]
- 
+
   syntax IExps ::= List{IExp,","} [strict]
   //@ Stream Expressions
 
 
-  syntax SExp ::= Id 
+  syntax SExp ::= Id
                 | "tl" "(" SExp ")" [strict, prefer]
                 | "(" SExp ")" [bracket]
                 > Id "(" SExps ")" [strict(2)]
@@ -67,13 +67,13 @@ module STREAM-SYNTAX
   syntax Ids ::= List{Id,","}
   syntax SSpecs ::= SSpec | SSpec SSpecs [right]
 
-/*@ A program is a sequence of specification followed by an 
+/*@ A program is a sequence of specification followed by an
   expression to be evaluated. If the expression is a stream one, then
   the evaluation is a infinite process and therefore the debugger should
   be used for such cases.
 */
 
-  syntax SPgm ::= SSpecs Exp 
+  syntax SPgm ::= SSpecs Exp
 
 
 /*@
@@ -84,11 +84,11 @@ module STREAM-SYNTAX
 
   syntax EqvPgm ::= "<k>" SExp "</k>"
                     "<sspecs>" SSpecs "</sspecs>"
-                    "~" 
+                    "~"
                     "<k>" SExp "</k>"
                     "<sspecs>" SSpecs "</sspecs>" ";"
 
-  syntax EqvPgms ::= EqvPgm | EqvPgms EqvPgms [left] 
+  syntax EqvPgms ::= EqvPgm | EqvPgms EqvPgms [left]
 
   syntax Start ::= EqvPgms
 
@@ -131,10 +131,10 @@ module SYMBOLIC-DOMAIN
 This implication is used to test satisfaction relation between the circular hypothesis and
 the current confuguration. Therefore we assume that it is of the form
 $\pattern{\pi}{\phi}\implies \pattern{\pi'}{\phi'}$, where $\pattern{\pi}{\phi}$ will play
-the role of the current configuration, and $\pattern{\pi'}{\phi'}$ the role of the 
+the role of the current configuration, and $\pattern{\pi'}{\phi'}$ the role of the
 hypothesis. Further, we always assume that $\pattern{\pi'}{\phi'}$ is in abstract form,
-i.e., of the form $(\exists X)\pattern{\overline{\pi}'}{\phi'\land \sigma}$, 
-where \emph{$\overline{\pi}$ is an abstraction of $\pi$ via $\sigma^\pi$} 
+i.e., of the form $(\exists X)\pattern{\overline{\pi}'}{\phi'\land \sigma}$,
+where \emph{$\overline{\pi}$ is an abstraction of $\pi$ via $\sigma^\pi$}
 (i.e., $\sigma^\pi(\overline{\pi})=\pi$), and $\sigma^\pi$ in the pattern condition is viewed
 as a conjunction formula $\bigwedge x = \sigma^\pi(x)$ (the equality is in the symbolic
 domain.\\
@@ -142,7 +142,7 @@ Since the current pattern condition is always satisfiable, the implication is eq
 $\phi\land \bigwedge\sigma\implies \phi'$, where $\sigma$ is the substitution that satisfies
 $\sigma(\pi')=\sigma(pi)$ (we assume that the abstractions are defined such that such a
 substitution always exists).
- 
+
 
 /*@
   Try to compute the substitution between two programs.
@@ -166,7 +166,7 @@ substitution always exists).
        andBool (K2' =/=K .K)
 
 
-  
+
   rule getSubst(#symSExp(X:K), SE:SExp) => (#symSExp(X) replBy SE)
 
   rule getSubst(#symInt(X:K), IE:IExp) => (#symInt(X) replBy IE)
@@ -175,9 +175,9 @@ substitution always exists).
 
   rule getSubst(V:VariableBSExp, SE:SExp) => (V replBy SE)
 
-  rule getSubst(hd(SE:SExp), hd(SE':SExp)) => getSubst(SE, SE') 
+  rule getSubst(hd(SE:SExp), hd(SE':SExp)) => getSubst(SE, SE')
 
-  rule getSubst(tl(SE:SExp), tl(SE':SExp)) => getSubst(SE, SE') 
+  rule getSubst(tl(SE:SExp), tl(SE':SExp)) => getSubst(SE, SE')
 
   rule getSubst(F:Id(SEs:SExps), F(SEs':SExps)) => getSubst(SEs, SEs')
 
@@ -219,7 +219,7 @@ substitution always exists).
 
 /*@
   The observational equivalence relation is defined by checking the equality of
-  the observer variables in the two configurations (see how \texttt{eqObs} is 
+  the observer variables in the two configurations (see how \texttt{eqObs} is
   called.
 */
 
@@ -232,7 +232,7 @@ substitution always exists).
        true
 */
 /*
-  It is easier to test OUT1 ==K OUT2 each time we need to compute the 
+  It is easier to test OUT1 ==K OUT2 each time we need to compute the
   observability relation.
 */
 
@@ -295,7 +295,7 @@ substitution always exists).
   syntax SExp ::= removeLabels(SExp) [function]
 
 /*
-  syntax SExp ::= Id 
+  syntax SExp ::= Id
                 | "tl" "(" SExp ")" [strict, prefer]
                 | "(" SExp ")" [bracket]
                 > Id "(" SExps ")" [strict(2)]
@@ -330,17 +330,17 @@ module SEQ
   The cell \texttt{hypos} is for storing the hypotheses met during
   the proving process. It has a structure similar to that of goals, but
   where the names of cells are changed in order to forbid the rules firing
-  for hypotheses, in this way the hypotheses are kept unchanged. 
+  for hypotheses, in this way the hypotheses are kept unchanged.
   The cell \texttt{observers} stores the list of the observer variables.
 */
 
-  configuration <T color="yellow"> 
-                  <goals> 
+  configuration <T color="yellow">
+                  <goals>
                     <goal multiplicity="*">
                       <config multiplicity="*">
                         <k color="green"> $PGM:EqvPgms  </k>
                         <sspecs color="red"> .Map </sspecs>
-                        <out> [] </out> 
+                        <out> [] </out>
                       </config>
                       <kb> .Map </kb>
                     </goal>
@@ -349,18 +349,18 @@ module SEQ
                     <hypo multiplicity="*">
                       <patt1>
                         <hk1 color="green"> .K  </hk1>
-                        <hout1> [] </hout1> 
+                        <hout1> [] </hout1>
                       </patt1>
                       <patt2>
                         <hk2 color="green"> .K  </hk2>
-                        <hout2> [] </hout2> 
+                        <hout2> [] </hout2>
                       </patt2>
                     </hypo>
                   </hypos>
                 </T>
 
  //@ The right-hand side of a specification is stored as a $\lambda$-expression:
-  syntax K ::= "lambda" "(" Ids ")" Exp
+  syntax KItem ::= "lambda" "(" Ids ")" Exp
 
 /*@ The result values are integers and stream expression for that at  least
   the head is evaluated to an integer:
@@ -378,7 +378,7 @@ module SEQ
          <config> <k> EP:EqvPgm EPs:EqvPgms </k> Cfg:Bag </config>
          Cfg':Bag
        </goal>
-       => 
+       =>
        <goal> <config> <k> EP </k> Cfg </config> Cfg' </goal>
        <goal> <config> <k> EPs </k> Cfg </config> Cfg' </goal>
 
@@ -413,7 +413,7 @@ module SEQ
 
   rule false & _:BExp => false
 
-  rule IE:IExp <| true |> _:IExp => IE 
+  rule IE:IExp <| true |> _:IExp => IE
 
   rule _:IExp <| false |> IE:IExp => IE
 
@@ -442,7 +442,7 @@ module SEQ
 
   rule tl(_:Int : SE:SExp) => SE [anywhere]
   rule tl('_._(_:Id ,, _:Int : SE:SExp)) => SE [anywhere]
-  
+
   //@ When the head is completely evaluated is moved in the cell out:
   rule <k> I:Int => . </k>
        <out> SE:SExp => append(I, SE) </out>
@@ -478,7 +478,7 @@ module SEQ
           ( L:Id . SE:SExp
             =>
             lbldStmt(L, SE) ~> SE // ~> K) ~> SE
-          ) // ~> K:K 
+          ) // ~> K:K
        </k>
 
 
@@ -486,7 +486,7 @@ module SEQ
 /*@
   The next rule implements the basic entailment relation. The current version
   is incomplete because we have to show it is sound on the tested (it is depending on
-  hpw the observation relation is defined). 
+  hpw the observation relation is defined).
   We have to elaborate the implementation of the basic
   entailment.
 */
@@ -512,7 +512,7 @@ module SEQ
 
 
 /*@
-  The followings defines (special) cases when a current goal is a 
+  The followings defines (special) cases when a current goal is a
   consequence of the circular hypotheses.\\
   This relation must be more elaborated.
 */
@@ -521,16 +521,16 @@ module SEQ
   We use a new syntactic construct that help us to store hypotheses. The basic
   idea is to add the hypotheses in a controlled way. For instance, we may add
   hypothesis only when on the top in the two k cells we have  statement with
-  the same label (the label is a kind of "rendevous" synchronisarion). 
+  the same label (the label is a kind of "rendevous" synchronisarion).
 */
 
-  syntax K ::= "storeHypo" "(" K ")"   // for storing hypotheses
-            |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
-                                              // statement
-            |  "checkHypo" "(" K ","  K "," HyposCellFragment ")"
-               // for checking hypotheses one by one 
+  syntax KItem ::= "storeHypo" "(" K ")"   // for storing hypotheses
+                |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
+                                                  // statement
+                |  "checkHypo" "(" K ","  K "," HyposCellFragment ")"
+                   // for checking hypotheses one by one
 
-  syntax K ::= "break"  // to temporarily stop one of the two programs
+  syntax KItem ::= "break"  // to temporarily stop one of the two programs
 
 
 /*@
@@ -544,14 +544,14 @@ module SEQ
   Note: the semantics of lbldStmt is similar to that of threads synchronization.
 */
 
-  rule [stmt-sync] : 
+  rule [stmt-sync] :
        <goal>
-         <config> 
+         <config>
            <k> lbldStmt(L:Id, SE1:K) => checkHypo(SE1, SE2, Hypos) ...</k>
            <sspecs> SSp1:Map </sspecs>
            <out> OUT1:SExp </out>
-         </config> 
-         <config> 
+         </config>
+         <config>
            <k> lbldStmt(L:Id, SE2:K) => break ...</k>
            <sspecs> SSp2:Map </sspecs>
            <out> OUT2:SExp </out>
@@ -562,25 +562,25 @@ module SEQ
        </hypos>
 
 
-  /*@ The case when the set of hypotheses is empty and 
+  /*@ The case when the set of hypotheses is empty and
        the configurations are observational equal.
        The formula is stored as circularity hypo
   */
 
-  rule [check-hypo-no-hyp-obseq] : 
+  rule [check-hypo-no-hyp-obseq] :
        <goal>
-         <config> 
+         <config>
            <k> checkHypo(SE1:K, SE2:K, .Bag)
                 =>
                 storeHypo(SE1)
            ...</k>
            <out> OUT1:SExp </out>
-         ...</config> 
-         <config> 
+         ...</config>
+         <config>
            <k> break => storeHypo(SE2) ...</k>
            <out> OUT2:SExp </out>
          ...</config>
-       ...</goal> 
+       ...</goal>
        when OUT1 ==K OUT2
        [transition]
 
@@ -604,32 +604,32 @@ module SEQ
 
   rule [check-hypo] :
        (<goal>
-         <config> 
-           <k> checkHypo(SE1:K, SE2:K, 
-       		               	     <hypo>     
-       				       <patt1>        
-         			         <hk1>
-          				   SE1':K 
-         				 </hk1> 
-         				 <hout1>
-          				   OUT1':SExp
-          				 </hout1> 
-       				       </patt1> 
-       				       <patt2>        
-        			         <hk2> 
-          				   SE2':K
-					 </hk2> 
-         				 <hout2>
-         				   OUT2':SExp
-         				 </hout2> 
-       				       </patt2> 
-     				     </hypo>
+         <config>
+           <k> checkHypo(SE1:K, SE2:K,
+                                       <hypo>
+                              <patt1>
+                              <hk1>
+                             SE1':K
+                          </hk1>
+                          <hout1>
+                             OUT1':SExp
+                           </hout1>
+                              </patt1>
+                              <patt2>
+                             <hk2>
+                             SE2':K
+                     </hk2>
+                          <hout2>
+                            OUT2':SExp
+                          </hout2>
+                              </patt2>
+                          </hypo>
                                      Hypos':Bag
                       )
            ...</k>
            <out> OUT1 </out>
-         ...</config> 
-         <config> 
+         ...</config>
+         <config>
            <k> break ...</k>
            <out> OUT2 </out>
          ...</config>
@@ -651,32 +651,32 @@ module SEQ
 
   rule [check-hypo] :
        (<goal>
-         <config> 
-           <k> checkHypo(SE1:K, SE2:K, 
-       		               	     <hypo>     
-       				       <patt1>        
-         			         <hk1>
-          				   SE1':K 
-         				 </hk1> 
-         				 <hout1>
-          				   OUT1':SExp
-          				 </hout1> 
-       				       </patt1> 
-       				       <patt2>        
-        			         <hk2> 
-          				   SE2':K
-					 </hk2> 
-         				 <hout2>
-         				   OUT2':SExp
-         				 </hout2> 
-       				       </patt2> 
-     				     </hypo>
+         <config>
+           <k> checkHypo(SE1:K, SE2:K,
+                                       <hypo>
+                              <patt1>
+                              <hk1>
+                             SE1':K
+                          </hk1>
+                          <hout1>
+                             OUT1':SExp
+                           </hout1>
+                              </patt1>
+                              <patt2>
+                             <hk2>
+                             SE2':K
+                     </hk2>
+                          <hout2>
+                            OUT2':SExp
+                          </hout2>
+                              </patt2>
+                          </hypo>
                                      Hypos':Bag
                       )
            ...</k>
            <out> OUT1 </out>
-         ...</config> 
-         <config> 
+         ...</config>
+         <config>
            <k> break ...</k>
            <out> OUT2 </out>
          ...</config>
@@ -693,34 +693,34 @@ module SEQ
 
   rule [check-hypo] :
        <goal>
-         <config> 
-           <k> checkHypo(SE1:K, SE2:K, 
-       		               	    (<hypo>     
-       				       <patt1>        
-         			         <hk1>
-          				   SE1':K 
-         				 </hk1> 
-         				 <hout1>
-          				   OUT1':SExp
-          				 </hout1> 
-       				       </patt1> 
-       				       <patt2>        
-        			         <hk2> 
-          				   SE2':K
-					 </hk2> 
-         				 <hout2>
-         				   OUT2':SExp
-         				 </hout2> 
-       				       </patt2> 
-     				     </hypo>
+         <config>
+           <k> checkHypo(SE1:K, SE2:K,
+                                      (<hypo>
+                              <patt1>
+                              <hk1>
+                             SE1':K
+                          </hk1>
+                          <hout1>
+                             OUT1':SExp
+                           </hout1>
+                              </patt1>
+                              <patt2>
+                             <hk2>
+                             SE2':K
+                     </hk2>
+                          <hout2>
+                            OUT2':SExp
+                          </hout2>
+                              </patt2>
+                          </hypo>
                                      =>
                                      .)
                                     Hypos':Bag
                       )
            ...</k>
            <out> OUT1 </out>
-         ...</config> 
-         <config> 
+         ...</config>
+         <config>
            <k> break ...</k>
            <out> OUT2 </out>
          ...</config>
@@ -736,21 +736,21 @@ module SEQ
   stored in abstract form.
   */
   rule [store-hypo] :
-       <config> 
+       <config>
          <k> storeHypo(K1:K) => restore(K1) ...</k> // just for conformance
-       ...</config> 
+       ...</config>
 //       [transition]
 
 
-  syntax K ::= "restore" "(" K ")"
+  syntax KItem ::= "restore" "(" K ")"
 
   rule [restore] :
        <goal>
-         <config> 
+         <config>
            <k> restore(K1:K) => . ...</k>
              <out> OUT1 </out>
-         ...</config> 
-         <config> 
+         ...</config>
+         <config>
            <k> restore(K2:K) => . ...</k>
              <out> OUT2 </out>
          ...</config>
@@ -760,11 +760,11 @@ module SEQ
          =>
          Hypos
          <hypo>
-           <patt1> 
+           <patt1>
              <hk1> removeLabels(K1) </hk1>
              <hout1> OUT1 </hout1>
-           </patt1> 
-           <patt2> 
+           </patt1>
+           <patt2>
              <hk2> removeLabels(K2) </hk2>
              <hout2> OUT2 </hout2>
            </patt2>
@@ -775,15 +775,15 @@ module SEQ
 
   /*@
      The case when both statements are labeled and
-     the configurations are NOT observational equal 
-  */ 
+     the configurations are NOT observational equal
+  */
   rule [store-hypo-fail]:
        <goal>
-         <config> 
+         <config>
            <k> lbldStmt(L1:Id, K1:K) => . ...</k>
            <out> OUT1:SExp </out>
-         ...</config> 
-         <config> 
+         ...</config>
+         <config>
            <k> lbldStmt(L2:Id, K2:K) => . ...</k>
            <out> OUT2:SExp </out>
          ...</config>
@@ -800,7 +800,7 @@ module SEQ
 
   rule [initial] :
        <config>
-         <k> 
+         <k>
            <k> SE1:SExp </k>
            <sspecs> SSs1:SSpecs </sspecs>
            ~

@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
-<!-- Expected to be called from k/tutorial, with the command
-
-  ktest tests/config.xml
-
--->
 
 <tests>
-
   <include file="../1_k/tests/config.xml" directory="1_k" />
-<!-- no languages tested yet
-   <include file="../2_languages/tests/config.xml" directory="2_languages" />
--->
-
+  <include file="../2_languages/tests/config.xml" directory="2_languages" />
 </tests>
+

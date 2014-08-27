@@ -1,11 +1,14 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -52,9 +55,9 @@ public class XmlLoader {
                     Element node = (Element) ch.item(i);
                     if (node.getNodeName().equals(Tag.localized)) {
                         String msg = node.getAttribute("message");
-                        String file = node.getAttribute("filename");
-                        String location = node.getAttribute("loc");
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+                        Source source = ASTNode.getElementSource(node);
+                        Location location = ASTNode.getElementLocation(node);
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, source, location));
                     }
                 }
             }
@@ -76,9 +79,9 @@ public class XmlLoader {
                         String msg = node.getAttribute("message");
                         if (msg.equals("Unexpected end of file"))
                             msg = "Unexpected end of " + fromWhere;
-                        String file = node.getAttribute("filename");
-                        String location = node.getAttribute("loc");
-                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, file, location));
+                        Source source = ASTNode.getElementSource(node);
+                        Location location = ASTNode.getElementLocation(node);
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, attr + ": " + msg, source, location));
                     }
                 }
             }
@@ -125,13 +128,16 @@ public class XmlLoader {
         return node;
     }
 
-    public static Node addFilename(Node node, String filename) {
+    public static Node addSource(Node node, Source source) {
+        if (source == null) {
+            return node;
+        }
         if (Node.ELEMENT_NODE == node.getNodeType()) {
             NamedNodeMap attr = node.getAttributes();
             Node item = attr.getNamedItem(Tag.location);
             if (item != null) {
                 Element e = (Element) node;
-                    e.setAttribute("filename", filename);
+                e.setUserData(Constants.SOURCE_ATTR, source, null);
             }
         }
         NodeList list = node.getChildNodes();
@@ -140,7 +146,7 @@ public class XmlLoader {
             Node childNode = list.item(i);
 
             // Visit child node
-            addFilename(childNode, filename);
+            addSource(childNode, source);
         }
         return node;
     }
@@ -148,7 +154,7 @@ public class XmlLoader {
     public static int getLocNumber(String loc, int place) {
         if (loc.equals("generated"))
             return -1;
-        
+
         String[] str = loc.split("[\\(,\\)]");
         return Integer.parseInt(str[place + 1]);
     }
@@ -156,7 +162,7 @@ public class XmlLoader {
     public static void writeXmlFile(Document doc, String filename) {
         try {
             // Prepare the DOM document for writing
-            Source source = new DOMSource(doc);
+            javax.xml.transform.Source source = new DOMSource(doc);
 
             // Prepare the output file
             File file = new File(filename);

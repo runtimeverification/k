@@ -1,10 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -12,6 +12,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
+import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -22,14 +23,14 @@ import com.google.common.collect.Multimap;
  *
  * @author AndreiS
  */
-public class KLabelConstant extends KLabel {
+public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /* KLabelConstant cache */
-    private static final HashMap<String, KLabelConstant> cache = new HashMap<String, KLabelConstant>();
+    private static final PatriciaTrie<KLabelConstant> cache = new PatriciaTrie<>();
 
     /* un-escaped label */
     private final String label;
-    
+
     /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
     private final ImmutableList<Production> productions;
 
@@ -38,23 +39,54 @@ public class KLabelConstant extends KLabel {
      * generates this {@code KLabelConstant}
      */
     private final boolean isFunction;
-    private final TermContext termContext;
 
-    private KLabelConstant(String label, TermContext termContext) {
+    /*
+     * boolean flag set iff a production tagged with "pattern" generates
+     * this {@code KLabelConstant}
+     */
+    private final boolean isPattern;
+
+    private final boolean isSortPredicate;
+
+    private final String smtlib;
+
+    private final Sort predicateSort;
+
+    /**
+     * Specifies if this {@code KLabelConstant} is a list label,
+     * e.g. {@code '.List{","}}.
+     */
+    private final boolean isListLabel;
+
+    /**
+     * Stores the associated list terminator if this {@code KLabelConstant} is a
+     * list label.
+     */
+    private final KItem listTerminator;
+
+    private KLabelConstant(String label, Context context) {
         this.label = label;
-        productions = ImmutableList.copyOf(termContext.definition().context().productionsOf(label));
-        
+        productions = context != null ?
+                ImmutableList.<Production>copyOf(context.productionsOf(label)) :
+                ImmutableList.<Production>of();
+
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
         boolean isFunction = false;
+        boolean isPattern = false;
+        String smtlib = null;
         if (!label.startsWith("is")) {
+            predicateSort = null;
+
             Iterator<Production> iterator = productions.iterator();
             if (iterator.hasNext()) {
                 Production fstProd = iterator.next();
                 isFunction = fstProd.containsAttribute(Attribute.FUNCTION.getKey())
                         || fstProd.containsAttribute(Attribute.PREDICATE.getKey());
+                isPattern = fstProd.containsAttribute(Attribute.PATTERN_KEY);
+                smtlib = fstProd.getAttribute(Attribute.SMTLIB_KEY);
             }
-            
+
             while (iterator.hasNext()) {
                 Production production = iterator.next();
                 /*
@@ -68,13 +100,36 @@ public class KLabelConstant extends KLabel {
                         + label
                         + " is a function symbol because there are multiple productions associated with this KLabel: "
                         + productions;
+                assert isPattern == production.containsAttribute(Attribute.PATTERN_KEY) :
+                        "Cannot determine if the KLabel " + label
+                        + " is a pattern symbol because there are multiple productions associated with this KLabel: "
+                        + productions;
+                assert smtlib == production.getAttribute(Attribute.SMTLIB_KEY) :
+                        "Cannot determine the smtlib attribute of the KLabel " + label
+                        + " because there are multiple productions associated with this KLabel: "
+                        + productions;
             }
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
+            predicateSort = Sort.of(label.substring("is".length()));
         }
+        this.isSortPredicate = predicateSort != null;
         this.isFunction = isFunction;
-        this.termContext = termContext;
+        this.isPattern = isPattern;
+        this.smtlib = smtlib;
+
+        this.listTerminator = buildListTerminator(context);
+        this.isListLabel = listTerminator != null;
+    }
+
+    private KItem buildListTerminator(Context context) {
+        if (!context.listKLabels.get(label).isEmpty()) {
+            Production production = context.listKLabels.get(label).iterator().next();
+            String separator = production.getListDecl().getSeparator();
+            return new KItem(this, KList.EMPTY, Sort.SHARP_BOT.getUserListSort(separator), true);
+        }
+        return null;
     }
 
     /**
@@ -85,20 +140,20 @@ public class KLabelConstant extends KLabel {
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, TermContext termContext) {
+    public static KLabelConstant of(String label, Context context) {
         assert label != null;
 
         KLabelConstant kLabelConstant = cache.get(label);
         if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, termContext);
+            kLabelConstant = new KLabelConstant(label, context);
             cache.put(label, kLabelConstant);
         }
         return kLabelConstant;
     }
 
     /**
-     * Returns true iff no production tagged with "function" or "predicate" generates this {@code
-     * KLabelConstant}.
+     * Returns true iff no production tagged with "function" or "predicate" or "pattern"
+     * generates this {@code KLabelConstant}.
      */
     @Override
     public boolean isConstructor() {
@@ -114,6 +169,48 @@ public class KLabelConstant extends KLabel {
         return isFunction;
     }
 
+    /**
+     * Returns true iff a production tagged with "pattern" generates
+     * this {@code KLabelConstant}.
+     */
+    @Override
+    public boolean isPattern() {
+        return isPattern;
+    }
+
+    public String smtlib() {
+        return smtlib;
+    }
+
+    /**
+     * Returns true if this {@code KLabelConstant} is a sort membership
+     * predicate; otherwise, false.
+     */
+    public boolean isSortPredicate() {
+        return isSortPredicate;
+    }
+
+    /**
+     * Returns the predicate sort if this {@code KLabelConstant} represents a
+     * sort membership predicate; otherwise, {@code null}.
+     */
+    public Sort getPredicateSort() {
+        assert isSortPredicate();
+        return predicateSort;
+    }
+
+    public boolean isListLabel() {
+        return isListLabel;
+    }
+
+    /**
+     * Returns the associated list terminator if this {@code KLabelConstant} is
+     * a list label; otherwise, {@code null}.
+     */
+    public KItem getListTerminator() {
+        return listTerminator;
+    }
+
     public String label() {
         return label;
     }
@@ -124,7 +221,7 @@ public class KLabelConstant extends KLabel {
     public List<Production> productions() {
         return productions;
     }
-    
+
     @Override
     public boolean equals(Object object) {
         /* {@code KLabelConstant} objects are cached to ensure uniqueness */
@@ -132,11 +229,13 @@ public class KLabelConstant extends KLabel {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = label.hashCode();
-        }
-        return hashCode;
+    protected int computeHash() {
+        return label.hashCode();
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        return false;
     }
 
     @Override
@@ -177,13 +276,17 @@ public class KLabelConstant extends KLabel {
         return kLabelConstant;
     }
 
-    public TermContext termContext() {
-        return termContext;
+    public boolean isMetaBinder() {
+        return hasAttribute("metabinder");
     }
 
     public boolean isBinder() {
+        return hasAttribute("binder");
+    }
+
+    private boolean hasAttribute(String attribute) {
         for (Production production : productions) {
-            if (production.containsAttribute("binder")) {
+            if (production.containsAttribute(attribute)) {
                 return true;
                 //assuming is binder if one production says so.
             }
@@ -191,10 +294,17 @@ public class KLabelConstant extends KLabel {
         return false;
     }
 
+    /**
+     * Searches for and retieves (if found) a binder map for this label
+     * See {@link org.kframework.kil.Production#getBinderMap()}
+     *
+     * @return the binder map for this label (or {@code null} if no binder map was defined.
+     */
     public Multimap<Integer, Integer> getBinderMap() {
         for (Production production : productions) {
-            if (production.containsAttribute("binder")) {
-                return production.getBinderMap();
+            Multimap<Integer, Integer> binderMap = production.getBinderMap();
+            if (binderMap != null) {
+                return binderMap;
                 //assuming is binder if one production says so.
             }
         }

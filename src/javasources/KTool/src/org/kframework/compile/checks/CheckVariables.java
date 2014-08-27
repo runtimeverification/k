@@ -6,7 +6,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -39,7 +38,7 @@ public class CheckVariables extends BasicVisitor {
     public static final String UNBOUND_VARS = "hasUnboundVars";
 
     KompileOptions options;
-    
+
     public CheckVariables(Context context) {
         super(context);
         options = context.kompileOptions;
@@ -62,8 +61,17 @@ public class CheckVariables extends BasicVisitor {
 
     @Override
     public Void visit(Variable node, Void _) {
-        if (node.isFresh()) {
-             if (current == right  && !inCondition) {
+        boolean freshConstant = node.isFreshConstant();
+        if (node.isFreshVariable() || freshConstant) {
+            if (freshConstant && !context.freshFunctionNames.containsKey(node.getSort())) {
+                GlobalSettings.kem.registerCompilerError(
+                        "Unsupported sort of fresh variable: " + node.getSort()
+                                + "\nOnly sorts "
+                                + context.freshFunctionNames.keySet()
+                                + " admit fresh variables.", this, node);
+            }
+
+            if (current == right  && !inCondition) {
                  Integer i = fresh.get(node);
                  if (i == null) i = new Integer(1);
                  else i = new Integer(i.intValue());
@@ -71,12 +79,9 @@ public class CheckVariables extends BasicVisitor {
                  return null;
              }
              //nodes are ok to be found in rhs
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
-                    "Fresh variable \"" + node + "\" is bound in the " +
-                            "rule pattern.",
-                    getName(), node.getFilename(), node.getLocation()
-            ));
+             GlobalSettings.kem.registerCompilerError(
+                    "Fresh variable \"" + node + "\" is bound in the " + "rule pattern.",
+                    this, node);
         }
 //        System.out.println("Variable: " + node);
         Integer i = current.remove(node);
@@ -100,40 +105,6 @@ public class CheckVariables extends BasicVisitor {
     }
 
     @Override
-    public Void visit(TermCons node, Void _) {
-        if (!node.getCons().equals(MetaK.Constants.freshCons)) {
-            super.visit(node, _);
-            return null;
-        }
-        if (!inCondition) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
-                    "Fresh can only be used in conditions.",
-                    getName(), node.getFilename(), node.getLocation()));
-        }
-        final Term term = node.getContents().get(0);
-        if (!(term instanceof  Variable)) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
-                    "Fresh can only be applied to variables, but was applied to\n\t\t" + term,
-                    getName(), term.getFilename(), term.getLocation()));
-        }
-        Variable v = (Variable) term;
-        if (left.containsKey(v)) {
-            for (Variable v1 : left.keySet()) {
-                if (v1.equals(v)) {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.COMPILER,
-                            "Fresh variable \"" + v1 + "\" is bound in the rule pattern.",
-                            getName(), v1.getFilename(), v1.getLocation()));
-                }
-            }
-        }
-        left.put(v, new Integer(1));
-        return null;
-    }
-
-    @Override
     public Void visit(Sentence node, Void _) {
         inCondition = false;
         left.clear();
@@ -148,48 +119,33 @@ public class CheckVariables extends BasicVisitor {
         }
         //TODO: add checks for Ensures, too.
         for (Variable v : right.keySet()) {
-            if (MetaK.isAnonVar(v) && !v.isFresh()) {
-                GlobalSettings.kem.register(new KException(KException
-                        .ExceptionType.ERROR,
-                        KException.KExceptionGroup.COMPILER,
+            if (MetaK.isAnonVar(v) && !(v.isFreshVariable() || v.isFreshConstant())) {
+                GlobalSettings.kem.registerCompilerError(
                         "Anonymous variable found in the right hand side of a rewrite.",
-                        getName(), v.getFilename(), v.getLocation()));
+                        this, v);
             }
             if (!left.containsKey(v)) {
                 node.addAttribute(UNBOUND_VARS, "");
-                
-                /* matching logic relaxes this restriction */
-                if (!options.backend.java()) {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.COMPILER,
-                            "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
-                } else {
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
-                            KException.KExceptionGroup.COMPILER,
-                            "Unbounded Variable " + v.toString() + ".",
-                            getName(), v.getFilename(), v.getLocation()));
-                }
+                GlobalSettings.kem.registerCompilerError(
+                        "Unbounded variable " + v.toString() + "should start with ? or !.",
+                        this, v);
             }
         }
         for (Map.Entry<Variable,Integer> e : left.entrySet()) {
             final Variable key = e.getKey();
             if (fresh.containsKey(key)) {
-                GlobalSettings.kem.register(new KException(KException
-                        .ExceptionType.ERROR,
-                        KException.KExceptionGroup.COMPILER,
-                        "Variable " + key + " has the same name as a fresh " +
-                                "variable.",
-                        getName(), key.getFilename(), key.getLocation()));
+                GlobalSettings.kem.registerCompilerError(
+                        "Variable " + key + " has the same name as a fresh variable.",
+                        this, key);
             }
             if (MetaK.isAnonVar(key)) continue;
-            if (e.getValue().intValue()>1) continue;
+            if (e.getValue().intValue() > 1) continue;
             if (!right.containsKey(key)) {
                 GlobalSettings.kem.register(new KException(KException.ExceptionType.HIDDENWARNING,
                         KException.KExceptionGroup.COMPILER,
                         "Singleton variable " + key.toString() + ".\n" +
-                                "    If this is not a spelling mistake, please consider using anonymous variables.",
-                        getName(), key.getFilename(), key.getLocation()));
+                        "    If this is not a spelling mistake, please consider using anonymous variables.",
+                        getName(), key.getSource(), key.getLocation()));
             }
         }
         return null;

@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * @author andrei.arusoaie
- * 
+ *
  */
 public class Constants {
 
@@ -73,10 +73,12 @@ public class Constants {
     public static final String FUNCTION = "function";
     public static final String ANYWHERE = "anywhere";
     public static final String REGEX = "regex";
+    public static final String SOURCE_ATTR = "source";
 
     // Streams
     public static final String STDIN = "stdin";
     public static final String STDOUT = "stdout";
+    public static final String STDERR = "stderr";
 
     // Generated stuff
     public static final String GENERATED_FILENAME = "File System";

@@ -8,10 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.kframework.kil.KApp;
-import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
+import org.kframework.kil.Location;
 import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 
@@ -72,8 +72,8 @@ public abstract class Rule implements Serializable {
      */
     public static class WrapLabelRule extends KListRule {
         private final Production label;
-        private final String sort;
-        public WrapLabelRule(Production label, String sort) {
+        private final Sort sort;
+        public WrapLabelRule(Production label, Sort sort) {
             assert label != null; assert sort != null;
             this.label = label; this.sort = sort;
         }
@@ -167,7 +167,8 @@ public abstract class Rule implements Serializable {
         protected int getSuffixLength() { return 1; }
         public List<Term> applySuffix(List<Term> terms, MetaData metaData) {
             Term newTerm = terms.get(0).shallowCopy();
-            newTerm.setLocation("("+metaData.start.line+","+metaData.start.column+","+metaData.end.line+","+metaData.end.column+")");
+            newTerm.setLocation(new Location(metaData.start.line, metaData.start.column,
+                                             metaData.end.line, metaData.end.column));
             return Arrays.asList(newTerm);
         }
     }

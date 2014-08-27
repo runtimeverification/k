@@ -1,7 +1,1 @@
-Search results:
-
-Solution 1:
-Solution:K -->
-A:Term |-> C:Term
-B:Term |-> B:Term
-C:Term |-> C
+A:Term \|-> C:Term\s+B:Term \|-> B:Term\s+C:Term \|-> C

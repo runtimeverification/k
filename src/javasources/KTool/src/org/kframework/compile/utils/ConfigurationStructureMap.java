@@ -2,31 +2,26 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.Cell;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * A Map from cell names to {@link ConfigurationStructure} representing the cell
  * contents and attributes.
- * 
+ *
  * @author Traian
  */
 public class ConfigurationStructureMap implements
         Map<String, ConfigurationStructure>, Serializable {
-    Map<String, ConfigurationStructure> config;
+    LinkedHashMap<String, ConfigurationStructure> config;
 
     public ConfigurationStructureMap() {
-        this(new HashMap<String, ConfigurationStructure>());
-    }
-
-    public ConfigurationStructureMap(Map<String, ConfigurationStructure> config) {
-        this.config = config;
+        this.config = new LinkedHashMap<String, ConfigurationStructure>();
     }
 
     @Override
@@ -58,22 +53,38 @@ public class ConfigurationStructureMap implements
         ConfigurationStructure cfgStr;
         cfgStr = config.get(o.getId());
         if (cfgStr == null) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.INTERNAL,
-                    "Cell " + o + " not found in configuration"
-                    , this.getClass().getName(), o.getFilename(), o.getLocation()));
+            GlobalSettings.kem.registerInternalError(
+                    "Cell " + o + " not found in configuration", o);
         }
         return cfgStr;
+    }
+
+    /**
+     * Returns the position of a cell declared under the {@code Cell} of this
+     * {@code ConfigurationStructureMap}.
+     *
+     * @param cellLabel
+     *            the cell label
+     * @return if found, the position of the cell starting from 0; otherwise, -1
+     */
+    public int positionOf(String cellLabel) {
+        int pos = -1;
+        for (String l : config.keySet()) {
+            pos++;
+            if (l.equals(cellLabel)) {
+                return pos;
+            }
+        }
+        return -1;
     }
 
     @Override
     public ConfigurationStructure put(String s, ConfigurationStructure configurationStructure) {
         if (config.containsKey(s)) {
             Cell c = config.get(s).cell;
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.INTERNAL,
-                    "Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").", this.getClass().getName(),
-                    configurationStructure.cell.getFilename(), configurationStructure.cell.getLocation()));
+            GlobalSettings.kem.registerInternalError(
+                    "Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").",
+                    configurationStructure.cell);
         }
         return config.put(s,configurationStructure);
     }

@@ -1,8 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing.pathIndex;
 
-import org.apache.commons.collections15.MultiMap;
-import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.indexing.pathIndex.trie.PathIndexTrie;
 import org.kframework.backend.java.indexing.pathIndex.visitors.CoolingRuleVisitor;
@@ -13,7 +11,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.krun.K;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.io.Serializable;
@@ -24,6 +22,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
 
 /**
  * This class implements some variant of the Path Indexing technique.
@@ -43,6 +45,7 @@ public class PathIndex implements RuleIndex, Serializable{
     private final Set<Integer> inputRuleIndices = new LinkedHashSet<>();
     private TermVisitor termVisitor;
     private boolean hasNOKCellRules;
+    private final JavaExecutionOptions options;
 
     public enum RuleType {
         COOLING,
@@ -58,11 +61,12 @@ public class PathIndex implements RuleIndex, Serializable{
      *              the future
      *
      */
-    @Deprecated
-    public PathIndex(Definition definition) {
+    @Deprecated @Inject
+    public PathIndex(Definition definition, JavaExecutionOptions options) {
         this.definition = definition;
+        this.options = options;
         this.indexedRules = new LinkedHashMap<>();
-        termVisitor = new TermVisitor(definition.context());
+        termVisitor = new TermVisitor(definition.context(), options, false);
         buildIndex();
     }
 
@@ -71,7 +75,7 @@ public class PathIndex implements RuleIndex, Serializable{
      */
     @Override
     public void buildIndex() {
-        MultiMap<Integer, String> pStringMap = new MultiHashMap<>();
+        Multimap<Integer, String> pStringMap = ArrayListMultimap.create();
         int count = 1;
 
         //Step 1. Get all the pStrings from each of the rules
@@ -115,7 +119,7 @@ public class PathIndex implements RuleIndex, Serializable{
      * @param indexedRules Mapping of Rules to the integers used to refer to them.
      * @param pString      Mapping of Rule number to the pStrings derived from a rule.
      */
-    private void printIndices(Map<Integer, Rule> indexedRules, MultiMap<Integer,
+    private void printIndices(Map<Integer, Rule> indexedRules, Multimap<Integer,
             String> pString) {
         for (Integer n : indexedRules.keySet()) {
             System.out.println("Rule " + n + ": ");
@@ -142,8 +146,8 @@ public class PathIndex implements RuleIndex, Serializable{
      * @param type The type of the rule, i.e., cooling, heating, etc.
      * @return A mapping of the rule index to the PStrings created from the input rule
      */
-    private MultiMap<Integer, String> createRulePString(Rule rule, int n, RuleType type) {
-        MultiMap<Integer, String> pStrings = new MultiHashMap<>();
+    private Multimap<Integer, String> createRulePString(Rule rule, int n, RuleType type) {
+        Multimap<Integer, String> pStrings = ArrayListMultimap.create();
         RuleVisitor ruleVisitor;
         //for rules with multiple K cells
         ArrayList<Cell> kCells = new ArrayList<>();
@@ -189,7 +193,7 @@ public class PathIndex implements RuleIndex, Serializable{
     public List<Rule> getRules(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
-        if (K.get_indexing_stats) {
+        if (options.indexingStats) {
             IndexingStatistics.getPStringFromTermStopWatch.reset();
             IndexingStatistics.getPStringFromTermStopWatch.start();
             pStrings = getPStringsFromTerm(term);
@@ -208,7 +212,7 @@ public class PathIndex implements RuleIndex, Serializable{
         Set<Integer> matchingIndices = new LinkedHashSet<>();
         String subString;
 
-        if (K.get_indexing_stats) {
+        if (options.indexingStats) {
             IndexingStatistics.findMatchingIndicesStopWatch.reset();
             IndexingStatistics.findMatchingIndicesStopWatch.start();
         }
@@ -253,7 +257,7 @@ public class PathIndex implements RuleIndex, Serializable{
             }
         }
 
-        if (K.get_indexing_stats) {
+        if (options.indexingStats) {
             IndexingStatistics.findMatchingIndicesStopWatch.stop();
             IndexingStatistics.timesForFindingMatchingIndices.add(
                     IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
@@ -272,7 +276,7 @@ public class PathIndex implements RuleIndex, Serializable{
      * @return a set of positions that can be used to query the path index
      */
     private Set<String> getPStringsFromTerm(Term term) {
-        termVisitor = new TermVisitor(definition.context(), hasNOKCellRules);
+        termVisitor = new TermVisitor(definition.context(), options, hasNOKCellRules);
         term.accept(termVisitor);
         return termVisitor.getpStrings();
     }

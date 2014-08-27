@@ -42,7 +42,7 @@ public class PriorityExtended extends ModuleItem  implements Interfaces.MutableL
 
         return "  syntax priorities" + blocks + "\n";
     }
-    
+
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
@@ -87,7 +87,7 @@ public class PriorityExtended extends ModuleItem  implements Interfaces.MutableL
     public List<PriorityBlockExtended> getChildren(Enum<?> _) {
         return priorityBlocks;
     }
-    
+
     @Override
     public void setChildren(List<PriorityBlockExtended> children, Enum<?> _) {
         this.priorityBlocks = children;

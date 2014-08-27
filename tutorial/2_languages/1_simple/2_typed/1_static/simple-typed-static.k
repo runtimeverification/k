@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 /*!
 \title{SIMPLE --- Typed --- Static}
-\author{Grigore Ro\c{s}u and 
+\author{Grigore Ro\c{s}u and
         Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
         (\texttt{\{grosu,tserban2\}@illinois.edu})}
 \organization{University of Illinois at Urbana-Champaign} */
@@ -184,7 +184,7 @@ such programs. */
 /*@ We still need lists of expressions, defined below, but note that we do
 not need lists of identifiers anymore.  They have been replaced by the lists
 of parameters. */
- 
+
   syntax Exps ::= List{Exp,","}          [strict]
 
 
@@ -205,7 +205,7 @@ type the actual construct. */
                 | "if" "(" Exp ")" Block "else" Block      [avoid, strict]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block                [strict]
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
@@ -230,6 +230,7 @@ course, including the types of the involved variables. */
 
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
@@ -303,7 +304,7 @@ holding various typing \textsf{task} cells, and a global type environment.
 Each task includes a \textsf{k} cell holding the code to type, a \textsf{tenv}
 cell holding the local type environment, and a \textsf{return} cell holding
 the return type of the currently checked function.  The latter is needed in
-order to check whether return statements return values of the expected type. 
+order to check whether return statements return values of the expected type.
 Initially, the program is placed in a \textsf{k} cell inside a
 \textsf{task} cell.  Since the cells with multiplicity ``?'' are not
 included in the initial configuration, the \textsf{task} cell holding
@@ -342,11 +343,11 @@ the array dimension into the type until the array becomes a simple
 variable. */
 
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
-       <gtenv> Rho (. => X |-> T) </gtenv>
+       <gtenv> Rho (.Map => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
-  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
+  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[X <- T] </tenv>
 
-  context _:Type _::Exp[HOLE::Exps];
+  context _:Type _:>Exp[HOLE:>Exps];
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
@@ -377,7 +378,7 @@ entire code of the function body needs to type anyway. */
 
   rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F;...</k> </task>
        (. => <task>
-               <k> mkDecls(Ps) S </k> <tenv> . </tenv> <return> T </return>
+               <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <return> T </return>
              </task>)
     [structural]
 
@@ -391,7 +392,7 @@ generate a function task executing \texttt{main()} to ensure that it
 types (remove this task creation if you do not want your type system
 to reject programs without a \texttt{main} function). */
 
-  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> . </tenv>) </task>
+  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> .Map </tenv>) </task>
     [structural]
 
 /*@ \subsection{Collecting the terminated tasks}
@@ -581,7 +582,7 @@ exceptions which are not caught. */
 /*@ The function \texttt{mkDecls} turns a list of parameters into a
 list of variable declarations. */
 
-  syntax Decl ::= mkDecls(Params)  [function]
+  syntax Stmts ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
@@ -594,12 +595,12 @@ list of variable declarations. */
   syntax LValue ::= Id
   rule isLValue(_:Exp[_:Exps]) => true
 
-  syntax Exp ::= ltype(Exp) 
+  syntax Exp ::= ltype(Exp)
 // We would like to say:
 //  context ltype(HOLE:LValue)
 // but we currently cannot type the HOLE
   context ltype(HOLE) when isLValue(HOLE)
-  
+
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 

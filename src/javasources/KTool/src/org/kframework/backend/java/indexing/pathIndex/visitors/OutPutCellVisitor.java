@@ -15,7 +15,7 @@ import org.kframework.backend.java.symbolic.BottomUpVisitor;
  */
 @Deprecated
 class OutPutCellVisitor extends BottomUpVisitor {
-    public static final String BUFFER_LABEL = "#buffer";
+    public static final String BUFFER_LABEL = "'#buffer";
 
     public boolean isAddOutCell() {
         return addOutCell;

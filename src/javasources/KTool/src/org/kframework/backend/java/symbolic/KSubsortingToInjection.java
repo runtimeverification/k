@@ -9,9 +9,9 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 /**
  * TODO(YilongL): add documentation or remove this class
- * 
+ *
  * @author AndreiS
- * 
+ *
  */
 public class KSubsortingToInjection extends CopyOnWriteTransformer {
 

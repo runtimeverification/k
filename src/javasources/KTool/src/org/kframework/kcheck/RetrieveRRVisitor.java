@@ -12,7 +12,7 @@ import org.kframework.kil.visitors.BasicVisitor;
 public class RetrieveRRVisitor extends BasicVisitor {
 
     List<ASTNode> rules = new LinkedList<ASTNode>();
-    
+
     public RetrieveRRVisitor(Context context) {
         super(context);
     }
@@ -22,7 +22,7 @@ public class RetrieveRRVisitor extends BasicVisitor {
         rules.add(node);
         return super.visit(node, _);
     }
-    
+
     public List<ASTNode> getRules() {
         return rules;
     }

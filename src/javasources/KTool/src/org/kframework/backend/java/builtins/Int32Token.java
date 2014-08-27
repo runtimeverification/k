@@ -4,14 +4,10 @@ package org.kframework.backend.java.builtins;
 import org.kframework.backend.java.builtins.primitives.Ints;
 import org.kframework.backend.java.builtins.primitives.OverflowArithmeticResult;
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Term;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedInts;
 
 
@@ -211,16 +207,25 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public List<BitVector> toDigits(int digitBase) {
-        assert digitBase > 0;
+    public BitVector extract(int beginIndex, int endIndex) {
+        int resultBitwidth = endIndex - beginIndex;
+        return BitVector.of(
+                (value >> (bitwidth - endIndex)) & ((1 << resultBitwidth) - 1),
+                resultBitwidth);
+    }
+
+    @Override
+    public List<BitVector> toDigits(int digitBitWidth, int count) {
+        assert digitBitWidth > 0;
+        assert digitBitWidth * count <= bitwidth;
 
         List<BitVector> digits = new ArrayList<>();
         long longValue = UnsignedInts.toLong(this.value);
-        for (int i = 0; i * digitBase < Integer.SIZE;  ++i, longValue >>= digitBase) {
-            digits.add(BitVector.of(longValue % (1 << digitBase), digitBase));
+        for (int i = 0, j = bitwidth - digitBitWidth; i < count;  ++i, j -= digitBitWidth) {
+            digits.add(BitVector.of((longValue >> j) & ((1 << digitBitWidth) - 1), digitBitWidth));
         }
 
-        return Lists.reverse(digits);
+        return digits;
     }
 
     @Override
@@ -229,15 +234,16 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public int hashCode() {
+    protected int computeHash() {
         return value;
     }
 
     private static BuiltinList makeBuiltinListOfOverflowArithmeticResult(
             OverflowArithmeticResult<Integer> result) {
-        return new BuiltinList(ImmutableList.<Term>of(
-                Int32Token.of(result.value),
-                BoolToken.of(result.overflow)));
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItem(Int32Token.of(result.value));
+        builder.addItem(BoolToken.of(result.overflow));
+        return (BuiltinList) builder.build();
     }
 
 }

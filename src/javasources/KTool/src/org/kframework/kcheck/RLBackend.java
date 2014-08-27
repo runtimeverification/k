@@ -8,7 +8,8 @@ import java.util.Properties;
 
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
-import org.kframework.backend.java.util.KSorts;
+import org.kframework.backend.FirstStep;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.maude.krun.MaudeKRun;
@@ -43,7 +44,6 @@ import org.kframework.compile.transformers.ContextsToHeating;
 import org.kframework.compile.transformers.DesugarStreams;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.FreshCondToFreshVar;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
@@ -79,22 +79,17 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.krun.Main;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.KRunResult;
-import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
-import org.kframework.main.FirstStep;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
-public class RLBackend extends BasicBackend implements Backend {
+public abstract class RLBackend extends BasicBackend implements Backend {
 
     public static int idx = 5000;
 
@@ -153,7 +148,7 @@ public class RLBackend extends BasicBackend implements Backend {
     }
 
     @Override
-    public void run(Definition javaDef) throws IOException {
+    public void run(Definition javaDef) {
 
         /******************************
          * initial setup of definition *
@@ -195,9 +190,9 @@ public class RLBackend extends BasicBackend implements Backend {
         /****************************
          * initial setup of krun *
          *****************************/
-        K.compiled_def = context.dotk.getAbsolutePath();
-        K.main_module = mainModule;
-        K.init(context);
+        //K.compiled_def = context.dotk.getAbsolutePath();
+        //K.main_module = mainModule;
+        //K.init(context);
         // delete temporary krun directory
 //        deleteDirectory(new File(K.krunDir));
 //        Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -214,11 +209,11 @@ public class RLBackend extends BasicBackend implements Backend {
         ASTNode pattern;
         try {
             pattern = DefinitionLoader.parsePattern(
-                    K.pattern,
-                    "Command line pattern",
-                    KSorts.BAG,
+                    null, //K.pattern,
+                    null,
+                    Sort.BAG.name(),
                     context);
-            defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
+            //defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern),
                     null);
             defaultPattern = (Rule) pattern;
@@ -229,7 +224,7 @@ public class RLBackend extends BasicBackend implements Backend {
         }
 
         // setup the runner
-        MaudeKRun mkr = new MaudeKRun(context, Stopwatch.instance());
+        MaudeKRun mkr = null;//new MaudeKRun(context, Stopwatch.instance());
         mkr.setBackendOption("io", false);
         /****************
          * end *
@@ -239,17 +234,17 @@ public class RLBackend extends BasicBackend implements Backend {
          * initial context *
          ********************/
         // setup initial context
-        K.kompiled_cfg = (org.kframework.kil.Configuration)
-            BinaryLoader.load(K.compiled_def + "/configuration.bin");
+        //K.kompiled_cfg = (org.kframework.kil.Configuration)
+        //    BinaryLoader.load(K.compiled_def + "/configuration.bin");
         if (PGM != null) {
             RunProcess rp = new RunProcess();
-            try {
-                KRunResult<KRunState> res = mkr.run(Main.makeConfiguration(
-                        program, null, rp, false, context));
-                icontext = res.getResult().getRawResult();//.getResult();
-            } catch (KRunExecutionException e1) {
-                e1.printStackTrace();
-            }
+            //try {
+                //KRunResult<KRunState> res = mkr.run(Main.makeConfiguration(
+                //        program, null, rp, false, context));
+                //icontext = res.getResult().getRawResult();//.getResult();
+            //} catch (KRunExecutionException e1) {
+            //    e1.printStackTrace();
+            //}
         }
         /****************
          * end *
@@ -273,7 +268,7 @@ public class RLBackend extends BasicBackend implements Backend {
         }
 
 //        System.exit(1);
-        
+
         // prints programs when verbose
         //if (GlobalSettings.verbose) {
             for (int i = 0; i < programs.size(); i++)
@@ -296,11 +291,11 @@ public class RLBackend extends BasicBackend implements Backend {
     }
 
     private Term mergeLeftIntoRight(Term lpgm, Term icontext) {
-        
+
         Term context = icontext.shallowCopy();
         MergeToTransformer mtt = new MergeToTransformer(this.context, lpgm);
         context = (Term) mtt.visitNode(context);
-        
+
         return context;
     }
 
@@ -331,7 +326,7 @@ public class RLBackend extends BasicBackend implements Backend {
         steps.add(new AddHeatingConditions(context));
         steps.add(new AddSuperheatRules(context));
         // steps.add(new ResolveSymbolicInputStream(context)); // symbolic step
-        steps.add(new DesugarStreams(context, false));
+        steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new TagUserRules(context)); // symbolic step
         steps.add(new AddKCell(context));
@@ -346,7 +341,6 @@ public class RLBackend extends BasicBackend implements Backend {
         steps.add(new AddImplicationRules(context, reachabilityRules));
 
         steps.add(new AddSemanticEquality(context));
-        steps.add(new FreshCondToFreshVar(context));
         steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
         AddConditionToConfig.PC = false;
@@ -354,7 +348,7 @@ public class RLBackend extends BasicBackend implements Backend {
         steps.add(new AddTopCellRules(context));
         steps.add(new ResolveBinder(context));
         steps.add(new ResolveAnonymousVariables(context));
-        steps.add(new ResolveBlockingInput(context, false));
+        steps.add(new ResolveBlockingInput(context));
         steps.add(new AddK2SMTLib(context));
         steps.add(new AddPredicates(context));
         steps.add(new ResolveSyntaxPredicates(context));

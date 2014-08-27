@@ -35,7 +35,7 @@ syntax FieldAttrsBody ::= List{FieldAttr, ","}
 syntax FieldAttr ::=
   "private" | "protected" | "package"
 | "list" "=" String /*separator*/ | "non-list"
-| "mutable" | "immutable" 
+| "mutable" | "immutable"
 | "required" | "optional" "=" String/*default value*/ | "omitted" "=" String/*initial value*/
 | "shown" | "hidden"
 > Id
@@ -77,7 +77,7 @@ public enum Assoc {
   private Assoc(String print) { this.print = print; }
   @Override public String toString() { return print; }
 }
-*/  
+*/
 
 endmodule
 

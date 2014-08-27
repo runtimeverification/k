@@ -16,9 +16,9 @@ int horizontal_los(double s_x, double s_y)
 module HORIZONTAL-LOS-RULE
   rule <threads>
            <thread>...
-	     <k> horizontal_los(Sx:Float, Sy:Float) => V:Bool </k>
+         <k> horizontal_los(Sx:Float, Sy:Float) => V:Bool </k>
              <env> GENV </env>
-	   ...</thread>
+       ...</thread>
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>

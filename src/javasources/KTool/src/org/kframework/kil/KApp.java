@@ -22,7 +22,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * A KList represented as a non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     private Term child;
-    
+
     public static enum Children {
         LABEL, CHILD;
     }
@@ -39,6 +39,17 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
     }
 
     /**
+     * Constructs the application of the given KLabel to a KList with the given elements.
+     *
+     * @param label the string of a KLabelConstant which is applied to a KList with the given elements.
+     * @param elements the elements of the KList.
+     * @return a {@link KApp} which represents the application of the given KLabel to a KList with the given elements.
+     */
+    public static KApp of(String label, Term... elements) {
+        return KApp.of(KLabelConstant.of(label), elements);
+    }
+
+    /**
      * Constructs a {@link KApp} object representing the application of the specified KLabel to the specified KList.
      *
      * @param location the line and column
@@ -46,8 +57,8 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @param label the KLabel which is applied to the given KList. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
-    public KApp(String location, String filename, Term label, Term child) {
-        super(location, filename, KSorts.KITEM);
+    public KApp(Location location, Source source, Term label, Term child) {
+        super(location, source, Sort.KITEM);
         setLabel(label);
         setChild(child);
     }
@@ -59,7 +70,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
      */
     public KApp(Term label, Term child) {
-        super(KSorts.KITEM);
+        super(label.getLocation(), label.getSource(), Sort.KITEM);
         setLabel(label);
         setChild(child);
     }
@@ -73,7 +84,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
         setLabel((Term) JavaClassesFactory.getTerm(body));
         Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
-        if (!(term.getSort().equals(KSorts.KLIST) || term instanceof Ambiguity)) {
+        if (!(term.getSort().equals(Sort.KLIST) || term instanceof Ambiguity)) {
             setChild(new KList(Collections.<Term> singletonList(term)));
         } else {
             setChild(term);

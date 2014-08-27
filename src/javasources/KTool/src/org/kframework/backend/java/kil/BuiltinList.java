@@ -2,87 +2,122 @@
 
 package org.kframework.backend.java.kil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
 
-import org.kframework.backend.java.builtins.IntToken;
+import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.ImprovedArrayDeque;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 
 /**
- * @author: TraianSF
+ * Class representing a list.
+ *
+ * @author: YilongL
  */
 public class BuiltinList extends Collection {
 
-    private final ImprovedArrayDeque<Term> elementsLeft;
-    protected final ImprovedArrayDeque<Term> elementsRight;
-    protected final int removeLeft;
-    protected final int removeRight;
-//    private final Queue<Operation> operations;
+    public static final BuiltinList EMPTY_LIST = (BuiltinList) builder().build();
 
-    public BuiltinList(java.util.Collection<Term> elements) {
-        this(null, 0, 0, elements, Collections.<Term>emptyList());
+    private static enum BaseTermType {
+        VARIABLE, FUNCTION, PATTERN, LIST;
     }
 
-    public BuiltinList(Variable frame, int removeLeft, int removeRight, java.util.Collection<Term> elementsLeft, java.util.Collection<Term> elementsRight) {
-        super(frame, Kind.KITEM);
-        this.elementsLeft = new ImprovedArrayDeque<Term>(elementsLeft);
-        if (frame == null) {
-            assert removeLeft == 0 && removeRight == 0 : "cannot remove from an empty base";
-            this.elementsLeft.addAll(elementsRight);
-            this.elementsRight = new ImprovedArrayDeque<Term>();
+    private final ImmutableList<Term> elementsLeft;
+    private final ImmutableList<Term> elementsRight;
+    private final ImmutableList<Term> baseTerms;
+    private final ImmutableList<BaseTermType> baseTermTypes;
+
+    /**
+     * Private efficient constructor used by {@link BuiltinList.Builder}.
+     */
+    private BuiltinList(
+            ImmutableList<Term> elementsLeft,
+            ImmutableList<Term> baseTerms,
+            ImmutableList<Term> elementsRight,
+            ImmutableList<BaseTermType> baseTermTypes
+            ) {
+        super(computeFrame(baseTerms), Kind.KITEM);
+        this.elementsLeft = elementsLeft;
+        this.elementsRight = elementsRight;
+        this.baseTerms = baseTerms;
+        this.baseTermTypes = baseTermTypes;
+    }
+
+    private static Variable computeFrame(List<Term> baseTerms) {
+        if (baseTerms.size() == 1 && baseTerms.get(0) instanceof Variable) {
+            return (Variable) baseTerms.get(0);
         } else {
-            this.elementsRight = new ImprovedArrayDeque<Term>(elementsRight);
+            return null;
         }
-        this.removeLeft = removeLeft;
-        this.removeRight = removeRight;
     }
 
-    public BuiltinList(Variable frame) {
-        this(frame, 0, 0, Collections.<Term>emptyList(), Collections.<Term>emptyList());
+    private BuiltinList(ImmutableList<Term> elementsLeft) {
+        this(elementsLeft, ImmutableList.<Term>of(), ImmutableList.<Term>of(), ImmutableList.<BaseTermType>of());
     }
 
-    public BuiltinList() {
-        this(null, 0, 0, Collections.<Term>emptyList(), Collections.<Term>emptyList());
+    public static Term concatenate(Term... lists) {
+        Builder builder = new Builder();
+        builder.concatenate(lists);
+        return builder.build();
     }
 
     public boolean contains(Term key) {
         return elementsLeft.contains(key) || elementsRight.contains(key);
     }
 
-    public void add(Term element) {
-        addRight(element);
-    }
-
-    public void addRight(Term element) {
-        elementsRight.add(element);
-    }
-
-    public void addLeft(Term element) {
-        elementsLeft.addFirst(element);
-    }
-
     public List<Term> elements() {
-        ArrayList<Term> elements = new ArrayList<Term>(elementsLeft);
-        elements.addAll(elementsRight);
-        return Collections.unmodifiableList(elements);
+        return ListUtils.union(elementsLeft, elementsRight);
+    }
+
+    public List<Term> elementsLeft() {
+        return elementsLeft;
+    }
+
+    public List<Term> elementsRight() {
+        return elementsRight;
+    }
+
+    public List<Term> baseTerms() {
+        return baseTerms;
+    }
+
+    public BaseTerm getBaseTerm(int index) {
+        if (index < 0) {
+            index += baseTerms.size();
+        }
+        return BaseTerm.of(baseTerms.get(index), baseTermTypes.get(index));
+    }
+
+    /**
+     * TODO(YilongL): implement it properly!
+     */
+    public boolean isUnifiableByCurrentAlgorithm() {
+        return true;
     }
 
     @Override
-    public int size() {
+    public int concreteSize() {
         return elementsLeft.size() + elementsRight.size();
+    }
+
+    @Override
+    public final boolean isConcreteCollection() {
+        return baseTerms.isEmpty();
+    }
+
+    @Override
+    public boolean isLHSView() {
+        return baseTerms.isEmpty() || baseTerms.size() == 1
+                && (baseTerms.get(0) instanceof Variable);
     }
 
     @Override
@@ -91,8 +126,8 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public String sort() {
-        return KSorts.LIST;
+    public Sort sort() {
+        return Sort.LIST;
     }
 
     @Override
@@ -106,31 +141,45 @@ public class BuiltinList extends Collection {
         }
 
         BuiltinList list = (BuiltinList) object;
-        return (frame == null ? list.frame == null : frame.equals(list.frame))
-                && removeLeft == list.removeLeft
-                && removeRight == list.removeRight
-                && elementsLeft.equals(list.elementsLeft)
-                && elementsRight.equals(list.elementsRight);
+        /* YilongL: the list shall be normalized if the baseTerms is empty;
+         * otherwise, the following equality check would be incorrect */
+        return elementsLeft.equals(list.elementsLeft)
+                && elementsRight.equals(list.elementsRight)
+                && baseTerms.equals(list.baseTerms);
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
-            hashCode = hashCode * Utils.HASH_PRIME + removeLeft;
-            hashCode = hashCode * Utils.HASH_PRIME + removeRight;
-            hashCode = hashCode * Utils.HASH_PRIME + elementsLeft.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
-        }
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + elementsLeft.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + baseTerms.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        boolean hasCell = false;
+        for (Term term : elementsLeft) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        for (Term term : elementsRight) {
+            hasCell = hasCell || term.hasCell();
+            if (hasCell) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);
@@ -147,54 +196,18 @@ public class BuiltinList extends Collection {
     }
 
     public Term get(int index) {
-        boolean onLeft = true;
-        Deque<Term> elements = elementsLeft;
-        Iterator<Term> iterator = elements.iterator();
-        if (frame == null) { // no framing variable
-            if (!elementsRight.isEmpty()) {
-                elementsLeft.addAll(elementsRight); // move all elements to the left
-                elementsRight.clear();
-            }
-        } else { // if there is a frame
-            if (index < 0) { // search among the elements on the right of frame if index < 0
-                onLeft = false;
-                elements = elementsRight;
-            }
-        }
-        if (index < 0) { // search from the end if index < 0
-            iterator = elements.descendingIterator();
-            index = -index-1; // index from the end
-        }
-        if (index < elements.size()) { // if there are enough elements
-            while (index-- > 0) iterator.next();
-            return iterator.next();
-        }
-        // TODO(AndreiS): use correct kind/sort
-        if (frame == null) return new Bottom(Kind.K);
-        java.util.Collection<Term> left = elementsLeft;
-        java.util.Collection<Term> right = elementsRight;
-        if (onLeft) {
-            index -= elementsLeft.size();
-            left = Collections.<Term>emptyList();
+        if (index >= 0) {
+            return index < elementsLeft.size() ? elementsLeft.get(index) : null;
         } else {
-            index -= elementsRight.size();
-            index = -index-1;
-            right = Collections.<Term>emptyList();
+            int idx;
+            if (!baseTerms.isEmpty()) {
+                idx = elementsRight.size() + index;
+                return idx >= 0 ? elementsRight.get(idx) : null;
+            } else {
+                idx = elementsLeft.size() + index;
+                return idx >= 0 ? elementsLeft.get(idx) : null;
+            }
         }
-
-        // TODO(AndreiS): use correct kind/sort
-        return new ListLookup(
-                BuiltinList.of(frame, removeLeft, removeRight, left, right),
-                IntToken.of(index),
-                Kind.K);
-    }
-
-    public java.util.Collection<Term> elementsLeft() {
-        return Collections.unmodifiableCollection(elementsLeft);
-    }
-
-    public java.util.Collection<Term> elementsRight() {
-        return Collections.unmodifiableCollection(elementsRight);
     }
 
     @Override
@@ -202,88 +215,240 @@ public class BuiltinList extends Collection {
         return toString(" ", ".List");
     }
 
+    /**
+     * TODO(YilongL): use Java8 functional features instead
+     * @deprecated
+     */
+    private static final Function<Term, String> ELEMENT_TO_STRING_FUNCTION = new Function<Term, String>() {
+        @Override
+        public String apply(Term term) {
+            return "ListItem(" + term + ")";
+        }
+    };
+
     public String toString(String operator, String identity) {
-        Joiner joiner = Joiner.on(operator);
-        StringBuilder stringBuilder = new StringBuilder();
-        joiner.appendTo(stringBuilder, elementsLeft);
-        if (super.frame != null) {
-            if (stringBuilder.length() != 0) {
-                stringBuilder.append(operator);
-            }
-            if (removeLeft != 0 || removeRight != 0) {
-                stringBuilder.append("remove(" + removeLeft + ", ");
-            }
-            stringBuilder.append(super.frame);
-            if (removeLeft != 0 || removeRight != 0) {
-                stringBuilder.append(", " + removeRight + ")");
-            }
+        if (!isEmpty()) {
+            return Joiner.on(operator).join(
+                    Joiner.on(operator).join(Lists.transform(elementsLeft, ELEMENT_TO_STRING_FUNCTION)),
+                    Joiner.on(operator).join(baseTerms),
+                    Joiner.on(operator).join(Lists.transform(elementsRight, ELEMENT_TO_STRING_FUNCTION)));
+        } else {
+            return identity;
         }
-        joiner.appendTo(stringBuilder, elementsRight);
-        if (stringBuilder.length() == 0) {
-            stringBuilder.append(identity);
-        }
-        return stringBuilder.toString();
     }
 
-    public static BuiltinList of(Term frame, int removeLeft, int removeRight, java.util.Collection<Term> elementsLeft, java.util.Collection<Term> elementsRight) {
-        if (frame instanceof BuiltinList) {
-            BuiltinList builtinList = (BuiltinList) frame;
-            if (!builtinList.hasFrame()) {
-                assert builtinList.elementsRight.isEmpty();
-                assert builtinList.elementsLeft().size() >= removeLeft + removeRight;
-                if (builtinList.elementsLeft().size() > removeLeft + removeRight) {
-                    Iterator<Term> iterator = builtinList.elementsLeft.iterator();
-                    int deleted = removeLeft + removeRight;
-                    while (removeLeft > 0) {
-                        removeLeft--; iterator.next();
-                    }
-                    for (int i = deleted; i < builtinList.elementsLeft.size(); i++) {
-                        elementsLeft.add(iterator.next());
-                    }
-                }
-                frame = null; removeLeft = 0; removeRight = 0;
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class BaseTerm {
+        private final Term term;
+        private final BaseTermType type;
+
+        public static BaseTerm of(Term term, BaseTermType type) {
+            return new BaseTerm(term, type);
+        }
+
+        private BaseTerm(Term term, BaseTermType type) {
+            this.term = term;
+            this.type = type;
+        }
+
+        public Term term() {
+            return term;
+        }
+
+        public boolean isVariable() {
+            return type == BaseTermType.VARIABLE;
+        }
+
+        public boolean isFunction() {
+            return type == BaseTermType.FUNCTION;
+        }
+
+        public boolean isPattern() {
+            return type == BaseTermType.PATTERN;
+        }
+
+        public boolean isList() {
+            return type == BaseTermType.LIST;
+        }
+    }
+
+    private enum BuilderStatus {
+        /**
+         * No base term has been added to the builder.
+         */
+        ELEMENTS_LEFT,
+
+        /**
+         * At least one base term (i.e., function, variable, pattern, or list)
+         * has been added to the builder and no list item has been added since
+         * then.
+         */
+        BASE_TERMS,
+
+        /**
+         * At least one list item has been added to the builder after some base
+         * term.
+         */
+        ELEMENTS_RIGHT;
+    }
+
+    public static class Builder {
+
+        private BuilderStatus status = BuilderStatus.ELEMENTS_LEFT;
+
+        /**
+         * List of pending elements that are yet to be decided where to go in
+         * the {@code BuiltinList} to be built. This field is only valid in
+         * {@code BuilderStatus#BASE_TERMS}.
+         */
+        private final List<Term> pendingElements = Lists.newArrayList();
+
+        private final ImmutableList.Builder<Term> elementsLeftBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<Term> baseTermsBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<Term> elementsRightBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
+
+        /**
+         * Appends the specified term as a list item, namely
+         * {@code ListItem(term)}, to the end of the list.
+         *
+         * @param term
+         *            the specified term
+         */
+        public void addItem(Term term) {
+            if (status == BuilderStatus.ELEMENTS_LEFT) {
+                elementsLeftBuilder.add(term);
+            } else if (status == BuilderStatus.BASE_TERMS) {
+                status = BuilderStatus.ELEMENTS_RIGHT;
+                elementsRightBuilder.addAll(pendingElements);
+                pendingElements.clear();
+                elementsRightBuilder.add(term);
             } else {
-                Iterator<Term> iterator = builtinList.elementsLeft().iterator();
-                while (removeLeft > 0 && iterator.hasNext()) {
-                    removeLeft--; iterator.next();
-                }
-                while (iterator.hasNext()) {
-                    elementsLeft.add(iterator.next());
-                }
-                removeLeft += builtinList.removeLeft;
-
-                ArrayList<Term> right = new ArrayList<Term>();
-                iterator = builtinList.elementsRight.iterator();
-                int size = builtinList.elementsRight.size();
-                for (int i = removeRight; i < size; i++) {
-                   right.add(iterator.next());
-                }
-                if (removeRight > size) {
-                    removeRight -= size;
-                } else removeRight = 0;
-                removeRight += builtinList.removeRight;
-                right.addAll(elementsRight);
-                return new BuiltinList(builtinList.frame, removeLeft, removeRight, elementsLeft, right);
+                elementsRightBuilder.add(term);
             }
         }
-        if (frame == null) {
-            assert removeLeft == 0 && removeRight == 0 : "cannot remove from an empty list";
-            elementsLeft.addAll(elementsRight);
-            return new BuiltinList(null, 0, 0, elementsLeft, Collections.<Term>emptyList());
+
+        public void addItems(List<Term> terms) {
+            for (Term term : terms) {
+                addItem(term);
+            }
         }
-        if (frame instanceof Variable)
-            return new BuiltinList((Variable) frame, removeLeft, removeRight, elementsLeft, elementsRight);
 
-        assert false : "Frame can only be substituted by a Variable or a BuiltinList, or deleted.";
-        return null;
-    }
+        private void addConcatTerm(Term term) {
+            baseTermsBuilder.add(term);
+            if (term instanceof BuiltinList) {
+                baseTermTypesBuilder.add(BaseTermType.LIST);
+            } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isPattern()) {
+                baseTermTypesBuilder.add(BaseTermType.PATTERN);
+            } else if (term instanceof KItem && ((KLabel) ((KItem) term).kLabel()).isFunction()) {
+                baseTermTypesBuilder.add(BaseTermType.FUNCTION);
+            } else if (term instanceof ListUpdate) {
+                baseTermTypesBuilder.add(BaseTermType.FUNCTION);
+            } else if (term instanceof Variable) {
+                baseTermTypesBuilder.add(BaseTermType.VARIABLE);
+            } else {
+                assert false : "unexpected concatenated term " + term;
+            }
+        }
 
-    public int removeLeft() {
-        return removeLeft;
-    }
+        private void addConcatTerms(List<Term> terms) {
+            for (Term term : terms) {
+                addConcatTerm(term);
+            }
+        }
 
-    public int removeRight() {
-        return removeRight;
+        /**
+         * Concatenates a term of sort List to this builder.
+         */
+        public void concatenate(Term term) {
+            assert term.sort().equals(Sort.LIST)
+                : "unexpected sort " + term.sort() + " of concatenated term " + term
+                + "; expected " + Sort.LIST;
+
+            if (status == BuilderStatus.ELEMENTS_LEFT) {
+                if (!(term instanceof BuiltinList)) {
+                    status = BuilderStatus.BASE_TERMS;
+                    addConcatTerm(term);
+                } else {
+                    BuiltinList list = (BuiltinList) term;
+                    if (list.isConcreteCollection()) {
+                        addItems(list.elementsLeft);
+                    } else {
+                        addItems(list.elementsLeft);
+                        status = BuilderStatus.BASE_TERMS;
+                        addConcatTerms(list.baseTerms);
+                        pendingElements.addAll(list.elementsRight);
+                    }
+                }
+            } else if (status == BuilderStatus.BASE_TERMS) {
+                if (!(term instanceof BuiltinList)) {
+                    if (!pendingElements.isEmpty()) {
+                        addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
+                        pendingElements.clear();
+                    }
+                    addConcatTerm(term);
+                } else {
+                    BuiltinList list = (BuiltinList) term;
+                    if (list.isConcreteCollection()) {
+                        pendingElements.addAll(list.elementsLeft);
+                    } else {
+                        pendingElements.addAll(list.elementsLeft);
+                        if (!pendingElements.isEmpty()) {
+                            addConcatTerm(new BuiltinList(ImmutableList.copyOf(pendingElements)));
+                            pendingElements.clear();
+                        }
+                        addConcatTerms(list.baseTerms);
+                        pendingElements.addAll(list.elementsRight);
+                    }
+                }
+            } else {
+                assert false : "the builder is not allowed to concatencate list terms in "
+                        + BuilderStatus.ELEMENTS_RIGHT;
+            }
+        }
+
+        /**
+         * Concatenates terms of sort List to this builder.
+         */
+        public void concatenate(Term... terms) {
+            for (Term term : terms) {
+                concatenate(term);
+            }
+        }
+
+        /**
+         * Concatenates terms of sort List to this builder.
+         */
+        public void concatenate(List<Term> terms) {
+            for (Term term : terms) {
+                concatenate(term);
+            }
+        }
+
+        public Term build() {
+            if (!pendingElements.isEmpty()) {
+                elementsRightBuilder.addAll(pendingElements);
+                pendingElements.clear();
+            }
+
+            BuiltinList builtinList = new BuiltinList(
+                    elementsLeftBuilder.build(),
+                    baseTermsBuilder.build(),
+                    elementsRightBuilder.build(),
+                    baseTermTypesBuilder.build());
+
+            /* special case: only one List variable */
+            if (builtinList.concreteSize() == 0 && builtinList.baseTerms.size() == 1) {
+                Term base = builtinList.baseTerms.get(0);
+                if (base instanceof Variable && base.sort().equals(Sort.LIST)) {
+                    return base;
+                }
+            }
+            return builtinList;
+        }
     }
 
 }

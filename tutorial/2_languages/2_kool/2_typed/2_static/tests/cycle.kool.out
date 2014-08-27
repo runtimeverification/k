@@ -1,1 +1,9 @@
-Class "C2" is in a cycle!
+Search results:
+
+Solution 1:
+L:List -->
+ListItem ( #buffer ( "Class \"C1\" is in a cycle!\n" ) )
+
+Solution 2:
+L:List -->
+ListItem ( #buffer ( "Class \"C2\" is in a cycle!\n" ) )

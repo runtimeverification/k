@@ -39,11 +39,12 @@ public class VariableTypeFilter extends ParseForestTransformer {
             newV.setExpectedSort(correctVar.getExpectedSort());
             newV.setSyntactic(correctVar.isSyntactic());
             newV.setUserTyped(r.isUserTyped());
+            newV.copyAttributesFrom(correctVar);
             return newV;
         }
         String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getExpectedSort();
         msg += " but it has been declared (or inferred) of sort " + correctVar.getExpectedSort() + ".";
-        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation());
+        KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getSource(), r.getLocation());
         throw new VariableTypeClashException(kex);
     }
 }

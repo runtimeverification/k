@@ -7,6 +7,7 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
 import org.kframework.parser.concrete2.Grammar.EntryState;
@@ -539,7 +540,7 @@ public class Parser {
          * @return 'true' iff the mappings in this function changed.
          */
         boolean addToken(Function that, String string, String sort) {
-            final KApp token = Token.kAppOf(sort, string);
+            final KApp token = Token.kAppOf(Sort.of(sort), string);
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
                     Set<KList> result = new HashSet<>();
@@ -579,7 +580,7 @@ public class Parser {
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
                             KList newKList = new KList(context);
-                            newKList.add(new Ambiguity(KSorts.K, new ArrayList<Term>(matches)));
+                            newKList.add(new Ambiguity(Sort.K, new ArrayList<Term>(matches)));
                             result.add(newKList);
                         }
                     }
@@ -664,11 +665,11 @@ public class Parser {
             this.workListStep(stateReturn);
         }
 
-        Ambiguity result = new Ambiguity(KSorts.K, new ArrayList<Term>());
+        Ambiguity result = new Ambiguity(Sort.K, new ArrayList<Term>());
         for(StateReturn stateReturn : s.ntCalls.get(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
                 result.getContents().add(new KList(new Ambiguity(
-                    KSorts.K, stateReturn.function.applyToNull())));
+                    Sort.K, stateReturn.function.applyToNull())));
             }
         }
 

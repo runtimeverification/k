@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexStringMatcher implements StringMatcher {
-    
+
     @Override
     public void matches(String patterns, String actual) throws MatchFailure {
         for (String pattern : patterns.split("\n")) {

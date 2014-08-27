@@ -7,6 +7,7 @@ import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.VariableCollector;
 import org.kframework.backend.java.symbolic.Visitable;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.Visitor;
 
@@ -27,7 +28,7 @@ public abstract class JavaSymbolicObject extends ASTNode
     /**
      * Field used for cashing the hash code
      */
-    protected int hashCode = 0;
+    protected int hashCode = Utils.NO_HASHCODE;
 
     /**
      * AndreiS: serializing this field causes a NullPointerException when hashing a de-serialized
@@ -126,7 +127,7 @@ public abstract class JavaSymbolicObject extends ASTNode
 
     /**
      * Gets the cached set of variables in this {@code JavaSymbolicObject}.
-     * 
+     *
      * @return a set of variables in this {@code JavaSymbolicObject} if they
      *         have been computed; otherwise, {@code null}
      * @see JavaSymbolicObject#variableSet()

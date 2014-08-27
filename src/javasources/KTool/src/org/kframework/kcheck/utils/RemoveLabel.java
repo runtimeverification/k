@@ -11,7 +11,7 @@ public class RemoveLabel extends CopyOnWriteTransformer {
 
     public final String LABEL = "program-label";
     private boolean removed = false;
-    
+
     public RemoveLabel(Context context) {
         super("Remove the program klabel", context);
         removed = false;
@@ -19,13 +19,13 @@ public class RemoveLabel extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(TermCons node, Void _)  {
-        
+
         if (node.getProduction().containsAttribute(LABEL) && !removed) {
             Term stmt = node.getContents().get(node.getContents().size() - 1);
             removed = true;
             return stmt;
         }
-        
+
         return super.visit(node, _);
     }
 }

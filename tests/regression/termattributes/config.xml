@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<tests>
+
+  <test definition="test"
+        programs="."
+        extension="test"
+	    skip="pdf"
+        results="." >
+        <kompile-option name="--backend" value="java" />
+        <all-programs>
+          <krun-option name="--parser" value="kast --parser rules" />
+          <krun-option name="--term" />
+        </all-programs>
+  </test>
+
+</tests>

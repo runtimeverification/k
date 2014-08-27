@@ -1,10 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -55,12 +55,12 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.content = t;
     }
 
-    public Cast(String location, String filename, String sort) {
-        super(location, filename, sort);
+    public Cast(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
-    public Cast(String location, String filename, Term t, org.kframework.kil.loader.Context context) {
-        super(location, filename, t.getSort());
+    public Cast(Location location, Source source, Term t, org.kframework.kil.loader.Context context) {
+        super(location, source, t.getSort());
         this.content = t;
     }
 
@@ -75,21 +75,26 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         else if (element.getAttribute("type").equals("outer"))
             this.type = CastType.OUTER;
         this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+
+        java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
+        if (its.size() > 0) {
+            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+        }
     }
 
-    public Cast(String sort) {
+    public Cast(Sort sort) {
         super(sort);
     }
 
-    public String getSort() {
+    public Sort getSort() {
         if (type == CastType.INNER)
-            return KSorts.K;
+            return Sort.K;
         return sort;
     }
 
-    public String getInnerSort() {
+    public Sort getInnerSort() {
         if (type == CastType.OUTER)
-            return KSorts.K;
+            return Sort.K;
         return sort;
     }
 

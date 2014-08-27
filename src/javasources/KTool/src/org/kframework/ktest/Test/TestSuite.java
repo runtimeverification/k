@@ -5,7 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.*;
-import org.kframework.ktest.CmdArgs.CmdArg;
+import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.OS;
 
@@ -28,6 +28,7 @@ public class TestSuite {
     private final boolean verbose;
 
     private final ColorSetting colorSetting;
+    private final Color terminalColor;
 
     /**
      * Set of ktest steps to skip.
@@ -49,7 +50,7 @@ public class TestSuite {
     private final boolean generateOut;
 
     private final ReportGen reportGen;
-    
+
     private final StringMatcher strComparator;
 
     // real times are times spend on a step, other times are total time spend by processess
@@ -67,7 +68,7 @@ public class TestSuite {
     private int krunSteps; // total number of krun tasks
 
     private TestSuite(List<TestCase> tests, Set<KTestStep> skips, int threads, boolean verbose,
-                     StringMatcher strComparator, ColorSetting colorSetting,
+                     StringMatcher strComparator, ColorSetting colorSetting, Color terminalColor,
                      int timeout, boolean updateOut, boolean generateOut, boolean report) {
         this.tests = tests;
         this.skips = skips;
@@ -75,15 +76,17 @@ public class TestSuite {
         this.verbose = verbose;
         this.strComparator = strComparator;
         this.colorSetting = colorSetting;
+        this.terminalColor = terminalColor;
         this.timeout = timeout;
         this.updateOut = updateOut;
         this.generateOut = generateOut;
         reportGen = report ? new ReportGen() : null;
     }
 
-    public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
+    public TestSuite(List<TestCase> tests, KTestOptions cmdArg) {
         this(tests, cmdArg.getSkips(), cmdArg.getThreads(), cmdArg.isVerbose(),
-                cmdArg.getDefaultStringMatcher(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
+                cmdArg.getDefaultStringMatcher(), cmdArg.getColorSetting(),
+                cmdArg.getTerminalColor(), cmdArg.getTimeout(),
                 cmdArg.getUpdateOut(), cmdArg.getGenerateOut(),
                 cmdArg.getGenerateReport());
     }
@@ -117,7 +120,7 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
 
-        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.green : Color.red, colorSetting);
+        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.GREEN : Color.RED, colorSetting, terminalColor);
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
@@ -187,7 +190,8 @@ public class TestSuite {
         for (TestCase tc : tests) {
             if (tc.hasPosixOnly()) {
                 Proc<TestCase> p = new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(),
-                        strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+                        strComparator, timeout, verbose, colorSetting, terminalColor, updateOut,
+                        generateOut);
                 ps.add(p);
                 p.setWorkingDir(tc.getWorkingDir());
                 tpe.execute(p);
@@ -230,7 +234,8 @@ public class TestSuite {
         startTpe();
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(),
-                    strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+                    strComparator, timeout, verbose, colorSetting, terminalColor, updateOut,
+                    generateOut);
             p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
@@ -268,7 +273,8 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(),
-                    strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+                    strComparator, timeout, verbose, colorSetting, terminalColor, updateOut,
+                    generateOut);
             p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
@@ -432,7 +438,8 @@ public class TestSuite {
         }
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
                 errorContentsAnn, program.toLogString(), matcher, timeout, verbose,
-                colorSetting, updateOut, generateOut, program.outputFile, program.newOutputFile);
+                colorSetting, terminalColor, updateOut, generateOut, program.outputFile,
+                program.newOutputFile);
         p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);
         krunSteps++;
@@ -460,9 +467,10 @@ public class TestSuite {
     private void printResult(boolean condition) {
         if (condition)
             System.out.println("SUCCESS");
-        else
-            System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL" + ColorUtil
+        else {
+            System.out.println(ColorUtil.RgbToAnsi(Color.RED, colorSetting, terminalColor) + "FAIL" + ColorUtil
                     .ANSI_NORMAL);
+        }
     }
 
     private String makeRelative(String absolutePath) {

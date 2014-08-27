@@ -8,9 +8,9 @@ double mmin(double a, double b){
 module MIN-RULE
   rule <threads>
            <thread>...
-	     <k> min(Vx:Float, Vy:Float) => V:Float </k>
+         <k> min(Vx:Float, Vy:Float) => V:Float </k>
              <env> GENV </env>
-	   ...</thread>
+       ...</thread>
        </threads>
        <store>... STORE ...</store>
        <genv> GENV </genv>

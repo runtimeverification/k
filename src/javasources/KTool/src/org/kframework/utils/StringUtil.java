@@ -6,9 +6,25 @@ import org.apache.commons.lang3.StringUtils;
 import com.beust.jcommander.JCommander;
 
 public class StringUtil {
-    public static String unescape(String str) {
+    /**
+     * Unescape the textual representation of a string specific to SDF and Maude.
+     * It removes the double quote at the beginning and end, and transforms special sequence
+     * of characters like "\n" into the newline character.
+     */
+    public static String unquoteCString(String str) {
+        return unquoteCString(str, '"');
+    }
+    public static String unquoteCString(String str, char delimiter) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
+        if (str.charAt(0) != delimiter) {
+            throw new IllegalArgumentException("Expected to find " + delimiter + " at the beginning of string: " + str);
+        }
+        if (str.charAt(str.length() - 1) != delimiter) {
+            throw new IllegalArgumentException("Expected to find " + delimiter + " at the end of string: " + str);
+        }
+        for (int i = 1; i < str.length() - 1; i++) {
+            if (str.charAt(i) > 0xFF)
+                throw new IllegalArgumentException("Unicode characters not supported here:" + str);
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '\\')
                     sb.append('\\');
@@ -20,8 +36,21 @@ public class StringUtil {
                     sb.append('\t');
                 else if (str.charAt(i + 1) == 'f')
                     sb.append('\f');
-                else if (str.charAt(i + 1) == '"')
-                    sb.append('"');
+                else if (str.charAt(i + 1) == delimiter)
+                    sb.append(delimiter);
+                else if (str.charAt(i + 1) >= '0' && str.charAt(i + 1) <= '9') {
+                    // found an octal value
+                    int a2 = str.charAt(i + 1) - '0';
+                    int a1 = str.charAt(i + 2) - '0';
+                    if (a1 < 0 || a1 > 9)
+                        throw new IllegalArgumentException("Malformed octal value in string:" + str);
+                    int a0 = str.charAt(i + 3) - '0';
+                    if (a0 < 0 || a0 > 9)
+                        throw new IllegalArgumentException("Malformed octal value in string:" + str);
+                    int decimal = a2 * 8 * 8 + a1 * 8 + a0;
+                    sb.append((char) decimal);
+                    i++; i++;
+                }
                 i++;
             } else
                 sb.append(str.charAt(i));
@@ -34,13 +63,25 @@ public class StringUtil {
         return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 
-    public static String escape(String value) {
+    /**
+     * Takes the internal representation of a string, and creates the textual representation
+     * that is ready to be printed.
+     * It adds double quote at the beginning and end, and transforms special characters into
+     * the textual representation (ex: newline becomes "\n").
+     */
+    public static String enquoteCString(String value) {
+        return enquoteCString(value, '"');
+    }
+    public static String enquoteCString(String value, char delimiter) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
+        result.append(delimiter);
         for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
             codepoint = value.codePointAt(offset);
-            if (codepoint == '"') {
-                result.append("\\\"");
+            if (codepoint > 0xFF) {
+                throw new IllegalArgumentException("Unicode characters not supported here:" + value);
+            } else if (codepoint == delimiter) {
+                result.append("\\" + delimiter);
             } else if (codepoint == '\\') {
                 result.append("\\\\");
             } else if (codepoint == '\n') {
@@ -58,6 +99,7 @@ public class StringUtil {
                 result.append(String.format("%03o", codepoint));
             }
         }
+        result.append(delimiter);
         return result.toString();
     }
 
@@ -106,16 +148,22 @@ public class StringUtil {
     }
 
     /**
-     * Removes the first and last double-quote characters and unescapes special characters.
-     * @param str double-quoted string
+     * Removes the first and last double-quote characters and unescapes special characters
+     * that start with backslash: newline, carriage return, line feed, tab and backslash.
+     * Characters between 127 and 255 are stored as \xFF
+     * Characters between 256 and 65535 are stored as \uFFFF
+     * Characters above 65536 are stored as \u0010FFFF
+     * @param str Python like double-quoted string
      * @return unescaped and unquoted string
      */
-    public static String unquoteString(String str) {
+    public static String unquoteKString(String str) {
         StringBuilder sb = new StringBuilder();
-        assert str.charAt(0) == '"' :
-                "Expected to find double quote at the beginning of string: " + str;
-        assert str.charAt(str.length() - 1) == '"' :
-                "Expected to find double quote at the end of string: " + str;
+        if (str.charAt(0) != '"') {
+            throw new IllegalArgumentException("Expected to find double quote at the beginning of string: " + str);
+        }
+        if (str.charAt(str.length() - 1) != '"') {
+            throw new IllegalArgumentException("Expected to find double quote at the end of string: " + str);
+        }
         for (int i = 1; i < str.length() - 1; i++) {
             if (str.charAt(i) == '\\') {
                 if (str.charAt(i + 1) == '"') {
@@ -161,11 +209,15 @@ public class StringUtil {
     }
 
     /**
-     * Adds double-quote at the beginning and end of the string and escapes special characters.
+     * Adds double-quote at the beginning and end of the string and escapes special characters
+     * with backslash: newline, carriage return, line feed, tab and backslash.
+     * Characters between 127 and 255 are stored as \xFF
+     * Characters between 256 and 65535 are stored as \uFFFF
+     * Characters above 65536 are stored as \u0010FFFF
      * @param value any string
-     * @return C like textual representation of the string
+     * @return Python like textual representation of the string
      */
-    public static String enquoteString(String value) {
+    public static String enquoteKString(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
         result.append("\"");
@@ -344,8 +396,8 @@ public class StringUtil {
     private static int number = 0;
 
     /**
-     * Generate incremental numbers that dosn't contain the number 1
-     * 
+     * Generate incremental numbers that doesn't contain the number 1
+     *
      * @return an integer that doesn't contain the number 1
      */
     public static int getUniqueId() {
@@ -367,12 +419,24 @@ public class StringUtil {
         return number++;
     }
 
+    /**
+     * Takes a string as input and creates a continuous token for the maude lexer.
+     * Adds a backquote character to the following characters: ( ) [ ] { } , `
+     * @param tag Input string.
+     * @return A string that would be parsed as a continuous token by maude.
+     */
     public static String escapeMaude(String tag) {
         // TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
         tag = tag.replaceAll("(?<!`)`", "BKQT");
         return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
     }
 
+    /**
+     * Removes the escaping backqotes required by the maude lexer.
+     * Removes backquote from in front of teh following characters: ( ) [ ] { } , `
+     * @param str A maude specific string representation of a token.
+     * @return String representation of the token without the backquote escaping.
+     */
     public static String unescapeMaude(String str) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
@@ -432,7 +496,7 @@ public class StringUtil {
 
     /**
      * split string to lines in a way that no lines will exceed 80 columns
-     * NOTE: strings splitted only at whitespace character ' ', if string contains no ' ', it's returned as is
+     * NOTE: strings split only at whitespace character ' ', if string contains no ' ', it's returned as is
      * @param str string to split
      * @return new string with newlines added
      */
@@ -442,7 +506,7 @@ public class StringUtil {
 
     /**
      * split string to lines in a way that no lines will exceed `col` columns
-     * NOTE: strings splitted only at whitespace character ' ', if string contains no ' ', it's returned as is
+     * NOTE: strings split only at whitespace character ' ', if string contains no ' ', it's returned as is
      * @param str string to split
      * @param col rightmost column
      * @return new string with newlines added
@@ -455,7 +519,7 @@ public class StringUtil {
             builder.append(nl);
             if (line.length() < 80) {
                 builder.append(line);
-                
+
             } else {
                 builder.append(splitLine(line, col));
             }
@@ -481,13 +545,13 @@ public class StringUtil {
 
     /**
      * Finesse the JCommander usage output to make it more readable to the user.
-     * 
-     * This function does two things. First, it reworks the indentation to fix a 
+     *
+     * This function does two things. First, it reworks the indentation to fix a
      * bug where different commands are indented differently. Second, it
      * separates out experimental and non-experimental options in order to print
      * their usage separately.
      * @param string The unfiltered output from JCommander's usage
-     * @return An array of strings. If the command has experimental options, they 
+     * @return An array of strings. If the command has experimental options, they
      * are in the second string, and the main options are in the first string.
      * Otherwise, there will only be one string outputted.
      */
@@ -516,7 +580,7 @@ public class StringUtil {
         }
         return new String[] {mainOptions.toString(), experimentalOptions.toString()};
     }
-    
+
     public static String escapeShell(String arg, OS os) {
         if (os.isPosix) {
             return "'" + StringUtils.replace(arg, "'", "'\\''") + "'";

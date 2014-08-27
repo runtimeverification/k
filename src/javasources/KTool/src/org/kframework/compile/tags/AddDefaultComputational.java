@@ -2,6 +2,7 @@
 package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -15,9 +16,9 @@ public class AddDefaultComputational extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rule node, Void _) {
         if (!(node.containsAttribute("structural")
-                || node.containsAttribute("anywhere")
-                || node.containsAttribute("function")
-                || node.containsAttribute("predicate")))
+                || node.containsAttribute(Attribute.ANYWHERE_KEY)
+                || node.containsAttribute(Attribute.FUNCTION_KEY)
+                || node.containsAttribute(Attribute.PREDICATE_KEY)))
             node.putAttribute("computational", "");
 
         return node;

@@ -15,6 +15,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -22,9 +23,6 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -51,11 +49,11 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
         if (PC) {
-            Variable pc = new Variable(PC_VAR, "Bool");
+            Variable pc = new Variable(PC_VAR, Sort.BOOL);
             cell.setContents(pc);
             context.configVarSorts.put(pc.getName(), pc.getSort());
         }
-        else 
+        else
             cell.setContents(BoolBuiltin.TRUE);
         // append the path condition cell as subcell of generated top cell
         Term body = node.getBody();
@@ -151,19 +149,14 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         if (result == node)
             return node;
         if (result == null) {
-            GlobalSettings.kem
-                    .register(new KException(
-                            ExceptionType.ERROR,
-                            KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerError(
                             "Expecting Module, but got null. Returning the untransformed module.",
-                            getName(), node.getFilename(), node.getLocation()));
+                            this, node);
             return node;
         }
         if (!(result instanceof Module)) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                    KExceptionGroup.INTERNAL, "Expecting Module, but got "
-                    + result.getClass() + " while transforming.", node
-                    .getFilename(), node.getLocation()));
+            GlobalSettings.kem.registerInternalError("Expecting Module, but got "
+                    + result.getClass() + " while transforming.", this, node);
             return node;
         }
         node = (Module) result;
@@ -171,11 +164,11 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         PriorityBlock topPriorityBlock = new PriorityBlock();
         List<ProductionItem> topTerminals = new ArrayList<ProductionItem>();
         topTerminals.add(new Terminal(MetaK.Constants.pathCondition));
-        Production topProduction = new Production(new Sort("CellLabel"),
+        Production topProduction = new Production(new NonTerminal(Sort.CELL_LABEL),
                 topTerminals);
         topPriorityBlock.getProductions().add(topProduction);
         topCellBlocks.add(topPriorityBlock);
-        Syntax topCellDecl = new Syntax(new Sort("CellLabel"), topCellBlocks);
+        Syntax topCellDecl = new Syntax(new NonTerminal(Sort.CELL_LABEL), topCellBlocks);
         node.getItems().add(topCellDecl);
         return node;
     }

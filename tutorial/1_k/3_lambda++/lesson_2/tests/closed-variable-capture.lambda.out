@@ -2,4 +2,16 @@ Search results:
 
 Solution 1:
 V:K -->
-closure ( x |-> #symNat(2) , y , (x y) )
+closure ( x |-> 3 , y , (x y) )
+
+Solution 2:
+V:K -->
+closure ( x |-> 4 , y , (x y) )
+
+Solution 3:
+V:K -->
+closure ( x |-> 5 , y , (x y) )
+
+Solution 4:
+V:K -->
+closure ( x |-> 6 , y , (x y) )

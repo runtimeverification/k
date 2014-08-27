@@ -38,20 +38,20 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             return node;
 
         for (String sep : listSeparators) {
-            node.addConstant(KSorts.KLABEL, MetaK.getListUnitLabel(sep));
+            node.addConstant(Sort.KLABEL, MetaK.getListUnitLabel(sep));
         }
         return node;
     }
 
     @Override
     public ASTNode visit(Syntax node, Void _)  {
-        if (!MetaK.isComputationSort(node.getSort().getName())) {
+        if (!node.getDeclaredSort().getSort().isComputationSort()) {
             isComputation = false;
             return super.visit(node, _);
         }
         isComputation = true;
         node = (Syntax) super.visit(node, _);
-        node.setSort(new Sort(KSorts.KLABEL));
+        node.setSort(new NonTerminal(Sort.KLABEL));
         return node;
     }
 
@@ -61,28 +61,28 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             return node;
         if (!isComputation)
             return super.visit(node, _);
-        if (node.isSubsort() && !node.containsAttribute("klabel"))
+        if (node.isSubsort() && node.getKLabel() == null)
             return null;
         String arity = String.valueOf(node.getArity());
         Attributes attrs = node.getAttributes().shallowCopy();
         if (node.isListDecl()) {
             listSeparators.add(((UserList) node.getItems().get(0)).getSeparator());
-            attrs.set("hybrid", "");
+            attrs.add(Attribute.HYBRID);
         }
         node = node.shallowCopy();
         List<ProductionItem> pis = new ArrayList<>();
         pis.add(new Terminal(node.getKLabel()));
         node.setItems(pis);
-        attrs.set("arity", arity);
+        attrs.add(new Attribute("arity", arity));
         node.setAttributes(attrs);
-        node.setSort(KSorts.KLABEL);
+        node.setSort(Sort.KLABEL);
         return node;
     }
 
     @Override
-    public ASTNode visit(Sort node, Void _)  {
-        if (!MetaK.isComputationSort(node.getName()))
+    public ASTNode visit(NonTerminal node, Void _)  {
+        if (!node.getSort().isComputationSort())
             return node;
-        return new Sort("K");
+        return new NonTerminal(Sort.K);
     }
 }

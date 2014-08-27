@@ -37,13 +37,13 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
             Lexical lexical = new Lexical(terminal, follow);
             org.kframework.kil.Attributes attributes = new Attributes();
 //            attributes.set("onlyLabel", "");
-            attributes.set("notInRules", "");
-            attributes.set("variable", "");
+            attributes.add(Attribute.NOT_IN_RULES);
+            attributes.add(Attribute.VARIABLE);
 
             // adding default Int ::= SymVar
             java.util.List<ModuleItem> itemsS = module.getItems();
             itemsS.add(getSyntaxDeclaration(symVariable, lexical, attributes));
-            itemsS.add(getSyntaxDeclaration("Int", new Sort(symVariable), new Attributes()));
+            itemsS.add(getSyntaxDeclaration("Int", new NonTerminal(Sort.of(symVariable)), new Attributes()));
             module.setItems(itemsS);
         }
 
@@ -54,7 +54,7 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
         java.util.List<ProductionItem> items = new ArrayList<ProductionItem>();
         items.add(pi);
 
-        Sort sort = new Sort(sortName);
+        NonTerminal sort = new NonTerminal(Sort.of(sortName));
         Production production = new Production(sort, items);
         production.setAttributes(attributes);
         java.util.List<Production> productions = new ArrayList<Production>();

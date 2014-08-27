@@ -4,7 +4,6 @@ package org.kframework.backend.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.backend.SMTSolver;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -17,11 +16,13 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.utils.options.SMTSolver;
 
 /**
  * Add path condition cell to rules. Since this step is right after
@@ -39,8 +40,8 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
     @Override
     /**
-     * Construct the path condition by adding to the original 
-     * path condition (phi) the side condition (SC) of the rule. 
+     * Construct the path condition by adding to the original
+     * path condition (phi) the side condition (SC) of the rule.
      * If NOSMT is set, then the side condition of the rule
      * remains unchanged. Otherwise, we filter the condition
      * separating the predicates(P) from 'smtlib' translatable
@@ -55,7 +56,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
         if (node.getRequires() == null)
             return node;
-        
+
         //TODO: handle ensures
 
         Term condition = node.getRequires();
@@ -65,13 +66,13 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
         ConditionTransformer ct = new ConditionTransformer(context);
         condition = (Term) ct.visitNode(condition);
-        
+
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();
 
             // variable holding the formula
-            Variable phi = Variable.getFreshVar("K");
-            
+            Variable phi = Variable.getFreshVar(Sort.K);
+
             // create lhs path condition cell
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
@@ -103,22 +104,18 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             if (right instanceof Cell) {
                 right = AddConditionToConfig.addSubcellToCell((Cell) right, rightCell);
             }
-            
+
             Attributes atts = node.getAttributes();
             Term cond = condition;
-            if (context.kompileOptions.experimental.smt != SMTSolver.NONE) {
+            if (context.smtOptions.smt != SMTSolver.NONE) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition, context));
                 if (!(pathCondition instanceof Variable)){
                     cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
                     // add transition attribute
-                  List<Attribute> attrs = node.getAttributes().getContents();
-                  // bad practice
-                  attrs.add(new Attribute("transition", ""));
-
-                  atts = node.getAttributes().shallowCopy();
-                  atts.setContents(attrs);
+                  node.getAttributes().add(Attribute.TRANSITION);
+                  node.setAttributes(node.getAttributes().shallowCopy());
                 }
             }
 

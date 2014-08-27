@@ -38,9 +38,9 @@ productions below are defined shortly. */
 
   syntax Decl ::= Type Exps ";"
                 | Type Id "(" TypedIds ")" Block
-		| "#include" String
-		| "#define" Id Exp
-		| "#define" Id "(" Ids ")" Exp [prefer]
+        | "#include" String
+        | "#define" Id Exp
+        | "#define" Id "(" Ids ")" Exp [prefer]
 
 /*@ \subsection{Expressions}
 The expression constructs below are standard.  Increment (\texttt{++}) takes
@@ -193,7 +193,7 @@ module KERNEL-CIL
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
 define the basic semantic infrastructure consisting of definitions for
-{\em values} and {\em configuration}.  
+{\em values} and {\em configuration}.
 Values are needed to know when to stop applying
 the heating rules and when to start applying the cooling rules corresponding
 to strictness or context declarations.  The configuration serves as a backbone
@@ -207,14 +207,14 @@ one to define it. */
 
 /*@ \subsection{Values}
 We here define the values of the language that the various fragments of
-programs evaluate to.  
+programs evaluate to.
 First, floats, integers, Booleans, and strings are values.  As discussed,
 arrays evaluate to special array reference values holding (1) a location from
 where the array's elements are contiguously allocated in the store, and
 (2) the size of the array.  Functions evaluate to function values as
 $\lambda$-abstractions (we do not need to evaluate functions to closures
 because each function is executed in the fixed global environment and
-function definitions cannot be nested).  
+function definitions cannot be nested).
 We finally tell the tool that values are \K results. */
 
   syntax Val ::= Float | Int | Bool | String
@@ -244,8 +244,8 @@ by threads, a set cell \textsf{terminated} holding the unique identifiers of
 the threads which already terminated (needed for \texttt{join}), \textsf{input}
 and \textsf{output} list cells, and a \textsf{nextLoc} cell holding a natural
 number indicating the next available location.  Unlike in the small languages,
-where we use the fresh predicate to generate fresh locations, in larger 
-languages we prefer to explicitly manage memory.  
+where we use the fresh predicate to generate fresh locations, in larger
+languages we prefer to explicitly manage memory.
 The location counter in \textsf{nextLoc} models an actual physical
 location in the store; for simplicity, we assume arbitrarily large memory and
 no garbage collection.  The \textsf{threads} cell contains one \textsf{thread}
@@ -358,7 +358,7 @@ file in the auxiliary operation section, initializes each location in
 the list $L \ldots L'$ to $V$.  Note that, since the dimensions of
 array declarations can be arbitrary expressions, this virtually means
 that we can dynamically allocate memory by means of array
-declarations. */ 
+declarations. */
 
   context _::Type _:Id[HOLE];
   // this looks weird for arrays of size 0, so AndreiS changed the condition to
@@ -421,7 +421,7 @@ would need to evaluate the expressions given as array dimensions). */
 /*@ \subsection{Function declaration}
 Functions are evaluated to $\lambda$-abstractions and stored like any other
 /values in the store.  A binding is added into the environment for the function
-name to the location holding its body.  Similarly to the C language, 
+name to the location holding its body.  Similarly to the C language,
 function declarations are only allowed at the top level of the program.  More
 precisely, the subsequent semantics only works well when one
 respects this requirement.  Indeed, the simplistic context-free parser
@@ -437,7 +437,7 @@ global variable before declaring a local function).  */
 
   rule #include S:String => .
 
-  rule #define X::Id E:Exp => #define X::Id(.Ids) E::Exp 
+  rule #define X::Id E:Exp => #define X::Id(.Ids) E::Exp
   rule <k> #define F:Id(Xs:Ids) B:Exp => . ...</k>
        <env> Env:Map => Env[L/F] </env>
        <store>... .Map => L |-> define(Xs, B) ...</store>
@@ -640,7 +640,7 @@ $7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
 may not evaluate at all (be undefined).  If one wants to make sure that
 such artificial values are never misused, then one needs to define a static
 checker (also using \K, like our the type checker in
-\texttt{examples/simple/typed/static}) and reject programs that do. 
+\texttt{examples/simple/typed/static}) and reject programs that do.
 Note that, unlike the undefined symbol $\bot$ which had the sort $K$
 instead of $\it Val$, we defined \texttt{nothing} to be a value.  That
 is because, as explained above, we do not want the program to get
@@ -807,7 +807,7 @@ exception stack.  The three rules below modularly do precisely the above. */
   // (line 643)
   syntax KItem ::= "(|" Type Id "," Stmts "," K "," Map "," ControlCellFragment "|)"
 
-  syntax KItem ::= "popx" 
+  syntax KItem ::= "popx"
 
   rule <k> (try S1:Block catch(T::Type X:Id) {S2:Stmts} => S1 ~> popx) ~> K </k>
        <control>
@@ -848,7 +848,7 @@ of the newly created thread and, at the same time, a new thread cell is added
 into the configuration, initialized with the $S$ statement and sharing the
 same environment with the parent thread.  Note that the newly created
 \textsf{thread} cell is torn.  That means that the remaining cells are added
-and initialized automatically as described in the 
+and initialized automatically as described in the
 configuration.  This is part of \K's configuration abstraction mechanism. */
 
   rule <thread>...
@@ -931,10 +931,10 @@ so other threads can acquire it if they need to. */
        <busy>... SetItem(V) => .Set ...</busy>
 
 /*@ \subsubsection{Rendezvous synchronization}
-In addition to synchronization through acquire and release of locks, this 
-language also provides a construct for rendezvous synchronization.  
-A thread whose next statement to execute is \texttt{rendezvous($V$)} gets 
-stuck until another thread reaches an identical statement; when that happens, 
+In addition to synchronization through acquire and release of locks, this
+language also provides a construct for rendezvous synchronization.
+A thread whose next statement to execute is \texttt{rendezvous($V$)} gets
+stuck until another thread reaches an identical statement; when that happens,
 the two threads drop their rendezvous statements and continue their executions.
 If three threads happen to have an identical rendezvous statement as their next
 statement, then precisely two of them will synchronize and the other will
@@ -1033,8 +1033,8 @@ corresponding store lookup operation. */
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  context lvalue(_:Exp[HOLE::Exp])
-  context lvalue(HOLE::Exp[_:Exp])
+  context lvalue(_:>Exp[HOLE:>Exp])
+  context lvalue(HOLE:>Exp[_:>Exp])
 
 // Finally, return the address of the desired object member
 
@@ -1054,5 +1054,5 @@ value: */
     when N >Int 0
 
 /*@ The semantics is now complete.  */
-endmodule 
+endmodule
 

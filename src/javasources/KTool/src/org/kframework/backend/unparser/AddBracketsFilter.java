@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -18,7 +17,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         super("Add brackets", context);
     }
 
-    @Override    
+    @Override
     public ASTNode visit(TermCons ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -28,7 +27,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(Collection ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -38,17 +37,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
-    public ASTNode visit(MapItem ast, Void _)  {
-        prepare(ast);
-        ASTNode result = super.visit(ast, _);
-        boolean needsParens = postpare();
-        if (needsParens)
-            return new Bracket((Term)result, context);
-        return result;
-    }
-
-    @Override    
+    @Override
     public ASTNode visit(Cell ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -58,7 +47,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(CollectionItem ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -68,7 +57,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(KApp ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -78,7 +67,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(Hole ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -88,7 +77,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(Freezer ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -98,7 +87,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         return result;
     }
 
-    @Override    
+    @Override
     public ASTNode visit(KInjectedLabel ast, Void _)  {
         prepare(ast);
         ASTNode result = super.visit(ast, _);
@@ -114,10 +103,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         NONASSOC,
         ASSOC,
         NONE;
-
-        public boolean equals2(Associativity o) {
-            return this == o || this == NONE || o == NONE;
-        }
     }
 
     private enum Fixity {
@@ -136,8 +121,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                 }
             }
             return tc.getProduction().getArity() == 1;
-        } else if (t instanceof MapItem) {
-            return false;
         } else if (t instanceof CollectionItem) {
             return true;
         } else if (t instanceof Cell || t instanceof Freezer || t instanceof KInjectedLabel) {
@@ -175,26 +158,25 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return Associativity.LEFT;
                 }
             }*/
-            
+
         } else if (t instanceof Collection) {
             return Associativity.ASSOC;
         }
         return Associativity.NONE;
     }
 
-    private boolean getAssociativity(Term inner, Term outer) {
+    private boolean getAssociativity(Term inner, Term outer, Associativity side) {
         if (!(inner instanceof TermCons && outer instanceof TermCons)) {
             return false;
         }
         TermCons tcInner = (TermCons) inner;
         TermCons tcOuter = (TermCons) outer;
-        if (tcInner.getCons().equals(tcOuter.getCons())) {
-            return true;
+        if (side == Associativity.LEFT) {
+            return !context.isRightAssoc(tcOuter.getProduction().getKLabel(), tcInner.getProduction().getKLabel());
+        } else if (side == Associativity.RIGHT) {
+            return !context.isLeftAssoc(tcOuter.getProduction().getKLabel(), tcInner.getProduction().getKLabel());
         }
-        if (context.associativity.get(tcInner.getCons()) == null) {
-            return false;
-        }
-        return context.associativity.get(tcInner.getCons()).contains(tcOuter.getProduction());
+        throw new AssertionError("unreachable");
     }
 
     private boolean isAtom(Term inner) {
@@ -223,7 +205,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             if (!(p.getItems().get(p.getItems().size() - 1) instanceof Terminal))
                 set.add(Fixity.BARE_RIGHT);
             return set;
-        } else if (t instanceof Collection || t instanceof MapItem || t instanceof Freezer) {
+        } else if (t instanceof Collection || t instanceof Freezer) {
             return EnumSet.allOf(Fixity.class);
         } else if (t instanceof CollectionItem || t instanceof Cell) {
             return EnumSet.noneOf(Fixity.class);
@@ -251,11 +233,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         } else if (outer instanceof Collection) {
             Collection c = (Collection)outer;
             childTerms = c.getContents();
-        } else if (outer instanceof MapItem) {
-            MapItem m = (MapItem)outer;
-            childTerms = new ArrayList<Term>();
-            childTerms.add(m.getKey());
-            childTerms.add(m.getValue());
         } else if (outer instanceof CollectionItem || outer instanceof Cell || outer instanceof KInjectedLabel || outer instanceof Freezer) {
             return EnumSet.allOf(Fixity.class);
         } else if (outer instanceof KApp) {
@@ -320,7 +297,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                 }
             }
             return set;
-        } else if (outer instanceof List || outer instanceof Set || outer instanceof Map || outer instanceof Bag) {
+        } else if (outer instanceof Bag) {
             return EnumSet.allOf(Fixity.class);
         } else if (outer instanceof Collection) {
             //KList or KSequence
@@ -336,11 +313,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
             if (i != c.getContents().size())
                 set.remove(Fixity.BARE_RIGHT);
             return set;
-        } else if (outer instanceof MapItem) {
-            MapItem m = (MapItem) outer;
-            if (contains(m.getKey(), inner, context))
-                return EnumSet.of(Fixity.BARE_LEFT);
-            return EnumSet.of(Fixity.BARE_RIGHT);
         } else if (outer instanceof CollectionItem) {
             return EnumSet.noneOf(Fixity.class);
         } else if (outer instanceof Cell) {
@@ -366,16 +338,16 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return inner instanceof TermCons && context.isPriorityWrong(tcOuter.getProduction().getKLabel(), ((TermCons)inner).getProduction().getKLabel());
                 }
             }
-            return !inner.getSort().equals("K");
+            return !inner.getSort().equals(Sort.K);
         } else if (inner instanceof Rewrite && !(outer instanceof Cell)) {
             return true;
         } else if (inner instanceof KSequence && outer instanceof TermCons) {
             return true;
         } else if (outer instanceof KInjectedLabel) {
             KInjectedLabel lbl = (KInjectedLabel)outer;
-            String sort = lbl.getTerm().getSort();
-            if (MetaK.isKSort(sort)) {
-                sort = lbl.getInjectedSort(sort);
+            Sort sort = lbl.getTerm().getSort();
+            if (sort.isKSort()) {
+                sort = KInjectedLabel.getInjectedSort(sort);
                 if (!context.isSubsortedEq(sort, inner.getSort())) {
                     return true;
                 }
@@ -414,7 +386,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                 lc = null;
                 rc = null;
             }
-            leftCapture.push(lc);    
+            leftCapture.push(lc);
             rightCapture.push(rc);
             parens.push(needsParentheses(ast, outer, lc, rc));
         } else {
@@ -433,14 +405,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
         rightCapture.pop();
         boolean needsParens = parens.pop();
         return needsParens;
-    }
-
-    private boolean getImplicitPriority(Term inner, Term outer) {
-    //    if (getFixity(inner).size() > 0 && getFixity(outer).size() == 0)
-    //        return true;
-    //    if (getFixity(inner).size() > 0 && !isUnary(inner) && getFixity(outer).size() > 0 && isUnary(outer))
-    //        return true;
-        return false;
     }
 
     private boolean needsParentheses(Term inner, Term outer, Term leftCapture, Term rightCapture)  {
@@ -486,7 +450,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 }
             }
-            
+
 */
 
             if (innerFixity.contains(Fixity.BARE_RIGHT) && rightCapture != null) {
@@ -498,7 +462,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 } else if (assoc == Associativity.RIGHT && !inversePriority) {
                     return true;
-                } else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture)) {
+                } else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture, Associativity.RIGHT)) {
                     return true;
                 }
             }
@@ -511,7 +475,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 } else if (assoc == Associativity.LEFT && !inversePriority) {
                     return true;
-                } else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture)) {
+                } else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture, Associativity.LEFT)) {
                     return true;
                 }
             }

@@ -19,8 +19,10 @@ module LAMBDA
                 </T>
 
   syntax Exp ::= Exp "->" Exp                  [strict]
-  rule <k> lambda X : T . E => (T -> E) ~> tenv(Rho) ...</k>
-       <tenv> Rho => Rho[T/X] </tenv>
+  rule <k> lambda X : T . E:Exp => (T -> E) ~> Rho ...</k>
+       <tenv> Rho:Map => Rho[X <- T] </tenv>
+  // Remove the sorting of E above when the bug is fixed.  Currently, the
+  // inferred sort is Type, due to a bug.
   rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>
   rule (T1 -> T2) T1 => T2
 
@@ -47,10 +49,9 @@ module LAMBDA
                | "mu" Id ":" Type "." Exp
   rule letrec F : T1  X : T2 = E in E'
     => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
-  rule <k> mu X : T . E => (T -> T) E ~> tenv(Rho) ...</k>
-       <tenv> Rho => Rho[T/X] </tenv>
+  rule <k> mu X : T . E => (T -> T) E ~> Rho ...</k>
+       <tenv> Rho => Rho[X <- T] </tenv>
 
-// Auxiliary tenv
-  syntax K ::= tenv(Map)
-  rule <k> _:Type ~> (tenv(Rho) => .) ...</k> <tenv> _ => Rho </tenv>
+// Auxiliary type environment recovery
+  rule <k> _:Type ~> (Rho => .) ...</k> <tenv> _ => Rho </tenv>
 endmodule

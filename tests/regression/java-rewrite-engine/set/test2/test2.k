@@ -4,18 +4,17 @@ require "builtins/set.k"
 module TEST2
   imports SET
 
-  syntax K ::= start(Int)
+  syntax KItem ::= start(Int)
 
   configuration
     <T>
-      <set> MySetItem(0), MySetItem(1), MySetItem(2), MySetItem(3), MySetItem(4) </set> 
-			<k> $PGM:K </k> 
-		</T>
-  
-  rule <k> start(I:Int => I -Int 1) ...</k> 
-	     <set>... MySetItem(I) => .MySet ...</set>
-    when I >Int 0
+            <k> $PGM:K </k>
+      <set> SetItem(0) SetItem(1) SetItem(2) SetItem(3) SetItem(4) </set>
+        </T>
 
+  rule <k> start(I:Int => I -Int 1) ...</k>
+         <set>... SetItem(I) => .Set ...</set>
+    when I >Int 0
   rule start(0) => .
 endmodule
 

@@ -1,10 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -12,8 +8,11 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+
 
 /**
  *
@@ -40,27 +39,27 @@ public class SetUpdate extends Term implements DataStructureUpdate {
         if (!(set instanceof BuiltinSet)) {
             return this;
         }
+        BuiltinSet builtinSet = (BuiltinSet) set;
 
-        BuiltinSet builtinSet = ((BuiltinSet) set);
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        builder.concatenate(set);
 
-        Set<Term> elems = new HashSet<Term>(builtinSet.elements());
-        Set<Term> elemsToRemove = new HashSet<Term>();
-        for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            Term nextElem = iterator.next();
-            if (elems.remove(nextElem)) {
-                elemsToRemove.add(nextElem);
+        Set<Term> pendingRemoveSet = new HashSet<>();
+        for (Term key : removeSet) {
+            if (!builder.remove(key)) {
+                pendingRemoveSet.add(key);
             }
         }
 
-        if (removeSet.size() > elemsToRemove.size()) {
-            return new SetUpdate(set, Sets.difference(elems, elemsToRemove));
+        if (!pendingRemoveSet.isEmpty()) {
+            if (!builtinSet.isConcreteCollection()) {
+                return new SetUpdate(builder.build(), pendingRemoveSet);
+            } else {
+                return Bottom.of(Kind.KITEM);
+            }
         }
 
-        if (builtinSet.hasFrame()) {
-            return new BuiltinSet(elems, builtinSet.frame());
-        } else {
-            return new BuiltinSet(elems);
-        }
+        return builder.build();
     }
 
     public Term base() {
@@ -83,18 +82,21 @@ public class SetUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return set.sort();
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + set.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
-        }
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + set.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

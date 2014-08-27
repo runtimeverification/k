@@ -24,7 +24,7 @@ module STRING-HOOKS
   imports FLOAT-HOOKS
 
 
-  syntax String ::= String "+String" String	[function, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(#STRING:_+String_)]
+  syntax String ::= String "+String" String    [function, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(#STRING:_+String_)]
 
   syntax Bool ::= String "==String" String [function, left, hook(#STRING:_==String_)]
 
@@ -40,12 +40,14 @@ module STRING-HOOKS
 
   syntax String ::= "Float2String" "(" Float ")" [function, klabel(Float2String), hook(#CONVERSION:float2string)]
   syntax Float ::= "String2Float" "(" String ")" [function, klabel(String2Float), hook(#CONVERSION:string2float)]
-  syntax Int ::= "String2Int" "(" String ")"	 [function, klabel(String2Int), hook(#CONVERSION:string2int)]
-  syntax String ::= "Int2String" "(" Int ")"	 [function, klabel(Int2String), hook(#CONVERSION:int2string)]
+  syntax Int ::= "String2Int" "(" String ")"     [function, klabel(String2Int), hook(#CONVERSION:string2int)]
+  syntax String ::= "Int2String" "(" Int ")"     [function, klabel(Int2String), hook(#CONVERSION:int2string)]
+  syntax String ::= "Base2String" "(" Int "," Int ")" [function, klabel(Base2String), hook(#CONVERSION:base2string)]
+  syntax Int ::= "String2Base" "(" String "," Int ")" [function, klabel(String2Base), hook(#CONVERSION:string2base)]
 
 
-  syntax String ::= "KLabel2String" "(" KLabel ")"  [function, klabel(KLabel2String)]
-  syntax KLabel ::= "String2KLabel" "(" String ")" [function, cons(KLabel1String2KLabelSyn)]
+  syntax String ::= KLabel2String(KLabel)  [function]
+  syntax KLabel ::= String2KLabel(String) [function]
 
   syntax String ::= "replaceAll" "(" String "," String "," String ")" [function, hook(#STRING:replaceAll)]
   syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(#STRING:replace)]
@@ -93,21 +95,21 @@ module STRING-HOOKS
            andBool (ordChar(C) <=Int ordChar("9")) when isChar(C)
 
   rule countAllOccurences(Source:String, ToCount:String) => 0
-			when findString(Source, ToCount, 0) <Int 0
+            when findString(Source, ToCount, 0) <Int 0
   rule countAllOccurences(Source:String, ToCount:String) => 1 +Int countAllOccurences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
-			when findString(Source, ToCount, 0) >=Int 0
+            when findString(Source, ToCount, 0) >=Int 0
 
   rule replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
-				+String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source))
-				when findString(Source, ToReplace, 0) >=Int 0
+                +String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source))
+                when findString(Source, ToReplace, 0) >=Int 0
   rule replaceFirst(Source:String, ToReplace:String, _:String) => Source
-		when findString(Source, ToReplace, 0) <Int 0
+        when findString(Source, ToReplace, 0) <Int 0
 
 
   rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) =>
        substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
-		when Count >Int 0
+        when Count >Int 0
   rule replace(Source:K, _, _, 0) => Source
   rule replaceAll(Source:K, ToReplace:K, Replacement:K) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
 
@@ -121,14 +123,11 @@ module STRING-HOOKS
 
   rule trim(S:K) => ltrim(rtrim(S))
 
-  syntax K ::= "#parseToken" "(" String "," String ")"  [function, klabel(#parseToken)]
-  rule #parseToken("#Int",S:String) => String2Int(S)
-  rule #parseToken("#Float",S:String) => (String2Float(S))
-  rule #parseToken("#String",S:String) => (S)
-  rule #parseToken("Int",S:String) => String2Int(S)
-  rule #parseToken("Float",S:String) => (String2Float(S))
-  rule #parseToken("String",S:String) => (S)
-  rule #parseToken("Char",S:String) => (String2Char(S))
+  syntax KItem ::= "#parseToken" "(" String "," String ")"  [function, klabel(#parseToken), hook(#CONVERSION:string2token)]
+  rule #parseToken("Int", S:String) => String2Int(S)
+  rule #parseToken("Float", S:String) => String2Float(S)
+  rule #parseToken("String", S:String) => S
+  rule #parseToken("Char", S:String) => String2Char(S)
 
   syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString), hook(#CONVERSION:token2string)]
 endmodule

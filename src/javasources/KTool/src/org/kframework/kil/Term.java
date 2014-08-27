@@ -13,7 +13,7 @@ import org.w3c.dom.Element;
  * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
  */
 public abstract class Term extends ASTNode implements Comparable<Term> {
-    protected String sort;
+    protected Sort sort;
 
     protected Term() {
     }
@@ -23,26 +23,26 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
         this.sort = t.sort;
     }
 
-    public Term(String location, String filename, String sort) {
-        super(location, filename);
+    public Term(Location location, Source source, Sort sort) {
+        super(location, source);
         setSort(sort);
     }
 
     public Term(Element element) {
         super(element);
-        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+        this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
     }
 
-    public Term(String sort) {
+    public Term(Sort sort) {
         super();
         this.sort = sort;
     }
 
-    public String getSort() {
+    public Sort getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Sort sort) {
         this.sort = sort;
     }
 

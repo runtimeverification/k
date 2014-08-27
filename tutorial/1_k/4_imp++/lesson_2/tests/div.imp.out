@@ -1,13 +1,46 @@
+Search results:
+
+Solution 1:
 <T>
     <k>
-        ++ x ~> HOLE / ((++ x) / x) ~> y = HOLE ;
+        (++ x) ~> (HOLE / ((++ x) / x)) ~> y = HOLE ;
     </k>
-    <store>
-        #symNat(1) |-> 1
-        #symNat(2) |-> 0
-    </store>
     <env>
-        x |-> #symNat(1)
-        y |-> #symNat(2)
+        x |-> 1
+        y |-> 2
     </env>
+    <store>
+        1 |-> 1
+        2 |-> 0
+    </store>
+</T>
+
+Solution 2:
+<T>
+    <k>
+        (++ x) ~> (HOLE / 1) ~> ((++ x) / HOLE) ~> y = HOLE ;
+    </k>
+    <env>
+        x |-> 1
+        y |-> 2
+    </env>
+    <store>
+        1 |-> 1
+        2 |-> 0
+    </store>
+</T>
+
+Solution 3:
+<T>
+    <k>
+        (++ x) ~> (HOLE / x) ~> ((++ x) / HOLE) ~> y = HOLE ;
+    </k>
+    <env>
+        x |-> 1
+        y |-> 2
+    </env>
+    <store>
+        1 |-> 1
+        2 |-> 0
+    </store>
 </T>

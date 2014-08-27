@@ -34,7 +34,7 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(Production node, P p) throws E;
     public R visit(ProductionItem node, P p) throws E;
     // <ProductionItems>
-    public R visit(Sort node, P p) throws E;
+    public R visit(NonTerminal node, P p) throws E;
     public R visit(Lexical node, P p) throws E;
     public R visit(Terminal node, P p) throws E;
     public R visit(UserList node, P p) throws E;
@@ -47,17 +47,11 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(Ambiguity node, P p) throws E;
     public R visit(Bag node, P p) throws E;
     public R visit(KSequence node, P p) throws E;
-    public R visit(List node, P p) throws E;
     public R visit(KList node, P p) throws E;
-    public R visit(org.kframework.kil.Map node, P p) throws E;
-    public R visit(Set node, P p) throws E;
     // </Collections>
     public R visit(CollectionItem node, P p) throws E;
     // <CollectionItems>
     public R visit(BagItem node, P p) throws E;
-    public R visit(ListItem node, P p) throws E;
-    public R visit(MapItem node, P p) throws E;
-    public R visit(SetItem node, P p) throws E;
     // </CollectionItems>
     // <BuiltinDataStructure>
     public R visit(BuiltinLookup node, P p) throws E;
@@ -78,6 +72,7 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(BoolBuiltin node, P p) throws E;
     public R visit(IntBuiltin node, P p) throws E;
     public R visit(StringBuiltin node, P p) throws E;
+    public R visit(FloatBuiltin node, P p) throws E;
     public R visit(GenericToken node, P p) throws E;
     // </Token>
     public R visit(ListTerminator node, P p) throws E;
@@ -102,22 +97,22 @@ public interface Visitor<P, R, E extends Throwable> {
     public R visit(FreezerLabel freezerLabel, P p) throws E;
     public R visit(Freezer f, P p) throws E;
     public R visit(BackendTerm term, P p) throws E;
-    
+
     /**
      * Visit an AST tree. This is the main entry point whenever you want to apply a visitor to an ASTNode.
-     * 
+     *
      * @param node The node to visit.
      * @param p The optional parameter to pass to the visit methods.
      * @return The value returned from visiting the entire ASTNode tree.
      * @throws E if the visitor implementation raises an exception.
      */
     public R visitNode(ASTNode node, P p) throws E;
-    
+
     /**
-     * Visit an AST tree with {@code p} equal to null. Useful if {@code <P>} is {@link Void}. 
-     * 
+     * Visit an AST tree with {@code p} equal to null. Useful if {@code <P>} is {@link Void}.
+     *
      * This method should be implemented by calling {@code visitNode(node, null)}.
-     * 
+     *
      * @param node The node to visit.
      * @return The value returned from visiting the entire ASTNode tree.
      * @throws E if the visitor implementation raises an exception.
@@ -128,7 +123,7 @@ public interface Visitor<P, R, E extends Throwable> {
      * This method must be called by {@link ASTNode#accept(Visitor, Object)} with the ASTNode
      * and the result of transforming the ASTNode. Its purpose is to factor out functionality
      * which must be performed by the visitor for correctness regardless of whether the visit
-     * methods are overridden. For example, a visitor may override a method in such a way that 
+     * methods are overridden. For example, a visitor may override a method in such a way that
      * children are not accepted, or so that the parent class's visit method is not called.
      * This method serves to guarantee that certain functionality will occur regardless of whether
      * this is the case.

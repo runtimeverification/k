@@ -2,8 +2,9 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.utils.StringUtil;
+import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 /**
@@ -16,46 +17,68 @@ public class Variable extends Term {
     private String name;
     /** True if the variable was written with an explicit type annotation */
     private boolean userTyped = false;
-    private boolean fresh = false;
+    private final boolean freshVariable;
+    private final boolean freshConstant;
     private boolean syntactic = false;
     /** Used by the type inferencer  */
-    private String expectedSort = null;
+    private Sort expectedSort = null;
     private static final String GENERATED_FRESH_VAR = "GeneratedFreshVar";
 
-    public String getExpectedSort() {
+    public Sort getExpectedSort() {
         return expectedSort;
     }
 
-    public void setExpectedSort(String expectedSort) {
+    public void setExpectedSort(Sort expectedSort) {
         this.expectedSort = expectedSort;
     }
 
     public Variable(Element element) {
         super(element);
-        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+        this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
         this.name = element.getAttribute(Constants.NAME_name_ATTR);
         this.userTyped = element.getAttribute(Constants.TYPE_userTyped_ATTR).equals("true");
+
+        java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
+        if (its.size() > 0) {
+            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+        }
+
         if (this.name.startsWith("?")) {
-            this.setFresh(true);
+            this.freshVariable = true;
+            this.freshConstant = false;
             this.name = this.name.substring(1);
+        } else if (this.name.startsWith("!")) {
+            this.freshConstant = true;
+            this.freshVariable = false;
+            this.name = this.name.substring(1);
+        } else {
+            this.freshVariable = false;
+            this.freshConstant = false;
         }
     }
 
-    public Variable(String name, String sort) {
+    public Variable(String name, Sort sort, boolean freshVariable, boolean freshConstant) {
         super(sort);
         this.name = name;
+        this.freshVariable = freshVariable;
+        this.freshConstant = freshConstant;
+    }
+
+    public Variable(String name, Sort sort) {
+        this(name, sort, false, false);
     }
 
     public Variable(Variable variable) {
         super(variable);
         name = variable.name;
-        fresh = variable.fresh;
+        freshVariable = variable.freshVariable;
+        freshConstant = variable.freshConstant;
         userTyped = variable.userTyped;
         syntactic = variable.syntactic;
         expectedSort = variable.expectedSort;
     }
 
-    public static Variable getFreshVar(String sort) {
+    public static Variable getFreshVar(Sort sort) {
         return new Variable(GENERATED_FRESH_VAR + nextVariableIndex++, sort);
     }
 
@@ -65,6 +88,16 @@ public class Variable extends Term {
 
     public String getName() {
         return name;
+    }
+
+    public String fullName() {
+        if (isFreshVariable()) {
+            return "?" + name;
+        } else if (isFreshConstant()) {
+            return "!" + name;
+        } else {
+            return name;
+        }
     }
 
     public String toString() {
@@ -86,7 +119,9 @@ public class Variable extends Term {
             return false;
         Variable var = (Variable) obj;
 
-        return this.sort.equals(var.getSort()) && this.name.equals(var.getName());
+        return this.sort.equals(var.getSort()) && this.name.equals(var.getName())
+                && this.freshVariable == var.freshVariable
+                && this.freshConstant == var.freshConstant;
     }
 
     @Override
@@ -107,12 +142,12 @@ public class Variable extends Term {
         return new Variable(this);
     }
 
-    public void setFresh(boolean fresh) {
-        this.fresh = fresh;
+    public boolean isFreshVariable() {
+        return freshVariable;
     }
 
-    public boolean isFresh() {
-        return fresh;
+    public boolean isFreshConstant() {
+        return freshConstant;
     }
 
     public boolean isGenerated(){

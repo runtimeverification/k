@@ -8,12 +8,12 @@
            0) ) { halt ; } else { s = 0 ; while ( (! (n <= 0)) ) { s = (s + n)
            ; n = (n + -1) ; } print ( "Sum = ", s, "\n" ) ; } }
     </k>
-    <store>
-        #symNat(1) |-> 0
-        #symNat(2) |-> 0
-    </store>
     <env>
-        n |-> #symNat(1)
-        s |-> #symNat(2)
+        n |-> 1
+        s |-> 2
     </env>
+    <store>
+        1 |-> 0
+        2 |-> 0
+    </store>
 </T>

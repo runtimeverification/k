@@ -10,12 +10,12 @@ module TEST3
                   | "while" Exp "do" Stmt [klabel('while_do_)]
                   | "{" Stmt "}" [bracket, klabel('{_})]
                   | "L1Stmt" Id ":" Stmt
-		  > "Labe1Stmt" Id
+          > "Labe1Stmt" Id
 
     syntax Code ::= Exp
                   | Stmt
                   > "L1Code" Id ":" Code
-		  > "Labe1Code" Id
+          > "Labe1Code" Id
 
     syntax KLabel ::= "Label1" Id
 

@@ -13,13 +13,13 @@ public class CollectLocationsVisitor extends BasicVisitor {
 
     @Override
     public Void visit(Production node, Void _) {
-        context.locations.put(node.getFilename() + ":" + node.getLocation(), node);
+        context.locations.put(node.getSource() + ":" + node.getLocation(), node);
         return null;
     }
 
     @Override
     public Void visit(Sentence node, Void _) {
-        context.locations.put(node.getFilename() + ":" + node.getLocation(), node);
+        context.locations.put(node.getSource() + ":" + node.getLocation(), node);
         return null;
     }
 }

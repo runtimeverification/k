@@ -3,7 +3,7 @@ require "builtins/model-checker.k"
 
 /*@
 This is the abstract semantics of IMP. It contains the normal semantics of IMP
-and its extension for abstact execution. 
+and its extension for abstact execution.
 */
 
 module ABSTRACT-DOMAIN-SYNTAX
@@ -35,8 +35,8 @@ module IMP-SYNTAX
                  | "while" "(" BExp ")" Block
                  | "spawn" "{" Process "}"
 
-  syntax Process ::=  "int" Ids ";" Stmts 
-  syntax Pgm ::= "main" "{" Process "}" | LTLFormula 
+  syntax Process ::=  "int" Ids ";" Stmts
+  syntax Pgm ::= "main" "{" Process "}" | LTLFormula
 
   syntax Ids   ::= List{Id,","}
   syntax Stmts   ::= List{Stmt,""}
@@ -54,43 +54,43 @@ module ABSTRACT-DOMAIN
   syntax Int ::= Int "plusInt" Int [function]
   syntax Int ::= Int "timesInt" Int [function]
 
-  rule anyInt timesInt _:Int => anyInt   
-  rule _:Int timesInt anyInt => anyInt   
- 
-  rule I1:Int timesInt I2:Int => #if I1 *Int I2 <=Int 2 ==K true #then  I1 *Int I2 #else anyInt #fi 
+  rule anyInt timesInt _:Int => anyInt
+  rule _:Int timesInt anyInt => anyInt
 
-  rule anyInt plusInt _:Int => anyInt   
-  rule _:Int plusInt anyInt => anyInt   
- 
-  rule I1:Int plusInt I2:Int => #if I1 +Int I2 <=Int 2 ==K true #then  I1 +Int I2 #else anyInt #fi 
+  rule I1:Int timesInt I2:Int => #if I1 *Int I2 <=Int 2 ==K true #then  I1 *Int I2 #else anyInt #fi
 
-  rule anyInt divInt I:Int => anyInt  when I =/=Int 0 
-  rule _:Int divInt anyInt => anyInt   
+  rule anyInt plusInt _:Int => anyInt
+  rule _:Int plusInt anyInt => anyInt
 
-  rule anyInt <=Int _:Int => anyBool   
-  rule _:Int <=Int anyInt => anyBool   
+  rule I1:Int plusInt I2:Int => #if I1 +Int I2 <=Int 2 ==K true #then  I1 +Int I2 #else anyInt #fi
 
-  rule anyInt ==Int _:Int => anyBool   
-  rule _:Int ==Int anyInt => anyBool   
+  rule anyInt divInt I:Int => anyInt  when I =/=Int 0
+  rule _:Int divInt anyInt => anyInt
 
-  rule anyInt =/=Int _:Int => anyBool   
+  rule anyInt <=Int _:Int => anyBool
+  rule _:Int <=Int anyInt => anyBool
+
+  rule anyInt ==Int _:Int => anyBool
+  rule _:Int ==Int anyInt => anyBool
+
+  rule anyInt =/=Int _:Int => anyBool
   rule _:Int =/=Int anyInt => anyBool
 
-  rule anyBool ==Bool _:Bool => anyBool   
-  rule _:Bool ==Bool anyBool => anyBool   
+  rule anyBool ==Bool _:Bool => anyBool
+  rule _:Bool ==Bool anyBool => anyBool
 
   rule false andBool B:Bool => false
   rule B:Bool andBool false => false
 
-  rule anyBool andBool B:Bool => anyBool  when B =/=Bool false 
-//  rule B:Bool andBool anyBool) => anyBool  when B =/=Bool false 
-  rule '_andBool_(B:Bool,, anyBool) => anyBool  when B =/=Bool false 
+  rule anyBool andBool B:Bool => anyBool  when B =/=Bool false
+//  rule B:Bool andBool anyBool) => anyBool  when B =/=Bool false
+  rule '_andBool_(B:Bool,, anyBool) => anyBool  when B =/=Bool false
 
   rule true orBool B:Bool => true
   rule B:Bool orBool true => true
 
-  rule anyBool orBool B:Bool => anyBool  when B =/=Bool true 
-  rule '_orBool_(B:Bool,, anyBool) => anyBool  when B =/=Bool true 
+  rule anyBool orBool B:Bool => anyBool  when B =/=Bool true
+  rule '_orBool_(B:Bool,, anyBool) => anyBool  when B =/=Bool true
 
   rule notBool anyBool => anyBool
 endmodule
@@ -104,11 +104,11 @@ module IMP-PREDICATES
 
 
   syntax Prop ::= "eqTo" "(" Id "," Val ")"
-               |  "lt" "(" Id "," Val ")" 
-               |  "leq" "(" Id "," Val ")" 
-               |  "gt" "(" Id "," Val ")" 
-               |  "geq" "(" Id "," Val ")" 
-               |  "neqTo" "(" Id "," Val ")" 
+               |  "lt" "(" Id "," Val ")"
+               |  "leq" "(" Id "," Val ")"
+               |  "gt" "(" Id "," Val ")"
+               |  "geq" "(" Id "," Val ")"
+               |  "neqTo" "(" Id "," Val ")"
 
 
 
@@ -118,14 +118,14 @@ module IMP-PREDICATES
 
   configuration <T> <store> .Map </store> </T>
 
-  rule val(<generatedTop><T>... 
-                 <store>... X |-> I:Int ...</store> 
+  rule val(<generatedTop><T>...
+                 <store>... X |-> I:Int ...</store>
            ...</T> </generatedTop>, X)
        =>
        I
 /*
-  rule val(<T>... 
-                 <store>... X |-> I:Int ...</store> 
+  rule val(<T>...
+                 <store>... X |-> I:Int ...</store>
            ...</T>, X)
        =>
        I
@@ -178,7 +178,7 @@ module IMP
   rule I1:Int * I2:Int => I1 timesInt I2
 // BExp
   rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int == I2:Int => I1 ==Int I2 
+  rule I1:Int == I2:Int => I1 ==Int I2
   rule ! T:Bool => notBool T
 //  rule true && B => B
 //  rule false && _ => false
@@ -191,7 +191,7 @@ module IMP
 
   rule <k> X = I:Int => I ...</k>
        <env> Rho </env>
-       <store>... X |-> (_ => I) ...</store> 
+       <store>... X |-> (_ => I) ...</store>
     when notBool(X in keys(Rho)) [transition]
 
 //  rule if (true)  S else _ => S
@@ -212,15 +212,15 @@ module IMP
   rule I1:Int / I2:Int => I1 divInt I2
        when (I2 =/=Int 0) generalizes true [transition]
 
-  rule true && B2:BExp => B2 
+  rule true && B2:BExp => B2
   rule <k> B1:Bool && B2:BExp => B2 ...</k>
        when (B1 ==Bool true) generalizes true  [transition]
-  
+
   rule false && B2:BExp => false
   rule <k> B1:Bool && B2:BExp => false ...</k>
        when (B1 ==Bool false) generalizes true  [transition]
 
-  rule if (true) S:Block else _ => S 
+  rule if (true) S:Block else _ => S
   rule <k> if (B:Bool) S:Block else _ => S ...</k>
        when (B ==Bool true) generalizes true  [transition]
 

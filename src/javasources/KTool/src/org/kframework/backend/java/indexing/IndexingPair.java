@@ -12,8 +12,6 @@ import java.io.Serializable;
  */
 public class IndexingPair implements Serializable {
 
-    public static final IndexingPair TOP = new IndexingPair(TopIndex.TOP, TopIndex.TOP);
-
     public static Index getIndex(Term term, Definition definition) {
         if (term instanceof KItem) {
             KItem kItem = (KItem) term;
@@ -33,25 +31,28 @@ public class IndexingPair implements Serializable {
             }
         }
 
-        return TopIndex.TOP;
+        return definition.indexingData.TOP_INDEX;
     }
 
-    public static IndexingPair getIndexingPair(Term term, Definition definition) {
+    public static IndexingPair getKCellIndexingPair(Cell cell, Definition definition) {
+        assert cell.getLabel().equals("k");
+
+        Term term = cell.getContent();
         if (term instanceof KSequence) {
             KSequence kSequence = (KSequence) term;
 
-            if (kSequence.size() == 0) {
+            if (kSequence.concreteSize() == 0) {
                 if (kSequence.hasFrame()) {
-                    return new IndexingPair(TopIndex.TOP, TopIndex.TOP);
+                    return definition.indexingData.TOP_INDEXING_PAIR;
                 } else {
-                    return new IndexingPair(BottomIndex.BOTTOM, BottomIndex.BOTTOM);
+                    return definition.indexingData.BOTTOM_INDEXING_PAIR;
                 }
             }
-            else if (kSequence.size() == 1) {
+            else if (kSequence.concreteSize() == 1) {
                 if (kSequence.hasFrame()) {
-                    return new IndexingPair(getIndex(kSequence.get(0), definition), TopIndex.TOP);
+                    return new IndexingPair(getIndex(kSequence.get(0), definition), definition.indexingData.TOP_INDEX);
                 } else {
-                    return new IndexingPair(getIndex(kSequence.get(0), definition), BottomIndex.BOTTOM);
+                    return new IndexingPair(getIndex(kSequence.get(0), definition), definition.indexingData.BOTTOM_INDEX);
                 }
             }
             else {
@@ -60,8 +61,68 @@ public class IndexingPair implements Serializable {
                         getIndex(kSequence.get(1), definition));
             }
         } else {
-            return new IndexingPair(getIndex(term, definition), BottomIndex.BOTTOM);
+            return new IndexingPair(getIndex(term, definition), definition.indexingData.BOTTOM_INDEX);
         }
+    }
+
+    /**
+     * Retrieves {@code IndexingPair} from an input stream pattern based on the
+     * first and last elements.
+     *
+     * @param pattern
+     *            the input stream pattern
+     * @param definition
+     *            the definition
+     * @return the indexing pair
+     */
+    public static IndexingPair getInstreamIndexingPair(Term pattern, Definition definition) {
+        Index fstIndex;
+        Index sndIndex;
+
+        if (!(pattern instanceof BuiltinList)) {
+            return definition.indexingData.TOP_INDEXING_PAIR;
+        };
+        BuiltinList instream = (BuiltinList) pattern;
+
+        if (!instream.isConcreteCollection()) {
+            fstIndex = instream.elementsLeft().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(instream.get(0), definition);
+            sndIndex = instream.elementsRight().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(instream.get(-1), definition);
+        } else {
+            fstIndex = instream.isEmpty() ? definition.indexingData.BOTTOM_INDEX : getIndex(instream.get(0), definition);
+            sndIndex = instream.concreteSize() < 2 ? definition.indexingData.BOTTOM_INDEX : getIndex(instream.get(-1), definition);
+        }
+
+        return new IndexingPair(fstIndex, sndIndex);
+    }
+
+    /**
+     * Retrieves {@code IndexingPair} from an output stream pattern based on the
+     * first and second elements.
+     *
+     * @param pattern
+     *            the output stream pattern
+     * @param definition
+     *            the definition
+     * @return the indexing pair
+     */
+    public static IndexingPair getOutstreamIndexingPair(Term pattern, Definition definition) {
+        Index fstIndex;
+        Index sndIndex;
+
+        if (!(pattern instanceof BuiltinList)) {
+            return definition.indexingData.TOP_INDEXING_PAIR;
+        }
+        BuiltinList outstream = (BuiltinList) pattern;
+
+        if (!outstream.isConcreteCollection()) {
+            fstIndex = outstream.elementsLeft().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(outstream.get(0), definition);
+            sndIndex = outstream.elementsLeft().size() < 2 ? definition.indexingData.TOP_INDEX : getIndex(outstream.get(1), definition);
+        } else {
+            fstIndex = outstream.isEmpty() ? definition.indexingData.BOTTOM_INDEX : getIndex(outstream.get(0), definition);
+            sndIndex = outstream.concreteSize() < 2 ? definition.indexingData.BOTTOM_INDEX : getIndex(outstream.get(1), definition);
+        }
+
+        return new IndexingPair(fstIndex, sndIndex);
     }
 
     public final Index first;

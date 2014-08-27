@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -21,15 +21,15 @@ import com.google.common.base.Stopwatch;
  */
 public class StepRewriter {
 
-    private final Definition definition;
     private final Collection<Rule> rules;
     private final Stopwatch stopwatch = new Stopwatch();
     private Collection<ConstrainedTerm> constrainedTermResults = new ArrayList<ConstrainedTerm>();
     private Collection<Term> termResults = new ArrayList<Term>();
+    private GlobalContext globalContext;
 
-    public StepRewriter(Collection<Rule> rules, Definition definition) {
+    public StepRewriter(Collection<Rule> rules, GlobalContext globalContext) {
         this.rules = new ArrayList<Rule>(rules);
-        this.definition = definition;
+        this.globalContext = globalContext;
     }
 
     public Collection<Term> getAllSuccessors(Term term) {
@@ -76,7 +76,9 @@ public class StepRewriter {
             constrainedTerm.termContext());
         leftHandSideConstraint.addAll(rule.requires());
         for (Variable variable : rule.freshVariables()) {
-            leftHandSideConstraint.add(variable, IntToken.fresh());
+            leftHandSideConstraint.add(
+                    variable,
+                    FreshOperations.fresh(variable.sort(), constrainedTerm.termContext()));
         }
 
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
@@ -98,7 +100,7 @@ public class StepRewriter {
             /* evaluate pending functions in the rule RHS */
             result = result.evaluate(constrainedTerm.termContext());
             /* eliminate anonymous variables */
-            constraint.eliminateAnonymousVariables();
+            constraint.eliminateAnonymousVariables(constrainedTerm.variableSet());
 
             /* compute all results */
             constrainedTermResults.add(new ConstrainedTerm(result, constraint,
@@ -115,13 +117,13 @@ public class StepRewriter {
 
         termResults = new ArrayList<Term>();
 
-        TermContext context = TermContext.of(definition);
+        TermContext context = TermContext.of(globalContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, context);
 
         SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
         leftHandSideConstraint.addAll(rule.requires());
         for (Variable variable : rule.freshVariables()) {
-            leftHandSideConstraint.add(variable, IntToken.fresh());
+            leftHandSideConstraint.add(variable, FreshOperations.fresh(variable.sort(), context));
         }
 
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
@@ -134,7 +136,7 @@ public class StepRewriter {
             if (!constraint.isMatching(leftHandSide)) {
                 continue;
             }
-            
+
             constraint.orientSubstitution(leftHandSide.variableSet());
 
             Term result = rule.rightHandSide();

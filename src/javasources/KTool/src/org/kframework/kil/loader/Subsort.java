@@ -42,17 +42,4 @@ public class Subsort {
     public int hashCode() {
         return bigSort.hashCode() + smallSort.hashCode();
     }
-
-    public static Set<Subsort> getDefaultSubsorts() {
-        Set<Subsort> sbs = new HashSet<Subsort>();
-        sbs.add(new Subsort(KSorts.KLIST, "K"));
-        sbs.add(new Subsort(KSorts.KLIST, "KResult"));
-        sbs.add(new Subsort("K", "KResult"));
-        sbs.add(new Subsort("Map", "MapItem"));
-        sbs.add(new Subsort("Set", "SetItem"));
-        sbs.add(new Subsort("List", "ListItem"));
-        sbs.add(new Subsort("Bag", "BagItem"));
-
-        return sbs;
-    }
 }

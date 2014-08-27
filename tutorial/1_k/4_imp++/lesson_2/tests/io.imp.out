@@ -4,10 +4,10 @@
            ~> x = (read ( )) ; ~> y = (read ( )) ; ~> print ( "Their sum is: "
           , (x + y), "\n" ) ;
     </k>
-    <store>
-        .Map
-    </store>
     <env>
         .Map
     </env>
+    <store>
+        .Map
+    </store>
 </T>

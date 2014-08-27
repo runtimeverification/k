@@ -11,8 +11,8 @@ module LAMBDA
                | "(" Exp ")"          [bracket]
   syntax KResult ::= Val
 
-  rule (lambda X:Id . E:Exp) V:Val => E[V / X]
-  
+  rule (lambda X:Id . E:Exp) V:Val => E[V / X]  [beta]
+
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]
                | Exp "/" Exp          [strict]
@@ -33,5 +33,5 @@ module LAMBDA
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
                | "mu" Id "." Exp      [binder, latex(\mu{#1}.{#2})]
   rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
-  rule mu X . E => E[(mu X . E) / X]
+  rule mu X . E => E[(mu X . E) / X]       [mu]
 endmodule

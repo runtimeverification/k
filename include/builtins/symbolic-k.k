@@ -55,7 +55,7 @@ module SYMBOLIC-K
     "(" +String K2SMTLib(V) +String " " +String K2Sort(V) +String ")"
     +String Vars2SMTLib(S)
   rule Vars2SMTLib(.Set) => ""
-  
+
   syntax String ::= "Consts2SMTLib" "(" Set ")"
   [prefixlabel(Consts2SMTLib), function]
   rule
@@ -110,25 +110,23 @@ module SYMBOLIC-K
 //  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
 
   // declare isSymbolicSort for List, Set, Bag and Map
-  syntax K ::= "isSymbolicList" "(" List ")" [prefixlabel(isSymbolicList), predicate]
-  syntax K ::= "isSymbolicSet" "(" Set ")" [prefixlabel(isSymbolicSet), predicate]
-  syntax K ::= "isSymbolicBag" "(" Bag ")" [prefixlabel(isSymbolicBag), predicate]
-  syntax K ::= "isSymbolicMap" "(" Map ")" [prefixlabel(isSymbolicMap), predicate]
+  syntax KItem ::= "isSymbolicBag" "(" Bag ")" [prefixlabel(isSymbolicBag), predicate]
 
+  syntax KItem ::= isSymbolicK(List)
 
   // define isSymbolicK
-  rule
-    isSymbolicK(List2KLabel(L:List)(.KList)) => isSymbolicList(L)
-  [predicate]
-  rule
-    isSymbolicK(Set2KLabel(S:Set)(.KList)) => isSymbolicSet(S)
-  [predicate]
-  rule
-    isSymbolicK(Bag2KLabel(B:Bag)(.KList)) => isSymbolicBag(B)
-  [predicate]
-  rule
-    isSymbolicK(Map2KLabel(M:Map)(.KList)) => isSymbolicMap(M)
-  [predicate]
+  //rule
+    //isSymbolicK(L:List) => isSymbolicList(L)
+  //[predicate]
+  //rule
+    //isSymbolicK(S:Set) => isSymbolicSet(S)
+  //[predicate]
+  //rule
+    //isSymbolicK(B:Bag) => isSymbolicBag(B)
+  //[predicate]
+  //rule
+    //isSymbolicK(M:Map) => isSymbolicMap(M)
+  //[predicate]
   rule isSymbolicK(KL:KLabel(LK:KList)) => false
   when isBuiltin(KL(LK))
   rule isSymbolicK(KL:KLabel(LK:KList)) => false
@@ -136,7 +134,7 @@ module SYMBOLIC-K
   rule
     isSymbolicK(KL:KLabel(LK:KList))
   =>
-    (isVariable(KL(LK)) ==K true) orElseBool isSymbolicK(LK)
+    (isVariable(KL(LK)) ==K true) orElseBool (isSymbolicK(LK) ==K true)
   when isKLabelConstant(KL)
   [predicate]
 
@@ -160,11 +158,11 @@ module SYMBOLIC-K
     => String2KLabel("#sym" +String Type)(.KList)
 
   syntax K ::= #freshSymSortN(String,Int) [function]
-  rule #freshSymSortN(Type:String,I:Int) 
+  rule #freshSymSortN(Type:String,I:Int)
     =>  String2KLabel("#sym" +String Type)(#distinctCounter(I))
 
   syntax K ::= #freshSymSort(String) [function]
-  rule #freshSymSort(Type:String) => #freshSymSortN(Type,0) 
+  rule #freshSymSort(Type:String) => #freshSymSortN(Type,0)
 
   syntax K ::= #freshSymN(K,Int) [function]
   rule #freshSymN(K:K,I:Int) => #freshSymSortN(K2Sort(K),I)

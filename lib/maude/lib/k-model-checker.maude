@@ -1,10 +1,11 @@
+--- Copyright (c) 2009-2014 K Team. All Rights Reserved.
 ***(
 
     This file is part of the Maude 2 interpreter.
 	
 	Modified for the K-Framework.
 
-    Copyright 1997-2006 SRI International, Menlo Park, CA 94025, USA.
+    Portions Copyright 1997-2006 SRI International, Menlo Park, CA 94025, USA.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -220,7 +221,7 @@ mod #MODEL-CHECKER is
   protecting #QID .
   including #MODEL-CHECKER-INTERFACE .
   including #LTL .
-  including K-WRAPPERS-LABELS .
+  including K-TECHNIQUE .
 
   subsort Bag < #ModelCheckerState .
   subsort K < #Prop .

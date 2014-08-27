@@ -2,7 +2,6 @@
 package org.kframework.kil;
 
 import com.google.common.collect.Multimap;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
@@ -18,25 +17,21 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
      * steps.
      */
     protected List<ProductionItem> items;
-    protected String sort;
+    protected Sort sort;
     protected String ownerModuleName;
     private Multimap<Integer, Integer> binderMap;
 
-    public static Production makeFunction(String funSort, String funName, String argSort, org.kframework.kil.loader.Context context) {
+    public static Production makeFunction(Sort funSort, String funName, Sort argSort, org.kframework.kil.loader.Context context) {
         List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
         prodItems.add(new Terminal(funName));
         prodItems.add(new Terminal("("));
-        prodItems.add(new Sort(argSort));
+        prodItems.add(new NonTerminal(argSort));
         prodItems.add(new Terminal(")"));
 
-        Production funProd = new Production(new Sort(funSort), prodItems);
-        funProd.addAttribute(new Attribute("prefixlabel", funName));
-        if (MetaK.isComputationSort(funSort)) {
-            funProd.addAttribute(new Attribute("klabel", funName));
-            String consAttr = funSort + "1" + funName + "Syn";
-            funProd.addAttribute(new Attribute("cons", consAttr));
-            context.conses.put(consAttr, funProd);
-            context.putLabel(funProd, consAttr);
+        Production funProd = new Production(new NonTerminal(funSort), prodItems);
+        if (funSort.isComputationSort()) {
+            funProd.putAttribute("klabel", funName);
+            context.addProduction(funProd);
         }
 
         return funProd;
@@ -57,17 +52,17 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     }
 
     public boolean isSubsort() {
-        return items.size() == 1 && items.get(0) instanceof Sort;
+        return items.size() == 1 && items.get(0) instanceof NonTerminal;
     }
 
     /**
-     * Retrieves the {@link Sort} object of the production if this is a subsorting.
+     * Retrieves the {@link NonTerminal} object of the production if this is a subsorting.
      * Should not be called on other types of productions.
      * @return the Sort object
      */
-    public Sort getSubsort() {
+    public NonTerminal getSubsort() {
         assert isSubsort();
-        return (Sort) items.get(0);
+        return (NonTerminal) items.get(0);
     }
 
     public boolean isLexical() {
@@ -86,13 +81,13 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
 
     public boolean isConstant() {
         // TODO(Radu): properly determine if a production is a constant or not, just like below
-        return isTerminal() && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
+        return isTerminal() && (sort.getName().startsWith("#") || sort.equals(Sort.KLABEL));
     }
 
     public boolean isConstant(org.kframework.kil.loader.Context context) {
-        return isTerminal() && (sort.startsWith("#") ||
-                                sort.equals(KSorts.KLABEL) ||
-                                context.getTokenSorts().contains(this.getSort()));
+        return isTerminal() && (sort.getName().startsWith("#") ||
+                                sort.equals(Sort.KLABEL) ||
+                                context.getTokenSorts().contains(getSort()));
     }
 
     public boolean isBracket() {
@@ -115,8 +110,8 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public boolean isTerminal() {
         return items.size() == 1 && items.get(0) instanceof Terminal;
     }
-    
-    public String getBracketSort() {
+
+    public Sort getBracketSort() {
         assert isBracket();
         return getChildSort(0);
     }
@@ -128,47 +123,33 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         this.ownerModuleName = node.ownerModuleName;
     }
 
-    public Production(Sort sort, java.util.List<ProductionItem> items) {
+    public Production(NonTerminal sort, java.util.List<ProductionItem> items) {
         super();
         this.items = items;
-        this.sort = sort.getName();
-        attributes = new Attributes();
+        this.sort = sort.getSort();
     }
 
-    public Production(Sort sort, java.util.List<ProductionItem> items, String ownerModule) {
+    public Production(NonTerminal sort, java.util.List<ProductionItem> items, String ownerModule) {
         super();
         this.items = items;
-        this.sort = sort.getName();
-        attributes = new Attributes();
+        this.sort = sort.getSort();
         this.ownerModuleName = ownerModule;
     }
 
-    public String getCons() {
-        return attributes.get("cons");
-    }
-
+    @Deprecated
     public String getLabel() {
-        String label = attributes.get("prefixlabel");
-        if (label == null) {
-            label = getPrefixLabel();
-            attributes.set("prefixlabel", label);
-        }
-        return label.replace(" ", "");
+        return getPrefixLabel();
     }
 
     public String getKLabel() {
-        /*
-        assert MetaK.isComputationSort(sort) || sort.equals(KSorts.KLABEL) && isConstant():
-                sort + " ::= " + this + " -> " + getPrefixLabel();
-        */
-
-        String klabel = attributes.get("klabel");
-        if (klabel == null) {
-            if (sort.toString().equals(KSorts.KLABEL))
+        String klabel = getAttribute("klabel");
+        if (klabel == null && isSubsort()) {
+            return null;
+        } else if (klabel == null) {
+            if (sort.toString().equals(KSorts.KLABEL) && getArity() == 0)
                 klabel = getPrefixLabel();
             else
                 klabel = "'" + getPrefixLabel();
-            attributes.set("klabel", klabel);
         }
         return klabel.replace(" ", "");
     }
@@ -176,7 +157,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     private String getPrefixLabel() {
         String label = "";
         for (ProductionItem pi : items) {
-            if (pi instanceof Sort) {
+            if (pi instanceof NonTerminal) {
                 label += "_";
             } else if (pi instanceof Terminal) {
                 label += ((Terminal) pi).getTerminal();
@@ -200,7 +181,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         for (ProductionItem i : items) {
             if (i instanceof UserList)
                 arity += 2;
-            if (i instanceof Sort)
+            if (i instanceof NonTerminal)
                 arity++;
         }
         return arity;
@@ -211,76 +192,81 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return visitor.complete(this, visitor.visit(this, p));
     }
 
-    public String getSort() {
+    public Sort getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Sort sort) {
         this.sort = sort;
     }
 
-    public String getChildSort(int idx) {
+    public ASTNode getChildNode(int idx) {
         int arity = -1;
         if (items.get(0) instanceof UserList) {
             if (idx == 0) {
-                return ((UserList) items.get(0)).getSort();
+                return items.get(0);
             } else {
-                return this.getSort();
+                return this;
             }
         }
         for (ProductionItem i : items) {
             if (!(i instanceof Terminal))
                 arity++;
             if (arity == idx) {
-                return ((Sort) i).getName();
+                return i;
             }
         }
         return null;
     }
 
+    public Sort getChildSort(int idx) {
+        ASTNode node = getChildNode(idx);
+        if (node instanceof UserList) {
+            return ((UserList) node).getSort();
+        } else if (node instanceof Production) {
+            return ((Production) node).getSort();
+        } else if (node instanceof NonTerminal) {
+            return ((NonTerminal) node).getSort();
+        }
+        throw new AssertionError("unreachable");
+    }
+
     @Override
     public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
         if (obj == null)
             return false;
-        if (obj == this)
-            return true;
-        if (!(obj instanceof Production))
+        if (getClass() != obj.getClass())
             return false;
-        Production prd = (Production) obj;
-
-        if (this.sort != null && prd.getSort() != null)
-            if (!this.sort.equals(prd.getSort()))
+        Production other = (Production) obj;
+        if (items == null) {
+            if (other.items != null)
                 return false;
-        if (this.sort == null && prd.getSort() != null)
+        } else if (!items.equals(other.items))
             return false;
-
-        if (prd.getItems().size() != this.items.size())
-            return false;
-
-        for (int i = 0; i < this.items.size(); i++) {
-            if (!prd.getItems().get(i).equals(items.get(i)))
+        if (getKLabel() == null) {
+            if (other.getKLabel() != null)
                 return false;
-        }
-        String klabel1 = prd.getAttributes().get("klabel");
-        String klabel2 = getAttributes().get("klabel");
-        if ((klabel1 == null && klabel2 != null) || (klabel1 != null && klabel2 == null)) {
+        } else if (!getKLabel().equals(other.getKLabel()))
             return false;
-        }
-        if (klabel1 != null && klabel2 != null && klabel1.equals(klabel2)) {
+        if (sort == null) {
+            if (other.sort != null)
+                return false;
+        } else if (!sort.equals(other.sort))
             return false;
-        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        if (sort != null)
-            hash += sort.hashCode();
-
-        for (ProductionItem pi : this.items)
-            hash += pi.hashCode();
-        return hash;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((items == null) ? 0 : items.hashCode());
+        result = prime * result
+                + ((getKLabel() == null) ? 0 : getKLabel().hashCode());
+        result = prime * result + ((sort == null) ? 0 : sort.hashCode());
+        return result;
     }
 
     public String toString() {
@@ -314,7 +300,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
                 if (idx == arity + 1)
                     return false;
                 arity += 2;
-            } else if (item instanceof Sort) {
+            } else if (item instanceof NonTerminal) {
                 if (idx == arity)
                     return i != items.size() - 1 && items.get(i + 1) instanceof Terminal;
                 arity++;
@@ -333,7 +319,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
                 if (idx == arity + 1)
                     return !((UserList) item).getSeparator().equals("");
                 arity += 2;
-            } else if (item instanceof Sort) {
+            } else if (item instanceof NonTerminal) {
                 if (idx == arity)
                     return i != 0 && items.get(i - 1) instanceof Terminal;
                 arity++;
@@ -342,6 +328,18 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         throw new IllegalArgumentException("Index not found in production");
     }
 
+    /**
+     * Getter for the {@code binderMap} structure.
+     * The binder map is a MultiMap consisting of key -> value pairs
+     * representing the position of a bounded variable and the position
+     * of an expression in which it is bound.
+     *
+     * Important note:  Unlike the positions specified by user (which start at 1),
+     * the positions in binderMap are rebased to start at 0 as it
+     * is customary for Java collections.
+     *
+     * @return the binder map associated to this production
+     */
     public Multimap<Integer, Integer> getBinderMap() {
         return binderMap;
     }
@@ -354,7 +352,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public List<ProductionItem> getChildren(Enum<?> _) {
         return items;
     }
-    
+
     @Override
     public void setChildren(List<ProductionItem> children, Enum<?> _) {
         this.items = children;

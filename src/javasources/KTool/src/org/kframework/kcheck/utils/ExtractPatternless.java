@@ -14,7 +14,7 @@ public class ExtractPatternless extends CopyOnWriteTransformer {
 
     private Term phi = BoolBuiltin.TRUE, phiPrime = BoolBuiltin.TRUE;
     private boolean remove = true;
-    
+
     public ExtractPatternless(Context context, boolean remove) {
         super("Extract encoded patternless formula from term", context);
         this.remove = remove;
@@ -29,7 +29,7 @@ public class ExtractPatternless extends CopyOnWriteTransformer {
                 return BoolBuiltin.TRUE;
             return node;
         }
-        
+
         return super.visit(node, _);
     }
 

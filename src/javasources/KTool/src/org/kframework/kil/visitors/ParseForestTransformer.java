@@ -14,7 +14,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 /**
  * A transformer useful for processing parse forests (i.e. trees with ambiguity nodes).
- * 
+ *
  * To remove a branch of an ambiguity, throw {@link ParseFailedException} from the visit method.
  * @author dwightguth
  *
@@ -28,8 +28,8 @@ public class ParseForestTransformer extends AbstractTransformer<ParseFailedExcep
     @Override
     public ASTNode visit(Ambiguity node, Void _) throws ParseFailedException {
         ParseFailedException exception = new ParseFailedException(new KException(
-                ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, 
-                "Parse forest contains no trees!", node.getFilename(), node.getLocation()));
+                ExceptionType.ERROR, KExceptionGroup.INNER_PARSER,
+                "Parse forest contains no trees!", node.getSource(), node.getLocation()));
         java.util.List<Term> terms = new ArrayList<>();
         for (Term t : node.getContents()) {
             ASTNode result;
@@ -58,5 +58,5 @@ public class ParseForestTransformer extends AbstractTransformer<ParseFailedExcep
     public <T extends ASTNode> T copy(T original) {
         return original;
     }
-    
+
 }

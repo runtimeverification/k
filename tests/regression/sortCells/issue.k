@@ -6,10 +6,10 @@ module ISSUE
                      <test> .List </test>
                   </control>
                   <out stream="stdout"> .List </out>
-		</T>
-  syntax K ::= "test"
+        </T>
+  syntax KItem ::= "test"
 
-  syntax K ::= control(ControlCellFragment)
+  syntax KItem ::= control(ControlCellFragment)
 
   rule <control> C
         <k> test => control(C) ...</k>

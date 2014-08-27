@@ -71,22 +71,20 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return mkl;
     }
 
-    public java.util.Set<String> getAllSorts() {
-        java.util.Set<String> sorts = new HashSet<String>();
+    public java.util.Set<Sort> getAllSorts() {
+        java.util.Set<Sort> sorts = new HashSet<>();
 
         for (ModuleItem mi : items) {
-            List<String> list = mi.getAllSorts();
+            List<Sort> list = mi.getAllSorts();
             if (list != null)
                 sorts.addAll(list);
         }
 
-        // Andrei S: bad, bad practice ...
-        // ... but it is 11:55pm and I do not see another way to get them
-        sorts.add("#Bool");
-        sorts.add("#Int");
-        sorts.add("#Float");
-        sorts.add("#String");
-        sorts.add("#Id");
+        sorts.add(Sort.BUILTIN_BOOL);
+        sorts.add(Sort.BUILTIN_INT);
+        sorts.add(Sort.BUILTIN_FLOAT);
+        sorts.add(Sort.BUILTIN_STRING);
+        sorts.add(Sort.BUILTIN_ID);
 
         return sorts;
     }
@@ -109,12 +107,12 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return new Module(this);
     }
 
-    public void addSubsort(String sort, String subsort, Context context) {
-        this.addProduction(sort, new Sort(subsort));
+    public void addSubsort(Sort sort, Sort subsort, Context context) {
+        this.addProduction(sort, new NonTerminal(subsort));
         context.addSubsort(sort, subsort);
     }
 
-    public void addConstant(String ctSort, String ctName) {
+    public void addConstant(Sort ctSort, String ctName) {
         this.addProduction(ctSort, new Terminal(ctName));
     }
 
@@ -122,13 +120,13 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
     }
 
-    public void addProduction(String sort, ProductionItem prodItem) {
+    public void addProduction(Sort sort, ProductionItem prodItem) {
         List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
         prodItems.add(prodItem);
-        this.addProduction(sort, new Production(new Sort(sort), prodItems));
+        this.addProduction(sort, new Production(new NonTerminal(sort), prodItems));
     }
 
-    public void addProduction(String sort, Production prod) {
+    public void addProduction(Sort sort, Production prod) {
         List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
         PriorityBlock pb = new PriorityBlock();
         pbs.add(pb);
@@ -138,7 +136,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
 
         prods.add(prod);
 
-        this.items.add(new Syntax(new Sort(sort), pbs));
+        this.items.add(new Syntax(new NonTerminal(sort), pbs));
     }
 
     public List<Rule> getRules() {
@@ -155,14 +153,14 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     /**
      * Returns a {@code Collection} of {@link Production} instances associated with the given sort.
      */
-    public Collection<Production> getProductionsOf(String sort) {
+    public Collection<Production> getProductionsOf(Sort sort) {
         Collection<Production> productions = new ArrayList<Production>();
         for (ModuleItem item : items) {
             if (!(item instanceof Syntax)) {
                 continue;
             }
             Syntax syntax = (Syntax) item;
-            if (!syntax.getSort().getName().equals(sort)) {
+            if (!syntax.getDeclaredSort().getSort().equals(sort)) {
                 continue;
             }
             for (PriorityBlock priorityBlock : syntax.getPriorityBlocks()) {
@@ -176,7 +174,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     public List<ModuleItem> getChildren(Enum<?> _) {
         return items;
     }
-    
+
     @Override
     public void setChildren(List<ModuleItem> children, Enum<?> _) {
         this.items = children;

@@ -7,9 +7,9 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 
 /**
  * Debugger class.
- * 
+ *
  * @author YilongL
- * 
+ *
  */
 public class Debug {
 

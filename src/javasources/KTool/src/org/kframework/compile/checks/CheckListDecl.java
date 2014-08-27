@@ -5,11 +5,9 @@ import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
-import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 public class CheckListDecl extends BasicVisitor {
@@ -20,16 +18,16 @@ public class CheckListDecl extends BasicVisitor {
 
     @Override
     public Void visit(Production node, Void _) {
-        if (node.isListDecl() && Sort.isBasesort(node.getSort())) {
+        if (node.isListDecl() && node.getSort().isBaseSort()) {
             String msg = node.getSort() + " can not be extended to be a list sort.";
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+            GlobalSettings.kem.registerCompilerError(msg, this, node);
         }
 
         if (node.isListDecl()) {
             UserList ul = (UserList) node.getItems().get(0);
             if (ul.getSort().equals(node.getSort())) {
                 String msg = "Circular lists are not allowed.";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, node);
             }
         }
 
@@ -37,11 +35,11 @@ public class CheckListDecl extends BasicVisitor {
             ProductionItem pi = node.getItems().get(i);
             if (pi instanceof UserList && node.getItems().size() > 1) {
                 String msg = "Inline list declarations are not allowed.";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), pi.getFilename(), pi.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, pi);
             }
             if (pi instanceof Lexical && node.getItems().size() > 1) {
                 String msg = "Inline lexical/token declarations are not allowed.";
-                GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), pi.getFilename(), pi.getLocation()));
+                GlobalSettings.kem.registerCompilerError(msg, this, pi);
             }
         }
         return null;

@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.MaximalSharing;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -15,9 +17,9 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public final class BoolToken extends Token {
+public final class BoolToken extends Token implements MaximalSharing {
 
-    public static final String SORT_NAME = "Bool";
+    public static final Sort SORT = Sort.BOOL;
 
     /**
      * Bool(#"true")
@@ -50,12 +52,9 @@ public final class BoolToken extends Token {
         return value;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this BoolToken.
-     */
     @Override
-    public String sort() {
-        return BoolToken.SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**
@@ -67,7 +66,7 @@ public final class BoolToken extends Token {
     }
 
     @Override
-    public int hashCode() {
+    protected int computeHash() {
         return Boolean.valueOf(value).hashCode();
     }
 
@@ -80,7 +79,7 @@ public final class BoolToken extends Token {
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);

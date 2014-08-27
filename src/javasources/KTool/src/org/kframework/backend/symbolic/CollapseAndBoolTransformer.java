@@ -28,7 +28,7 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(KApp node, Void _)  {
         return recursiveCollapseAndBool(node);
     }
-    
+
     private KApp recursiveCollapseAndBool(KApp node) {
         Term label = node.getLabel();
         if (label instanceof KLabelConstant) {
@@ -80,9 +80,9 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
                     Term aLabel = ((KApp) content).getLabel();
                     if (aLabel.equals(KLabelConstant.BOOL_ANDBOOL_KLABEL)
                             || aLabel.equals(KLabelConstant.ANDBOOL_KLABEL)){
-                        
+
                         Term resolved = recursiveCollapseAndBool((KApp)content);
-                        
+
                         List<Term> newList = new ArrayList<Term>();
                         newList.add(resolved.shallowCopy());
                         newContent = new KList(newList);

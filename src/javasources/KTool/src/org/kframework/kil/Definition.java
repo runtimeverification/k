@@ -6,9 +6,6 @@ import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
 
@@ -66,8 +63,8 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
 
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
     }
-    
-    
+
+
 
     public void setItems(List<DefinitionItem> items) {
         this.items = items;
@@ -105,9 +102,9 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         // Collect information
         // this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
         new UpdateReferencesVisitor(context).visitNode(this);
-        new AddConsesVisitor(context).visitNode(this);
         new UpdateAssocVisitor(context).visitNode(this);
-        new CollectConsesVisitor(context).visitNode(this);
+        new CollectProductionsVisitor(context).visitNode(this);
+        context.computeConses();
         new CollectBracketsVisitor(context).visitNode(this);
         new CollectSubsortsVisitor(context).visitNode(this);
         new CollectPrioritiesVisitor(context).visitNode(this);
@@ -125,6 +122,8 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
                 = new DataStructureSortCollector(context);
         dataStructureSortCollector.visitNode(this);
         context.setDataStructureSorts(dataStructureSortCollector.getSorts());
+
+        context.makeFreshFunctionNamesMap(this.getSyntaxByTag(Attribute.FRESH_GENERATOR, context));
 
         /* set the initialized flag */
         context.initialized = true;
@@ -146,7 +145,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         }
         if (modules.size() != 1) {
             String msg = "Should have been only one module when calling this method.";
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, this.getFilename(), this.getLocation()));
+            GlobalSettings.kem.registerInternalError(msg, this);
         }
         return modules.get(0);
     }
@@ -182,12 +181,12 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public List<DefinitionItem> getChildren(Enum<?> _) {
         return items;
     }
-    
+
     @Override
     public void setChildren(List<DefinitionItem> children, Enum<?> _) {
         this.items = children;

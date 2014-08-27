@@ -11,7 +11,7 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
 
     private Term term;
 
-    public KItemProjection(String kind, Term term) {
+    public KItemProjection(Sort kind, Term term) {
         super(kind);
         this.term = term;
     }
@@ -25,14 +25,14 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
         return term;
     }
 
-    public String projectedKind() {
+    public Sort projectedKind() {
         return getSort();
     }
 
     public void setTerm(Term term) {
         this.term = term;
     }
-    
+
     @Override
     public KItemProjection shallowCopy() {
         return new KItemProjection(this);
@@ -59,7 +59,7 @@ public class KItemProjection extends Term implements Interfaces.MutableParent<Te
 
         return getSort().equals(kItemProjection.getSort()) && term.equals(kItemProjection.term);
     }
-    
+
     @Override
     public String toString() {
         return "projection(" + term + ")";

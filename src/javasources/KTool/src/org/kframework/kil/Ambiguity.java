@@ -4,6 +4,8 @@ package org.kframework.kil;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
+import com.google.common.collect.Sets;
+
 import java.util.ArrayList;
 
 /**
@@ -19,11 +21,13 @@ public class Ambiguity extends Collection {
         super(node);
     }
 
-    public Ambiguity(String sort, java.util.List<Term> col) {
+    public Ambiguity(Sort sort, java.util.List<Term> col) {
         super(sort, col);
     }
 
-    public Ambiguity(String sort, java.util.Collection<? extends Term> col) { this(sort, new ArrayList<>(col)); }
+    public Ambiguity(Sort sort, java.util.Collection<? extends Term> col) {
+        this(sort, new ArrayList<>(col));
+    }
 
     @Override
     public String toString() {
@@ -61,5 +65,27 @@ public class Ambiguity extends Collection {
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Collection other = (Collection) obj;
+        if (contents == null) {
+            if (other.contents != null)
+                return false;
+        } else if (!Sets.newHashSet(contents).equals(Sets.newHashSet(other.contents)))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Sets.newHashSet(contents).hashCode();
     }
 }

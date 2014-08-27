@@ -2,13 +2,26 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.Multimap;
+
+import org.kframework.backend.java.builtins.BitVector;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
+import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.ListBuiltin;
+import org.kframework.kil.MapBuiltin;
+import org.kframework.kil.SetBuiltin;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +31,7 @@ import java.util.Map;
  *
  * @author: AndreiS
  */
-public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
+public class BackendJavaKILtoKILTransformer implements Transformer {
 
     private final Context context;
     private final ConfigurationStructureMap configurationStructureMap;
@@ -30,19 +43,39 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public String getName() {
+        return this.getClass().toString();
+    }
+
+    /**
+     * Private helper method that translates Java backend specific KIL term back
+     * to generic KIL term.
+     *
+     * @param term
+     *            the term to be translated
+     * @return the translated term
+     */
+    private ASTNode transformJavaBackendSpecificTerm(Term term) {
+        ASTNode kil = new org.kframework.kil.BackendTerm(term.sort().toFrontEnd(), term.toString());
+        kil.copyAttributesFrom(term);
+        return kil;
+    }
+
+    @Override
     public ASTNode transform(Cell cell) {
+        final String label = cell.getLabel();
         // TODO(AndreiS): fix the printing of the cells which are representing maps
-        if (cell.getLabel().startsWith("value_cell_label_prefix_")) {
-            currentCell = configurationStructureMap.get(cell.getLabel().substring("value_cell_label_prefix_".length())).cell;
-            return cell.getContent().accept(this);
+        if (cell.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
+            currentCell = configurationStructureMap.get(label.substring(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX.length())).cell;
+        } else {
+            currentCell = configurationStructureMap.get(label).cell;
         }
 
         org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
-        final String label = cell.getLabel();
-        currentCell = configurationStructureMap.get(label).cell;
         returnCell.setLabel(label);
         returnCell.setEndLabel(label);
         returnCell.setContents((org.kframework.kil.Term) cell.getContent().accept(this));
+        returnCell.copyAttributesFrom(cell);
         return returnCell;
     }
 
@@ -61,7 +94,9 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
         if (cellCollection.hasFrame()) {
             contents.add((org.kframework.kil.Term) cellCollection.frame().accept(this));
         }
-        return new org.kframework.kil.Bag(contents);
+        ASTNode kil = new org.kframework.kil.Bag(contents);
+        kil.copyAttributesFrom(cellCollection);
+        return kil;
     }
 
     @Override
@@ -72,45 +107,59 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(KItem kItem) {
-        return new org.kframework.kil.KApp(
+        ASTNode kil = new org.kframework.kil.KApp(
                 (org.kframework.kil.Term) kItem.kLabel().accept(this),
                 (org.kframework.kil.Term) kItem.kList().accept(this));
+        kil.copyAttributesFrom(kItem);
+        return kil;
     }
-    
+
     @Override
     public ASTNode transform(KItemProjection kItemProj) {
-        return new org.kframework.kil.KItemProjection(
-                kItemProj.kind().toString(), 
+        ASTNode kil = new org.kframework.kil.KItemProjection(
+                Sort.of(kItemProj.kind().toString()),
                 (org.kframework.kil.Term) kItemProj.term().accept(this));
+        kil.copyAttributesFrom(kItemProj);
+        return kil;
     }
-    
+
     @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
-        return org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);
+        ASTNode kil = org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);
+        kil.copyAttributesFrom(kLabelConstant);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KLabelFreezer kLabelFreezer) {
-        return new org.kframework.kil.FreezerLabel(
+        ASTNode kil = new org.kframework.kil.FreezerLabel(
                 (org.kframework.kil.Term) kLabelFreezer.term().accept(this));
+        kil.copyAttributesFrom(kLabelFreezer);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KLabelInjection kLabelInjection) {
-        return new org.kframework.kil.KInjectedLabel(
+        ASTNode kil = new org.kframework.kil.KInjectedLabel(
                 (org.kframework.kil.Term) kLabelInjection.term().accept(this));
+        kil.copyAttributesFrom(kLabelInjection);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KList kList) {
         List<org.kframework.kil.Term> terms = transformTerms(kList);
-        return new org.kframework.kil.KList(terms);
+        ASTNode kil = new org.kframework.kil.KList(terms);
+        kil.copyAttributesFrom(kList);
+        return kil;
     }
 
     @Override
     public ASTNode transform(KSequence kSequence) {
         List<org.kframework.kil.Term> terms = transformTerms(kSequence);
-        return new org.kframework.kil.KSequence(terms);
+        ASTNode kil = new org.kframework.kil.KSequence(terms);
+        kil.copyAttributesFrom(kSequence);
+        return kil;
     }
 
     private List<org.kframework.kil.Term> transformTerms(KCollection kCollection) {
@@ -126,76 +175,199 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(BuiltinSet set) {
-        // TODO(AndreiS): use BuiltinMap
-        List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elements = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
         for (Term entry : set.elements()) {
-            items.add(new org.kframework.kil.SetItem(
-                    (org.kframework.kil.Term) entry.accept(this)));
+            elements.add((org.kframework.kil.Term)entry.accept(this));
         }
-        Collections.sort(items);
-        if (set.hasFrame()) {
-            items.add((org.kframework.kil.Term) set.frame().accept(this));
+        Collections.sort(elements);
+        for (Term term : set.baseTerms()) {
+            baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
-        return new org.kframework.kil.Set(items);
+        ASTNode kil = new SetBuiltin(
+                context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),
+                baseTerms,
+                elements);
+        kil.copyAttributesFrom(set);
+        return kil;
     }
 
-     @Override
+
+    @Override
     public ASTNode transform(BuiltinList builtinList) {
-        // TODO(AndreiS): use BuiltinList
-        List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elementsLeft = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> elementsRight = new ArrayList<org.kframework.kil.Term>();
         for (Term entry : builtinList.elementsLeft()) {
-            items.add(new org.kframework.kil.ListItem(
-                    (org.kframework.kil.Term) entry.accept(this)));
+            elementsLeft.add((org.kframework.kil.Term)entry.accept(this));
         }
-         if (builtinList.hasFrame()) {
-             items.add((org.kframework.kil.Term) builtinList.frame().accept(this));
-         }
+        for (Term term : builtinList.baseTerms()) {
+            baseTerms.add((org.kframework.kil.Term) term.accept(this));
+        }
         for (Term entry : builtinList.elementsRight()) {
-            items.add(new org.kframework.kil.ListItem(
-                    (org.kframework.kil.Term) entry.accept(this)));
+            elementsRight.add((org.kframework.kil.Term)entry.accept(this));
         }
-        return new org.kframework.kil.List(items);
+        ASTNode kil = ListBuiltin.of(context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
+                baseTerms, elementsLeft, elementsRight);
+        kil.copyAttributesFrom(builtinList);
+        return kil;
     }
 
     @Override
     public ASTNode transform(BuiltinMap map) {
-        // TODO(AndreiS): use BuiltinMap
         final Map<Term, Term> entries = map.getEntries();
         List<Term> keys = new ArrayList<Term>(entries.keySet());
         Collections.sort(keys);
-        List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
+        Map<org.kframework.kil.Term, org.kframework.kil.Term> elements = new HashMap<>();
+        List<org.kframework.kil.Term> baseTerms = new ArrayList<>();
         for (Term key : keys) {
             Term value = entries.get(key);
-            items.add(new org.kframework.kil.MapItem(
+            elements.put(
                     (org.kframework.kil.Term) key.accept(this),
-                    (org.kframework.kil.Term) value.accept(this)));
+                    (org.kframework.kil.Term) value.accept(this));
         }
-        if (map.hasFrame()) {
-            items.add((org.kframework.kil.Term) map.frame().accept(this));
+        for (Term term : map.baseTerms()) {
+            baseTerms.add((org.kframework.kil.Term) term.accept(this));
         }
-        return new org.kframework.kil.Map(items);
+        ASTNode kil = new MapBuiltin(
+                context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT),
+                baseTerms,
+                elements);
+        kil.copyAttributesFrom(map);
+        return kil;
     }
 
     @Override
     public ASTNode transform(Token token) {
-        return org.kframework.kil.Token.kAppOf(token.sort(), token.value());
+        ASTNode kil = org.kframework.kil.Token.kAppOf(token.sort().toFrontEnd(), token.value());
+        kil.copyAttributesFrom(token);
+        return kil;
     }
 
     @Override
     public ASTNode transform(Variable variable) {
 //        System.out.println("VARIABLE*************"+ variable.name()+"->"+variable.sort());
-        ASTNode node = new org.kframework.kil.Variable(variable.name(), variable.sort());
+        ASTNode node = new org.kframework.kil.Variable(variable.name(), variable.sort().toFrontEnd());
 //        System.out.println("NODE: "+node.toString());
 //        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
+        node.copyAttributesFrom(variable);
         return node;
     }
-    
+
     @Override
     public ASTNode transform(BuiltinMgu mgu) {
         // TODO(YilongL): properly translate the Mgu into KItem form using the toK function
-        return new org.kframework.kil.KApp(
-                new org.kframework.kil.KLabelConstant("'someMgu(" + mgu.constraint().toString() + ")"),
-                new org.kframework.kil.KList());
+        return transformJavaBackendSpecificTerm(mgu);
+    }
+
+    @Override
+    public ASTNode transform(BitVector bitVector) {
+        return transform((Token) bitVector);
+    }
+
+    @Override
+    public ASTNode transform(BoolToken boolToken) {
+        return transform((Token) boolToken);
+    }
+
+    @Override
+    public ASTNode transform(Collection collection) {
+        throw new UnsupportedOperationException("This method should never be called");
+    }
+
+    @Override
+    public ASTNode transform(ConstrainedTerm constrainedTerm) {
+        throw new UnsupportedOperationException("Not implemented, yet");
+    }
+
+    @Override
+    public ASTNode transform(IntToken intToken) {
+        return transform((Token) intToken);
+    }
+
+    @Override
+    public ASTNode transform(KCollection kCollection) {
+        throw new UnsupportedOperationException("This method should never be called");
+    }
+
+    @Override
+    public ASTNode transform(KLabel kLabel) {
+        throw new UnsupportedOperationException("This method should never be called");
+    }
+
+    @Override
+    public ASTNode transform(ListLookup listLookup) {
+        return transformJavaBackendSpecificTerm(listLookup);
+    }
+
+    @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return transformJavaBackendSpecificTerm(listUpdate);
+    }
+
+    @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        return transformJavaBackendSpecificTerm(mapKeyChoice);
+    }
+
+    @Override
+    public ASTNode transform(MapLookup mapLookup) {
+        return transformJavaBackendSpecificTerm(mapLookup);
+    }
+
+    @Override
+    public ASTNode transform(MapUpdate mapUpdate) {
+        return transformJavaBackendSpecificTerm(mapUpdate);
+    }
+
+    @Override
+    public ASTNode transform(MetaVariable metaVariable) {
+        return transform((Token) metaVariable);
+    }
+
+    @Override
+    public ASTNode transform(Rule rule) {
+        throw new UnsupportedOperationException("Not implemented, yet");
+    }
+
+    @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        return transformJavaBackendSpecificTerm(setElementChoice);
+    }
+
+    @Override
+    public ASTNode transform(SetLookup setLookup) {
+        return transformJavaBackendSpecificTerm(setLookup);
+    }
+
+    @Override
+    public ASTNode transform(SetUpdate setUpdate) {
+        return transformJavaBackendSpecificTerm(setUpdate);
+    }
+
+    @Override
+    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
+        throw new UnsupportedOperationException("Not implemented, yet");
+    }
+
+    @Override
+    public ASTNode transform(StringToken stringToken) {
+        return transform((Token) stringToken);
+    }
+
+    @Override
+    public ASTNode transform(Term node) {
+        throw new UnsupportedOperationException("This method should never be called");
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        throw new UnsupportedOperationException("Not implemented, yet");
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedToken uninterpretedToken) {
+        return transform((Token) uninterpretedToken);
     }
 
 }

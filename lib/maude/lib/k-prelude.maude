@@ -1,3 +1,4 @@
+--- Copyright (c) 2009-2014 K Team. All Rights Reserved.
 load builtins-interface.maude
 
 --- Level 0
@@ -25,9 +26,15 @@ mod K-TECHNIQUE is
   --- Might cause the compilation to fail.
   op _`,`,_ : NeKList KList -> NeKList [ditto] .
   op _`,`,_ : KList NeKList -> NeKList [ditto] .
+  op KList2KLabel_ : KList -> KLabel [metadata "wrapper=(builtin)"] .
+  op K2KList : K ~> KList [metadata "deconstructor"] .
+  eq K2KList(KList2KLabel(Ks:KList)(.KList)) = Ks:KList .
 
 
   sorts KLabel .
+  op KLabel2KLabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
+  op K2KLabel : K ~> KLabel [metadata "deconstructor"] .
+  eq K2KLabel(KLabel2KLabel(Ks:KLabel)(.KList)) = Ks:KLabel .
 
   op _`(_`) : KLabel KList -> KItem [prec 0 gather(& &)] .
 
@@ -39,7 +46,10 @@ mod K-TECHNIQUE is
   op __ : List List -> List [assoc id: .List] .
   op __ : NeList List -> NeList [ditto] .
   op __ : List NeList -> NeList [ditto] .
-  
+  op List2KLabel_ : List -> KLabel [metadata "wrapper=(builtin)"] .
+  op K2List : K ~> List [metadata "deconstructor"] .
+  eq K2List(List2KLabel(Ks:List)(.KList)) = Ks:List .
+ 
   sort BagItem Bag NeBag .
   subsort BagItem < NeBag < Bag .
   subsort BagItem < Bag .
@@ -48,6 +58,9 @@ mod K-TECHNIQUE is
   op __ : Bag Bag -> Bag [assoc comm id: .Bag] .
   op __ : NeBag Bag -> NeBag [ditto] .
   op BagMapItem : K Bag -> BagItem .
+  op Bag2KLabel_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
+  op K2Bag : K ~> Bag [metadata "deconstructor"] .
+  eq K2Bag(Bag2KLabel(Ks:Bag)(.KList)) = Ks:Bag .
 
   sort SetItem Set NeSet .
   subsort SetItem < NeSet < Set .
@@ -58,6 +71,9 @@ mod K-TECHNIQUE is
   op __ : NeSet Set -> NeSet [ditto] .
 
   eq SI:SetItem SI:SetItem = SI:SetItem .
+  op Set2KLabel_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
+  op K2Set : K ~> Set [metadata "deconstructor"] .
+  eq K2Set(Set2KLabel(Ks:Set)(.KList)) = Ks:Set .
 
   sort MapItem Map NeMap .
   subsort MapItem < NeMap < Map .
@@ -80,6 +96,9 @@ mod K-TECHNIQUE is
   eq remove((M Key |-> V), Key, V) = M .
   eq remove(M1, (Key |-> V M2)) = remove(remove(M1, Key, V), M2) .  
   eq remove(M, .Map) = M .
+  op Map2KLabel_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
+  op K2Map : K ~> Map [metadata "deconstructor"] .
+  eq K2Map(Map2KLabel(Ks:Map)(.KList)) = Ks:Map .
 
   sort CellLabel .
 
@@ -92,6 +111,9 @@ mod K-TECHNIQUE is
   sort KCellSort .
   op <k>_</k> : K -> KCellSort [format(b o++ni --nib o)].
   op k : -> CellLabel .
+  op CellLabel2KLabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
+  op K2CellLabel : K ~> CellLabel [metadata "deconstructor"] .
+  eq K2CellLabel(CellLabel2KLabel(Ks:CellLabel)(.KList)) = Ks:CellLabel .
 
 
   op HOLE : -> K .
@@ -102,25 +124,6 @@ mod K-TECHNIQUE is
   op #token : #String #String -> KLabel .
   op K2Sort : -> KLabel .
   eq K2Sort(#token(Sort:#String, Value:#String)(.KList)) = # Sort:#String (.KList) .
-
-endm
-
---- K notation starts from here on
-
---- KLabel-Wrappers level
-
-mod K-WRAPPERS-LABELS is
-  including K-TECHNIQUE .
-  including #STRING-INTERFACE .
-  op KLabel2KLabel_ : KLabel -> KLabel [metadata "wrapper=(builtin)"] .
-  op CellLabel2KLabel_ : CellLabel -> KLabel [metadata "wrapper=(builtin)"] .
-  op KList2KLabel_ : KList -> KLabel [metadata "wrapper=(builtin)"] .
-  op Bag2KLabel_ : Bag -> KLabel [metadata "wrapper=(builtin)"] .
-  op Set2KLabel_ : Set -> KLabel [metadata "wrapper=(builtin)"] .
-  op List2KLabel_ : List -> KLabel [metadata "wrapper=(builtin)"] .
-  op Map2KLabel_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
-  op 'wrap-with : -> KLabel .
-  op #_ : #Bool -> KLabel [metadata "wrapper=(builtin)"] .
 
 endm
 

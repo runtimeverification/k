@@ -1,61 +1,10 @@
-Search results:
-
-Solution 1:
-Solution:K -->
-A:Term |-> jim
-B:Term |-> john
-X:Term |-> david
-
-Solution 2:
-Solution:K -->
-A:Term |-> nathan
-B:Term |-> david
-X:Term |-> jim
-
-Solution 3:
-Solution:K -->
-A:Term |-> nathan
-B:Term |-> david
-X:Term |-> steve
-
-Solution 4:
-Solution:K -->
-A:Term |-> nathan
-B:Term |-> jim
-X:Term |-> steve
-
-Solution 5:
-Solution:K -->
-A:Term |-> nathan
-B:Term |-> john
-X:Term |-> david
-
-Solution 6:
-Solution:K -->
-A:Term |-> nathan
-B:Term |-> john
-X:Term |-> jim
-
-Solution 7:
-Solution:K -->
-A:Term |-> nathan
-B:Term |-> john
-X:Term |-> steve
-
-Solution 8:
-Solution:K -->
-A:Term |-> steve
-B:Term |-> david
-X:Term |-> jim
-
-Solution 9:
-Solution:K -->
-A:Term |-> steve
-B:Term |-> john
-X:Term |-> david
-
-Solution 10:
-Solution:K -->
-A:Term |-> steve
-B:Term |-> john
-X:Term |-> jim
+A:Term.*jim\s+B:Term.*john\s+X:Term.*david.*
+A:Term.*nathan\s+B:Term.*david\s+X:Term.*jim.*
+A:Term.*nathan\s+B:Term.*david\s+X:Term.*steve.*
+A:Term.*nathan\s+B:Term.*jim\s+X:Term.*steve.*
+A:Term.*nathan\s+B:Term.*john\s+X:Term.*david.*
+A:Term.*nathan\s+B:Term.*john\s+X:Term.*jim.*
+A:Term.*nathan\s+B:Term.*john\s+X:Term.*steve.*
+A:Term.*steve\s+B:Term.*david\s+X:Term.*jim.*
+A:Term.*steve\s+B:Term.*john\s+X:Term.*david.*
+A:Term.*steve\s+B:Term.*john\s+X:Term.*jim.*

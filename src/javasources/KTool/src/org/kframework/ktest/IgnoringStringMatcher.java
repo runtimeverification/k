@@ -5,7 +5,7 @@ public class IgnoringStringMatcher implements StringMatcher {
 
     private final boolean ignoreWS;
     private final boolean ignoreBalancedParens;
-    
+
     public IgnoringStringMatcher(boolean ignoreWS, boolean ignoreBalancedParens) {
         this.ignoreWS = ignoreWS;
         this.ignoreBalancedParens = ignoreBalancedParens;

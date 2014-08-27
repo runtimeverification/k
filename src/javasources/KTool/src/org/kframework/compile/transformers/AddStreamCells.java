@@ -6,9 +6,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -45,17 +42,17 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     public ASTNode visit(Configuration node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(org.kframework.kil.Context node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Syntax node, Void _)  {
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Rule node, Void _)  {
         boolean isStream = false;
@@ -79,11 +76,10 @@ public class AddStreamCells extends CopyOnWriteTransformer {
 
     private void addRules(Rule rule, String stream) {
         DataStructureSort sort = context.dataStructureSortOf(rule.getBody().getSort());
-        if (!(rule.getBody().getSort().equals("List") || rule.getBody().getSort().equals("ListItem") || context.dataStructureListSortOf(rule.getBody().getSort()) != null)) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                    KExceptionGroup.INTERNAL,
+        if (!(rule.getBody().getSort().equals(Sort.LIST) || rule.getBody().getSort().equals(Sort.LIST_ITEM) || context.dataStructureListSortOf(rule.getBody().getSort()) != null)) {
+            GlobalSettings.kem.registerInternalError(
                     "Found a rule tagged '" + stream + "' whose body wasn't a list.",
-                        getName(), rule.getFilename(), rule.getLocation()));
+                        this, rule);
         }
         Set<Cell> cells = new HashSet<Cell>();
         for (String cellName : context.cells.keySet()) {

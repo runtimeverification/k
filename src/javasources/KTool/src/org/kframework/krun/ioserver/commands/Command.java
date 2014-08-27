@@ -38,7 +38,7 @@ public abstract class Command implements Runnable {
         }
         _logger.info("sending '" + success + "\001\001' to "+ maudeId);
         success += "\001\001\n";
-        
+
         BufferedWriter output = null;
         try {
             output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));

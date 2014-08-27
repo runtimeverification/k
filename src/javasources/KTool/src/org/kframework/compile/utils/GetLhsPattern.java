@@ -10,7 +10,7 @@ public class GetLhsPattern extends CopyOnWriteTransformer {
     public GetLhsPattern(String s, Context context) {
         super(s, context);
     }
-    
+
     @Override
     public ASTNode visit(Rewrite node, Void _)  {
         return node.getLeft();

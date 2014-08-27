@@ -2,10 +2,9 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 
 
@@ -14,7 +13,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public final class Hole extends Term {
+public final class Hole extends Term implements MaximalSharing {
 
     public static final Hole HOLE = new Hole();
 
@@ -33,8 +32,8 @@ public final class Hole extends Term {
     }
 
     @Override
-    public String sort() {
-        return KSorts.KITEM;
+    public Sort sort() {
+        return Sort.KITEM;
     }
 
     @Override
@@ -43,11 +42,13 @@ public final class Hole extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = super.hashCode();
-        }
-        return hashCode;
+    protected int computeHash() {
+        return System.identityHashCode(this);
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        return false;
     }
 
     @Override

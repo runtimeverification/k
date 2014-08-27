@@ -8,12 +8,20 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
+
 /**
  * An injection KLabel.
  *
  * @author AndreiS
  */
 public class KLabelInjection extends KLabel {
+
+    /**
+     * Returns an injection of the term into a {@link org.kframework.backend.java.kil.KItem}.
+     */
+    public static KItem injectionOf(Term term, TermContext context) {
+        return KItem.of(new KLabelInjection(term), KList.EMPTY, context);
+    }
 
     private final Term term;
 
@@ -36,7 +44,7 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public final boolean equals(Object object) {
         if (this == object) {
             return true;
         }
@@ -50,21 +58,28 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
-    public boolean isConstructor() {
+    public final boolean isConstructor() {
         return true;
     }
 
     @Override
-    public boolean isFunction() {
+    public final boolean isFunction() {
         return false;
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = term.hashCode();
-        }
-        return hashCode;
+    public final boolean isPattern() {
+        return false;
+    }
+
+    @Override
+    protected final int computeHash() {
+        return term.hashCode();
+    }
+
+    @Override
+    protected final boolean computeHasCell() {
+        return term.hasCell();
     }
 
     @Override

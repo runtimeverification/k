@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -10,6 +11,8 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -23,7 +26,7 @@ import java.util.List;
  */
 public abstract class BitVector<T extends Number> extends Token {
 
-    public static final String SORT_NAME = "MInt";
+    public static final Sort SORT = Sort.BIT_VECTOR;
 
     /**
      * Integer value wrapped by this BitVector. The signed value and the unsigned value of this
@@ -95,12 +98,9 @@ public abstract class BitVector<T extends Number> extends Token {
      */
     public abstract BigInteger unsignedValue();
 
-    /**
-     * Returns a {@code String} representation of the sort of this BitVector.
-     */
     @Override
-    public String sort() {
-        return BitVector.SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**
@@ -126,12 +126,10 @@ public abstract class BitVector<T extends Number> extends Token {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + bitwidth;
-        }
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + bitwidth;
         return hashCode;
     }
 
@@ -191,23 +189,54 @@ public abstract class BitVector<T extends Number> extends Token {
     public abstract BoolToken eq(BitVector<T> bitVector);
     public abstract BoolToken ne(BitVector<T> bitVector);
 
-    public abstract List<BitVector> toDigits(int digitBase);
+    public BitVector concatenate(BitVector bitVector) {
+        return BitVector.of(
+                unsignedValue().shiftLeft(bitVector.bitwidth).add(bitVector.unsignedValue()),
+                bitwidth + bitVector.bitwidth);
+    }
+    public abstract BitVector extract(int beginIndex, int endIndex);
 
-    public static BitVector fromDigits(List<BitVector> digits, int base) {
-        assert base > 0;
+    public abstract List<BitVector> toDigits(int digitBitWidth, int count);
+
+    public static BitVector fromDigits(List<BitVector> digits) {
         assert !digits.isEmpty();
 
         BigInteger value = BigInteger.ZERO;
+        int bitwidth = 0;
         for (BitVector digit : digits) {
-            if (digit.bitwidth != base) {
-                return null;
-            }
-
-            /* value = value * 2^base + digit */
-            value = (value.shiftLeft(base)).add(digit.unsignedValue());
+            /* value = value * 2^digit_bitwidth + digit */
+            value = value.shiftLeft(digit.bitwidth).add(digit.unsignedValue());
+            bitwidth += digit.bitwidth;
         }
 
-        return BitVector.of(value, digits.size() * base);
+        return BitVector.of(value, bitwidth);
+    }
+
+    /**
+     * Get the bitwidth of a term of sort MInt assumed to have a bitwidth attribute.
+     * Throws an error if the term does not declare one.
+     */
+    public static int getBitwidthOrDie(ASTNode t) {
+        Integer bitwidth = getBitwidth(t);
+        if (bitwidth == null) {
+            GlobalSettings.kem.registerCriticalError("Expected machine integer variable to declare a bitwidth." +
+                    " For example, M:MInt{bitwidth(32)} for a 32-bit integer.");
+        }
+        return bitwidth;
+    }
+
+    public static Integer getBitwidth(ASTNode t) {
+        String bitwidth = t.getAttribute(Attribute.BITWIDTH_KEY);
+        if (bitwidth == null) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(bitwidth);
+        } catch (NumberFormatException e) {
+            GlobalSettings.kem.registerCriticalError("Expected variable attribute 'bitwidth' to " +
+                    "be an integer, found: " + t.getAttribute("bitwidth"), e);
+            throw new AssertionError("unreachable");
+        }
     }
 
 }

@@ -117,7 +117,7 @@ public class CoolingRuleVisitor extends RuleVisitor {
     @Override
     public void visit(KList kList) {
         Term frozenTerm;
-        for (int i = 0; i < kList.size(); i++) {
+        for (int i = 0; i < kList.concreteSize(); i++) {
             frozenTerm = kList.get(i);
             if (frozenTerm instanceof Hole) {
                 pStrings.add(pString + (i + 1) + ".HOLE");

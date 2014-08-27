@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.MaximalSharing;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -19,26 +21,18 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public final class IntToken extends Token {
+public final class IntToken extends Token implements MaximalSharing {
 
-    public static final String SORT_NAME = "Int";
+    public static final Sort SORT = Sort.INT;
 
     /* IntToken cache */
     private static final Map<BigInteger, IntToken> cache = new HashMap<BigInteger, IntToken>();
-
-    /* counter for generating fresh IntToken values */
-    private static BigInteger freshValue = BigInteger.valueOf(0);
 
     /* BigInteger value wrapped by this IntToken */
     private final BigInteger value;
 
     private IntToken(BigInteger value) {
         this.value = value;
-    }
-
-    public static IntToken fresh() {
-        freshValue = freshValue.add(BigInteger.valueOf(1));
-        return of(freshValue);
     }
 
     /**
@@ -59,6 +53,20 @@ public final class IntToken extends Token {
 
     public static IntToken of(long value) {
         return of(BigInteger.valueOf(value));
+    }
+
+    public static IntToken of(String value) {
+        try {
+            return IntToken.of(new BigInteger(value));
+        } catch (NumberFormatException e) {
+            if (value.codePointCount(0, value.length()) == 1) {
+                int numericValue = Character.getNumericValue(value.codePointAt(0));
+                if (numericValue >= 0) {
+                    return IntToken.of(numericValue);
+                }
+            }
+            throw e;
+        }
     }
 
     /**
@@ -113,12 +121,9 @@ public final class IntToken extends Token {
         return (byte)value.longValue();
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this IntToken.
-     */
     @Override
-    public String sort() {
-        return IntToken.SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**
@@ -130,7 +135,7 @@ public final class IntToken extends Token {
     }
 
     @Override
-    public int hashCode() {
+    protected int computeHash() {
         return value.hashCode();
     }
 
@@ -144,7 +149,7 @@ public final class IntToken extends Token {
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }
-    
+
     @Override
     public void accept(Matcher matcher, Term pattern) {
         matcher.match(this, pattern);

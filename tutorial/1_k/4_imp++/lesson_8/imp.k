@@ -1,5 +1,4 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
-// This is a heavily commented K definition, part of the K tutorial.
+// Copyright (c) 2010-2014 K Team. All Rights Reserved.
 
 /*!
 \setlength{\parindent}{1em}
@@ -25,7 +24,7 @@ expressions have side effects, and thus makes the evaluation strategies
 of the various language constructs have an influence on the set
 of possible program behaviors.
 \item [Input and output.]  IMP++ adds a \texttt{read()} expression
-construct which reads an integer number and evaluates to it, and 
+construct which reads an integer number and evaluates to it, and
 a variadic (i.e., it has an arbitrary number of arguments) statement
 construct \texttt{print(e1,e2,...,en)} which evaluates its arguments
 and then outputs their values.  Note that the \K tool allows to
@@ -58,7 +57,7 @@ generalized to be used anywhere as a statement, not only at the
 beginning of the program.  As expected, the scope of the declared
 variables is from their declaration point till the end of the most
 nested enclosing block.
-\end{description} 
+\end{description}
 
 \section{What You Will Learn Here}
 
@@ -230,7 +229,7 @@ Sum = 55
 Add numbers up to (<= 0 to quit)? 1000
 Sum = 500500
 Add numbers up to (<= 0 to quit)? 0
-bash$ 
+bash$
 \end{verbatim}
 The option \texttt{-\,\!-no-config} instructs \texttt{krun} to not
 display the resulting configuration after the program executes.  The
@@ -298,13 +297,13 @@ them is chosen first. */
 
 //@ \subsubsection{Arithmetic constructs}
 
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
 
 //@ \subsubsection{Boolean constructs}
 
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule ! T:Bool => notBool T
+  rule I1 <= I2 => I1 <=Int I2
+  rule ! T => notBool T
   rule true && B => B
   rule false && _ => false
 
@@ -328,7 +327,7 @@ sequentialize a syntactic list of statements ``s1 s2 ... sn.. into the
 corresponding computation ``s1 ~> s2 ~> ... ~> sn''. */
 
    rule .Stmts => .
-   rule S Ss => S ~> Ss  [structural]
+   rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
 
 //@ \subsubsection{Conditional statement}
 
@@ -353,7 +352,7 @@ uses the already existing addition symbol \texttt{+} from IMP) by
 reduction to the built-in string concatenation operation. */
 
   syntax KResult ::= String
-  rule Str1:String + Str2:String => Str1 +String Str2
+  rule Str1 + Str2 => Str1 +String Str2
 
 /*@ \subsubsection{Variable increment}
 Like variable lookup, this is also meant to be a supercool transition: we
@@ -377,7 +376,7 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => . ...</in>  [read]
+       <in> ListItem(I:Int) => .List ...</in>  [read]
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement is strict, so all its arguments are
@@ -399,7 +398,7 @@ count as a computational step. */
   syntax Printable ::= Int | String
   syntax AExp ::= Printable
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <out>... . => ListItem(P) </out>  [print]
+       <out>... .List => ListItem(P) </out>  [print]
   rule print(.AExps); => .  [structural]
 
 /*@ \subsubsection{Halt}
@@ -413,7 +412,7 @@ terminates the entire program, no matter how many concurrent threads it has,
 because there is nothing else to rewrite.  */
 
   rule <k> halt; ~> _ => . </k>
-  
+
 /*@ \subsubsection{Spawn thread}
 A spawned thread is passed its parent's environment at creation time.
 The \texttt{spawn} expression in the parent thread is immediately
@@ -444,9 +443,8 @@ thread cell will add a new thread cell next to it, which is consistent
 with the declared configuration cell multiplicity.  The unique identifier
 of the new thread is generated using the ``fresh'' side condition. */
 
-  rule <k> spawn S => T ...</k> <env> Rho </env>
-       (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
-    when fresh(T:Int)
+  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
+       (. => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
 
 /*@ \subsubsection{Join thread}
 A thread who wants to join another thread \texttt{T} has to wait until
@@ -480,16 +478,15 @@ below can be structural, because what it effectively does is to take a
 snapshot of the current environment; this operation is arguably not a
 computational step. */
 
-  rule <k> {Ss} => Ss ~> env(Rho) ...</k> <env> Rho </env>  [structural]
+  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>  [structural]
 
 /*@ \subsubsection{Variable declaration}
 We allocate a fresh location for each newly declared variable and
 initialize it with 0. */
 
-  rule <k> int (X:Id,Xs => Xs); ...</k>
-       <env> Rho => Rho[N/X] </env>
-       <store>... . => N|->0 ...</store>
-    when fresh(N:Nat)
+  rule <k> int (X,Xs => Xs); ...</k>
+       <env> Rho => Rho[X <- !N:Int] </env>
+       <store>... .Map => !N |-> 0 ...</store>
   rule int .Ids; => .  [structural]
 
 /*@ \subsubsection{Auxiliary operations}
@@ -499,13 +496,12 @@ recovery.  Its role is to discard the current environment in the
 This rule is structural: we do not want them to count as computational
 steps in the transition system of a program. */
 
-  syntax K ::= env(Map)
-  rule <k> env(Rho) => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
 
 /*@ If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule
 \begin{verbatim}
- rule (env(_) => .) ~> env(_)  [structural]
+ rule (_:Map => .) ~> _:Map  [structural]
 \end{verbatim}
 This rule acts like a ``tail recursion'' optimization, but for blocks. */
 endmodule

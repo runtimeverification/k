@@ -16,8 +16,8 @@ public class Bag extends Collection {
 
     public static final Bag EMPTY = new Bag(Collections.<Term> emptyList());
 
-    public Bag(String location, String filename) {
-        super(location, filename, "Bag");
+    public Bag(Location location, Source source) {
+        super(location, source, Sort.BAG);
     }
 
     public Bag(Element element) {
@@ -29,11 +29,11 @@ public class Bag extends Collection {
     }
 
     public Bag() {
-        super("Bag");
+        super(Sort.BAG);
     }
 
     public Bag(List<Term> col) {
-        super("Bag", col);
+        super(Sort.BAG, col);
     }
 
     public static Bag flatten(Bag bag) {

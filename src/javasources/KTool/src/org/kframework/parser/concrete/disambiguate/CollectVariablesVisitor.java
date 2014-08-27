@@ -11,6 +11,7 @@ import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Rewrite;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -21,6 +22,10 @@ import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
+/**
+ * Do not use outside the parser!
+ *
+ */
 public class CollectVariablesVisitor extends BasicVisitor {
     public CollectVariablesVisitor(Context context) {
         super(context);
@@ -38,13 +43,12 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
     @Override
     public Void visit(Cell c, Void _) {
-        if (c.getEllipses() == Ellipses.NONE)
-            if (context.cellSorts.containsKey(c.getLabel())) {
-                try {
-                    c.setContents((Term) new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel())).visitNode(c.getContents()));
-                } catch (ParseFailedException e) {
-                    e.printStackTrace();
-                }
+        Sort s = context.getCellSort(c);
+        if (s != null)
+            try {
+                c.setContents((Term) new CollectVariablesVisitor2(context, s).visitNode(c.getContents()));
+            } catch (ParseFailedException e) {
+                e.printStackTrace();
             }
         return super.visit(c, _);
     }
@@ -55,10 +59,10 @@ public class CollectVariablesVisitor extends BasicVisitor {
             return null;
 
         for (int i = 0, j = 0; i < node.getProduction().getItems().size(); i++) {
-            if (node.getProduction().getItems().get(i) instanceof Sort) {
+            if (node.getProduction().getItems().get(i) instanceof NonTerminal) {
                 Term t = node.getContents().get(j);
                 try {
-                    new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()).visitNode(t);
+                    new CollectVariablesVisitor2(context, ((NonTerminal) node.getProduction().getItems().get(i)).getSort()).visitNode(t);
                 } catch (ParseFailedException e) {
                     e.printStackTrace();
                 }
@@ -100,16 +104,16 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
     /**
      * A new class (nested) that goes down one level (jumps over Ambiguity, Rewrite and Bracket) and checks to see if there is a Variable
-     * 
+     *
      * if found, sets a parameter to that variable with the expected sort gathered from the parent production
-     * 
+     *
      * @author Radu
-     * 
+     *
      */
     public class CollectVariablesVisitor2 extends LocalTransformer {
-        String expectedSort = null;
+        Sort expectedSort = null;
 
-        public CollectVariablesVisitor2(Context context, String expectedSort) {
+        public CollectVariablesVisitor2(Context context, Sort expectedSort) {
             super("org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor2", context);
             this.expectedSort = expectedSort;
         }

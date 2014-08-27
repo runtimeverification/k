@@ -1,22 +1,5 @@
-Search results:
-
-Solution 1:
-Solution:K -->
-L:Term |-> cons ( _113:Term, cons ( _113, nil ) )
-
-Solution 2:
-Solution:K -->
-L:Term |-> cons ( _113:Term, cons ( _146:Term, cons ( _113, nil ) ) )
-
-Solution 3:
-Solution:K -->
-L:Term |-> cons ( _113:Term, cons ( _146:Term, cons ( _146, cons ( _113, nil )
-   ) ) )
-
-Solution 4:
-Solution:K -->
-L:Term |-> cons ( _113:Term, nil )
-
-Solution 5:
-Solution:K -->
-L:Term |-> nil
+L:Term |-> cons \( (.*?), cons \( \1, nil \(  \) \) \)
+L:Term |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( \1, nil \(  \) \) \) \)
+L:Term |-> cons \( (.*?), cons \( ((?!\1).*?), cons \( \2, cons \( \1, nil \(  \) \) \) \) \)
+L:Term |-> cons \( (.*?), nil \(  \) \)
+L:Term |-> nil \(  \)

@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,8 +12,8 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 
@@ -25,28 +24,24 @@ import com.google.common.collect.Multimap;
  * the target node to return unless it is actually going to be mutated.
  * <p>
  * COW strategy allows safe sub-term sharing.
- * 
+ *
  * @author AndreiS
  */
 public class CopyOnWriteTransformer implements Transformer {
 
     protected final TermContext context;
     protected final Definition definition;
-    
+
     public CopyOnWriteTransformer(TermContext context) {
         this.context = context;
         this.definition = context.definition();
-    }
-
-    public CopyOnWriteTransformer(Definition definition) {
-        this(TermContext.of(definition));
     }
 
     public CopyOnWriteTransformer() {
         this.context = null;
         this.definition = null;
     }
-    
+
     @Override
     public String getName() {
         return this.getClass().toString();
@@ -63,48 +58,45 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(CellCollection cellCollection) {
-        boolean change = false;
-        Multimap<String, Cell> cells = ArrayListMultimap.create();
+        boolean changed = false;
+        Multimap<String, Cell> cellMap = ArrayListMultimap.create();
         for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
             Cell<?> cell = (Cell<?>) entry.getValue().accept(this);
-            cells.put(entry.getKey(), cell);
-            change = change || cell != entry.getValue();
+            cellMap.put(entry.getKey(), cell);
+            changed = changed || cell != entry.getValue();
         }
-        if (!change) {
-            cells = cellCollection.cellMap();
+        if (!changed) {
+            cellMap = cellCollection.cellMap();
         }
 
-        if (cellCollection.hasFrame()) {
-            Variable frame;
-            Term transformedFrame = (Term) cellCollection.frame().accept(this);
-            if (transformedFrame instanceof CellCollection) {
-                if (cells == cellCollection.cellMap()) {
-                    cells = ArrayListMultimap.create(cellCollection.cellMap());
+        // starting from now, !changed <=> cellMap == cellCollection.cellMap()
+        List<Variable> transformedBaseTerms = Lists.newArrayList();
+        for (Variable variable : cellCollection.baseTerms()) {
+            Term transformedBaseTerm = (Term) variable.accept(this);
+            if (transformedBaseTerm instanceof CellCollection) {
+                if (!changed) {
+                    cellMap = ArrayListMultimap.create(cellCollection.cellMap());
+                    changed = true;
                 }
-                cells.putAll(((CellCollection) transformedFrame).cellMap());
-                frame = ((CellCollection) transformedFrame).hasFrame() ?
-                        ((CellCollection) transformedFrame).frame() : null;
-            } else if (transformedFrame instanceof Cell) {
-                if (cells == cellCollection.cellMap()) {
-                    cells = ArrayListMultimap.create(cellCollection.cellMap());
+
+                CellCollection transformedCellCollection = (CellCollection) transformedBaseTerm;
+                cellMap.putAll(transformedCellCollection.cellMap());
+                transformedBaseTerms.addAll(transformedCellCollection.baseTerms());
+            } else if (transformedBaseTerm instanceof Cell) {
+                if (!changed) {
+                    cellMap = ArrayListMultimap.create(cellCollection.cellMap());
+                    changed = true;
                 }
-                Cell<?> cell = (Cell<?>) transformedFrame;
-                cells.put(cell.getLabel(), cell);
-                frame = null;
+
+                Cell<?> transformedCell = (Cell<?>) transformedBaseTerm;
+                cellMap.put(transformedCell.getLabel(), transformedCell);
             } else {
-                frame = (Variable) transformedFrame;
-            }
-
-            if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
-                cellCollection = new CellCollection(cells, frame, definition.context());
-            }
-        } else {
-            if (cells != cellCollection.cellMap()) {
-                cellCollection = new CellCollection(cells, definition.context());
+                changed = changed || variable != transformedBaseTerm;
+                transformedBaseTerms.add((Variable) transformedBaseTerm);
             }
         }
 
-        return cellCollection;
+        return changed ? new CellCollection(cellMap, transformedBaseTerms, definition.context()) : cellCollection;
     }
 
     @Override
@@ -159,7 +151,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = new KItem(kLabel, kList, context);
+            kItem = KItem.of(kLabel, kList, context);
         }
         return kItem;
     }
@@ -234,13 +226,6 @@ public class CopyOnWriteTransformer implements Transformer {
                     items.addAll(((KList) transformedFrame).getContents());
                     frame = ((KList) transformedFrame).hasFrame() ?
                             ((KList) transformedFrame).frame() : null;
-                } else if (transformedFrame instanceof KCollectionFragment) {
-                    if (items == kList.getContents()) {
-                        items = new ArrayList<>(items);
-                    }
-                    Iterables.addAll(items, (KCollectionFragment) transformedFrame);
-                    frame = ((KCollectionFragment) transformedFrame).hasFrame() ?
-                            ((KCollectionFragment) transformedFrame).frame() : null;
                 } else {
                     frame = (Variable) transformedFrame;
                 }
@@ -255,11 +240,11 @@ public class CopyOnWriteTransformer implements Transformer {
             }
 
             if (items != kList.getContents() || frame != kList.frame()) {
-                kList = new KList(ImmutableList.<Term>copyOf(items), frame);
+                kList = new KList(items, frame);
             }
         } else {
             if (items != kList.getContents()) {
-                kList = new KList(ImmutableList.<Term>copyOf(items));
+                kList = new KList(items);
             }
         }
 
@@ -268,53 +253,36 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KSequence kSequence) {
-        List<Term> items = transformList(kSequence.getContents());
+        boolean changed = false;
+        // transform the contents
+        List<Term> transformedItems = Lists.newArrayListWithCapacity(kSequence.concreteSize());
+        for (Term term : kSequence) {
+            Term transformedTerm = (Term) term.accept(this);
+            if (transformedTerm != term) {
+                changed = true;
+            }
+            transformedItems.add(transformedTerm);
+        }
 
+        Term transformedFrame = null;
         if (kSequence.hasFrame()) {
-            Variable frame;
-            Term transformedFrame = (Term) kSequence.frame().accept(this);
-
-            if (transformedFrame.kind() == Kind.K) {
-                if (transformedFrame instanceof KSequence) {
-                    if (items == kSequence.getContents()) {
-                        items = new ArrayList<>(items);
-                    }
-                    items.addAll(((KSequence) transformedFrame).getContents());
-                    frame = ((KSequence) transformedFrame).hasFrame() ?
-                            ((KSequence) transformedFrame).frame() : null;
-                } else if (transformedFrame instanceof KCollectionFragment) {
-                    if (items == kSequence.getContents()) {
-                        items = new ArrayList<>(items);
-                    }
-                    Iterables.addAll(items, (KCollectionFragment) transformedFrame);
-                    frame = ((KCollectionFragment) transformedFrame).hasFrame() ?
-                            ((KCollectionFragment) transformedFrame).frame() : null;
-                } else {
-                    frame = (Variable) transformedFrame;
-                }
-            } else {
-                assert transformedFrame.kind() == Kind.KITEM;
-
-                if (items == kSequence.getContents()) {
-                    items = new ArrayList<>(items);
-                }
-                items.add(transformedFrame);
-                frame = null;
-            }
-
-            if (items != kSequence.getContents() || frame != kSequence.frame()) {
-                kSequence = new KSequence(ImmutableList.<Term>copyOf(items), frame);
-            }
-        } else {
-            if (items != kSequence.getContents()) {
-                kSequence = new KSequence(ImmutableList.<Term>copyOf(items));
+            Variable frame = kSequence.frame();
+            transformedFrame = (Term) frame.accept(this);
+            if (transformedFrame != frame) {
+                changed = true;
             }
         }
 
-        if (kSequence.hasFrame() || kSequence.size() != 1) {
+        if (!changed) {
             return kSequence;
         } else {
-            return kSequence.get(0);
+            KSequence transformedKSeq = KSequence.of(transformedItems, transformedFrame);
+
+            if (!transformedKSeq.hasFrame() && transformedKSeq.concreteSize() == 1) {
+                return transformedKSeq.get(0);
+            } else {
+                return transformedKSeq;
+            }
         }
     }
 
@@ -329,107 +297,95 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(BuiltinList builtinList) {
-        Term frame = null;
-        boolean change = false;
-        if (builtinList.hasFrame()) {
-            frame = (Term) builtinList.frame().accept(this);
-            if (frame != builtinList.frame()) change = true;
+    public ASTNode transform(ListUpdate listUpdate) {
+        Term list = (Term) listUpdate.list().accept(this);
+        if (list != listUpdate.list()) {
+            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
         }
+        return listUpdate;
+    }
 
-        ArrayList<Term> elementsLeft = new ArrayList<Term>(builtinList.elementsLeft().size());
-        for (Term entry : builtinList.elementsLeft()) {
-            ASTNode newEntry = entry.accept(this);
-            if (newEntry != entry) change = true;
-            if (newEntry != null) elementsLeft.add((Term) newEntry);
+    @Override
+    public ASTNode transform(BuiltinList builtinList) {
+        boolean changed = false;
+        BuiltinList.Builder builder = BuiltinList.builder();
+        for (Term term : builtinList.elementsLeft()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.addItem(transformedTerm);
         }
-        ArrayList<Term> elementsRight = new ArrayList<Term>(builtinList.elementsRight().size());
-        for (Term entry : builtinList.elementsRight()) {
-            ASTNode newEntry = entry.accept(this);
-            if (newEntry != entry) change = true;
-            if (newEntry != null) elementsRight.add((Term) newEntry);
+        for (Term term : builtinList.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
         }
-        if (! change) return  builtinList;
-        return BuiltinList.of(frame, builtinList.removeLeft(), builtinList.removeRight(), elementsLeft, elementsRight);
+        for (Term term : builtinList.elementsRight()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.addItem(transformedTerm);
+        }
+        return changed ? builder.build() : builtinList;
     }
 
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
-        BuiltinMap transformedMap = null;
-        if (builtinMap.hasFrame()) {
-            Term frame = (Term) builtinMap.frame().accept(this);
-            if (frame != builtinMap.frame()) {
-                transformedMap = BuiltinMap.of(Collections.<Term, Term>emptyMap(), frame);
-            }
-        }
+        boolean changed = false;
+        BuiltinMap.Builder builder = BuiltinMap.builder();
 
-        for(Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
+        for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
 
-            if (transformedMap == null && (key != entry.getKey() || value != entry.getValue())) {
-                if (builtinMap.hasFrame()) {
-                    transformedMap = new BuiltinMap(builtinMap.frame());
-                } else {
-                    transformedMap = new BuiltinMap();
-                }
-                for(Map.Entry<Term, Term> copyEntry : builtinMap.getEntries().entrySet()) {
-                    if (copyEntry.equals(entry)) {
+            // first time encounter a changed entry
+            if (!changed && (key != entry.getKey() || value != entry.getValue())) {
+                changed = true;
+                // copy previous entries into the BuiltinMap being built
+                for (Map.Entry<Term, Term> copy : builtinMap.getEntries().entrySet()) {
+                    if (copy.equals(entry)) {
+                        // cannot rely on reference identity check here
                         break;
                     }
-                    transformedMap.put(copyEntry.getKey(), copyEntry.getValue());
+                    builder.put(copy.getKey(), copy.getValue());
                 }
             }
 
-            if (transformedMap != null) {
-                transformedMap.put(key, value);
+            if (changed) {
+                builder.put(key, value);
             }
         }
-
-        if (transformedMap != null) {
-            return transformedMap;
-        } else {
-            return builtinMap;
+        /* special case for maps composed only of entries */
+        if (builtinMap.isConcreteCollection()) {
+            return changed ? builder.build() : builtinMap;
         }
+
+        if (!changed) {
+            builder.putAll(builtinMap.getEntries());
+        }
+
+        for (Term term : builtinMap.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
+        }
+
+        return changed ? builder.build() : builtinMap;
     }
 
     @Override
     public ASTNode transform(BuiltinSet builtinSet) {
-        BuiltinSet transformedSet = null;
-        if (builtinSet.hasFrame()) {
-            Term frame = (Term) builtinSet.frame().accept(this);
-            if (frame != builtinSet.frame()) {
-                transformedSet = BuiltinSet.of(Collections.<Term>emptySet(), frame);
-            }
+        boolean changed = false;
+        BuiltinSet.Builder builder = BuiltinSet.builder();
+        for(Term element : builtinSet.elements()) {
+            Term transformedElement = (Term) element.accept(this);
+            builder.add(transformedElement);
+            changed = changed || (transformedElement != element);
         }
-
-        for(Term entry : builtinSet.elements()) {
-            Term key = (Term) entry.accept(this);
-
-            if (transformedSet == null && (key != entry)) {
-                if (builtinSet.hasFrame()) {
-                    transformedSet = new BuiltinSet(builtinSet.frame());
-                } else {
-                    transformedSet = new BuiltinSet();
-                }
-                for(Term copyEntry : builtinSet.elements()) {
-                    if (copyEntry.equals(entry)) {
-                        break;
-                    }
-                    transformedSet.add(copyEntry);
-                }
-            }
-
-            if (transformedSet != null) {
-                transformedSet.add(key);
-            }
+        for (Term term : builtinSet.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            changed = changed || (transformedTerm != term);
+            builder.concatenate(transformedTerm);
         }
-
-        if (transformedSet != null) {
-            return transformedSet;
-        } else {
-            return builtinSet;
-        }
+        return changed ? builder.build() : builtinSet;
     }
 
     @Override
@@ -586,14 +542,24 @@ public class CopyOnWriteTransformer implements Transformer {
         UninterpretedConstraint processedLookups
                 = (UninterpretedConstraint) rule.lookups().accept(this);
 
+        Map<String, Term> processedLhsOfReadCell = null;
+        Map<String, Term> processedRhsOfWriteCell = null;
+        if (rule.isCompiledForFastRewriting()) {
+            processedLhsOfReadCell = new HashMap<>();
+            for (Map.Entry<String, Term> entry : rule.lhsOfReadCell().entrySet()) {
+                processedLhsOfReadCell.put(entry.getKey(), (Term) entry.getValue().accept(this));
+            }
+            processedRhsOfWriteCell = new HashMap<>();
+            for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+                processedRhsOfWriteCell.put(entry.getKey(), (Term) entry.getValue().accept(this));
+            }
+        }
+
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()
-//                || !processedRequires.equals(rule.requires())
-//                || !processedEnsures.equals(rule.ensures())
-//                || !processedFreshVariables.equals(rule.freshVariables())
-                || processedRequires != rule.requires()
-                || processedEnsures != rule.ensures()
-                || processedFreshVariables != rule.freshVariables()
+                || processedRequires.equals(rule.requires())
+                || processedEnsures.equals(rule.ensures())
+                || processedFreshVariables.equals(rule.freshVariables())
                 || processedLookups != rule.lookups()) {
             return new Rule(
                     rule.label(),
@@ -603,7 +569,14 @@ public class CopyOnWriteTransformer implements Transformer {
                     processedEnsures,
                     processedFreshVariables,
                     processedLookups,
+                    rule.isCompiledForFastRewriting(),
+                    processedLhsOfReadCell,
+                    processedRhsOfWriteCell,
+                    rule.cellsToCopy(),
+                    rule.instructions(),
                     rule.getAttributes(),
+                    rule.getLocation(),
+                    rule.getSource(),
                     definition);
         } else {
             return rule;
@@ -638,7 +611,7 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(Variable variable) {
         return variable;
     }
-    
+
     @Override
     public ASTNode transform(BuiltinMgu mgu) {
         SymbolicConstraint transformedConstraint = (SymbolicConstraint) mgu.constraint().accept(this);
@@ -650,6 +623,8 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     protected List<Term> transformList(List<Term> list) {
+        // TODO(YilongL): avoid using index number to traverse the list, there
+        // is no guarantee that the underlying list is a random access list
         ArrayList<Term> transformedList = null;
         for (int index = 0; index < list.size(); ++index) {
             Term transformedTerm = (Term) list.get(index).accept(this);

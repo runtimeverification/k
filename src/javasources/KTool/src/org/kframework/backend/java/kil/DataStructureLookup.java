@@ -2,11 +2,16 @@
 package org.kframework.backend.java.kil;
 
 /**
- * The tag interface for data structure lookup operations.
+ * Interface for data structure lookup operations.
  *
  * @author YilongL
  *
  */
 public interface DataStructureLookup extends DataStructureLookupOrChoice {
 
+    enum Type { MAP_LOOKUP, LIST_LOOKUP, SET_LOOKUP }
+
+    Term key();
+    Term evaluateLookup();
+    Type type();
 }

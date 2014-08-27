@@ -11,7 +11,7 @@ import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.parser.generator.SDFHelper;
@@ -37,12 +37,12 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                 // allow priorities only between productions that have a sort at the left or right
                 if (prd1.isSubsort() || prd1.isConstant())
                     continue;
-                if (!(prd1.getItems().get(0) instanceof Sort) && !(prd1.getItems().get(prd1.getItems().size() - 1) instanceof Sort))
+                if (!(prd1.getItems().get(0) instanceof NonTerminal) && !(prd1.getItems().get(prd1.getItems().size() - 1) instanceof NonTerminal))
                     continue;
                 for (Production prd2 : pb2.getProductions()) {
                     if (prd2.isSubsort() || prd2.isConstant())
                         continue;
-                    if (!(prd2.getItems().get(0) instanceof Sort) && !(prd2.getItems().get(prd2.getItems().size() - 1) instanceof Sort))
+                    if (!(prd2.getItems().get(0) instanceof NonTerminal) && !(prd2.getItems().get(prd2.getItems().size() - 1) instanceof NonTerminal))
                         continue;
                     context.addPriority(prd1.getKLabel(), prd2.getKLabel());
                 }
@@ -69,10 +69,10 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                     Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel(), context);
                     // add all the relations between all the productions annotated with tag1 and tag 2
                     for (Production p1 : prods1) {
-                        if (p1.isSubsort() && !p1.containsAttribute("klabel"))
+                        if (p1.isSubsort() && p1.getKLabel() == null)
                             continue;
                         for (Production p2 : prods2) {
-                            if (p2.isSubsort() && !p2.containsAttribute("klabel"))
+                            if (p2.isSubsort() && p2.getKLabel() == null)
                                 continue;
                             context.addPriority(p1.getKLabel(), p2.getKLabel());
                         }
@@ -94,7 +94,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 
     public void manageAssociativity(Set<Production> prods, String assoc) {
         for (Production p1 : prods) {
-            if (p1.containsAttribute("klabel")) {
+            if (p1.getKLabel() != null) {
                 for (Production p2 : prods) {
                     // collect the associativity for the entire block (production1 to production2)
                     if (p1 != p2) {

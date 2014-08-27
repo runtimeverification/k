@@ -7,7 +7,7 @@ module IF-SYNTAX
   syntax Exp ::= "if" Exp "then" Exp "else" Exp   [if, strict(1)]
 endmodule
 
-module IF 
+module IF
   imports IF-SYNTAX
   imports BOOL-EXP
 

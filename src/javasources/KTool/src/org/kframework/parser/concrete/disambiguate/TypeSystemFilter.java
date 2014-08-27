@@ -4,6 +4,7 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Production;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -29,10 +30,10 @@ public class TypeSystemFilter extends ParseForestTransformer {
             int j = 0;
             Production prd = tc.getProduction();
             for (int i = 0; i < prd.getItems().size(); i++) {
-                if (prd.getItems().get(i) instanceof Sort) {
-                    Sort sort = (Sort) prd.getItems().get(i);
-                    Term child = (Term) tc.getContents().get(j);
-                    tc.getContents().set(j, (Term) new TypeSystemFilter2(sort.getName(), context).visitNode(child));
+                if (prd.getItems().get(i) instanceof NonTerminal) {
+                    NonTerminal sort = (NonTerminal) prd.getItems().get(i);
+                    Term child = tc.getContents().get(j);
+                    tc.getContents().set(j, (Term) new TypeSystemFilter2(sort.getSort(), context).visitNode(child));
                     j++;
                 }
             }
@@ -43,7 +44,8 @@ public class TypeSystemFilter extends ParseForestTransformer {
 
     @Override
     public ASTNode visit(Cast cast, Void _) throws ParseFailedException {
-        cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), context).visitNode(cast.getContent()));
+        if (cast.getType() != Cast.CastType.OUTER)
+            cast.setContent((Term) new TypeSystemFilter2(cast.getInnerSort(), true, context).visitNode(cast.getContent()));
         return super.visit(cast, _);
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * Combines a list of {@code LocalVisitor}s.
- * 
+ *
  * @author Traian
  */
 public class CombinedLocalVisitor extends LocalVisitor {
@@ -41,7 +41,7 @@ public class CombinedLocalVisitor extends LocalVisitor {
 
     /**
      * Invokes all internal visitors on the given node in order.
-     * 
+     *
      * @param node
      *            the given node
      */
@@ -218,7 +218,7 @@ public class CombinedLocalVisitor extends LocalVisitor {
     public void visit(Variable node) {
         visitAll(node);
     }
-    
+
     @Override
     public void visit(BuiltinMgu node) {
         visitAll(node);

@@ -36,16 +36,15 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
   syntax Exp ::= Exp "->" Exp  [strict]
-  // TODO (AndreiS): fix sort inference for E
-  // rule lambda X . E => T -> E[T/X]  when fresh(T:Type)
-  rule lambda X . E:Exp => T -> E[T/X]  when fresh(T:Type)
-  rule T1:Type T2:Type => T1 = (T2 -> T) ~> T  when fresh(T:Type)
+
+  rule lambda X . E:Exp => ?T:Type -> E[?T/X]
+  rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
   rule let X = E in E' => (lambda X . E') E                             [macro]
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
-  rule mu X . E => (T -> T) E[T/X]  when fresh(T:Type)
+  rule mu X . E => (?T:Type -> ?T) E[?T/X]
 
-  syntax K ::= Type "=" Type
+  syntax KItem ::= Type "=" Type
   rule <k> T = T' => . ...</k>  <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
   rule <k> T:Type => applyMgu(Theta,T) </k>  <mgu> Theta:Mgu => . </mgu>
 endmodule

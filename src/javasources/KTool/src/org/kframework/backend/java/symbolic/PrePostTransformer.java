@@ -13,7 +13,7 @@ import org.kframework.kil.visitors.Visitor;
  * <li>pre-processing that node;
  * <li>applying transformation recursively on its children;
  * <li>post-processing that node.
- * 
+ *
  * @author AndreiS
  */
 public abstract class PrePostTransformer extends CopyOnWriteTransformer {
@@ -45,10 +45,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
 
     public PrePostTransformer(TermContext context) {
         super(context);
-    }
-
-    public PrePostTransformer(Definition definition) {
-        super(TermContext.of(definition));
     }
 
     public PrePostTransformer() {
@@ -160,7 +156,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         kItemProjection = (KItemProjection) super.transform(kItemProjection);
         return kItemProjection.accept(postTransformer);
     }
-    
+
     @Override
     public ASTNode transform(Token token) {
         ASTNode astNode = token.accept(preTransformer);
@@ -249,6 +245,18 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        ASTNode astNode = listUpdate.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof ListUpdate : "preTransformer should not modify type";
+        listUpdate = (ListUpdate) astNode;
+        listUpdate = (ListUpdate) super.transform(listUpdate);
+        return listUpdate.accept(postTransformer);
+    }
+
+    @Override
     public ASTNode transform(BuiltinList builtinList) {
         ASTNode astNode = builtinList.accept(preTransformer);
         if (astNode instanceof DoneTransforming) {
@@ -268,8 +276,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         }
         assert astNode instanceof BuiltinMap : "preTransformer should not modify type";
         builtinMap = (BuiltinMap) astNode;
-        builtinMap = (BuiltinMap) super.transform(builtinMap);
-        return builtinMap.accept(postTransformer);
+        return ((JavaSymbolicObject) super.transform(builtinMap)).accept(postTransformer);
     }
 
     @Override
@@ -413,7 +420,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         variable = (Variable) super.transform(variable);
         return variable.accept(postTransformer);
     }
-    
+
     @Override
     public ASTNode transform(BuiltinMgu mgu) {
         ASTNode astNode = mgu.accept(preTransformer);

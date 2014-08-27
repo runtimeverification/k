@@ -18,13 +18,13 @@ module INT-HOOKS
                  Int "*Int" Int                 [function, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(#INT:_*Int_)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
-               | Int "/Int" Int                 [function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
-               | Int "%Int" Int                 [function, left, latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
+               | Int "/Int" Int                 [function, left, smtlib(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(#INT:_/Int_)]
+               | Int "%Int" Int                 [function, left, smtlib(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(#INT:_%Int_)]
                /* divInt and modInt implement e-division */
                | Int "divInt" Int               [function, left, smtlib(div), hook(#INT:_divInt_)]
                | Int "modInt" Int               [function, left, smtlib(mod), hook(#INT:_modInt_)]
                > left:
-                 Int "+Int" Int                 [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_), cons(Int1PlusSyn)]
+                 Int "+Int" Int                 [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(#INT:_+Int_)]
                | Int "-Int" Int                 [function, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(#INT:_-Int_)]
                > left:
                  Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(#INT:_>>Int_)]
@@ -35,9 +35,9 @@ module INT-HOOKS
                  Int "xorInt" Int               [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(#INT:_xorInt_)]
                > left:
                  Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(#INT:_|Int_)]
-               > "minInt" "(" Int "," Int ")"   [function]
-               | "maxInt" "(" Int "," Int ")"   [function]
-               | "absInt" "(" Int ")"           [function, smtlib(abs), klabel(absInt), hook(#INT:absInt)]
+               > "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(#INT:minInt)]
+               | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(#INT:maxInt)]
+               | "absInt" "(" Int ")"           [function, smtlib(int_abs), klabel(absInt), hook(#INT:absInt)]
 
   rule I1:#Int divInt I2:#Int => (I1 -Int (I1 modInt I2)) /Int I2
   when I2 =/=Int 0
@@ -46,13 +46,6 @@ module INT-HOOKS
   =>
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
   when I2 =/=Int 0
-
-  rule minInt(I1:Int, I2:Int) => #if I1 <Int I2 #then I1 #else I2 #fi
-  rule maxInt(I1:Int, I2:Int) => #if I1 >Int I2 #then I1 #else I2 #fi
-
-  // absInt hooked
-  // rule absInt(I:Int) => I when I >=Int 0
-  // rule absInt(I:Int) => 0 -Int I when I <Int 0
 
   syntax Bool ::= Int "<=Int" Int         [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(#INT:_<=Int_)]
                 | Int "<Int" Int          [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(#INT:_<Int_)]
@@ -70,6 +63,6 @@ module INT-HOOKS
   syntax Nat
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]
 
-  rule 0 +Int I:Int => I [anywhere]
-  rule 0 *Int I:Int => 0 [anywhere]
+  syntax Int ::= freshInt(Int)    [freshGenerator, function]
+  rule freshInt(I:Int) => I
 endmodule

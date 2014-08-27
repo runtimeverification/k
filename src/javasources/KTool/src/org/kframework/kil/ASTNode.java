@@ -2,6 +2,7 @@
 package org.kframework.kil;
 
 import java.io.Serializable;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.kframework.compile.utils.SyntaxByTag;
@@ -15,116 +16,119 @@ import org.w3c.dom.Element;
  */
 public abstract class ASTNode implements Serializable {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
     /**
-     * Used on any node for metadata such as location, also used on {@link Rule} and {@link Production} for the attribute list.
+     * Used on any node for metadata also used on {@link Rule} and {@link Production} for the attribute list.
      */
-    protected Attributes attributes;
+    private Attributes attributes;
+
+    private Source source;
+    private Location location;
 
     /**
      * Initializes an ASTNode from XML describing the parse tree
-     * 
+     *
      * @param elem
      *            The XML element describing the ASTNode
      */
     public ASTNode(Element elem) {
-        setLocation(elem);
+        this(getElementLocation(elem), getElementSource(elem));
     }
 
     /**
      * Retrieves the location from an XML element
-     * 
+     *
      * @param elem
      * @return the location stored in XML or Constants.GENERATED_LOCATION if no location found.
      */
-    private static String getElementLocation(Element elem) {
-        if (elem != null && elem.hasAttribute(Constants.LOC_loc_ATTR))
-            return elem.getAttribute(Constants.LOC_loc_ATTR);
+    public static Location getElementLocation(Element elem) {
+        if (elem != null && elem.hasAttribute(Constants.LOC_loc_ATTR)) {
+            Scanner scanner = new Scanner(elem.getAttribute(Constants.LOC_loc_ATTR)).useDelimiter("[,)]").skip("\\(");
+            int beginLine = scanner.nextInt();
+            int beginCol = scanner.nextInt();
+            int endLine = scanner.nextInt();
+            int endCol = scanner.nextInt();
+            return new Location(beginLine, beginCol, endLine, endCol);
+        }
         else
-            return Constants.GENERATED_LOCATION;
+            return null;
     }
 
     /**
      * Retrieves the file name from an XML element
-     * 
+     *
      * @param elem
      * @return the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
      */
-    private static String getElementFile(Element elem) {
-        if (elem != null && elem.hasAttribute(Constants.LOC_loc_ATTR))
-            return elem.getAttribute(Constants.FILENAME_filename_ATTR);
-        else
-            return Constants.GENERATED_FILENAME;
+    public static Source getElementSource(Element elem) {
+        return (Source) elem.getUserData(Constants.SOURCE_ATTR);
     }
 
     /**
      * Copy constructor
-     * 
+     *
      * @param astNode
      */
     public ASTNode(ASTNode astNode) {
         attributes = astNode.attributes;
+        location = astNode.location;
+        source = astNode.source;
     }
 
     /**
      * Default constructor (generated at runtime)
      */
     public ASTNode() {
-        this(Constants.GENERATED_LOCATION, Constants.GENERATED_FILENAME);
+        this(null, null);
     }
 
     /**
      * Constructor with specified location and filename.
-     * 
+     *
      * @param loc
      * @param file
      */
-    public ASTNode(String loc, String file) {
+    public ASTNode(Location loc, Source source) {
         setLocation(loc);
-        setFilename(file);
-    }
-
-        protected void setLocation(Element elem) {
-        setLocation(getElementLocation(elem));
-        setFilename(getElementFile(elem));
+        setSource(source);
     }
 
     /**
      * Retrieves the location of the current ASTNode.
-     * 
-     * @return recorded location or Constants.GENERATED_LOCATION if no recorded location found.
+     *
+     * @return recorded location or null if no recorded location found.
      */
-    public String getLocation() {
-        return getAttribute("location");
+    public Location getLocation() {
+        return location;
     }
 
     /**
      * Sets the location or removes it if appropriate.
-     * 
+     *
      * @param loc
      */
-    public void setLocation(String loc) {
-        putAttribute("location", loc);
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     /**
-     * Retrieves the filename of the current ASTNode.
-     * 
-     * @return recorded filename or Constants.GENERATED_FILENAME if no recorded location found.
+     * Retrieves the source of the current ASTNode.
+     *
+     * @return recorded source or null if no recorded source found.
      */
-    public String getFilename() {
-        return getAttribute("filename");
+    public Source getSource() {
+        return source;
     }
 
     /**
-     * Sets the filename or removes it if appropriate.
-     * 
+     * Sets the source or removes it if appropriate.
+     *
      * @param file
      */
-    public void setFilename(String file) {
-        putAttribute("filename", file);
+    public void setSource(Source source) {
+        this.source = source;
     }
 
     /*
@@ -133,7 +137,7 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Appends an attribute to the list of attributes.
-     * 
+     *
      * @param key
      * @param val
      */
@@ -143,14 +147,14 @@ public abstract class ASTNode implements Serializable {
 
     /**
      * Appends an attribute to the list of attributes.
-     * 
+     *
      * @param attr
      */
     public void addAttribute(Attribute attr) {
         if (attributes == null)
             attributes = new Attributes();
 
-        attributes.contents.add(attr);
+        attributes.add(attr);
     }
 
     /**
@@ -158,19 +162,10 @@ public abstract class ASTNode implements Serializable {
      * @return whether the attribute key occurs in the list of attributes.
      */
     public boolean containsAttribute(String key) {
-        return containsAttribute(key, false);
-    }
-
-    /**
-     * @param key
-     * @param prefix  whether it should search for an attribute having {@key} as a prefix for its key
-     * @return whether the attribute key occurs in the list of attributes.
-     */
-    public boolean containsAttribute(String key, boolean prefix) {
         if (attributes == null)
             return false;
 
-        return attributes.containsKey(key, prefix);
+        return attributes.containsKey(key);
     }
 
     /**
@@ -180,29 +175,18 @@ public abstract class ASTNode implements Serializable {
      * @return a value for key in the list of attributes or the default value.
      */
     public String getAttribute(String key) {
-        return getAttribute(key, false);
-
-    }
-    /**
-     * Retrieves the attribute by key from the list of attributes
-     * 
-     * @param key
-     * @param prefix  whether it should look for a key having {@key} as a prefix
-     * @return a value for key in the list of attributes or the default value.
-     */
-    public String getAttribute(String key, boolean prefix) {
         final String defaultValue = Constants.defaultAttributeValues.get(key);
         if (attributes == null)
             return defaultValue;
-        final String value = attributes.get(key, prefix);
+        final Attribute value = attributes.get(key);
         if (value == null)
             return defaultValue;
-        return value;
+        return value.getValue();
     }
 
     /**
      * Updates the value of an attribute in the list of attributes.
-     * 
+     *
      * @param key
      * @param val
      */
@@ -217,19 +201,23 @@ public abstract class ASTNode implements Serializable {
         if (attributes == null)
             attributes = new Attributes();
 
-        attributes.set(key, val);
+        attributes.put(key, new Attribute(key, val));
     }
 
     /**
-     * @return the attributes object associated to this ASTNode.
+     * @return the attributes object associated to this ASTNode. Constructs one if it is
+     * not already created.
      */
     public Attributes getAttributes() {
+        if (attributes == null) {
+            attributes = new Attributes();
+        }
         return attributes;
     }
 
     /**
      * Sets the attributes object associated to this ASTNode.
-     * 
+     *
      * @param attrs
      */
     public void setAttributes(Attributes attrs) {
@@ -237,8 +225,20 @@ public abstract class ASTNode implements Serializable {
     }
 
     /**
+     * Copies attributes from another node into this node.
+     * Use this in preference to {@link ASTNode#getAttributes} where appropriate because
+     * the latter will create a new object if no attributes exist.
+     * @param node The ASTNode to copy all attributes from.
+     */
+    public void copyAttributesFrom(ASTNode node) {
+        if (node.attributes == null)
+            return;
+        this.getAttributes().putAll(node.attributes);
+    }
+
+    /**
      * Retrieves the syntax production descendants of this ASTNode by attribute key.
-     * 
+     *
      * @param key
      * @return Set<Production> object containing the production descendants
      */
@@ -250,6 +250,6 @@ public abstract class ASTNode implements Serializable {
      * @return a copy of the ASTNode containing the same fields.
      */
     public abstract ASTNode shallowCopy();
-    
+
     protected abstract <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E;
 }

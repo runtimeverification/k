@@ -7,6 +7,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -89,7 +90,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 
 
     @Override
-    public Void visit(Sort node, Void _) {
+    public Void visit(NonTerminal node, Void _) {
         if (!first) {
             left += ",, ";
             right += ", ";
@@ -98,20 +99,20 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         }
 
         Variable var;
-        if (context.getDataStructureSorts().containsKey(node.getName())
-                || node.getName().equals(KSorts.K)
-                || node.getName().equals(KSorts.KITEM)) {
-            var = Variable.getFreshVar(node.getName());
+        if (context.getDataStructureSorts().containsKey(node.getSort())
+                || node.getSort().equals(Sort.K)
+                || node.getSort().equals(Sort.KITEM)) {
+            var = Variable.getFreshVar(node.getSort());
         } else {
-            var = Variable.getFreshVar("#" + node.getName());
+            var = Variable.getFreshVar(Sort.of("#" + node.getName()));
         }
 
         MaudeFilter filter = new MaudeFilter(context);
         filter.visit(var, null);
         left += filter.getResult();
 
-        if (context.getDataStructureSorts().containsKey(node.getName())) {
-            var.setSort(context.dataStructureSortOf(node.getName()).type());
+        if (context.getDataStructureSorts().containsKey(node.getSort())) {
+            var.setSort(context.dataStructureSortOf(node.getSort()).type());
         }
         right += var.toString();
         return null;

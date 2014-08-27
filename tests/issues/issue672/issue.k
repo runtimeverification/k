@@ -1,11 +1,11 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 require "simplification.k"
 
-module ISSUE 
+module ISSUE
   imports SIMPLIFICATION
-  
+
   configuration <k color="red"> ((#symBool(0) andBool #symBool(1)) impliesBool #symBool(3))
-andBool 
+andBool
 (notBool(#symBool(0) andBool #symBool(1)) impliesBool #symBool(3))
  </k>
 

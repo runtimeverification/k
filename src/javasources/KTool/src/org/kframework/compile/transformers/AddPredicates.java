@@ -15,6 +15,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
@@ -39,16 +40,16 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         private List<ModuleItem> result = new ArrayList<ModuleItem>();
-        private Set<String> lists = new HashSet<String>();
+        private Set<Sort> lists = new HashSet<>();
 
         @Override
         public Void visit(Module node, Void _) {
             lists.clear();
             super.visit(node, _);
             if (!lists.isEmpty()) {
-                for (String listSort : lists) {
+                for (Sort listSort : lists) {
                     Rule rule = new Rule(
-                            KApp.of(KLabelConstant.of(predicate(listSort), context), new ListTerminator(listSort, null)),
+                            KApp.of(KLabelConstant.of(predicate(listSort.getName()), context), new ListTerminator(listSort, null)),
                             BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);
@@ -64,12 +65,12 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
         @Override
         public Void visit(Syntax node, Void _) {
-            String sort = node.getSort().getName();
+            Sort sort = node.getDeclaredSort().getSort();
 
             if (context.isListSort(sort))
                 lists.add(sort);
 
-            if (MetaK.isKSort(sort))
+            if (sort.isKSort())
                 return null;
             else
                 return super.visit(node, _);
@@ -91,7 +92,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                 return null;
             }
 
-            String sort = node.getSort();
+            Sort sort = node.getSort();
             Term term = MetaK.getTerm(node, context);
 
             Term rhs;
@@ -99,7 +100,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                rhs = KApp.of(KSymbolicPredicate, term);
             else
                rhs = BoolBuiltin.TRUE;
-            Term lhs = KApp.of(KLabelConstant.of(syntaxPredicate(sort), context), term);
+            Term lhs = KApp.of(KLabelConstant.of(syntaxPredicate(sort.getName()), context), term);
             Rule rule = new Rule(lhs, rhs, context);
             rule.addAttribute(Attribute.PREDICATE);
             result.add(rule);
@@ -107,7 +108,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
             // define K2Sort for syntactic production (excluding subsorts)
             if (!node.isSubsort()) {
                 lhs = KApp.of(K2Sort, term);
-                rhs = StringBuiltin.kAppOf(sort);
+                rhs = StringBuiltin.kAppOf(sort.getName());
                 rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);
                 result.add(rule);
@@ -143,7 +144,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     public static final KLabelConstant VariablePredicate =
             KLabelConstant.of(predicate("Variable"));
     public static final KLabelConstant KSymbolicPredicate =
-            KLabelConstant.of(symbolicPredicate("K"));
+            KLabelConstant.of(symbolicPredicate(KSorts.K));
 
 
     public static final String predicate(String sort) {
@@ -151,7 +152,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     }
 
     public static final String syntaxPredicate(String sort) {
-        assert !MetaK.isKSort(sort):
+        assert !Sort.of(sort).isKSort():
                 "invalid syntactic predicate " + predicate(sort) + " for sort " + sort;
 
         return predicate(sort);
@@ -175,19 +176,19 @@ public class AddPredicates extends CopyOnWriteTransformer {
         // declare isSymbolicK predicate as KLabel
         retNode.addConstant(KSymbolicPredicate);
 
-        for (String sort : node.getAllSorts()) {
-            if (!MetaK.isKSort(sort)) {
-                String pred = AddPredicates.syntaxPredicate(sort);
+        for (Sort sort : node.getAllSorts()) {
+            if (!sort.isKSort()) {
+                String pred = AddPredicates.syntaxPredicate(sort.getName());
                 // declare isSort predicate as KLabel
-                retNode.addConstant(KSorts.KLABEL, pred);
+                retNode.addConstant(Sort.KLABEL, pred);
 
-                if (AddSymbolicK.allowKSymbolic(sort)) {
-                    String symPred = AddPredicates.symbolicPredicate(sort);
+                if (AddSymbolicK.allowKSymbolic(sort.getName())) {
+                    String symPred = AddPredicates.symbolicPredicate(sort.getName());
                     // declare isSymbolicSort predicate as KLabel
-                    retNode.addConstant(KSorts.KLABEL, symPred);
+                    retNode.addConstant(Sort.KLABEL, symPred);
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
-                    Variable var = Variable.getFreshVar("K");
+                    Variable var = Variable.getFreshVar(Sort.K);
                     Term lhs = KApp.of(KLabelConstant.of(symPred, context), var);
                     Term rhs = KApp.of(
                             KLabelConstant.BOOL_ANDTHENBOOL_KLABEL,
@@ -197,8 +198,8 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
-                    String symCtor = AddSymbolicK.symbolicConstructor(sort);
-                    var = Variable.getFreshVar(KSorts.KLIST);
+                    String symCtor = AddSymbolicK.symbolicConstructor(sort.getName());
+                    var = Variable.getFreshVar(Sort.KLIST);
                     Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
 
                     // define isSort for symbolic sort constructor symSort
@@ -214,11 +215,11 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     // define K2Sort function for symbolic sort constructor
                     // symSort
                     lhs = KApp.of(K2Sort, symTerm);
-                    rhs = StringBuiltin.kAppOf(sort);
+                    rhs = StringBuiltin.kAppOf(sort.getName());
                     rule = new Rule(lhs, rhs, context);
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
-                } else if (MetaK.isBuiltinSort(sort)) {
+                } else if (sort.isBuiltinSort()) {
                     Variable var = Variable.getFreshVar(sort);
                     Term lhs = KApp.of(BuiltinPredicate, var);
                     Rule rule = new Rule(lhs, BoolBuiltin.TRUE, context);
@@ -241,8 +242,8 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         /* add collection membership predicates */
-        for (String sort : context.getDataStructureSorts().keySet()) {
-            retNode.addConstant(KSorts.KLABEL, AddPredicates.predicate(sort));
+        for (Sort sort : context.getDataStructureSorts().keySet()) {
+            retNode.addConstant(Sort.KLABEL, AddPredicates.predicate(sort.getName()));
         }
 
         PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", context);
@@ -258,7 +259,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
     public static Rule getIsVariableRule(Term symTerm, Context context) {
         Term lhs;
         Rule rule;
-        if (!MetaK.isComputationSort(symTerm.getSort())) {
+        if (!symTerm.getSort().isComputationSort()) {
             symTerm = KApp.of(new KInjectedLabel(symTerm));
         }
 

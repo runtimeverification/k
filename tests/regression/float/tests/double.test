@@ -1,0 +1,39 @@
+0.1 ==Float 1.0000000000000001e-1 andBool 
+0.1 =/=Float 1.0000000000000002e-1p53x11 andBool
+precisionFloat(0.1) ==Int 53 andBool
+exponentBitsFloat(0.1) ==Int 11 andBool
+signFloat(0.0) ==Bool false andBool
+signFloat(-0.1) ==Bool true andBool
+--Float 0.1 ==Float -0.1 andBool
+2.0 ^Float 3.0 ==Float 8.0 andBool
+2.0 *Float 3.0 ==Float 6.0 andBool
+1.0 /Float 2.0 ==Float 0.5 andBool
+0.5 +Float 0.5 ==Float 1.0 andBool
+0.5 -Float 0.5 ==Float 0.0 andBool
+rootFloat(4.0, 2) ==Float 2.0 andBool
+absFloat(1.0) ==Float 1.0 andBool
+absFloat(-1.0) ==Float 1.0 andBool
+floorFloat(0.5) ==Float 0.0 andBool
+ceilFloat(0.5) ==Float 1.0 andBool
+expFloat(1.0) ==Float 2.7182818284590451 andBool
+logFloat(2.7182818284590451) ==Float 1.0 andBool
+sinFloat(0.0) ==Float 0.0 andBool
+cosFloat(0.0) ==Float 1.0 andBool
+tanFloat(0.0) ==Float 0.0 andBool
+asinFloat(0.0) ==Float 0.0 andBool
+acosFloat(1.0) ==Float 0.0 andBool
+atanFloat(0.0) ==Float 0.0 andBool
+maxFloat(0.0, 1.0) ==Float 1.0 andBool
+minFloat(0.0, 1.0) ==Float 0.0 andBool
+notBool(1.0 <Float 1.0) andBool
+1.0 <=Float 1.0 andBool
+1.0 >=Float 1.0 andBool
+notBool(1.0 >Float 1.0) andBool
+1.0 <Float 2.0 andBool
+1.0 <=Float 2.0 andBool
+2.0 >Float 1.0 andBool
+2.0 >=Float 1.0 andBool
+2.0 =/=Float 1.0 andBool
+Int2Float(5, 53, 11) ==Float 5.0 andBool
+Float2Int(5.0) ==Int 5 andBool
+String2Float("5.0") ==Float 5.0

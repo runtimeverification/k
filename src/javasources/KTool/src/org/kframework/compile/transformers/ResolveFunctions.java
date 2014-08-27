@@ -5,7 +5,6 @@ package org.kframework.compile.transformers;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
@@ -27,8 +26,9 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
             body = ((Rewrite) body).getLeft();
         }
         if (body instanceof TermCons) {
-            Production prod = context.conses.get(((TermCons) body).getCons());
-            if (prod.containsAttribute("function") || prod.containsAttribute("predicate")) {
+            Production prod = ((TermCons) body).getProduction();
+            if (prod.containsAttribute(Attribute.FUNCTION_KEY)
+                    || prod.containsAttribute(Attribute.PREDICATE_KEY)) {
                 node = addFunction(node);
             }
         }
@@ -48,12 +48,11 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
         node = node.shallowCopy();
         node.setAttributes(node.getAttributes().shallowCopy());
         if (node.containsAttribute("heat")) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.COMPILER,
+            GlobalSettings.kem.registerCompilerError(
                     "Top symbol tagged as function but evaluation strategies are not supported for functions.",
-                    getName(), node.getFilename(), node.getLocation()));
+                    this, node);
         }
-        node.putAttribute("function", "");
+        node.putAttribute(Attribute.FUNCTION_KEY, "");
         return node;
     }
 

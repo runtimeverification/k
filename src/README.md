@@ -65,7 +65,13 @@ Common error messages:
 -  `Execute failed: java.io.IOException: Cannot run program "git":
    CreateProcess error=2, The system cannot find the file specified`
    +  Git is not accessible in the command line. Please reinstall git and make
-      make sure to check to option to make it available in the command line.
+   make sure to check to option to make it available in the command line.
+
+- Can't find/access AST Node typecom.puppycrawl.tools.checkstyle.api.DetailAST
++ Checkstyle 5.7 is known to be incompatible with version 1.9.2 of the ant antlr
+  task. Compatibility with version 1.8.2 is confirmed, and other older versions
+  may also be compatible. Checkstyle also works correctly if the antlr ant task
+  is not installed.
 
 Sometimes javac dependency resolution fails to recognize changed files and
 would fail to build. Try `ant clean` and rebuild the entire project.

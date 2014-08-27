@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 public abstract class CollectionItem extends Term implements Interfaces.MutableParent<Term, CollectionItem.Children> {
 
     protected Term value;
-    
+
     public static enum Children {
         KEY, VALUE
     }
@@ -17,15 +17,15 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
         this.value = i.value;
     }
 
-    public CollectionItem(String location, String filename, String sort) {
-        super(location, filename, sort);
+    public CollectionItem(Location location, Source source, Sort sort) {
+        super(location, source, sort);
     }
 
     public CollectionItem(Element element) {
         super(element);
     }
 
-    public CollectionItem(String sort) {
+    public CollectionItem(Sort sort) {
         super(sort);
     }
 
@@ -64,7 +64,7 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
     public int hashCode() {
         return sort.hashCode() * 19 + value.hashCode();
     }
-    
+
     @Override
     public Term getChild(Children type) {
         if (type == Children.VALUE) {
@@ -72,7 +72,7 @@ public abstract class CollectionItem extends Term implements Interfaces.MutableP
         }
         throw new IllegalArgumentException("unexpected child type " + type.name());
     }
-    
+
     @Override
     public void setChild(Term child, Children type) {
         if (type == Children.VALUE) {

@@ -1,13 +1,15 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.Sets;
+import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Subsorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,8 +19,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
 
 
 /**
@@ -28,31 +32,48 @@ import com.google.common.collect.Multimap;
  */
 public class Definition extends JavaSymbolicObject {
 
-    public static final Set<String> TOKEN_SORTS = ImmutableSet.of(
-            "Bool",
-            "Int",
-            "Float",
-            "String",
-            "List",
-            "Set",
-            "Map");
+    public static final Set<Sort> TOKEN_SORTS = ImmutableSet.of(
+            Sort.BOOL,
+            Sort.INT,
+            Sort.FLOAT,
+            Sort.CHAR,
+            Sort.STRING,
+            Sort.LIST,
+            Sort.SET,
+            Sort.MAP);
 
     private final List<Rule> rules;
     private final List<Rule> macros;
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
+    private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
+    private final Multimap<KLabelConstant, Rule> anywhereRules = HashMultimap.create();
+    private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
-    private final Set<KLabelConstant> sortPredLabels;
-    private final Context context;
+    private transient Context context;
+    private final Subsorts subsorts;
+    private final Set<Sort> tokenSorts;
+    private final Set<Sort> builtinSorts;
     private RuleIndex index;
+    public final IndexingTable.Data indexingData;
 
-    public Definition(Context context) {
+    @Inject
+    public Definition(Context context, IndexingTable.Data indexingData) {
         this.context = context;
-        rules = new ArrayList<Rule>();
-        macros = new ArrayList<Rule>();
-        kLabels = new HashSet<KLabelConstant>();
-        frozenKLabels = new HashSet<KLabelConstant>();
-        sortPredLabels = new HashSet<KLabelConstant>();
+        this.indexingData = indexingData;
+        rules = new ArrayList<>();
+        macros = new ArrayList<>();
+        kLabels = new HashSet<>();
+        frozenKLabels = new HashSet<>();
+
+        subsorts = new Subsorts(context);
+        tokenSorts = Sort.of(context.getTokenSorts());
+
+        ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
+        // TODO(YilongL): this is confusing; give a better name to tokenSorts
+        builder.addAll(tokenSorts); // [Bool, Int, Float, Char, String, List, Set, Map]
+        builder.addAll(TOKEN_SORTS); // e.g., [#String, #Int, Id, #Float]
+        builtinSorts = builder.build();
     }
 
     public void addFrozenKLabel(KLabelConstant frozenKLabel) {
@@ -77,12 +98,23 @@ public class Definition extends JavaSymbolicObject {
 
     public void addRule(Rule rule) {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
-            functionRules.put(rule.functionKLabel(), rule);
+            functionRules.put(rule.definedKLabel(), rule);
             if (rule.isSortPredicate()) {
-                sortPredLabels.add(rule.functionKLabel());
+                sortPredicateRules.put((KLabelConstant) rule.sortPredicateArgument().kLabel(), rule);
             }
+        } else if (rule.containsAttribute(Attribute.PATTERN_KEY)) {
+            patternRules.put(rule.definedKLabel(), rule);
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
+        } else if (rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
+            if (!(rule.leftHandSide() instanceof KItem)) {
+                GlobalSettings.kem.registerCriticalWarning(
+                        "The Java backend only supports [anywhere] rule that rewrites KItem; but found:\n\t"
+                                + rule, rule);
+                return;
+            }
+
+            anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
         }
@@ -94,16 +126,57 @@ public class Definition extends JavaSymbolicObject {
         }
     }
 
-    public Set<String> builtinSorts() {
-        return Sets.union(tokenSorts(), Definition.TOKEN_SORTS);
+    /**
+     * TODO(YilongL): this name is really confusing; looks like it's only used
+     * in building index;
+     */
+    public Set<Sort> builtinSorts() {
+        return builtinSorts;
+    }
+
+    /**
+     * @see Context#getTokenSorts()
+     */
+    public Set<Sort> tokenSorts() {
+        // TODO(YilongL): delegate to context.getTokenSorts() once all String representation of sorts are eliminated
+        // return context.getTokenSorts();
+        return tokenSorts;
+    }
+
+    public Set<Sort> allSorts() {
+        return subsorts.allSorts();
+    }
+
+    public Subsorts subsorts() {
+        return subsorts;
     }
 
     public Context context() {
         return context;
     }
 
+    @Inject
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
     public Multimap<KLabelConstant, Rule> functionRules() {
         return functionRules;
+    }
+
+    public Multimap<KLabelConstant, Rule> anywhereRules() {
+        return anywhereRules;
+    }
+
+    public Collection<Rule> sortPredicateRulesOn(KLabelConstant kLabel) {
+        if (sortPredicateRules.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return sortPredicateRules.get(kLabel);
+    }
+
+    public Multimap<KLabelConstant, Rule> patternRules() {
+        return patternRules;
     }
 
     public Set<KLabelConstant> frozenKLabels() {
@@ -112,10 +185,6 @@ public class Definition extends JavaSymbolicObject {
 
     public Set<KLabelConstant> kLabels() {
         return Collections.unmodifiableSet(kLabels);
-    }
-    
-    public Set<KLabelConstant> sortPredLabels() {
-        return sortPredLabels;
     }
 
     public List<Rule> macros() {
@@ -128,10 +197,6 @@ public class Definition extends JavaSymbolicObject {
         // TODO(AndreiS): fix this issue with modifiable collections
         //return Collections.unmodifiableList(rules);
         return rules;
-    }
-
-    public Set<String> tokenSorts() {
-        return context.getTokenSorts();
     }
 
     @Override

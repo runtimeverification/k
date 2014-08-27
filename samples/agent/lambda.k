@@ -14,14 +14,14 @@ module LAMBDA-SYNTAX
   syntax priorities app > lam
 endmodule
 
-module LAMBDA 
+module LAMBDA
   imports LAMBDA-SYNTAX
   imports SUBSTITUTION
   imports VAL
 
-  syntax Val ::= Id 
+  syntax Val ::= Id
                | Lambda
 
 // Function application (through beta-substitution)
-  rule  (\ X:Id . E:K) V:KResult => E[V / X] 
+  rule  (\ X:Id . E:K) V:KResult => E[V / X]
 endmodule

@@ -2,7 +2,6 @@
 package org.kframework.utils;
 
 import org.kframework.krun.ColorSetting;
-import org.kframework.krun.K;
 
 import java.awt.Color;
 import java.lang.reflect.Field;
@@ -32,13 +31,15 @@ public class ColorUtil {
     private static Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache;
 
     public static Map<String, Color> colors() {
-        if (colors == null) {
-            colors = initColors();
-            ansiColorsToTerminalCodes = initAnsiColors();
-            eightBitColorsToTerminalCodes = initEightBitColors();
-            colorToCodeConvertCache = initColorToCodeConvertCache();
-        }
-        return colors;
+        colors = initColors();
+        return Collections.unmodifiableMap(colors);
+    }
+
+    private static void initColors(Color terminalColor) {
+        colors = initColors();
+        ansiColorsToTerminalCodes = initAnsiColors(terminalColor);
+        eightBitColorsToTerminalCodes = initEightBitColors(terminalColor);
+        colorToCodeConvertCache = initColorToCodeConvertCache();
     }
 
     private static HashMap<Map<Color, String>, Map<Color, String>> initColorToCodeConvertCache() {
@@ -313,7 +314,7 @@ public class ColorUtil {
         return new Color(r, g, b);
     }
 
-    private static Map<Color, String> initAnsiColors() {
+    private static Map<Color, String> initAnsiColors(Color terminalColor) {
         Map<Color, String> map = new HashMap<Color, String>(8);
         map.put(Color.black, getBasicTerminalCode(30));
         map.put(Color.red, getBasicTerminalCode(31));
@@ -326,7 +327,7 @@ public class ColorUtil {
 
         //We remove the background terminal color, so that K cells would never be colored in this,
         //but rather in the next closest color
-        map.remove(K.getTerminalColor());
+        map.remove(terminalColor);
 
         return Collections.unmodifiableMap(map);
     }
@@ -339,7 +340,7 @@ public class ColorUtil {
         return "\u001b[" + code + "m";
     }
 
-    private static Map<Color, String> initEightBitColors() {
+    private static Map<Color, String> initEightBitColors(Color terminalColor) {
         Map<Integer, Integer> coordMap = new HashMap<Integer, Integer>();
         coordMap.put(0,0);
         coordMap.put(1,95);
@@ -364,7 +365,7 @@ public class ColorUtil {
 
         //We remove the background terminal color, so that K cells would never be colored in this,
         //but rather in the next closest color
-        map.remove(K.getTerminalColor());
+        map.remove(terminalColor);
 
         return Collections.unmodifiableMap(map);
     }
@@ -376,25 +377,25 @@ public class ColorUtil {
         return "\u001b[38;5;" + code + "m";
     }
 
-    public static String RgbToAnsi(Color rgb, ColorSetting colorSetting) {
-        colors(); //init static maps if needed
+    public static String RgbToAnsi(Color rgb, ColorSetting colorSetting, Color terminalColor) {
+        initColors(terminalColor); //init static maps if needed
         switch(colorSetting) {
             case OFF:
                 return "";
             case ON:
-                return getClosestTerminalCode(rgb, ansiColorsToTerminalCodes);
+                return getClosestTerminalCode(rgb, ansiColorsToTerminalCodes, terminalColor);
             case EXTENDED:
-                return getClosestTerminalCode(rgb, eightBitColorsToTerminalCodes);
+                return getClosestTerminalCode(rgb, eightBitColorsToTerminalCodes, terminalColor);
             default:
                 throw new UnsupportedOperationException("colorSettung: " + colorSetting);
         }
     }
 
-    private static String getClosestTerminalCode(Color rgb, Map<Color, String> codesMap) {
+    private static String getClosestTerminalCode(Color rgb, Map<Color, String> codesMap, Color terminalColor) {
         if (rgb == null)
             return "";
         if (colorToCodeConvertCache.get(codesMap).get(rgb) == null) {
-            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap, K.getTerminalColor()));
+            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap, terminalColor));
         }
         return colorToCodeConvertCache.get(codesMap).get(rgb);
     }

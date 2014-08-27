@@ -17,26 +17,25 @@ module LAMBDA
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
        <env> Rho </env>
-  rule <k> closure(Rho,X,E) V:Val => E ~> env(Rho') ...</k>
-       <env> Rho' => Rho[N/X] </env>
-       <store>... . => (N |-> V) ...</store>
-    when fresh(N:Nat)
+    [structural]
+  rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
+       <env> Rho' => Rho[X <- !N] </env>
+       <store>... .Map => (!N:Int |-> V) ...</store>
   rule <k> X => V ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> V ...</store>
-  syntax K ::= env(Map)
-  rule <k> _:Val ~> (env(Rho) => .) ...</k>
-       <env> _ => Rho </env>    [structural]
+  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
+    [structural]
 
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]
                | Exp "/" Exp          [strict]
                > Exp "+" Exp          [strict, left]
                > Exp "<=" Exp         [strict]
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2
+  rule I1 + I2 => I1 +Int I2
+  rule I1 <= I2 => I1 <=Int I2
 
   syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]
   rule if true  then E else _ => E
@@ -50,11 +49,11 @@ module LAMBDA
   rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
 
   syntax Exp ::= muclosure(Map,Exp)
-  rule <k> mu X . E => muclosure(Rho[N/X],E) ...</k>
+  rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
        <env> Rho </env>
-       <store>... . => (N |-> muclosure(Rho[N/X],E)) ...</store>
-    when fresh(N:Nat)  [structural]
-  rule <k> muclosure(Rho,E) => E ~> env(Rho') ...</k>
+       <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
+    [structural]
+  rule <k> muclosure(Rho,E) => E ~> Rho' ...</k>
        <env> Rho' => Rho </env>
 
   syntax Exp ::= "callcc" Exp  [strict]

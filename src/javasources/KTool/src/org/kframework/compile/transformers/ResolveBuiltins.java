@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -17,13 +16,13 @@ import java.util.Set;
  * andreis: this is backend specific, should go to MaudeFilter or something...
  */
 public class ResolveBuiltins extends CopyOnWriteTransformer {
-    
-    Set<String> builtinSorts = new HashSet<String>();
+
+    private Set<Sort> builtinSorts = new HashSet<>();
 
     public ResolveBuiltins(Context context) {
         super("Resolve Builtins", context);
     }
-    
+
     @Override
     public ASTNode visit(Module node, Void _)  {
         builtinSorts.clear();
@@ -34,43 +33,41 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
         List<PriorityBlock> priorities = new ArrayList<PriorityBlock>();
         PriorityBlock block = new PriorityBlock();
         priorities.add(block );
-        Syntax syn = new Syntax(new Sort(KSorts.KLABEL), priorities);
+        Syntax syn = new Syntax(new NonTerminal(Sort.KLABEL), priorities);
         items.add(syn);
-        for (String sort : builtinSorts) {
+        for (Sort sort : builtinSorts) {
             List<ProductionItem> pItems = new ArrayList<ProductionItem>();
-            Production p = new Production(new Sort(KSorts.KLABEL), pItems );
+            Production p = new Production(new NonTerminal(Sort.KLABEL), pItems );
             pItems.add(new Terminal("#"));
-            pItems.add(new Sort(sort));
-            p.putAttribute("KLabelWrapper", sort);
-            p.putAttribute("cons", "KLabel1" + sort + "Wrapper");
+            pItems.add(new NonTerminal(sort));
+            p.putAttribute("KLabelWrapper", sort.getName());
             p.putAttribute("prefixlabel", "#_");
-            context.conses.put("KLabel1" + sort + "Wrapper", p);
-            context.putLabel(p, "KLabel1" + sort+ "Wrapper");
+            context.addProduction(p);
             block.getProductions().add(p);
             pItems = new ArrayList<ProductionItem>();
-            p = new Production(new Sort(KSorts.KLABEL), pItems );
+            p = new Production(new NonTerminal(Sort.KLABEL), pItems );
             pItems.add(new Terminal("is" + sort));
             block.getProductions().add(p);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(
-                    KApp.of(KLabelConstant.of(AddPredicates.predicate(sort), context),
-                            new Variable(sort, sort)),
+                    KApp.of(KLabelConstant.of(AddPredicates.predicate(sort.getName()), context),
+                            new Variable(sort.getName(), sort)),
                     BoolBuiltin.TRUE, context));
             rule.addAttribute(Attribute.PREDICATE);
             items.add(rule);
-            
+
         }
         node.setItems(items);
         return node;
     }
-    
+
     @Override
-    public ASTNode visit(Sort node, Void _)  {
-        if (MetaK.isBuiltinSort(node.getName()))
-                builtinSorts.add(node.getName());
+    public ASTNode visit(NonTerminal node, Void _)  {
+        if (node.getSort().isBuiltinSort())
+                builtinSorts.add(node.getSort());
         return node;
     }
-    
+
     @Override
     public ASTNode visit(Configuration node, Void _)  {
         return node;

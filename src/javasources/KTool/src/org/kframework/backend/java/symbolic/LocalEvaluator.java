@@ -3,15 +3,28 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Evaluates predicates and functions without doing tree traversal.
- * 
+ *
+ * @deprecated This {@link PrePostTransformer}-based implementation for
+ *             substitute and evaluate is just too slow; switch to
+ *             {@link SubstituteAndEvaluateTransformer} instead
+ *
  * @author Traian
  */
+@Deprecated
 public class LocalEvaluator extends LocalTransformer {
-    
+
     /**
+     * TODO(YilongL): this field needs to be removed; this was added long time
+     * ago for test generation; definitely not the right solution
+     * <p>
      * The symbolic constraint of the {@code ConstrainedTerm} which contains the
      * terms to be evaluated by this evaluator.
      */
@@ -25,20 +38,25 @@ public class LocalEvaluator extends LocalTransformer {
         super(context);
         this.constraint = constraint;
     }
-    
+
     public SymbolicConstraint constraint() {
         return constraint;
     }
-    
+
+    private static String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
+
     @Override
     public ASTNode transform(KItem kItem) {
-        // TODO(YilongL): shall we consider cache evaluation result in certain cases?
-        Term evaluatedTerm = kItem.evaluateFunction(constraint, context);
-        // TODO(YilongL): had to comment out the following assertion because the visitor/imp.k somehow fails here
-//        if (kItem.isGround() && kItem.isEvaluable(context)) {
-//            assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;
-//        }
-        return evaluatedTerm;
+        try {
+            // TODO(YilongL): shall we consider cache evaluation result in certain cases?
+            return kItem.resolveFunctionAndAnywhere(false, context);
+        } catch (StackOverflowError e) {
+            GlobalSettings.kem.registerCriticalError(TRACE_MSG, e);
+            throw e; //unreachable
+        } catch (KEMException e) {
+            e.exception.addTraceFrame(kItem.kLabel().toString());
+            throw e;
+        }
     }
 
     @Override
@@ -49,6 +67,11 @@ public class LocalEvaluator extends LocalTransformer {
     @Override
     public ASTNode transform(ListLookup listLookup) {
         return listLookup.evaluateLookup();
+    }
+
+    @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return listUpdate.evaluateUpdate();
     }
 
     @Override

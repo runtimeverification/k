@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+  <test definition="simple-untyped.k"
+        programs="../verification"
+        results="../verification"
+        extension="simple"
+        >
+    <kompile-option name="--backend" value="java" />
+    <program name="reverse.simple">
+      <krun-option name="--prove" value="verification/reverse_spec.k" />
+    </program>
+    <program name="sum.simple">
+      <krun-option name="--prove" value="verification/sum_spec.k" />
+    </program>
+    <program name="comm_assoc.simple">
+      <krun-option name="--prove" value="verification/comm_assoc_spec.k" />
+    </program>
+    <program name="head.simple">
+      <krun-option name="--prove" value="verification/head_spec.k" />
+    </program>
+  </test>
+</tests>

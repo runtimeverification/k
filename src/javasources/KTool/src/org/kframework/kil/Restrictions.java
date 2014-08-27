@@ -7,19 +7,19 @@ import org.kframework.kil.visitors.Visitor;
  *
  */
 public class Restrictions extends ModuleItem {
-    Sort sort;
+    NonTerminal sort;
     Terminal terminal;
     String pattern;
 
-    public Sort getSort() {
+    public NonTerminal getSort() {
         return sort;
     }
 
-    public void setSort(Sort sort) {
+    public void setSort(NonTerminal sort) {
         this.sort = sort;
     }
 
-    public Restrictions(Sort sort, Terminal terminal, String pattern) {
+    public Restrictions(NonTerminal sort, Terminal terminal, String pattern) {
         this.sort = sort;
         this.terminal = terminal;
         this.pattern = pattern;

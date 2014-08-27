@@ -20,7 +20,7 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
     }
 
     public LiterateModuleComment(LiterateDefinitionComment ldc) {
-        setFilename(ldc.getFilename());
+        setSource(ldc.getSource());
         setLocation(ldc.getLocation());
         value = ldc.getValue();
         lcType = ldc.getType();
@@ -30,7 +30,7 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
     }
-    
+
     @Override
     public LiterateCommentType getType() {
         return lcType;

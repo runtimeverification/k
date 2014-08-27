@@ -36,7 +36,7 @@ public class CheckSmtLibByAddingPredicates extends BasicVisitor{
                 return null;
             }
 
-            Set<Production> prods = context.productions.get(((KLabelConstant) klabel).getLabel());
+            Set<Production> prods = context.klabels.get(((KLabelConstant) klabel).getLabel());
             if (prods == null) {
                 smtValid = false;
             } else {
@@ -49,7 +49,7 @@ public class CheckSmtLibByAddingPredicates extends BasicVisitor{
                             KList children = (KList) node.getChild();
                             int i = 0;
                             for (Term child: children.getContents()) {
-                                String predicateString = AddPredicates.predicate(p.getChildSort(i));
+                                String predicateString = AddPredicates.predicate(p.getChildSort(i).getName());
                                 i++;
                                 KLabelConstant kLabel = KLabelConstant.of(predicateString);
                                 contents.add(KApp.of(kLabel, child));

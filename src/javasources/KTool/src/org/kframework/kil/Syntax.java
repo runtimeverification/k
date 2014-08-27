@@ -1,8 +1,9 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Visitor;
+
+import com.beust.jcommander.internal.Lists;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -13,27 +14,31 @@ import java.util.List;
  * Contains {@link Production}s, grouped into a list {@link PriorityBlock}
  * according to precedence marked by {@code >} in the declaration.
  */
-public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort, Enum<?>>, 
+public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTerminal, Enum<?>>,
         Interfaces.MutableList<PriorityBlock, Enum<?>> {
     /** The sort being declared. */
-    Sort sort;
+    NonTerminal sort;
     java.util.List<PriorityBlock> priorityBlocks;
 
-    public Syntax(Sort sort, java.util.List<PriorityBlock> priorities) {
+    public Syntax(NonTerminal sort, java.util.List<PriorityBlock> priorities) {
         super();
         this.sort = sort;
         this.priorityBlocks = priorities;
     }
 
-    public Syntax(Sort sort) {
+    public Syntax(NonTerminal sort, PriorityBlock... priorities) {
+        this(sort, Lists.newArrayList(priorities));
+    }
+
+    public Syntax(NonTerminal sort) {
         this(sort, new ArrayList<PriorityBlock>());
     }
 
-    public Sort getSort() {
+    public NonTerminal getDeclaredSort() {
         return sort;
     }
 
-    public void setSort(Sort sort) {
+    public void setSort(NonTerminal sort) {
         this.sort = sort;
     }
 
@@ -82,7 +87,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort,
             return lbls;
         for (PriorityBlock pb : priorityBlocks) {
             for (Production prod : pb.getProductions()) {
-                if (MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
+                if (prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL) && prod.isConstant())
                     lbls.add(prod.getKLabel());
             }
         }
@@ -90,9 +95,9 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort,
     }
 
     @Override
-    public List<String> getAllSorts() {
-        List<String> sorts = new ArrayList<String>();
-        sorts.add(sort.toString());
+    public List<Sort> getAllSorts() {
+        List<Sort> sorts = new ArrayList<>();
+        sorts.add(sort.getSort());
         return sorts;
     }
 
@@ -111,7 +116,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort,
             return false;
         Syntax syn = (Syntax) obj;
 
-        if (!syn.getSort().equals(this.sort))
+        if (!syn.getDeclaredSort().equals(this.sort))
             return false;
 
         if (syn.priorityBlocks.size() != priorityBlocks.size())
@@ -140,7 +145,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort,
     }
 
     @Override
-    public Sort getChild(Enum<?> type) {
+    public NonTerminal getChild(Enum<?> type) {
         return sort;
     }
 
@@ -155,7 +160,7 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<Sort,
     }
 
     @Override
-    public void setChild(Sort child, Enum<?> type) {
+    public void setChild(NonTerminal child, Enum<?> type) {
         this.sort = child;
     }
 }

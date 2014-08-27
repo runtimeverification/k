@@ -14,23 +14,20 @@ import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
-import org.kframework.kil.Sort;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect all the syntax declarations into containers according to their function.
- * 
+ *
  * @author Radu
- * 
+ *
  */
 public class ProgramSDFVisitor extends BasicVisitor {
 
@@ -55,7 +52,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
     }
 
     public Void visit(Syntax syn, Void _) {
-        userSort.add(syn.getSort().getName());
+        userSort.add(syn.getDeclaredSort().getName());
         List<PriorityBlock> priblocks = syn.getPriorityBlocks();
         processPriorities(priblocks);
         return null;
@@ -72,7 +69,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                 Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
                 if (prods2.isEmpty()) {
                     String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+                    GlobalSettings.kem.registerCriticalError(msg, this, tag);
                 }
                 pb1.getProductions().addAll(prods2);
             }
@@ -93,7 +90,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
             Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
             if (prods2.isEmpty()) {
                 String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
+                GlobalSettings.kem.registerCriticalError(msg, this, tag);
             }
             pb1.getProductions().addAll(prods2);
         }
@@ -111,7 +108,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
             // filter the productions according to their form
             for (Production prd : prt.getProductions()) {
-                startSorts.add(prd.getSort());
+                startSorts.add(prd.getSort().getName());
 
                 if (prd.containsAttribute("notInPrograms")) {
                     // if a production has this attribute, don't add it to the list
@@ -119,15 +116,15 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     lexical.add(prd);
                 } else if (prd.isSubsort()) {
                     p.getProductions().add(prd);
-                    startSorts.add(((Sort) prd.getItems().get(0)).getName());
+                    startSorts.add(((NonTerminal) prd.getItems().get(0)).getName());
                 } else if (prd.isConstant()) {
                     constants.add(prd);
-                    constantSorts.add(prd.getSort());
+                    constantSorts.add(prd.getSort().getName());
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
                     outsides.add(prd);
                 } else if (prd.getItems().get(0) instanceof UserList) {
                     outsides.add(prd);
-                    listSorts.add(prd.getSort());
+                    listSorts.add(prd.getSort().getName());
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -158,9 +155,9 @@ public class ProgramSDFVisitor extends BasicVisitor {
                             ProductionItem itm = items.get(i);
                             if (itm instanceof Terminal) {
                                 Terminal t = (Terminal) itm;
-                                sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-                            } else if (itm instanceof Sort) {
-                                Sort srt = (Sort) itm;
+                                sdf.append(t.toString() + " ");
+                            } else if (itm instanceof NonTerminal) {
+                                NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
                                     sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
@@ -174,8 +171,8 @@ public class ProgramSDFVisitor extends BasicVisitor {
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
-                        sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
+                        sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
                     }
                     sdf.append("} > ");
                 }

@@ -18,7 +18,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Variable extends Term {
+public class Variable extends Term implements Immutable {
 
     protected static final String VARIABLE_PREFIX = "_";
     protected static int counter = 0;
@@ -27,7 +27,7 @@ public class Variable extends Term {
     /**
      * Given a set of {@link Variable}s, returns a substitution that maps each
      * element inside to a fresh {@code Variable}.
-     * 
+     *
      * @param variableSet
      *            the set of {@code Variable}s
      * @return the substitution
@@ -42,21 +42,21 @@ public class Variable extends Term {
 
     /**
      * Returns a fresh {@code Variable} of a given sort.
-     * 
+     *
      * @param sort
      *            the given sort
      * @return the fresh variable
      */
-    public static Variable getFreshVariable(String sort) {
+    public static Variable getFreshVariable(Sort sort) {
         return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
     }
-    
+
     /* TODO(AndreiS): cache the variables */
     private final String name;
-    private final String sort;
+    private final Sort sort;
     private final boolean anonymous;
 
-    public Variable(String name, String sort, boolean anonymous) {
+    public Variable(String name, Sort sort, boolean anonymous) {
         super(Kind.of(sort));
 
         assert name != null && sort != null;
@@ -66,16 +66,19 @@ public class Variable extends Term {
         this.anonymous = anonymous;
     }
 
-    public Variable(String name, String sort) {
+    public Variable(String name, Sort sort) {
         this(name, sort, false);
     }
 
     public Variable(MetaVariable metaVariable) {
         this(metaVariable.variableName(), metaVariable.variableSort());
+        this.copyAttributesFrom(metaVariable);
     }
 
     public Variable getFreshCopy() {
-        return Variable.getFreshVariable(sort);
+        Variable var = Variable.getFreshVariable(sort);
+        var.copyAttributesFrom(this);
+        return var;
     }
 
     /**
@@ -89,26 +92,23 @@ public class Variable extends Term {
         return anonymous;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this variable.
-     */
     @Override
-    public String sort() {
+    public Sort sort() {
         return sort;
     }
 
     @Override
-    public boolean isExactSort() {
+    public final boolean isExactSort() {
         return false;
     }
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return true;
     }
 
     @Override
-    public boolean equals(Object object) {
+    public final boolean equals(Object object) {
         if (this == object) {
             return true;
         }
@@ -122,13 +122,16 @@ public class Variable extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
-        }
+    protected final int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected final boolean computeHasCell() {
+        return false;
     }
 
     @Override
@@ -160,13 +163,13 @@ public class Variable extends Term {
      * Renames serialized anonymous variables to avoid name clashes with existing anonymous
      * variables.
      */
-    private Object readResolve() {
+    Object readResolve() {
         if (anonymous) {
             int id = Integer.parseInt(name.substring(VARIABLE_PREFIX.length()));
             if (id < counter) {
                 Variable variable = deserializationAnonymousVariableMap.get(id);
                 if (variable == null) {
-                    variable = getFreshVariable(sort);
+                    variable = getFreshCopy();
                     deserializationAnonymousVariableMap.put(id, variable);
                 }
                 return variable;

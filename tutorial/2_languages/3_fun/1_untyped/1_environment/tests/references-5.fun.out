@@ -2,4 +2,16 @@ Search results:
 
 Solution 1:
 V:K -->
-[ 7, 8, 9 ]
+([ 7, 8, 9 ])
+
+Solution 2:
+V:K -->
+([ 7, 9, 8 ])
+
+Solution 3:
+V:K -->
+([ 9, 8, 9 ])
+
+Solution 4:
+V:K -->
+([ 9, 9, 8 ])

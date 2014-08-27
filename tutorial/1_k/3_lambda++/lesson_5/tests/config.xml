@@ -3,7 +3,10 @@
 <tests>
 
   <include file="../../lesson_4/tests/config.xml"
-           exclude="omega"
+           exclude="omega closed-variable-capture free-variable-capture"
            more-results="../../lesson_1/tests ." />
-
+<!-- The above is not perfect, because closed-variable-capture and
+     free-variable-capture ended up being excluded from both sets of
+     included tests; we need to extend ktest to allow for finer
+     grain configuration of inclusions -->
 </tests>

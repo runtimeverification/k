@@ -12,7 +12,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 public class EliminateRRWrapper extends CopyOnWriteTransformer {
 
     Term lphi, rphi;
-    
+
     public EliminateRRWrapper(Context context) {
         super("Filter condition: eliminate RRCondition wrapper", context);
     }
@@ -25,7 +25,7 @@ public class EliminateRRWrapper extends CopyOnWriteTransformer {
                 rphi = contents.getContents().get(1);
                 return BoolBuiltin.TRUE;
         }
-        
+
         return super.visit(node, _);
     }
 

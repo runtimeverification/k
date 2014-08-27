@@ -8,8 +8,10 @@ import java.util.Set;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Lexical;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -49,19 +51,19 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
                 if (t instanceof TermCons) {
                     // finally, try to find the <strike> maximum </strike> minimum
                     for (Term tm2 : group) {
-                        boolean min = true;
+                        boolean max = true;
                         Production tcBig = ((TermCons) tm2).getProduction();
                         for (Term tm22 : group) {
                             Production tcSmall = ((TermCons) tm22).getProduction();
-                            if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
-                                min = false;
+                            if (tm2 != tm22 && isSubsorted(tcSmall, tcBig)) {
+                                max = false;
                                 break;
                             }
                         }
-                        if (min)
+                        if (max)
                             maxterms.add(tm2);
                     }
-                } else if (t instanceof Variable) {
+                } else if (t instanceof Variable || t instanceof ListTerminator) {
                     // for variables only, find maximum
                     for (Term t1 : group) {
                         boolean max = true;
@@ -93,18 +95,18 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
             return false;
         for (int i = 0; i < big.getItems().size(); i++) {
             if (!(big.getItems().get(i) instanceof Terminal && small.getItems().get(i) instanceof Terminal) &&
-                !(big.getItems().get(i) instanceof Sort && small.getItems().get(i) instanceof Sort) &&
+                !(big.getItems().get(i) instanceof NonTerminal && small.getItems().get(i) instanceof NonTerminal) &&
                 !(big.getItems().get(i) instanceof UserList && small.getItems().get(i) instanceof UserList) &&
                 !(big.getItems().get(i) instanceof Lexical && small.getItems().get(i) instanceof Lexical)) {
                 return false;
-            } else if (big.getItems().get(i) instanceof Sort) {
-                String bigSort = ((Sort) big.getItems().get(i)).getName();
-                String smallSort = ((Sort) small.getItems().get(i)).getName();
+            } else if (big.getItems().get(i) instanceof NonTerminal) {
+                Sort bigSort = ((NonTerminal) big.getItems().get(i)).getSort();
+                Sort smallSort = ((NonTerminal) small.getItems().get(i)).getSort();
                 if (!context.isSubsortedEq(bigSort, smallSort))
                     return false;
             } else if (big.getItems().get(i) instanceof UserList) {
-                String bigSort = ((UserList) big.getItems().get(i)).getSort();
-                String smallSort = ((UserList) small.getItems().get(i)).getSort();
+                Sort bigSort = ((UserList) big.getItems().get(i)).getSort();
+                Sort smallSort = ((UserList) small.getItems().get(i)).getSort();
                 if (!context.isSubsortedEq(bigSort, smallSort))
                     return false;
             } else
@@ -142,8 +144,8 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
 
                     if (!ul1.getSeparator().equals(ul2.getSeparator()))
                         return false;
-                } else if (itm1 instanceof Sort) {
-                    if (!(itm2 instanceof Sort))
+                } else if (itm1 instanceof NonTerminal) {
+                    if (!(itm2 instanceof NonTerminal))
                         return false;
                 }
             }

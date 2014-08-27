@@ -50,17 +50,17 @@ module LAMBDA
   rule int - int => int
   rule int <= int => bool
   rule if bool then T:Type else T => T
-  //rule <k> lambda X:Id . E:Exp => T:Type -> E::K ~> TEnv ...</k>
-  syntax K ::= env(Map)
-  rule <k> lambda X:Id . E:Exp => T:Type -> (E)::K ~> env(TEnv) ...</k>
-       <tenv> TEnv:Map => TEnv[T / X] </tenv>
-  rule <k> mu X:Id . E:Exp => (T:Type -> T) E ~> env(TEnv) ...</k>
-       <tenv> TEnv:Map => TEnv[T / X] </tenv>
+
+  syntax KItem ::= env(Map)
+  rule <k> lambda X:Id . E:Exp => ?T:Type -> (E)::K ~> env(TEnv) ...</k>
+       <tenv> TEnv:Map => TEnv[X <- ?T] </tenv>
+  rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> env(TEnv) ...</k>
+       <tenv> TEnv:Map => TEnv[X <- ?T] </tenv>
   rule <k> let X:Id = T:Type in E:Exp => E ~> env(TEnv) ...</k>
        <tenv>
          TEnv:Map
        =>
-         TEnv:Map[forall #variables(T) -Set #variables(env(TEnv)) . T / X]
+         TEnv:Map[X <- forall #variables(T) -Set #variables(env(TEnv)) . T]
        </tenv>
 
   rule <k> T:Type ~> (env(TEnv:Map) => .) ...</k> <tenv> _:Map => TEnv </tenv>

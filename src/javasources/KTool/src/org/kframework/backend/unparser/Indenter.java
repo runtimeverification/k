@@ -29,11 +29,11 @@ public class Indenter {
         }
         return size;
     }
-    
+
     public void setWidth(int newWidth) {
         indentationOptions.setWidth(newWidth);
     }
-    
+
     public int getWidth() {
         return indentationOptions.getWidth();
     }
@@ -43,6 +43,9 @@ public class Indenter {
     }
 
     public void write(String string) {
+        if (string.isEmpty()) {
+            return;
+        }
 //        System.err.println("@" + string + "@"); // for debugging
         if (atBOL) {
             for (int i = 0; i < indentSize(); ++i) {

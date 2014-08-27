@@ -414,7 +414,7 @@ file in the auxiliary operation section, initializes each location in
 the list $L \ldots L'$ to $V$.  Note that, since the dimensions of
 array declarations can be arbitrary expressions, this virtually means
 that we can dynamically allocate memory in SIMPLE by means of array
-declarations. */ 
+declarations. */
 
   context var _:Id[HOLE];
   // this looks weird for arrays of size 0, so AndreiS changed the condition to
@@ -686,7 +686,7 @@ $7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
 may not evaluate at all (be undefined).  If one wants to make sure that
 such artificial values are never misused, then one needs to define a static
 checker (also using \K, like our the type checker in
-\texttt{examples/simple/typed/static}) and reject programs that do. 
+\texttt{examples/simple/typed/static}) and reject programs that do.
 Note that, unlike the undefined symbol $\bot$ which had the sort $K$
 instead of $\it Val$, we defined \texttt{nothing} to be a value.  That
 is because, as explained above, we do not want the program to get
@@ -850,7 +850,7 @@ exception stack.  The three rules below modularly do precisely the above. */
   // (line 643)
   syntax KItem ::= "(|" Id "," Stmts "," K "," MyMap "," ControlCellFragment "|)"
 
-  syntax KItem ::= "popx" 
+  syntax KItem ::= "popx"
 
   rule <k> (try S1:Block catch(X:Id) {S2:Stmts} => S1 ~> popx) ~> K </k>
        <control>
@@ -1076,8 +1076,8 @@ corresponding store lookup operation. */
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  context lvalue(_:Exp[HOLE::Exp])
-  context lvalue(HOLE::Exp[_:Exp])
+  context lvalue(_:>Exp[HOLE:>Exp])
+  context lvalue(HOLE:>Exp[_:>Exp])
 
 // Finally, return the address of the desired object member
 
@@ -1103,5 +1103,5 @@ No kompile options are needed if you only only want to execute the definition
 program behaviors then you need to kompile with the transition option
 including rule tags such as lookup, increment, acquire, etc.  See the
 IMP++ tutorial for what the transition option means how to use it. */
-endmodule 
+endmodule
 

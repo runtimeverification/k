@@ -23,7 +23,7 @@ module K-FUNCTIONAL-VISITOR
 
   /*
    * Particular forms of #visit (default argument KList is .KList, default
-   * KLabel predicate is '$visitTrue) 
+   * KLabel predicate is '$visitTrue)
    */
   syntax KItem ::= "#visit" "(" K "," KLabel "," KList "," KLabel ")"   [function]
                  | "#visit" "(" K "," KLabel "," KLabel "," KList ")"   [function]
@@ -97,7 +97,7 @@ module K-FUNCTIONAL-VISITOR
    */
   // TODO(AndreiS): fix this declaration; cannot declare a function
   // with variable number of arguments
-  syntax Bool ::= "$visitTrue" "(" KItem ")"   [function]
+  syntax Bool ::= "$visitTrue" "(" KItem ")"   [function, klabel('$visitTrue)]
   rule '$visitTrue(_:KList) => true
 
   /*
@@ -130,7 +130,7 @@ module K-FUNCTIONAL-VISITOR
     ~> #visit(K2, VisitLabel, VisitList, IfLabel, IfList)
   when K1 =/=K .K andBool K2 =/=K .K
   rule #visit(.K, _:KLabel, _:KList, _:KLabel, _:KList) => .K
-  
+
   /*
    * #visit applied to an AST node (a KLabel applies to a KList) either
    * transforms the node or reduces to #visit applied to its children.

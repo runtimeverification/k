@@ -29,7 +29,7 @@ public abstract class AbstractUnifier implements Unifier {
 
     /**
      * Fails the unification task.
-     * 
+     *
      * @throws UnificationFailure
      */
     protected void fail(Term term, Term otherTerm) {

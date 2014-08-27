@@ -14,10 +14,7 @@ import java.util.ArrayList;
 public class AddKStringConversion extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabel2String =
-            KLabelConstant.of("KLabel2String");
-
-    private static final String String2KLabelCons =
-            "KLabel1String2KLabelSyn";
+            KLabelConstant.of("'KLabel2String");
 
     public AddKStringConversion(Context context) {
         super("Define KLabel2String and String2Klabel for KLabel constants", context);
@@ -25,6 +22,7 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Module node, Void _)  {
+        Production String2KLabelProd = Production.makeFunction(Sort.KLABEL, "String2KLabel", Sort.STRING, context);
         /* TODO: escape labels when generating KLabel2String and String2KLabel */
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
@@ -39,7 +37,7 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
 
             java.util.List<Term> termList = new ArrayList<Term>();
             termList.add(rhs);
-            TermCons termCons = new TermCons(KSorts.KLABEL, String2KLabelCons, termList, context);
+            TermCons termCons = new TermCons(Sort.KLABEL, termList, String2KLabelProd);
             rule = new Rule(termCons, KLabelConstant.of(klbl, context), context);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);

@@ -2,12 +2,12 @@
     <k>
         .K
     </k>
-    <store>
-        #symNat(1) |-> 0
-        #symNat(2) |-> 5050
-    </store>
     <env>
-        n |-> #symNat(1)
-        sum |-> #symNat(2)
+        n |-> 1
+        sum |-> 2
     </env>
+    <store>
+        1 |-> 0
+        2 |-> 5050
+    </store>
 </T>

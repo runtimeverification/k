@@ -8,20 +8,20 @@ import org.kframework.utils.StringUtil;
  * A production item for a cons-list with separator, like List{UserSort,";"}. Must be the only item in a {@link Production}.
  */
 public class UserList extends ProductionItem {
-    protected String sort;
+    protected Sort sort;
     protected String separator;
     protected String listType;
 
     public static final String ZERO_OR_MORE = "*";
     public static final String ONE_OR_MORE = "+";
 
-    public UserList(String sort, String separator) {
+    public UserList(Sort sort, String separator) {
         this.sort = sort;
         this.separator = separator.trim();
         this.listType = ZERO_OR_MORE;
     }
 
-    public UserList(String sort, String separator, String listType) {
+    public UserList(Sort sort, String separator, String listType) {
         this.sort = sort;
         this.separator = separator.trim();
         this.listType = listType;
@@ -37,20 +37,20 @@ public class UserList extends ProductionItem {
     @Override
     public String toString() {
         if (listType.equals(ZERO_OR_MORE))
-            return "List{" + sort + ",\"" + StringUtil.escape(separator) + "\"} ";
+            return "List{" + sort + "," + StringUtil.enquoteCString(separator) + "} ";
         else
-            return "NeList{" + sort + ",\"" + StringUtil.escape(separator) + "\"} ";
+            return "NeList{" + sort + "," + StringUtil.enquoteCString(separator) + "} ";
     }
 
     public String getTerminatorKLabel() {
-        return "'.List{\"" + StringUtil.escape(separator) + "\"}";
+        return "'.List{" + StringUtil.enquoteCString(separator) + "}";
     }
 
-    public String getSort() {
+    public Sort getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Sort sort) {
         this.sort = sort;
     }
 

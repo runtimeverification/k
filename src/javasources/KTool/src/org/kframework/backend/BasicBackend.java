@@ -15,8 +15,6 @@ import org.kframework.compile.utils.*;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.main.FirstStep;
-import org.kframework.main.LastStep;
 import org.kframework.utils.Stopwatch;
 
 /**
@@ -50,11 +48,17 @@ public abstract class BasicBackend implements Backend {
         return !options.experimental.noPrelude;
     }
 
+    @Override
+    public org.kframework.kompile.KompileOptions.Backend getEnum() {
+        return options.backend;
+    }
+
     public CompilerSteps<Definition> getCompilationSteps() {
         CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
         steps.add(new FirstStep(this, context));
         steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
         steps.add(new RemoveBrackets(context));
+        steps.add(new SetVariablesInferredSort(context));
         steps.add(new AddEmptyLists(context));
         steps.add(new RemoveSyntacticCasts(context));
 //        steps.add(new EnforceInferredSorts(context));
@@ -67,14 +71,12 @@ public abstract class BasicBackend implements Backend {
         steps.add(new AddSupercoolDefinition(context));
         steps.add(new AddHeatingConditions(context));
         steps.add(new AddSuperheatRules(context));
-        steps.add(new DesugarStreams(context, false));
+        steps.add(new DesugarStreams(context));
         steps.add(new ResolveFunctions(context));
         steps.add(new AddKCell(context));
         steps.add(new AddStreamCells(context));
         steps.add(new AddSymbolicK(context));
         steps.add(new AddSemanticEquality(context));
-        // steps.add(new ResolveFresh());
-        steps.add(new FreshCondToFreshVar(context));
         steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
         if (options.experimental.addTopCell) {
@@ -82,13 +84,13 @@ public abstract class BasicBackend implements Backend {
         }
         steps.add(new ResolveBinder(context));
         steps.add(new ResolveAnonymousVariables(context));
-        steps.add(new ResolveBlockingInput(context, false));
         steps.add(new AddK2SMTLib(context));
         steps.add(new AddPredicates(context));
         steps.add(new ResolveSyntaxPredicates(context));
         steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
         steps.add(new FlattenSyntax(context));
+        steps.add(new ResolveBlockingInput(context));
         steps.add(new InitializeConfigurationStructure(context));
         steps.add(new AddKStringConversion(context));
         steps.add(new AddKLabelConstant(context));
@@ -97,6 +99,7 @@ public abstract class BasicBackend implements Backend {
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
         steps.add(new CompileDataStructures(context));
+        steps.add(new Cell2DataStructure(context));
         steps.add(new ResolveSupercool(context));
         steps.add(new AddStrictStar(context));
         steps.add(new AddDefaultComputational(context));

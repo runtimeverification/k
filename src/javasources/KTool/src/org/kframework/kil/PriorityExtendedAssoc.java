@@ -99,7 +99,7 @@ public class PriorityExtendedAssoc extends ModuleItem implements Interfaces.Muta
     public List<KLabelConstant> getChildren(Enum<?> _) {
         return tags;
     }
-    
+
     @Override
     public void setChildren(List<KLabelConstant> children, Enum<?> _) {
         this.tags = children;

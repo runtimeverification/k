@@ -6,13 +6,10 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class ConfigurationCleaner extends CopyOnWriteTransformer {
-        
+
     public ConfigurationCleaner(Context context) {
         super("Configuration Cleaner", context);
         // TODO Auto-generated constructor stub
@@ -33,10 +30,9 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
             node = node.shallowCopy();
         } else {
             if (!(result instanceof Cell)) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.INTERNAL,
+                GlobalSettings.kem.registerInternalError(
                         "Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.",
-                        getName(), node.getFilename(), node.getLocation()));
+                        this, node);
             } else    node = (Cell) result;
         }
         node.setDefaultAttributes();

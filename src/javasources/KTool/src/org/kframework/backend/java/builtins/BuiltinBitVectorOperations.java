@@ -4,7 +4,6 @@ package org.kframework.backend.java.builtins;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
-
 import java.util.List;
 
 
@@ -16,8 +15,6 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public final class BuiltinBitVectorOperations {
 
-    private BuiltinBitVectorOperations() { }
-
     public static BitVector construct(IntToken bitwidth, IntToken value, TermContext context) {
         try {
             return BitVector.of(value.bigIntegerValue(), bitwidth.intValue());
@@ -26,8 +23,16 @@ public final class BuiltinBitVectorOperations {
         }
     }
 
-    public static IntToken bitwidth(BitVector term, TermContext context) {
-        return IntToken.of(term.bitwidth());
+    public static IntToken bitwidth(Term term, TermContext context) {
+        if (term instanceof BitVector) {
+            return IntToken.of(((BitVector)term).bitwidth());
+        } else {
+            Integer bitwidth = BitVector.getBitwidth(term);
+            if (bitwidth == null) {
+                return null;
+            }
+            return IntToken.of(bitwidth);
+        }
     }
 
     public static BoolToken zero(BitVector term, TermContext context) {
@@ -262,12 +267,34 @@ public final class BuiltinBitVectorOperations {
         }
     }
 
-    public static BuiltinList toDigits(BitVector term, IntToken bitwidth, TermContext context) {
-        return new BuiltinList(term.toDigits(bitwidth.intValue()));
+    public static BitVector concatenate(BitVector term1, BitVector term2, TermContext context) {
+        return term1.concatenate(term2);
     }
 
-    public static BitVector fromDigits(BuiltinList digitList, IntToken bitwidth, TermContext context) {
-        if (!digitList.hasFrame()) {
+    public static BitVector extract(
+            BitVector term,
+            IntToken beginIndex,
+            IntToken endIndex,
+            TermContext context) {
+        return term.extract(beginIndex.intValue(), endIndex.intValue());
+    }
+
+    public static BuiltinList toDigits(
+            BitVector term,
+            IntToken bitwidth,
+            IntToken count,
+            TermContext context) {
+        if (bitwidth.intValue() > 0 && bitwidth.intValue() * count.intValue() <= term.bitwidth) {
+            BuiltinList.Builder builder = BuiltinList.builder();
+            builder.addItems(term.toDigits(bitwidth.intValue(), count.intValue()));
+            return (BuiltinList) builder.build();
+        } else {
+            return null;
+        }
+    }
+
+    public static BitVector fromDigits(BuiltinList digitList, TermContext context) {
+        if (digitList.isGround()) {
             List<BitVector> digits;
             try {
                 // AndreiS: double cast because Java in its infinite wisdom does not allow to cast
@@ -276,9 +303,10 @@ public final class BuiltinBitVectorOperations {
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException(digitList + " is not a list of bitvectors");
             }
-            return BitVector.fromDigits(digits, bitwidth.intValue());
+            return BitVector.fromDigits(digits);
         } else {
-            throw new IllegalArgumentException(digitList + " contains list variables");
+            //throw new IllegalArgumentException(digitList + " contains list variables");
+            return null;
         }
     }
 

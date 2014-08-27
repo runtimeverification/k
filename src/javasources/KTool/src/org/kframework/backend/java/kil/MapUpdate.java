@@ -1,12 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -14,9 +8,12 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 /**
  *
@@ -46,29 +43,28 @@ public class MapUpdate extends Term implements DataStructureUpdate {
         if (!(map instanceof BuiltinMap)) {
             return this;
         }
+        BuiltinMap builtinMap = (BuiltinMap) map;
 
-        BuiltinMap builtinMap = ((BuiltinMap) map);
+        BuiltinMap.Builder builder = BuiltinMap.builder();
+        builder.concatenate(builtinMap);
 
-        Map<Term, Term> entries = new HashMap<Term, Term>(builtinMap.getEntries());
-        Set<Term> keysToRemove = new HashSet<Term>();
-        for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            Term nextKey = iterator.next();
-            if (entries.remove(nextKey) != null) {
-                keysToRemove.add(nextKey);
+        Set<Term> pendingRemoveSet = new HashSet<>();
+        for (Term key : removeSet) {
+            if (builder.remove(key) == null) {
+                pendingRemoveSet.add(key);
             }
         }
 
-        if (removeSet.size() > keysToRemove.size()) {
-            return new MapUpdate(builtinMap, Sets.difference(removeSet, keysToRemove), updateMap);
+        if (!pendingRemoveSet.isEmpty()) {
+            if (!builtinMap.isConcreteCollection()) {
+                return new MapUpdate(builder.build(), pendingRemoveSet, updateMap);
+            } else {
+                return Bottom.of(Kind.KITEM);
+            }
         }
 
-        entries.putAll(updateMap);
-
-        if (builtinMap.hasFrame()) {
-            return new BuiltinMap(entries, builtinMap.frame());
-        } else {
-            return new BuiltinMap(entries);
-        }
+        builder.putAll(updateMap);
+        return builder.build();
     }
 
     public Term map() {
@@ -95,19 +91,22 @@ public class MapUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    public String sort() {
+    public Sort sort() {
         return map.sort();
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
-        }
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

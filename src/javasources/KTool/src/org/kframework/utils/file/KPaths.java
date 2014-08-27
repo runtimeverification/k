@@ -24,7 +24,7 @@ public class KPaths {
 
     /**
      * Returns the K installation directory
-     * 
+     *
      * @param windowfy
      *            - if true, then the path will be transformed into /cygdirve/c/... when on windows (just for maude)
      * @return The path to the K installation
@@ -71,5 +71,9 @@ public class KPaths {
             }
         }
         return javaLibraryPath;
+    }
+
+    public static String getZ3PreludePath() {
+        return getKBase(false) + "/include/z3/prelude.smt2";
     }
 }

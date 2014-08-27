@@ -2,7 +2,7 @@
 module ISSUE
   syntax Exp ::= "`" Id
   syntax Id ::= "a"
-  syntax K ::= "start"
+  syntax KItem ::= "start"
 
   configuration <k> start </k> <out stream="stdout"> .List </out>
 

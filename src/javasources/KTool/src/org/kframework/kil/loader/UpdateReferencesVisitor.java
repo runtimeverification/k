@@ -11,7 +11,7 @@ public class UpdateReferencesVisitor extends BasicVisitor {
         super(context);
     }
 
-    private String prodSort;
+    private Syntax prodRoot;
     private String moduleName;
 
     @Override
@@ -25,14 +25,15 @@ public class UpdateReferencesVisitor extends BasicVisitor {
      */
     @Override
     public Void visit(Syntax syn, Void _) {
-        context.definedSorts.add(syn.getSort().getName());
-        prodSort = syn.getSort().getName();
+        prodRoot = syn;
+        context.definedSorts.add(prodRoot.getDeclaredSort().getSort());
         return super.visit(syn, _);
     }
 
     @Override
     public Void visit(Production node, Void _) {
-        node.setSort(prodSort);
+        node.setSort(prodRoot.getDeclaredSort().getSort());
+        node.copyAttributesFrom(prodRoot);
         node.setOwnerModuleName(moduleName);
         return null;
     }

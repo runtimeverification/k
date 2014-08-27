@@ -2,6 +2,7 @@
 package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -10,7 +11,7 @@ import org.kframework.kompile.KompileOptions;
 public class AddOptionalTags extends CopyOnWriteTransformer {
 
     private KompileOptions options;
-    
+
     public AddOptionalTags(Context context) {
         super("AddOptionalTags", context);
         this.options = context.kompileOptions;
@@ -21,13 +22,13 @@ public class AddOptionalTags extends CopyOnWriteTransformer {
 
         for (String tag : options.transition)
             if (node.containsKey(tag))
-                node.set("transition", "");
+                node.add(Attribute.TRANSITION);
         for (String tag : options.supercool)
             if (node.containsKey(tag))
-                node.set("supercool", "");
+                node.add(Attribute.SUPERCOOL);
         for (String tag : options.superheat)
             if (node.containsKey(tag))
-                node.set("superheat", "");
+                node.add(Attribute.SUPERHEAT);
 
         return node;
     }

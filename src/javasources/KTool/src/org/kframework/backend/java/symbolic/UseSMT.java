@@ -1,69 +1,64 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.io.Serializable;
-
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.utils.options.SMTSolver;
 
+import java.io.Serializable;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.Model;
-
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
-
-import java.util.*;
-
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
-import org.kframework.kil.Context;
-import org.kframework.krun.K;
-
-
 
 public class UseSMT implements Serializable {
 
-    public static BuiltinMap checkSat(Term term, TermContext termContext) {
-        if (!K.smt.equals("z3")) {
+    public static Term checkSat(Term term, TermContext termContext) {
+        if (termContext.definition().context().smtOptions.smt != SMTSolver.Z3) {
             return null;
         }
 
-        BuiltinMap result = new BuiltinMap();   
+        BuiltinMap.Builder resultBuilder = BuiltinMap.builder();
         try {
+            SymbolicConstraint constraint = new SymbolicConstraint(termContext);
+            constraint.add(term, BoolToken.TRUE);
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
             Solver solver = context.MkSolver();
-            
-            BoolExpr query = (BoolExpr) ((Z3Term) term.accept(transformer)).expression(); 
+            BoolExpr query = context.ParseSMTLIB2String(
+                    KILtoSMTLib.translateConstraint(constraint),
+                    null,
+                    null,
+                    null,
+                    null);
             solver.Assert(query);
-            
-            
+
+
             if(solver.Check() == Status.SATISFIABLE){
-                
-                Map<Term,Term> entries = new HashMap<Term,Term>();
-                
+
                 Model model = solver.Model();
                 FuncDecl[] consts = model.ConstDecls();
-                
+
                 for(int i=0 ; i < consts.length; ++i){
-                    
+
                     Expr resultFrg = model.ConstInterp(consts[i]);
-                                        
-                    Variable akey = new Variable(consts[i].Name().toString(), consts[i].Range().toString());
-                    
+
+                    Variable akey = new Variable(consts[i].Name().toString(), Sort.of(consts[i].Range().toString()));
+
                     IntToken avalue = IntToken.of(Integer.parseInt(resultFrg.toString()));
-                    
-                    result.put((Term)akey,(Term)avalue);
+
+                    resultBuilder.put(akey, avalue);
                 }
-                
-                
+
+
             }
             context.Dispose();
         } catch (Z3Exception e) {
@@ -72,6 +67,6 @@ public class UseSMT implements Serializable {
             // TODO(AndreiS): fix this translation and the exceptions
             e.printStackTrace();
         }
-        return result;
+        return resultBuilder.build();
     }
 }

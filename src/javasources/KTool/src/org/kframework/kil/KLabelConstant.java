@@ -2,18 +2,18 @@
 
 package org.kframework.kil;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * AST representation of a KLabel constant.
@@ -43,11 +43,12 @@ public class KLabelConstant extends KLabel {
     public static final KLabelConstant KRESULT_PREDICATE = of(AddPredicates.predicate(KSorts.KRESULT));
     public static final KLabelConstant STREAM_PREDICATE = of(AddPredicates.predicate("Stream"));
     public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
+    public static final KLabelConstant FRESH_KLABEL = of("fresh");
 
     /**
      * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant objects; subsequent calls with the same label return
      * the same object.
-     * 
+     *
      * @param label
      *            string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the KLabel;
@@ -66,7 +67,7 @@ public class KLabelConstant extends KLabel {
     /**
      * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant objects; subsequent calls with the same label return
      * the same object. As opposed to "of", does not inspect for list of productions. Should be used for builtins only.
-     * 
+     *
      * @param label
      *            string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the KLabel;
@@ -97,16 +98,17 @@ public class KLabelConstant extends KLabel {
     /* un-escaped label */
     private final String label;
     /* unmodifiable view of the production list */
-    private final List<Production> productions;
+    private final ImmutableSet<Production> productions;
 
     public KLabelConstant(String label) {
         this.label = label;
-        productions = Collections.emptyList();
+        productions = ImmutableSet.of();
     }
 
     private KLabelConstant(String label, Context context) {
         this.label = label;
-        productions = Collections.unmodifiableList(context.productionsOf(label));
+        // context.productionsOf returns a view into a multimap, which is not serializable. So we copy it
+        productions = ImmutableSet.copyOf(context.productionsOf(label));
     }
 
     /**
@@ -116,20 +118,20 @@ public class KLabelConstant extends KLabel {
     public KLabelConstant(Element element, Context context) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = Collections.unmodifiableList(context.productionsOf(label));
+        // context.productionsOf returns a view into a multimap, which is not serializable. So we copy it
+        productions = ImmutableSet.copyOf(context.productionsOf(label));
     }
 
-    @SuppressWarnings("unchecked")
     public KLabelConstant(Element element) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = (List<Production>) Collections.EMPTY_LIST;
+        productions = ImmutableSet.of();
     }
 
     /**
      * @return unmodifiable list of productions generating this KLabel
      */
-    public List<Production> productions() {
+    public Set<Production> productions() {
         return productions;
     }
 
@@ -173,19 +175,18 @@ public class KLabelConstant extends KLabel {
         if (isPredicate()) {
             return true;
         } else {
-            List<Production> productions = context.productionsOf(getLabel());
+            Set<Production> productions = context.productionsOf(getLabel());
             Production functionProduction = null;
             for (Production production : productions) {
                 if (production.containsAttribute(Attribute.FUNCTION_KEY)
                         || production.containsAttribute(Attribute.PREDICATE_KEY)) {
                     functionProduction = production;
                 } else if (functionProduction != null) {  // this label can either be function or not.
-                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                            KException.KExceptionGroup.CRITICAL,
+                    GlobalSettings.kem.registerCriticalError(
                             "Ambiguity: Top symbol " + label + " corresponds to both a functional declaration (" +
                                     functionProduction + ") and to a non-functional one (" +
                                     production + ")",
-                            "KLabelConstant.isFunctional()", getFilename(), getLocation()));
+                            this);
                 }
             }
             if (functionProduction != null) {

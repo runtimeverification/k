@@ -209,8 +209,8 @@ for the KOOL object-oriented constructs.
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-        	    //| "for" "(" Stmt Exp ";" Exp ")" Block
-        	    | "for" "(" Stmts Exp ";" Exp ")" Block
+                //| "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -357,16 +357,16 @@ definition. */
   syntax KItem ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined ...</store>
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 
   context var _:Id[HOLE];
 
   rule <k> var X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(L +Int 1, N)
+       <env> Env => Env[X <- L] </env>
+       <store>... .Map => L |-> array(L +Int 1, N)
                        (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
@@ -416,15 +416,11 @@ definition. */
   rule false || E => E
 
 
-//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-//    [structural, anywhere]
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]  [structural]
-  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])  [structural]
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
+    [structural, anywhere]
 
-//  rule array(L,_)[N:Int] => lookup(L +Int N)
-//    [structural, anywhere]
-  rule array(L,_)[N:Int] => lookup(L +Int N)  [structural]
-  rule lvalue(array(L,_)[N:Int] => lookup(L +Int N))  [structural]
+  rule array(L,_)[N:Int] => lookup(L +Int N)
+    [structural, anywhere]
 
   rule sizeOf(array(_,N)) => N
 
@@ -435,7 +431,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
-         <fstack> ListItem((Env,K,C)) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => .List ...</fstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -444,7 +440,7 @@ interestingly, the semantics of return stays unchanged. */
   rule return; => return nothing;   [macro]
 
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
 
 
   context (HOLE => lvalue(HOLE)) = _
@@ -457,16 +453,21 @@ interestingly, the semantics of return stays unchanged. */
   rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
 
 
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1::Stmts S2::Stmts => S1 ~> S2  [structural]
 
   rule _:Val; => .
 
-  rule if ( true) S else _ => S
-  rule if (false) _ else S => S
+  rule if ( true) S::Block else _ => S
+  rule if (false) _ else S::Block => S
 
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+/* TODO(Grigore) Evaluating the elements one by one makes the code
+non-deterministic, as the engine might choose to print the first argument
+before evaluating the others. Asking for the entire list to be evaluated first
+ensure only one path of execution.
+*/
+  rule <k> print(V:Val, Vs:Vals => Vs); ...</k> <out>... .List => ListItem(V) </out>
     [print]
   rule print(.Vals); => .  [structural]
 
@@ -477,17 +478,17 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
+         <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
   rule <k> popx => . ...</k>
-       <xstack> _:ListItem => . ...</xstack>
+       <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
+         <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -500,14 +501,14 @@ from SIMPLE unchanged. */
 
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
        <busy> Busy => Busy -Set keys(H) </busy>
-       <terminated>... . => SetItem(T) ...</terminated>
+       <terminated>... .Set => SetItem(T) ...</terminated>
 
   rule <k> join T:Int; => . ...</k>
        <terminated>... SetItem(T) ...</terminated>
 
   rule <k> acquire V:Val; => . ...</k>
-       <holds>... . => V |-> 0 ...</holds>
-       <busy> Busy (. => SetItem(V)) </busy>
+       <holds>... .Map => V |-> 0 ...</holds>
+       <busy> Busy (.Set => SetItem(V)) </busy>
     when (notBool(V in Busy:Set))  [acquire]
 
   rule <k> acquire V; => . ...</k>
@@ -517,15 +518,15 @@ from SIMPLE unchanged. */
        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
     when N >Int 0
 
-  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-       <busy>... SetItem(V) => . ...</busy>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+       <busy>... SetItem(V) => .Set ...</busy>
 
   rule <k> rendezvous V:Val; => . ...</k>
        <k> rendezvous V; => . ...</k>  [rendezvous]
 
 //@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
-  syntax Decl ::= mkDecls(Ids,Vals)  [function]
+  syntax Stmts ::= mkDecls(Ids,Vals)  [function]
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
@@ -542,8 +543,8 @@ from SIMPLE unchanged. */
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_::Exp[HOLE::Exps])
-  context lvalue(HOLE::Exp[_::Exps])
+  context lvalue(_:>Exp[HOLE:>Exps])
+  context lvalue(HOLE:>Exp[_:>Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
@@ -580,7 +581,7 @@ that the user has not declared anything but classes at the top level
 of the program. */
 
   syntax KItem ::= "execute"
-  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
+  rule <k> execute => new Main(.Exps); </k> <env> .Map </env>  [structural]
 
 /*@ The semantics of \texttt{new} (defined below) requires the
 execution of all the class' declarations (and also of its
@@ -622,16 +623,16 @@ switch to method closure's class and object environment and execute
 the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
-  syntax KItem ::= (Map,K,ControlCellFragment)
+  syntax KItem ::=  (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
        <br/>
        <control>
           C
-          <fstack> . => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
+          <fstack> .List => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
           ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
        </control>
@@ -648,17 +649,16 @@ fail if the child thread did not have access to its parent's object
 environment. */
 
   rule <thread>...
-         <k> spawn S => T ...</k>
+         <k> spawn S => !T:Int ...</k>
          <env> Env </env>
          <crntObj> Obj </crntObj>
        ...</thread>
        (. => <thread>...
                <k> S </k>
                <env> Env </env>
-               <id> T </id>
+               <id> !T </id>
                <crntObj> Obj </crntObj>
              ...</thread>)
-    when fresh(T:Int)
 
 
 //@ \subsection{Semantics of the new KOOL constructs}
@@ -696,8 +696,8 @@ understand and reason about if one overuses these features. */
   rule <k> method F:Id(Xs:Ids) S => . ...</k>
        <crntClass> Class:Id </crntClass>
        <location> OL:Int </location>
-       <env> Env => Env[L/F] </env>
-       <store>... . => L |-> methodClosure(Class,OL,Xs,S) ...</store>
+       <env> Env => Env[F <- L] </env>
+       <store>... .Map => L |-> methodClosure(Class,OL,Xs,S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 
@@ -725,7 +725,7 @@ refer to it (see rule above). */
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
        <br/>
        <control> C
@@ -735,7 +735,7 @@ refer to it (see rule above). */
                       <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
                       <location> L </location>
          </crntObj>
-         <fstack> . => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
+         <fstack> .List => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
        </control>
 
 /*@ The creation of a new object (the memory allocation part only) is
@@ -773,10 +773,10 @@ empty). */
   syntax KItem ::= "addEnvLayer"
 
   rule <k> addEnvLayer => . ...</k>
-       <env> Env => . </env>
+       <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
-       //<envStack> . => (Class, <env>Env</env>) ...</envStack>
-       <envStack> . => ListItem((Class, <env>Env</env>)) ...</envStack>
+       //<envStack> .List => (Class, <env>Env</env>) ...</envStack>
+       <envStack> .List => ListItem((Class, <env>Env</env>)) ...</envStack>
     [structural]
 
 /*@ The following operation stores the created object at the location
@@ -791,7 +791,7 @@ the location is unnecessary and thus we delete it from the
 
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L:Int </location> => .) </crntObj>
-       <store>... . => L |-> objectClosure(Obj) ...</store>
+       <store>... .Map => L |-> objectClosure(Obj) ...</store>
 
 
 /*@ \subsubsection{Self reference}
@@ -841,7 +841,7 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
     [structural]
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class':Id,_)) => . ...</envStack>)
+                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
        . X:Id
     when Class =/=K Class'  [structural]
 
@@ -855,7 +855,7 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     [structural]
   rule <k> super . X ...</k>
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class':Id,_)) => . ...</envStack>
+       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
 /*@\subsubsection{Method invocation}
@@ -905,7 +905,7 @@ method call or the array access.  */
     [structural]
   rule <k> (super . X)(_:Exps) ...</k>
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class':Id,_)) => . ...</envStack>
+       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
   context HOLE(_:Exps)
@@ -935,12 +935,13 @@ argument does not evaluate to an object.  */
   rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
-//  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
+//  rule objectClosure(<envStack> (C,_) => .List ...</envStack> _)
 //       instanceOf C'  when C =/=K C'  [structural]
-  rule objectClosure(<envStack> ListItem((C:Id,_)) => . ...</envStack> _)
+// TODO(YilongL): Changing `.List' to `.' in the following line would cause the rewrite engine to get stuck in the test instanceOf.kool because that `.' will be interpreted as `.K'. Why doesn't the type-inferencer catch this error?
+  rule objectClosure(<envStack> ListItem((C:Id,_)) => .List ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
-  rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
+  rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
 
 
 /*@ \subsubsection{Cast}
@@ -977,7 +978,7 @@ member's location based on the current class of the object. */
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context lvalue(HOLE . _)
+  context lvalue((HOLE . _)<:Exp)
 
 /*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... (C,EnvC) EStack </envStack>)
@@ -990,7 +991,7 @@ member's location based on the current class of the object. */
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
                               X))  [structural]
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class':Id,_)) => . ...</envStack>)
+                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
               . X)
     when Class =/=K Class'  [structural]
 
@@ -1006,12 +1007,10 @@ starting with the most concrete class and going up in the hierarchy. */
   rule lookupMember(<envStack> ListItem((_, <env>... X|->L ...</env>)) ...</envStack>, X)
     => lookup(L)
 
-//  rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
+//  rule lookupMember(<envStack> (_, <env> Env </env>) => .List ...</envStack>, X)
 //    when notBool(X in keys(Env))
-  // TODO (AndreiS): support function with deep rewrites
-  // rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => . ...</envStack>, X)
-  //   when notBool(X in keys(Env))
-  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) L </envStack>, X)
-    => lookupMember(<envStack> L </envStack>, X)
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) Rest </envStack>, X) =>
+       lookupMember(<envStack> Rest </envStack>, X)
     when notBool(X in keys(Env))
+
 endmodule

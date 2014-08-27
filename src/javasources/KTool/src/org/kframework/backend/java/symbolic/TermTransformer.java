@@ -17,14 +17,10 @@ public class TermTransformer extends CopyOnWriteTransformer {
         super(context);
     }
 
-    public TermTransformer(Definition definition) {
-        super(definition);
-    }
-
     /**
      * Performs the transformation used for all {@code Term} nodes on a
      * {@code Term}.
-     * 
+     *
      * @param term
      *            the term to be transformed
      * @return the transformed term
@@ -102,7 +98,7 @@ public class TermTransformer extends CopyOnWriteTransformer {
     public ASTNode transform(KItem kItem) {
         return transformTerm((Term) super.transform(kItem));
     }
-    
+
 //    @Override
 //    public ASTNode transform(KItemProjection kItemProj) {
 //        return transformTerm((Term) super.transform(kItemProj));
@@ -117,7 +113,7 @@ public class TermTransformer extends CopyOnWriteTransformer {
     public ASTNode transform(KSequence kSequence) {
         return transformTerm((Term) super.transform(kSequence));
     }
-    
+
     @Override
     public ASTNode transform(ListLookup listLookup) {
         return transformTerm((Term) super.transform(listLookup));
@@ -152,12 +148,12 @@ public class TermTransformer extends CopyOnWriteTransformer {
     public ASTNode transform(SetUpdate setUpdate) {
         return transformTerm((Term) super.transform(setUpdate));
     }
-    
+
     @Override
     public ASTNode transform(StringToken stringToken) {
         return transformTerm((Term) super.transform(stringToken));
     }
-    
+
     @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transformTerm((Term) super.transform(metaVariable));

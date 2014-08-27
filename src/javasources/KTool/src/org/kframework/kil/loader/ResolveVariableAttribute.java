@@ -2,11 +2,9 @@
 package org.kframework.kil.loader;
 
 import org.kframework.compile.transformers.AddSymbolicK;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.krun.K;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,9 +27,9 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             so whenever somebody refactors the backends should split this transformer
             for each backend.
              */
-            if (K.backend.equals("maude")) {
+            if (kompileOptions.experimental.legacyKast) {
                 if (context.variableTokenSorts.contains(node.tokenSort())) {
-                    String sort = "K";
+                    String sort = KSorts.K;
                     String name = node.value();
                     int index = node.value().lastIndexOf(":");
                     if (index > 0) {
@@ -39,10 +37,10 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
                         name = node.value().substring(0, index);
                     }
 
-                    if (MetaK.isDataSort("#" + sort)) {
-                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(sort)), Token.kAppOf("#Id", name));
+                    if (Sort.of("#" + sort).isDataSort()) {
+                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(sort)), Token.kAppOf(Sort.BUILTIN_ID, name));
                     } else {
-                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor("K")), Token.kAppOf("#Id", node.value()));
+                        return KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(KSorts.K)), Token.kAppOf(Sort.BUILTIN_ID, node.value()));
                     }
                 }
             }

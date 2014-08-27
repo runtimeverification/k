@@ -1,1 +1,1 @@
-assertEqual(close(3), #EBADF) ~> assertEqual(open("tests/regression/java-rewrite-engine/io/test1/files/file", "r"), 3) ~> close(3)
+assertEqual(close(3), #EBADF) ~> assertEqual(open("files/file", "r"), 3) ~> close(3)

@@ -6,6 +6,7 @@
 *.swp
 *.class
 .metadata
+.recommenders
 .cache
 .idea
 .checkstyle-files

@@ -4,13 +4,11 @@ package org.kframework.compile.utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.AbstractTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 
 public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerStep<T> {
-    
+
     AbstractTransformer<RuntimeException> t;
 
     public CompilerTransformerStep(AbstractTransformer<RuntimeException> t, Context context) {
@@ -23,11 +21,10 @@ public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerSte
         ASTNode result = null;
         result = t.visitNode(def);
         if (!def.getClass().isInstance(result)) {
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                    KException.KExceptionGroup.INTERNAL,
+            GlobalSettings.kem.registerInternalError(
                     "Expecting " + def.getClass().getName() + ", but got " + result.getClass().getName()
                     + " while applying" + getName() + ".",
-                    def.getFilename(), def.getLocation()));
+                    def);
         }
         // we checked above that result is an instance of the class of def.
         @SuppressWarnings("unchecked")

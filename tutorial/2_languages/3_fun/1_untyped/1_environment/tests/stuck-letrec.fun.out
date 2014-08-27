@@ -2,5 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-x ~> ( HOLE,.List{","} ) ~> ( 2,HOLE ) ~> assignTo ( (x, y) , HOLE ) ~> y ~> 
-  env ( .Map )
+x ~> HOLE ~> 2, HOLE ~> assignTo ( x, y , HOLE ) ~> y ~> env ( .Map )

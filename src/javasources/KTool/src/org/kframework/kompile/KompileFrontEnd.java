@@ -8,85 +8,97 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
-import org.kframework.backend.html.HtmlBackend;
-import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
-import org.kframework.backend.kore.KoreBackend;
-import org.kframework.backend.latex.LatexBackend;
-import org.kframework.backend.latex.PdfBackend;
-import org.kframework.backend.maude.KompileBackend;
-import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.backend.unparser.UnflattenBackend;
-import org.kframework.backend.unparser.UnparserBackend;
+import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
-import org.kframework.krun.K;
+import org.kframework.main.FrontEnd;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.inject.JCommanderModule;
+import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
+import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import com.google.inject.Inject;
+import com.google.inject.Module;
 
-public class KompileFrontEnd {
+public class KompileFrontEnd extends FrontEnd {
 
-    public static void main(String[] args) throws IOException {
-        KompileOptions options = new KompileOptions();
-        options.global.initialize();
+    public static Module[] getModules(String[] args) {
         try {
+            KompileOptions options = new KompileOptions();
+
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kompile");
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class));
-            
-            if (options.global.help) {
-                StringBuilder sb = new StringBuilder();
-                jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
-                return;
-            }
-            
-            if (options.helpExperimental) {
-                StringBuilder sb = new StringBuilder();
-                jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
-                return;    
-            }
-            
-            if (options.global.version) {
-                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-                System.out.print(msg);
-                return;
-            }
-            
-            kompile(options);
+
+            final Context context = new Context();
+            context.kompileOptions = options;
+
+            return new Module[] {
+                    new KompileModule(context, options),
+                    new JCommanderModule(jc),
+                    new CommonModule(),
+                    new JavaSymbolicCommonModule() };
         } catch (ParameterException ex) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, ex.getMessage()));
+            printBootError(ex.getMessage());
+            return null;
         }
     }
 
-    private static void kompile(KompileOptions options) throws IOException {
-        K.do_kompilation = true;
-        org.kframework.utils.Error.checkIfOutputDirectory(options.directory);
 
-        final Context context = new Context(options);
-        
+    private final Context context;
+    private final KompileOptions options;
+    private final Backend backend;
+    private final Stopwatch sw;
+    private final KExceptionManager kem;
+    private final BinaryLoader loader;
+    private final DefinitionLoader defLoader;
+
+    @Inject
+    KompileFrontEnd(
+            Context context,
+            KompileOptions options,
+            @Usage String usage,
+            @ExperimentalUsage String experimentalUsage,
+            Backend backend,
+            Stopwatch sw,
+            KExceptionManager kem,
+            BinaryLoader loader,
+            DefinitionLoader defLoader) {
+        super(kem, options.global, usage, experimentalUsage);
+        this.context = context;
+        this.options = options;
+        this.backend = backend;
+        this.sw = sw;
+        this.kem = kem;
+        this.loader = loader;
+        this.defLoader = defLoader;
+    }
+
+    @Override
+    public boolean run() {
+        if (options.directory.isFile()) { // isFile = exists && !isDirectory
+            String msg = "Not a directory: " + options.directory;
+            kem.registerCriticalError(msg);
+        }
+
         context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
         context.dotk.mkdirs();
-        
+
         // default for documentation backends is to store intermediate outputs in temp directory
         context.kompiled = context.dotk;
-        
+
         if (!options.global.debug) {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -99,90 +111,36 @@ public class KompileFrontEnd {
             });
         }
 
-        Backend backend = null;
-        switch (options.backend) {
-            case PDF:
-                backend = new PdfBackend(Stopwatch.instance(), context);
-                break;
-            case LATEX:
-                backend = new LatexBackend(Stopwatch.instance(), context);
-                break;
-            case DOC:
-                backend = new LatexBackend(Stopwatch.instance(), context, true);                
-                break;
-            case HTML:
-                backend = new HtmlBackend(Stopwatch.instance(), context);
-                break;
-            case KORE:
-                backend = new KoreBackend(Stopwatch.instance(), context);
-                backend.run(DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
-                        backend.autoinclude(), context));
-                return;
-            case MAUDE:
-                backend = new KompileBackend(Stopwatch.instance(), context);
+        if (backend.getEnum().generatesDefinition()) {
                 context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.kompiled);
                 context.kompiled.mkdirs();
-                break;
-            case JAVA:
-                backend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.kompiled);
-                context.kompiled.mkdirs();
-                break;
-            case UNPARSE:
-                backend = new UnparserBackend(Stopwatch.instance(), context);
-                break;
-            case UNFLATTEN:
-                backend = new UnparserBackend(Stopwatch.instance(), context, true);
-                break;
-            case UNFLATTEN_JAVA:
-                // TODO(YilongL): make it general to all backends; add info about
-                // this backend in KompileOptionsParser
-                Backend innerBackend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.kompiled);
-                context.kompiled.mkdirs();
-                backend = new UnflattenBackend(Stopwatch.instance(), context, innerBackend);
-                break;
-            case SYMBOLIC:
-                backend = new SymbolicBackend(Stopwatch.instance(), context);
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-                checkAnotherKompiled(context.kompiled);
-                context.kompiled.mkdirs();
-                break;
-            default:
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.CRITICAL, "Invalid backend option: " + backend, "", ""));
-                break;
         }
 
-        if (backend != null) {
-            genericCompile(options, backend, options.experimental.step, context);
-        }
-        
-        BinaryLoader.save(new File(context.kompiled, "kompile-options.bin").getAbsolutePath(), options);
+        genericCompile(options.experimental.step);
 
-        verbose(context);
+        loader.saveOrDie(new File(context.kompiled, "context.bin").getAbsolutePath(), context);
+
+        verbose();
+        return true;
     }
 
-    private static void verbose(Context context) {
-        Stopwatch.instance().printTotal("Total");
+    private void verbose() {
+        sw.printTotal("Total");
         if (context.globalOptions.verbose) {
             context.printStatistics();
         }
     }
 
 
-    private static void genericCompile(KompileOptions options, Backend backend, String step,
-                                       Context context) throws IOException {
+    private void genericCompile(String step) {
         org.kframework.kil.Definition javaDef;
-        Stopwatch.instance().start();
-        javaDef = DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
+        sw.start();
+        javaDef = defLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 backend.autoinclude(), context);
-        
+
         new CountNodesVisitor(context).visitNode(javaDef);
-        
+
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
         if (step == null) {
@@ -194,14 +152,14 @@ public class KompileFrontEnd {
             javaDef = (Definition) e.getResult();
         }
 
-        BinaryLoader.save(context.kompiled.getAbsolutePath() + "/configuration.bin",
+        loader.saveOrDie(context.kompiled.getAbsolutePath() + "/configuration.bin",
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
-        
+
     }
 
-    private static void checkAnotherKompiled(File kompiled) {
+    private void checkAnotherKompiled(File kompiled) {
         File[] kompiledList = kompiled.getParentFile().listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -212,10 +170,8 @@ public class KompileFrontEnd {
         for (File aKompiledList : kompiledList) {
             if (!aKompiledList.getName().equals(kompiled.getName())) {
                 String msg = "Creating multiple kompiled definition in the same directory " +
-                        "is not allowed.";
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.CRITICAL, msg, "command line",
-                        aKompiledList.getAbsolutePath()));
+                        "is not allowed. Found " + aKompiledList.getName() + " and " + kompiled.getName() + ".";
+                kem.registerCriticalError(msg);
             }
         }
     }

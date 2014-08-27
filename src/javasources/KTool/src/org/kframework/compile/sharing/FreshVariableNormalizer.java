@@ -4,8 +4,8 @@ package org.kframework.compile.sharing;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.NonCachingVisitor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
      * Class implementing a visitor which constructs a substitution mapping the fresh variables
      * into variables with indices the number in the range [0, this.counter].
      */
-    class FreshVariableCounter extends BasicVisitor {
+    class FreshVariableCounter extends NonCachingVisitor {
 
         public FreshVariableCounter(Context context) {
             super(context);

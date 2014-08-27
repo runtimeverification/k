@@ -3,7 +3,7 @@ package org.kframework.backend.symbolic;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
+import org.kframework.kil.FileSource;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
@@ -11,7 +11,6 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.file.KPaths;
 
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -21,7 +20,7 @@ import com.google.common.collect.ImmutableSet;
  * Tag all the rules which are not part of K "dist/include" files with
  * 'symbolic' attribute. All the rules tagged with symbolic will suffer the
  * symbolic execution transformation steps.
- * 
+ *
  * @author andreiarusoaie
  */
 public class TagUserRules extends CopyOnWriteTransformer {
@@ -49,10 +48,8 @@ public class TagUserRules extends CopyOnWriteTransformer {
                 return super.visit(node, _);
             }
 
-        if ((!node.getFilename().startsWith(
-                KPaths.getKBase(false) + File.separator + "include")
-                && !node.getFilename().startsWith(
-                        org.kframework.kil.loader.Constants.GENERATED_FILENAME))
+        if (node.getSource() instanceof FileSource && (!((FileSource)node.getSource()).getFile().getAbsolutePath().startsWith(
+                KPaths.getKBase(false) + File.separator + "include"))
                 ) {
 
             // this handles the case when the user wants to
@@ -71,14 +68,8 @@ public class TagUserRules extends CopyOnWriteTransformer {
                 return super.visit(node, _);
             }
 
-            List<Attribute> attrs = node.getAttributes().getContents();
-            attrs.add(new Attribute(SymbolicBackend.SYMBOLIC, ""));
-
-            Attributes atts = node.getAttributes().shallowCopy();
-            atts.setContents(attrs);
-
-            node = node.shallowCopy();
-            node.setAttributes(atts);
+            node.getAttributes().add(Attribute.SYMBOLIC);
+            node.setAttributes(node.getAttributes().shallowCopy());
             return node;
         }
 

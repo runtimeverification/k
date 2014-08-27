@@ -11,7 +11,7 @@ module TESTECHIV2
                  | Exp "i<" Exp [strict, klabel('_i<_)]
                  | "(" Exp ")" [bracket, klabel('(_))]
                  | "L1Exp" Id ":" Exp
-		 | "Labe1Exp" Id
+         | "Labe1Exp" Id
 
     syntax Stmt ::= Id ":=" Exp [strict(2), klabel('_:=_)]
                   | "skip" [klabel('skip)]
@@ -21,12 +21,12 @@ module TESTECHIV2
                   | "while" Exp "do" Stmt [klabel('while_do_)]
                   | "{" Stmt "}" [bracket, klabel('{_})]
                   | "L1Stmt" Id ":" Stmt
-		  | "Labe1Stmt" Id
+          | "Labe1Stmt" Id
 
     syntax Code ::= Exp
                   | Stmt
                   | "L1Code" Id ":" Code
-		  | "Labe1Code" Id
+          | "Labe1Code" Id
 
     syntax KLabel ::= "Label1" Id
 
@@ -63,7 +63,7 @@ module TESTECHIV2
 
     rule <k1> if false then _:K else S2:Stmt => S2 ...</k1>
 
-    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else 
+    rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else
       skip ...</k1>
 
     syntax FExp ::= Id
@@ -78,13 +78,13 @@ module TESTECHIV2
                   | FExp FExp [seqstrict, klabel('__)]
                   | "(" FExp ")" [bracket, klabel('(_))]
                   | "L2FExp" Id ":" FExp
-		  | "Labe2FExp" Id
+          | "Labe2FExp" Id
 
     syntax Val ::= "lambda" Id "." FExp [binder, klabel('lambda_._)]
                  | Int
                  | Bool
                  | "L2Val" Id ":" Val
-		 | "Labe2" Id
+         | "Labe2" Id
 
     syntax KLabel ::= "Label2" Id
 
@@ -136,6 +136,6 @@ module TESTECHIV2
       syntax KResult ::= "Success1" | "Success2"
 
       rule <k1> .K </k1> <env1>... _:Id |-> (R1:KResult => Success1) ...</env1>
-	   <k2> R2:KResult => Success2 </k2> when R1 ==K R2 [transition]
+       <k2> R2:KResult => Success2 </k2> when R1 ==K R2 [transition]
 
 endmodule

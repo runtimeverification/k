@@ -5,12 +5,12 @@ module K-PRINTER
   syntax Builtin ::= Int | String | Float | Id
 
   syntax String ::= "printSKExp" "(" K ")"  [function]
-  rule printSKExp(B:Builtin) => printSKExpBuiltin(B) 
+  rule printSKExp(B:Builtin) => printSKExpBuiltin(B)
   rule printSKExp(L:KLabel(Ks:KList))
-    => "(" 
-        +String KLabel2String(L) 
-        +String " " 
-        +String printSKExps(L(Ks)) 
+    => "("
+        +String KLabel2String(L)
+        +String " "
+        +String printSKExps(L(Ks))
         +String ")"
     when isBuiltin(L(Ks)) =/=K true
 
@@ -20,7 +20,7 @@ module K-PRINTER
 
   rule printSKExps(L:KLabel(.KList)) => ""
 
-  
+
   syntax String ::= "printSKExpBuiltin" "(" K ")"  [function]
   rule printSKExpBuiltin(I:Int) => "((Int " +String Int2String(I) +String "))"
   rule printSKExpBuiltin(S:String) => "((String \"" +String S +String "\"))"
@@ -40,7 +40,7 @@ module K-PARSER
   rule parseSKExpCheck(pair(K:K, "")) => K
 
   syntax K ::= "parseSKExpHelper" "(" String ")" [function]
-  rule parseSKExpHelper(S:String) 
+  rule parseSKExpHelper(S:String)
     => parseSKExpHelper(substrString(S,0,1), ltrim(substrString(S,1, lengthString(S))))
 
   syntax K ::= "parseSKExpHelper" "(" String "," String ")"  [function]
@@ -59,7 +59,7 @@ module K-PARSER
     => parseSKExps(ltrim(substrString(S, I +Int 1, lengthString(S))), String2KLabel(substrString(S, 0, I))(.KList))
 
   syntax K ::= "parseSKExps" "(" String "," K ")"  [function]
-  rule parseSKExps(S:String, K:K) 
+  rule parseSKExps(S:String, K:K)
     => parseSKExps(substrString(S,0,1), S, K)
 
   syntax K ::= "parseSKExps" "(" String "," String "," K ")"  [function]
@@ -83,7 +83,7 @@ module K-PARSER
     => parseSKExpInjectedLabel(S1, S2, findString(S2, ")", 0))
     when S1 =/=String "String"
 
-  syntax K ::= "parseSKExpInjectedLabel" "(" String "," String "," Int ")" 
+  syntax K ::= "parseSKExpInjectedLabel" "(" String "," String "," Int ")"
     [function]
   rule parseSKExpInjectedLabel(S1:String, S2:String, I:Int)
     => parseSKExps(ltrim(substrString(S2, I +Int 1, lengthString(S2))), #parseToken(S1, ltrim(substrString(S2, 0, I))))
@@ -95,15 +95,15 @@ module K-PARSER
   rule parseSKExpInjectedString(S:String, 0)
     => parseSKExpInjectedString(S, 0, findString(S,"\"", 1))
 
-  syntax K ::= "parseSKExpInjectedString" "(" String "," Int "," Int ")" 
+  syntax K ::= "parseSKExpInjectedString" "(" String "," Int "," Int ")"
     [function]
   rule parseSKExpInjectedString(S:String, 0, I:Int)
     =>  parseSKExpInjectedString(S, 0, I, substrString(S,I -Int 1, 1))
 
-  syntax K ::= "parseSKExpInjectedString" "(" String "," 
-                                              Int "," 
-                                              Int "," 
-                                              String ")" 
+  syntax K ::= "parseSKExpInjectedString" "(" String ","
+                                              Int ","
+                                              Int ","
+                                              String ")"
     [function]
   rule parseSKExpInjectedString(S:String, 0, I:Int, "\\")
     => parseSKExpInjectedString(S, 0, findString(S,"\"",I +Int 1))

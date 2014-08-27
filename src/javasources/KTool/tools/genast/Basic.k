@@ -24,15 +24,15 @@ syntax Sentence ::=
 */
 
 code {
-	public Restrictions(String sort, String terminal, String pattern) {
-		if (sort != null && terminal != null)
-			System.out.println("A restriction can have only one of sort or terminal!");
-		if (sort != null)
-			this.sort = new Sort(sort);
-		else
-			this.terminal = new Terminal(terminal);
-		this.pattern = pattern;
-	}
+    public Restrictions(String sort, String terminal, String pattern) {
+        if (sort != null && terminal != null)
+            System.out.println("A restriction can have only one of sort or terminal!");
+        if (sort != null)
+            this.sort = new Sort(sort);
+        else
+            this.terminal = new Terminal(terminal);
+        this.pattern = pattern;
+    }
 }
 
 syntax ASTNode ::=
@@ -42,7 +42,7 @@ syntax ASTNode ::=
   String[sort, hidden] String[ownerModuleName, hidden] [Production]
 | "ProductionItem" [ProductionItem, abstract]
 
-enum ListType ::= "*"[List] | "+"[NeList]   
+enum ListType ::= "*"[List] | "+"[NeList]
 
 ----------
 

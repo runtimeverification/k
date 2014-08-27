@@ -4,13 +4,18 @@ package org.kframework.utils.errorsystem;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kframework.kil.Location;
+import org.kframework.kil.Source;
+
 public class KException {
     protected final ExceptionType type;
     private final KExceptionGroup exceptionGroup;
-    private final String filename;
-    private final String location;
+    private final Source source;
+    private final Location location;
     private final String message;
+    private final Throwable exception;
     private String compilationPhase = null;
+    private StringBuilder trace = new StringBuilder();
 
     private static final Map<ExceptionType, String> types;
     private static final Map<KExceptionGroup, String> labels;
@@ -29,22 +34,52 @@ public class KException {
         labels.put(KExceptionGroup.CRITICAL, "Critical");
     }
 
-    public KException(ExceptionType type, KExceptionGroup label, String message) {
-        this(type, label, message, null, null);
+    public static KException criticalError(String message) {
+        return new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message);
     }
 
-    public KException(ExceptionType type, KExceptionGroup label, String message, String filename, String location) {
+    public KException(ExceptionType type, KExceptionGroup label, String message) {
+        this(type, label, message, null, null, null, null);
+    }
+
+    public KException(ExceptionType type, KExceptionGroup label, String message, Throwable e) {
+        this(type, label, message, null, null, null, e);
+    }
+
+    public KException(ExceptionType type, KExceptionGroup label, String message, Source source, Location location) {
+        this(type, label, message, null, source, location, null);
+    }
+
+    public KException(
+            ExceptionType type,
+            KExceptionGroup label,
+            String message,
+            Source source,
+            Location location,
+            Throwable e) {
+        this(type, label, message, null, source, location, e);
+    }
+
+    public KException(
+            ExceptionType type,
+            KExceptionGroup label,
+            String message,
+            String compilationPhase,
+            Source source,
+            Location location,
+            Throwable exception) {
         super();
         this.type = type;
         this.exceptionGroup = label;
         this.message = message;
-        this.filename = filename;
-        this.location = location;
-    }
-    
-    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, String filename, String location) {
-        this(type,label,message,filename,location);
         this.compilationPhase = compilationPhase;
+        this.source = source;
+        this.location = location;
+        this.exception = exception;
+    }
+
+    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, Location location) {
+        this(type,label,message,compilationPhase,source,location, null);
     }
 
     public enum KExceptionGroup {
@@ -57,14 +92,52 @@ public class KException {
 
     @Override
     public String toString() {
+        return toString(false);
+    }
+
+    public String toString(boolean verbose) {
         return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
-            + (filename == null ? "" : "\n\tFile: " + filename)
-            + (location == null ? "" : "\n\tLocation: " + location)
-            + (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);
-        
+                + trace.toString() + traceTail()
+                + (source == null ? "" : "\n\tSource: " + source)
+                + (location == null ? "" : "\n\tLocation: " + location)
+                + (compilationPhase == null || !verbose ? "" : "\n\tCompilation Phase: " + compilationPhase);
     }
 
     public String getMessage() {
         return message;
+    }
+
+    public Throwable getException() {
+        return exception;
+    }
+
+    public ExceptionType getType() {
+        return type;
+    }
+
+    private String traceTail() {
+        if (identicalFrames > 1) {
+            return " * " + identicalFrames;
+        }
+        return "";
+    }
+
+    private int frames = 0;
+    private int identicalFrames = 1;
+    private String lastFrame;
+    public void addTraceFrame(String frame) {
+        if (frames < 1024) {
+            if (frame.equals(lastFrame)) {
+                identicalFrames++;
+            } else {
+                if (identicalFrames > 1) {
+                    trace.append(" * " + identicalFrames);
+                    identicalFrames = 1;
+                }
+                trace.append("\n  " + frame);
+                lastFrame = frame;
+                frames++;
+            }
+        }
     }
 }

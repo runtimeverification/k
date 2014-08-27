@@ -5,19 +5,19 @@ The brainfuck language uses a simple machine model consisting of the program and
 */
 
 module BF-SYNTAX
-  /*@ 
+  /*@
       The syntax of the language consists in eight commands: > < + - . , [ ]
-  */ 
+  */
   syntax Ignore ::= Token{~[\>\<\+\-\.\,\[\]\ \n\r\t]+}
                    [regex("[^\\>\\<\\+\\-\\.\\,\\[\\]\\ \n\r\t]+"), onlyLabel]
-  syntax Instruction  ::= ">" 
-  	 	      	| "<" 
-			| "+" 
-			| "-" 
-			| "."
-			| "," [onlyLabel]
-			| "[" Instructions "]"
-			| Ignore
+  syntax Instruction  ::= ">"
+                     | "<"
+            | "+"
+            | "-"
+            | "."
+            | "," [onlyLabel]
+            | "[" Instructions "]"
+            | Ignore
 
   /*@
       A Brainfuck program consists in a list of commands. Brainfuck ignores all characters except the eight commands +-<>[],. so no special syntax for comments is needed. Unfortunately, because of K parsing issues, we assume that programs contain only the language instructions.
@@ -29,15 +29,15 @@ module BF
   imports BF-SYNTAX
 
   /*@
-     The configuration of the language contains the K cell for Brainfuck programs, an array cell containing the byte array, a cell ptr for the instruction pointer and I/O streams. 
+     The configuration of the language contains the K cell for Brainfuck programs, an array cell containing the byte array, a cell ptr for the instruction pointer and I/O streams.
   */
-  configuration <T> 
-  		    <k> $PGM:Instructions </k>
-		    <array> .Map </array>
-		    <ptr> 0 </ptr>
-		    <in stream="stdin"> .List </in>
-		    <out stream="stdout"> .List </out>
-		</T>
+  configuration <T>
+              <k> $PGM:Instructions </k>
+            <array> .Map </array>
+            <ptr> 0 </ptr>
+            <in stream="stdin"> .List </in>
+            <out stream="stdout"> .List </out>
+        </T>
 
   /*@
     Unroll intructions into KList.
@@ -97,10 +97,10 @@ Brainfuck jumps ('[' and ']') are considered to be loops. Whenever the byte at t
   rule <k> [ Is:Instructions ] => .K ...</k>
        <ptr> P:Int </ptr>
        <array>... P |-> 0 ...</array>
-      
+
   rule I:Ignore => .K
 
   rule <ptr> I:Int </ptr>
-       <array> M:Map (. => I |-> 0) </array> when notBool(I in keys M) andBool (I >=Int 0) [structural]
-  
+       <array> M:Map (.Map => I |-> 0) </array> when notBool(I in keys(M)) andBool (I >=Int 0) [structural]
+
 endmodule

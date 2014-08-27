@@ -3,19 +3,19 @@ package org.kframework.backend.java.kil;
 
 /**
  * A variable which represents a concrete collection.
- * 
+ *
  * @author AndreiS
  */
 public class ConcreteCollectionVariable extends Variable {
 
     private final int concreteSize;
 
-    public ConcreteCollectionVariable(String name, String sort, boolean anonymous, int concreteSize) {
+    public ConcreteCollectionVariable(String name, Sort sort, boolean anonymous, int concreteSize) {
         super(name, sort, anonymous);
         this.concreteSize = concreteSize;
     }
 
-    public ConcreteCollectionVariable(String name, String sort, int concreteSize) {
+    public ConcreteCollectionVariable(String name, Sort sort, int concreteSize) {
         this(name, sort, false, concreteSize);
     }
 
@@ -29,9 +29,11 @@ public class ConcreteCollectionVariable extends Variable {
             return concreteCollectionSize() == otherVariable.concreteCollectionSize();
         } else if (term instanceof Collection) {
             Collection collection = (Collection) term;
-            return collection.hasFrame() || concreteCollectionSize() == collection.size();
-        } else if (term instanceof Variable) {
-            return true;
+            if (!collection.isConcreteCollection()) {
+                return collection.concreteSize() <= concreteSize;
+            } else {
+                return collection.concreteSize() == concreteSize;
+            }
         } else {
             return false;
         }
@@ -39,11 +41,13 @@ public class ConcreteCollectionVariable extends Variable {
 
     @Override
     public ConcreteCollectionVariable getFreshCopy() {
-        return new ConcreteCollectionVariable(
+        ConcreteCollectionVariable var = new ConcreteCollectionVariable(
                 Variable.getFreshVariable(sort()).name(),
                 sort(),
                 true,
                 concreteSize);
+        var.copyAttributesFrom(this);
+        return var;
     }
 
 }

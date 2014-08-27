@@ -31,8 +31,8 @@ public class BottomUpVisitor implements Visitor {
 
     @Override
     public void visit(BuiltinList node) {
-        if (node.hasFrame()) node.frame().accept(this);
         for (Term t : node.elementsLeft()) t.accept(this);
+        for (Term t : node.baseTerms()) t.accept(this);
         for (Term t : node.elementsRight()) t.accept(this);
     }
 
@@ -42,6 +42,9 @@ public class BottomUpVisitor implements Visitor {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
+        for (Term term : builtinMap.baseTerms()) {
+            term.accept(this);
+        }
         visit((Collection) builtinMap);
     }
 
@@ -50,9 +53,9 @@ public class BottomUpVisitor implements Visitor {
         for (Term term : builtinSet.elements()) {
             term.accept(this);
         }
-//        for (BuiltinSet.Operation operation : builtinSet.operations()) {
-//            operation.element().accept(this);
-//        }
+        for (Term term : builtinSet.baseTerms()) {
+            term.accept(this);
+        }
         visit((Collection) builtinSet);
     }
 
@@ -67,14 +70,14 @@ public class BottomUpVisitor implements Visitor {
         for (Cell cell : cellCollection.cells()) {
             cell.accept(this);
         }
+        for (Variable variable : cellCollection.baseTerms()) {
+            variable.accept(this);
+        }
         visit((Collection) cellCollection);
     }
 
     @Override
     public void visit(Collection collection) {
-        if (collection.hasFrame()) {
-            collection.frame().accept(this);
-        }
         visit((Term) collection);
     }
 
@@ -128,15 +131,10 @@ public class BottomUpVisitor implements Visitor {
         for (Term term : kCollection) {
             term.accept(this);
         }
-        visit((Collection) kCollection);
-    }
-
-    @Override
-    public void visit(KCollectionFragment kCollectionFragment) {
-        for (Term term : kCollectionFragment) {
-            term.accept(this);
+        if (kCollection.hasFrame()) {
+            kCollection.frame().accept(this);
         }
-        visit((Collection) kCollectionFragment);
+        visit((Collection) kCollection);
     }
 
     @Override
@@ -158,6 +156,11 @@ public class BottomUpVisitor implements Visitor {
     public void visit(ListLookup listLookup) {
         listLookup.list().accept(this);
         listLookup.key().accept(this);
+    }
+
+    @Override
+    public void visit(ListUpdate listUpdate) {
+        listUpdate.list().accept(this);
     }
 
     @Override
@@ -263,7 +266,7 @@ public class BottomUpVisitor implements Visitor {
     public void visit(Variable variable) {
         visit((Term) variable);
     }
-    
+
     @Override
     public void visit(BuiltinMgu mgu) {
         visit((Term) mgu);

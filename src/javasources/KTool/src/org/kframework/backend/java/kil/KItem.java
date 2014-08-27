@@ -1,33 +1,44 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.MetaK;
+import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
+import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Subsorts;
+import org.kframework.backend.java.util.Utils;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Production;
+import org.kframework.main.GlobalOptions;
+import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
+
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.MetaK;
-import org.kframework.backend.java.builtins.SortMembership;
-import org.kframework.backend.java.symbolic.BuiltinFunction;
-import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.PatternMatcher;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
-import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
-import org.kframework.utils.errorsystem.KExceptionManager;
-
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import com.google.inject.Inject;
 
 
 /**
@@ -48,169 +59,167 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("serial")
 public final class KItem extends Term {
 
+    private static final Table<Definition, CacheTableColKey, CacheTableValue> SORT_CACHE_TABLE = HashBasedTable.create();
+
     private final Term kLabel;
     private final Term kList;
     private final boolean isExactSort;
-    private final String sort;
+    private final Sort sort;
     private Boolean evaluable = null;
+    private Boolean anywhereApplicable = null;
 
-    /**
-     * Valid only if {@code kLabel} is a constructor. Must contain a sort
-     * which is subsorted or equal to {@code sort} when it is valid.
-     */
-    private final Set<String> possibleMinimalSorts;
+    public static KItem of(Term kLabel, Term kList, TermContext termContext) {
+        // TODO(AndreiS): remove defensive coding
+        kList = KCollection.upKind(kList, Kind.KLIST);
 
-    public KItem(Term kLabel, Term kList, TermContext termContext) {
+        if (kLabel instanceof KLabelConstant) {
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            if (kLabelConstant.isListLabel()) {
+                return kLabelConstant.getListTerminator();
+            }
+        }
+
+        return new KItem(kLabel, kList, termContext);
+    }
+
+    KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
         super(Kind.KITEM);
+        this.kLabel = kLabel;
+        this.kList = kList;
+        this.sort = sort;
+        this.isExactSort = isExactSort;
+    }
 
+    private KItem(Term kLabel, Term kList, TermContext termContext) {
+        super(Kind.KITEM);
         this.kLabel = kLabel;
         this.kList = kList;
 
         Definition definition = termContext.definition();
-        Context context = definition.context();
 
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-            Set<String> sorts = new HashSet<>();
-            Set<String> possibleMinimalSorts = new HashSet<>();
-
-            if (!K.do_kompilation) {
-                /**
-                 * Sort checks in the Java engine are not implemented as
-                 * rewrite rules, so we need to precompute the sort of
-                 * terms. However, right now, we also want to allow users
-                 * to provide user-defined sort predicate rules, e.g.
-                 *      ``rule isVal(cons V:Val) => true''
-                 * to express the same meaning as overloaded productions
-                 * which are not allowed to write in the current front-end.
-                 */
-                /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
-                for (KLabelConstant sortPredLabel : definition.sortPredLabels()) {
-                    Collection<Rule> rules = definition.functionRules().get(sortPredLabel);
-                    for (Rule rule : rules) {
-                        KItem predArg = rule.getSortPredArgument();
-                        if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
-                                && MetaK.matchable(kList, predArg.kList(), termContext).equals(BoolToken.TRUE)) {
-                            sorts.add(rule.getPredSort());
-                            if (kLabelConstant.isConstructor()) {
-                                possibleMinimalSorts.add(rule.getPredSort());
-                            }
-                        } else if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
-                                && MetaK.unifiable(kList, predArg.kList(), termContext).equals(BoolToken.TRUE)) {
-                            if (kLabelConstant.isConstructor()) {
-                                possibleMinimalSorts.add(rule.getPredSort());
-                            }
-                        }
-                    }
+            /* at runtime, checks if the result has been cached */
+            CacheTableColKey cacheTabColKey = null;
+            CacheTableValue cacheTabVal = null;
+            boolean enableCache = (Tool.instance() != Tool.KOMPILE)
+                    && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
+            if (enableCache) {
+                cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
+                cacheTabVal = SORT_CACHE_TABLE.get(definition, cacheTabColKey);
+                if (cacheTabVal != null) {
+                    sort = cacheTabVal.sort;
+                    isExactSort = cacheTabVal.isExactSort;
+                    return;
                 }
             }
 
-            List<Production> productions = kLabelConstant.productions();
-            if (productions.size() != 0) {
-                for (Production production : productions) {
-                    boolean mustMatch = true;
-                    boolean mayMatch = true;
-
-                    /* check if the production can match this KItem */
-                    // TODO(YilongL): I guess the only point of this check is to
-                    // distinguish between overloaded productions, however, once
-                    // we have passed the front-end the arguments of a K label
-                    // can violate its original declaration, therefore the code
-                    // below would need to be revised
-                    if (((KList) kList).size() == production.getArity()) {
-                        for (int i = 0; i < ((KList) kList).size(); ++i) {
-                            String childSort;
-                            Term childTerm = ((KList) kList).get(i);
-                            /* extract the real injected term when necessary */
-                            if (childTerm instanceof KItem){
-                                KItem kItem = (KItem) childTerm;
-                                if (isInjectionWrapper(kItem)) {
-                                    childTerm = extractInjectedTerm(kItem);
-                                }
-                            }
-                            childSort = childTerm.sort();
-
-                            if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
-                                mustMatch = false;
-
-                                if (kLabelConstant.isConstructor()) {
-                                    if (childTerm instanceof Variable) {
-                                        Set<String> set = Sets.newHashSet(production.getChildSort(i), childTerm.sort());
-                                        if (context.getCommonSubsorts(set).isEmpty()) {
-                                            mayMatch = false;
-                                        }
-                                    } else if (childTerm instanceof KItem) {
-                                        mayMatch = false;
-                                        if (((KItem) childTerm).possibleMinimalSorts() != null) {
-                                            for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
-                                                if (context.isSubsortedEq(production.getChildSort(i), pms)) {
-                                                    mayMatch = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    } else { // e.g., childTerm is a HOLE
-                                        mayMatch = false;
-                                    }
-
-                                    if (!mayMatch) {
-                                        // mayMatch == false => mustMatch == false
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (mustMatch) {
-                        sorts.add(production.getSort());
-                    }
-
-                    if (mayMatch && kLabelConstant.isConstructor()) {
-                        possibleMinimalSorts.add(production.getSort());
-                    }
-                }
-            } else {    /* productions.size() == 0 */
-                /* a list terminator does not have conses */
-                Set<String> listSorts = context.listLabels.get(kLabelConstant.label());
-                if (listSorts != null && ((KList) kList).size() == 0) {
-                    sorts.addAll(listSorts);
-                }
+            /* cache miss, compute sort information and cache it */
+            cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext);
+            if (enableCache) {
+                SORT_CACHE_TABLE.put(definition, cacheTabColKey, cacheTabVal);
             }
 
-            /* no production matches this KItem */
-            if (sorts.isEmpty()) {
-                sorts.add(kind.toString());
+            sort = cacheTabVal.sort;
+            isExactSort = cacheTabVal.isExactSort;
+        } else {
+            /* not a KLabelConstant or the kList contains a frame variable */
+            if (kLabel instanceof KLabelInjection) {
+                assert kList.equals(KList.EMPTY);
             }
 
-            sort = context.getGLBSort(sorts);
-            assert sort != null && !sort.equals("null"):
-                    "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
-            /* this sort is exact if the KLabel is a constructor and there are no possible smaller sorts */
-            isExactSort = kLabelConstant.isConstructor() && sorts.containsAll(possibleMinimalSorts);
-
-            if (kLabelConstant.isConstructor()) {
-                possibleMinimalSorts.add(sort);
-                Set<String> nonMinimalSorts = new HashSet<String>();
-                for (String s1 : possibleMinimalSorts) {
-                    for (String s2 : possibleMinimalSorts) {
-                        if (context.isSubsorted(s1, s2)) {
-                            nonMinimalSorts.add(s1);
-                        }
-                    }
-                }
-                possibleMinimalSorts.removeAll(nonMinimalSorts);
-                this.possibleMinimalSorts = possibleMinimalSorts;
-            } else {
-                this.possibleMinimalSorts = null;
-            }
-        } else {    /* not a KLabelConstant or the kList contains a frame variable */
-            sort = kind.toString();
+            sort = kind.asSort();
             isExactSort = false;
-            possibleMinimalSorts = null;
         }
+    }
+
+    private CacheTableValue computeSort(KLabelConstant kLabelConstant,
+            KList kList, TermContext termContext) {
+        Definition definition = termContext.definition();
+        Subsorts subsorts = definition.subsorts();
+
+        Set<Sort> sorts = Sets.newHashSet();
+        Set<Sort> possibleSorts = Sets.newHashSet();
+
+        if (Tool.instance() != Tool.KOMPILE) {
+            /**
+             * Sort checks in the Java engine are not implemented as
+             * rewrite rules, so we need to precompute the sort of
+             * terms. However, right now, we also want to allow users
+             * to provide user-defined sort predicate rules, e.g.
+             *      ``rule isVal(cons V:Val) => true''
+             * to express the same meaning as overloaded productions
+             * which are not allowed to write in the current front-end.
+             */
+            /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
+            for (Rule rule : definition.sortPredicateRulesOn(kLabelConstant)) {
+                if (MetaK.matchable(kList, rule.sortPredicateArgument().kList(), termContext)
+                        .equals(BoolToken.TRUE)) {
+                    sorts.add(rule.predicateSort());
+                } else if (MetaK.unifiable(kList, rule.sortPredicateArgument().kList(), termContext)
+                        .equals(BoolToken.TRUE)) {
+                    possibleSorts.add(rule.predicateSort());
+                }
+            }
+        }
+
+        for (Production production : kLabelConstant.productions()) {
+            boolean mustMatch = true;
+            boolean mayMatch = true;
+
+            if (kList.concreteSize() == production.getArity()) {
+                /* check if the production can match this KItem */
+                int idx = 0;
+                for (Term term : kList) {
+                    if (!mayMatch) {
+                        break;
+                    }
+
+                    Sort childSort = term.sort();
+                    if (!definition.context().isSubsortedEq(production.getChildSort(idx), childSort.toFrontEnd())) {
+                        mustMatch = false;
+                        /*
+                         * YilongL: the following analysis can be made more
+                         * precise by considering all possible sorts of the
+                         * term; however, it would be too expensive to
+                         * compute for our purpose
+                         */
+                        mayMatch = !term.isExactSort()
+                                && definition.context().hasCommonSubsort(production.getChildSort(idx), childSort.toFrontEnd());
+                    }
+                    idx++;
+                }
+            } else {
+                mustMatch = mayMatch = false;
+            }
+
+            if (mustMatch) {
+                sorts.add(production.getSort().toBackendJava());
+            } else if (mayMatch) {
+                possibleSorts.add(production.getSort().toBackendJava());
+            }
+        }
+
+        /*
+         * YilongL: we are taking the GLB of all sorts because it is the
+         * most precise sort information we can get without losing
+         * information. e.g. sorts = [Types, #ListOfId{","}, Exps] => sort =
+         * #ListOfId{","}. On the other hand, if the GLB doesn't exist, then
+         * we must have an ambiguous grammar with which this KItem cannot be
+         * correctly parsed.
+         */
+        Sort sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
+        if (sort == null) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                    KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " +
+                            this.toString() + "\nPossible least sorts are: " + sorts));
+        }
+        /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
+        boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
+
+        return new CacheTableValue(sort, isExactSort);
     }
 
     public boolean isEvaluable(TermContext context) {
@@ -228,166 +237,255 @@ public final class KItem extends Term {
             return false;
         }
 
-        if (kLabelConstant.label().startsWith("is")
+        if (kLabelConstant.isSortPredicate()
                 || !context.definition().functionRules().get(kLabelConstant).isEmpty()
-                || BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+                || context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
             evaluable = true;
         }
         return evaluable;
     }
 
+    public Term evaluateFunction(boolean copyOnShareSubstAndEval, TermContext context) {
+        return context.global.kItemOps.evaluateFunction(this, copyOnShareSubstAndEval, context);
+    }
+
+    public Term resolveFunctionAndAnywhere(boolean copyOnShareSubstAndEval, TermContext context) {
+        return context.global.kItemOps.resolveFunctionAndAnywhere(this, copyOnShareSubstAndEval, context);
+    }
+
+    public static class KItemOperations {
+
+        private final Tool tool;
+        private final JavaExecutionOptions javaOptions;
+        private final GlobalOptions globalOptions;
+
+        @Inject
+        public KItemOperations(
+                Tool tool,
+                JavaExecutionOptions javaOptions,
+                GlobalOptions globalOptions) {
+            this.tool = tool;
+            this.javaOptions = javaOptions;
+            this.globalOptions = globalOptions;
+        }
+
+        /**
+         * Evaluates this {@code KItem} if it is a predicate or function; otherwise,
+         * applies [anywhere] rules associated with this {@code KItem}
+         *
+         * @param copyOnShareSubstAndEval
+         *            specifies whether to use
+         *            {@link CopyOnShareSubstAndEvalTransformer} when applying rules
+         *
+         * @param context
+         *            a term context
+         *
+         * @return the reduced result on success, or this {@code KItem} otherwise
+         */
+        public Term resolveFunctionAndAnywhere(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
+            return kItem.isEvaluable(context) ?
+                    evaluateFunction(kItem, copyOnShareSubstAndEval, context) :
+                    kItem.applyAnywhereRules(copyOnShareSubstAndEval, context);
+        }
+
+        /**
+         * Evaluates this {@code KItem} if it is a predicate or function
+         *
+         * @param copyOnShareSubstAndEval
+         *            specifies whether to use
+         *            {@link CopyOnShareSubstAndEvalTransformer} when applying
+         *            user-defined function rules
+         *
+         * @param context
+         *            a term context
+         *
+         * @return the evaluated result on success, or this {@code KItem} otherwise
+         */
+        public Term evaluateFunction(KItem kItem, boolean copyOnShareSubstAndEval, TermContext context) {
+            if (!kItem.isEvaluable(context)) {
+                return kItem;
+            }
+
+            Definition definition = context.definition();
+            KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
+
+            KList kList = (KList) kItem.kList;
+
+            if (context.global.builtins.isBuiltinKLabel(kLabelConstant)) {
+                try {
+                    Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
+                    Term result = context.global.builtins.invoke(context, kLabelConstant, arguments);
+                    if (result != null) {
+                        assert result.kind() == Kind.KITEM:
+                            "unexpected kind " + result.kind() + " of term " + result + ";"
+                            + "expected kind " + Kind.KITEM + " instead";
+                        return result;
+                    }
+                } catch (IllegalAccessException | IllegalArgumentException e) {
+                } catch (InvocationTargetException e) {
+                    Throwable t = e.getTargetException();
+                    if (t instanceof Error) {
+                        throw (Error)t;
+                    }
+                    if (t instanceof KExceptionManager.KEMException) {
+                        throw (RuntimeException)t;
+                    }
+                    if (t instanceof RuntimeException) {
+                        if (globalOptions.verbose) {
+                            System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
+                            e.printStackTrace();
+                        }
+                    } else {
+                        throw new AssertionError("Builtin functions should not throw checked exceptions", e);
+                    }
+                }
+            }
+
+            /* evaluate a sort membership predicate */
+            // TODO(YilongL): maybe we can move sort membership evaluation after
+            // applying user-defined rules to allow the users to provide their
+            // own rules for checking sort membership
+            if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
+                Term checkResult = SortMembership.check(kItem, context.definition());
+                if (checkResult != kItem) {
+                    return checkResult;
+                }
+            }
+
+            /* apply rules for user defined functions */
+            if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
+                Term result = null;
+
+                LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
+                for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                    /* function rules should be applied by pattern match rather than unification */
+                    Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(kItem, rule, context);
+                    if (solutions.isEmpty()) {
+                        continue;
+                    }
+
+                    Map<Variable, Term> solution = solutions.iterator().next();
+                    if (tool == Tool.KOMPILE || javaOptions.concreteExecution()) {
+                        assert solutions.size() <= 1 :
+                            "[non-deterministic function definition]: more than one way to apply the rule\n"
+                            + rule + "\nagainst the function\n" + kItem;
+                    }
+
+                    Term rightHandSide = rule.rightHandSide();
+                    if (rule.hasUnboundVariables()) {
+                        // this opt. only makes sense when using pattern matching
+                        // because after unification variables can end up in the
+                        // constraint rather than in the form of substitution
+
+                        /* rename unbound variables */
+                        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.unboundVariables());
+                        /* rename rule variables in the rule RHS */
+                        rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
+                    }
+                    if (copyOnShareSubstAndEval) {
+                        rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                                solution,
+                                rule.reusableVariables().elementSet(),
+                                context);
+                    } else {
+                        rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+                    }
+
+                    if (rule.containsAttribute("owise")) {
+                        /*
+                         * YilongL: consider applying ``owise'' rule only when the
+                         * function is ground. This is fine because 1) it's OK not
+                         * to fully evaluate non-ground function during kompilation;
+                         * and 2) it's better to get stuck rather than to apply the
+                         * wrong ``owise'' rule during execution.
+                         */
+                        if (kItem.isGround()) {
+                            owiseResults.add(rightHandSide);
+                        }
+                    } else {
+                        if (javaOptions.concreteExecution()) {
+                            assert result == null || result.equals(rightHandSide):
+                                "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
+                        }
+                        result = rightHandSide;
+                    }
+
+                    /*
+                     * If the function definitions do not need to be deterministic, try them in order
+                     * and apply the first one that matches.
+                     */
+                    if (!javaOptions.deterministicFunctions
+                            && result != null) {
+                        return result;
+                    }
+                }
+
+                if (result != null) {
+                    return result;
+                } else if (!owiseResults.isEmpty()) {
+                    assert owiseResults.size() == 1 :
+                        "[non-deterministic function definition]: more than one ``owise'' rule for the function\n"
+                        + kItem;
+                    return owiseResults.iterator().next();
+                }
+            }
+
+            return kItem;
+        }
+    }
+
+    private boolean isAnywhereApplicable(TermContext context) {
+        if (anywhereApplicable != null) {
+            return anywhereApplicable;
+        }
+
+        anywhereApplicable = (kLabel instanceof KLabelConstant)
+                && !context.definition().anywhereRules()
+                        .get((KLabelConstant) kLabel).isEmpty();
+        return anywhereApplicable;
+    }
+
     /**
-     * Evaluates this {@code KItem} if it is a predicate or function
+     * Apply [anywhere] associated with this {@code KItem}.
      *
-     * @param constraint
-     *            the existing symbolic constraint that needs to be taken into
-     *            consideration when evaluating this function
+     * @param copyOnShareSubstAndEval
+     *            specifies whether to use
+     *            {@link CopyOnShareSubstAndEvalTransformer} when applying
+     *            [anywhere] rules
+     *
      * @param context
      *            a term context
-     * @return the evaluated result on success, or this {@code KItem} otherwise
+     *
+     * @return the result on success, or this {@code KItem} otherwise
      */
-    public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
-        if (!isEvaluable(context)) {
+    private Term applyAnywhereRules(boolean copyOnShareSubstAndEval, TermContext context) {
+        if (!isAnywhereApplicable(context)) {
             return this;
         }
 
         Definition definition = context.definition();
-
-        if (!(kLabel instanceof KLabelConstant)) {
-            return this;
-        }
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-        if (!(kList instanceof KList)) {
-            return this;
-        }
-        KList kList = (KList) this.kList;
-
-        if (BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
-            try {
-                Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-                Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
-                if (result != null) {
-                    assert result.kind() == Kind.KITEM:
-                            "unexpected kind " + result.kind() + " of term " + result + ";"
-                            + "expected kind " + Kind.KITEM + " instead";
-                    return result;
-                }
-            } catch (IllegalAccessException | IllegalArgumentException e) {
-            } catch (InvocationTargetException e) {
-                // TODO(YilongL): is reflection/exception really the best way to
-                // deal with builtin functions? builtin functions are supposed to be
-                // super-fast...
-                Throwable t = e.getTargetException();
-                if (t instanceof Error) {
-                    throw (Error)t;
-                }
-                if (t instanceof KExceptionManager.KEMException) {
-                    throw (RuntimeException)t;
-                }
-                if (t instanceof RuntimeException) {
-                    if (context.definition().context().globalOptions.verbose) {
-                        System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
-                        e.printStackTrace();
-                    }
-                } else {
-                    throw new AssertionError("Builtin functions should not throw checked exceptions", e);
-                }
-            }
-        }
-
-        /* evaluate a sort membership predicate */
-        // TODO(YilongL): maybe we can move sort membership evaluation after
-        // applying user-defined rules to allow the users to provide their
-        // own rules for checking sort membership
-        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1) {
-            Term checkResult = SortMembership.check(this, context.definition().context());
-            if (checkResult != this) {
-                return checkResult;
-            }
-        }
-
-        /* apply rules for user defined functions */
-        if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
-            Term result = null;
-
-            LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
-            for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                /* function rules should be applied by pattern match rather than unification */
-                Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
-                if (solutions.isEmpty()) {
-                    continue;
-                }
-
+        /* apply [anywhere] rules */
+        /* TODO(YilongL): make KLabelConstant dependent on Definition and store
+         * anywhere rules in KLabelConstant */
+        for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
+            /* anywhere rules should be applied by pattern match rather than unification */
+            Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
+            if (solutions.isEmpty()) {
+                continue;
+            } else {
                 Map<Variable, Term> solution = solutions.iterator().next();
-                if (K.do_kompilation || K.do_concrete_exec) {
-                    assert solutions.size() <= 1 :
-                         "[non-deterministic function definition]: more than one way to apply the rule\n"
-                            + rule + "\nagainst the function\n" + this;
-                }
-
                 Term rightHandSide = rule.rightHandSide();
-                if (rule.hasUnboundVariables()) {
-                    // this opt. only makes sense when using pattern matching
-                    // because after unification variables can end up in the
-                    // constraint rather than in the form of substitution
-
-                    /* rename unbound variables */
-                    Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.unboundVariables());
-                    /* rename rule variables in the rule RHS */
-                    rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
-                }
-                rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-
-                /* update the constraint */
-                if (K.do_kompilation || K.do_concrete_exec) {
-                    // in kompilation and concrete execution mode, the
-                    // evaluation of user-defined functions will not create
-                    // new constraints
+                if (copyOnShareSubstAndEval) {
+                    rightHandSide = rightHandSide.copyOnShareSubstAndEval(
+                            solution,
+                            rule.reusableVariables().elementSet(),
+                            context);
                 } else {
-                    if (constraint != null) {
-                        throw new RuntimeException(
-                                "Fix it; need to find a proper way to update "
-                                        + "the constraint without interferring with the "
-                                        + "potential ongoing normalization process");
-                    }
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
                 }
-
-                if (rule.containsAttribute("owise")) {
-                    /*
-                     * YilongL: consider applying ``owise'' rule only when the
-                     * function is ground. This is fine because 1) it's OK not
-                     * to fully evaluate non-ground function during kompilation;
-                     * and 2) it's better to get stuck rather than to apply the
-                     * wrong ``owise'' rule during execution.
-                     */
-                    if (this.isGround()) {
-                        owiseResults.add(rightHandSide);
-                    }
-                } else {
-                    if (K.do_concrete_exec) {
-                        assert result == null || result.equals(rightHandSide):
-                                "[non-deterministic function definition]: more than one rule can apply to the function\n" + this;
-                    }
-                    result = rightHandSide;
-                }
-
-                /*
-                 * If the function definitions do not need to be deterministic, try them in order
-                 * and apply the first one that matches.
-                 */
-                if (!K.deterministic_functions && result != null) {
-                    return result;
-                }
-            }
-
-            if (result != null) {
-                return result;
-            } else if (!owiseResults.isEmpty()) {
-                assert owiseResults.size() == 1 :
-                    "[non-deterministic function definition]: more than one ``owise'' rule for the function\n"
-                        + this;
-                return owiseResults.iterator().next();
+                return rightHandSide;
             }
         }
 
@@ -415,14 +513,12 @@ public final class KItem extends Term {
     public boolean isSymbolic() {
         // TODO(AndreiS): handle KLabel variables
         //return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
-        return kLabel instanceof KLabel && ((KLabel) kLabel).isFunction();
+        return kLabel instanceof KLabel
+                && (((KLabel) kLabel).isFunction() || ((KLabel) kLabel).isPattern());
     }
 
-    /**
-     * @return a {@code String} representation of the sort of this K application.
-     */
     @Override
-    public String sort() {
+    public Sort sort() {
         return sort;
     }
 
@@ -431,12 +527,9 @@ public final class KItem extends Term {
      *         {@code KItem} when its {@code KLabel} is a constructor;
      *         otherwise, null;
      */
-    public Set<String> possibleMinimalSorts() {
-        if (possibleMinimalSorts != null) {
-            return Collections.unmodifiableSet(possibleMinimalSorts);
-        } else {
-            return null;
-        }
+    public Set<Sort> possibleMinimalSorts() {
+        // TODO(YilongL): reconsider the use of this method when doing test generation
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -454,14 +547,16 @@ public final class KItem extends Term {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + kLabel.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + kList.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
-        }
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + kLabel.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + kList.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        return kLabel.hasCell() || kList.hasCell();
     }
 
     @Override
@@ -489,30 +584,153 @@ public final class KItem extends Term {
         return transformer.transform(this);
     }
 
-    /**
-     * Checks if the specified KItem is merely used as a wrapper for a non-K
-     * term.
-     *
-     * @param kItem
-     *            the specified KItem
-     * @return {@code true} if the specified KItem is an injection wrapper;
-     *         otherwise, {@code false}
-     */
-    public static boolean isInjectionWrapper(KItem kItem) {
-        return kItem.kLabel.getClass() == KLabelInjection.class && kItem.kList instanceof KList
-                && ((KList) kItem.kList).contents.isEmpty();
+    public Term expandPattern(SymbolicConstraint constraint, boolean narrowing, TermContext context) {
+        if (constraint == null) {
+            return this;
+        }
+
+        if (!(kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList)) {
+            return this;
+        }
+        KLabelConstant kLabel = (KLabelConstant) kLabel();
+        KList kList = (KList) kList();
+
+        List<ConstrainedTerm> results = new ArrayList<>();
+        KList inputKList = new KList(getPatternInput());
+        KList outputKList = new KList(getPatternOutput());
+        for (Rule rule : context.definition().patternRules().get(kLabel)) {
+            KList ruleInputKList = new KList(((KItem) rule.leftHandSide()).getPatternInput());
+            KList ruleOutputKList = new KList(((KItem) rule.leftHandSide()).getPatternOutput());
+            SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
+            unificationConstraint.add(inputKList, ruleInputKList);
+            unificationConstraint.simplify();
+            // TODO(AndreiS): there is only one solution here, so no list of constraints
+            if (unificationConstraint.isFalse()) {
+                continue;
+            }
+
+            if (narrowing) {
+                SymbolicConstraint globalConstraint = SymbolicConstraint.simplifiedConstraintFrom(context,
+                                constraint.equalities(),
+                                unificationConstraint,
+                                rule.requires());
+                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                    continue;
+                }
+            } else {
+                if (!unificationConstraint.isMatching(ruleInputKList.variableSet())) {
+                    continue;
+                }
+
+                SymbolicConstraint requires = SymbolicConstraint
+                        .simplifiedConstraintFrom(context, rule.requires(), unificationConstraint);
+                requires.orientSubstitution(ruleInputKList.variableSet());
+                if (!constraint.implies(requires, ruleInputKList.variableSet())) {
+                    continue;
+                }
+            }
+
+            unificationConstraint.add(outputKList, ruleOutputKList);
+            unificationConstraint.addAllThenSimplify(rule.ensures());
+            if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
+                results.add(SymbolicRewriter.constructNewSubjectTerm(
+                        rule,
+                        unificationConstraint,
+                        variableSet()));
+            }
+        }
+
+        if (results.size() == 1) {
+            /* TODO(YilongL): this seems problematic since it modifies the
+             * outside constraint while SymbolicConstraint#expandPatterns is
+             * still traversing it */
+            constraint.addAll(results.get(0).constraint());
+            return results.get(0).term().expandPatterns(constraint, narrowing, context);
+        } else {
+            return this;
+        }
+    }
+
+    public ImmutableList<Term> getPatternInput() {
+        assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
+        int inputCount = Integer.parseInt(
+                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        return ImmutableList.copyOf(((KList) kList).getContents()).subList(0, inputCount);
+    }
+
+    public ImmutableList<Term> getPatternOutput() {
+        assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
+        int inputCount = Integer.parseInt(
+                ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
+        return ImmutableList.copyOf(((KList) kList).getContents())
+                .subList(inputCount, ((KList) kList).getContents().size());
     }
 
     /**
-     * Extracts the injected non-K term inside the specified KItem.
-     *
-     * @param kItem
-     *            the specified KItem
-     * @return the injected term
+     * The sort information of this {@code KItem}, namely {@link KItem#sort} and
+     * {@link KItem#isExactSort}, depends only on the {@code KLabelConstant} and
+     * the sorts of its children.
      */
-    public static Term extractInjectedTerm(KItem kItem) {
-        assert isInjectionWrapper(kItem);
-        return ((KLabelInjection) kItem.kLabel).term();
+    private static final class CacheTableColKey {
+
+        final KLabelConstant kLabelConstant;
+        final Sort[] sorts;
+        final boolean[] bools;
+        final int hashCode;
+
+        public CacheTableColKey(KLabelConstant kLabelConstant, KList kList) {
+            this.kLabelConstant = kLabelConstant;
+            sorts = new Sort[kList.concreteSize()];
+            bools = new boolean[kList.concreteSize()];
+            int idx = 0;
+            for (Term term : kList) {
+                if (term instanceof KItem){
+                    KItem kItem = (KItem) term;
+                    if (kItem.kLabel instanceof KLabelInjection) {
+                        term = ((KLabelInjection) kItem.kLabel).term();
+                    }
+                }
+                sorts[idx] = term.sort();
+                bools[idx] = term.isExactSort();
+                idx++;
+            }
+            hashCode = computeHash();
+        }
+
+        private int computeHash() {
+            int hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + kLabelConstant.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + Arrays.deepHashCode(sorts);
+            hashCode = hashCode * Utils.HASH_PRIME + Arrays.hashCode(bools);
+            return hashCode;
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof CacheTableColKey)) {
+                return false;
+            }
+            CacheTableColKey key = (CacheTableColKey) object;
+            return kLabelConstant.equals(key.kLabelConstant)
+                    && Arrays.deepEquals(sorts, key.sorts)
+                    && Arrays.equals(bools, key.bools);
+        }
+    }
+
+    private static final class CacheTableValue {
+
+        final Sort sort;
+        final boolean isExactSort;
+
+        CacheTableValue(Sort sort, boolean isExactSort) {
+            this.sort = sort;
+            this.isExactSort = isExactSort;
+        }
     }
 
 }

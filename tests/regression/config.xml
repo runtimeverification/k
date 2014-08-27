@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+  <!-- Java Backend Regression Tests -->
+  <test
+      definition="issue#1/issue.k"
+      programs="issue#1"
+      results="issue#1"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue#2/issue.k"
+      programs="issue#2"
+      results="issue#2"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue#8/test.k"
+      programs="issue#8/programs"
+      results="issue#8/tests"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue#12/test.k"
+      programs="issue#12/programs"
+      results="issue#12/tests"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tokenconstants/issue.k"
+      programs="tokenconstants"
+      results="tokenconstants"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--directory" value="tokenconstants-java_kompiled" />
+    <program name="test.issue">
+      <krun-option  name="--directory" value="tokenconstants-java_kompiled" />
+    </program>
+  </test>
+
+  <test
+      definition="freshMOS/test.k"
+      programs="freshMOS/programs"
+      results="freshMOS/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--directory" value="freshMOS-java_kompiled" />
+    <all-programs>
+      <krun-option  name="--directory" value="freshMOS-java_kompiled" />
+    </all-programs>
+  </test>
+
+  <include file="java-rewrite-engine/config.xml" directory="java-rewrite-engine" />
+
+  <!-- Regression Tests -->
+  <test definition="issue552/issue.k" />
+  <test definition="issue529/issue.k" />
+  <test definition="defaultTerms1/issue.k" />
+  <test
+      definition="freshMOS/test.k"
+      programs="freshMOS/programs"
+      results="freshMOS/tests"
+      extension="test"
+      />
+  <test
+      definition="openCells1/issue.k"
+      programs="openCells1/programs"
+      results="openCells1/tests"
+      extension="issue"
+      >
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+  <test
+      definition="sets-issue/issue.k"
+      programs="sets-issue/programs"
+      results="sets-issue/tests"
+      extension="issue"
+      >
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+  <test definition="mapitem2klabel/issue.k" />
+  <test
+      definition="issue/issue.k"
+      programs="issue/programs"
+      results="issue/tests"
+      extension="issue"
+      >
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+  <test definition="issue403/issue.k" />
+  <test definition="issue425/issue.k" />
+  <test definition="issue466/issue.k" />
+  <test definition="issue483/issue.k" />
+  <test
+      definition="issue#313/test.k"
+      programs="issue#313/programs"
+      results="issue#313/tests"
+      extension="test"
+      >
+      <all-programs>
+        <krun-option name="--output" value="pretty" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+
+  <test
+      definition="strictness/issue.k"
+      programs="strictness/programs"
+      results="strictness/tests"
+      extension="issue"
+      >
+    <kompile-option name="--transition" value="bar" />
+    <all-programs>
+      <krun-option name="--color" value="off" />
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue580/issue.k"
+      programs="issue580/programs"
+      results="issue580/tests"
+      extension="issue" >
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+      <program name="test.issue">
+        <krun-option name="--output" value="pretty" />
+        <krun-option name="--search" />
+        <krun-option name="--pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
+      </program>
+  </test>
+
+  <test
+      definition="subsort-klabel/issue.k"
+      programs="subsort-klabel/programs"
+      results="subsort-klabel/tests"
+      extension="issue" >
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+      <program name="test.issue">
+        <krun-option name="--output" value="pretty" />
+      </program>
+  </test>
+
+  <test
+      definition="issue627/issue.k"
+      programs="issue627/programs"
+      results="issue627/tests"
+      extension="issue" >
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+
+  <test
+      definition="issue631/issue.k"
+      programs="issue631"
+      results="issue631"
+      extension="issue" >
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+
+  <test
+      definition="negative-test/issue.k"
+      programs="negative-test/programs"
+      results="negative-test/tests"
+      extension="issue" >
+    <program name="test.issue">
+      <krun-option name="--color" value="off" />
+    </program>
+  </test>
+
+  <test
+      definition="escapedKLabel/issue.k"
+      programs="escapedKLabel/programs"
+      results="escapedKLabel/tests"
+      extension="issue" >
+    <program name="test.issue">
+      <krun-option name="--output" value="pretty" />
+    </program>
+  </test>
+
+  <test
+      definition="tokenconstants/issue.k"
+      programs="tokenconstants"
+      results="tokenconstants"
+      extension="issue"
+      >
+    <program name="test.issue">
+      <krun-option name="--color" value="off" />
+    </program>
+  </test>
+
+  <test
+      definition="unparsing/issue.k"
+      programs="unparsing/programs"
+      results="unparsing/out/"
+      extension="issue"
+      >
+    <all-programs>
+        <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="addbrackets/issue.k"
+      programs="addbrackets/programs"
+      results="addbrackets/out/"
+      extension="issue"
+      >
+    <all-programs>
+      <krun-option name="--output" value="smart" />
+	    <krun-option name="--parser" value="kast --parser ground" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue647/issue.k"
+      programs="issue647"
+      results="issue647"
+      extension="issue"
+      >
+    <all-programs>
+      <krun-option name="--output" value="none" />
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue663/issue.k"
+      programs="issue663/programs"
+      results="issue663/out"
+      extension="issue"
+      exclude="b"
+      >
+      <program name="a.issue">
+        <krun-option name="--ltlmc" value="TrueLtl" />
+      </program>
+      <program name="b.issue">
+        <krun-option name="--ltlmc-file" value="b.formula" />
+      </program>
+  </test>
+  <test
+      definition="issue674/issue.k"
+      programs="issue674"
+      results="issue674"
+      extension="issue"
+      >
+    <all-programs>
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="follow/issue.k"
+      programs="follow"
+      results="follow"
+      extension="issue"
+      >
+    <all-programs>
+      <krun-option name="--output" value="none" />
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="lint/test.k"
+      programs="lint"
+      results="lint"
+      extension="test"
+      >
+    <kompile-option name="-w" value="none" />
+      <all-programs>
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+
+  <test
+      definition="string2int/test.k"
+      programs="string2int"
+      results="string2int"
+      extension="test"
+      >
+    <all-programs>
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue#36/issue.k"
+      programs="issue#36"
+      results="issue#36"
+	    extension="issue"
+      >
+    <all-programs>
+      <krun-option name="--output" value="pretty" />
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+
+<test
+      definition="issue#428/test.k"
+      programs="issue#428"
+      results="issue#428"
+      extension="test"
+      >
+    <all-programs>
+	  <krun-option name="--parser" value="kast --parser rules" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="issue677/test.k"
+      programs="issue677/programs"
+      results="issue677/tests"
+      extension="test"
+      >
+    <all-programs>
+      <krun-option name="--output" value="none" />
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="label-and-context/label-and-context.k"
+      programs="label-and-context"
+      results="label-and-context"
+      extension="issue"
+      >
+    <all-programs>
+      <krun-option name="--output" value="pretty" />
+      <krun-option name="--color" value="off" />
+      <krun-option name="--parser" value="cat"/>
+    </all-programs>
+  </test>
+
+  <test
+      definition="cool-issue/test.k"
+      programs="cool-issue/programs"
+      results="cool-issue/tests"
+      extension="test"
+      >
+    <all-programs>
+      <krun-option name="--color" value="off" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="profiler/test.k"
+      programs="profiler"
+      results="profiler"
+      extension="test"
+      >
+    <all-programs regex="true">
+      <krun-option name="--profile" />
+      <krun-option name="--output" value="raw" />
+    </all-programs>
+  </test>
+
+  <include file="kast/config.xml"
+           directory="kast"
+           programs="kast"
+           results="kast" />
+
+  <include file="generalized-strictness/config.xml"
+           directory="generalized-strictness"
+           programs="generalized-strictness"
+           results="generalized-strictness" />
+
+  <include file="termattributes/config.xml"
+           directory="termattributes"
+           programs="termattributes"
+           results="termattributes" />
+
+
+  <include file="float/tests/config.xml"
+           directory="float" />
+
+  <include file="symbolic-sets/tests/config.xml"
+           directory="symbolic-sets"
+           programs="symbolic-sets/tests"
+           results="symbolic-sets/tests" />
+
+  <include file="user_substitution/tests/config.xml"
+           directory="user_substitution"
+           programs="user_substitution/tests"
+           results="user_substitution/tests" />
+
+  <include file="list-applyMGU/tests/config.xml"
+           directory="list-applyMGU"
+           programs="list-applyMGU/tests"
+           results="list-applyMGU/tests" />
+
+  <include file="issue720/tests/config.xml"
+           directory="issue720"
+           programs="issue720/tests"
+           results="issue720/tests" />
+
+</tests>
+

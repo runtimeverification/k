@@ -11,12 +11,16 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.loader.*;
 import org.kframework.utils.StringUtil;
 
 public class LatexFilter extends BackendFilter {
     public LatexFilter(org.kframework.kil.loader.Context context) {
         super(context);
+    }
+
+    public LatexFilter(org.kframework.kil.loader.Context context, String indent) {
+        this(context);
+        this.indent = indent;
     }
 
     protected String endl = System.getProperty("line.separator");
@@ -27,6 +31,9 @@ public class LatexFilter extends BackendFilter {
     private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor(context);
     private boolean firstAttribute;
     private boolean hasTitle = false;
+
+    //The indent for a new line at the current position.
+    private String indent = "";
 
     public LinkedList<Boolean> getWantParens() {
         return wantParens;
@@ -43,6 +50,36 @@ public class LatexFilter extends BackendFilter {
 
     public StringBuilder getPreamble() {
         return preamble;
+    }
+
+    private void increaseIndent() {
+        indent += "  ";
+    }
+
+    private void decreaseIndent() {
+        indent = indent.substring(2);
+    }
+
+    private void newLine() {
+        result.append(endl).append(indent);
+    }
+
+    private boolean isOnNewLine() {
+        int lastEndl = result.lastIndexOf(endl);
+        return  //nested LatexFilter with no new lines yet
+                (lastEndl == -1 && result.length() == indent.length())
+                //top-level or nested LatexFilter with new lines
+                || result.length() == lastEndl + endl.length() + indent.length();
+    }
+
+    private void decreaseIndentAndNewLineIfNeeded() {
+        if (isOnNewLine()) {
+            decreaseIndent();
+            result.delete(result.length() - 2, result.length());
+        } else {
+            decreaseIndent();
+            newLine();
+        }
     }
 
     @Override
@@ -82,13 +119,18 @@ public class LatexFilter extends BackendFilter {
     public Void visit(Syntax syn, Void _) {
         result.append(endl + "\\begin{syntaxBlock}");
         firstProduction = true;
+        increaseIndent();
         super.visit(syn, _);
-        result.append(endl + "\\end{syntaxBlock}" + endl);
+        result.append(endl + "\\end{syntaxBlock}");
+        decreaseIndent();
+        newLine();
+        result.append("%");
+        newLine();
         return null;
     }
 
     @Override
-    public Void visit(Sort sort, Void _) {
+    public Void visit(NonTerminal sort, Void _) {
         result.append("{\\nonTerminal{\\sort{" + StringUtil.latexify(sort.getName()) + "}}}");
                 terminalBefore = false;
                 return null;
@@ -96,17 +138,21 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Production p, Void _) {
+        newLine();
         if (firstProduction) {
-            result.append("\\syntax{");
+            result.append("\\syntax");
             firstProduction = false;
         } else {
-            result.append("\\syntaxCont{");
+            result.append("\\syntaxCont");
         }
-        if (!(p.getItems().get(0) instanceof UserList) && p.containsAttribute(Constants.CONS_cons_ATTR)
-                && patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
-            String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
+      increaseIndent();
+      newLine();
+      result.append("{");
+        if (!(p.getItems().get(0) instanceof UserList)
+                && patternsVisitor.getPatterns().containsKey(p)) {
+            String pattern = patternsVisitor.getPatterns().get(p);
             int n = 1;
-            LatexFilter termFilter = new LatexFilter(context);
+            LatexFilter termFilter = new LatexFilter(context, indent);
             for (ProductionItem pi : p.getItems()) {
                 if (!(pi instanceof Terminal)) {
                     termFilter.setResult(new StringBuilder());
@@ -118,9 +164,12 @@ public class LatexFilter extends BackendFilter {
         } else {
             super.visit(p, _);
         }
-        result.append("}{");
+        result.append("}");
+        newLine();
+        result.append("{");
         this.visitNode(p.getAttributes());
         result.append("}");
+        decreaseIndent();
         return null;
     }
 
@@ -142,7 +191,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(UserList ul, Void _) {
         result.append("List\\{");
-        this.visitNode(new Sort(ul.getSort()));
+        this.visitNode(new NonTerminal(ul.getSort()));
         result.append(", \\mbox{``}" + StringUtil.latexify(ul.getSeparator()) + "\\mbox{''}\\}");
         terminalBefore = false;
         return null;
@@ -165,6 +214,9 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Cell c, Void _) {
+        if(!isOnNewLine()) {
+            newLine();
+        }
         wantParens.push(Boolean.FALSE);
         Ellipses ellipses = c.getEllipses();
         if (ellipses == Ellipses.LEFT) {
@@ -182,9 +234,16 @@ public class LatexFilter extends BackendFilter {
         if (colors.containsKey(c.getLabel())) {
             result.append("[" + colors.get(c.getLabel()) + "]");
         }
-        result.append("{" + StringUtil.latexify(c.getLabel() + StringUtil.emptyIfNull(c.getCellAttributes().get("multiplicity"))) + "}{");
+        result.append("{" + StringUtil.latexify(
+                c.getLabel() + StringUtil.emptyIfNull(c.getCellAttributes().get("multiplicity"))));
+        result.append("}");
+
+        result.append("{");
+        increaseIndent();
+        newLine();
         super.visit(c, _);
-        result.append("}" + endl);
+        decreaseIndentAndNewLineIfNeeded();
+        result.append("}");
         wantParens.pop();
         return null;
     }
@@ -193,15 +252,21 @@ public class LatexFilter extends BackendFilter {
         final boolean parens = wantParens.peek();
         final boolean hasBR = containsBR(col);
         if (col.isEmpty()) {
-            printEmpty(col.getSort());
+            printEmpty(col.getSort().getName());
             return null;
         }
         if (hasBR) {
+            if (!isOnNewLine()) {
+                newLine();
+            }
             result.append("\\begin{array}{@{}c@{}}");
+            increaseIndent();
         }
         List<Term> contents = col.getContents();
-        printList(contents, "\\mathrel{}");
+        printList(contents, "\\mathrel{}", true);
         if (hasBR) {
+            decreaseIndent();
+            newLine();
             result.append("\\end{array}");
         }
         return null;
@@ -216,12 +281,15 @@ public class LatexFilter extends BackendFilter {
         return false;
     }
 
-    private void printList(List<Term> contents, String str) {
+    private void printList(List<Term> contents, String str, boolean addNewLine) {
         boolean first = true;
         for (Term trm : contents) {
             if (first) {
                 first = false;
             } else {
+                if (addNewLine && !isOnNewLine()) {
+                    newLine();
+                }
                 result.append(str);
             }
             this.visitNode(trm);
@@ -243,7 +311,7 @@ public class LatexFilter extends BackendFilter {
             result.append("\\variable");
         }
         if (var.getSort() != null) {
-            result.append("[" + StringUtil.latexify(var.getSort()) + "]");
+            result.append("[" + StringUtil.latexify(var.getSort().getName()) + "]");
         }
         if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
             result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
@@ -270,7 +338,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(ListTerminator e, Void _) {
-        printEmpty(e.getSort());
+        printEmpty(e.getSort().getName());
         return null;
     }
 
@@ -285,9 +353,15 @@ public class LatexFilter extends BackendFilter {
         if (!"".equals(rule.getLabel())) {
             result.append("[" + rule.getLabel() + "]");
         }
-        result.append("{" + endl);
+        result.append("{");
+        increaseIndent();
+        increaseIndent();
+        newLine();
         this.visitNode(rule.getBody());
-        result.append("}{");
+        decreaseIndentAndNewLineIfNeeded();
+        result.append("}");
+        newLine();
+        result.append("{");
         if (rule.getRequires() != null) {
             this.visitNode(rule.getRequires());
         }
@@ -301,16 +375,25 @@ public class LatexFilter extends BackendFilter {
         result.append("{");
         // if (termComment) result.append("large");
         result.append("}");
-        result.append(endl);
+        decreaseIndent();
+        newLine();
+        result.append("%");
+        newLine();
         return null;
     }
 
     @Override
     public Void visit(org.kframework.kil.Context cxt, Void _) {
         result.append("\\kcontext");
-        result.append("{" + endl);
+        result.append("{");
+        increaseIndent();
+        increaseIndent();
+        newLine();
         this.visitNode(cxt.getBody());
-        result.append("}{");
+        decreaseIndentAndNewLineIfNeeded();
+        result.append("}");
+        newLine();
+        result.append("{");
         if (cxt.getRequires() != null) {
             this.visitNode(cxt.getRequires());
         }
@@ -320,7 +403,11 @@ public class LatexFilter extends BackendFilter {
         }
         result.append("}{");
         this.visitNode(cxt.getAttributes());
-        result.append("}" + endl);
+        result.append("}");
+        decreaseIndent();
+        newLine();
+        result.append("%");
+        newLine();
         return null;
     }
 
@@ -333,11 +420,21 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(Rewrite rew, Void _) {
         wantParens.push(Boolean.TRUE);
-        result.append("\\reduce{");
+        if (!isOnNewLine()) {
+            newLine();
+        }
+        result.append("\\reduce");
+        increaseIndent();
+        newLine();
+        result.append("{");
         this.visitNode(rew.getLeft());
-        result.append("}{");
+        result.append("}");
+        newLine();
+        result.append("{");
         this.visitNode(rew.getRight());
         result.append("}");
+        decreaseIndent();
+        newLine();
         wantParens.pop();
         return null;
     }
@@ -348,7 +445,7 @@ public class LatexFilter extends BackendFilter {
             super.visit(trm, _);
         else {
             String pattern = "\\left({#1}\\right)";
-            LatexFilter termFilter = new LatexFilter(context);
+            LatexFilter termFilter = new LatexFilter(context, indent);
             termFilter.getWantParens().push(Boolean.FALSE);
             termFilter.visitNode(trm.getContent());
             pattern = pattern.replace("{#1}", "{" + termFilter.getResult() + "}");
@@ -359,14 +456,14 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(TermCons trm, Void _) {
-        String pattern = patternsVisitor.getPatterns().get(trm.getCons());
+        String pattern = patternsVisitor.getPatterns().get(trm.getProduction());
         if (pattern == null) {
-            Production pr = context.conses.get(trm.getCons());
+            Production pr = trm.getProduction();
             patternsVisitor.visitNode(pr);
-            pattern = patternsVisitor.getPatterns().get(trm.getCons());
+            pattern = patternsVisitor.getPatterns().get(trm.getProduction());
         }
         int n = 1;
-        LatexFilter termFilter = new LatexFilter(context);
+        LatexFilter termFilter = new LatexFilter(context, indent);
         for (Term t : trm.getContents()) {
             termFilter.setResult(new StringBuilder());
             termFilter.visitNode(t);
@@ -384,22 +481,14 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Token t, Void _) {
-        result.append("\\constant[" + StringUtil.latexify(t.tokenSort()) + "]{" + StringUtil.latexify(t.value()) + "}");
-        return null;
-    }
-
-    @Override
-    public Void visit(MapItem mi, Void _) {
-        this.visitNode(mi.getKey());
-        result.append("\\mapsto");
-        this.visitNode(mi.getItem());
+        result.append("\\constant[" + StringUtil.latexify(t.tokenSort().getName()) + "]{" + StringUtil.latexify(t.value()) + "}");
         return null;
     }
 
     @Override
     public Void visit(KSequence k, Void _) {
-        if (k.getContents().isEmpty()) printEmpty(KSort.K.name());
-        else printList(k.getContents(), "\\kra");
+        if (k.getContents().isEmpty()) printEmpty(Sort.K.getName());
+        else printList(k.getContents(), "\\kra", false);
         return null;
 
     }
@@ -407,7 +496,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(KApp app, Void _) {
         if (app.getLabel() instanceof Token) {
-            result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
+            result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort().getName()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
         } else {
             this.visitNode(app.getLabel());
             result.append("(");
@@ -419,7 +508,7 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(KList list, Void _) {
-        printList(list.getContents(), "\\kcomma");
+        printList(list.getContents(), "\\kcomma", false);
         return null;
     }
 
@@ -428,7 +517,9 @@ public class LatexFilter extends BackendFilter {
         if (comment.getType() == LiterateCommentType.LATEX) {
             result.append("\\begin{kblock}[text]" + endl);
             result.append(comment.getValue());
-            result.append("\\end{kblock}" + endl);
+            result.append(endl + "\\end{kblock}" + endl);
+            result.append("%");
+            newLine();
         } else if (comment.getType() == LiterateCommentType.PREAMBLE) {
             preamble.append(comment.getValue());
             if (comment.getValue().contains("\\title{")) {
@@ -443,7 +534,9 @@ public class LatexFilter extends BackendFilter {
         if (comment.getType() == LiterateCommentType.LATEX) {
             result.append("\\begin{kblock}[text]" + endl);
             result.append(comment.getValue());
-            result.append("\\end{kblock}" + endl);
+            result.append(endl + "\\end{kblock}" + endl);
+            result.append("%");
+            newLine();
         } else if (comment.getType() == LiterateCommentType.PREAMBLE) {
             preamble.append(comment.getValue());
             if (comment.getValue().contains("\\title{")) {
@@ -455,10 +548,6 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public Void visit(Attribute entry, Void _) {
-        if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
-            return null;
-        if (context.isTagGenerated(entry.getKey()))
-            return null;
         if (context.isParsingTag(entry.getKey()))
             return null;
         if (entry.getKey().equals("latex"))
@@ -481,7 +570,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
-        for (Attribute entry : attributes.getContents()) {
+        for (Attribute entry : attributes.values()) {
             this.visitNode(entry);
         }
         return null;

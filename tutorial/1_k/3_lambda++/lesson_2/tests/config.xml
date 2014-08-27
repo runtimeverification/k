@@ -4,6 +4,10 @@
 
   <include file="../../../1_lambda/lesson_1/tests/config.xml"
            exclude="omega"
-           results="." />
+           results=".">
+    <kompile-option name="--superheat"
+                    value="strict" />
+<!-- Grigore: explain the superheat option above -->
+  </include>
 
 </tests>

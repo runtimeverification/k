@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BoolBuiltin;
@@ -22,17 +23,12 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSort;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.ListItem;
 import org.kframework.kil.ListTerminator;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.SetItem;
+import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
@@ -42,17 +38,10 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class MetaK {
-
-    public static final String cellSort = "CellSort";
-    public static final String cellFragment = "CellFragment";
 
     public static Term incrementCondition(Term condition, Term kresultCnd) {
         if (condition == null) {
@@ -61,23 +50,17 @@ public class MetaK {
         return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
     }
 
-    public static boolean isCellSort(String bigSort) {
-        return (bigSort.endsWith(cellSort)
-                ||bigSort.endsWith(cellFragment));
-    }
-
-    public static boolean isCellFragment(String bigSort) {
-        return (bigSort.endsWith(cellFragment));
-    }
-
+    @Deprecated
     public static String cellSort(String cellName) {
-        return StringUtil.makeProper(cellName) + cellSort;
+        return StringUtil.makeProper(cellName) + Sort.CELL_SORT_NAME;
     }
 
+    @Deprecated
     public static String cellFragment(String cellName) {
-        return StringUtil.makeProper(cellName) + cellFragment;
+        return StringUtil.makeProper(cellName) + Sort.CELL_FRAGMENT_NAME;
     }
 
+    @Deprecated
     public static String cellUnit(String cellName) {
         return "." + cellFragment(cellName);
     }
@@ -87,6 +70,7 @@ public class MetaK {
         public static final String heatingTag = "heat";
         public static final String coolingTag = "cool";
         public static final String hole = "[]";
+        @Deprecated
         public static final String freshCons = "Bool1FreshSyn";
         public static final String plusIntCons = "Int1PlusSyn";
         public static final String generatedTopCellLabel = "generatedTop";
@@ -108,13 +92,12 @@ public class MetaK {
         kModules.add("K-WRAPPERS-LABELS");
     };
 
-    public static Set<Attribute> anywheres = new HashSet<Attribute>();
-    static {
-        anywheres.add(new Attribute("anywhere", ""));
-        anywheres.add(new Attribute("macro", ""));
-        anywheres.add(new Attribute("predicate", ""));
-        anywheres.add(new Attribute("function", ""));
-    }
+    public static final ImmutableSet<Attribute> anywheres = ImmutableSet.of(
+            Attribute.FUNCTION,
+            Attribute.PREDICATE,
+            Attribute.PATTERN,
+            Attribute.MACRO,
+            Attribute.ANYWHERE);
 
     public static boolean isKModule(String key) {
         return kModules.contains(key);
@@ -134,55 +117,34 @@ public class MetaK {
             }
 
             @Override
-            public Void visit(org.kframework.kil.Context node, Void _) { 
+            public Void visit(org.kframework.kil.Context node, Void _) {
                 return null;
             }
 
             @Override
-            public Void visit(Rule node, Void _) { 
+            public Void visit(Rule node, Void _) {
                 return null;
             }
 
             @Override
-            public Void visit(Syntax node, Void _) { 
+            public Void visit(Syntax node, Void _) {
                 return null;
             }
         }.visitNode(node);
         if (result.size() == 0) {
-            GlobalSettings.kem
-                    .register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Internal compiler error --- Cannot find configuration.", node.getFilename(), node.getLocation()));
+            GlobalSettings.kem.registerInternalError("Internal compiler error --- Cannot find configuration.",
+                    node);
         }
         return result.get(0);
     }
 
     public static Term defaultTerm(Term v, org.kframework.kil.loader.Context context) {
-        String sort = v.getSort();
-        KSort ksort = KSort.getKSort(sort).mainSort();
+        Sort sort = v.getSort();
+        Sort ksort = sort.getKSort().mainSort();
         if (ksort.isDefaultable())
-            return new ListTerminator(ksort.toString(), null);
-        GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
-                .getLocation()));
+            return new ListTerminator(Sort.of(ksort.toString()), null);
+        GlobalSettings.kem.registerCompilerWarning("Don't know the default value for term " + v.toString() + ". Assuming .K", v);
         return KSequence.EMPTY;
-    }
-
-    /**
-     * Checks if the specified sort has been defined in {@link KSort}.
-     * 
-     * @param sort
-     *            the specified sort
-     * @return {@code true} if the specified sort has been defined in
-     *         {@code KSort}; otherwise, false
-     */
-    public static boolean isKSort(String sort) {
-        try {
-            KSort.valueOf(sort);
-        } catch (IllegalArgumentException e) {
-            // TODO(YilongL): I think we can return false for sure, since we
-            // have KList defined in KSort
-//            return sort.equals(KSorts.KLIST);
-            return false;
-        }
-        return true;
     }
 
     public static boolean isAnywhere(Rule r) {
@@ -200,23 +162,11 @@ public class MetaK {
     }
 
     public static Term wrap(Term t, String label, Ellipses ellipses) {
-        Cell cell = new Cell(t.getLocation(),t.getFilename());
+        Cell cell = new Cell(t.getLocation(),t.getSource());
         cell.setLabel(label);
         cell.setEllipses(ellipses);
         cell.setContents(t);
         return cell;
-    }
-
-
-
-    public static Variable freshVar(Set<Variable> vars, String sort) {
-        String prefix = "?";
-        int i = 0;
-        Variable v = new Variable(prefix + i, sort);
-        while (vars.contains(v)) {
-            v.setName(prefix + (++i));
-        }
-        return v;
     }
 
     public static int countRewrites(Term t, org.kframework.kil.loader.Context context) {
@@ -255,31 +205,13 @@ public class MetaK {
             public Void visit(KSequence node, Void _) { return null; }
 
             @Override
-            public Void visit(org.kframework.kil.List node, Void _) { return null; }
-
-            @Override
-            public Void visit(ListItem node, Void _) { return null; }
-
-            @Override
             public Void visit(TermCons node, Void _) { return null; }
-
-            @Override
-            public Void visit(org.kframework.kil.Set node, Void _) { return null; }
-
-            @Override
-            public Void visit(SetItem node, Void _) { return null; }
 
             @Override
             public Void visit(KApp node, Void _) { return null; }
 
             @Override
             public Void visit(KList node, Void _) { return null; }
-
-            @Override
-            public Void visit(Map node, Void _) { return null; }
-
-            @Override
-            public Void visit(MapItem node, Void _) { return null; }
 
             @Override
             public Void visit(UserList node, Void _) { return null; }
@@ -300,21 +232,21 @@ public class MetaK {
 
     public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
         if (prod.isSubsort()) {
-            final Variable freshVar = Variable.getFreshVar(prod.getItems().get(0).toString());
-            if (prod.containsAttribute("klabel")) {
+            final Variable freshVar = Variable.getFreshVar(Sort.of(prod.getItems().get(0).toString()));
+            if (prod.getKLabel() != null) {
                 return KApp.of(KLabelConstant.of(prod.getKLabel(), context), freshVar);
             }
             return freshVar;
         }
         if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
-            if (prod.getSort().equals(KSorts.KLABEL)) {
+            if (prod.getSort().equals(Sort.KLABEL)) {
                 return KLabelConstant.of(terminal, context);
-            } else if (prod.getSort().equals(BoolBuiltin.SORT_NAME)) {
+            } else if (prod.getSort().equals(Sort.BUILTIN_BOOL)) {
                 return BoolBuiltin.kAppOf(terminal);
-            } else if (prod.getSort().equals(IntBuiltin.SORT_NAME)) {
+            } else if (prod.getSort().equals(Sort.BUILTIN_INT)) {
                 return IntBuiltin.kAppOf(terminal);
-            } else if (prod.getSort().equals(StringBuiltin.SORT_NAME)) {
+            } else if (prod.getSort().equals(Sort.BUILTIN_STRING)) {
                 return StringBuiltin.kAppOf(terminal);
             } else {
                 return GenericToken.kAppOf(prod.getSort(), terminal);
@@ -322,18 +254,18 @@ public class MetaK {
         }
         if (prod.isLexical()) {
             return KApp.of(KLabelConstant.of("#token", context),
-                           StringBuiltin.kAppOf(prod.getSort()),
-                           Variable.getFreshVar("String"));
+                           StringBuiltin.kAppOf(prod.getSort().getName()),
+                           Variable.getFreshVar(Sort.STRING));
         }
-        TermCons t = new TermCons(prod.getSort(), prod.getCons(), context);
+        TermCons t = new TermCons(prod.getSort(), prod);
         if (prod.isListDecl()) {
             t.getContents().add(Variable.getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
             t.getContents().add(Variable.getFreshVar(prod.getSort()));
             return t;
         }
         for (ProductionItem item : prod.getItems()) {
-            if (item instanceof Sort) {
-                t.getContents().add(Variable.getFreshVar(((Sort) item).getName()));
+            if (item instanceof NonTerminal) {
+                t.getContents().add(Variable.getFreshVar(((NonTerminal) item).getSort()));
             }
         }
         return t;
@@ -341,38 +273,6 @@ public class MetaK {
 
     public static boolean isAnonVar(Variable node) {
         return node.getName().startsWith(Constants.anyVarSymbol);
-    }
-
-    public static boolean isBuiltinSort(String sort) {
-        /* TODO: replace with a proper table of builtins */
-        return sort.equals(BoolBuiltin.SORT_NAME)
-               || sort.equals(IntBuiltin.SORT_NAME)
-               || sort.equals(StringBuiltin.SORT_NAME)
-               || sort.equals("#Float")
-               /* LTL builtin sorts */
-//               || sort.equals("#LtlFormula")
-               || sort.equals("#Prop")
-               || sort.equals("#ModelCheckerState")
-               || sort.equals("#ModelCheckResult");
-    }
-
-    public static boolean isDataSort(String sort) {
-        return sort.equals(BoolBuiltin.SORT_NAME)
-                || sort.equals(IntBuiltin.SORT_NAME)
-                || sort.equals(StringBuiltin.SORT_NAME);
-    }
-
-    /**
-     * Checks if the specified sort is a computation sort, that is, K, KItem, or
-     * any sort other than those defined in {@link KSort}.
-     * 
-     * @param sort
-     *            the specified sort
-     * @return {@code true} if the specified sort is K, KItem, or any sort other
-     *         than those defined in {@code KSort}; otherwise, {@code false}
-     */
-    public static boolean isComputationSort(String sort) {
-        return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
     }
 
     public static String getListUnitLabel(String sep) {
@@ -403,22 +303,15 @@ public class MetaK {
         return cells;
     }
 
-    public static Collection createCollection(Term contents, KSort sort) {
+    public static Collection createCollection(Term contents, Sort sort) {
         List<Term> col = new ArrayList<Term>();
         col.add(contents);
-        switch (sort) {
-            case Bag:
-                return new Bag(col);
-            case List:
-                return new org.kframework.kil.List(col);
-            case Set:
-                return new org.kframework.kil.Set(col);
-            case Map:
-                return new Map(col);
-            case K:
-                return new KSequence(col);
-            default:
-                return null;
+        if (sort.equals(Sort.BAG)) {
+            return new Bag(col);
+        } else if (sort.equals(Sort.K)) {
+            return new KSequence(col);
+        } else {
+            return null;
         }
     }
 

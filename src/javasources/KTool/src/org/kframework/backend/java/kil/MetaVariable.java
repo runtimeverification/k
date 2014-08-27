@@ -5,6 +5,7 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 
@@ -17,12 +18,12 @@ import org.kframework.kil.ASTNode;
  */
 public class MetaVariable extends Token {
 
-    public static final String SORT_NAME = "MetaVariable";
+    public static final Sort SORT = Sort.META_VARIABLE;
 
     private final String name;
-    private final String sort;
+    private final Sort sort;
 
-    public MetaVariable(String name, String sort) {
+    public MetaVariable(String name, Sort sort) {
         this.name = name;
         this.sort = sort;
     }
@@ -31,12 +32,9 @@ public class MetaVariable extends Token {
         this(variable.name(), variable.sort());
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this meta variable.
-     */
     @Override
-    public String sort() {
-        return SORT_NAME;
+    public Sort sort() {
+        return SORT;
     }
 
     /**
@@ -51,7 +49,9 @@ public class MetaVariable extends Token {
      * Returns a {@link Variable} with the meta representation given by this meta variable.
      */
     public Variable variable() {
-        return new Variable(name, sort);
+        Variable var = new Variable(name, sort);
+        var.copyAttributesFrom(this);
+        return var;
     }
 
     /**
@@ -64,8 +64,16 @@ public class MetaVariable extends Token {
     /**
      * Returns a {@code String} representation of the sort of this meta variable.
      */
-    public String variableSort() {
+    public Sort variableSort() {
         return sort;
+    }
+
+    @Override
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
+        return hashCode;
     }
 
     @Override

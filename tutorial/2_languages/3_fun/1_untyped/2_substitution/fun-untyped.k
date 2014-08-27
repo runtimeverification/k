@@ -147,7 +147,7 @@ module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
   imports SUBSTITUTION
 
-  configuration <T color="yellow"> 
+  configuration <T color="yellow">
                   <k color="green"> $PGM:Exp </k>
                   <store color="white"> .Map </store>
                 </T>
@@ -194,7 +194,7 @@ module FUN-UNTYPED
   rule decomposeMatching(([H:Exp|T:Exp] => H,T),([V:Val,Vs:Vals] => V,[Vs]))
 
 /*@ We can reduce multiple bindings to one list binding, and then
-apply the usual desugaring of let into function application. 
+apply the usual desugaring of let into function application.
 It is important that the rule below is a macro, so let is eliminated
 immediately, otherwise it may interfere in ugly ways with substitution. */
 
@@ -212,8 +212,7 @@ be a value, so that we will never heat on it. */
 
 //  rule <k> & X => L ...</k>  <env>... X |-> L </env>
   syntax Val ::= "ref"
-  rule <k> ref V:Val => L ...</k> <store>... . => L |-> V ...</store>
-  when fresh(L:Int)
+  rule <k> ref V:Val => !L:Int ...</k> <store>... .Map => !L |-> V ...</store>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
   rule <k> L:Int := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
   rule V:Val; E => E

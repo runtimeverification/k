@@ -11,9 +11,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 /**
  * Remove meta-variables from the configuration.
- * 
+ *
  * @author radu
- * 
+ *
  */
 public class SentenceVariablesFilter extends ParseForestTransformer {
     private boolean config = false;
@@ -62,13 +62,13 @@ public class SentenceVariablesFilter extends ParseForestTransformer {
         if (config) {
             if (!var.getName().startsWith("$")) {
                 String msg = "In the configuration you can only have external variables, not: '" + var.getName() + "' (starts with '$').";
-                KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, var.getFilename(), var.getLocation());
+                KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, var.getSource(), var.getLocation());
                 throw new VariableTypeClashException(kex);
             }
         } else {
             if (var.getName().startsWith("$")) {
                 String msg = "You can have external variables only in the configuration: '" + var.getName() + "' (starts with '$').";
-                KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, var.getFilename(), var.getLocation());
+                KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, var.getSource(), var.getLocation());
                 throw new VariableTypeClashException(kex);
             }
         }

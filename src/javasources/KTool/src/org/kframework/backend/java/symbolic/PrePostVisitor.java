@@ -39,6 +39,17 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(BuiltinList node) {
+        preVisitor.resetProceed();
+        node.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        for (Term t : node.elementsLeft()) t.accept(this);
+        for (Term t : node.baseTerms()) t.accept(this);
+        for (Term t : node.elementsRight()) t.accept(this);
+        node.accept(postVisitor);
+    }
+
+    @Override
     public void visit(BuiltinMap builtinMap) {
         preVisitor.resetProceed();
         builtinMap.accept(preVisitor);
@@ -47,8 +58,8 @@ public class PrePostVisitor implements Visitor {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
-        if (builtinMap.hasFrame()) {
-            builtinMap.frame().accept(this);
+        for (Term term : builtinMap.baseTerms()) {
+            term.accept(this);
         }
         builtinMap.accept(postVisitor);
     }
@@ -61,8 +72,8 @@ public class PrePostVisitor implements Visitor {
         for (Term term : builtinSet.elements()) {
             term.accept(this);
         }
-        if (builtinSet.hasFrame()) {
-            builtinSet.frame().accept(this);
+        for (Term term : builtinSet.baseTerms()) {
+            term.accept(this);
         }
         builtinSet.accept(postVisitor);
     }
@@ -91,8 +102,8 @@ public class PrePostVisitor implements Visitor {
         for (Cell<?> cell : cellCollection.cells()) {
             cell.accept(this);
         }
-        if (cellCollection.hasFrame()) {
-            cellCollection.frame().accept(this);
+        for (Variable variable : cellCollection.baseTerms()) {
+            variable.accept(this);
         }
         cellCollection.accept(postVisitor);
     }
@@ -223,19 +234,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(KCollectionFragment kCollectionFragment) {
-        preVisitor.resetProceed();
-        kCollectionFragment.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        for (Term term : kCollectionFragment) {
-            term.accept(this);
-        }
-        if (kCollectionFragment.hasFrame())
-            kCollectionFragment.frame().accept(this);
-        kCollectionFragment.accept(postVisitor);
-    }
-
-    @Override
     public void visit(KLabel kLabel) {
         preVisitor.resetProceed();
         kLabel.accept(preVisitor);
@@ -251,6 +249,25 @@ public class PrePostVisitor implements Visitor {
     @Override
     public void visit(KSequence kSequence) {
         visit((KCollection) kSequence);
+    }
+
+    @Override
+    public void visit(ListLookup node) {
+        preVisitor.resetProceed();
+        node.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        node.list().accept(this);
+        node.key().accept(this);
+        node.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(ListUpdate node) {
+        preVisitor.resetProceed();
+        node.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        node.list().accept(this);
+        node.accept(postVisitor);
     }
 
     @Override
@@ -366,16 +383,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(ListLookup node) {
-        preVisitor.resetProceed();
-        node.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        node.list().accept(this);
-        node.key().accept(this);
-        node.accept(postVisitor);
-    }
-
-    @Override
     public void visit(ConstrainedTerm node) {
         // TODO(Traian): check if this fix is correct
         preVisitor.resetProceed();
@@ -384,17 +391,6 @@ public class PrePostVisitor implements Visitor {
         node.term().accept(this);
         node.lookups().accept(this);
         node.constraint().accept(this);
-        node.accept(postVisitor);
-    }
-
-    @Override
-    public void visit(BuiltinList node) {
-        preVisitor.resetProceed();
-        node.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        if (node.hasFrame()) node.frame().accept(this);
-        for (Term t : node.elementsLeft()) t.accept(this);
-        for (Term t : node.elementsRight()) t.accept(this);
         node.accept(postVisitor);
     }
 

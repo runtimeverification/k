@@ -409,8 +409,8 @@ part of the \K tutorial).  */
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Exp </k>
-                  <env color="violet"> .MyMap </env>
-                  <store color="white"> .MyMap </store>
+                  <env color="violet"> .Map </env>
+                  <store color="white"> .Map </store>
                 </T>
 
 
@@ -495,7 +495,7 @@ the current environment besides the function contents; the environment
 will be used at execution time to lookup all the variables that appear
 free in the function body (we want static scoping in FUN). */
 
-  syntax Val ::= closure(MyMap,Cases)
+  syntax Val ::= closure(Map,Cases)
   rule <k> fun Cases => closure(Rho,Cases) ...</k>  <env> Rho </env>
 
 /*@ \paragraph{Note:} The reader may want to get familiar with
@@ -638,7 +638,7 @@ its argument function.  When/If invoked, the special value replaces
 the current execution context with its own and continues the execution
 normally. */
 
-  syntax Val ::= "callcc" | cc(MyMap,K)
+  syntax Val ::= "callcc" | cc(Map,K)
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k>  <env> Rho </env>
   rule <k> cc(Rho,K) V:Val ~> _ => V ~> K </k>  <env> _ => Rho </env>
 
@@ -652,7 +652,7 @@ language in the \K tutorial and many other languages provided with the
 \K distribution.  The first ``anywhere'' rule below shows an elegant
 way to achieve the benefits of tail recursion in \K.  */
 
-  syntax KItem ::= env(MyMap)
+  syntax KItem ::= env(Map)
   // TODO(YilongL): how to get rid of this anywhere rule?
   rule (env(_) => .) ~> env(_)  [anywhere]
   rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>
@@ -665,28 +665,28 @@ discussed the \texttt{let} and \texttt{letrec} language constructs
 above. */
 
   syntax KItem ::= bindTo(Names,Exps)         [strict(2)]
-                 | bindTo(MyMap)
+                 | bindTo(Map)
                  | bind(Names)
 
   rule bindTo(Xs:Names,Vs:Vals) => bindTo(myGetMatching(Xs,Vs))
 
-  rule bindTo(.MyMap) => .  [structural]
-  rule <k> bindTo((X:Name |-> V:Val => .MyMap), _) ...</k>  // <= TODO(YilongL): need to implement iteration of builtin map in DataStructureToLookupUpdate
-       <env> Rho => Rho[X <- L] </env>
-       <store>... .MyMap => L |-> V ...</store> // YilongL: gotta use .MyMap
-    when fresh(L:Int)  [structural]
+  rule bindTo(.Map) => .  [structural]
+  rule <k> bindTo((X:Name |-> V:Val => .Map) _:Map) ...</k>  // <= TODO(YilongL): need to implement iteration of builtin map in DataStructureToLookupUpdate
+       <env> Rho => Rho[X <- !L:Int] </env>
+       <store>... .Map => !L |-> V ...</store>
+  [structural]
 
   rule bind(.Names) => .                  [structural]
   rule <k> bind(X:Name,Xs => Xs) ...</k>
-       <env> Rho => Rho[X <- L] </env>
-    when fresh(L:Int)                   [structural]
+       <env> Rho => Rho[X <- !L:Int] </env>
+  [structural]
 
   syntax KItem ::= assignTo(Names,Exps)  [strict(2)]
 
   rule <k> assignTo(.Names,.Vals) => . ...</k>            [structural]
   rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
        <env>... X |-> L ...</env>
-       <store>... .MyMap => L |-> V ...</store>              [structural]
+       <store>... .Map => L |-> V ...</store>              [structural]
 
 /*@ \subsubsection{Getters}
 

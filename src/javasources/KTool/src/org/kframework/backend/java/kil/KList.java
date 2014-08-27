@@ -1,14 +1,15 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -16,14 +17,14 @@ import org.kframework.kil.ASTNode;
  * usual syntax of K, it can be defined as the following:
  * <p>
  * <blockquote>
- * 
+ *
  * <pre>
  * syntax KList ::= List{K}{","}
  * </pre>
- * 
+ *
  * </blockquote>
  * <p>
- * 
+ *
  * @author AndreiS
  */
 @SuppressWarnings("serial")
@@ -31,35 +32,54 @@ public class KList extends KCollection {
 
     private static final String SEPARATOR_NAME = ",, ";
     private static final String IDENTITY_NAME = "." + Kind.KLIST;
-    
-    private String sort;
+    public static final KList EMPTY = new KList((Variable) null);
 
-    public KList(ImmutableList<Term> items, Variable frame) {
-        super(items, frame, Kind.KLIST);
+    /**
+     * A list of {@code Term}s contained in this {@code KList}.
+     */
+    private ImmutableList<Term> contents;
+
+    private Sort sort;
+
+    public KList(List<Term> items, Variable frame) {
+        super(frame, Kind.KLIST);
+
+        ImmutableList.Builder<Term> normalizedItemsBuilder = ImmutableList.builder();
+        for (Term term : items) {
+            // TODO (AndreiS): fix KItem projection
+            if (!(term instanceof Variable) && !(term instanceof KItemProjection) && (term.kind() == kind)) {
+                assert term instanceof KList :
+                    "associative use of KList(" + items + ", " + frame + ")";
+
+                KList kList = (KList) term;
+
+                assert !kList.hasFrame() : "associative use of KCollection";
+
+                normalizedItemsBuilder.addAll(kList.contents);
+            } else {
+                normalizedItemsBuilder.add(term);
+            }
+        }
+        this.contents = normalizedItemsBuilder.build();
     }
 
-    /*
-    public KList(ListIterator<Term> itemsIterator, Variable frame) {
-        super(itemsIterator, frame, "KList");
+    public KList(List<Term> items) {
+        this(items, null);
     }
-    */
 
     public KList(Variable frame) {
         super(frame, Kind.KLIST);
+        this.contents = ImmutableList.of();
     }
 
-    public KList(ImmutableList<Term> items) {
-        super(items, null, Kind.KLIST);
-    }
-
-    /*
-    public KList(ListIterator<Term> itemsIterator) {
-        super(itemsIterator, null, "KList");
-    }
-    */
-
-    public KList() {
-        super(null, Kind.KLIST);
+    /**
+     * Private constructor only used for building KList fragment.
+     * @param contents
+     * @param frame
+     */
+    private KList(ImmutableList<Term> contents, Variable frame) {
+        super(frame, Kind.KLIST);
+        this.contents = contents;
     }
 
     @Override
@@ -68,14 +88,19 @@ public class KList extends KCollection {
     }
 
     @Override
-    public String sort() {
+    public List<Term> getContents() {
+        return contents;
+    }
+
+    @Override
+    public Sort sort() {
         if (sort != null) {
             return sort;
         }
 
-        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : KSorts.KSEQUENCE;
+        sort = concreteSize() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KSEQUENCE;
         return sort;
-    }    
+    }
 
     @Override
     public String getSeparatorName() {

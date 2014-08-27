@@ -60,18 +60,26 @@ public class SetLookup extends Term implements DataStructureLookup {
     }
 
     @Override
-    public String sort() {
-        return BoolToken.SORT_NAME;
+    public Sort sort() {
+        return BoolToken.SORT;
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + base.hashCode();
-        }
+    public Type type() {
+        return Type.SET_LOOKUP;
+    }
+
+    @Override
+    protected int computeHash() {
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + base.hashCode();
         return hashCode;
+    }
+
+    @Override
+    protected boolean computeHasCell() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

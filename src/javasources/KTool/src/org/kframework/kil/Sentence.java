@@ -20,7 +20,7 @@ public class Sentence extends ModuleItem implements MutableParent<Term, Sentence
     Term body;
     Term requires = null;
     Term ensures = null;
-    
+
     public static enum Children {
         BODY, REQUIRES, ENSURES
     }
@@ -35,11 +35,10 @@ public class Sentence extends ModuleItem implements MutableParent<Term, Sentence
 
     public Sentence() {
         super();
-        attributes = new Attributes();
     }
 
     public Sentence(Element element) {
-        setLocation(element);
+        super(element);
 
         label = element.getAttribute(Constants.LABEL);
         Element elm = XML.getChildrenElementsByTagName(element, Constants.BODY).get(0);
@@ -57,11 +56,9 @@ public class Sentence extends ModuleItem implements MutableParent<Term, Sentence
         its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
         // assumption: <cellAttributes> appears only once
         if (its.size() > 0) {
-            attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
         } else {
-            if (attributes == null)
-                attributes = new Attributes();
-            attributes.addAttribute("generated", "generated");
+            getAttributes().addAttribute("generated", "generated");
         }
     }
 
@@ -108,7 +105,7 @@ public class Sentence extends ModuleItem implements MutableParent<Term, Sentence
             content += "ensures " + this.ensures + " ";
         }
 
-        return content + attributes;
+        return content + getAttributes();
     }
 
     public Term getEnsures() {

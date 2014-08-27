@@ -3,17 +3,12 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 /**
  * A collection of {@link Term}s.
- * 
+ *
  * @author AndreiS
  */
 @SuppressWarnings("serial")
@@ -30,7 +25,7 @@ public abstract class Collection extends Term {
      * Creates an instance of class {@code Collection} given its kind and a
      * frame variable. If the given frame is non-null, the kind of the frame
      * must be equal to the kind of the instance.
-     * 
+     *
      * @param frame
      *            the frame variable
      * @param kind
@@ -64,32 +59,34 @@ public abstract class Collection extends Term {
     }
 
     /**
-     * Returns true if this {@code Collection} does not have any contents and does not have a frame.
+     * Returns true if this {@code Collection} does not contain any content.
      */
     public boolean isEmpty() {
-        return size() == 0 && !hasFrame();
+        return concreteSize() == 0 && isConcreteCollection();
     }
 
     /**
-     * Returns the size of the contents of this {@code Collection}.
-     *
-     * @return the size of the contents
+     * Returns the number of elements or entries of this {@code Collection}.
      */
-    public abstract int size();
+    public abstract int concreteSize();
+
+    /**
+     * Returns true if this collection contains elements or entries, but does not contain patterns,
+     * functions or variables.
+     */
+    public abstract boolean isConcreteCollection();
+
+    /**
+     * Checks if this {@code Collection} term is a proper left-hand side view.
+     *
+     * @return {@code true} if this {@code Collection} term can be used as a
+     *         pattern on the left-hand side of a rule; otherwise, {@code false}
+     */
+    public abstract boolean isLHSView();
 
     @Override
-    public final boolean isSymbolic() {
+    public boolean isSymbolic() {
         return false;
-    }
-    
-    @Override
-    public int hashCode() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
