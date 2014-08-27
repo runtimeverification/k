@@ -4,15 +4,12 @@
  * copying the content of the original list to the newly created one.
  */
 
-
 #include <stdlib.h>
-
 
 struct listNode {
   int val;
   struct listNode *next;
 };
-
 
 struct listNode* copy(struct listNode *x)
 /*@ rule <k> $ => return ?y; ...</k>
@@ -48,6 +45,3 @@ struct listNode* copy(struct listNode *x)
   return y;
 }
 
-
-/*@ var v: Int */
-/*@ var A, B, C : Seq */

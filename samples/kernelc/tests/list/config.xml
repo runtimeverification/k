@@ -40,6 +40,12 @@
         <program name="reverse.c">
           <krun-option name="--prove" value="tests/list/reverse_spec.k" />
         </program>
+        <program name="append.c">
+          <krun-option name="--prove" value="tests/list/append_spec.k" />
+        </program>
+        <program name="copy.c">
+          <krun-option name="--prove" value="tests/list/copy_spec.k" />
+        </program>
     </test>
 
 </tests>
