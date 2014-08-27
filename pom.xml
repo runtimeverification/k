@@ -546,7 +546,6 @@
         <executions>
           <execution>
             <id>checkstyle-copyright</id>
-            <phase>verify</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -561,7 +560,6 @@
           </execution>
           <execution>
             <id>checkstyle-k</id>
-            <phase>test</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -575,7 +573,6 @@
           </execution>
           <execution>
             <id>checkstyle-java</id>
-            <phase>test</phase>
             <goals>
               <goal>check</goal>
             </goals>
