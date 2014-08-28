@@ -13,6 +13,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +28,20 @@ public class KExceptionManager {
     @Inject
     KExceptionManager(GlobalOptions options) {
         this.options = options;
+    }
+
+    public void installForUncaughtExceptions() {
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                printStackTrace(e);
+                exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
+                        "Uncaught exception thrown of type " + e.getClass().getSimpleName()
+                        + ".\nPlease file a bug report at https://github.com/kframework/k/issues", e));
+                print();
+            }
+        });
     }
 
     private void printStackTrace(Throwable e) {
@@ -141,21 +156,6 @@ public class KExceptionManager {
     }
 
     public void print() {
-        print(null);
-    }
-
-    public void print(Throwable t) {
-
-        if (t != null) {
-            if (!(t instanceof KEMException)) {
-                KException e = KException.criticalError("Failed to initialize application. "
-                        + "Please file a bug report at https://github.com/kframework/k/issues");
-                exceptions.add(e);
-            }
-            if (options.debug) {
-                t.printStackTrace();
-            }
-        }
         Collections.sort(exceptions, new Comparator<KException>() {
             @Override
             public int compare(KException arg0, KException arg1) {

@@ -12,12 +12,14 @@ import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
 import org.kframework.ktest.KTestFrontEnd;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 import org.kframework.utils.file.KPaths;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.ProvisionException;
+import com.google.inject.spi.Message;
 
 public class Main {
 
@@ -82,11 +84,17 @@ public class Main {
             }
             Injector injector = Guice.createInjector(modules);
             KExceptionManager kem = injector.getInstance(KExceptionManager.class);
+            kem.installForUncaughtExceptions();
             try {
                 boolean succeeded = injector.getInstance(FrontEnd.class).main();
                 System.exit(succeeded ? 0 : 1);
             } catch (ProvisionException e) {
-                kem.print(e);
+                kem.print();
+                for (Message m : e.getErrorMessages()) {
+                    if (!(m.getCause() instanceof KEMException)) {
+                        throw e;
+                    }
+                }
                 System.exit(1);
             }
         }

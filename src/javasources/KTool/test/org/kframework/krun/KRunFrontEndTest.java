@@ -10,9 +10,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRun;
 import org.kframework.utils.BaseTestCase;
 import org.kframework.utils.errorsystem.KEMExceptionProvider;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
-import org.mockito.Matchers;
-
 import com.google.common.base.Optional;
 
 public class KRunFrontEndTest extends BaseTestCase {
@@ -35,6 +32,6 @@ public class KRunFrontEndTest extends BaseTestCase {
                 new KEMExceptionProvider<KRun>(), new KEMExceptionProvider<Context>(),
                 new KEMExceptionProvider<Term>(), sw, kem, loader);
         frontend.main();
-        verify(kem).print(Matchers.<KEMException>any());
+        verify(kem).print();
     }
 }
