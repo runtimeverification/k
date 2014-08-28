@@ -503,9 +503,8 @@ public class HTMLFilter extends BackendFilter {
             return null;
 
         // The latex and/or html attributes are processed in the HTMLPatternVisitor, not here.
-        if (entry.getKey().equals(Attribute.keyOf("latex")))
-            return null;
-        if (entry.getKey().equals(Attribute.keyOf("html"))) {
+        if (entry.getKey().equals(Attribute.keyOf("latex")) 
+                || entry.getKey().equals(Attribute.keyOf("html"))) {
             return null;
         }
 
