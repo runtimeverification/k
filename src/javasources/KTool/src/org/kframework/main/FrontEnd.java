@@ -43,7 +43,10 @@ public abstract class FrontEnd {
         } catch (KExceptionManager.KEMException e) {
             // terminated with errors, so we need to return nonzero error code.
             succeeded = false;
-            kem.print(e);
+            if (globalOptions.debug) {
+                e.printStackTrace();
+            }
+            kem.print();
         }
         return succeeded;
     }
