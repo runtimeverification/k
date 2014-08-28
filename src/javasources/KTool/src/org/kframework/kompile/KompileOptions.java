@@ -44,18 +44,6 @@ public final class KompileOptions implements Serializable {
     @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the current directory.")
     public File directory = new File(".");
 
-//    PDF(true, false, PdfBackend.class, null, "autoinclude.k"),
-//    LATEX(true, false, LatexBackend.class, null, "autoinclude.k"),
-//    DOC(true, false, DocumentationBackend.class, null, "autoinclude.k"),
-//    HTML(true, false, HtmlBackend.class, null, "autoinclude.k"),
-//    MAUDE(false, true, KompileBackend.class, MaudeKRun.class, "autoinclude.k"),
-//    JAVA(false, true, JavaSymbolicBackend.class, JavaSymbolicKRun.class, "autoinclude-java.k"),
-//    UNPARSE(false, false, UnparserBackend.class, null, "autoinclude.k"),
-//    UNFLATTEN(false, false, UnflattenBackend.class, null, "autoinclude.k"),
-//    UNFLATTEN_JAVA(false, false, UnflattenJavaBackend.class, null, "autoinclude-java.k"),
-//    SYMBOLIC(false, true, SymbolicBackend.class, MaudeKRun.class, "autoinclude.k"),
-//    COQ(false, false, CoqBackend.class, null, "autoinclude-java.k");
-
     @Parameter(names="--backend", description="Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics. Experimental: 'doc' generates a .tex document, omitting rules unless specified.")
     public String backend = Backends.MAUDE;
 
