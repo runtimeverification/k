@@ -4,9 +4,9 @@ module LIST-PATTERN
   imports MAP
   imports KERNELC-SEMANTICS
 
-  syntax IntSeq ::= Int "::" IntSeq
-                  | "[]"
-                  > IntSeq "@" IntSeq   [function, left]
+  syntax IntSeq ::= Int "::" IntSeq     [smtlib(smt_list_cons)]
+                  | "[]"                [smtlib(smt_list_nil)]
+                  > IntSeq "@" IntSeq   [function, left, smtlib(smt_list_concat)]
                   | rev(IntSeq)         [function]
   syntax Int ::= len(IntSeq)            [function, smtlib(smt_list_len)]
                | sum(IntSeq)            [function, smtlib(smt_list_sum)]
@@ -51,4 +51,70 @@ module LIST-PATTERN
   rule list(null)([]) => .Map
   [pattern]
 
+  /* lseg pattern */
+  syntax Map ::= "lseg" "(" Pointer "," Pointer ")" "(" IntSeq ")"    [pattern(2)]
+  rule lseg(object(P:Int), Q:Pointer)(E:Int::L:IntSeq)
+    => object(P) |-> (
+          val  |-> tv(int, E)
+          next |-> tv(struct listNode *, ?PNext:Pointer))
+       lseg(?PNext, Q)(L)
+    requires object(P) =/=K Q
+    //ensures object(P) =/=K ?PNext
+    [pattern]
+  rule lseg(P:Pointer, P)([]) => .Map
+    [pattern]
+
+  rule P:Pointer |-> (
+          val  |-> tv(int, E:Int)
+          next |-> tv(struct listNode *, null))
+       F:Map
+    => lseg(P, null)(E::[])
+       F
+    [pattern-folding]
+  rule P:Pointer |-> (
+          val  |-> tv(int, E:Int)
+          next |-> tv(struct listNode *, Q:Pointer))
+       (Q |-> M:Map)
+       F:Map
+    => lseg(P, Q)(E::[])
+       (Q |-> M)
+       F
+    [pattern-folding]
+  rule P:Pointer |-> (
+          val  |-> tv(int, E:Int)
+          next |-> tv(struct listNode *, Q:Pointer))
+       lseg(Q, null)(L:IntSeq)
+       F:Map
+    => lseg(P, Q)(E::[])
+       lseg(Q, null)(L)
+       F
+    [pattern-folding]
+  rule lseg(P:Pointer, Q:Pointer)(L1:IntSeq)
+       lseg(Q, null)(L2:IntSeq)
+       F:Map
+    => lseg(P, null)(L1 @ L2)
+       F
+    [pattern-folding]
+  rule lseg(P:Pointer, R:Pointer)(L1:IntSeq)
+       lseg(R, Q:Pointer)(L2:IntSeq)
+       (Q |-> M:Map)
+       F:Map
+    => lseg(P, Q)(L1 @ L2)
+       (Q |-> M)
+       F
+    [pattern-folding]
+  rule lseg(P:Pointer, R:Pointer)(L1:IntSeq)
+       lseg(R, Q:Pointer)(L2:IntSeq)
+       lseg(Q, null)(L3:IntSeq)
+       F:Map
+    => lseg(P, Q)(L1 @ L2)
+       lseg(Q, null)(L3)
+       F
+    [pattern-folding]
+
+  rule (E::L1) @ L2 => E::(L1 @ L2)       [smt-lemma]
+  rule [] @ L => L                        [smt-lemma]
+  rule L @ [] => L                        [smt-lemma]
+  rule (L1 @ L2) @ L3 => L1 @ (L2 @ L3)   [smt-lemma]
 endmodule
+

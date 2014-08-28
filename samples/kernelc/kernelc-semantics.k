@@ -27,9 +27,9 @@ module KERNELC-SEMANTICS
   syntax Value ::= Int
                  | Pointer
                  | "undef"
-  syntax Pointer ::= "object" "(" Int ")"
+  syntax Pointer ::= "object" "(" Int ")"           [smtlib(smt_pointer_object)]
                    | "member" "(" Int "," Id ")"
-                   | "null"
+                   | "null"                         [smtlib(smt_pointer_null)]
 
 
   /*
