@@ -30,10 +30,10 @@ to the installation directory of the JDK (not to be mistaken with JRE).
 Having a GUI client is not enough. Most distributions have an installation
 option to make git accessible in the command line too.
 
-You can test if it works by calling `ant` in a Terminal.
+You can test if it works by calling `mvn -version` in a Terminal.
 
 ## (On Windows only) Visual C++ 2012 Redistributable Package
-Download here: 
+This is a dependency of the Z3 JNI library. You can download it here: 
 http://www.microsoft.com/en-us/download/details.aspx?id=30679
 
 Make sure to download the 64-bit version if you are using a 64-bit JRE,
@@ -44,22 +44,27 @@ Checkout this directory in your desired location and call `mvn package` from the
 directory to build the distribution. For convenient usage, you can update
 your $PATH with <checkout-dir>/target/release/k/bin (strongly recommended, but optional).
 
-You are also encouraged to set the environment variable MAVEN\_OPTS to `-XX:+TieredCompilation`,
+You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
 which will significantly speed up the incremental build process.
 
-# Work on Java code
-We here only give instructions for Eclipse, but similar instructions apply
-for other IDEs.
+# IDE Setup
 
+## Eclipse
 To autogenerate an Eclipse project for K, run `mvn eclipse:eclipse` on the
 command line. Then go to
 File->Import->General->Existing projects into workspace, and select
-the directory of the installation.  If you need to edit SDF-related code,
-you should install the Spoofax plugin and then also import
-src/main/sdf.
+the directory of the installation.  
+
+## IntelliJ IDEA
+
+IntelliJ IDEA comes with built-in maven integration. For more information, refer to
+the [IntelliJ IDEA wiki](http://wiki.jetbrains.net/intellij/Creating_and_importing_Maven_projects)
 
 # Run test suite
 To completely test the current version of the K framework, run `mvn verify`.
+This normally takes roughly 30 minutes on a fast machine. If you are interested only
+in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
+skip the lengthy `ktest` execution.
 
 # Work on Maude code
 Modify the Maude files found in src/main/maude and rerun `mvn package`.
@@ -74,7 +79,7 @@ The functionality to create a tagged release is currently incomplete.
 Assuming target/release/k/bin is in your path, you can compile definitions using
 the `kompile` command.  To execute a program you can use `krun`.
 
-# Cross platform compiation
+# Cross platform compilation
 To build a version of the K framework for a platform other than the current version,
 you can specify the OS and architecture using profiles. For example, to build a 32-bit
 windows release of the K framework, run `mvn install -P windows -P x86 -DskipTests -DskipKTest`.
@@ -96,7 +101,8 @@ Common error messages:
       `git` from the command line.
 
 If something unexpected happens and the project fails to build, try `mvn clean` and
-rebuild the entire project. This should not normally be necessary, however.
+rebuild the entire project. Generally speaking, however, the project should build incrementally
+without needing to be cleaned first.
 
 If you are doing work with snapshot dependencies, you can update them to the latest version by
 running maven with the -U flag.
