@@ -6,10 +6,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
@@ -42,6 +45,13 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
 
     public ComputeCellsOfInterest(Context context) {
         super("compute information for fast rewriting", context);
+    }
+
+    @Override
+    public ASTNode visit(Definition node, Void _) {
+        ConfigurationStructureVisitor cfgVisitor = new ConfigurationStructureVisitor(context);
+        cfgVisitor.visitNode(node);
+        return super.visit(node, _);
     }
 
     @Override
@@ -121,13 +131,34 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rewrite node, Void _)  {
         if (nestedCellCount == 0) {
-            /* TODO(YilongL): unable to handle the case where the top mentioned
-             * cell is inside a rewrite, e.g.:
+            /* YilongL: handle the case where the top mentioned cell is inside a
+             * rewrite, e.g.:
              *   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
              *         <busy> Busy => Busy -Set keys(H) </busy>
              *         <terminated>... .Set => SetItem(T) ...</terminated>
              */
-            compiledForFastRewriting = false;
+            Cell cell = null;
+            if (node.getLeft() instanceof Cell) {
+                cell = (Cell) node.getLeft();
+            } else if (node.getRight() instanceof Cell) {
+                cell = (Cell) node.getRight();
+            } else if (node.getLeft() instanceof Bag) {
+                Bag bag = (Bag) node.getLeft();
+                if (!bag.isEmpty()) {
+                    cell = (Cell) bag.getContents().get(0);
+                }
+            } else {
+                Bag bag = (Bag) node.getRight();
+                if (!bag.isEmpty()) {
+                    cell = (Cell) bag.getContents().get(0);
+                }
+            }
+
+            String parentCellLabel = context.getConfigurationStructureMap().get(cell).parent.id;
+            cellsOfInterest.add(parentCellLabel);
+            readCell2LHS.put(parentCellLabel, null);
+            writeCell2RHS.put(parentCellLabel, null);
+
             return node;
         }
 
