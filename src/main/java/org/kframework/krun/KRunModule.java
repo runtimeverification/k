@@ -2,35 +2,81 @@
 package org.kframework.krun;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Map;
-
 import org.kframework.backend.Backends;
-import org.kframework.backend.maude.krun.MaudeKRun;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.KilFactory;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
+import org.kframework.backend.maude.krun.MaudeExecutor;
+import org.kframework.backend.maude.krun.MaudeModelChecker;
+import org.kframework.backend.unparser.BinaryOutputMode;
+import org.kframework.backend.unparser.KASTOutputMode;
+import org.kframework.backend.unparser.NoOutputMode;
+import org.kframework.backend.unparser.OutputModes;
+import org.kframework.backend.unparser.PrettyPrintingOutputMode;
+import org.kframework.backend.unparser.PrintKRunGraph;
+import org.kframework.backend.unparser.PrintKRunResult;
+import org.kframework.backend.unparser.PrintSearchResult;
+import org.kframework.backend.unparser.PrintSearchResults;
+import org.kframework.backend.unparser.PrintTerm;
+import org.kframework.backend.unparser.PrintTransition;
+import org.kframework.backend.unparser.RawOutputMode;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.InitialConfigurationProvider;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
-import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.ExecutorDebugger;
+import org.kframework.krun.api.KRunGraph;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchResult;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.Transition;
+import org.kframework.krun.tools.Debugger;
+import org.kframework.krun.tools.Executor;
+import org.kframework.krun.tools.GuiDebugger;
+import org.kframework.krun.tools.LtlModelChecker;
+import org.kframework.krun.tools.Prover;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.transformation.ActivatedTransformationProvider;
+import org.kframework.transformation.BasicTransformationProvider;
+import org.kframework.transformation.ToolActivation;
+import org.kframework.transformation.Transformation;
+import org.kframework.transformation.TransformationCompositionProvider;
+import org.kframework.transformation.TransformationMembersInjector;
+import org.kframework.transformation.TransformationProvider;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.inject.DefinitionLoadingModule;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.InjectGeneric;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeParameter;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
+import com.google.inject.throwingproviders.ThrowingProviderBinder;
 
 public class KRunModule extends AbstractModule {
 
@@ -54,20 +100,111 @@ public class KRunModule extends AbstractModule {
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
         experimentalOptionsBinder.addBinding().toInstance(KRunOptions.Experimental.class);
         experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
+
+        bind(OutputModes.class).toInstance(options.output);
+
+        ThrowingProviderBinder throwingBinder = ThrowingProviderBinder.create(binder());
+
+        bindListener(Matchers.any(), new TypeListener() {
+
+            @Override
+            public <I> void hear(TypeLiteral<I> typeLiteral, TypeEncounter<I> typeEncounter) {
+                for (Field field : typeLiteral.getRawType().getDeclaredFields()) {
+                    if (field.getType() == Transformation.class && field.isAnnotationPresent(InjectGeneric.class)) {
+                      TypeToken<?> fieldType = TypeToken.of(typeLiteral.getFieldType(field).getType());
+                      TypeToken<? extends TransformationProvider<?>> genericProviderTypeToken = providerOf(fieldType);
+                      TypeLiteral<? extends TransformationProvider<?>> genericProviderTypeLiteral = (TypeLiteral<? extends TransformationProvider<?>>) TypeLiteral.get(genericProviderTypeToken.getType());
+                      typeEncounter.register(new TransformationMembersInjector<I>(field, typeEncounter.getProvider(Key.get(genericProviderTypeLiteral)), typeEncounter.getProvider(KExceptionManager.class)));
+                    }
+                }
+            }
+
+            private <T> TypeToken<TransformationProvider<T>> providerOf(TypeToken<T> transformationType) {
+                return new TypeToken<TransformationProvider<T>>() {}.where(new TypeParameter<T>() {}, transformationType);
+            }
+        });
+
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<ASTNode, String>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<ASTNode, String>>() {}));
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunState, ASTNode>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<KRunState, ASTNode>>() {}));
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<SearchResult, Map<String, Term>>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<SearchResult, Map<String, Term>>>() {}));
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunResult<?>, String>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<KRunResult<?>, String>>() {}));
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<Void, KRunResult<?>>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<Void, KRunResult<?>>>() {}));
+
+        bind(new TypeLiteral<TransformationProvider<Transformation<Transition, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<Transition, String>, PrintTransition>>() {});
+        bind(new TypeLiteral<TransformationProvider<Transformation<SearchResults, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<SearchResults, String>, PrintSearchResults>>() {});
+        bind(new TypeLiteral<TransformationProvider<Transformation<Map<String, Term>, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<Map<String, Term>, String>, PrintSearchResult>>() {});
+        bind(new TypeLiteral<TransformationProvider<Transformation<KRunGraph, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<KRunGraph, String>, PrintKRunGraph>>() {});
+        bind(new TypeLiteral<TransformationProvider<Transformation<String, Void>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<String, Void>, WriteOutput>>() {});
+
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<Void, Void>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<Void, KRunResult<?>, Void>>() {}));
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunState, String>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<KRunState, ASTNode, String>>() {}));
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<SearchResult, String>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<SearchResult, Map<String, Term>, String>>() {}));
+        throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunResult<?>, Void>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<KRunResult<?>, String, Void>>() {}));
+
+        MapBinder<ToolActivation, Transformation<Void, Void>> mainTools = MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<Void, Void>>() {});
+        MapBinder<ToolActivation, Transformation<Void, KRunResult<?>>> krunResultTools = MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<Void, KRunResult<?>>>() {});
+        mainTools.addBinding(new ToolActivation.OptionActivation("--debugger")).to(Debugger.Tool.class);
+        mainTools.addBinding(new ToolActivation.OptionActivation("--debugger-gui")).to(GuiDebugger.class);
+        krunResultTools.addBinding(new ToolActivation.OptionActivation("--ltlmc")).to(LtlModelChecker.Tool.class);
+        krunResultTools.addBinding(new ToolActivation.OptionActivation("--ltlmc-file")).to(LtlModelChecker.Tool.class);
+        krunResultTools.addBinding(new ToolActivation.OptionActivation("--prove")).to(Prover.Tool.class);
+
+        MapBinder<ToolActivation, Transformation<KRunResult<?>, String>> krunResultPrinters = MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<KRunResult<?>, String>>() {});
+        MapBinder<ToolActivation, Transformation<ASTNode, String>> astNodePrinters = MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<ASTNode, String>>() {});
+        MapBinder<ToolActivation, Transformation<KRunState, ASTNode>> krunStatePrinters = MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<KRunState, ASTNode>>() {});
+        MapBinder<ToolActivation, Transformation<SearchResult, Map<String, Term>>> searchResultPrinters = MapBinder.newMapBinder(
+                binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<SearchResult, Map<String, Term>>>() {});
+        krunResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.BINARY)).to(BinaryOutputMode.class);
+        krunResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.NONE)).to(NoOutputMode.class);
+        krunResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.RAW)).to(RawOutputMode.PrintKRunResult.class);
+        krunStatePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.RAW)).to(KASTOutputMode.PrintKRunState.class);
+        astNodePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.RAW)).to(RawOutputMode.PrintASTNode.class);
+        searchResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.RAW)).to(KASTOutputMode.PrintSearchResult.class);
+        krunResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.KAST)).to(PrintKRunResult.class);
+        krunStatePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.KAST)).to(KASTOutputMode.PrintKRunState.class);
+        astNodePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.KAST)).to(PrintTerm.class);
+        searchResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", OutputModes.KAST)).to(KASTOutputMode.PrintSearchResult.class);
+        for (OutputModes mode : OutputModes.values()) {
+            if (mode.isPrettyPrinting()) {
+                krunResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", mode)).to(PrintKRunResult.class);
+                krunStatePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", mode)).to(PrettyPrintingOutputMode.PrintKRunState.class);
+                searchResultPrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", mode)).to(PrettyPrintingOutputMode.PrintSearchResult.class);
+                astNodePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", mode)).to(PrintTerm.class);
+            }
+        }
+
+        Multibinder<Transformation<?, ?>> transformations = Multibinder.newSetBinder(binder(),
+                new TypeLiteral<Transformation<?, ?>>() {});
+        transformations.addBinding().to(PrintSearchResult.class);
+        transformations.addBinding().to(PrintKRunGraph.class);
+        transformations.addBinding().to(PrintTransition.class);
+
     }
 
     public static class CommonModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            install(new DefinitionLoadingModule());
+            MapBinder<String, Executor> executorBinder = MapBinder.newMapBinder(
+                    binder(), String.class, Executor.class);
+            executorBinder.addBinding(Backends.MAUDE).to(MaudeExecutor.class);
+            executorBinder.addBinding(Backends.SYMBOLIC).to(MaudeExecutor.class);
 
-            MapBinder<String, KRun> krunBinder = MapBinder.newMapBinder(
-                    binder(), String.class, KRun.class);
-            krunBinder.addBinding(Backends.MAUDE).to(MaudeKRun.class);
-            krunBinder.addBinding(Backends.SYMBOLIC).to(MaudeKRun.class);
+            MapBinder<String, LtlModelChecker> ltlBinder = MapBinder.newMapBinder(
+                    binder(), String.class, LtlModelChecker.class);
+            ltlBinder.addBinding(Backends.MAUDE).to(MaudeModelChecker.class);
+            ltlBinder.addBinding(Backends.SYMBOLIC).to(MaudeModelChecker.class);
+
+            bind(Debugger.class).to(ExecutorDebugger.class);
 
             bind(Term.class).toProvider(InitialConfigurationProvider.class);
+
+
         }
 
         @Provides
@@ -76,7 +213,17 @@ public class KRunModule extends AbstractModule {
         }
 
         @Provides
-        KRun getKRun(KompileOptions options, Map<String, Provider<KRun>> map) {
+        Executor getExecutor(KompileOptions options, Map<String, Provider<Executor>> map) {
+            return map.get(options.backend).get();
+        }
+
+        @Provides
+        LtlModelChecker getModelChecker(KompileOptions options, Map<String, Provider<LtlModelChecker>> map) {
+            return map.get(options.backend).get();
+        }
+
+        @Provides
+        Prover getProver(KompileOptions options, Map<String, Provider<Prover>> map) {
             return map.get(options.backend).get();
         }
 
@@ -89,23 +236,49 @@ public class KRunModule extends AbstractModule {
         }
     }
 
-
-    public static class NoSimulationModule extends AbstractModule {
+    public static class MainExecutionContextModule extends PrivateModule {
 
         private final KRunOptions options;
+        private final ImmutableList<Module> definitionSpecificModules;
 
-        public NoSimulationModule(KRunOptions options) {
+        public MainExecutionContextModule(KRunOptions options, Module... definitionSpecificModules) {
             this.options = options;
+            this.definitionSpecificModules = ImmutableList.copyOf(definitionSpecificModules);
         }
 
         @Override
         protected void configure() {
-            install(new CommonModule());
+            for (Module m : definitionSpecificModules) {
+                install(m);
+            }
 
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
-            bind(Term.class).annotatedWith(Main.class).to(Term.class);
-            bind(KRun.class).annotatedWith(Main.class).to(KRun.class);
+
+            bind(Term.class).annotatedWith(Main.class).to(Term.class).in(Singleton.class);
+            bind(SymbolicRewriter.class).annotatedWith(Main.class).to(SymbolicRewriter.class);
+            bind(GlobalContext.class).annotatedWith(Main.class).to(GlobalContext.class);
+            bind(KilFactory.class).annotatedWith(Main.class).to(KilFactory.class);
             bind(Context.class).annotatedWith(Main.class).to(Context.class);
+            bind(KompileOptions.class).annotatedWith(Main.class).to(KompileOptions.class);
+
+            bind(Debugger.class).annotatedWith(Main.class).to(Debugger.class);
+            bind(LtlModelChecker.class).annotatedWith(Main.class).to(LtlModelChecker.class);
+            bind(Executor.class).annotatedWith(Main.class).to(Executor.class);
+            bind(GuiDebugger.class).annotatedWith(Main.class).to(GuiDebugger.class);
+            bind(Prover.class).annotatedWith(Main.class).to(Prover.class);
+
+            expose(Term.class).annotatedWith(Main.class);
+            expose(SymbolicRewriter.class).annotatedWith(Main.class);
+            expose(GlobalContext.class).annotatedWith(Main.class);
+            expose(KilFactory.class).annotatedWith(Main.class);
+            expose(Context.class).annotatedWith(Main.class);
+            expose(KompileOptions.class).annotatedWith(Main.class);
+
+            expose(Debugger.class).annotatedWith(Main.class);
+            expose(LtlModelChecker.class).annotatedWith(Main.class);
+            expose(Executor.class).annotatedWith(Main.class);
+            expose(GuiDebugger.class).annotatedWith(Main.class);
+            expose(Prover.class).annotatedWith(Main.class);
         }
     }
 }

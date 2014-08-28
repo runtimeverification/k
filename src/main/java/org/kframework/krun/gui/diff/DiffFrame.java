@@ -36,8 +36,8 @@ public class DiffFrame extends javax.swing.JFrame {
         initComponents("");
         String htmlDiff;
         htmlDiff = Diff.comparableTest(
-                RunKRunCommand.transformTerm(srcState.getResult(), context),
-                RunKRunCommand.transformTerm(destState.getResult(), context));
+                RunKRunCommand.transformTerm(srcState.getResult(context), context),
+                RunKRunCommand.transformTerm(destState.getResult(context), context));
         diffEditor.setText(htmlDiff);
         src.setText("Config : " + srcState.getStateId());
         dest.setText("Config : " + destState.getStateId());

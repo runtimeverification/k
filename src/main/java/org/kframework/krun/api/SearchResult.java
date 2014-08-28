@@ -49,10 +49,14 @@ public class SearchResult {
                 }
                 rawValue = rawSubstitution.get(varString);
 
-                substitution.put(var.getName() + ":" + var.getSort(), KRunState.concretize(rawValue, context));
+                substitution.put(var.getName(), KRunState.concretize(rawValue, context));
             }
         }
         return substitution;
+    }
+
+    public Map<String, Term> getRawSubstitution() {
+        return rawSubstitution;
     }
 
     public KRunState getState() {

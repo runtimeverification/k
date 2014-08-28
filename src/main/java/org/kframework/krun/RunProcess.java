@@ -15,8 +15,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,40 +112,40 @@ public class RunProcess {
         if (startSymbol == null) {
             startSymbol = context.startSymbolPgm;
         }
-        byte[] content = value.getBytes();
+        String content = value;
         Source source = Sources.fromCommandLine("parameters");
 
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContentAsBytes(value);
+                    content = FileUtil.getFileContent(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast -e":
-                term = ProgramLoader.processPgm(value.getBytes(), source, startSymbol, context, ParserType.PROGRAM);
+                term = ProgramLoader.processPgm(value, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContentAsBytes(value);
+                    content = FileUtil.getFileContent(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser ground -e":
-                term = ProgramLoader.processPgm(value.getBytes(), source, startSymbol, context, ParserType.GROUND);
+                term = ProgramLoader.processPgm(value, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContentAsBytes(value);
+                    content = FileUtil.getFileContent(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContentAsBytes(value);
+                    content = FileUtil.getFileContent(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
@@ -175,20 +173,6 @@ public class RunProcess {
         }
 
         return term;
-    }
-
-    // check if the execution of Maude process produced some errors
-    public void printError(String content) {
-        if (content.contains("GLIBC")) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                    "Error: A known bug in the current version of the Maude rewrite engine\n"
-                            + "prohibits running K with I/O on certain architectures.\n"
-                            + "If non I/O programs and definitions work but I/O ones fail, \n"
-                            + "please let us know and we'll try helping you fix it.\n"));
-        } else {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                    content));
-        }
     }
 
     public String getStdout() {

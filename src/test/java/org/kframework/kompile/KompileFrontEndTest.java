@@ -9,11 +9,11 @@ import java.io.IOException;
 import org.junit.Test;
 import org.kframework.backend.Backend;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.utils.BaseTestCase;
+import org.kframework.utils.IOTestCase;
 import org.kframework.utils.file.JarInfo;
 import org.mockito.Mock;
 
-public class KompileFrontEndTest extends BaseTestCase {
+public class KompileFrontEndTest extends IOTestCase {
 
     @Mock
     Backend backend;

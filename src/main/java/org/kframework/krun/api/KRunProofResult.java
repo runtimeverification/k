@@ -1,13 +1,11 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.api;
 
-import org.kframework.kil.loader.Context;
-
 public class KRunProofResult<T> extends KRunResult<T> {
     private boolean proven;
 
-    public KRunProofResult(boolean proven, T result, Context context) {
-        super(result, context);
+    public KRunProofResult(boolean proven, T result) {
+        super(result);
         this.proven = proven;
     }
 

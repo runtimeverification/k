@@ -22,7 +22,6 @@ import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.Main;
-import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -30,17 +29,12 @@ import com.google.inject.Provider;
 public class KastFrontEnd extends FrontEnd {
 
     public static Module[] getModules(String[] args) {
-        try {
-            KastOptions options = new KastOptions();
+        KastOptions options = new KastOptions();
 
-            return new Module[] {
-                    new KastModule(options),
-                    new JCommanderModule(args),
-                    new CommonModule() };
-        } catch (ParameterException ex) {
-            printBootError(ex.getMessage());
-            return null;
-        }
+        return new Module[] {
+                new KastModule(options),
+                new JCommanderModule(args),
+                new CommonModule() };
     }
 
     private final KastOptions options;
@@ -75,7 +69,7 @@ public class KastFrontEnd extends FrontEnd {
         Sort sort = options.sort(context);
 
         try {
-            ASTNode out = ProgramLoader.processPgm(stringToParse.getBytes(), source, sort, context, options.parser);
+            ASTNode out = ProgramLoader.processPgm(stringToParse, source, sort, context, options.parser);
             StringBuilder kast;
             if (options.experimental.pretty) {
                 IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),

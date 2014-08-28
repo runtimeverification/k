@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.unparser.OutputModes;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Cell;
@@ -39,20 +40,6 @@ public final class KRunOptions {
     //TODO(dwightguth): remove in Guice 4.0
     @Inject
     public KRunOptions(Void v) {}
-
-    public enum OutputMode {
-        PRETTY(true), SMART(true), COMPATIBLE(true), KORE(true), RAW(false), BINARY(false), NONE(false), NO_WRAP(true);
-
-        private boolean isPrettyPrinting;
-
-        private OutputMode(boolean isPrettyPrinting) {
-            this.isPrettyPrinting = isPrettyPrinting;
-        }
-
-        public boolean isPrettyPrinting() {
-            return isPrettyPrinting;
-        }
-    }
 
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
@@ -151,9 +138,13 @@ public final class KRunOptions {
         if (io != null && io == true && experimental.ltlmc() != null) {
             GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --ltlmc");
         }
+        if (io != null && io == true && experimental.debugger()) {
+            GlobalSettings.kem.registerCriticalError("You cannot specify both --io on and --debugger");
+        }
         if (search()
                 || experimental.prove != null
-                || experimental.ltlmc() != null) {
+                || experimental.ltlmc() != null
+                || experimental.debugger()) {
             return false;
         }
         if (io == null) {
@@ -167,13 +158,13 @@ public final class KRunOptions {
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
             description="How to display Maude results. <mode> is either [pretty|smart|compatible|kore|raw|binary|none].")
-    public OutputMode output = OutputMode.PRETTY;
+    public OutputModes output = OutputModes.PRETTY;
 
-    public static class OutputModeConverter extends BaseEnumConverter<OutputMode> {
+    public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
 
         @Override
-        public Class<OutputMode> enumClass() {
-            return OutputMode.class;
+        public Class<OutputModes> enumClass() {
+            return OutputModes.class;
         }
     }
 

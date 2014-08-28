@@ -7,6 +7,8 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+import com.google.inject.name.Names;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -131,6 +133,26 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
 
     public void add(Attribute<?> e) {
         contents.put(e.getKey(), e);
+    }
+
+    public <T> void add(Class<T> cls, T value) {
+        add(new Attribute<T>(Key.get(cls), value));
+    }
+
+    public <T> void add(Class<T> cls, String string, T value) {
+        add(new Attribute<T>(Key.get(cls, Names.named(string)), value));
+    }
+
+    public <T> T typeSafeGet(Key<T> key) {
+        return (T) get(key).getValue();
+    }
+
+    public <T> T typeSafeGet(Class<T> cls) {
+        return typeSafeGet(Key.get(cls));
+    }
+
+    public <T> T typeSafeGet(Class<T> cls, String string) {
+        return typeSafeGet(Key.get(cls, Names.named(string)));
     }
 
     @Override

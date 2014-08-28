@@ -3,11 +3,7 @@ package org.kframework.krun.api;
 
 import java.io.Serializable;
 
-import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.StringBuiltin;
-import org.kframework.kil.loader.Context;
 
 /**
 A transitition in the transition system of a semantics. Used to represent edges in the search graph
@@ -33,39 +29,36 @@ public class Transition implements Serializable{
 
     private TransitionType type;
 
-    protected Context context;
-
-    protected Transition(Context context, TransitionType type, String label, ASTNode rule,
+    protected Transition(TransitionType type, String label, ASTNode rule,
         String readString) {
-        this.context = context;
         this.type = type;
         this.label = label;
         this.rule = rule;
         this.readString = readString;
     }
 
-    public static Transition rule(ASTNode rule, Context context) {
-        return new Transition(context, TransitionType.RULE, null, rule, null);
+    public static Transition rule(ASTNode rule) {
+        return new Transition(TransitionType.RULE, null, rule, null);
     }
 
-    public static Transition label(String label, Context context) {
-        return new Transition(context, TransitionType.LABEL, label, null, null);
+    public static Transition label(String label) {
+        return new Transition(TransitionType.LABEL, label, null, null);
     }
 
-    public static Transition unlabelled(Context context) {
-        return new Transition(context, TransitionType.UNLABELLED, null, null, null);
+    public static Transition unlabelled() {
+        return new Transition(TransitionType.UNLABELLED, null, null, null);
     }
 
-    public static Transition deadlock(Context context) {
-        return new Transition(context, TransitionType.DEADLOCK, null, null, null);
+    public static Transition deadlock() {
+        return new Transition(TransitionType.DEADLOCK, null, null, null);
     }
 
-    public static Transition reduce(Context context) {
-        return new Transition(context, TransitionType.REDUCE, null, null, null);
+    public static Transition reduce() {
+        return new Transition(TransitionType.REDUCE, null, null, null);
     }
 
-    public static Transition stdin(String readString, Context context) {
-        return new Transition(context, TransitionType.STDIN, null, null, readString);
+    public static Transition stdin(String readString) {
+        return new Transition(TransitionType.STDIN, null, null, readString);
     }
 
     public ASTNode getRule() {
@@ -116,23 +109,7 @@ public class Transition implements Serializable{
         return type;
     }
 
-    @Override
-    public String toString() {
-        if (type == TransitionType.RULE) {
-            Attributes a = rule.getAttributes();
-            UnparserFilter unparser = new UnparserFilter(true, context.colorOptions.color(), context.krunOptions.output, context);
-            unparser.visitNode(a);
-            return "\nRule tagged " + unparser.getResult() + " ";
-        } else if (type == TransitionType.LABEL) {
-            return "\nRule labelled " + label + " ";
-        } else if (type == TransitionType.REDUCE) {
-            return "\nMaude 'reduce' command ";
-        } else if (type == TransitionType.UNLABELLED) {
-            return "\nUnlabelled rule ";
-        } else if (type == TransitionType.DEADLOCK) {
-            return "\nDeadlock ";
-        } else {
-            return "\nRead " + StringBuiltin.of(readString).value();
-        }
+    public String getReadString() {
+        return readString;
     }
 }

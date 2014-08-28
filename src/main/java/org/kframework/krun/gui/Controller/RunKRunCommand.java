@@ -6,37 +6,32 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.krun.api.KRun;
-import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunGraph;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
-
+import org.kframework.krun.tools.Debugger;
 import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class RunKRunCommand {
 
-    protected Term initialConfiguration;
-    protected Context context;
-    protected KRun krun;
-    protected KRunDebugger debugger;
+    private final Term initialConfiguration;
+    protected final Context context;
+    protected final Debugger debugger;
 
-    public RunKRunCommand(Term initialConfiguration, KRun krun, Context context) throws KRunExecutionException {
+    public RunKRunCommand(Term initialConfiguration, Debugger debugger, Context context) throws KRunExecutionException {
         super();
         this.context = context;
         this.initialConfiguration = initialConfiguration;
-        this.krun = krun;
-        debugger = krun.debug(initialConfiguration);
+        this.debugger = debugger;
     }
 
-    public RunKRunCommand(KRunState state, KRun krun, Context context) {
+    public RunKRunCommand(KRunState state, Debugger debugger, Context context) {
         super();
         this.context = context;
         this.initialConfiguration = state.getRawResult();
-        this.krun = krun;
-        DirectedGraph<KRunState, Transition> dg = new KRunGraph();
+        this.debugger = debugger;
+        KRunGraph dg = new KRunGraph();
         dg.addVertex(state);
-        debugger = krun.debug(dg);
     }
 
     public DirectedGraph<KRunState, Transition> firstStep() {
@@ -62,8 +57,9 @@ public class RunKRunCommand {
     public DirectedGraph<KRunState, Transition> getCurrentGraph() {
         return debugger.getGraph();
     }
-    public KRun getKrun() {
-        return krun;
+
+    public Debugger getDebugger() {
+        return debugger;
     }
 
     public Context getContext() {

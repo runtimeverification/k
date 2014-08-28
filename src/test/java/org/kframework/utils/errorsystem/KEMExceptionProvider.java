@@ -2,10 +2,9 @@
 package org.kframework.utils.errorsystem;
 
 import org.kframework.main.GlobalOptions;
+import org.kframework.transformation.TransformationProvider;
 
-import com.google.inject.Provider;
-
-public class KEMExceptionProvider<T> implements Provider<T> {
+public class KEMExceptionProvider<T> implements TransformationProvider<T> {
 
     @Override
     public T get() {

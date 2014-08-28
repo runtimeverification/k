@@ -12,7 +12,6 @@ import org.kframework.backend.FirstStep;
 import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
-import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.backend.symbolic.AddConditionToConfig;
 import org.kframework.backend.symbolic.AddPathCondition;
 import org.kframework.backend.symbolic.ReplaceConstants;
@@ -80,11 +79,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.RunProcess;
-import org.kframework.krun.api.KRunResult;
-import org.kframework.krun.api.SearchResults;
-import org.kframework.krun.api.SearchType;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
@@ -222,8 +217,8 @@ public abstract class RLBackend extends BasicBackend implements Backend {
         }
 
         // setup the runner
-        MaudeKRun mkr = null;//new MaudeKRun(context, Stopwatch.instance());
-        mkr.setBackendOption("io", false);
+        //MaudeKRun mkr = null;//new MaudeKRun(context, Stopwatch.instance());
+        //mkr.setBackendOption("io", false);
         /****************
          * end *
          ****************/
@@ -274,17 +269,17 @@ public abstract class RLBackend extends BasicBackend implements Backend {
         //}
 
         for (Term pgm : programs) {
-            try {
+            //try {
                 System.out.println("Verifying PGM(" + programs.indexOf(pgm)
                         + ") ...");
                 // System.out.println("PGM: " + pgm);
-                KRunResult<SearchResults> result = mkr.search(null, null,
-                        SearchType.FINAL, defaultPattern, pgm,
-                        defaultPatternInfo);
-                System.out.println("Result: " + result + "\n\n");
-            } catch (KRunExecutionException e) {
-                e.printStackTrace();
-            }
+                //KRunResult<SearchResults> result = mkr.search(null, null,
+                //        SearchType.FINAL, defaultPattern, pgm,
+                //        defaultPatternInfo);
+                //System.out.println("Result: " + result + "\n\n");
+            //} catch (KRunExecutionException e) {
+            //    e.printStackTrace();
+            //}
         }
     }
 

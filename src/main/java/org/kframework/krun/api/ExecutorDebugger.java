@@ -3,7 +3,6 @@ package org.kframework.krun.api;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -21,25 +20,37 @@ import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.Transition.TransitionType;
+import org.kframework.krun.tools.Debugger;
+import org.kframework.krun.tools.Executor;
 import org.kframework.parser.DefinitionLoader;
+import com.google.inject.Inject;
+
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
 import java.util.Map.Entry;
 
-public class KRunApiDebugger implements KRunDebugger {
-    private KRun krun;
+public class ExecutorDebugger implements Debugger {
     private Integer currentState;
-    private DirectedGraph<KRunState, Transition> graph;
+    private KRunGraph graph;
     private BidiMap<Integer, KRunState> states;
 
     private static Rule defaultPattern;
     private static RuleCompilerSteps defaultPatternInfo;
 
-    protected final Context context;
+    private final Context context;
+    private final Executor executor;
 
-    public KRunApiDebugger(KRun krun, Term cfg, Context context) throws KRunExecutionException {
+    @Inject
+    public ExecutorDebugger(
+            Executor executor,
+            Context context) throws KRunExecutionException {
         this.context = context;
+        this.executor = executor;
+    }
+
+    @Override
+    public void start(Term initialConfiguration) throws KRunExecutionException {
         try {
             org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
             ASTNode pattern = DefinitionLoader.parsePattern(
@@ -57,32 +68,20 @@ public class KRunApiDebugger implements KRunDebugger {
             e.report();
         }
 
-        this.krun = krun;
-        KRunState initialState = new KRunState(cfg, context);
+        KRunState initialState = new KRunState(initialConfiguration);
         graph = new KRunGraph();
         graph.addVertex(initialState);
         states = new DualHashBidiMap<Integer, KRunState>();
         putState(initialState);
-        KRunState reduced = krun.step(cfg, 0).getResult();
+        KRunState reduced = executor.step(initialConfiguration, 0).getResult();
         //reduce may return same node as initial node
         //so we add it just if it is different from the initial node
         if(putState(reduced)){
             graph.addVertex(reduced);
-            graph.addEdge(Transition.reduce(context), initialState, reduced);
+            graph.addEdge(Transition.reduce(), initialState, reduced);
             currentState = reduced.getStateId();
         }else {
             currentState = initialState.getStateId();
-        }
-    }
-
-    public KRunApiDebugger(KRun krun, DirectedGraph<KRunState, Transition> graph, Context context) {
-        this.context = context;
-        this.krun = krun;
-        this.currentState = null;
-        this.graph = graph;
-        states = new DualHashBidiMap<Integer, KRunState>();
-        for (KRunState state : graph.getVertices()) {
-            putState(state);
         }
     }
 
@@ -99,7 +98,7 @@ public class KRunApiDebugger implements KRunDebugger {
         return false;
     }
 
-    public DirectedGraph<KRunState, Transition> getGraph() {
+    public KRunGraph getGraph() {
         return graph;
     }
 
@@ -129,7 +128,7 @@ public class KRunApiDebugger implements KRunDebugger {
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
         for (int i = 0; steps == null || i < steps; i++) {
-            KRunState nextStep = krun.step(getState(currentState).getRawResult(), 1).getResult();
+            KRunState nextStep = executor.step(getState(currentState).getRawResult(), 1).getResult();
             Entry<Integer, KRunState> prevValue = containsValue(nextStep);
             if (prevValue!=null) {
                 nextStep = prevValue.getValue();
@@ -147,7 +146,7 @@ public class KRunApiDebugger implements KRunDebugger {
                 putState(nextStep);
             }
             graph.addVertex(nextStep);
-            graph.addEdge(Transition.unlabelled(context), getState(currentState), nextStep);
+            graph.addEdge(Transition.unlabelled(), getState(currentState), nextStep);
             currentState = nextStep.getStateId();
         }
     }
@@ -166,7 +165,7 @@ public class KRunApiDebugger implements KRunDebugger {
                     + "If you previously used the search command you must"
                     + "first select a solution with the select command before executing steps of rewrites!");
         }
-        SearchResults results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
+        SearchResults results = executor.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
         mergeSearchGraph(results.getGraph());
         currentState = null;
         return results;
@@ -220,13 +219,6 @@ public class KRunApiDebugger implements KRunDebugger {
         return states.get(stateNum);
     }
 
-    public String printState(int stateNum) {
-        KRunState state = getState(stateNum);
-        UnparserFilter unparser = new UnparserFilter(true, context.colorOptions.color(), context.krunOptions.output, context);
-        unparser.visitNode(state.getResult());
-        return state.toString(true) + ":\n" + unparser.getResult();
-    }
-
     public Transition getEdge(int state1, int state2) {
         KRunState first = getState(state1);
         KRunState second = getState(state2);
@@ -235,22 +227,6 @@ public class KRunApiDebugger implements KRunDebugger {
             throw new IllegalArgumentException("Edge between states "
                     + state1 + " and " + state2 + " does not exist in the current graph");
         return edge;
-    }
-
-    public String printEdge(int state1, int state2) {
-        Transition edge = getEdge(state1, state2);
-        String rule;
-        if (edge.getType() == TransitionType.RULE) {
-            UnparserFilter unparser = new UnparserFilter(true, context.colorOptions.color(), context.krunOptions.output, context);
-            unparser.visitNode(edge.getRule());
-            rule = unparser.getResult();
-        } else if (edge.getType() == TransitionType.LABEL) {
-            rule = "rule [" + edge.getLabel() + "]: ...";
-        } else {
-            rule = "rule ...";
-        }
-
-        return rule + "\n" + printState(state1) + "\n=>\n" + printState(state2);
     }
 
     public void readFromStdin(String s) {
@@ -267,13 +243,13 @@ public class KRunApiDebugger implements KRunDebugger {
             throw new IllegalStateException("Cannot perform command: Configuration does not " +
                 "have an stdin buffer");
         }
-        KRunState newState = new KRunState(result, context);
+        KRunState newState = new KRunState(result);
         Entry<Integer, KRunState> prevValue = containsValue(newState);
         if (prevValue!=null) {
             KRunState canonicalNewState = canonicalizeState(newState);
             Transition edge = graph.findEdge(getState(currentState), canonicalNewState);
             if (edge == null) {
-                graph.addEdge(Transition.stdin(s, context),
+                graph.addEdge(Transition.stdin(s),
                     getState(currentState), canonicalNewState);
             }
             currentState = canonicalNewState.getStateId();
@@ -281,7 +257,7 @@ public class KRunApiDebugger implements KRunDebugger {
         }
         putState(newState);
         graph.addVertex(newState);
-        graph.addEdge(Transition.stdin(s, context),
+        graph.addEdge(Transition.stdin(s),
             getState(currentState), newState);
         currentState = newState.getStateId();
     }
@@ -332,6 +308,15 @@ public class KRunApiDebugger implements KRunDebugger {
                 return StringBuiltin.of(s.stringValue() + str);
             }
             return super.visit(s, _);
+        }
+    }
+
+    @Override
+    public void setGraph(KRunGraph graph) {
+        this.graph = graph;
+        states.clear();
+        for (KRunState state : graph.getVertices()) {
+            putState(state);
         }
     }
 }

@@ -707,7 +707,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                 KRunState conf = loadConf(file);
                 // addConfToTabbed(conf);
                 MainWindow.addDebugTab(new GraphRepresentation(new RunKRunCommand(conf,
-                        commandProcessor.getKrun(),
+                        commandProcessor.getDebugger(),
                         definitionHelper)),
                         "Tab resulted from loading :" + file.getName());
             } catch (ClassCastException e) {
@@ -718,7 +718,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     }
 
     private static String getXmlFromKrunState(KRunState pick, Context definitionHelper) {
-        Term term = pick.getResult();
+        Term term = pick.getResult(definitionHelper);
         if (term.getClass() == Cell.class) {
             Cell generatedTop = (Cell) term;
             if (generatedTop.getLabel().equals("generatedTop")) {

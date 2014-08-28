@@ -4,8 +4,6 @@ package org.kframework.backend.unparser;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
-import org.kframework.krun.KRunOptions;
-import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.StringUtil;
 
@@ -19,7 +17,7 @@ public class UnparserFilter extends NonCachingVisitor {
     private boolean firstProduction = false;
     private boolean inConfiguration = false;
     private boolean addParentheses;
-    private final KRunOptions.OutputMode outputMode;
+    private final OutputModes outputMode;
     private int inTerm = 0;
     private ColorSetting color = ColorSetting.OFF;
     private Color terminalColor = Color.black;
@@ -47,19 +45,19 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     public UnparserFilter(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, OutputMode.PRETTY, context);
+        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, OutputModes.PRETTY, context);
     }
 
-    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputMode outputMode, org.kframework.kil.loader.Context context) {
+    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputModes outputMode, org.kframework.kil.loader.Context context) {
         this(inConfiguration, color, outputMode, false, context);
     }
 
-    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputMode outputMode, boolean annotateLocation, org.kframework.kil.loader.Context context) {
+    public UnparserFilter(boolean inConfiguration, ColorSetting color, OutputModes outputMode, boolean annotateLocation, org.kframework.kil.loader.Context context) {
         super(context);
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
-        this.addParentheses = outputMode != OutputMode.SMART;
+        this.addParentheses = outputMode != OutputModes.SMART;
         this.annotateLocation = annotateLocation;
         this.outputMode = outputMode;
         //TODO(dwightguth): clean up pretty printing so we don't need this ugly hack
@@ -361,7 +359,7 @@ public class UnparserFilter extends NonCachingVisitor {
             assert child instanceof KList : "child of KApp with Token is not KList";
             assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
             indenter.write(((Token) label).value());
-        } else if ((outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP)
+        } else if ((outputMode == OutputModes.PRETTY || outputMode == OutputModes.NO_WRAP)
                 && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
 
             String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";

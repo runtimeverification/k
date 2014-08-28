@@ -32,17 +32,12 @@ import java.util.*;
 public class KTestFrontEnd extends FrontEnd {
 
     public static Module[] getModules(String[] args) {
-        try {
-            KTestOptions options = new KTestOptions();
+        KTestOptions options = new KTestOptions();
 
-            return new Module[] {
-                    new KTestModule(options),
-                    new JCommanderModule(args),
-                    new CommonModule() };
-        } catch (ParameterException ex) {
-            printBootError(ex.getMessage());
-            return null;
-        }
+        return new Module[] {
+                new KTestModule(options),
+                new JCommanderModule(args),
+                new CommonModule() };
     }
 
     private final KTestOptions options;

@@ -3,7 +3,7 @@ package org.kframework.krun.api;
 
 import org.kframework.backend.unparser.AddBracketsFilter;
 import org.kframework.backend.unparser.AddBracketsFilter2;
-import org.kframework.backend.unparser.UnparserFilterNew;
+import org.kframework.backend.unparser.OutputModes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -13,9 +13,7 @@ import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.SubstitutionFilter;
-import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -52,10 +50,7 @@ public class KRunState implements Serializable, Comparable<KRunState> {
 
     private static int nextState = 0;
 
-    protected Context context;
-
-    public KRunState(Term rawResult, Context context) {
-        this.context = context;
+    public KRunState(Term rawResult) {
         this.rawResult = rawResult;
         this.stateId = nextState++;
     }
@@ -65,7 +60,7 @@ public class KRunState implements Serializable, Comparable<KRunState> {
             result = (Term) new ConcretizeSyntax(context).visitNode(result);
             result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
             result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
-            if (context.krunOptions.output == OutputMode.SMART) {
+            if (context.krunOptions.output == OutputModes.SMART) {
                 result = (Term) new AddBracketsFilter(context).visitNode(result);
                 try {
                     /* collect existing free variables in the result */
@@ -116,23 +111,7 @@ public class KRunState implements Serializable, Comparable<KRunState> {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return toString(false);
-    }
-
-    public String toString(boolean includeStateId) {
-        UnparserFilterNew printer = new UnparserFilterNew(true,context.colorOptions.color(),
-                context.krunOptions.output, false, context);
-        printer.visitNode(getResult());
-        if (includeStateId) {
-            return "\nNode " + stateId + ":\n" + printer.getResult();
-        }
-        Stopwatch.instance().printIntermediate("Pretty printing");
-        return printer.getResult();
-    }
-
-    public Term getResult() {
+    public Term getResult(Context context) {
         if (result == null) {
             result = concretize(rawResult, context);
         }

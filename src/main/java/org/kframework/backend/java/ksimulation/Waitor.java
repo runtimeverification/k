@@ -23,7 +23,7 @@ public class Waitor extends Thread{
 
     private final SymbolicRewriter impl, spec;
     private final Provider<org.kframework.kil.Term> implTerm, specTerm;
-    private final Provider<GlobalContext> implGlobalContext, specGlobalContext;
+    private final GlobalContext implGlobalContext, specGlobalContext;
     private final KilFactory implFactory, specFactory;
     private Looper child;
     private Adjuster decider;
@@ -64,8 +64,8 @@ public class Waitor extends Thread{
             @Spec SymbolicRewriter spec,
             @Main Provider<org.kframework.kil.Term> implTerm,
             @Spec Provider<org.kframework.kil.Term> specTerm,
-            @Main Provider<GlobalContext> implGlobalContext,
-            @Spec Provider<GlobalContext> specGlobalContext,
+            @Main GlobalContext implGlobalContext,
+            @Spec GlobalContext specGlobalContext,
             @Main KilFactory implFactory,
             @Spec KilFactory specFactory) throws KRunExecutionException{
 
@@ -84,13 +84,14 @@ public class Waitor extends Thread{
         decider = new Adjuster(impl,this.spec);
         ConstrainedTerm [] pair = new ConstrainedTerm[2];
 
-
+        implGlobalContext.setDefinition(impl.getDefinition());
         Term term = implFactory.term(implTerm.get());
-        ConstrainedTerm implConstraint = new ConstrainedTerm(term, TermContext.of(implGlobalContext.get()));
+        ConstrainedTerm implConstraint = new ConstrainedTerm(term, TermContext.of(implGlobalContext));
         pair[0] = implConstraint;
 
+        specGlobalContext.setDefinition(spec.getDefinition());
         term = specFactory.term(specTerm.get());
-        ConstrainedTerm specConstraint = new ConstrainedTerm(term, TermContext.of(specGlobalContext.get()));
+        ConstrainedTerm specConstraint = new ConstrainedTerm(term, TermContext.of(specGlobalContext));
         pair[1] = specConstraint;
 
 

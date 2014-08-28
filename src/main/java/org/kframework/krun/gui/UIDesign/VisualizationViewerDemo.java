@@ -203,7 +203,7 @@ public class VisualizationViewerDemo {
     }
 
     public void addEdge(KRunState source, KRunState target, int depth, String rule) {
-        this.layout.getGraph().addEdge(Transition.reduce(parent.getDefinitionHelper()), source,
+        this.layout.getGraph().addEdge(Transition.reduce(), source,
                 target);
     }
 

@@ -29,40 +29,8 @@ public class Main {
     public static void main(String[] args) {
         AnsiConsole.systemInstall();
 
-        Module[] modules;
         if (args.length >= 1) {
-            String[] args2 = Arrays.copyOfRange(args, 1, args.length);
-                switch (args[0]) {
-                    case "-kompile":
-                        modules = KompileFrontEnd.getModules(args2);
-                        break;
-                    case "-kagreg":
-                        modules = KagregFrontEnd.getModules(args2);
-                        break;
-                    case "-kcheck":
-                        assert false : "kcheck no longer supported";
-                        return;
-                    case "-ktest":
-                        modules = KTestFrontEnd.getModules(args2);
-                        break;
-                    case "-kast":
-                        modules = KastFrontEnd.getModules(args2);
-                        break;
-                    case "-krun":
-                        modules = KRunFrontEnd.getModules(args2);
-                        break;
-                    case "-kpp":
-                        modules = KppFrontEnd.getModules(args2);
-                        break;
-                    default:
-                        invalidJarArguments();
-                        return;
-            }
-            if (modules == null) {
-                //boot error, we should have printed it already
-                System.exit(1);
-            }
-            Injector injector = Guice.createInjector(modules);
+            Injector injector = getInjector(args);
             KExceptionManager kem = injector.getInstance(KExceptionManager.class);
             kem.installForUncaughtExceptions();
             try {
@@ -79,6 +47,42 @@ public class Main {
             }
         }
         invalidJarArguments();
+    }
+
+    public static Injector getInjector(String[] args) {
+        Module[] modules;
+        String[] args2 = Arrays.copyOfRange(args, 1, args.length);
+            switch (args[0]) {
+                case "-kompile":
+                    modules = KompileFrontEnd.getModules(args2);
+                    break;
+                case "-kagreg":
+                    modules = KagregFrontEnd.getModules(args2);
+                    break;
+                case "-kcheck":
+                    throw new AssertionError("kcheck no longer supported");
+                case "-ktest":
+                    modules = KTestFrontEnd.getModules(args2);
+                    break;
+                case "-kast":
+                    modules = KastFrontEnd.getModules(args2);
+                    break;
+                case "-krun":
+                    modules = KRunFrontEnd.getModules(args2, KRunFrontEnd.getDefinitionSpecificModules(args2));
+                    break;
+                case "-kpp":
+                    modules = KppFrontEnd.getModules(args2);
+                    break;
+                default:
+                    invalidJarArguments();
+                    throw new AssertionError("unreachable");
+        }
+        if (modules == null) {
+            //boot error, we should have printed it already
+            System.exit(1);
+        }
+        Injector injector = Guice.createInjector(modules);
+        return injector;
     }
 
     private static void invalidJarArguments() {
