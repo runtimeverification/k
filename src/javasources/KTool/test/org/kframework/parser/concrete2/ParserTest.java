@@ -251,9 +251,9 @@ public class ParserTest {
             Term result = new Parser("xxyy").parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xAy",
-                        new Constant(Sort.K, "x"),
+                    new Constant(Sort.K, "x"),
                     amb(klist(kapp("xAy",
-                            new Constant(Sort.K, "x"),
+                        new Constant(Sort.K, "x"),
                         amb(klist(kapp("epsilon"))),
                             new Constant(Sort.K, "y")))),
                         new Constant(Sort.K, "y"))))));
@@ -769,7 +769,7 @@ public class ParserTest {
         Term one = new Constant(Sort.K, "1");
         Term mone = new Constant(Sort.K, "-1");
         Term mexp = new TermCons(EXP_SORT, Arrays.asList(one), p1);
-        Term expected = new TermCons(Sort.of("Exps"), Arrays.<Term>asList(amb(mexp, mone)), p2);
+        Term expected = new TermCons(Sort.of("Exps"), Arrays.<Term>asList(amb(mone, mexp)), p2);
 
         Assert.assertEquals("The error: ", expected, result2);
     }
