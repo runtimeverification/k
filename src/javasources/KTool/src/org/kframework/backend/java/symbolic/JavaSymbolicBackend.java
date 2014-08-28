@@ -1,10 +1,13 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.Backends;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.FirstStep;
 import org.kframework.backend.LastStep;
+import org.kframework.backend.java.compile.GenerateKRewriteMachineInstructions;
 import org.kframework.backend.java.indexing.RuleIndex;
+import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -157,5 +160,20 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new LastStep(this, context));
 
         return steps;
+    }
+
+    @Override
+    public boolean documentation() {
+        return false;
+    }
+
+    @Override
+    public boolean generatesDefinition() {
+        return true;
+    }
+
+    @Override
+    public String autoincludedFile() {
+        return Backends.AUTOINCLUDE_JAVA;
     }
 }

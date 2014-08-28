@@ -196,9 +196,9 @@ public final class KItem extends Term {
             }
 
             if (mustMatch) {
-                sorts.add(production.getSort().toBackendJava());
+                sorts.add(Sort.of(production.getSort()));
             } else if (mayMatch) {
-                possibleSorts.add(production.getSort().toBackendJava());
+                possibleSorts.add(Sort.of(production.getSort()));
             }
         }
 

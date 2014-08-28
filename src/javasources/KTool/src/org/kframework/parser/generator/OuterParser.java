@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.backend.Backend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
@@ -21,6 +22,8 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.inject.Inject;
+
 public class OuterParser {
     private List<DefinitionItem> moduleItems;
     private Map<String, Module> modulesMap;
@@ -30,13 +33,16 @@ public class OuterParser {
     private boolean autoinclude;
     private static final String missingFileMsg = "Could not find 'required' file: ";
 
-    private KompileOptions kompileOptions;
-    private GlobalOptions globalOptions;
+    private final KompileOptions kompileOptions;
+    private final GlobalOptions globalOptions;
+    private final Backend backend;
 
-    public OuterParser(boolean autoinclude, KompileOptions kompileOptions) {
-        this.autoinclude = autoinclude;
+    @Inject
+    public OuterParser(KompileOptions kompileOptions, Backend backend) {
+        this.autoinclude = backend.autoinclude();
         this.kompileOptions = kompileOptions;
         this.globalOptions = kompileOptions.global;
+        this.backend = backend;
     }
 
     /**
@@ -60,7 +66,7 @@ public class OuterParser {
                 List<DefinitionItem> tempmi = moduleItems;
                 moduleItems = new ArrayList<DefinitionItem>();
 
-                file = buildCanonicalPath(context.kompileOptions.backend.autoinclude(), new File(fileName));
+                file = buildCanonicalPath(backend.autoincludedFile(), new File(fileName));
                 if (file == null)
                     GlobalSettings.kem.registerCriticalError(missingFileMsg + fileName + " autoimported for every definition ");
 

@@ -3,7 +3,6 @@ package org.kframework.backend;
 
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.kil.Definition;
-import org.kframework.kompile.KompileOptions;
 
 public interface Backend {
     public void run(Definition definition);
@@ -29,8 +28,9 @@ public interface Backend {
     Definition lastStep(Definition def);
 
     public boolean autoinclude();
-
-    public KompileOptions.Backend getEnum();
+    public String autoincludedFile();
+    public boolean documentation();
+    public boolean generatesDefinition();
 
     /**
      * Gets all compilation steps of this backend.

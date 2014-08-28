@@ -8,7 +8,6 @@ import java.io.PrintStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
@@ -28,9 +27,6 @@ public abstract class BaseTestCase {
     protected Configuration configuration;
 
     @Mock
-    protected Definition definition;
-
-    @Mock
     protected KExceptionManager kem;
 
     @Mock
@@ -45,7 +41,6 @@ public abstract class BaseTestCase {
 
     @Before
     public void setUpWiring() {
-        when(definition.context()).thenReturn(context);
         context.kompileOptions = new KompileOptions();
     }
 
@@ -69,7 +64,6 @@ public abstract class BaseTestCase {
         protected void configure() {
             bind(Context.class).toInstance(context);
             bind(Configuration.class).toInstance(configuration);
-            bind(Definition.class).toInstance(definition);
         }
 
     }

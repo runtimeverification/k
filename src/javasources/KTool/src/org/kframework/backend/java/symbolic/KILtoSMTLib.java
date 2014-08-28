@@ -166,9 +166,9 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             String smtlib = production.getAttribute(Attribute.SMTLIB_KEY);
             if (smtlib != null && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
                 functions.add(production);
-                sorts.add(production.getSort().toBackendJava());
+                sorts.add(Sort.of(production.getSort()));
                 for (int i = 0; i < production.getArity(); ++i) {
-                    sorts.add(production.getChildSort(i).toBackendJava());
+                    sorts.add(Sort.of(production.getChildSort(i)));
                 }
             }
         }
@@ -261,11 +261,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private static String getSortName(ASTNode node) {
         Sort s;
         if (node instanceof NonTerminal) {
-            s = ((NonTerminal) node).getSort().toBackendJava();
+            s = Sort.of(((NonTerminal) node).getSort());
         } else if (node instanceof UserList) {
-            s = ((UserList) node).getSort().toBackendJava();
+            s = Sort.of(((UserList) node).getSort());
         } else if (node instanceof Production) {
-            s = ((Production) node).getSort().toBackendJava();
+            s = Sort.of(((Production) node).getSort());
         } else if (node instanceof Variable) {
             s = ((Variable) node).sort();
         } else {

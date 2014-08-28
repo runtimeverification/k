@@ -664,7 +664,7 @@ public class MaudeKRun implements KRun {
     }
 
     @Override
-    public KRunResult<TestGenResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException{
+    public KRunResult<SearchResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException{
         throw new UnsupportedOperationException("--generate-tests");
     }
 

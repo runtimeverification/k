@@ -30,7 +30,6 @@ import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
-import org.kframework.krun.api.TestGenResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.api.io.FileSystem;
@@ -311,7 +310,7 @@ public class JavaSymbolicKRun implements KRun {
     }
 
     @Override
-    public KRunResult<TestGenResults> generate(
+    public KRunResult<SearchResults> generate(
             Integer bound,
             Integer depth,
             SearchType searchType,

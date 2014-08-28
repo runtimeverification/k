@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
+import org.kframework.backend.java.symbolic.JavaSymbolicKompileModule;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
@@ -25,9 +26,6 @@ import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
-import org.kframework.utils.options.SortedParameterDescriptions;
-
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
 import com.google.inject.Module;
@@ -38,18 +36,15 @@ public class KompileFrontEnd extends FrontEnd {
         try {
             KompileOptions options = new KompileOptions();
 
-            JCommander jc = new JCommander(options, args);
-            jc.setProgramName("kompile");
-            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class));
-
             final Context context = new Context();
             context.kompileOptions = options;
 
             return new Module[] {
                     new KompileModule(context, options),
-                    new JCommanderModule(jc),
+                    new JCommanderModule(args),
                     new CommonModule(),
-                    new JavaSymbolicCommonModule() };
+                    new JavaSymbolicCommonModule(),
+                    new JavaSymbolicKompileModule() };
         } catch (ParameterException ex) {
             printBootError(ex.getMessage());
             return null;
@@ -111,7 +106,7 @@ public class KompileFrontEnd extends FrontEnd {
             });
         }
 
-        if (backend.getEnum().generatesDefinition()) {
+        if (backend.generatesDefinition()) {
                 context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.kompiled);
                 context.kompiled.mkdirs();
@@ -137,7 +132,7 @@ public class KompileFrontEnd extends FrontEnd {
         org.kframework.kil.Definition javaDef;
         sw.start();
         javaDef = defLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
-                backend.autoinclude(), context);
+                context);
 
         new CountNodesVisitor(context).visitNode(javaDef);
 

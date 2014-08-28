@@ -3,7 +3,6 @@ package org.kframework.utils.inject;
 
 import java.io.File;
 
-import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;

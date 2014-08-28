@@ -4,24 +4,28 @@ package org.kframework.kompile;
 import java.util.Map;
 
 import org.kframework.backend.Backend;
-import org.kframework.backend.java.builtins.BuiltinIOOperations;
-import org.kframework.backend.java.builtins.DummyBuiltinIOOperations;
-import org.kframework.backend.java.indexing.IndexingAlgorithm;
-import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.GlobalContext;
-import org.kframework.backend.java.symbolic.FreshRules;
-import org.kframework.backend.java.symbolic.JavaExecutionOptions;
+import org.kframework.backend.Backends;
+import org.kframework.backend.coq.CoqBackend;
+import org.kframework.backend.html.HtmlBackend;
+import org.kframework.backend.latex.DocumentationBackend;
+import org.kframework.backend.latex.LatexBackend;
+import org.kframework.backend.latex.PdfBackend;
+import org.kframework.backend.maude.KompileBackend;
+import org.kframework.backend.symbolic.SymbolicBackend;
+import org.kframework.backend.unparser.UnflattenBackend;
+import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.SMTOptions;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 
 public class KompileModule extends AbstractModule {
 
@@ -41,35 +45,28 @@ public class KompileModule extends AbstractModule {
         bind(KompileOptions.class).toInstance(options);
         bind(GlobalOptions.class).toInstance(options.global);
         bind(SMTOptions.class).toInstance(options.experimental.smt);
-        bind(JavaExecutionOptions.class).toInstance(new JavaExecutionOptions());
-        bind(BuiltinIOOperations.class).to(DummyBuiltinIOOperations.class);
-        bind(Boolean.class).annotatedWith(FreshRules.class).toInstance(true);
 
-        MapBinder<KompileOptions.Backend, Backend> mapBinder = MapBinder.newMapBinder(
-                binder(), KompileOptions.Backend.class, Backend.class);
-        for (KompileOptions.Backend enumVal : KompileOptions.Backend.values()) {
-            mapBinder.addBinding(enumVal).to(enumVal.backend());
-        }
+        Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
+        optionsBinder.addBinding().toInstance(options);
+        Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
+        experimentalOptionsBinder.addBinding().toInstance(KompileOptions.Experimental.class);
+        experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
 
-        MapBinder<IndexingAlgorithm, RuleIndex> indexBinder = MapBinder.newMapBinder(
-                binder(), IndexingAlgorithm.class, RuleIndex.class);
-        for (IndexingAlgorithm enumVal : IndexingAlgorithm.values()) {
-            indexBinder.addBinding(enumVal).to(enumVal.clazz);
-        }
+        MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
+                binder(), String.class, Backend.class);
+        mapBinder.addBinding(Backends.PDF).to(PdfBackend.class);
+        mapBinder.addBinding(Backends.LATEX).to(LatexBackend.class);
+        mapBinder.addBinding(Backends.DOC).to(DocumentationBackend.class);
+        mapBinder.addBinding(Backends.HTML).to(HtmlBackend.class);
+        mapBinder.addBinding(Backends.MAUDE).to(KompileBackend.class);
+        mapBinder.addBinding(Backends.UNPARSE).to(UnparserBackend.class);
+        mapBinder.addBinding(Backends.UNFLATTEN).to(UnflattenBackend.class);
+        mapBinder.addBinding(Backends.SYMBOLIC).to(SymbolicBackend.class);
+        mapBinder.addBinding(Backends.COQ).to(CoqBackend.class);
     }
 
     @Provides
-    Backend getBackend(KompileOptions options, Map<KompileOptions.Backend, Backend> map) {
+    Backend getBackend(KompileOptions options, Map<String, Backend> map) {
         return map.get(options.backend);
-    }
-
-    @Provides
-    RuleIndex getRuleIndex(KompileOptions options, Map<IndexingAlgorithm, Provider<RuleIndex>> map) {
-        return map.get(options.experimental.ruleIndex).get();
-    }
-
-    @Provides
-    Definition definition(GlobalContext context) {
-        return context.getDefinition();
     }
 }

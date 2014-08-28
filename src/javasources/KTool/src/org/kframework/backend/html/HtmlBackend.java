@@ -41,4 +41,14 @@ public class HtmlBackend extends BasicBackend {
     public String getDefaultStep() {
         return "FirstStep";
     }
+
+    @Override
+    public boolean documentation() {
+        return true;
+    }
+
+    @Override
+    public boolean generatesDefinition() {
+        return false;
+    }
 }
