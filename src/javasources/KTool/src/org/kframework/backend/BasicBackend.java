@@ -48,11 +48,6 @@ public abstract class BasicBackend implements Backend {
         return !options.experimental.noPrelude;
     }
 
-    @Override
-    public org.kframework.kompile.KompileOptions.Backend getEnum() {
-        return options.backend;
-    }
-
     public CompilerSteps<Definition> getCompilationSteps() {
         CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
         steps.add(new FirstStep(this, context));
@@ -107,5 +102,10 @@ public abstract class BasicBackend implements Backend {
         steps.add(new DeclareCellLabels(context));
         steps.add(new LastStep(this, context));
         return steps;
+    }
+
+    @Override
+    public String autoincludedFile() {
+        return Backends.AUTOINCLUDE;
     }
 }

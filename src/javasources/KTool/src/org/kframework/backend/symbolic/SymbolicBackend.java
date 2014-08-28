@@ -179,4 +179,14 @@ public class SymbolicBackend extends BasicBackend implements Backend {
         steps.add(new LastStep(this, context));
         return steps;
     }
+
+    @Override
+    public boolean documentation() {
+        return false;
+    }
+
+    @Override
+    public boolean generatesDefinition() {
+        return true;
+    }
 }

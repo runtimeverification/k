@@ -65,10 +65,6 @@ public class Sort implements Serializable {
         return name;
     }
 
-    public org.kframework.backend.java.kil.Sort toBackendJava() {
-        return org.kframework.backend.java.kil.Sort.of(name);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

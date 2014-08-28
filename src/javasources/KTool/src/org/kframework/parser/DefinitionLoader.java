@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.backend.Backend;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
@@ -77,18 +78,24 @@ public class DefinitionLoader {
     private final Stopwatch sw;
     private final BinaryLoader loader;
     private final KExceptionManager kem;
+    private final OuterParser outer;
+    private final Backend backend;
 
     @Inject
     public DefinitionLoader(
             Stopwatch sw,
             BinaryLoader loader,
-            KExceptionManager kem) {
+            KExceptionManager kem,
+            OuterParser outer,
+            Backend backend) {
         this.sw = sw;
         this.loader = loader;
         this.kem = kem;
+        this.outer = outer;
+        this.backend = backend;
     }
 
-    public Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) {
+    public Definition loadDefinition(File mainFile, String lang, Context context) {
         Definition javaDef;
         File canoFile = mainFile.getAbsoluteFile();
 
@@ -103,7 +110,7 @@ public class DefinitionLoader {
             sw.printIntermediate("Preprocess");
 
         } else {
-            javaDef = parseDefinition(mainFile, lang, autoinclude, context);
+            javaDef = parseDefinition(mainFile, lang, context);
         }
         return javaDef;
     }
@@ -115,13 +122,12 @@ public class DefinitionLoader {
      * @param mainModule
      * @return
      */
-    public Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude, Context context) {
+    public Definition parseDefinition(File mainFile, String mainModule, Context context) {
         try {
             // for now just use this file as main argument
             // ------------------------------------- outer parsing
 
-            OuterParser bparser = new OuterParser(autoinclude, context.kompileOptions);
-            bparser.slurp(mainFile.getPath(), context);
+            outer.slurp(mainFile.getPath(), context);
 
             // transfer information from the OuterParser object, to the Definition object
             org.kframework.kil.Definition def = new org.kframework.kil.Definition();
@@ -132,10 +138,10 @@ public class DefinitionLoader {
                 def.setMainFile(mainFile.getAbsolutePath());
             }
             def.setMainModule(mainModule);
-            def.setModulesMap(bparser.getModulesMap());
-            def.setItems(bparser.getModuleItems());
+            def.setModulesMap(outer.getModulesMap());
+            def.setItems(outer.getModuleItems());
 
-            if (!context.kompileOptions.backend.documentation()) {
+            if (!backend.documentation()) {
                 if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
                     String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
                     kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
@@ -153,7 +159,7 @@ public class DefinitionLoader {
 
             //This following line was commented out to make the latex backend
             //parse files importing from other files
-            def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
+            def = (Definition) new RemoveUnusedModules(context, backend.autoinclude()).visitNode(def);
 
             // HERE: add labels to sorts
 
@@ -174,7 +180,7 @@ public class DefinitionLoader {
             ResourceExtractor.ExtractProgramSDF(new File(context.dotk, "pgm"));
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
-            if (!context.kompileOptions.backend.documentation()) {
+            if (!backend.documentation()) {
                 String oldSdfPgm = "";
                 if (new File(context.kompiled, "Program.sdf").exists())
                     oldSdfPgm = FileUtil.getFileContent(context.kompiled.getAbsolutePath() + "/Program.sdf");
@@ -224,7 +230,7 @@ public class DefinitionLoader {
                     new File(cacheFile).delete();
                     // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                    if (!context.kompileOptions.backend.documentation()) {
+                    if (!backend.documentation()) {
                         Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
                         t2.join();
                         try {

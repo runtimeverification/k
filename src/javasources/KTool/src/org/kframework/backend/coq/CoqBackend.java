@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.backend.Backends;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.FirstStep;
 import org.kframework.backend.LastStep;
@@ -107,5 +108,20 @@ public class CoqBackend extends BasicBackend {
         steps.add(new AddHeatingConditions(context));
         steps.add(new LastStep(this, context));
         return steps;
+    }
+
+    @Override
+    public String autoincludedFile() {
+        return Backends.AUTOINCLUDE_JAVA;
+    }
+
+    @Override
+    public boolean documentation() {
+        return false;
+    }
+
+    @Override
+    public boolean generatesDefinition() {
+        return false;
     }
 }

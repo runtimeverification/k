@@ -328,7 +328,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         for (Production production : ((KLabelConstant) ((KItem) rightHandSide).kLabel()).productions()) {
                             if (definition.subsorts().isSubsortedEq(
                                     leftHandSide.sort(),
-                                    production.getSort().toBackendJava())) {
+                                    Sort.of(production.getSort()))) {
                                 flag = true;
                             }
                         }
@@ -344,7 +344,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         for (Production production : ((KLabelConstant) ((KItem) leftHandSide).kLabel()).productions()) {
                             if (definition.subsorts().isSubsortedEq(
                                     rightHandSide.sort(),
-                                    production.getSort().toBackendJava())) {
+                                    Sort.of(production.getSort()))) {
                                 flag = true;
                             }
                         }

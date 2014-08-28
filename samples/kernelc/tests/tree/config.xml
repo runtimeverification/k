@@ -9,6 +9,7 @@
             extension="c"
             >
         <kompile-option name="--backend" value="java" />
+        <kompile-option name="-d" value="tree" />
         <program name="height.c">
           <krun-option name="--prove" value="tests/tree/height_spec.k" />
         </program>

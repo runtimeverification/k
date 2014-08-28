@@ -9,6 +9,7 @@
             extension="c"
             >
         <kompile-option name="--backend" value="java" />
+        <kompile-option name="-d" value="list" />
         <program name="head.c">
           <krun-option name="--prove" value="tests/list/head_spec.k" />
         </program>

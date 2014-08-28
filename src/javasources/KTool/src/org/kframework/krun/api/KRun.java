@@ -64,7 +64,7 @@ public interface KRun {
      @return An object containing both metadata about krun's execution, and information about
      the results of the search
      */
-    public KRunResult<TestGenResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
+    public KRunResult<SearchResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
 
     /**
     Perform LTL model-checking of a term according to a particular LTL formula

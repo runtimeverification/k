@@ -9,7 +9,6 @@ import java.util.Properties;
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.FirstStep;
-import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.maude.krun.MaudeKRun;
@@ -76,6 +75,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
@@ -211,7 +211,7 @@ public abstract class RLBackend extends BasicBackend implements Backend {
             pattern = DefinitionLoader.parsePattern(
                     null, //K.pattern,
                     null,
-                    Sort.BAG.name(),
+                    Sort.BAG.getName(),
                     context);
             //defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern),

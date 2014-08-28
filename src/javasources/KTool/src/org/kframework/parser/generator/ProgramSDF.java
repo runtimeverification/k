@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.kframework.backend.Backends;
 import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
@@ -20,7 +21,6 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
-import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
@@ -145,7 +145,8 @@ public class ProgramSDF {
                 sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
         }
 
-        if (context.kompileOptions.backend == Backend.SYMBOLIC) {
+        //TODO(dwightguth): remove for modularization
+        if (context.kompileOptions.backend.equals(Backends.SYMBOLIC)) {
             sdf.append("\ncontext-free syntax\n");
             sdf.append("    DzId    -> UnitDz\n");
             sdf.append("    DzBool    -> UnitDz\n");

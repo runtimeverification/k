@@ -48,4 +48,14 @@ public class UnparserBackend extends BasicBackend {
         return "FirstStep";
     }
 
+    @Override
+    public boolean documentation() {
+        return false;
+    }
+
+    @Override
+    public boolean generatesDefinition() {
+        return false;
+    }
+
 }
