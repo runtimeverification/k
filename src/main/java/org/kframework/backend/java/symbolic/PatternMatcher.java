@@ -594,7 +594,8 @@ public class PatternMatcher extends AbstractMatcher {
         }
 
         if (patternBuiltinMap.collectionVariables().isEmpty()
-                && (builtinMap.size() != patternBuiltinMap.size() || builtinMap.collectionPatterns().size() != patternBuiltinMap.collectionPatterns().size())) {
+                && (builtinMap.concreteSize() != patternBuiltinMap.concreteSize()
+                || builtinMap.collectionPatterns().size() != patternBuiltinMap.collectionPatterns().size())) {
             this.fail(builtinMap, pattern);
         }
 
