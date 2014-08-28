@@ -1,12 +1,12 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
-import com.google.inject.Key;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -48,7 +48,7 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
     private static class C implements Comparator<Key<?>>, Serializable {
         @Override
         public int compare(Key<?> o1, Key<?> o2) {
-            return Attribute.toString(o1).compareTo(Attribute.toString(o2));
+            return o1.toString().compareTo(o2.toString());
         }
     };
 

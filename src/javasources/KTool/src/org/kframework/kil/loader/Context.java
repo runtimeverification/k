@@ -4,6 +4,7 @@ package org.kframework.kil.loader;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.CellDataStructure;
@@ -41,7 +42,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.google.inject.Key;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -180,8 +180,8 @@ public class Context implements Serializable {
         if (p.isListDecl()) {
             listProductions.put(p.getSort(), p);
         }
-        for (Attribute a : p.getAttributes().values()) {
-            tags.put(Attribute.toString(a.getKey()), p);
+        for (Attribute<?> a : p.getAttributes().values()) {
+            tags.put(a.getKey().toString(), p);
         }
     }
 
@@ -198,8 +198,8 @@ public class Context implements Serializable {
             // AndreiS: this code assumes each list sort has only one production
             listProductions.remove(p.getSort());
         }
-        for (Attribute a : p.getAttributes().values()) {
-            tags.remove(Attribute.toString(a.getKey()), p);
+        for (Attribute<?> a : p.getAttributes().values()) {
+            tags.remove(a.getKey().toString(), p);
         }
     }
 

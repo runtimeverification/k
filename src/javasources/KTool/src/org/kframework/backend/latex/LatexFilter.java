@@ -559,7 +559,7 @@ public class LatexFilter extends BackendFilter {
         } else {
             result.append(", ");
         }
-        result.append("\\kattribute{" + StringUtil.latexify(Attribute.toString(entry.getKey())) + "}");
+        result.append("\\kattribute{" + StringUtil.latexify(entry.getKey().toString()) + "}");
         String value = entry.toString();
         if (!value.isEmpty()) {
             result.append("(" + StringUtil.latexify(value) + ")");
@@ -570,7 +570,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
-        for (Attribute entry : attributes.values()) {
+        for (Attribute<?> entry : attributes.values()) {
             this.visitNode(entry);
         }
         return null;

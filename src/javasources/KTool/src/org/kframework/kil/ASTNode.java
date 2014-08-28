@@ -6,12 +6,12 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.kframework.compile.utils.SyntaxByTag;
+import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import com.google.inject.Key;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.

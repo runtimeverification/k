@@ -4,13 +4,13 @@ package org.kframework.kil;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
-import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -53,8 +53,66 @@ public class Attribute<T> extends ASTNode {
     public static final Attribute<String> SUPERHEAT = Attribute.of("superheat", "");
     public static final Attribute<String> HYBRID = Attribute.of("hybrid", "");
 
-    private transient Key<T> key;
+    private Key<T> key;
     private T value;
+
+    public static class Key<T> implements Serializable {
+        private transient TypeLiteral<T> typeLiteral;
+        private final Annotation annotation;
+
+        protected Key(TypeLiteral<T> typeLiteral, Annotation annotation) {
+            this.typeLiteral = typeLiteral;
+            this.annotation = annotation;
+        }
+
+        public TypeLiteral<T> getTypeLiteral() {
+            return typeLiteral;
+        }
+
+        public Annotation getAnnotation() {
+            return annotation;
+        }
+
+        private void writeObject(ObjectOutputStream stream) throws IOException {
+            stream.defaultWriteObject();
+            stream.writeObject(getTypeLiteral().getType());
+        }
+
+        private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+            stream.defaultReadObject();
+            Type type = (Type) stream.readObject();
+            typeLiteral = (TypeLiteral<T>) TypeLiteral.get(type);
+        }
+
+        public static <T> Key<T> get(Class<T> cls, Annotation annotation) {
+            return new Key<T>(TypeLiteral.get(cls), annotation);
+        }
+
+        public static <T> Key<T> get(Class<T> cls) {
+            return new Key<T>(TypeLiteral.get(cls), null);
+        }
+
+        @Override
+        public String toString() {
+            if (getTypeLiteral().equals(TypeLiteral.get(String.class))) {
+                return toString(getAnnotation());
+            }
+            String annotation = toString(getAnnotation());
+            if (annotation != null) {
+                return "@" + getTypeLiteral().toString() + "." + annotation;
+            } else {
+                return "@" + getTypeLiteral().toString();
+            }
+        }
+
+        public static String toString(Annotation annotation) {
+            if (annotation == null) return null;
+            if (annotation instanceof Named) {
+                return ((Named)annotation).value();
+            }
+            return annotation.toString();
+        }
+    }
 
     public static Attribute<String> of(String key, String value) {
         return new Attribute<String>(keyOf(key), value);
@@ -78,7 +136,7 @@ public class Attribute<T> extends ASTNode {
 
     @Override
     public String toString() {
-        return " " + toString(this.getKey()) + "(" + this.getValue() + ")";
+        return " " + this.getKey() + "(" + this.getValue() + ")";
     }
 
     public void setValue(T value) {
@@ -100,26 +158,6 @@ public class Attribute<T> extends ASTNode {
     @Override
     public Attribute<T> shallowCopy() {
         return new Attribute<T>(this);
-    }
-
-    public static String toString(Key<?> key) {
-        if (key.getTypeLiteral().equals(TypeLiteral.get(String.class))) {
-            return toString(key.getAnnotation());
-        }
-        String annotation = toString(key.getAnnotation());
-        if (annotation != null) {
-            return "@" + key.getTypeLiteral().toString() + "." + annotation;
-        } else {
-            return "@" + key.getTypeLiteral().toString();
-        }
-    }
-
-    public static String toString(Annotation annotation) {
-        if (annotation == null) return null;
-        if (annotation instanceof Named) {
-            return ((Named)annotation).value();
-        }
-        return annotation.toString();
     }
 
     @Override
@@ -156,23 +194,5 @@ public class Attribute<T> extends ASTNode {
         } else if (!value.equals(other.value))
             return false;
         return true;
-    }
-
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.defaultWriteObject();
-        stream.writeObject(key.getTypeLiteral().getType());
-        stream.writeObject(key.getAnnotation());
-    }
-
-    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
-        Type type = (Type) stream.readObject();
-        TypeLiteral tl = TypeLiteral.get(type);
-        Annotation annotation = (Annotation) stream.readObject();
-        if (annotation == null) {
-            key = Key.get(tl);
-        } else {
-            key = Key.get(tl, annotation);
-        }
     }
 }

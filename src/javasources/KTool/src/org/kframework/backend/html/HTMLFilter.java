@@ -515,7 +515,7 @@ public class HTMLFilter extends BackendFilter {
         } else {
             result.append(", ");
         }
-        result.append(makeGreek(Attribute.toString(entry.getKey())));
+        result.append(makeGreek(entry.getKey().toString()));
         String value = makeGreek(entry.getValue().toString());
 
         if (!value.isEmpty())

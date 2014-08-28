@@ -8,6 +8,7 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
@@ -19,7 +20,6 @@ import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
 
 import java.util.*;
 
@@ -304,7 +304,7 @@ public class MaudeFilter extends BackendFilter {
             } else {
                 firstAttribute = false;
             }
-            result.append(Attribute.toString(attribute.getKey()));
+            result.append(attribute.getKey());
             result.append("=(");
             result.append(attribute.getValue().toString().replaceAll("[()]", ""));
             result.append(")");
