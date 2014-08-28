@@ -658,13 +658,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Iterable<Rule> rules = Iterables.concat(
                 definition.rules(),
                 definition.macros(),
-                definition.patternRules().values());
+                definition.patternRules().values(),
+                definition.patternFoldingRules());
         for (Rule rule : rules) {
             partiallyEvaluatedRules.add(evaluateRule(rule, globalContext));
         }
         definition.rules().clear();
         definition.macros().clear();
         definition.patternRules().clear();
+        definition.patternFoldingRules().clear();
         definition.addRuleCollection(partiallyEvaluatedRules);
 
         return definition;

@@ -6,15 +6,42 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
@@ -167,9 +194,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";
 
         // TODO(AndreiS): treat Map unification less adhoc
-        if (term instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()
-                && otherTerm instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()) {
-            unifyMap((BuiltinMap) term, (BuiltinMap) otherTerm, true);
+        if (BuiltinMap.isMapUnifiableByCurrentAlgorithm(term, otherTerm)) {
+            unifyMap((BuiltinMap) term, (BuiltinMap) otherTerm, false);
             return;
         }
         // TODO(YilongL): how should I implement BuiltinList#isUnifiableByCurrentAlgorithm?
@@ -304,107 +330,198 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     public boolean unifyMap(BuiltinMap map, BuiltinMap otherMap, boolean addUnchanged) {
         assert map.collectionFunctions().isEmpty() && otherMap.collectionFunctions().isEmpty();
-
-        Map<Term, Term> entries = map.getEntries();
-        Map<Term, Term> otherEntries = otherMap.getEntries();
-        Set<Term> commonKeys = Sets.intersection(map.getEntries().keySet(), otherEntries.keySet());
-        Map<Term, Term> remainingEntries = new HashMap<>();
-        Map<Term, Term> otherRemainingEntries = new HashMap<>();
-        for (Term key : commonKeys) {
-            unify(entries.get(key), otherEntries.get(key));
-        }
-        for (Term key : entries.keySet()) {
-            if (!commonKeys.contains(key)) {
-                remainingEntries.put(key, entries.get(key));
-            }
-        }
-        for (Term key : otherEntries.keySet()) {
-            if (!commonKeys.contains(key)) {
-                otherRemainingEntries.put(key, otherEntries.get(key));
-            }
+    public boolean simplifyMapEquality(BuiltinMap map, BuiltinMap otherMap, boolean fold) {
+        if (!fold) {
+            return unifyMap(map, otherMap, true);
         }
 
-        Multiset<KItem> patterns = map.collectionPatterns();
-        Multiset<KItem> otherPatterns = otherMap.collectionPatterns();
-        Set<KItem> unifiedPatterns = new HashSet<>();
-        Set<KItem> otherUnifiedPatterns = new HashSet<>();
-        List<KItem> remainingPatterns = new ArrayList<>();
-        List<KItem> otherRemainingPatterns = new ArrayList<>();
-        for (KItem pattern : patterns) {
-            for (KItem otherPattern : otherPatterns) {
-                if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
-                    List<Term> patternOutput = pattern.getPatternOutput();
-                    List<Term> otherPatternOutput = otherPattern.getPatternOutput();
-                    for (int i = 0; i < patternOutput.size(); ++i) {
-                        unify(patternOutput.get(i), otherPatternOutput.get(i));
+        Set<BuiltinMap> foldedMaps = new HashSet<>();
+        foldedMaps.add(map);
+        Queue<BuiltinMap> queue = new LinkedList<>();
+        queue.add(map);
+        while (!queue.isEmpty()) {
+            BuiltinMap candidate = queue.remove();
+            for (Rule rule : termContext.definition().patternFoldingRules()) {
+                for (Map<Variable, Term> substitution : PatternMatcher.patternMatch(candidate, rule, termContext)) {
+                    BuiltinMap result = (BuiltinMap) rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
+                    if (foldedMaps.add(result)) {
+                        queue.add(result);
                     }
-                    unifiedPatterns.add(pattern);
-                    otherUnifiedPatterns.add(otherPattern);
                 }
             }
         }
-        for (KItem pattern : patterns) {
-            if (!unifiedPatterns.contains(pattern)) {
-                remainingPatterns.add(pattern);
-            }
-        }
-        for (KItem otherPattern : otherPatterns) {
-            if (!otherUnifiedPatterns.contains(otherPattern)) {
-                otherRemainingPatterns.add(otherPattern);
-            }
+
+        /* no folding occurred */
+        if (foldedMaps.size() == 1) {
+            return unifyMap(map, otherMap, true);
         }
 
-        Multiset<Variable> variables = map.collectionVariables();
-        Multiset<Variable> otherVariables = otherMap.collectionVariables();
-        Set<Variable> commonVariables = Sets.intersection(
-                ImmutableSet.copyOf(variables),
-                ImmutableSet.copyOf(otherVariables));
-        List<Variable> remainingVariables = new ArrayList<>();
-        List<Variable> otherRemainingVariables = new ArrayList<>();
-        for (Variable variable : variables) {
-            if (!commonVariables.contains(variable)) {
-                remainingVariables.add(variable);
+        for (BuiltinMap foldedMap : foldedMaps) {
+            SymbolicConstraint constraint = new SymbolicConstraint(fConstraint.termContext());
+            constraint.add(foldedMap, otherMap);
+            constraint.simplify();
+            if (constraint.isFalse()) {
+                continue;
             }
-        }
-        for (Variable otherVariable : otherVariables) {
-            if (!commonVariables.contains(otherVariable)) {
-                otherRemainingVariables.add(otherVariable);
+            /* since here we have a non-deterministic choice to make, we only make a choice
+             * if it eliminates all map equalities */
+            boolean mapEqualities = false;
+            for (SymbolicConstraint.Equality equality : constraint.equalities()) {
+                if (equality.leftHandSide() instanceof BuiltinMap
+                        && equality.rightHandSide() instanceof BuiltinMap) {
+                    mapEqualities = true;
+                }
             }
+            if (!mapEqualities) {
+                fConstraint.addAll(constraint);
+                return true;
+            }
+/*
+            SymbolicConstraint stashedConstrained = fConstraint;
+            fConstraint = new SymbolicConstraint(fConstraint.termContext());
+            try {
+                unifyMap(foldedMap, otherMap, false);
+
+                boolean mapEqualities = false;
+                for (SymbolicConstraint.Equality equality : fConstraint.equalities()) {
+                    if (equality.leftHandSide() instanceof BuiltinMap
+                            && equality.rightHandSide() instanceof BuiltinMap) {
+                        mapEqualities = true;
+                    }
+                }
+                if (!mapEqualities) {
+                    stashedConstrained.addAll(fConstraint);
+                    fConstraint = stashedConstrained;
+                    return true;
+                }
+            } catch (UnificationFailure e)  { }
+            fConstraint = stashedConstrained;
+*/
         }
 
-        if (remainingEntries.isEmpty()
-                && remainingPatterns.isEmpty()
-                && remainingVariables.isEmpty()
-                && !otherRemainingEntries.isEmpty()) {
-            fail(map, otherMap);
-        }
-        if (otherRemainingEntries.isEmpty()
-                && otherRemainingPatterns.isEmpty()
-                && otherRemainingVariables.isEmpty()
-                && !remainingEntries.isEmpty()) {
-            fail(map, otherMap);
-        }
+        return false;
+    }
 
-        if (!(commonKeys.isEmpty() && unifiedPatterns.isEmpty() && commonVariables.isEmpty()) || addUnchanged) {
+    public boolean unifyMap(BuiltinMap map, BuiltinMap otherMap, boolean simplification) {
+        assert map.collectionFunctions().isEmpty() && otherMap.collectionFunctions().isEmpty();
+
+        SymbolicConstraint stashedConstraint = fConstraint;
+        fConstraint = new SymbolicConstraint(fConstraint.termContext());
+        try {
+            Map<Term, Term> entries = map.getEntries();
+            Map<Term, Term> otherEntries = otherMap.getEntries();
+            Set<Term> commonKeys = Sets.intersection(map.getEntries().keySet(), otherEntries.keySet());
+            Map<Term, Term> remainingEntries = new HashMap<>();
+            Map<Term, Term> otherRemainingEntries = new HashMap<>();
+            for (Term key : commonKeys) {
+                unify(entries.get(key), otherEntries.get(key));
+            }
+            for (Term key : entries.keySet()) {
+                if (!commonKeys.contains(key)) {
+                    remainingEntries.put(key, entries.get(key));
+                }
+            }
+            for (Term key : otherEntries.keySet()) {
+                if (!commonKeys.contains(key)) {
+                    otherRemainingEntries.put(key, otherEntries.get(key));
+                }
+            }
+
+            Multiset<KItem> patterns = map.collectionPatterns();
+            Multiset<KItem> otherPatterns = otherMap.collectionPatterns();
+            Set<KItem> unifiedPatterns = new HashSet<>();
+            Set<KItem> otherUnifiedPatterns = new HashSet<>();
+            List<KItem> remainingPatterns = new ArrayList<>();
+            List<KItem> otherRemainingPatterns = new ArrayList<>();
+            for (KItem pattern : patterns) {
+                for (KItem otherPattern : otherPatterns) {
+                    if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
+                        ImmutableList<Term> patternOutput = pattern.getPatternOutput();
+                        ImmutableList<Term> otherPatternOutput = otherPattern.getPatternOutput();
+                        for (int i = 0; i < patternOutput.size(); ++i) {
+                            unify(patternOutput.get(i), otherPatternOutput.get(i));
+                        }
+                        unifiedPatterns.add(pattern);
+                        otherUnifiedPatterns.add(otherPattern);
+                    }
+                }
+            }
+            for (KItem pattern : patterns) {
+                if (!unifiedPatterns.contains(pattern)) {
+                    remainingPatterns.add(pattern);
+                }
+            }
+            for (KItem otherPattern : otherPatterns) {
+                if (!otherUnifiedPatterns.contains(otherPattern)) {
+                    otherRemainingPatterns.add(otherPattern);
+                }
+            }
+
+            Multiset<Variable> variables = map.collectionVariables();
+            Multiset<Variable> otherVariables = otherMap.collectionVariables();
+            Set<Variable> commonVariables = Sets.intersection(
+                    ImmutableSet.copyOf(variables),
+                    ImmutableSet.copyOf(otherVariables));
+            List<Variable> remainingVariables = new ArrayList<>();
+            List<Variable> otherRemainingVariables = new ArrayList<>();
+            for (Variable variable : variables) {
+                if (!commonVariables.contains(variable)) {
+                    remainingVariables.add(variable);
+                }
+            }
+            for (Variable otherVariable : otherVariables) {
+                if (!commonVariables.contains(otherVariable)) {
+                    otherRemainingVariables.add(otherVariable);
+                }
+            }
+
+            if (remainingEntries.isEmpty()
+                    && remainingPatterns.isEmpty()
+                    && remainingVariables.isEmpty()
+                    && !otherRemainingEntries.isEmpty()) {
+                fail(map, otherMap);
+            }
+            if (otherRemainingEntries.isEmpty()
+                    && otherRemainingPatterns.isEmpty()
+                    && otherRemainingVariables.isEmpty()
+                    && !remainingEntries.isEmpty()) {
+                fail(map, otherMap);
+            }
+
+
             BuiltinMap.Builder builder = BuiltinMap.builder();
             builder.putAll(remainingEntries);
             builder.concatenate(remainingPatterns.toArray(new Term[remainingPatterns.size()]));
             builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
+            Term remainingMap = builder.build();
 
             BuiltinMap.Builder otherBuilder = BuiltinMap.builder();
             otherBuilder.putAll(otherRemainingEntries);
             otherBuilder.concatenate(otherRemainingPatterns.toArray(new Term[otherRemainingPatterns.size()]));
             otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
-
-            Term remainingMap = builder.build();
             Term otherRemainingMap = otherBuilder.build();
-            if (!(remainingMap instanceof BuiltinMap && ((BuiltinMap) remainingMap).isEmpty())
-                    || !(otherRemainingMap instanceof BuiltinMap && ((BuiltinMap) otherRemainingMap).isEmpty())) {
-                fConstraint.add(remainingMap, otherRemainingMap);
+
+            if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable
+                    || ((BuiltinMap) remainingMap).isEmpty() && ((BuiltinMap) otherRemainingMap).isEmpty()) {
+                /* equality eliminated */
+                if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable) {
+                    stashedConstraint.add(remainingMap, otherRemainingMap);
+                }
+                stashedConstraint.addAll(fConstraint);
+                fConstraint = stashedConstraint;
+                return true;
+            } else {
+                if (!simplification) {
+                    stashedConstraint.add(remainingMap, otherRemainingMap);
+                }
+                fConstraint.simplify();
+                stashedConstraint.addAll(fConstraint.substitution());
+                fConstraint = stashedConstraint;
+                return false;
             }
-            return true;
-        } else {
-            return false;
+        } catch (UnificationFailure e) {
+            fConstraint = stashedConstraint;
+            throw e;
         }
     }
 

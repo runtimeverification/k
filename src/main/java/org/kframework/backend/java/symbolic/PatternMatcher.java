@@ -47,7 +47,12 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -581,9 +586,148 @@ public class PatternMatcher extends AbstractMatcher {
         if (!(pattern instanceof BuiltinMap)) {
             this.fail(builtinMap, pattern);
         }
+        BuiltinMap patternBuiltinMap = (BuiltinMap) pattern;
 
-        throw new UnsupportedOperationException(
-                "map matching is only supported when one of the maps is a variable.");
+        if (!patternBuiltinMap.isUnifiableByCurrentAlgorithm()) {
+            throw new UnsupportedOperationException(
+                    "map matching is only supported when one of the maps is a variable.");
+        }
+
+        if (patternBuiltinMap.collectionVariables().isEmpty()
+                && (builtinMap.size() != patternBuiltinMap.size() || builtinMap.collectionPatterns().size() != patternBuiltinMap.collectionPatterns().size())) {
+            this.fail(builtinMap, pattern);
+        }
+
+        // TODO(AndreiS): implement AC matching/unification
+        /* stash the existing substitution */
+        Map<Variable, Term> stashedSubstitution = fSubstitution;
+
+        Set<PartialSubstitution> partialSubstitutions = new HashSet<>();
+        partialSubstitutions.add(new PartialSubstitution(
+                ImmutableSet.<Term>of(),
+                ImmutableMap.<Variable, Term>of()));
+
+        /* match each entry from the pattern */
+        for (Map.Entry<Term, Term> patternEntry : patternBuiltinMap.getEntries().entrySet()) {
+            List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
+            for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
+                fSubstitution = new HashMap<>();
+                if (patternMatch(entry.getKey(), patternEntry.getKey())
+                        && patternMatch(entry.getValue(), patternEntry.getValue())) {
+                    stepSubstitutions.add(new PartialSubstitution(
+                            ImmutableSet.of(entry.getKey()),
+                            ImmutableMap.copyOf(fSubstitution)));
+                }
+                fSubstitution = null;
+            }
+            partialSubstitutions = getCrossProduct(partialSubstitutions, stepSubstitutions);
+        }
+
+        /* match each collection abstraction predicate from the pattern */
+        for (KItem patternKItem : patternBuiltinMap.collectionPatterns()) {
+            List<PartialSubstitution> stepSubstitutions = new ArrayList<>();
+            for (KItem kItem : builtinMap.collectionPatterns()) {
+                fSubstitution = new HashMap<>();
+                if (kItem.kLabel().equals(patternKItem.kLabel())) {
+                    if (patternMatch(kItem.kList(), patternKItem.kList())) {
+                        stepSubstitutions.add(new PartialSubstitution(
+                                ImmutableSet.<Term>of(kItem),
+                                ImmutableMap.copyOf(fSubstitution)));
+                    }
+                }
+                fSubstitution = null;
+            }
+            partialSubstitutions = getCrossProduct(partialSubstitutions, stepSubstitutions);
+        }
+
+        /* restore the main substitution */
+        fSubstitution = stashedSubstitution;
+
+        if (partialSubstitutions.isEmpty()) {
+            this.fail(builtinMap, patternBuiltinMap);
+        }
+
+        List<Map<Variable, Term>> substitutions = new ArrayList<>();
+        for (PartialSubstitution ps : partialSubstitutions) {
+            Map<Variable, Term> substitution = addFrameMatching(builtinMap, patternBuiltinMap, ps);
+            if (substitution != null) {
+                substitutions.add(substitution);
+            }
+        }
+
+        if (substitutions.size() != 1) {
+            multiSubstitutions.add(substitutions);
+        } else {
+            addSubstitution(substitutions.iterator().next());
+        }
+    }
+
+    private static Map<Variable, Term> addFrameMatching(
+            BuiltinMap builtinMap,
+            BuiltinMap patternBuiltinMap,
+            PartialSubstitution ps) {
+        if (!patternBuiltinMap.collectionVariables().isEmpty()) {
+            Variable frame = patternBuiltinMap.collectionVariables().iterator().next();
+            if (ps.substitution.containsKey(frame)) {
+                return null;
+            }
+
+            BuiltinMap.Builder builder = BuiltinMap.builder();
+            for (Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
+                if (!ps.matched.contains(entry.getKey())) {
+                    builder.put(entry.getKey(), entry.getValue());
+                }
+            }
+            for (Term term : builtinMap.baseTerms()) {
+                if (!ps.matched.contains(term)) {
+                    builder.concatenate(term);
+                }
+            }
+
+            return ImmutableMap.<Variable, Term>builder()
+                    .putAll(ps.substitution)
+                    .put(frame, builder.build())
+                    .build();
+        } else {
+            return ps.substitution;
+        }
+    }
+
+    private static class PartialSubstitution {
+        public final ImmutableSet<Term> matched;
+        public final ImmutableMap<Variable, Term> substitution;
+
+        public PartialSubstitution(ImmutableSet<Term> matched, ImmutableMap<Variable, Term> substitution) {
+            this.matched = matched;
+            this.substitution = substitution;
+        }
+    }
+
+    private static Set<PartialSubstitution> getCrossProduct(
+            Collection<PartialSubstitution> set1,
+            Collection<PartialSubstitution> set2) {
+        Set<PartialSubstitution> set = new HashSet<>();
+        for (PartialSubstitution ps1 : set1) {
+            for (PartialSubstitution ps2 : set2) {
+                MapDifference<Variable, Term> mapDifference = Maps.difference(
+                        ps1.substitution,
+                        ps2.substitution);
+                // TODO(AndreiS): this fail to match "list(x) list(x)" with "list(null) list(null)"
+                if (mapDifference.entriesDiffering().isEmpty()
+                        && Sets.intersection(ps1.matched, ps2.matched).isEmpty()) {
+                    set.add(new PartialSubstitution(
+                            ImmutableSet.<Term>builder()
+                                    .addAll(ps1.matched)
+                                    .addAll(ps2.matched)
+                                    .build(),
+                            ImmutableMap.<Variable, Term>builder()
+                                    .putAll(ps1.substitution)
+                                    .putAll(mapDifference.entriesOnlyOnRight())
+                                    .build()));
+                }
+            }
+        }
+        return set;
     }
 
     @Override

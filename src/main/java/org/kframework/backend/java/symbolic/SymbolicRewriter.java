@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.ImmutableList;
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
+import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.Index;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.RuleIndex;
@@ -653,6 +656,22 @@ public class SymbolicRewriter {
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
                     continue;
+                }
+
+                KSequence leftKContent = (KSequence) KCollection.upKind(term.term().getCellContentsByName("k").get(0), Kind.K);
+                KSequence rightKContent = (KSequence) KCollection.upKind(targetTerm.term().getCellContentsByName("k").get(0), Kind.K);
+                if (leftKContent.hasFrame() && rightKContent.hasFrame()
+                        && leftKContent.frame().equals(rightKContent.frame())) {
+                    leftKContent = KSequence.of(ImmutableList.copyOf(leftKContent.getContents()), null);
+                    rightKContent = KSequence.of(ImmutableList.copyOf(rightKContent.getContents()), null);
+                    BoolToken unifiable = MetaK.unifiable(
+                            leftKContent,
+                            rightKContent,
+                            term.termContext());
+                    if (unifiable != null && unifiable.booleanValue()) {
+                        proofResults.add(term);
+                        continue;
+                    }
                 }
 
                 if (guarded) {

@@ -597,6 +597,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     public static SymbolicConstraint simplifiedConstraintFrom(TermContext context, Object... args) {
         SymbolicConstraint constraint = new SymbolicConstraint(context);
         constraint.addAll(args);
+        constraint.simplify();
         return constraint;
     }
 
@@ -905,6 +906,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean implies(SymbolicConstraint constraint, Set<Variable> rightOnlyVariables) {
+        // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
+        assert !constraint.isFalse();
+
         LinkedList<Implication> implications = new LinkedList<>();
         implications.add(new Implication(this, constraint));
         while (!implications.isEmpty()) {
@@ -918,6 +922,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 System.out.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
+            right.orientSubstitution(rightOnlyVariables);
             right = left.simplifyConstraint(right);
             right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
@@ -1115,6 +1120,18 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value of this symbolic constraint after simplification
      */
     public TruthValue simplify() {
+        return simplify(false);
+    }
+
+    /**
+     * Simplifies this symbolic constraint as much as possible. Decomposes large
+     * equalities into small ones using unification.
+     *
+     * @param fold set if non-deterministic pattern folding is enabled
+     *
+     * @return the truth value of this symbolic constraint after simplification
+     */
+    public TruthValue simplify(boolean fold) {
         if (data.truthValue != TruthValue.UNKNOWN) {
             return data.truthValue;
         }
@@ -1145,14 +1162,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     }
 
                     change = true;
-                } else if (equality.leftHandSide instanceof BuiltinMap
-                        && ((BuiltinMap) equality.leftHandSide).isUnifiableByCurrentAlgorithm()
-                        && equality.rightHandSide instanceof BuiltinMap
-                        && ((BuiltinMap) equality.rightHandSide).isUnifiableByCurrentAlgorithm()) {
+                } else if (BuiltinMap.isMapUnifiableByCurrentAlgorithm(equality.leftHandSide, equality.rightHandSide)) {
                     try {
-                        if (unifier.unifyMap(
+                        if (unifier.simplifyMapEquality(
                                 (BuiltinMap) equality.leftHandSide,
-                                (BuiltinMap) equality.rightHandSide, false)) {
+                                (BuiltinMap) equality.rightHandSide,
+                                fold)) {
                             iterator.remove();
                             change = true;
                         }
@@ -1327,7 +1342,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             /* force normalization to consider the changes made by this method */
             data.isNormal = false;
-            simplify();
+            // TODO(AndreiS): move folding from here (this is way too fragile)
+            /* simplify with pattern folding if not performing narrowing */
+            if (!narrowing) {
+                simplify(true);
+            } else {
+                simplify();
+            }
         } while (changed);
     }
 

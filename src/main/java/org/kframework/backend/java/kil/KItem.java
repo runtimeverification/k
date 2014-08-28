@@ -625,7 +625,7 @@ public final class KItem extends Term {
                 SymbolicConstraint requires = SymbolicConstraint
                         .simplifiedConstraintFrom(context, rule.requires(), unificationConstraint);
                 requires.orientSubstitution(ruleInputKList.variableSet());
-                if (!constraint.implies(requires, ruleInputKList.variableSet())) {
+                if (requires.isFalse() || !constraint.implies(requires, ruleInputKList.variableSet())) {
                     continue;
                 }
             }

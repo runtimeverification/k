@@ -75,7 +75,15 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ConstrainedTerm constrainedTerm) {
-        throw new UnsupportedOperationException();
+        Term term = (Term) constrainedTerm.term().accept(this);
+        SymbolicConstraint lookups = (SymbolicConstraint) constrainedTerm.lookups().accept(this);
+        SymbolicConstraint constraint = (SymbolicConstraint) constrainedTerm.constraint().accept(this);
+        if (term != constrainedTerm.term()
+                || lookups != constrainedTerm.lookups()
+                || constraint != constrainedTerm.constraint()) {
+            constrainedTerm = new ConstrainedTerm(term, lookups, constraint, context);
+        }
+        return constrainedTerm;
     }
 
     @Override

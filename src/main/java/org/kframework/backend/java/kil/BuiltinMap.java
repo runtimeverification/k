@@ -45,6 +45,11 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         return builder.build();
     }
 
+    public static boolean isMapUnifiableByCurrentAlgorithm(Term term, Term otherTerm) {
+        return term instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()
+                && otherTerm instanceof BuiltinMap && ((BuiltinMap) otherTerm).isUnifiableByCurrentAlgorithm();
+    }
+
     public Term get(Term key) {
         return entries.get(key);
     }

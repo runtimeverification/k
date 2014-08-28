@@ -141,6 +141,12 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
     */
 
+
+    /**
+     * Checks if this constrained term implies the given constrained term, assuming the variables
+     * occurring only in the given constrained term (but not in this constrained term) are
+     * existentially quantified.
+     */
     public SymbolicConstraint matchImplies(ConstrainedTerm constrainedTerm) {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.addAll(constraint.substitution());
@@ -152,6 +158,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
 
         unificationConstraint.addAllThenSimplify(constrainedTerm.lookups, constrainedTerm.constraint);
+        unificationConstraint.simplify(true);
         unificationConstraint.expandPatternsAndSimplify(false);
 
         final Set<Variable> variables = unificationConstraint.variableSet();
