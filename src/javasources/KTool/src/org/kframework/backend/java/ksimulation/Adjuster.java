@@ -102,18 +102,18 @@ public class Adjuster {
         com.microsoft.z3.Context context = Z3Wrapper.newContext();
         KILtoZ3 transformer = new KILtoZ3(allVars, context);
 
-        Solver solver = context.MkSolver();
+        Solver solver = context.mkSolver();
 
-        BoolExpr first = context.MkEq(((Z3Term)newImplContent.accept(transformer)).expression(),
+        BoolExpr first = context.mkEq(((Z3Term)newImplContent.accept(transformer)).expression(),
                 ((Z3Term)newSepcContent.accept(transformer)).expression());
 
         if(allVarsInTerm.isEmpty()){
 
-            solver.Assert(first);
+            solver.add(first);
 
-            if(solver.Check() == Status.SATISFIABLE){
+            if(solver.check() == Status.SATISFIABLE){
                 return true;
-                } else if(solver.Check()==Status.UNKNOWN){
+                } else if(solver.check()==Status.UNKNOWN){
                     return implside.term().equals(specside.term());
                 }
 
@@ -126,7 +126,7 @@ public class Adjuster {
 
         for(Equality equality : newImplside.equalities()){
 
-            BoolExpr tempBoolExpr = context.MkEq(((Z3Term) equality.leftHandSide().accept(transformer)).expression(),
+            BoolExpr tempBoolExpr = context.mkEq(((Z3Term) equality.leftHandSide().accept(transformer)).expression(),
                     ((Z3Term) equality.rightHandSide().accept(transformer)).expression());
             temp.add(tempBoolExpr);
         }
@@ -143,7 +143,7 @@ public class Adjuster {
 
         for(Equality equality : newSpecside.equalities()){
 
-            BoolExpr tempBoolExpr = context.MkEq(((Z3Term) equality.leftHandSide().accept(transformer)).expression(),
+            BoolExpr tempBoolExpr = context.mkEq(((Z3Term) equality.leftHandSide().accept(transformer)).expression(),
                     ((Z3Term) equality.rightHandSide().accept(transformer)).expression());
             temp.add(tempBoolExpr);
         }
@@ -155,8 +155,8 @@ public class Adjuster {
             newSpecEqualities[i] = temp.get(i);
         }
 
-        BoolExpr forAllLeftSide = context.MkAnd(newImplEqualities);
-        BoolExpr forAllRightSide = context.MkAnd(newSpecEqualities);
+        BoolExpr forAllLeftSide = context.mkAnd(newImplEqualities);
+        BoolExpr forAllRightSide = context.mkAnd(newSpecEqualities);
 
         Expr [] varsInZ3 = new Expr[allVarsInTerm.size()];
 
@@ -169,12 +169,12 @@ public class Adjuster {
                     ((Z3Term)((org.kframework.backend.java.kil.Term)iter.next()).accept(transformer)).expression();
         }
 
-        solver.Assert(context.MkForall(varsInZ3,context.MkImplies(forAllLeftSide, forAllRightSide)
+        solver.add(context.mkForall(varsInZ3,context.mkImplies(forAllLeftSide, forAllRightSide)
                     , 1, null, null, null, null));
 
-        if(solver.Check() == Status.SATISFIABLE){
+        if(solver.check() == Status.SATISFIABLE){
         return true;
-        } else if(solver.Check()==Status.UNKNOWN){
+        } else if(solver.check()==Status.UNKNOWN){
             return implside.term().equals(specside.term());
         }
 

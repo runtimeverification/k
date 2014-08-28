@@ -32,26 +32,26 @@ public class UseSMT implements Serializable {
             SymbolicConstraint constraint = new SymbolicConstraint(termContext);
             constraint.add(term, BoolToken.TRUE);
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            Solver solver = context.MkSolver();
-            BoolExpr query = context.ParseSMTLIB2String(
+            Solver solver = context.mkSolver();
+            BoolExpr query = context.parseSMTLIB2String(
                     KILtoSMTLib.translateConstraint(constraint),
                     null,
                     null,
                     null,
                     null);
-            solver.Assert(query);
+            solver.add(query);
 
 
-            if(solver.Check() == Status.SATISFIABLE){
+            if(solver.check() == Status.SATISFIABLE){
 
-                Model model = solver.Model();
-                FuncDecl[] consts = model.ConstDecls();
+                Model model = solver.getModel();
+                FuncDecl[] consts = model.getConstDecls();
 
                 for(int i=0 ; i < consts.length; ++i){
 
-                    Expr resultFrg = model.ConstInterp(consts[i]);
+                    Expr resultFrg = model.getConstInterp(consts[i]);
 
-                    Variable akey = new Variable(consts[i].Name().toString(), Sort.of(consts[i].Range().toString()));
+                    Variable akey = new Variable(consts[i].getName().toString(), Sort.of(consts[i].getRange().toString()));
 
                     IntToken avalue = IntToken.of(Integer.parseInt(resultFrg.toString()));
 
@@ -60,7 +60,7 @@ public class UseSMT implements Serializable {
 
 
             }
-            context.Dispose();
+            context.dispose();
         } catch (Z3Exception e) {
             e.printStackTrace();
         } catch (UnsupportedOperationException e) {
