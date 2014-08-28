@@ -9,6 +9,11 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -110,7 +115,10 @@ public class FileUtil {
 
     // generate an unique name for a folder with the name dirName
     public static String generateUniqueFolderName(String dirName) {
-        return dirName + UUID.randomUUID().toString();
+        DateFormat df = new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss-");
+        Date today = Calendar.getInstance().getTime();
+        String reportDate = df.format(today);
+        return dirName + reportDate + UUID.randomUUID().toString();
     }
 
     /**
