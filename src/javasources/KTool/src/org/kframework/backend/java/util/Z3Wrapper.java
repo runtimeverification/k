@@ -58,10 +58,10 @@ public class Z3Wrapper {
         boolean result = false;
         try {
             com.microsoft.z3.Context context = newContext();
-            Solver solver = context.MkSolver();
-            solver.Assert(context.ParseSMTLIB2String(SMT_PRELUDE + query, null, null, null, null));
-            result = solver.Check() == Status.UNSATISFIABLE;
-            context.Dispose();
+            Solver solver = context.mkSolver();
+            solver.add(context.parseSMTLIB2String(SMT_PRELUDE + query, null, null, null, null));
+            result = solver.check() == Status.UNSATISFIABLE;
+            context.dispose();
         } catch (Z3Exception e) {
             System.err.println("failed to translate smtlib expression:\n" + SMT_PRELUDE + query);
             e.printStackTrace();
