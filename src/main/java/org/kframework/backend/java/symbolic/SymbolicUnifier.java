@@ -328,8 +328,6 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
-    public boolean unifyMap(BuiltinMap map, BuiltinMap otherMap, boolean addUnchanged) {
-        assert map.collectionFunctions().isEmpty() && otherMap.collectionFunctions().isEmpty();
     public boolean simplifyMapEquality(BuiltinMap map, BuiltinMap otherMap, boolean fold) {
         if (!fold) {
             return unifyMap(map, otherMap, true);
