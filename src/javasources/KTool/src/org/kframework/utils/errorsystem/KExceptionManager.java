@@ -74,6 +74,10 @@ public class KExceptionManager {
         register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, phase, null, node.getLocation(), node.getSource());
     }
 
+    public void registerCompilerError(String message) {
+        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, null, null);
+    }
+
     public void registerCompilerError(String message, ASTNode node) {
         register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, node.getLocation(), node.getSource());
     }

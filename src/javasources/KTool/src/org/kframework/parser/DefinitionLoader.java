@@ -79,7 +79,8 @@ public class DefinitionLoader {
     private final BinaryLoader loader;
     private final KExceptionManager kem;
     private final OuterParser outer;
-    private final Backend backend;
+    private final boolean documentation;
+    private final boolean autoinclude;
 
     @Inject
     public DefinitionLoader(
@@ -87,12 +88,14 @@ public class DefinitionLoader {
             BinaryLoader loader,
             KExceptionManager kem,
             OuterParser outer,
-            Backend backend) {
+            @Backend.Documentation boolean documentation,
+            @Backend.Autoinclude boolean autoinclude) {
         this.sw = sw;
         this.loader = loader;
         this.kem = kem;
         this.outer = outer;
-        this.backend = backend;
+        this.documentation = documentation;
+        this.autoinclude = autoinclude;
     }
 
     public Definition loadDefinition(File mainFile, String lang, Context context) {
@@ -141,7 +144,7 @@ public class DefinitionLoader {
             def.setModulesMap(outer.getModulesMap());
             def.setItems(outer.getModuleItems());
 
-            if (!backend.documentation()) {
+            if (!documentation) {
                 if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
                     String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
                     kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
@@ -152,14 +155,14 @@ public class DefinitionLoader {
 
                 if (!def.getModulesMap().containsKey(mainModule)) {
                     String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
-                    kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg));
+                    kem.registerCompilerError(msg);
                 }
             }
             sw.printIntermediate("Outer Parsing");
 
             //This following line was commented out to make the latex backend
             //parse files importing from other files
-            def = (Definition) new RemoveUnusedModules(context, backend.autoinclude()).visitNode(def);
+            def = (Definition) new RemoveUnusedModules(context, autoinclude).visitNode(def);
 
             // HERE: add labels to sorts
 
@@ -180,7 +183,7 @@ public class DefinitionLoader {
             ResourceExtractor.ExtractProgramSDF(new File(context.dotk, "pgm"));
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
-            if (!backend.documentation()) {
+            if (!documentation) {
                 String oldSdfPgm = "";
                 if (new File(context.kompiled, "Program.sdf").exists())
                     oldSdfPgm = FileUtil.getFileContent(context.kompiled.getAbsolutePath() + "/Program.sdf");
@@ -230,7 +233,7 @@ public class DefinitionLoader {
                     new File(cacheFile).delete();
                     // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                    if (!backend.documentation()) {
+                    if (!documentation) {
                         Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
                         t2.join();
                         try {
@@ -252,8 +255,8 @@ public class DefinitionLoader {
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-                            "Thread was interrupted trying to run SDF2Table"));
+                    kem.registerCriticalError(
+                            "Thread was interrupted trying to run SDF2Table");
                 }
 
 

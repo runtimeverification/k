@@ -65,6 +65,21 @@ public class KompileModule extends AbstractModule {
         mapBinder.addBinding(Backends.COQ).to(CoqBackend.class);
     }
 
+    @Provides @Backend.Autoinclude
+    boolean autoinclude(Backend backend) {
+        return backend.autoinclude();
+    }
+
+    @Provides @Backend.AutoincludedFile
+    String autoincludedFile(Backend backend) {
+        return backend.autoincludedFile();
+    }
+
+    @Provides @Backend.Documentation
+    boolean documentation(Backend backend) {
+        return backend.documentation();
+    }
+
     @Provides
     Backend getBackend(KompileOptions options, Map<String, Backend> map) {
         return map.get(options.backend);
