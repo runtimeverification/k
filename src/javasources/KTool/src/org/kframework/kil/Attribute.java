@@ -1,17 +1,13 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
-import com.google.inject.TypeLiteral;
+
+import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
@@ -57,51 +53,40 @@ public class Attribute<T> extends ASTNode {
     private T value;
 
     public static class Key<T> implements Serializable {
-        private transient TypeLiteral<T> typeLiteral;
+        private final TypeToken<T> typeToken;
         private final Annotation annotation;
 
-        protected Key(TypeLiteral<T> typeLiteral, Annotation annotation) {
-            this.typeLiteral = typeLiteral;
+        protected Key(TypeToken<T> typeToken, Annotation annotation) {
+            this.typeToken = typeToken;
             this.annotation = annotation;
         }
 
-        public TypeLiteral<T> getTypeLiteral() {
-            return typeLiteral;
+        public TypeToken<T> getTypeToken() {
+            return typeToken;
         }
 
         public Annotation getAnnotation() {
             return annotation;
         }
 
-        private void writeObject(ObjectOutputStream stream) throws IOException {
-            stream.defaultWriteObject();
-            stream.writeObject(getTypeLiteral().getType());
-        }
-
-        private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-            stream.defaultReadObject();
-            Type type = (Type) stream.readObject();
-            typeLiteral = (TypeLiteral<T>) TypeLiteral.get(type);
-        }
-
         public static <T> Key<T> get(Class<T> cls, Annotation annotation) {
-            return new Key<T>(TypeLiteral.get(cls), annotation);
+            return new Key<T>(TypeToken.of(cls), annotation);
         }
 
         public static <T> Key<T> get(Class<T> cls) {
-            return new Key<T>(TypeLiteral.get(cls), null);
+            return new Key<T>(TypeToken.of(cls), null);
         }
 
         @Override
         public String toString() {
-            if (getTypeLiteral().equals(TypeLiteral.get(String.class))) {
+            if (getTypeToken().equals(TypeToken.of(String.class))) {
                 return toString(getAnnotation());
             }
             String annotation = toString(getAnnotation());
             if (annotation != null) {
-                return "@" + getTypeLiteral().toString() + "." + annotation;
+                return "@" + getTypeToken().toString() + "." + annotation;
             } else {
-                return "@" + getTypeLiteral().toString();
+                return "@" + getTypeToken().toString();
             }
         }
 
@@ -111,6 +96,39 @@ public class Attribute<T> extends ASTNode {
                 return ((Named)annotation).value();
             }
             return annotation.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((annotation == null) ? 0 : annotation.hashCode());
+            result = prime * result
+                    + ((typeToken == null) ? 0 : typeToken.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Key<?> other = (Key<?>) obj;
+            if (annotation == null) {
+                if (other.annotation != null)
+                    return false;
+            } else if (!annotation.equals(other.annotation))
+                return false;
+            if (typeToken == null) {
+                if (other.typeToken != null)
+                    return false;
+            } else if (!typeToken.equals(other.typeToken))
+                return false;
+            return true;
         }
     }
 
