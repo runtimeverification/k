@@ -96,8 +96,7 @@ public class ListUpdate extends Term implements DataStructureUpdate {
 
     @Override
     public boolean isSymbolic() {
-        // TODO(YilongL): throw an exception instead?
-        return false;
+        return true;
     }
 
     @Override
