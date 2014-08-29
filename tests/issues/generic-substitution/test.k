@@ -13,8 +13,8 @@ module TEST
 //  rule isBound('let_=_in_, 1) => "star"
 //  rule isBounding('let_=_in_, 3) => true
 
-  syntax List{K} ::= ExpList2KList(Exps) [function]
-  rule ExpList2KList(.Exps) => .List{K}
+  syntax KList ::= ExpList2KList(Exps) [function]
+  rule ExpList2KList(.Exps) => .KList
   rule ExpList2KList(E:Exp, Es:Exps) => E,,ExpList2KList(Es)
 
   //rule isInt('#symInt(_)) => true

@@ -47,7 +47,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
 
     /**
      * Flattens this TermCons if it has sort K, KItem, or any sort other than
-     * those defined in {@link org.kframework.kil.KSort}.
+     * those defined in {@link org.kframework.kil.Sort}.
      */
     @Override
     public ASTNode visit(TermCons tc, Void _)  {
@@ -96,7 +96,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             }
             String label;
             if (tc.isListTerminator())
-                label = tc.getProduction().getListDecl().getTerminatorKLabel();
+                label = tc.getProduction().getTerminatorKLabel();
             else
                 label = ppp.getKLabel();
             return new KApp(l, s, KLabelConstant.of(label, context), lok);
@@ -121,8 +121,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             // if this is a list sort
             if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
                 Production listProd = context.listProductions.get(emp.getSort());
-                String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
-                return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), context), KList.EMPTY);
+                return new KApp(l, f, KLabelConstant.of(listProd.getTerminatorKLabel(), context), KList.EMPTY);
                 // Constant cst = new Constant(l, f, KSorts.KLABEL, "'." + emp.getSort() + "");
                 // return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
             }

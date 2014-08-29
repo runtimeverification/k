@@ -42,9 +42,9 @@ import java.util.concurrent.TimeUnit;
 @Deprecated
 public class TermVisitor extends LocalVisitor implements Serializable {
     private static final String K_RESULT = "KResult";
-    private static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
-    private static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";
-    private static final String LIST_LABEL = "List{\",\"}";
+    private static final String EMPTY_LIST_LABEL = "'.List{\"'_,_\"}";
+    private static final String EMPTY_LIST_SORT = "#ListOf#Bot{\"'_,_\"}";
+    private static final String LIST_LABEL = "List{\"'_,_\"}";
     private static final String USER_LIST_REPLACEMENT = "UserList";
     private static final String K_ITEM_SORT = "KItem";
     private static final String EMPTY_K = "EMPTY_K";
