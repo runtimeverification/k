@@ -42,10 +42,6 @@ public class UserList extends ProductionItem {
             return "NeList{" + sort + "," + StringUtil.enquoteCString(separator) + "} ";
     }
 
-    public String getTerminatorKLabel() {
-        return "'.List{" + StringUtil.enquoteCString(separator) + "}";
-    }
-
     public Sort getSort() {
         return sort;
     }

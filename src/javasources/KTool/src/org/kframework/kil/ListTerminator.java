@@ -8,7 +8,7 @@ import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
 /**
- * A subclass of {@link Empty} used to represent both typed and untyped cons list terminators. Distinguished by {@link #sort} and {@link #separator}
+ * A subclass of {@link ListTerminator} used to represent both typed and untyped cons list terminators. Distinguished by {@link #sort} and {@link #separator}
  */
 public class ListTerminator extends Term {
 
@@ -43,7 +43,7 @@ public class ListTerminator extends Term {
     @Override
     public String toString() {
         if (separator != null && sort.equals(Sort.K)) {
-            return ".List{\"" + separator + "\"}";
+            return ".List{" + StringUtil.enquoteKString(separator) + "}";
         } else {
         return "." + sort;
     }

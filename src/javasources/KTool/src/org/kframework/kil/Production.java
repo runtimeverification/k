@@ -3,6 +3,7 @@ package org.kframework.kil;
 
 import com.google.common.collect.Multimap;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,18 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         assert isListDecl();
         return (UserList) items.get(0);
     }
+
+    /**
+     * Returns the KLabel for the list terminator.
+     * Constructed as '.List{"<list_klabel>"}
+     * Should be called only if isListDecl is true.
+     * @return String representation of the separator KLabel.
+     */
+    public String getTerminatorKLabel() {
+        assert isListDecl();
+        return "'.List{" + StringUtil.enquoteCString(getKLabel()) + "}";
+    }
+
 
     public boolean isSubsort() {
         return items.size() == 1 && items.get(0) instanceof NonTerminal;

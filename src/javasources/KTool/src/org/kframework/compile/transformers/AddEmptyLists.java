@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Transformer class adding the implicit terminator (.List{"SEP"}) to user defined lists.
+ * Transformer class adding the implicit terminator (.List{"<klabel>"}) to user defined lists.
  */
 public class AddEmptyLists extends CopyOnWriteTransformer {
 

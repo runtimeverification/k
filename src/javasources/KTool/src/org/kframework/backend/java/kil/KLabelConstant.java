@@ -54,7 +54,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
 
     /**
      * Specifies if this {@code KLabelConstant} is a list label,
-     * e.g. {@code '.List{","}}.
+     * e.g. {@code '.List{"'_,_"}}.
      */
     private final boolean isListLabel;
 

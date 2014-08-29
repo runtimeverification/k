@@ -275,10 +275,6 @@ public class MetaK {
         return node.getName().startsWith(Constants.anyVarSymbol);
     }
 
-    public static String getListUnitLabel(String sep) {
-        return  "'.List{\"" + sep + "\"}";
-    }
-
     public static List<Cell> getTopCells(Term t, org.kframework.kil.loader.Context context) {
         final List<Cell> cells = new ArrayList<Cell>();
         new BasicVisitor(context) {

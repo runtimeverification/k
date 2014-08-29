@@ -2,7 +2,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.KilProperty;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -16,7 +15,7 @@ import java.util.Set;
  */
 @KilProperty.Ensures({KilProperty.NO_CONCRETE_SYNTAX, KilProperty.NO_CONCRETE_SYNTAX_DECLARATIONS})
 public class FlattenSyntax extends CopyOnWriteTransformer {
-    Set<String> listSeparators = new HashSet<>();
+    Set<String> listUnits = new HashSet<>();
     boolean isComputation = false;
 
     public FlattenSyntax(Context context) {
@@ -32,13 +31,13 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Module node, Void _)  {
-        listSeparators.clear();
+        listUnits.clear();
         node = (Module) super.visit(node, _);
-        if (listSeparators.isEmpty())
+        if (listUnits.isEmpty())
             return node;
 
-        for (String sep : listSeparators) {
-            node.addConstant(Sort.KLABEL, MetaK.getListUnitLabel(sep));
+        for (String listUnit : listUnits) {
+            node.addConstant(Sort.KLABEL, listUnit);
         }
         return node;
     }
@@ -66,7 +65,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
         String arity = String.valueOf(node.getArity());
         Attributes attrs = node.getAttributes().shallowCopy();
         if (node.isListDecl()) {
-            listSeparators.add(((UserList) node.getItems().get(0)).getSeparator());
+            listUnits.add(node.getTerminatorKLabel());
             attrs.add(Attribute.HYBRID);
         }
         node = node.shallowCopy();

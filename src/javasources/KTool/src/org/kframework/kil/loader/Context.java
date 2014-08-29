@@ -173,7 +173,7 @@ public class Context implements Serializable {
             klabels.put(p.getKLabel(), p);
             tags.put(p.getKLabel(), p);
             if (p.isListDecl()) {
-                listKLabels.put(p.getListDecl().getTerminatorKLabel(), p);
+                listKLabels.put(p.getTerminatorKLabel(), p);
             }
         }
         if (p.isListDecl()) {
@@ -190,7 +190,7 @@ public class Context implements Serializable {
             klabels.remove(p.getKLabel(), p);
             tags.remove(p.getKLabel(), p);
             if (p.isListDecl()) {
-                listKLabels.remove(p.getListDecl().getTerminatorKLabel(), p);
+                listKLabels.remove(p.getTerminatorKLabel(), p);
             }
         }
         if (p.isListDecl()) {
