@@ -4,6 +4,7 @@ package org.kframework.backend.java.indexing;
 import java.util.List;
 
 import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
@@ -37,12 +38,12 @@ public class IndexingCellsCollector extends BottomUpVisitor {
 
     @Override
     public void visit(Cell cell) {
-        String cellLabel = cell.getLabel();
+        CellLabel cellLabel = cell.getLabel();
         String streamCellAttr = definition.context()
-                .getConfigurationStructureMap().get(cellLabel).cell
+                .getConfigurationStructureMap().get(cellLabel.name()).cell
                 .getCellAttribute(Attribute.STREAM_KEY);
 
-        if (cellLabel.equals("k")
+        if (cellLabel.equals(CellLabel.K)
                 || Constants.STDIN.equals(streamCellAttr)
                 || Constants.STDOUT.equals(streamCellAttr)
                 || Constants.STDERR.equals(streamCellAttr)) {

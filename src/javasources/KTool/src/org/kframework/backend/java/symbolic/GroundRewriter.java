@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
@@ -136,7 +137,7 @@ public class GroundRewriter extends AbstractRewriter {
                 if (value == null) {
                     return null;
                 }
-                map.put(variable, new Cell<Term>("generatedTop", value));
+                map.put(variable, new Cell<Term>(CellLabel.GENERATED_TOP, value));
             }
         }
         return map;

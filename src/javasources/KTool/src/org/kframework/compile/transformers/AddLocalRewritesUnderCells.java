@@ -85,6 +85,8 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
             } else {
                 rule.setCellsToCopy(ImmutableSet.<String>of());
             }
+        } else {
+            rule.setCellsToCopy(ImmutableSet.<String>of());
         }
         return rule;
     }

@@ -171,7 +171,7 @@ public class SymbolicRewriter {
 
                 newTemp.cellMap().put(((Cell<Term>)rule.leftHandSide()).getLabel(), (Cell<Term>)rule.leftHandSide());
 
-                Cell<Term> newRuleTerm = new Cell<Term>("generatedTop",newTemp);
+                Cell<Term> newRuleTerm = new Cell<Term>(CellLabel.GENERATED_TOP, newTemp);
 
                 ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
                         newRuleTerm,
@@ -475,7 +475,7 @@ public class SymbolicRewriter {
                 if (value == null) {
                     return null;
                 }
-                map.put(variable, new Cell<Term>("generatedTop", value));
+                map.put(variable, new Cell<Term>(CellLabel.GENERATED_TOP, value));
             }
         }
         return map;

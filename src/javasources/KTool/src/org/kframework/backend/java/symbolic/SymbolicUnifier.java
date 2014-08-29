@@ -21,7 +21,6 @@ import java.util.Set;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
@@ -534,7 +533,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 //         */
 //        assert !(cellCollection.hasFrame() && otherCellCollection.hasFrame());
 
-        Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
+        Set<CellLabel> unifiableCellLabels = new HashSet<CellLabel>(cellCollection.labelSet());
         unifiableCellLabels.retainAll(otherCellCollection.labelSet());
 
         Context context = termContext.definition().context();
@@ -544,15 +543,15 @@ public class SymbolicUnifier extends AbstractUnifier {
          * therefore, no need to worry about AC-unification at all!
          */
         if (!cellCollection.hasStar()) {
-            for (String label : unifiableCellLabels) {
+            for (CellLabel label : unifiableCellLabels) {
                 assert cellCollection.get(label).size() == 1
                         && otherCellCollection.get(label).size() == 1;
                 unify(cellCollection.get(label).iterator().next(),
                         otherCellCollection.get(label).iterator().next());
             }
 
-            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
-            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
                     cellMap, otherCellCollection, otherCellMap);
 
@@ -580,17 +579,17 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             // from now on, we assume that cellCollection is free of frame
-            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
-            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
                     cellMap, otherCellCollection, otherCellMap);
             if (!otherCellMap.isEmpty()) {
                 fail(cellCollection, otherCellCollection);
             }
 
-            for (Iterator<String> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
-                String cellLabel = iter.next();
-                if (!context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
+            for (Iterator<CellLabel> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
+                CellLabel cellLabel = iter.next();
+                if (!context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     unify(cellCollection.get(cellLabel).iterator().next(),
@@ -612,7 +611,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
             }
 
-            String label = unifiableCellLabels.iterator().next();
+            CellLabel label = unifiableCellLabels.iterator().next();
             Cell<?>[] cells = cellCollection.get(label).toArray(new Cell[1]);
             Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
@@ -638,7 +637,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     continue;
                 }
 
-                Multimap<String, Cell> cm = ArrayListMultimap.create();
+                Multimap<CellLabel, Cell> cm = ArrayListMultimap.create();
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.selected.contains(i)) {
                         cm.put(cells[i].getLabel(), cells[i]);
@@ -673,19 +672,19 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
-    private void computeDisjointCellMaps(Set<String> unifiableCellLabels,
-            CellCollection cellCollection, Multimap<String, Cell> cellMap,
+    private void computeDisjointCellMaps(Set<CellLabel> unifiableCellLabels,
+            CellCollection cellCollection, Multimap<CellLabel, Cell> cellMap,
             CellCollection otherCellCollection,
-            Multimap<String, Cell> otherCellMap) {
+            Multimap<CellLabel, Cell> otherCellMap) {
         cellMap.clear();
-        for (String label : cellCollection.labelSet()) {
+        for (CellLabel label : cellCollection.labelSet()) {
             if (!unifiableCellLabels.contains(label)) {
                 cellMap.putAll(label, cellCollection.get(label));
             }
         }
 
         otherCellMap.clear();
-        for (String label : otherCellCollection.labelSet()) {
+        for (CellLabel label : otherCellCollection.labelSet()) {
             if (!unifiableCellLabels.contains(label)) {
                 otherCellMap.putAll(label, otherCellCollection.get(label));
             }
@@ -761,11 +760,11 @@ public class SymbolicUnifier extends AbstractUnifier {
      * @return true if the constraint addition does not make the unification to fail
      */
     private boolean addCellCollectionConstraint(
-            Multimap<String, Cell> cellMap,
+            Multimap<CellLabel, Cell> cellMap,
             Variable frame,
-            Multimap<String, Cell> otherCellMap,
+            Multimap<CellLabel, Cell> otherCellMap,
             Variable otherFrame) {
-        for (String cellLabel : cellMap.keySet()) {
+        for (CellLabel cellLabel : cellMap.keySet()) {
             assert !otherCellMap.containsKey(cellLabel);
             assert cellMap.get(cellLabel).size() == 1;
         }

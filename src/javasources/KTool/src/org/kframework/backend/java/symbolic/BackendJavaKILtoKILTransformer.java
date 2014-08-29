@@ -9,7 +9,6 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
-import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
@@ -63,17 +62,17 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Cell cell) {
-        final String label = cell.getLabel();
+        final CellLabel label = cell.getLabel();
         // TODO(AndreiS): fix the printing of the cells which are representing maps
-        if (cell.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
-            currentCell = configurationStructureMap.get(label.substring(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX.length())).cell;
+        if (cell.getLabel().isMapCell()) {
+            currentCell = configurationStructureMap.get(label.getRealCellLabel().name()).cell;
         } else {
-            currentCell = configurationStructureMap.get(label).cell;
+            currentCell = configurationStructureMap.get(label.name()).cell;
         }
 
         org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
-        returnCell.setLabel(label);
-        returnCell.setEndLabel(label);
+        returnCell.setLabel(label.name());
+        returnCell.setEndLabel(label.name());
         returnCell.setContents((org.kframework.kil.Term) cell.getContent().accept(this));
         returnCell.copyAttributesFrom(cell);
         return returnCell;
@@ -81,13 +80,13 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(CellCollection cellCollection) {
-        final Multimap<String,Cell> cellMap = cellCollection.cellMap();
+        final Multimap<CellLabel, Cell> cellMap = cellCollection.cellMap();
         List<org.kframework.kil.Term> terms = currentCell.getCellTerms();
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
         for (org.kframework.kil.Term term : terms) {
             if (! (term instanceof org.kframework.kil.Cell)) continue;
             String key = ((org.kframework.kil.Cell) term).getLabel();
-            for (Cell<?> cell : cellMap.get(key)) {
+            for (Cell<?> cell : cellMap.get(CellLabel.of(key))) {
                 contents.add((org.kframework.kil.Cell) transform(cell));
             }
         }
