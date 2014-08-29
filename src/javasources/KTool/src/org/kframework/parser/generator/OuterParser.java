@@ -30,19 +30,22 @@ public class OuterParser {
     private List<String> filePaths;
     private File mainFile;
     private String mainModule;
-    private boolean autoinclude;
+    private final boolean autoinclude;
     private static final String missingFileMsg = "Could not find 'required' file: ";
 
     private final KompileOptions kompileOptions;
     private final GlobalOptions globalOptions;
-    private final Backend backend;
+    private final String autoincludedFile;
 
     @Inject
-    public OuterParser(KompileOptions kompileOptions, Backend backend) {
-        this.autoinclude = backend.autoinclude();
+    public OuterParser(
+            KompileOptions kompileOptions,
+            @Backend.Autoinclude boolean autoinclude,
+            @Backend.AutoincludedFile String autoincludedFile) {
+        this.autoinclude = autoinclude;
         this.kompileOptions = kompileOptions;
         this.globalOptions = kompileOptions.global;
-        this.backend = backend;
+        this.autoincludedFile = autoincludedFile;
     }
 
     /**
@@ -66,7 +69,7 @@ public class OuterParser {
                 List<DefinitionItem> tempmi = moduleItems;
                 moduleItems = new ArrayList<DefinitionItem>();
 
-                file = buildCanonicalPath(backend.autoincludedFile(), new File(fileName));
+                file = buildCanonicalPath(autoincludedFile, new File(fileName));
                 if (file == null)
                     GlobalSettings.kem.registerCriticalError(missingFileMsg + fileName + " autoimported for every definition ");
 

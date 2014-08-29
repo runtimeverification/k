@@ -1,8 +1,18 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.kil.Definition;
+
+import com.google.inject.BindingAnnotation;
 
 public interface Backend {
     public void run(Definition definition);
@@ -41,4 +51,11 @@ public interface Backend {
     public CompilerSteps<Definition> getCompilationSteps();
     // TODO(YilongL): why mixing the uses of "compilation step" and
     // "compiler step"? what about a uniform name?
+
+    @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+    public static @interface Documentation {}
+    @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+    public static @interface Autoinclude {}
+    @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+    public static @interface AutoincludedFile {}
 }
