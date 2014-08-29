@@ -223,7 +223,7 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             modifyCellStructure = false;
             for (String wrtCellLabel : rhsOfWriteCells.keySet()) {
-                if (!definition.context().getConfigurationStructureMap().get(wrtCellLabel).hasChildren()) {
+                if (definition.context().getConfigurationStructureMap().get(wrtCellLabel).hasChildren()) {
                     modifyCellStructure = true;
                 }
             }
