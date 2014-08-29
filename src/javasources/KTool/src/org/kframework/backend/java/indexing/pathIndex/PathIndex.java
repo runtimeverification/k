@@ -280,4 +280,9 @@ public class PathIndex implements RuleIndex, Serializable{
         term.accept(termVisitor);
         return termVisitor.getpStrings();
     }
+
+    @Override
+    public List<Rule> getRules(List<Cell<?>> indexingCells) {
+        throw new UnsupportedOperationException();
+    }
 }

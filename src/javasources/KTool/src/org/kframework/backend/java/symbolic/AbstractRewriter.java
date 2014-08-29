@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
@@ -11,7 +12,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
-import org.kframework.backend.java.util.Profiler;
 import org.kframework.krun.api.SearchType;
 
 public abstract class AbstractRewriter {
@@ -44,21 +44,6 @@ public abstract class AbstractRewriter {
 
     public Term rewrite(Term subject) {
         return rewrite(subject, -1);
-    }
-
-    /**
-     * Gets the rules that could be applied to a given term according to the
-     * rule indexing mechanism.
-     *
-     * @param term
-     *            the given term
-     * @return a list of rules that could be applied
-     */
-    protected final List<Rule> getRules(Term term) {
-        Profiler.startTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
-        List<Rule> rules = ruleIndex.getRules(term);
-        Profiler.stopTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
-        return rules;
     }
 
     protected final Term getTransition(int n) {

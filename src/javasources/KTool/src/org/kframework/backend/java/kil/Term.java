@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.indexing.ConfigurationTermIndex;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
@@ -13,14 +12,11 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.loader.Constants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.lang3.mutable.MutableInt;
 
 
 /**
@@ -56,41 +52,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
             }
         });
         return indexingPairs;
-    }
-
-    public ConfigurationTermIndex getConfigurationTermIndex(final Definition definition) {
-        final List<IndexingPair> kCellIndexingPairs = new ArrayList<>();
-        final List<IndexingPair> instreamIndexingPairs = new ArrayList<>();
-        final List<IndexingPair> outstreamIndexingPairs = new ArrayList<>();
-        final MutableInt maxInputBufLen = new MutableInt(0);
-        final MutableInt maxOutputBufLen = new MutableInt(0);
-        accept(new BottomUpVisitor() {
-            @Override
-            public void visit(Cell cell) {
-                String cellLabel = cell.getLabel();
-                String streamCellAttr = definition.context().getConfigurationStructureMap().get(cellLabel).cell.getCellAttribute("stream");
-                if (cellLabel.equals("k")) {
-                    kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
-                } else if (Constants.STDIN.equals(streamCellAttr)) {
-                    Term instream = cell.getContent();
-                    instreamIndexingPairs.add(IndexingPair.getInstreamIndexingPair(instream, definition));
-                    if (instream instanceof BuiltinList) {
-                        maxInputBufLen.setValue(Math.max(maxInputBufLen.intValue(), ((BuiltinList) instream).concreteSize()));
-                    }
-                } else if (Constants.STDOUT.equals(streamCellAttr) || Constants.STDERR.equals(streamCellAttr)) {
-                    Term outstream = cell.getContent();
-                    outstreamIndexingPairs.add(IndexingPair.getOutstreamIndexingPair(outstream, definition));
-                    if (outstream instanceof BuiltinList) {
-                        maxOutputBufLen.setValue(Math.max(maxOutputBufLen.intValue(), ((BuiltinList) outstream).concreteSize()));
-                    }
-                } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
-                    super.visit(cell);
-                }
-            }
-        });
-        return new ConfigurationTermIndex(kCellIndexingPairs,
-                instreamIndexingPairs, outstreamIndexingPairs,
-                maxInputBufLen.intValue(), maxOutputBufLen.intValue());
     }
 
     /**
