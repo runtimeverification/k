@@ -550,17 +550,17 @@ public class LatexFilter extends BackendFilter {
     public Void visit(Attribute entry, Void _) {
         if (context.isParsingTag(entry.getKey()))
             return null;
-        if (entry.getKey().equals("latex"))
+        if (entry.getKey().equals(Attribute.keyOf("latex")))
             return null;
-        if (entry.getKey().equals("html"))
+        if (entry.getKey().equals(Attribute.keyOf("html")))
             return null;
         if (firstAttribute) {
             firstAttribute = false;
         } else {
             result.append(", ");
         }
-        result.append("\\kattribute{" + StringUtil.latexify(entry.getKey()) + "}");
-        String value = entry.getValue();
+        result.append("\\kattribute{" + StringUtil.latexify(entry.getKey().toString()) + "}");
+        String value = entry.toString();
         if (!value.isEmpty()) {
             result.append("(" + StringUtil.latexify(value) + ")");
         }
@@ -570,7 +570,7 @@ public class LatexFilter extends BackendFilter {
     @Override
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
-        for (Attribute entry : attributes.values()) {
+        for (Attribute<?> entry : attributes.values()) {
             this.visitNode(entry);
         }
         return null;

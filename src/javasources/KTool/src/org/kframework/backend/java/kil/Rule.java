@@ -23,9 +23,6 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Location;
-import org.kframework.kil.Source;
 import org.kframework.kil.loader.Constants;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
@@ -109,9 +106,7 @@ public class Rule extends JavaSymbolicObject {
             Map<String, Term> rhsOfWriteCells,
             Set<String> cellsToCopy,
             List<Instruction> instructions,
-            Attributes attributes,
-            Location location,
-            Source source,
+            ASTNode oldRule,
             Definition definition) {
         this.label = label;
         this.leftHandSide = leftHandSide;
@@ -121,13 +116,13 @@ public class Rule extends JavaSymbolicObject {
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
 
-        super.setAttributes(attributes);
-        setLocation(location);
-        setSource(source);
+        copyAttributesFrom(oldRule);
+        setLocation(oldRule.getLocation());
+        setSource(oldRule.getSource());
 
-        if (attributes.containsKey(Constants.STDIN)
-                || attributes.containsKey(Constants.STDOUT)
-                || attributes.containsKey(Constants.STDERR)) {
+        if (oldRule.containsAttribute(Constants.STDIN)
+                || oldRule.containsAttribute(Constants.STDOUT)
+                || oldRule.containsAttribute(Constants.STDERR)) {
             Variable listVar = (Variable) lhsOfReadCells.values().iterator().next();
             BuiltinList.Builder streamListBuilder = BuiltinList.builder();
             for (Equality eq : lookups.equalities()) {
@@ -138,7 +133,7 @@ public class Rule extends JavaSymbolicObject {
             }
 
             Term streamList = streamListBuilder.build();
-            this.indexingPair = attributes.containsKey(Constants.STDIN) ?
+            this.indexingPair = oldRule.containsAttribute(Constants.STDIN) ?
                     IndexingPair.getInstreamIndexingPair(streamList, definition) :
                     IndexingPair.getOutstreamIndexingPair(streamList, definition);
         } else {

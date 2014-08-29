@@ -8,6 +8,7 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
@@ -17,6 +18,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.*;
@@ -264,7 +266,7 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(Attributes attributes, Void _) {
         firstAttribute = true;
         for (Attribute entry : attributes.values()) {
-            if (!entry.getKey().equals("klabel")) {
+            if (!entry.getKey().equals(Attribute.keyOf("klabel"))) {
                 this.visitNode(entry);
             }
         }
@@ -273,7 +275,7 @@ public class MaudeFilter extends BackendFilter {
 
     private boolean isEmptyAttributes(Attributes attributes) {
         for (Attribute entry : attributes.values()) {
-            if (!entry.getKey().equals("klabel")) {
+            if (!entry.getKey().equals(Attribute.keyOf("klabel"))) {
                 if (!isEmptyAttribute(entry)) {
                     return false;
                 }
@@ -283,9 +285,6 @@ public class MaudeFilter extends BackendFilter {
     }
 
     private boolean isEmptyAttribute(Attribute entry) {
-        java.util.List<String> reject = new LinkedList<String>();
-        reject.add("latex");
-        reject.add("regex");
 
         if (!reject.contains(entry.getKey())) {
             return false;
@@ -293,12 +292,12 @@ public class MaudeFilter extends BackendFilter {
         return true;
     }
 
+    private static final ImmutableList<Key<String>> reject = ImmutableList.of(
+            Attribute.keyOf("latex"),
+            Attribute.keyOf("regex"));
+
     @Override
     public Void visit(Attribute attribute, Void _) {
-        java.util.List<String> reject = new LinkedList<String>();
-        reject.add("latex");
-        reject.add("regex");
-
         if (!reject.contains(attribute.getKey())) {
             if (!firstAttribute) {
                 result.append(" ");
@@ -307,7 +306,7 @@ public class MaudeFilter extends BackendFilter {
             }
             result.append(attribute.getKey());
             result.append("=(");
-            result.append(attribute.getValue().replaceAll("[()]", ""));
+            result.append(attribute.getValue().toString().replaceAll("[()]", ""));
             result.append(")");
         }
         return null;
@@ -483,14 +482,14 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(Rule rule, Void _) {
         boolean isTransition = false;
-        for (Attribute a : rule.getAttributes().values()) {
-            if (options.transition.contains(a.getKey())) {
+        for (String transition : options.transition) {
+            if (rule.containsAttribute(transition)) {
                 isTransition = true;
-                unusedTransitions.remove(a.getKey());
+                unusedTransitions.remove(transition);
                 break;
             }
         }
-        if (rule.getAttributes().containsKey("heat-choice")) {
+        if (rule.containsAttribute("heat-choice")) {
             isTransition = true;
         }
         if (!(rule.getBody() instanceof Rewrite)) {
@@ -548,7 +547,7 @@ public class MaudeFilter extends BackendFilter {
         }
         if (null != rule.getAttributes()) {
             result.append(" [");
-            if (!isTransition && rule.getAttributes().containsKey("owise"))
+            if (!isTransition && rule.containsAttribute("owise"))
                 result.append("owise ");
             if (rule.getLabel() != null && !rule.getLabel().equals("")) {
                 result.append("label " + rule.getLabel() + " metadata");

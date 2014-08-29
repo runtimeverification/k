@@ -103,7 +103,8 @@ public class JavaClassesFactory {
         if (Constants.AMB.equals(element.getNodeName()))
             return new Ambiguity(element);
         if (Constants.TAG.equals(element.getNodeName()))
-            return new Attribute(element);
+            return Attribute.of(element.getAttribute(Constants.KEY_key_ATTR),
+                    element.getAttribute(Constants.VALUE_value_ATTR));
         if (Constants.ATTRIBUTES.equals(element.getNodeName()))
             return new Attributes(element);
 

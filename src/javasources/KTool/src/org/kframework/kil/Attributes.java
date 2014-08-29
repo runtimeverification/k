@@ -1,17 +1,25 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * class for AST Attributes.
@@ -23,9 +31,9 @@ import java.util.Set;
  *
  * @see ASTNode
  */
-public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute, Enum<?>>, Map<String, Attribute> {
+public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute<?>, Enum<?>>, Map<Key<?>, Attribute<?>> {
 
-    protected LinkedHashMap<String, Attribute> contents;
+    protected transient SortedMap<Key<?>, Attribute<?>> contents;
 
     public Attributes(Attributes c) {
         super(c);
@@ -34,20 +42,29 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
 
     public Attributes(Location location, Source source) {
         super(location, source);
-        contents = new LinkedHashMap<String, Attribute>();
+        contents = new TreeMap<>(comparator);
     }
+
+    private static class C implements Comparator<Key<?>>, Serializable {
+        @Override
+        public int compare(Key<?> o1, Key<?> o2) {
+            return o1.toString().compareTo(o2.toString());
+        }
+    };
+
+    private static C comparator = new C();
 
     public Attributes(Element element) {
         super(element);
 
-        contents = new LinkedHashMap<String, Attribute>();
+        contents = new TreeMap<>(comparator);
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
-            add((Attribute) JavaClassesFactory.getTerm(e));
+            add((Attribute<?>) JavaClassesFactory.getTerm(e));
     }
 
     public Attributes() {
-        contents = new LinkedHashMap<String, Attribute>();
+        contents = new TreeMap<>(comparator);
     }
 
     @Override
@@ -55,7 +72,7 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
         if (isEmpty())
             return "";
         String content = "[";
-        for (Attribute t : contents.values())
+        for (Attribute<?> t : contents.values())
             content += t + ", ";
         return content.substring(0, content.length() - 2) + "]";
     }
@@ -100,19 +117,19 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
     }
 
     @Override
-    public List<Attribute> getChildren(Enum<?> _) {
-        return new ArrayList<Attribute>(contents.values());
+    public List<Attribute<?>> getChildren(Enum<?> _) {
+        return new ArrayList<Attribute<?>>(contents.values());
     }
 
     @Override
-    public void setChildren(List<Attribute> children, Enum<?> _) {
+    public void setChildren(List<Attribute<?>> children, Enum<?> _) {
         contents.clear();
-        for (Attribute attr : children) {
+        for (Attribute<?> attr : children) {
             add(attr);
         }
     }
 
-    public void add(Attribute e) {
+    public void add(Attribute<?> e) {
         contents.put(e.getKey(), e);
     }
 
@@ -132,12 +149,12 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
     }
 
     @Override
-    public Set<java.util.Map.Entry<String, Attribute>> entrySet() {
+    public Set<java.util.Map.Entry<Key<?>, Attribute<?>>> entrySet() {
         return contents.entrySet();
     }
 
     @Override
-    public Attribute get(Object key) {
+    public Attribute<?> get(Object key) {
         return contents.get(key);
     }
 
@@ -147,22 +164,22 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
     }
 
     @Override
-    public Set<String> keySet() {
+    public Set<Key<?>> keySet() {
         return contents.keySet();
     }
 
     @Override
-    public Attribute put(String key, Attribute value) {
+    public Attribute<?> put(Key<?> key, Attribute<?> value) {
         return contents.put(key, value);
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Attribute> m) {
+    public void putAll(Map<? extends Key<?>, ? extends Attribute<?>> m) {
         contents.putAll(m);
     }
 
     @Override
-    public Attribute remove(Object key) {
+    public Attribute<?> remove(Object key) {
         return contents.remove(key);
     }
 
@@ -172,7 +189,22 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
     }
 
     @Override
-    public Collection<Attribute> values() {
+    public Collection<Attribute<?>> values() {
         return contents.values();
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        Set<Attribute<?>> attributes = new HashSet<>(contents.values());
+        stream.writeObject(attributes);
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        contents = new TreeMap<>(comparator);
+        Set<Attribute<?>> attributes = (Set<Attribute<?>>) stream.readObject();
+        for (Attribute<?> attr : attributes) {
+            contents.put(attr.getKey(), attr);
+        }
     }
 }

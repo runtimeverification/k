@@ -4,7 +4,6 @@ package org.kframework.parser.generator;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.kframework.kil.Attributes;
 import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
@@ -14,20 +13,19 @@ import com.google.common.collect.BiMap;
 
 public class SDFHelper {
     public static String getSDFAttributes(Production p, BiMap<String, Production> conses) {
-        Attributes attrs = p.getAttributes();
         String str = " {";
 
         // if (attrs.containsKey("prefer"))
         // str += "prefer, ";
         // if (attrs.containsKey("avoid"))
         // str += "avoid, ";
-        if (attrs.containsKey("left"))
+        if (p.containsAttribute("left"))
             str += "left, ";
-        if (attrs.containsKey("reject"))
+        if (p.containsAttribute("reject"))
             str += "reject, ";
-        if (attrs.containsKey("right"))
+        if (p.containsAttribute("right"))
             str += "right, ";
-        if (attrs.containsKey("non-assoc"))
+        if (p.containsAttribute("non-assoc"))
             str += "non-assoc, ";
         // if (attrs.containsKey("bracket")) // should not need this since we use the Bracket class
         // str += "bracket, ";

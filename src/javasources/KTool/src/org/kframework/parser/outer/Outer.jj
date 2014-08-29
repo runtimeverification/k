@@ -739,7 +739,7 @@ void Tag(ASTNode node) :
     ( val = String() ")"
     | TagContent(sb) ")" { val = sb.toString() + special(); } )
     { SwitchTo(ATTR_STATE); })?
-  { node.addAttribute(markLoc(loc, new Attribute(key, val))); }
+  { node.addAttribute(markLoc(loc, Attribute.of(key, val))); }
 }
 
 /** Parses the value of an attribute and appends it to 'sb' */

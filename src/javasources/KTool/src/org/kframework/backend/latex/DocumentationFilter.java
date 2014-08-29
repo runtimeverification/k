@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.latex;
 
-import org.kframework.kil.Attributes;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -37,10 +36,9 @@ public class DocumentationFilter extends LatexFilter {
     @Override
     public Void visit(Rule rule, Void _) {
         // termComment = false;
-        Attributes atts = rule.getAttributes();
         boolean process = false;
         for(String tag : options.experimental.documentation) {
-            if(atts.containsKey(tag)) {
+            if(rule.containsAttribute(tag)) {
                 process = true;
                 break;
             }

@@ -4,6 +4,7 @@ package org.kframework.kil.loader;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.CellDataStructure;
@@ -50,10 +51,10 @@ public class Context implements Serializable {
             "kgeneratedlabel",
             "prefixlabel");
 
-    public static final Set<String> parsingTags = ImmutableSet.of(
-        "left",
-        "right",
-        "non-assoc");
+    public static final Set<Key<String>> parsingTags = ImmutableSet.of(
+        Attribute.keyOf("left"),
+        Attribute.keyOf("right"),
+        Attribute.keyOf("non-assoc"));
 
     public static final Set<String> specialTerminals = ImmutableSet.of(
         "(",
@@ -179,8 +180,8 @@ public class Context implements Serializable {
         if (p.isListDecl()) {
             listProductions.put(p.getSort(), p);
         }
-        for (Attribute a : p.getAttributes().values()) {
-            tags.put(a.getKey(), p);
+        for (Attribute<?> a : p.getAttributes().values()) {
+            tags.put(a.getKey().toString(), p);
         }
     }
 
@@ -197,8 +198,8 @@ public class Context implements Serializable {
             // AndreiS: this code assumes each list sort has only one production
             listProductions.remove(p.getSort());
         }
-        for (Attribute a : p.getAttributes().values()) {
-            tags.remove(a.getKey(), p);
+        for (Attribute<?> a : p.getAttributes().values()) {
+            tags.remove(a.getKey().toString(), p);
         }
     }
 
@@ -489,7 +490,7 @@ public class Context implements Serializable {
         return specialTerminals.contains(terminal);
     }
 
-    public boolean isParsingTag(String key) {
+    public boolean isParsingTag(Key<?> key) {
         return parsingTags.contains(key);
     }
 
