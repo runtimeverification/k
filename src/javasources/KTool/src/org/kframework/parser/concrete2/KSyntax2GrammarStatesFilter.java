@@ -73,9 +73,9 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                  *      +---[E]---(",")--<Del>--+
                  *           ^------------------+
                  */
-                RuleState labelState = new RuleState(ntName + "-L", nt, new WrapLabelRule(prd, prd.getSort()));
+                RuleState labelState = new RuleState(ntName + "-L", nt, new WrapLabelRule(prd));
                 NonTerminalState IdState = new NonTerminalState(ntName + "-S", nt, grammar.get(ul.getSort().getName()), false);
-                PrimitiveState separatorState = new RegExState(ntName + "-T", nt, Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.KITEM);
+                PrimitiveState separatorState = new RegExState(ntName + "-T", nt, Pattern.compile(ul.getSeparator(), Pattern.LITERAL), null);
                 RuleState deleteToken = new RuleState(ntName + "-D", nt, new DeleteRule(1, true));
 
                 if (ul.getListType().equals(UserList.ZERO_OR_MORE)) {
@@ -126,7 +126,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 NonTerminal IdsTerminatorNt = new NonTerminal(prd.getSort() + "-Terminator");
                 {
                     RuleState terminatorLabelRule = new RuleState("AddLabelRS", IdsTerminatorNt,
-                            new WrapLabelRule(prd, prd.getSort()));
+                            new WrapLabelRule(prd));
                     RuleState locRule = new RuleState(prd.getSort() + "-R", IdsTerminatorNt,
                             new AddLocationRule());
 
@@ -141,13 +141,13 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     NonTerminalState IdState = new NonTerminalState(ntName + "-S", NeIdsNt,
                             grammar.get(ul.getSort().getName()), false);
                     PrimitiveState separatorState = new RegExState(ntName + "-T", NeIdsNt,
-                            Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.KITEM);
+                            Pattern.compile(ul.getSeparator(), Pattern.LITERAL), null);
                     RuleState deleteToken = new RuleState(ntName + "-D", NeIdsNt,
                             new DeleteRule(1, true));
                     NonTerminalState NeIdsState = new NonTerminalState(ntName + "-S", NeIdsNt,
                             NeIdsNt, false);
                     RuleState labelState = new RuleState(ntName + "-L", NeIdsNt,
-                            new WrapLabelRule(prd, prd.getSort()));
+                            new WrapLabelRule(prd));
                     RuleState locRule = new RuleState(prd.getSort() + "-R", NeIdsNt,
                             new AddLocationRule());
 
@@ -218,7 +218,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 }
             }
             PrimitiveState pstate = new RegExState(prd.getSort().getName() + "-T",
-                nt, p, prd.getSort().getName(), rejects);
+                nt, p, prd, rejects);
             previous.next.add(pstate);
             previous = pstate;
         } else if (prd.isConstant(context)) { // TODO(Radu): properly determine if a production is a constant or not
@@ -227,7 +227,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             Terminal terminal = prd.getConstant();
             PrimitiveState pstate = new RegExState(
                 prd.getSort().getName() + "-T", nt,
-                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort().getName());
+                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd);
             previous.next.add(pstate);
             previous = pstate;
         } else {
@@ -238,7 +238,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     Terminal terminal = (Terminal) prdItem;
                     PrimitiveState pstate = new RegExState(
                             prd.getSort() + "-T", nt,
-                            Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.KITEM);
+                            Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), null);
                     previous.next.add(pstate);
                     RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
                     pstate.next.add(del);
@@ -254,7 +254,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 }
             }
             RuleState labelRule = new RuleState("AddLabelRS",
-                    nt, new WrapLabelRule(prd, prd.getSort()));
+                    nt, new WrapLabelRule(prd));
             previous.next.add(labelRule);
             previous = labelRule;
         }

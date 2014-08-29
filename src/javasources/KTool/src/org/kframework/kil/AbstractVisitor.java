@@ -766,9 +766,19 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     }
 
     @Override
+    public R visit(Constant node, P p) throws E {
+        return visit((ProductionReference) node, p);
+    }
+
+    @Override
+    public R visit(ProductionReference node, P p) throws E {
+        return visit((Term) node, p);
+    }
+
+    @Override
     public R visit(TermCons node, P p) throws E {
         node = genericVisitList(node, p, mutableList(TermCons.class), null);
-        return visit((Term) node, p);
+        return visit((ProductionReference) node, p);
     }
 
     @Override

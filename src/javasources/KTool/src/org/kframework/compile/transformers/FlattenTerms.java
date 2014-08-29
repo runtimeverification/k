@@ -6,6 +6,7 @@ import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -50,10 +51,15 @@ public class FlattenTerms extends CopyOnWriteTransformer {
      * those defined in {@link org.kframework.kil.Sort}.
      */
     @Override
-    public ASTNode visit(TermCons tc, Void _)  {
+    public ASTNode visit(TermCons tc, Void _) {
         if (tc.getSort().isComputationSort())
             return kTrans.visitNode(tc);
         return super.visit(tc, _);
+    }
+
+    @Override
+    public ASTNode visit(Constant constant, Void _) {
+        return kTrans.visitNode(constant);
     }
 
     class FlattenKSyntax extends CopyOnWriteTransformer {
@@ -79,6 +85,22 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         @Override
         public ASTNode visit(Freezer node, Void _)  {
             return KApp.of(new FreezerLabel((Term) this.visitNode(node.getTerm())));
+        }
+
+        @Override
+        public ASTNode visit(Constant constant, Void _) {
+            Term rez;
+            if (constant.getSort().equals(Sort.KLABEL)) {
+                rez = new KLabelConstant(constant.getValue());
+            } else {
+                // builtin token or lexical token
+                rez =  Token.kAppOf(constant.getSort(), constant.getValue());
+            }
+            rez.setLocation(constant.getLocation());
+            rez.setSource(constant.getSource());
+            rez.copyAttributesFrom(constant);
+
+            return this.visitNode(rez);
         }
 
         @Override

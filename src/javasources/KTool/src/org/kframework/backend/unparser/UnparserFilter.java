@@ -7,6 +7,7 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.StringUtil;
 
 import java.awt.Color;
 import java.util.Iterator;
@@ -419,6 +420,13 @@ public class UnparserFilter extends NonCachingVisitor {
         } else {
             indenter.write(".K");
         }
+        return postpare();
+    }
+
+    @Override
+    public Void visit(Constant t, Void _) {
+        prepare(t);
+        indenter.write(t.getValue());
         return postpare();
     }
 
