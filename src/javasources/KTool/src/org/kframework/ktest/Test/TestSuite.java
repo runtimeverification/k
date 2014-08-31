@@ -155,8 +155,10 @@ public class TestSuite {
                 for (KRunProgram program : programs) {
                     StringBuilder krunLogCmd = new StringBuilder();
                     krunLogCmd.append(program.toLogString());
-                    if (program.outputFile != null)
+                    if (updateOut && program.outputFile != null)
                         krunLogCmd.append(" >").append(program.outputFile);
+                    else if (generateOut && program.newOutputFile != null)
+                        krunLogCmd.append(" >").append(program.newOutputFile);
                     if (program.inputFile != null)
                         krunLogCmd.append(" <").append(program.inputFile);
                     System.out.println(krunLogCmd.toString());
