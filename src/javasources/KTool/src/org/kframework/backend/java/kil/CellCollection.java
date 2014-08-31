@@ -160,14 +160,17 @@ public class CellCollection extends Collection {
         }
 
         CellCollection collection = (CellCollection) object;
-        return (frame == null ? collection.frame == null : frame
-                .equals(collection.frame)) && cells.equals(collection.cells);
+        /* YilongL: `cells.equals(collection.cells)` could be problematic
+         * because `cells` is an ArrayListMultiMap whose equality depends on the
+         * ordering of its values */
+        return baseTerms.equals(collection.baseTerms)
+                && cells.equals(collection.cells);
     }
 
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+        hashCode = hashCode * Utils.HASH_PRIME + baseTerms.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
         return hashCode;
     }
@@ -297,7 +300,7 @@ public class CellCollection extends Collection {
         assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
 
         if (term instanceof CellCollection
-                && !((CellCollection) term).baseTerms().isEmpty()
+                && ((CellCollection) term).baseTerms().isEmpty()
                 && ((CellCollection) term).concreteSize() == 1) {
             term = ((CellCollection) term).cells().iterator().next();
         }
