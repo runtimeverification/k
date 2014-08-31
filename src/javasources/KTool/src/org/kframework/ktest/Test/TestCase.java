@@ -156,8 +156,8 @@ public class TestCase {
         List<String> stringArgs = new ArrayList<String>();
         stringArgs.add(ExecNames.getKompile());
         stringArgs.add(getDefinition());
-        for (int i = 0; i < kompileOpts.size(); i++) {
-            stringArgs.addAll(kompileOpts.get(i).toStringList());
+        for (PgmArg kompileOpt : kompileOpts) {
+            stringArgs.addAll(kompileOpt.toStringList());
         }
         String[] argsArr = stringArgs.toArray(new String[stringArgs.size()]);
         if (OS.current() == OS.WIN) {
