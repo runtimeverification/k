@@ -623,6 +623,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             isStarNested = true;
 
             java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
+            if (otherCells.length > cells.length) {
+                fail(cellCollection, otherCellCollection);
+            }
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             // start searching for all possible unifiers
             do {
