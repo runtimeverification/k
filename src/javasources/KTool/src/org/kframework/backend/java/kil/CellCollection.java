@@ -16,10 +16,10 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 
