@@ -531,9 +531,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        java.util.Set<CellLabel> cellsToCopy = Sets.newHashSet();
-        for (String cellLabelName : node.getCellsToCopy()) {
-            cellsToCopy.add(CellLabel.of(cellLabelName));
+        java.util.Set<CellLabel> cellsToCopy = null;
+        if (node.getCellsToCopy() != null) {
+            cellsToCopy = Sets.newHashSet();
+            for (String cellLabelName : node.getCellsToCopy()) {
+                cellsToCopy.add(CellLabel.of(cellLabelName));
+            }
         }
 
         Rule rule = new Rule(
