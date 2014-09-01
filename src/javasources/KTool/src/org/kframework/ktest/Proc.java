@@ -183,7 +183,7 @@ public class Proc<T> implements Runnable {
             try {
                 pgmOut = outputGobbler.get();
                 pgmErr = errorGobbler.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 // program was killed before producing output,
                 // set pgmOut and pgmErr null manually, in case one of the outputs is produced
                 // but other is not (not sure if that's possible, just to make sure..)

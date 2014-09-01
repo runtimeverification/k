@@ -43,8 +43,8 @@ public class KRunProgram {
         List<String> stringArgs = new ArrayList<String>();
         stringArgs.add(ExecNames.getKrun());
         stringArgs.add(pgmPath);
-        for (int i = 0; i < args.size(); i++) {
-            stringArgs.addAll(args.get(i).toStringList());
+        for (PgmArg arg : args) {
+            stringArgs.addAll(arg.toStringList());
         }
         String[] argsArr = stringArgs.toArray(new String[stringArgs.size()]);
         if (OS.current() == OS.WIN) {

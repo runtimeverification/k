@@ -98,7 +98,6 @@ public class TestSuite {
      */
     public boolean run() throws InterruptedException, TransformerException,
             ParserConfigurationException, IOException {
-        boolean ret = true;
 
         List<TestCase> successfulTests;
 
@@ -108,7 +107,7 @@ public class TestSuite {
             successfulTests = tests;
         }
 
-        ret &= successfulTests.size() == tests.size();
+        boolean ret = successfulTests.size() == tests.size();
 
         if (!skips.contains(KTestStep.KOMPILE)) {
             List<TestCase> testsIn = successfulTests;

@@ -73,7 +73,7 @@ public class TestCase {
                     List<PgmArg> kompileOpts,
                     ProgramProfile krunOpts,
                     Map<String, ProgramProfile> pgmSpecificKRunOpts,
-                    Set<KTestStep> skips) throws InvalidConfigError {
+                    Set<KTestStep> skips) {
         // programs and results should be ordered set because of how search algorithm works
         this.definition = definition;
         this.programs = programs;
@@ -86,7 +86,7 @@ public class TestCase {
         this.skips = skips;
     }
 
-    public static TestCase makeTestCaseFromK(KTestOptions cmdArgs) throws InvalidConfigError {
+    public static TestCase makeTestCaseFromK(KTestOptions cmdArgs) {
         Annotated<String, LocationData> targetFile =
                 new Annotated<>(cmdArgs.getTargetFile(), new LocationData());
 
