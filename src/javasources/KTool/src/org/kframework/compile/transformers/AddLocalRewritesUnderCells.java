@@ -18,6 +18,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -75,19 +76,23 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         return node;
     }
 
+    private Rule setCellsToCopyForUncompiledRule(Rule rule) {
+        if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
+            Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
+            rule = rule.shallowCopy();
+            if (hasGroundCell(rhs)) {
+                rule.setCellsToCopy(ImmutableSet.of(rhs.getLabel()));
+            } else {
+                rule.setCellsToCopy(ImmutableSet.<String>of());
+            }
+        }
+        return rule;
+    }
+
     @Override
     public ASTNode visit(Rule rule, Void _)  {
         if (!rule.isCompiledForFastRewriting()) {
-            if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
-                Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
-                rule = rule.shallowCopy();
-                if (hasGroundCell(rhs)) {
-                    rule.setCellsToCopy(Collections.singleton(rhs.getLabel()));
-                } else {
-                    rule.setCellsToCopy(Collections.<String>emptySet());
-                }
-            }
-            return rule;
+            return setCellsToCopyForUncompiledRule(rule);
         }
 
         hasAssocCommMatching = false;
@@ -101,6 +106,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         if (hasAssocCommMatching) {
             rule = rule.shallowCopy();
             rule.setCompiledForFastRewriting(false);
+            rule = setCellsToCopyForUncompiledRule(rule);
             return rule;
         }
 

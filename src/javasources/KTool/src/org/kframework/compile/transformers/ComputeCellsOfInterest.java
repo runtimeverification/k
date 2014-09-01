@@ -1,21 +1,29 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.compile.utils.ConfigurationStructureVisitor;
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
+
+import com.google.common.collect.Lists;
 
 /**
  * For each non-function rule, compute all cells that we are interested in
@@ -39,9 +47,17 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
 
     private int nestedCellCount;
     private boolean hasRewrite;
+    private boolean topMentionedCellUnderRewrite;
 
     public ComputeCellsOfInterest(Context context) {
         super("compute information for fast rewriting", context);
+    }
+
+    @Override
+    public ASTNode visit(Definition node, Void _) {
+        ConfigurationStructureVisitor cfgVisitor = new ConfigurationStructureVisitor(context);
+        cfgVisitor.visitNode(node);
+        return super.visit(node, _);
     }
 
     @Override
@@ -74,7 +90,26 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         readCell2LHS.clear();
         writeCell2RHS.clear();
         nestedCellCount = 0;
+        topMentionedCellUnderRewrite = false;
         rule = (Rule) super.visit(rule, _);
+
+        if (compiledForFastRewriting && topMentionedCellUnderRewrite) {
+            /**
+             * YilongL: Handle the following case where the parent cell of
+             * <tasks>, i.e. <T>, is also the parent of <out>:
+             * rule (<tasks> .Bag </tasks> => .)
+             *      <out>... .List => ListItem("Type checked!\n") </out>
+             */
+            List<String> cellsToRemove = Lists.newArrayList();
+            for (String cellLabel : cellsOfInterest) {
+                if (!Collections.disjoint(context.getConfigurationStructureMap().get(cellLabel).ancestorIds, cellsOfInterest)) {
+                    cellsToRemove.add(cellLabel);
+                    readCell2LHS.remove(cellLabel);
+                    writeCell2RHS.remove(cellLabel);
+                }
+            }
+            cellsOfInterest.removeAll(cellsToRemove);
+        }
 
         rule = rule.shallowCopy();
         rule.setCompiledForFastRewriting(compiledForFastRewriting);
@@ -121,13 +156,40 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Rewrite node, Void _)  {
         if (nestedCellCount == 0) {
-            /* TODO(YilongL): unable to handle the case where the top mentioned
-             * cell is inside a rewrite, e.g.:
+            topMentionedCellUnderRewrite = true;
+
+            /* YilongL: handle the case where the top mentioned cell is inside a
+             * rewrite, e.g.:
              *   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
              *         <busy> Busy => Busy -Set keys(H) </busy>
              *         <terminated>... .Set => SetItem(T) ...</terminated>
              */
-            compiledForFastRewriting = false;
+            Cell cell = null;
+            if (node.getLeft() instanceof Cell) {
+                cell = (Cell) node.getLeft();
+            } else if (node.getRight() instanceof Cell) {
+                cell = (Cell) node.getRight();
+            } else if (node.getLeft() instanceof Bag) {
+                Bag bag = (Bag) node.getLeft();
+                if (!bag.isEmpty()) {
+                    cell = (Cell) bag.getContents().get(0);
+                }
+            } else {
+                Bag bag = (Bag) node.getRight();
+                if (!bag.isEmpty()) {
+                    cell = (Cell) bag.getContents().get(0);
+                }
+            }
+
+            String parentCellLabel = context.getConfigurationStructureMap().get(cell).parent.id;
+            if (parentCellLabel.equals(MetaK.Constants.generatedCfgAbsTopCellLabel)) {
+                compiledForFastRewriting = false;
+            } else {
+                cellsOfInterest.add(parentCellLabel);
+                readCell2LHS.put(parentCellLabel, null);
+                writeCell2RHS.put(parentCellLabel, null);
+            }
+
             return node;
         }
 

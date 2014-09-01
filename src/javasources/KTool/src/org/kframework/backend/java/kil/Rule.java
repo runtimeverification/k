@@ -80,6 +80,8 @@ public class Rule extends JavaSymbolicObject {
      */
     private final List<Instruction> instructions;
 
+    private final boolean modifyCellStructure;
+
     /**
      * Unbound variables in the rule before kompilation; that is, all variables
      * on the rhs which do not appear in either lhs or fresh condition(s).
@@ -211,6 +213,19 @@ public class Rule extends JavaSymbolicObject {
         this.reusableVariables  = computeReusableBoundVars();
         this.groundCells        = cellsToCopy != null ? ImmutableSet.copyOf(cellsToCopy) : null;
         this.instructions       = compiledForFastRewriting ? ImmutableList.copyOf(instructions) : null;
+
+        boolean modifyCellStructure;
+        if (compiledForFastRewriting) {
+            modifyCellStructure = false;
+            for (String wrtCellLabel : rhsOfWriteCells.keySet()) {
+                if (definition.context().getConfigurationStructureMap().get(wrtCellLabel).hasChildren()) {
+                    modifyCellStructure = true;
+                }
+            }
+        } else {
+            modifyCellStructure = true;
+        }
+        this.modifyCellStructure = modifyCellStructure;
     }
 
     /**
@@ -334,7 +349,11 @@ public class Rule extends JavaSymbolicObject {
     }
 
     public boolean isPattern() {
-        return super.containsAttribute(Attribute.PATTERN_KEY);
+        return containsAttribute(Attribute.PATTERN_KEY);
+    }
+
+    public boolean isLemma() {
+        return containsAttribute(Attribute.LEMMA_KEY);
     }
 
     /**
@@ -401,6 +420,13 @@ public class Rule extends JavaSymbolicObject {
 
     public List<Instruction> instructions() {
         return instructions;
+    }
+
+    /**
+     * Checks if this rule will modify the cell structure of the subject term.
+     */
+    public boolean modifyCellStructure() {
+        return modifyCellStructure;
     }
 
     @Override

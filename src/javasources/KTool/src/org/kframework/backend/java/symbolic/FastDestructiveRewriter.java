@@ -4,6 +4,8 @@ package org.kframework.backend.java.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.kframework.backend.java.indexing.IndexingCellsCollector;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
@@ -23,6 +25,8 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
     private final Stopwatch stopwatch = new Stopwatch();
 
+    private List<Cell<?>> indexingCells = Lists.newArrayList();
+
     public FastDestructiveRewriter(Definition definition, TermContext termContext) {
         super(definition, termContext);
     }
@@ -34,6 +38,9 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         /* first break any possible sharing of mutable terms introduced by macro
          * expansion or front-end */
         subject = EliminateUnsafeSharingTransformer.transformTerm(subject, termContext);
+
+        /* compute indexing cells of the subject term for the first time */
+        computeIndexingCells(subject);
 
         /* Invariant during rewriting:
          *   no sharing between mutable terms inside the subject
@@ -70,6 +77,17 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         return subject;
     }
 
+    private List<Rule> getRules(List<Cell<?>> indexingCells) {
+        Profiler.startTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
+        List<Rule> rules = ruleIndex.getRules(indexingCells);
+        Profiler.stopTimer(Profiler.QUERY_RULE_INDEXING_TIMER);
+        return rules;
+    }
+
+    private void computeIndexingCells(Term subject) {
+        indexingCells = IndexingCellsCollector.getIndexingCells(subject, termContext.definition());
+    }
+
     protected final void computeRewriteStep(Term subject, int successorBound) {
         results.clear();
         assert successorBound == 1;
@@ -77,8 +95,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
-        //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
-        strategy.reset(getRules(subject));
+        strategy.reset(getRules(indexingCells));
 
         while (strategy.hasNext()) {
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
@@ -111,7 +128,8 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                 } else {
                     Profiler.startTimer(Profiler.REWRITE_WITH_UNKOMPILED_RULES_TIMER);
                     for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
-                        results.add(constructNewSubjectTerm(rule, subst));
+                        subject = constructNewSubjectTerm(rule, subst);
+                        results.add(subject);
                         succeed = true;
                         break;
                     }
@@ -119,14 +137,11 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                 }
 
                 if (succeed) {
+                    if (rule.modifyCellStructure()) {
+                        computeIndexingCells(subject);
+                    }
                     return;
                 }
-            }
-            // If we've found matching results from one equivalence class then
-            // we are done, as we can't match rules from two equivalence classes
-            // in the same step.
-            if (results.size() > 0) {
-                return;
             }
         }
     }

@@ -43,6 +43,18 @@ public class GroundRewriter extends AbstractRewriter {
         return subject;
     }
 
+    /**
+     * Gets the rules that could be applied to a given term according to the
+     * rule indexing mechanism.
+     *
+     * @param term
+     *            the given term
+     * @return a list of rules that could be applied
+     */
+    private List<Rule> getRules(Term term) {
+        return ruleIndex.getRules(term);
+    }
+
     @Override
     protected final void computeRewriteStep(Term subject, int successorBound) {
         results.clear();
@@ -230,4 +242,5 @@ public class GroundRewriter extends AbstractRewriter {
 
         return searchResults;
     }
+
 }
