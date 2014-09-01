@@ -1,8 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.HashMap;
-
+import java.util.EnumMap;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -22,7 +21,7 @@ import com.google.common.collect.Maps;
  */
 public class Bottom extends Term implements MaximalSharing {
 
-    private static final HashMap<Kind, Bottom> cache = Maps.newHashMap();
+    private static final EnumMap<Kind, Bottom> cache = Maps.newEnumMap(Kind.class);
 
     public static Bottom of(Kind kind) {
         Bottom bottom = cache.get(kind);

@@ -3,6 +3,8 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -10,7 +12,6 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,12 +29,13 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
      * An equality between terms. Used merely to store the left-hand side and
      * the right-hand side of the equality.
      */
-    public class Equality implements Serializable {
+    public static class Equality implements Serializable {
 
         public static final String SEPARATOR = " = ";
 
         private final Term leftHandSide;
         private final Term rightHandSide;
+        private int hashCode;
 
         private Equality(Term leftHandSide, Term rightHandSide) {
             this.leftHandSide = leftHandSide;
@@ -65,10 +67,12 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
         @Override
         public int hashCode() {
-            int hash = 1;
-            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
-            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
-            return hash;
+            if (hashCode == Utils.NO_HASHCODE) {
+                hashCode = 1;
+                hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
+                hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
+            }
+            return hashCode;
         }
 
         @Override
@@ -82,23 +86,14 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
     private static final Joiner joiner = Joiner.on(SEPARATOR);
 
-    private final List<Equality> equalities = new ArrayList<Equality>();
+    private final ImmutableList<Equality> equalities;
 
-    public void add(Term leftHandSide, Term rightHandSide) {
-        equalities.add(new Equality(leftHandSide, rightHandSide));
+    private UninterpretedConstraint(ImmutableList<Equality> equalities) {
+        this.equalities = equalities;
     }
 
-    public void addAll(UninterpretedConstraint constraint) {
-        for (Equality eq : constraint.equalities) {
-            equalities.add(eq);
-        }
-    }
-
-    /**
-     * @return an unmodifiable view of the equalities
-     */
     public List<Equality> equalities() {
-        return Collections.unmodifiableList(equalities);
+        return equalities;
     }
 
     /**
@@ -132,7 +127,7 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        if (hashCode == 0) {
+        if (hashCode == Utils.NO_HASHCODE) {
             hashCode = equalities.hashCode();
         }
         return hashCode;
@@ -153,9 +148,21 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
         visitor.visit(this);
     }
 
-    public UninterpretedConstraint deepCopy() {
-        UninterpretedConstraint result = new UninterpretedConstraint();
-        result.equalities.addAll(equalities);
-        return result;
+    public static Builder builder() {
+        return new Builder();
     }
+
+    public static class Builder {
+
+        private final ImmutableList.Builder<Equality> equalitiesBuilder = ImmutableList.builder();
+
+        public void add(Term leftHandSide, Term rightHandSide) {
+            equalitiesBuilder.add(new Equality(leftHandSide, rightHandSide));
+        }
+
+        public UninterpretedConstraint build() {
+            return new UninterpretedConstraint(equalitiesBuilder.build());
+        }
+    }
+
 }

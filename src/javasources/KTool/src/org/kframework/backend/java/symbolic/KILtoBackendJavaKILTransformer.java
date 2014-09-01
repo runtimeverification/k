@@ -460,7 +460,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
         }
 
-        UninterpretedConstraint lookups = new UninterpretedConstraint();
+        UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
         for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
@@ -484,19 +484,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 if (lookup.choice()) {
-                    lookups.add(new SetElementChoice(base), key);
+                    lookupsBuilder.add(new SetElementChoice(base), key);
                 } else {
-                    lookups.add(new SetLookup(base, key), BoolToken.TRUE);
+                    lookupsBuilder.add(new SetLookup(base, key), BoolToken.TRUE);
                 }
             } else {
                 Term value = (Term) this.visitNode(lookup.value());
                 if (lookup instanceof org.kframework.kil.MapLookup) {
                     if (lookup.choice()) {
-                        lookups.add(new MapKeyChoice(base), key);
+                        lookupsBuilder.add(new MapKeyChoice(base), key);
                     }
-                    lookups.add(new MapLookup(base, key, kind), value);
+                    lookupsBuilder.add(new MapLookup(base, key, kind), value);
                 } else { // ListLookup
-                    lookups.add(new ListLookup(base, key, kind), value);
+                    lookupsBuilder.add(new ListLookup(base, key, kind), value);
                 }
             }
 
@@ -536,7 +536,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 requires,
                 ensures,
                 freshVariables,
-                lookups,
+                lookupsBuilder.build(),
                 node.isCompiledForFastRewriting(),
                 lhsOfReadCell,
                 rhsOfWriteCell,
@@ -668,9 +668,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         for (Term term : rule.ensures()) {
             ensures.add(term.evaluate(termContext));
         }
-        UninterpretedConstraint lookups = new UninterpretedConstraint();
+        UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
         for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-            lookups.add(
+            lookupsBuilder.add(
                     equality.leftHandSide().evaluate(termContext),
                     equality.rightHandSide().evaluate(termContext));
         }
@@ -690,7 +690,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 requires,
                 ensures,
                 rule.freshVariables(),
-                lookups,
+                lookupsBuilder.build(),
                 rule.isCompiledForFastRewriting(),
                 rule.lhsOfReadCell(),
                 rhsOfWriteCell,

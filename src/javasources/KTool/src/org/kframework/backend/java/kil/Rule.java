@@ -439,7 +439,7 @@ public class Rule extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        if (hashCode == 0) {
+        if (hashCode == Utils.NO_HASHCODE) {
             hashCode = 1;
             hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
             hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();

@@ -12,7 +12,6 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -164,15 +163,15 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
         boolean changed = false;
-        UninterpretedConstraint transformedUninterpretedConstraint = new UninterpretedConstraint();
+        UninterpretedConstraint.Builder builder = UninterpretedConstraint.builder();
         for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
             Term transformedLHS = (Term) equality.leftHandSide().accept(this);
             Term transformedRHS = (Term) equality.rightHandSide().accept(this);
             changed = changed || transformedLHS != equality.leftHandSide()
                     || transformedRHS != equality.rightHandSide();
-            transformedUninterpretedConstraint.add(transformedLHS, transformedRHS);
+            builder.add(transformedLHS, transformedRHS);
         }
-        return changed ? transformedUninterpretedConstraint : uninterpretedConstraint;
+        return changed ? builder.build() : uninterpretedConstraint;
     }
 
     @Override
