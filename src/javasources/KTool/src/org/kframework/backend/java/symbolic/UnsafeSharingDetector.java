@@ -38,7 +38,7 @@ public class UnsafeSharingDetector extends PrePostVisitor {
 
         @Override
         public void visit(Term term) {
-            if (term instanceof Immutable || !term.hasCell()) {
+            if (term instanceof Immutable || !term.isMutable()) {
                 this.proceed = false;
                 return;
             }

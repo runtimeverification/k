@@ -96,10 +96,16 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         boolean hasCell = false;
         for (Map.Entry<Term, Term> entry : entries.entrySet()) {
-            hasCell = hasCell || entry.getKey().hasCell() || entry.getValue().hasCell();
+            hasCell = hasCell || entry.getKey().isMutable() || entry.getValue().isMutable();
+            if (hasCell) {
+                return true;
+            }
+        }
+        for (Term term : baseTerms()) {
+            hasCell = hasCell || term.isMutable();
             if (hasCell) {
                 return true;
             }

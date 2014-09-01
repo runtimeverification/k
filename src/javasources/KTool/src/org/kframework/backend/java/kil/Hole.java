@@ -47,7 +47,7 @@ public final class Hole extends Term implements MaximalSharing {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         return false;
     }
 

@@ -555,8 +555,8 @@ public final class KItem extends Term {
     }
 
     @Override
-    protected boolean computeHasCell() {
-        return kLabel.hasCell() || kList.hasCell();
+    protected boolean computeMutability() {
+        return kLabel.isMutable() || kList.isMutable();
     }
 
     @Override

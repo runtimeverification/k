@@ -15,6 +15,7 @@ import org.kframework.kil.ASTNode;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 
@@ -158,16 +159,10 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         boolean hasCell = false;
-        for (Term term : elementsLeft) {
-            hasCell = hasCell || term.hasCell();
-            if (hasCell) {
-                return true;
-            }
-        }
-        for (Term term : elementsRight) {
-            hasCell = hasCell || term.hasCell();
+        for (Term term : Iterables.concat(elements(), baseTerms)) {
+            hasCell = hasCell || term.isMutable();
             if (hasCell) {
                 return true;
             }

@@ -41,7 +41,7 @@ public class CopyOnShareSubstAndEvalTransformer extends SubstituteAndEvaluateTra
 
         if (reusableVariables.contains(variable)) {
             reusableVariables.remove(variable);
-        } else if (term.hasCell()) {
+        } else if (term.isMutable()) {
             term = DeepCloner.clone(term);
         }
         return term;

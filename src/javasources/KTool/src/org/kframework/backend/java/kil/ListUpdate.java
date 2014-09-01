@@ -114,7 +114,7 @@ public class ListUpdate extends Term implements DataStructureUpdate {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         throw new UnsupportedOperationException();
     }
 

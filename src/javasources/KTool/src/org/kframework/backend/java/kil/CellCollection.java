@@ -201,7 +201,7 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         return true;
     }
 

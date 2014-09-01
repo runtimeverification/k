@@ -64,8 +64,8 @@ public class KItemProjection extends Term {
     }
 
     @Override
-    protected boolean computeHasCell() {
-        return term.hasCell();
+    protected boolean computeMutability() {
+        return term.isMutable();
     }
 
     @Override

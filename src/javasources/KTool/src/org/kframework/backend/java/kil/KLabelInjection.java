@@ -78,8 +78,8 @@ public class KLabelInjection extends KLabel {
     }
 
     @Override
-    protected final boolean computeHasCell() {
-        return term.hasCell();
+    protected final boolean computeMutability() {
+        return term.isMutable();
     }
 
     @Override

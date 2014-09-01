@@ -93,9 +93,9 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    protected final boolean computeHasCell() {
+    protected final boolean computeMutability() {
         for (Term term : getContents()) {
-            if (term.hasCell()) {
+            if (term.isMutable()) {
                 return true;
             }
         }
