@@ -1,0 +1,8 @@
+<T>
+    <tasks>
+        .Bag
+    </tasks>
+    <gtenv>
+        main |-> ((void) -> (void))
+    </gtenv>
+</T>
