@@ -200,14 +200,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build());
-            if (builtinSet.collectionVariables.size() == 1
-                    && builtinSet.elements.isEmpty()
-                    && builtinSet.collectionPatterns.isEmpty()
-                    && builtinSet.collectionFunctions.isEmpty()) {
-                return builtinSet.collectionVariables.iterator().next();
-            } else {
-                return builtinSet;
-            }
+            return builtinSet.hasFrame() && builtinSet.elements.isEmpty() ? builtinSet.frame : builtinSet;
         }
     }
 

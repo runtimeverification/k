@@ -439,15 +439,7 @@ public class BuiltinList extends Collection {
                     baseTermsBuilder.build(),
                     elementsRightBuilder.build(),
                     baseTermTypesBuilder.build());
-
-            /* special case: only one List variable */
-            if (builtinList.concreteSize() == 0 && builtinList.baseTerms.size() == 1) {
-                Term base = builtinList.baseTerms.get(0);
-                if (base instanceof Variable && base.sort().equals(Sort.LIST)) {
-                    return base;
-                }
-            }
-            return builtinList;
+            return builtinList.hasFrame() && builtinList.concreteSize() == 0 ? builtinList.frame : builtinList;
         }
     }
 
