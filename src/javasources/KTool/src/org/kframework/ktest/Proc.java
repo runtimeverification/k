@@ -2,8 +2,8 @@
 package org.kframework.ktest;
 
 import org.apache.commons.io.IOUtils;
+import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.StringMatcher.MatchFailure;
-import org.kframework.krun.ColorSetting;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -18,7 +18,19 @@ import java.util.concurrent.*;
  */
 public class Proc<T> implements Runnable {
 
+    /**
+     * Global KTest state.
+     */
+    private final KTestOptions options;
+
+    /**
+     * Operating system program and arguments.
+     */
     private final String[] args;
+
+    /**
+     * Directory to spawn process from.
+     */
     private File workingDir;
 
     /**
@@ -67,17 +79,13 @@ public class Proc<T> implements Runnable {
     private final T obj;
 
     /**
-     * Timeout for process in milliseconds.
+     * Output file to be generated/overwritten when --update-out is used.
      */
-    private final int timeout;
-
-    private final boolean verbose;
-    private final ColorSetting colorSetting;
-    private final Color terminalColor;
-
-    private final boolean updateOut;
-    private final boolean generateOut;
     private final String outputFile;
+
+    /**
+     * Output file to be generated when --generate-out is used.
+     */
     private final String newOutputFile;
 
     /**
@@ -110,18 +118,12 @@ public class Proc<T> implements Runnable {
      *                    program returns 0
      * @param logStr String representation of the process
      * @param strComparator comparator object to compare program outputs with expected outputs
-     * @param timeout Maximum amount of time for a process to finish
-     * @param verbose Verbose output
-     * @param updateOut
-     * @param generateOut
-     * @param outputFile
-     * @param newOutputFile
+     * @param outputFile output file to be updated when --update-out is used
+     * @param newOutputFile output file to generated when --generate-out is used
      */
     public Proc(T obj, String[] args, String inputFile, String procInput,
                 Annotated<String, String> expectedOut, Annotated<String, String> expectedErr,
-                String logStr, StringMatcher strComparator, int timeout, boolean verbose,
-                ColorSetting colorSetting, Color terminalColor,
-                boolean updateOut, boolean generateOut,
+                String logStr, StringMatcher strComparator, KTestOptions options,
                 String outputFile, String newOutputFile) {
         this.obj = obj;
         this.args = args;
@@ -131,21 +133,14 @@ public class Proc<T> implements Runnable {
         this.expectedErr = expectedErr;
         this.logStr = logStr;
         this.strComparator = strComparator;
-        this.timeout = timeout;
-        this.verbose = verbose;
-        this.colorSetting = colorSetting;
-        this.terminalColor = terminalColor;
-        this.updateOut = updateOut;
-        this.generateOut = generateOut;
+        this.options = options;
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
     }
 
-    public Proc(T obj, String[] args, String logStr, StringMatcher strComparator, int timeout,
-                boolean verbose, ColorSetting colorSetting, Color terminalColor,
-                boolean updateOut, boolean generateOut) {
-        this(obj, args, null, "", null, null, logStr, strComparator, timeout, verbose, colorSetting,
-            terminalColor, updateOut, generateOut, null, null);
+    public Proc(T obj, String[] args, String logStr, KTestOptions options) {
+        this(obj, args, null, "", null, null, logStr, options.getDefaultStringMatcher(), options,
+                null, null);
     }
 
     @Override
@@ -157,7 +152,7 @@ public class Proc<T> implements Runnable {
         pb.environment().put("kast", ExecNames.getKast());
 
         try {
-            if (verbose) {
+            if (options.isVerbose()) {
                 printVerboseRunningMsg();
             }
             long startTime = System.currentTimeMillis();
@@ -252,7 +247,7 @@ public class Proc<T> implements Runnable {
             public void run() {
                 proc.destroy();
             }
-        }, timeout);
+        }, options.getTimeout());
         int ret = proc.waitFor();
         timer.cancel();
         return ret;
@@ -264,7 +259,9 @@ public class Proc<T> implements Runnable {
      * @param returnCode return code of the process
      */
     private void handlePgmResult(int returnCode) throws IOException {
-        String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting, terminalColor);
+        String red = ColorUtil.RgbToAnsi(
+                Color.RED, options.getColorSetting(), options.getTerminalColor());
+        boolean verbose = options.isVerbose();
         if (returnCode == 0) {
 
             boolean doGenerateOut = false;
@@ -298,11 +295,11 @@ public class Proc<T> implements Runnable {
             }
 
             // https://github.com/kframework/k/wiki/Manual-(to-be-processed)#ktest-automatic-output-generation
-            if (updateOut && outputFile != null) {
+            if (options.getUpdateOut() && outputFile != null) {
                 IOUtils.write(pgmOut, new FileOutputStream(new File(outputFile)));
                 System.out.println("Updating output file: " + outputFile);
             }
-            if (doGenerateOut && generateOut && newOutputFile != null) {
+            if (doGenerateOut && options.getGenerateOut() && newOutputFile != null) {
                 IOUtils.write(pgmOut, new FileOutputStream(new File(newOutputFile)));
                 System.out.println("Generating output file: " + newOutputFile);
             }

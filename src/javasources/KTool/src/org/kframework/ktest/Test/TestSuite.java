@@ -3,7 +3,6 @@ package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.utils.ColorUtil;
@@ -22,36 +21,9 @@ import java.util.concurrent.TimeUnit;
 public class TestSuite {
 
     private final List<TestCase> tests;
-
+    private final KTestOptions options;
     private ThreadPoolExecutor tpe;
-
-    private final boolean verbose;
-
-    private final ColorSetting colorSetting;
-    private final Color terminalColor;
-
-    /**
-     * Set of ktest steps to skip.
-     */
-    private final Set<KTestStep> skips;
-
-    /**
-     * Threads to spawn in parallel.
-     */
-    private final int threads;
-
-    /**
-     * Timeout for a process.
-     */
-    private final int timeout;
-
-    private final boolean updateOut;
-
-    private final boolean generateOut;
-
     private final ReportGen reportGen;
-
-    private final StringMatcher strComparator;
 
     // real times are times spend on a step, other times are total time spend by processess
     // generated for a step
@@ -67,28 +39,10 @@ public class TestSuite {
     private int pdfSteps; // total number of pdf generation tasks
     private int krunSteps; // total number of krun tasks
 
-    private TestSuite(List<TestCase> tests, Set<KTestStep> skips, int threads, boolean verbose,
-                     StringMatcher strComparator, ColorSetting colorSetting, Color terminalColor,
-                     int timeout, boolean updateOut, boolean generateOut, boolean report) {
+    public TestSuite(List<TestCase> tests, KTestOptions options) {
         this.tests = tests;
-        this.skips = skips;
-        this.threads = threads;
-        this.verbose = verbose;
-        this.strComparator = strComparator;
-        this.colorSetting = colorSetting;
-        this.terminalColor = terminalColor;
-        this.timeout = timeout;
-        this.updateOut = updateOut;
-        this.generateOut = generateOut;
-        reportGen = report ? new ReportGen() : null;
-    }
-
-    public TestSuite(List<TestCase> tests, KTestOptions cmdArg) {
-        this(tests, cmdArg.getSkips(), cmdArg.getThreads(), cmdArg.isVerbose(),
-                cmdArg.getDefaultStringMatcher(), cmdArg.getColorSetting(),
-                cmdArg.getTerminalColor(), cmdArg.getTimeout(),
-                cmdArg.getUpdateOut(), cmdArg.getGenerateOut(),
-                cmdArg.getGenerateReport());
+        this.options = options;
+        reportGen = options.getGenerateReport() ? new ReportGen() : null;
     }
 
     /**
@@ -109,6 +63,7 @@ public class TestSuite {
 
         boolean ret = successfulTests.size() == tests.size();
 
+        Set<KTestStep> skips = options.getSkips();
         if (!skips.contains(KTestStep.KOMPILE)) {
             List<TestCase> testsIn = successfulTests;
             successfulTests = runKompileSteps(filterSkips(testsIn, KTestStep.KOMPILE));
@@ -119,7 +74,8 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
 
-        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.GREEN : Color.RED, colorSetting, terminalColor);
+        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.GREEN : Color.RED,
+                options.getColorSetting(), options.getTerminalColor());
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
@@ -137,6 +93,7 @@ public class TestSuite {
      * (inspired by GNU Make)
      */
     public void dryRun() {
+        Set<KTestStep> skips = options.getSkips();
         if (!skips.contains(KTestStep.KOMPILE)) {
             List<TestCase> kompileSteps = filterSkips(tests, KTestStep.KOMPILE);
             for (TestCase tc : kompileSteps)
@@ -154,9 +111,9 @@ public class TestSuite {
                 for (KRunProgram program : programs) {
                     StringBuilder krunLogCmd = new StringBuilder();
                     krunLogCmd.append(program.toLogString());
-                    if (updateOut && program.outputFile != null)
+                    if (options.getUpdateOut() && program.outputFile != null)
                         krunLogCmd.append(" >").append(program.outputFile);
-                    else if (generateOut && program.newOutputFile != null)
+                    else if (options.getGenerateOut() && program.newOutputFile != null)
                         krunLogCmd.append(" >").append(program.newOutputFile);
                     if (program.inputFile != null)
                         krunLogCmd.append(" <").append(program.inputFile);
@@ -190,9 +147,8 @@ public class TestSuite {
         startTpe();
         for (TestCase tc : tests) {
             if (tc.hasPosixOnly()) {
-                Proc<TestCase> p = new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(),
-                        strComparator, timeout, verbose, colorSetting, terminalColor, updateOut,
-                        generateOut);
+                Proc<TestCase> p =
+                        new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(), options);
                 ps.add(p);
                 p.setWorkingDir(tc.getWorkingDir());
                 tpe.execute(p);
@@ -234,9 +190,7 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         startTpe();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(),
-                    strComparator, timeout, verbose, colorSetting, terminalColor, updateOut,
-                    generateOut);
+            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(), options);
             p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
@@ -273,9 +227,7 @@ public class TestSuite {
         startTpe();
         long startTime = System.currentTimeMillis();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(),
-                    strComparator, timeout, verbose, colorSetting, terminalColor, updateOut,
-                    generateOut);
+            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(), options);
             p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
@@ -370,10 +322,10 @@ public class TestSuite {
 
     private void startTpe() {
         int nThreads;
-        if (updateOut || generateOut) {
+        if (options.getUpdateOut() || options.getGenerateOut()) {
             nThreads = 1;
         } else {
-            nThreads = threads;
+            nThreads = options.getThreads();
         }
         tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
     }
@@ -431,14 +383,13 @@ public class TestSuite {
         if (errorContents != null)
             errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
 
-        StringMatcher matcher = strComparator;
+        StringMatcher matcher = options.getDefaultStringMatcher();
         if (program.regex) {
             matcher = new RegexStringMatcher();
         }
         Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
-                outputContentsAnn, errorContentsAnn, program.toLogString(), matcher, timeout,
-                verbose, colorSetting, terminalColor, updateOut, generateOut, program.outputFile,
-                program.newOutputFile);
+                outputContentsAnn, errorContentsAnn, program.toLogString(), matcher, options,
+                program.outputFile, program.newOutputFile);
         p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);
         krunSteps++;
@@ -449,8 +400,10 @@ public class TestSuite {
         if (condition)
             System.out.println("SUCCESS");
         else {
-            System.out.println(ColorUtil.RgbToAnsi(Color.RED, colorSetting, terminalColor) + "FAIL" + ColorUtil
-                    .ANSI_NORMAL);
+            System.out.println(ColorUtil.RgbToAnsi(
+                    Color.RED, options.getColorSetting(), options.getTerminalColor())
+                    + "FAIL"
+                    + ColorUtil.ANSI_NORMAL);
         }
     }
 
