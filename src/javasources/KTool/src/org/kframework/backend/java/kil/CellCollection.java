@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kil;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -15,8 +16,10 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
 
@@ -31,12 +34,17 @@ import com.google.common.collect.Multimap;
 @SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
-    private final Multimap<CellLabel, Cell> cells;
+    /**
+     * Choose {@code ListMultimap} over {@code SetMultimap} because we need to
+     * be able to store identical cells.
+     */
+    // TODO(YilongL): make it immutable?
+    private final ListMultimap<CellLabel, Cell> cells;
 
     /**
      * Only allow {@code Variable}s as base terms for now.
      */
-    private final List<Variable> baseTerms;
+    private final Set<Variable> baseTerms;
 
     /**
      * Contains {@code true} if the explicitly specified part of this cell
@@ -48,10 +56,11 @@ public class CellCollection extends Collection {
 
     public CellCollection(Multimap<CellLabel, Cell> cells, Variable frame, Context context) {
         super(frame, Kind.CELL_COLLECTION);
+        // TODO(YilongL): implement builder pattern for this!
         this.cells = ArrayListMultimap.create(cells);
         this.baseTerms = frame != null ?
-                Collections.<Variable>singletonList(frame) :
-                Collections.<Variable>emptyList();
+                Collections.<Variable>singleton(frame) :
+                Collections.<Variable>emptySet();
 
         this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
     }
@@ -59,7 +68,7 @@ public class CellCollection extends Collection {
     public CellCollection(Multimap<CellLabel, Cell> cells, List<Variable> baseTerms, Context context) {
         super(getFrame(baseTerms), Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
-        this.baseTerms = ImmutableList.copyOf(baseTerms);
+        this.baseTerms = ImmutableSet.copyOf(baseTerms);
 
         this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
     }
@@ -84,7 +93,7 @@ public class CellCollection extends Collection {
         return cells;
     }
 
-    public List<Variable> baseTerms() {
+    public Set<Variable> baseTerms() {
         return baseTerms;
     }
 
@@ -160,11 +169,27 @@ public class CellCollection extends Collection {
         }
 
         CellCollection collection = (CellCollection) object;
-        /* YilongL: `cells.equals(collection.cells)` could be problematic
-         * because `cells` is an ArrayListMultiMap whose equality depends on the
-         * ordering of its values */
-        return baseTerms.equals(collection.baseTerms)
-                && cells.equals(collection.cells);
+        if (!baseTerms.equals(collection.baseTerms)) {
+            return false;
+        }
+
+        if (cells.keys().equals(collection.cells.keys())) {
+            for (CellLabel cellLabel : cells.keySet()) {
+                /* YilongL: didn't use the O(N) hash-based approach for
+                 * comparing two bags because 1) the fast destructive rewriter
+                 * destroys hashcode of terms 2) the number of elements is
+                 * usually very small */
+                List<Cell> list = Lists.newArrayList(cells.get(cellLabel));
+                for (Cell<?> c : collection.cells.get(cellLabel)) {
+                    if (!list.remove(c)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -189,9 +214,10 @@ public class CellCollection extends Collection {
             for (Cell cell : cells.values()) {
                 stringBuilder.append(cell);
             }
-            for (int i = 0; i < baseTerms.size(); i++) {
-                stringBuilder.append(baseTerms.get(i));
-                if (i < baseTerms.size() - 1) {
+            Iterator<Variable> iter = baseTerms.iterator();
+            while (iter.hasNext()) {
+                stringBuilder.append(iter.next());
+                if (iter.hasNext()) {
                     stringBuilder.append(" ");
                 }
             }
