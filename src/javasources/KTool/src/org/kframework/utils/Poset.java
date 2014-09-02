@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.collections4.set.UnmodifiableSet;
-import org.kframework.kil.KSorts;
 
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.Table;

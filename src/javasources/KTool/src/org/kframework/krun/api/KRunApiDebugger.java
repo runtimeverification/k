@@ -10,9 +10,9 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -45,7 +45,7 @@ public class KRunApiDebugger implements KRunDebugger {
             ASTNode pattern = DefinitionLoader.parsePattern(
                     KRunOptions.DEFAULT_PATTERN,
                     null,
-                    KSorts.BAG,
+                    Sort.BAG,
                     context);
             defaultPatternInfo = new RuleCompilerSteps(context);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);

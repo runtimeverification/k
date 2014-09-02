@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.utils.algorithms.SCCTarjan;

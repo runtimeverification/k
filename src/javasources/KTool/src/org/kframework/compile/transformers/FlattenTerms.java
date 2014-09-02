@@ -144,8 +144,6 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
                 Production listProd = context.listProductions.get(emp.getSort());
                 return new KApp(l, f, KLabelConstant.of(listProd.getTerminatorKLabel(), context), KList.EMPTY);
-                // Constant cst = new Constant(l, f, KSorts.KLABEL, "'." + emp.getSort() + "");
-                // return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
             }
             return emp;
         }

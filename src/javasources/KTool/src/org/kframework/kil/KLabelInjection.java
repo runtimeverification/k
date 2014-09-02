@@ -29,8 +29,8 @@ public class KLabelInjection extends KLabel implements Interfaces.MutableParent<
 
     public void setTerm(Term term) {
         // TODO(AndreiS): fix assertion
-        //assert term.getSort().equals(KSorts.K) || term.getSort().equals(KSorts.KLABEL)
-        //       || term.getSort().equals(KSorts.KLIST);
+        //assert term.getSort().equals(Sort.K) || term.getSort().equals(Sort.KLABEL)
+        //       || term.getSort().equals(Sort.KLIST);
         this.term = term;
     }
 

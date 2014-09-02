@@ -329,7 +329,7 @@ public class DefinitionLoader {
      *
      * @param content
      *            - the input string.
-     * @param filename
+     * @param source
      *            - only for error reporting purposes. Can be empty string.
      * @param context
      *            - the context for disambiguation purposes.
@@ -408,7 +408,7 @@ public class DefinitionLoader {
         return (Term) config;
     }
 
-    public static ASTNode parsePattern(String pattern, Source source, String startSymbol, Context context) throws ParseFailedException {
+    public static ASTNode parsePattern(String pattern, Source source, Sort startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
@@ -428,7 +428,7 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
-        config = new TypeSystemFilter2(Sort.of(startSymbol), context).visitNode(config);
+        config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
