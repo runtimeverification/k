@@ -511,36 +511,45 @@ public class StringUtil {
      * @param col rightmost column
      * @return new string with newlines added
      */
-    public static String splitLines(String str, int col) {
+    public static String splitLines(String str, final int col) {
         String[] lines = str.split("\n");
         StringBuilder builder = new StringBuilder();
         String nl = "";
         for (String line : lines) {
             builder.append(nl);
-            if (line.length() < 80) {
+            if (line.length() < col) {
                 builder.append(line);
-
             } else {
                 builder.append(splitLine(line, col));
             }
             nl = "\n";
         }
-
         return builder.toString();
     }
 
-    private static String splitLine(String str, int col) {
-        if (str.length() < col)
+    private static String splitLine(String str, final int col) {
+        if (str.length() < col) {
             return str;
-        int lastIdx = col - 1;
-        while (str.charAt(lastIdx) != ' ') {
-            --lastIdx;
-            if (lastIdx < 0) {
-                // string contains no whitespace
-                return str;
+        }
+
+        // scan from `col` to left
+        for (int i = col - 1; i > 0; i--) {
+            if (str.charAt(i) == ' ') {
+                return str.substring(0, i) + "\n" + splitLine(str.substring(i + 1), col);
             }
         }
-        return str.substring(0, lastIdx) + "\n" + splitLine(str.substring(lastIdx + 1), col);
+
+        // we reached to beginning of the string and it contains no whitespaces before the `col`
+        // but it's longer than `col` so we should replace first space after rightmost column
+        // with a newline to make it shorter
+        for (int i = col; i < str.length(); i++) {
+            if (str.charAt(i) == ' ') {
+                return str.substring(0, i) + "\n" + splitLine(str.substring(i + 1), col);
+            }
+        }
+
+        // string has no spaces to split
+        return str;
     }
 
     /**
