@@ -49,7 +49,7 @@ public class CheckSmtLibByAddingPredicates extends BasicVisitor{
                             KList children = (KList) node.getChild();
                             int i = 0;
                             for (Term child: children.getContents()) {
-                                String predicateString = AddPredicates.predicate(p.getChildSort(i).getName());
+                                String predicateString = AddPredicates.predicate(p.getChildSort(i));
                                 i++;
                                 KLabelConstant kLabel = KLabelConstant.of(predicateString);
                                 contents.add(KApp.of(kLabel, child));

@@ -15,6 +15,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.NonTerminal;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -35,7 +36,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
     public Set<Production> constants = new HashSet<Production>();
     public Set<String> constantSorts = new HashSet<String>();
     public Set<String> insertSorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
-    public Set<String> startSorts = new HashSet<String>(); // list of sorts that are start symbols
+    public Set<Sort> startSorts = new HashSet<>(); // list of sorts that are start symbols
     public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
     public Set<String> userSort = new HashSet<String>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
     public StringBuilder sdf = new StringBuilder("");
@@ -108,7 +109,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
             // filter the productions according to their form
             for (Production prd : prt.getProductions()) {
-                startSorts.add(prd.getSort().getName());
+                startSorts.add(prd.getSort());
 
                 if (prd.containsAttribute("notInPrograms")) {
                     // if a production has this attribute, don't add it to the list
@@ -116,7 +117,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     lexical.add(prd);
                 } else if (prd.isSubsort()) {
                     p.getProductions().add(prd);
-                    startSorts.add(((NonTerminal) prd.getItems().get(0)).getName());
+                    startSorts.add(((NonTerminal) prd.getItems().get(0)).getSort());
                 } else if (prd.isConstant()) {
                     constants.add(prd);
                     constantSorts.add(prd.getSort().getName());

@@ -79,7 +79,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
                         "User specified configuration variable " + name + " which does not exist."));
             }
             Sort sort = context.configVarSorts.get(name);
-            String startSymbol = sort == null ? null : sort.getName();
+            Sort startSymbol = sort == null ? null : sort;
             Term parsed = new RunProcess().runParserOrDie(parser, value, false, startSymbol, context);
             parsed = (Term) new ResolveVariableAttribute(context).visitNode(parsed);
             output.put("$" + name, parsed);

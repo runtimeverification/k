@@ -91,7 +91,7 @@ public class Context implements Serializable {
     private Poset<String> assocRight = Poset.create();
     private Poset<String> modules = Poset.create();
     private Poset<String> fileRequirements = Poset.create();
-    public String startSymbolPgm = "K";
+    public Sort startSymbolPgm = Sort.K;
     public Map<String, Sort> configVarSorts = new HashMap<>();
     public File dotk = null;
     public File kompiled = null;

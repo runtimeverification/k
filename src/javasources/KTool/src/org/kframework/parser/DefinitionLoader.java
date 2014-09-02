@@ -360,7 +360,7 @@ public class DefinitionLoader {
         return def;
     }
 
-    public static Term parseCmdString(String content, Source source, String startSymbol, Context context) throws ParseFailedException {
+    public static Term parseCmdString(String content, Source source, Sort startSymbol, Context context) throws ParseFailedException {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
@@ -378,7 +378,7 @@ public class DefinitionLoader {
         config = new CellEndLabelFilter(context).visitNode(config);
         //if (checkInclusion)
         //    config = new InclusionFilter(localModule, context).visitNode(config);
-        config = new TypeSystemFilter2(Sort.of(startSymbol), context).visitNode(config);
+        config = new TypeSystemFilter2(startSymbol, context).visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);

@@ -4,6 +4,7 @@ package org.kframework.kast;
 import java.io.File;
 import java.util.List;
 
+import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
@@ -87,12 +88,12 @@ public final class KastOptions {
             "The default is the sort of $PGM from the configuration. A sort may also be specified " +
             "with the 'KRUN_SORT' environment variable, in which case it is used if the option is " +
             "not specified on the command line.")
-    private String sort;
+    private Sort sort;
 
-    public String sort(Context context) {
+    public Sort sort(Context context) {
         if (sort == null) {
             if (System.getenv("KRUN_SORT") != null) {
-                sort = System.getenv("KRUN_SORT");
+                sort = Sort.of(System.getenv("KRUN_SORT"));
             } else {
                 sort = context.startSymbolPgm;
             }

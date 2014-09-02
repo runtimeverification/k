@@ -69,7 +69,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
                             this, node);
         }
         Variable variable = vars.iterator().next();
-        String resultType = node.getAttribute("result");
+        Sort resultType = Sort.of(node.getAttribute("result"));
         KLabel resultLabel = getResultLabel(resultType);
         final KApp isKResult = KApp.of(resultLabel, variable);
         if (heating) {
@@ -84,14 +84,14 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
         return node;
     }
 
-    private KLabel getResultLabel(String resultType) {
+    private KLabel getResultLabel(Sort resultType) {
         if (resultType == null) {
             return KLabelConstant.KRESULT_PREDICATE;
         }
-        if (Character.isUpperCase(resultType.charAt(0))) {
+        if (Character.isUpperCase(resultType.getName().charAt(0))) {
             return KLabelConstant.of(AddPredicates.predicate(resultType));
         }
-        return KLabelConstant.of(resultType);
+        return KLabelConstant.of(resultType.getName());
 
 
     }

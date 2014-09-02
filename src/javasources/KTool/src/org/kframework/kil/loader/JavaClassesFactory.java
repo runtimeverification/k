@@ -76,7 +76,7 @@ public class JavaClassesFactory {
         }
         if (Constants.KAPP.equals(element.getNodeName()))
             return new KApp(element, context);
-        if (Sort.KLIST.equals(element.getNodeName()))
+        if (Constants.KLIST.equals(element.getNodeName()))
             return new KList(element);
         if (Constants.EMPTY.equals(element.getNodeName()))
             return new ListTerminator(element, null);
@@ -86,9 +86,9 @@ public class JavaClassesFactory {
             return new Cell(element);
         if (Constants.BREAK.equals(element.getNodeName()))
             return new TermComment(element);
-        if (Sort.BAG.equals(element.getNodeName()))
+        if (Constants.BAG.equals(element.getNodeName()))
             return new Bag(element);
-        if (Sort.BAG_ITEM.equals(element.getNodeName()))
+        if (Constants.BAG_ITEM.equals(element.getNodeName()))
             return new BagItem(element);
         if (Constants.KSEQUENCE.equals(element.getNodeName()))
             return new KSequence(element);

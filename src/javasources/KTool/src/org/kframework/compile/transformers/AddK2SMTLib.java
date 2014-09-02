@@ -56,8 +56,8 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
         // constructors symSort(Int), symSort(String) and symSort(Id)
         // TODO: add generic K2String and generate support for symSort(K)
         for (Sort sort : node.getAllSorts()) {
-            if (AddSymbolicK.allowKSymbolic(sort.getName())) {
-                String symCtor = AddSymbolicK.symbolicConstructor(sort.getName());
+            if (AddSymbolicK.allowKSymbolic(sort)) {
+                String symCtor = AddSymbolicK.symbolicConstructor(sort);
 
                 Variable var = Variable.getFreshVar(Sort.INT);
                 Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);

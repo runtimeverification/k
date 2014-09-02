@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class AddKLabelConstant extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabelConstantPredicate =
-            KLabelConstant.of(AddPredicates.predicate("KLabelConstant"));
+            KLabelConstant.of(AddPredicates.predicate(Sort.of("KLabelConstant")));
 
     public AddKLabelConstant(org.kframework.kil.loader.Context context) {
         super("Define isKLabelConstant predicate for KLabel constants", context);
