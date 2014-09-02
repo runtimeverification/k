@@ -254,13 +254,13 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(KSequence kSequence) {
         boolean changed = false;
         // transform the contents
-        List<Term> transformedItems = Lists.newArrayListWithCapacity(kSequence.concreteSize());
+        KSequence.Builder builder = KSequence.builder();
         for (Term term : kSequence) {
             Term transformedTerm = (Term) term.accept(this);
             if (transformedTerm != term) {
                 changed = true;
             }
-            transformedItems.add(transformedTerm);
+            builder.concatenate(transformedTerm);
         }
 
         Term transformedFrame = null;
@@ -270,18 +270,13 @@ public class CopyOnWriteTransformer implements Transformer {
             if (transformedFrame != frame) {
                 changed = true;
             }
+            builder.concatenate(transformedFrame);
         }
 
         if (!changed) {
             return kSequence;
         } else {
-            KSequence transformedKSeq = KSequence.of(transformedItems, transformedFrame);
-
-            if (!transformedKSeq.hasFrame() && transformedKSeq.concreteSize() == 1) {
-                return transformedKSeq.get(0);
-            } else {
-                return transformedKSeq;
-            }
+            return builder.build();
         }
     }
 

@@ -209,7 +209,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.KSequence node, Void _)  {
-        List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
+        List<org.kframework.kil.Term> list = new ArrayList<>();
         KILtoBackendJavaKILTransformer.flattenKSequence(list, node.getContents());
 
         Variable variable = null;
@@ -219,12 +219,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
-        List<Term> items = Lists.newArrayListWithCapacity(list.size());
+        KSequence.Builder builder = KSequence.builder();
         for (org.kframework.kil.Term term : list) {
-            items.add((Term) this.visitNode(term));
+            builder.concatenate((Term) this.visitNode(term));
+        }
+        if (variable != null) {
+            builder.concatenate(variable);
         }
 
-        return new KSequence(items, variable);
+        return builder.build();
     }
 
     @Override

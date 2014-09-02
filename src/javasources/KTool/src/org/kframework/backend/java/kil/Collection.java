@@ -44,7 +44,7 @@ public abstract class Collection extends Term {
     /**
      * Checks if this {@code Collection} contains a frame variable.
      */
-    public boolean hasFrame() {
+    public final boolean hasFrame() {
         return frame != null;
     }
 
@@ -52,7 +52,7 @@ public abstract class Collection extends Term {
      * @return the frame variable of this {@code Collection} if there is one;
      *         otherwise, fail the assertion
      */
-    public Variable frame() {
+    public final Variable frame() {
         assert hasFrame();
 
         return frame;
@@ -75,14 +75,6 @@ public abstract class Collection extends Term {
      * functions or variables.
      */
     public abstract boolean isConcreteCollection();
-
-    /**
-     * Checks if this {@code Collection} term is a proper left-hand side view.
-     *
-     * @return {@code true} if this {@code Collection} term can be used as a
-     *         pattern on the left-hand side of a rule; otherwise, {@code false}
-     */
-    public abstract boolean isLHSView();
 
     @Override
     public boolean isSymbolic() {

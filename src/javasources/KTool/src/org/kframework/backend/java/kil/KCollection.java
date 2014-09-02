@@ -33,7 +33,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      *            the start index of the fragment
      * @return a view of the specified fragment
      */
-    public abstract KCollection fragment(int fromIndex);
+    public abstract Term fragment(int fromIndex);
 
     public final Term get(int index) {
         return getContents().get(index);
@@ -62,16 +62,8 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     @Override
     public final boolean isConcreteCollection() {
+        // TODO(YilongL): this might be problematic because KSequence on the RHS can have more than one variable of sort K.
         return !hasFrame();
-    }
-
-    /**
-     * {@code KCollection} is guaranteed to have only one frame; thus, they can
-     * always be used in the left-hand side of a rule.
-     */
-    @Override
-    public boolean isLHSView() {
-        return true;
     }
 
     @Override
@@ -151,7 +143,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
         /* promote KItem to K, and then promote K to KList */
         if (term.kind() == Kind.KITEM && (kind == Kind.K || kind == Kind.KLIST)) {
-            term = new KSequence(Lists.newArrayList(term));
+            term = KSequence.singleton(term);
         }
 
         if (term.kind() == Kind.K && kind == Kind.KLIST) {

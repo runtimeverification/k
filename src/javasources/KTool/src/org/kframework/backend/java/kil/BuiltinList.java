@@ -116,12 +116,6 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public boolean isLHSView() {
-        return baseTerms.isEmpty() || baseTerms.size() == 1
-                && (baseTerms.get(0) instanceof Variable);
-    }
-
-    @Override
     public boolean isExactSort() {
         return true;
     }

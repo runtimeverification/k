@@ -129,23 +129,8 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public boolean hasFrame() {
-        assert isLHSView() : "This CellCollection cannot be used in the left-hand side of a rule";
-        return super.hasFrame();
-    }
-
-    @Override
     public final boolean isConcreteCollection() {
         return baseTerms.isEmpty();
-    }
-
-    /**
-     * Checks if this {@code CellCollection} contains at most one
-     * {@code Variable} as its frame variable.
-     */
-    @Override
-    public boolean isLHSView() {
-        return baseTerms.size() <= 1;
     }
 
     @Override
