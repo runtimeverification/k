@@ -5,7 +5,6 @@ import org.apache.commons.io.IOUtils;
 import org.kframework.ktest.StringMatcher.MatchFailure;
 import org.kframework.krun.ColorSetting;
 import org.kframework.utils.ColorUtil;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
@@ -41,6 +40,11 @@ public class Proc<T> implements Runnable {
      * Error produced by program.
      */
     private String pgmErr;
+
+    /**
+     * Process' input source.
+     */
+    private final String inputFile;
 
     /**
      * Input string to pass to program.
@@ -98,25 +102,34 @@ public class Proc<T> implements Runnable {
      * @param obj this is basically an arbitrary object to keep in a process,
      *            this used to know which TestCase a process is running
      * @param args arguments to pass to process
+     * @param inputFile process' input source -- used for logging
+     * @param procInput null or empty string to not pass anything to program input
      * @param expectedOut null to ignore the program output, output messages are ignored when
      *                    program fails with an error
      * @param expectedErr null if not testing for error output, error messages are ignored when
      *                    program returns 0
-     * @param procInput null or empty string to not pass anything to program input
+     * @param logStr String representation of the process
      * @param strComparator comparator object to compare program outputs with expected outputs
+     * @param timeout Maximum amount of time for a process to finish
+     * @param verbose Verbose output
+     * @param updateOut
+     * @param generateOut
+     * @param outputFile
+     * @param newOutputFile
      */
-    public Proc(T obj, String[] args, String procInput, Annotated<String, String> expectedOut,
-                Annotated<String, String> expectedErr, String logStr,
-                StringMatcher strComparator, int timeout, boolean verbose,
+    public Proc(T obj, String[] args, String inputFile, String procInput,
+                Annotated<String, String> expectedOut, Annotated<String, String> expectedErr,
+                String logStr, StringMatcher strComparator, int timeout, boolean verbose,
                 ColorSetting colorSetting, Color terminalColor,
                 boolean updateOut, boolean generateOut,
                 String outputFile, String newOutputFile) {
         this.obj = obj;
         this.args = args;
+        this.inputFile = inputFile;
+        this.procInput = procInput;
         this.expectedOut = expectedOut;
         this.expectedErr = expectedErr;
         this.logStr = logStr;
-        this.procInput = procInput;
         this.strComparator = strComparator;
         this.timeout = timeout;
         this.verbose = verbose;
@@ -131,7 +144,7 @@ public class Proc<T> implements Runnable {
     public Proc(T obj, String[] args, String logStr, StringMatcher strComparator, int timeout,
                 boolean verbose, ColorSetting colorSetting, Color terminalColor,
                 boolean updateOut, boolean generateOut) {
-        this(obj, args, "", null, null, logStr, strComparator, timeout, verbose, colorSetting,
+        this(obj, args, null, "", null, null, logStr, strComparator, timeout, verbose, colorSetting,
             terminalColor, updateOut, generateOut, null, null);
     }
 
@@ -144,6 +157,9 @@ public class Proc<T> implements Runnable {
         pb.environment().put("kast", ExecNames.getKast());
 
         try {
+            if (verbose) {
+                printVerboseRunningMsg();
+            }
             long startTime = System.currentTimeMillis();
             Process proc = pb.start();
 
@@ -281,6 +297,7 @@ public class Proc<T> implements Runnable {
                 }
             }
 
+            // https://github.com/kframework/k/wiki/Manual-(to-be-processed)#ktest-automatic-output-generation
             if (updateOut && outputFile != null) {
                 IOUtils.write(pgmOut, new FileOutputStream(new File(outputFile)));
                 System.out.println("Updating output file: " + outputFile);
@@ -345,6 +362,24 @@ public class Proc<T> implements Runnable {
     private void reportTimeout() {
         assert reason == null;
         reason = "Timeout";
+    }
+
+    private void printVerboseRunningMsg() {
+        StringBuilder b = new StringBuilder();
+        b.append("Running [");
+        b.append(logStr);
+        b.append("]");
+        if (inputFile != null) {
+            b.append(" [input: ");
+            b.append(inputFile);
+            b.append("]");
+        }
+        if (outputFile != null) {
+            b.append(" [output: ");
+            b.append(outputFile);
+            b.append("]");
+        }
+        System.out.println(b);
     }
 }
 
