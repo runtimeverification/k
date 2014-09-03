@@ -124,8 +124,8 @@ public class ProgramSDF {
             sdf.append("    " + StringUtil.escapeSortName(ss) + " -> InsertDz" + StringUtil.escapeSortName(ss) + "\n");
 
         sdf.append("\n\n");
-        for (String sort : psdfv.constantSorts) {
-            String s = StringUtil.escapeSortName(sort);
+        for (Sort sort : psdfv.constantSorts) {
+            String s = StringUtil.escapeSortName(sort.getName());
             sdf.append("    Dz" + s + "        -> " + s + "    {cons(\"" + s + "1Const\")}\n");
         }
 

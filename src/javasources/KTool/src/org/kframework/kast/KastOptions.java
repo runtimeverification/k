@@ -88,17 +88,18 @@ public final class KastOptions {
             "The default is the sort of $PGM from the configuration. A sort may also be specified " +
             "with the 'KRUN_SORT' environment variable, in which case it is used if the option is " +
             "not specified on the command line.")
-    private Sort sort;
+    // This one needs to be String in order for JCommander to be able to set it. The getter though returns Sort
+    private String sort;
 
     public Sort sort(Context context) {
         if (sort == null) {
             if (System.getenv("KRUN_SORT") != null) {
-                sort = Sort.of(System.getenv("KRUN_SORT"));
+                sort = System.getenv("KRUN_SORT");
             } else {
-                sort = context.startSymbolPgm;
+                sort = context.startSymbolPgm.getName();
             }
         }
-        return sort;
+        return Sort.of(sort);
     }
 
     @ParametersDelegate

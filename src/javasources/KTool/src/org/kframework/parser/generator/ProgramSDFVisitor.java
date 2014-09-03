@@ -34,7 +34,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
     public Set<Production> outsides = new HashSet<Production>();
     public Set<Production> constants = new HashSet<Production>();
-    public Set<String> constantSorts = new HashSet<String>();
+    public Set<Sort> constantSorts = new HashSet<>();
     public Set<String> insertSorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
     public Set<Sort> startSorts = new HashSet<>(); // list of sorts that are start symbols
     public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
@@ -45,11 +45,11 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
     public ProgramSDFVisitor(Context context) {
         super(context);
-        constantSorts.add("#Id");
-        constantSorts.add("#Bool");
-        constantSorts.add("#Int");
-        constantSorts.add("#String");
-        constantSorts.add("#Float");
+        constantSorts.add(Sort.BUILTIN_ID);
+        constantSorts.add(Sort.BUILTIN_BOOL);
+        constantSorts.add(Sort.BUILTIN_INT);
+        constantSorts.add(Sort.BUILTIN_FLOAT);
+        constantSorts.add(Sort.BUILTIN_STRING);
     }
 
     public Void visit(Syntax syn, Void _) {
@@ -120,7 +120,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     startSorts.add(((NonTerminal) prd.getItems().get(0)).getSort());
                 } else if (prd.isConstant()) {
                     constants.add(prd);
-                    constantSorts.add(prd.getSort().getName());
+                    constantSorts.add(prd.getSort());
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
                     outsides.add(prd);
                 } else if (prd.getItems().get(0) instanceof UserList) {
