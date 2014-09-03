@@ -85,7 +85,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
     }
 
     private KLabel getResultLabel(Sort resultType) {
-        if (resultType == null) {
+        if (resultType == null || resultType.getName() == null) {
             return KLabelConstant.KRESULT_PREDICATE;
         }
         if (Character.isUpperCase(resultType.getName().charAt(0))) {
