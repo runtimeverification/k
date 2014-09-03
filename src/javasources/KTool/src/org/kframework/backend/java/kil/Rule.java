@@ -59,11 +59,11 @@ public class Rule extends JavaSymbolicObject {
      * Left-hand sides of the local rewrite operations under read cells; such
      * left-hand sides are used as patterns to match against the subject term.
      */
-    private final Map<String, Term> lhsOfReadCells;
+    private final Map<CellLabel, Term> lhsOfReadCells;
     /**
      * Right-hand sides of the local rewrite operations under write cells.
      */
-    private final Map<String, Term> rhsOfWriteCells;
+    private final Map<CellLabel, Term> rhsOfWriteCells;
     /**
      * @see Rule#computeReusableBoundVars()
      */
@@ -73,7 +73,7 @@ public class Rule extends JavaSymbolicObject {
      * mutable, they must be copied when the RHS is instantiated to avoid
      * undesired sharing.
      */
-    private final Set<String> groundCells;
+    private final Set<CellLabel> groundCells;
     /**
      * Instructions generated from this rule to be executed by the
      * {@link KAbstractRewriteMachine}.
@@ -104,9 +104,9 @@ public class Rule extends JavaSymbolicObject {
             Collection<Variable> freshVariables,
             UninterpretedConstraint lookups,
             boolean compiledForFastRewriting,
-            Map<String, Term> lhsOfReadCells,
-            Map<String, Term> rhsOfWriteCells,
-            Set<String> cellsToCopy,
+            Map<CellLabel, Term> lhsOfReadCells,
+            Map<CellLabel, Term> rhsOfWriteCells,
+            Set<CellLabel> cellsToCopy,
             List<Instruction> instructions,
             ASTNode oldRule,
             Definition definition) {
@@ -155,7 +155,7 @@ public class Rule extends JavaSymbolicObject {
         leftHandSide.accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
-                if (cell.getLabel().equals("k")) {
+                if (cell.getLabel().equals(CellLabel.K)) {
                     tempContainsKCell = true;
                 } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
                     super.visit(cell);
@@ -217,8 +217,8 @@ public class Rule extends JavaSymbolicObject {
         boolean modifyCellStructure;
         if (compiledForFastRewriting) {
             modifyCellStructure = false;
-            for (String wrtCellLabel : rhsOfWriteCells.keySet()) {
-                if (definition.context().getConfigurationStructureMap().get(wrtCellLabel).hasChildren()) {
+            for (CellLabel wrtCellLabel : rhsOfWriteCells.keySet()) {
+                if (definition.context().getConfigurationStructureMap().get(wrtCellLabel.name()).hasChildren()) {
                     modifyCellStructure = true;
                 }
             }
@@ -246,8 +246,8 @@ public class Rule extends JavaSymbolicObject {
         if (compiledForFastRewriting) {
             Set<Term> lhsOfReadOnlyCell = Sets.newHashSet();
             /* add all variables that occur in the left-hand sides of read-write cells */
-            for (Map.Entry<String, Term> entry : lhsOfReadCells.entrySet()) {
-                String cellLabel = entry.getKey();
+            for (Map.Entry<CellLabel, Term> entry : lhsOfReadCells.entrySet()) {
+                CellLabel cellLabel = entry.getKey();
                 Term lhs = entry.getValue();
                 if (rhsOfWriteCells.containsKey(cellLabel)) {
                     lhsVariablesToReuse.addAll(VariableOccurrencesCounter.count(lhs));
@@ -402,11 +402,11 @@ public class Rule extends JavaSymbolicObject {
         return compiledForFastRewriting;
     }
 
-    public Map<String, Term> lhsOfReadCell() {
+    public Map<CellLabel, Term> lhsOfReadCell() {
         return lhsOfReadCells;
     }
 
-    public Map<String, Term> rhsOfWriteCell() {
+    public Map<CellLabel, Term> rhsOfWriteCell() {
         return rhsOfWriteCells;
     }
 
@@ -414,7 +414,7 @@ public class Rule extends JavaSymbolicObject {
         return reusableVariables;
     }
 
-    public Set<String> cellsToCopy() {
+    public Set<CellLabel> cellsToCopy() {
         return groundCells;
     }
 

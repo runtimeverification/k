@@ -25,11 +25,11 @@ import org.kframework.kil.ASTNode;
 @SuppressWarnings("serial")
 public class Cell<T extends Term> extends Term {
 
-    private final String label;
+    private final CellLabel label;
     private final Kind contentKind;
     private T content;
 
-    public Cell(String label, T content) {
+    public Cell(CellLabel label, T content) {
         super(Kind.CELL);
 
         assert content.kind() == Kind.CELL_COLLECTION
@@ -45,7 +45,7 @@ public class Cell<T extends Term> extends Term {
         this.content = content;
     }
 
-    public String getLabel() {
+    public CellLabel getLabel() {
         return label;
     }
 

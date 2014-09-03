@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
@@ -256,12 +257,12 @@ public class IndexingTable implements Serializable, RuleIndex{
         int maxOutputBufLen = 0;
 
         for (Cell<?> cell : indexingCells) {
-            String cellLabel = cell.getLabel();
+            CellLabel cellLabel = cell.getLabel();
             String streamCellAttr = definition.context()
-                    .getConfigurationStructureMap().get(cellLabel).cell
+                    .getConfigurationStructureMap().get(cellLabel.name()).cell
                     .getCellAttribute(Attribute.STREAM_KEY);
 
-            if (cellLabel.equals("k")) {
+            if (cellLabel.equals(CellLabel.K)) {
                 kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
             } else if (Constants.STDIN.equals(streamCellAttr)) {
                 Term instream = cell.getContent();

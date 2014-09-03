@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -65,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -249,43 +251,43 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Cell node, Void _)  {
         if (node.getContents() instanceof org.kframework.kil.Bag) {
             CellCollection cellCollection = (CellCollection) this.visitNode(node.getContents());
-            return new Cell<CellCollection>(node.getLabel(), cellCollection);
+            return new Cell<CellCollection>(CellLabel.of(node.getLabel()), cellCollection);
         } else if (node.getContents() instanceof org.kframework.kil.Cell) {
-            Multimap<String, Cell> cells = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> cells = ArrayListMultimap.create();
             Cell<?> cell = (Cell<?>) this.visitNode(node.getContents());
             cells.put(cell.getLabel(), cell);
 
-            return new Cell<CellCollection>(node.getLabel(),
+            return new Cell<CellCollection>(CellLabel.of(node.getLabel()),
                     new CellCollection(cells, context));
         } else {
             Term content = (Term) this.visitNode(node.getContents());
 
             if (content instanceof KItem) {
-                return new Cell<KItem>(node.getLabel(), (KItem) content);
+                return new Cell<KItem>(CellLabel.of(node.getLabel()), (KItem) content);
             } else if (content instanceof Token) {
-                return new Cell<Token>(node.getLabel(), (Token) content);
+                return new Cell<Token>(CellLabel.of(node.getLabel()), (Token) content);
             } else if (content instanceof KSequence) {
-                return new Cell<KSequence>(node.getLabel(), (KSequence) content);
+                return new Cell<KSequence>(CellLabel.of(node.getLabel()), (KSequence) content);
             } else if (content instanceof KList) {
-                return new Cell<KList>(node.getLabel(), (KList) content);
+                return new Cell<KList>(CellLabel.of(node.getLabel()), (KList) content);
             } else if (content instanceof BuiltinList) {
-                return new Cell<BuiltinList>(node.getLabel(), (BuiltinList) content);
+                return new Cell<BuiltinList>(CellLabel.of(node.getLabel()), (BuiltinList) content);
             } else if (content instanceof ListUpdate) {
-                return new Cell<ListUpdate>(node.getLabel(), (ListUpdate) content);
+                return new Cell<ListUpdate>(CellLabel.of(node.getLabel()), (ListUpdate) content);
             } else if (content instanceof BuiltinSet) {
-                return new Cell<BuiltinSet>(node.getLabel(), (BuiltinSet) content);
+                return new Cell<BuiltinSet>(CellLabel.of(node.getLabel()), (BuiltinSet) content);
             } else if (content instanceof SetUpdate) {
-                return new Cell<SetUpdate>(node.getLabel(), (SetUpdate) content);
+                return new Cell<SetUpdate>(CellLabel.of(node.getLabel()), (SetUpdate) content);
             } else if (content instanceof BuiltinMap) {
-                return new Cell<BuiltinMap>(node.getLabel(), (BuiltinMap) content);
+                return new Cell<BuiltinMap>(CellLabel.of(node.getLabel()), (BuiltinMap) content);
             } else if (content instanceof MapUpdate) {
-                return new Cell<MapUpdate>(node.getLabel(), (MapUpdate) content);
+                return new Cell<MapUpdate>(CellLabel.of(node.getLabel()), (MapUpdate) content);
             } else if (content instanceof Variable) {
-                return new Cell<Term>(node.getLabel(), content);
+                return new Cell<Term>(CellLabel.of(node.getLabel()), content);
             } else if (content instanceof KItemProjection) {
-                return new Cell<KItemProjection>(node.getLabel(), (KItemProjection) content);
+                return new Cell<KItemProjection>(CellLabel.of(node.getLabel()), (KItemProjection) content);
             } else if (content instanceof BuiltinMgu) {
-                return new Cell<BuiltinMgu>(node.getLabel(), (BuiltinMgu) content);
+                return new Cell<BuiltinMgu>(CellLabel.of(node.getLabel()), (BuiltinMgu) content);
             } else {
                 throw new RuntimeException();
             }
@@ -298,7 +300,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         org.kframework.kil.Bag.flatten(contents,
                 node.getContents());
 
-        Multimap<String, Cell> cells = ArrayListMultimap.create();
+        Multimap<CellLabel, Cell> cells = ArrayListMultimap.create();
         List<Variable> baseTerms = Lists.newArrayList();
         for (org.kframework.kil.Term term : contents) {
             if (term instanceof TermComment) {
@@ -516,16 +518,24 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         concreteCollectionSize = Collections.emptyMap();
 
-        java.util.Map<String, Term> lhsOfReadCell = null;
-        java.util.Map<String, Term> rhsOfWriteCell = null;
+        java.util.Map<CellLabel, Term> lhsOfReadCell = null;
+        java.util.Map<CellLabel, Term> rhsOfWriteCell = null;
         if (node.isCompiledForFastRewriting()) {
             lhsOfReadCell = Maps.newHashMap();
             for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getLhsOfReadCell().entrySet()) {
-                lhsOfReadCell.put(entry.getKey(), (Term) this.visitNode(entry.getValue()));
+                lhsOfReadCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
             }
             rhsOfWriteCell = Maps.newHashMap();
             for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getRhsOfWriteCell().entrySet()) {
-                rhsOfWriteCell.put(entry.getKey(), (Term) this.visitNode(entry.getValue()));
+                rhsOfWriteCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
+            }
+        }
+
+        java.util.Set<CellLabel> cellsToCopy = null;
+        if (node.getCellsToCopy() != null) {
+            cellsToCopy = Sets.newHashSet();
+            for (String cellLabelName : node.getCellsToCopy()) {
+                cellsToCopy.add(CellLabel.of(cellLabelName));
             }
         }
 
@@ -540,7 +550,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 node.isCompiledForFastRewriting(),
                 lhsOfReadCell,
                 rhsOfWriteCell,
-                node.getCellsToCopy(),
+                cellsToCopy,
                 node.getInstructions(),
                 node,
                 globalContext.getDefinition());
@@ -675,10 +685,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     equality.rightHandSide().evaluate(termContext));
         }
 
-        Map<String, Term> rhsOfWriteCell = null;
+        Map<CellLabel, Term> rhsOfWriteCell = null;
         if (rule.isCompiledForFastRewriting()) {
             rhsOfWriteCell = new HashMap<>();
-            for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+            for (Map.Entry<CellLabel, Term> entry : rule.rhsOfWriteCell().entrySet()) {
                 rhsOfWriteCell.put(entry.getKey(), entry.getValue().evaluate(termContext));
             }
         }

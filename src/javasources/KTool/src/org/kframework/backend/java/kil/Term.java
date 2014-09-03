@@ -44,7 +44,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
-                if (cell.getLabel().equals("k")) {
+                if (cell.getLabel().equals(CellLabel.K)) {
                     indexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
                 } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
                     super.visit(cell);
@@ -213,13 +213,13 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Warning: this is slow!
      * TODO(YilongL): improve performance when better indexing is available
      */
-    public List<Term> getCellContentsByName(final String cellName) {
+    public List<Term> getCellContentsByName(final CellLabel cellLabel) {
         final List<Term> contents = new ArrayList<>();
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
                 super.visit(cell);
-                if (cell.getLabel().equals(cellName)) {
+                if (cell.getLabel().equals(cellLabel)) {
                     contents.add(cell.getContent());
                 }
             }

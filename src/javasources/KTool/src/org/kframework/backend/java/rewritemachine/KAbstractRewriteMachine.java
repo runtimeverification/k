@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -93,7 +94,7 @@ public class KAbstractRewriteMachine {
 
                 /* perform local rewrites under write cells */
                 for (Cell cell : solution.writeCells()) {
-                    String cellLabel = cell.getLabel();
+                    CellLabel cellLabel = cell.getLabel();
                     Term rightHandSide = getWriteCellRHS(cellLabel);
                     if (rule.cellsToCopy().contains(cellLabel)) {
                         rightHandSide = DeepCloner.clone(rightHandSide);
@@ -111,7 +112,7 @@ public class KAbstractRewriteMachine {
     }
 
     private void match(Cell<?> crntCell) {
-        String cellLabel = crntCell.getLabel();
+        CellLabel cellLabel = crntCell.getLabel();
         if (isReadCell(cellLabel)) {
             /* 1) perform matching under read cell;
              * 2) record the reference if it is also a write cell. */
@@ -217,23 +218,23 @@ public class KAbstractRewriteMachine {
         return instructions.get(pc++);
     }
 
-    private boolean isReadCell(String cellLabel) {
+    private boolean isReadCell(CellLabel cellLabel) {
         return rule.lhsOfReadCell().keySet().contains(cellLabel);
     }
 
-    private boolean isWriteCell(String cellLabel) {
+    private boolean isWriteCell(CellLabel cellLabel) {
         return rule.rhsOfWriteCell().keySet().contains(cellLabel);
     }
 
-    private Term getReadCellLHS(String cellLabel) {
+    private Term getReadCellLHS(CellLabel cellLabel) {
         return rule.lhsOfReadCell().get(cellLabel);
     }
 
-    private Term getWriteCellRHS(String cellLabel) {
+    private Term getWriteCellRHS(CellLabel cellLabel) {
         return rule.rhsOfWriteCell().get(cellLabel);
     }
 
-    private Collection<Cell> getSubCellsByLabel(Cell<?> cell, String label) {
+    private Collection<Cell> getSubCellsByLabel(Cell<?> cell, CellLabel label) {
         Object content = cell.getContent();
         if (content instanceof CellCollection) {
             return ((CellCollection) content).cellMap().get(label);

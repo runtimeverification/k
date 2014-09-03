@@ -58,8 +58,8 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean changed = false;
-        Multimap<String, Cell> cellMap = ArrayListMultimap.create();
-        for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
+        Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
+        for (Map.Entry<CellLabel, Cell> entry : cellCollection.cellMap().entries()) {
             Cell<?> cell = (Cell<?>) entry.getValue().accept(this);
             cellMap.put(entry.getKey(), cell);
             changed = changed || cell != entry.getValue();
@@ -541,15 +541,15 @@ public class CopyOnWriteTransformer implements Transformer {
         UninterpretedConstraint processedLookups
                 = (UninterpretedConstraint) rule.lookups().accept(this);
 
-        Map<String, Term> processedLhsOfReadCell = null;
-        Map<String, Term> processedRhsOfWriteCell = null;
+        Map<CellLabel, Term> processedLhsOfReadCell = null;
+        Map<CellLabel, Term> processedRhsOfWriteCell = null;
         if (rule.isCompiledForFastRewriting()) {
             processedLhsOfReadCell = new HashMap<>();
-            for (Map.Entry<String, Term> entry : rule.lhsOfReadCell().entrySet()) {
+            for (Map.Entry<CellLabel, Term> entry : rule.lhsOfReadCell().entrySet()) {
                 processedLhsOfReadCell.put(entry.getKey(), (Term) entry.getValue().accept(this));
             }
             processedRhsOfWriteCell = new HashMap<>();
-            for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+            for (Map.Entry<CellLabel, Term> entry : rule.rhsOfWriteCell().entrySet()) {
                 processedRhsOfWriteCell.put(entry.getKey(), (Term) entry.getValue().accept(this));
             }
         }

@@ -5,6 +5,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.util.Utils;
 
 import com.google.common.collect.Maps;
@@ -24,13 +25,13 @@ public final class Instruction implements Serializable {
     public static Instruction UP = new Instruction(Type.UP, null);
     public static Instruction CHOICE = new Instruction(Type.CHOICE, null);
 
-    private static final Map<String, Instruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
+    private static final Map<CellLabel, Instruction> cachedGOTOInstructions = Maps.newHashMapWithExpectedSize(100);
 
     private final Type type;
-    private final String cellLabel;
+    private final CellLabel cellLabel;
     private final int hashCode;
 
-    public static Instruction GOTO(String cellLabel) {
+    public static Instruction GOTO(CellLabel cellLabel) {
         Instruction instr = cachedGOTOInstructions.get(cellLabel);
         if (instr == null) {
             instr = new Instruction(Type.GOTO, cellLabel);
@@ -39,7 +40,7 @@ public final class Instruction implements Serializable {
         return instr;
     }
 
-    private Instruction(Type type, String cellLabel) {
+    private Instruction(Type type, CellLabel cellLabel) {
         this.type = type;
         this.cellLabel = cellLabel;
         this.hashCode = type == Type.GOTO ?
@@ -51,7 +52,7 @@ public final class Instruction implements Serializable {
         return type;
     }
 
-    public String cellLabel() {
+    public CellLabel cellLabel() {
         return cellLabel;
     }
 
