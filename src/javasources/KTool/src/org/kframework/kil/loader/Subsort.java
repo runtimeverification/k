@@ -1,19 +1,21 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-public class Subsort {
-    private String bigSort, smallSort;
+import org.kframework.kil.Sort;
 
-    public Subsort(String bigSort, String smallSort) {
+public class Subsort {
+    private Sort bigSort, smallSort;
+
+    public Subsort(Sort bigSort, Sort smallSort) {
         this.bigSort = bigSort;
         this.smallSort = smallSort;
     }
 
-    public String getBigSort() {
+    public Sort getBigSort() {
         return bigSort;
     }
 
-    public String getSmallSort() {
+    public Sort getSmallSort() {
         return smallSort;
     }
 

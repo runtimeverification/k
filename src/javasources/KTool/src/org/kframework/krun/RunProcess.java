@@ -156,7 +156,7 @@ public class RunProcess {
                 List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
                 tokens.add(value);
                 Map<String, String> environment = new HashMap<>();
-                environment.put("KRUN_SORT", startSymbol.getName());
+                environment.put("KRUN_SORT", startSymbol.toString());
                 environment.put("KRUN_COMPILED_DEF", context.kompiled.getParentFile().getAbsolutePath());
                 if (isNotFile) {
                     environment.put("KRUN_IS_NOT_FILE", "true");

@@ -54,7 +54,7 @@ public class ProgramLoader {
         ASTNode out;
 
         org.kframework.parser.concrete.KParser.ImportTblPgm(context.kompiled);
-        String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol.getName());
+        String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol.toString());
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         XmlLoader.addSource(doc.getFirstChild(), source);
@@ -129,7 +129,7 @@ public class ProgramLoader {
 
             String contentString = new String(content);
             Parser parser = new Parser(contentString);
-            out = parser.parse(grammar.get(startSymbol.getName()), 0);
+            out = parser.parse(grammar.get(startSymbol.toString()), 0);
             if (context.globalOptions.debug)
                 System.err.println("Raw: " + out + "\n");
             try {

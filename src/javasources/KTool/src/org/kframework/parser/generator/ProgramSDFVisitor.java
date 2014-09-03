@@ -35,10 +35,10 @@ public class ProgramSDFVisitor extends BasicVisitor {
     public Set<Production> outsides = new HashSet<Production>();
     public Set<Production> constants = new HashSet<Production>();
     public Set<Sort> constantSorts = new HashSet<>();
-    public Set<String> insertSorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
+    public Set<Sort> insertSorts = new HashSet<>(); // list of inserted sorts that need to avoid the priority filter
     public Set<Sort> startSorts = new HashSet<>(); // list of sorts that are start symbols
     public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
-    public Set<String> userSort = new HashSet<String>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
+    public Set<Sort> userSort = new HashSet<>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
     public StringBuilder sdf = new StringBuilder("");
     public List<Production> lexical = new ArrayList<Production>();
     public List<Restrictions> restrictions = new ArrayList<Restrictions>();
@@ -53,7 +53,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
     }
 
     public Void visit(Syntax syn, Void _) {
-        userSort.add(syn.getDeclaredSort().getName());
+        userSort.add(syn.getDeclaredSort().getSort());
         List<PriorityBlock> priblocks = syn.getPriorityBlocks();
         processPriorities(priblocks);
         return null;
@@ -125,7 +125,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     outsides.add(prd);
                 } else if (prd.getItems().get(0) instanceof UserList) {
                     outsides.add(prd);
-                    listSorts.add(prd.getSort().getName());
+                    listSorts.add(prd.getSort().toString());
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -161,18 +161,18 @@ public class ProgramSDFVisitor extends BasicVisitor {
                                 NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
-                                    sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+                                    sdf.append(StringUtil.escapeSortName(srt.toString()) + " ");
                                 } else {
                                     // if this sort should be inserted to avoid the priority filter, then add it to the list
-                                    insertSorts.add(srt.getName());
-                                    String tempstr = srt.getName();
+                                    insertSorts.add(srt.getSort());
+                                    String tempstr = srt.toString();
                                     if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
                                         tempstr = "Bag";
                                     sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
+                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().toString()));
                         sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
                     }
                     sdf.append("} > ");
