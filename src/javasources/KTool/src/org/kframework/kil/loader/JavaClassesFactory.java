@@ -67,7 +67,7 @@ public class JavaClassesFactory {
         if (Constants.VAR.equals(element.getNodeName()))
             return new Variable(element);
         if (Constants.CONST.equals(element.getNodeName())) {
-            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Sort.KLABEL)) {
+            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Sort.KLABEL.toString())) {
                 return new KLabelConstant(element);
             } else {
                 // builtin token or lexical token
