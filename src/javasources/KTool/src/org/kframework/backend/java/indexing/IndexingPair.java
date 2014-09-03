@@ -35,7 +35,7 @@ public class IndexingPair implements Serializable {
     }
 
     public static IndexingPair getKCellIndexingPair(Cell cell, Definition definition) {
-        assert cell.getLabel().equals("k");
+        assert cell.getLabel().equals(CellLabel.K);
 
         Term term = cell.getContent();
         if (term instanceof KSequence) {

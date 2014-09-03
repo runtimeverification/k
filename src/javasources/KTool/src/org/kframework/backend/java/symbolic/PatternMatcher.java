@@ -11,6 +11,7 @@ import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.DataStructureChoice;
 import org.kframework.backend.java.kil.DataStructureLookup;
@@ -31,7 +32,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Profiler;
-import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -134,9 +133,7 @@ public class PatternMatcher extends AbstractMatcher {
      *         variables in the pattern to sub-terms in the subject)
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(
-                rule.containsAttribute(Attribute.LEMMA_KEY),
-                context);
+        PatternMatcher matcher = new PatternMatcher(rule.isLemma(), context);
 
         boolean failed = true;
         if (rule.isFunction()) {
@@ -226,9 +223,7 @@ public class PatternMatcher extends AbstractMatcher {
                         // the non-lookup term is not a variable and thus requires further pattern matching
                         // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
                         //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
-                        PatternMatcher lookupMatcher = new PatternMatcher(
-                                rule.containsAttribute(Attribute.LEMMA_KEY),
-                                context);
+                        PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
                         if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
                             resolved = true;
                             assert lookupMatcher.multiSubstitutions.isEmpty();
@@ -667,7 +662,7 @@ public class PatternMatcher extends AbstractMatcher {
             }
         }
 
-        Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
+        Set<CellLabel> unifiableCellLabels = new HashSet<>(cellCollection.labelSet());
         unifiableCellLabels.retainAll(otherCellCollection.labelSet());
 
         Context context = termContext.definition().context();
@@ -678,15 +673,15 @@ public class PatternMatcher extends AbstractMatcher {
          * at all!
          */
         if (!cellCollection.hasStar() || !otherCellCollection.hasStar()) {
-            for (String label : unifiableCellLabels) {
+            for (CellLabel label : unifiableCellLabels) {
                 assert cellCollection.get(label).size() == 1
                         && otherCellCollection.get(label).size() == 1;
                 match(cellCollection.get(label).iterator().next(),
                         otherCellCollection.get(label).iterator().next());
             }
 
-            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
-            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
                     cellMap, otherCellCollection, otherCellMap);
 
@@ -703,17 +698,17 @@ public class PatternMatcher extends AbstractMatcher {
             assert !isStarNested : "nested cells with multiplicity='*' not supported";
             // TODO(AndreiS): fix this assertions
 
-            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
-            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
+            Multimap<CellLabel, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
                     cellMap, otherCellCollection, otherCellMap);
             if (!otherCellMap.isEmpty()) {
                 fail(cellCollection, otherCellCollection);
             }
 
-            for (Iterator<String> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
-                String cellLabel = iter.next();
-                if (!context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
+            for (Iterator<CellLabel> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
+                CellLabel cellLabel = iter.next();
+                if (!context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     match(cellCollection.get(cellLabel).iterator().next(),
@@ -728,7 +723,7 @@ public class PatternMatcher extends AbstractMatcher {
             } else {
                 assert unifiableCellLabels.size() == 1;
             }
-            String starredCellLabel = unifiableCellLabels.iterator().next();
+            CellLabel starredCellLabel = unifiableCellLabels.iterator().next();
 
             if (otherCellCollection.hasFrame()) {
                 if (cellCollection.get(starredCellLabel).size() < otherCellCollection.get(starredCellLabel).size()) {
@@ -773,7 +768,7 @@ public class PatternMatcher extends AbstractMatcher {
                     continue;
                 }
 
-                Multimap<String, Cell> cm = ArrayListMultimap.create();
+                Multimap<CellLabel, Cell> cm = ArrayListMultimap.create();
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.selected.contains(i)) {
                         cm.put(cells[i].getLabel(), cells[i]);
@@ -808,19 +803,19 @@ public class PatternMatcher extends AbstractMatcher {
         }
     }
 
-    private void computeDisjointCellMaps(Set<String> unifiableCellLabels,
-            CellCollection cellCollection, Multimap<String, Cell> cellMap,
+    private void computeDisjointCellMaps(Set<CellLabel> unifiableCellLabels,
+            CellCollection cellCollection, Multimap<CellLabel, Cell> cellMap,
             CellCollection otherCellCollection,
-            Multimap<String, Cell> otherCellMap) {
+            Multimap<CellLabel, Cell> otherCellMap) {
         cellMap.clear();
-        for (String label : cellCollection.labelSet()) {
+        for (CellLabel label : cellCollection.labelSet()) {
             if (!unifiableCellLabels.contains(label)) {
                 cellMap.putAll(label, cellCollection.get(label));
             }
         }
 
         otherCellMap.clear();
-        for (String label : otherCellCollection.labelSet()) {
+        for (CellLabel label : otherCellCollection.labelSet()) {
             if (!unifiableCellLabels.contains(label)) {
                 otherCellMap.putAll(label, otherCellCollection.get(label));
             }
@@ -896,11 +891,11 @@ public class PatternMatcher extends AbstractMatcher {
      *         fail
      */
     private boolean addCellCollectionConstraint(
-            Multimap<String, Cell> cellMap,
+            Multimap<CellLabel, Cell> cellMap,
             Variable frame,
-            Multimap<String, Cell> otherCellMap,
+            Multimap<CellLabel, Cell> otherCellMap,
             Variable otherFrame) {
-        for (String cellLabel : cellMap.keySet()) {
+        for (CellLabel cellLabel : cellMap.keySet()) {
             assert !otherCellMap.containsKey(cellLabel);
         }
 

@@ -29,4 +29,8 @@ public class ConfigurationStructure implements Serializable {
     public boolean isStarOrPlus() {
         return multiplicity == Cell.Multiplicity.ANY || multiplicity == Cell.Multiplicity.SOME;
     }
+
+    public boolean hasChildren() {
+        return !sons.isEmpty();
+    }
 }

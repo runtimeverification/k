@@ -2,6 +2,7 @@
 package org.kframework.backend.java.util;
 
 import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.symbolic.PrePostVisitor;
@@ -11,19 +12,19 @@ import org.kframework.backend.java.symbolic.PrePostVisitor;
  */
 public class LookupCell extends LocalVisitor {
 
-    public LookupCell(String name) {
-        this.cellName = name;
+    public LookupCell(CellLabel cellLabel) {
+        this.cellLabel = cellLabel;
         result = null;
         cellFound = false;
     }
 
-    String cellName;
+    CellLabel cellLabel;
     Cell result;
     boolean cellFound;
 
     @Override
     public void visit(Cell cell) {
-        if (cell.getLabel().equals(cellName)) {
+        if (cell.getLabel().equals(cellLabel)) {
             result = cell;
             cellFound = true;
         }
@@ -35,8 +36,8 @@ public class LookupCell extends LocalVisitor {
         return !cellFound;
     }
 
-    public static Cell find(Term context, final String name) {
-        LookupCell cellLocator = new LookupCell(name);
+    public static Cell find(Term context, final CellLabel cellLabel) {
+        LookupCell cellLocator = new LookupCell(cellLabel);
         PrePostVisitor recursiveCellFinder = new PrePostVisitor();
         recursiveCellFinder.getPreVisitor().addVisitor(cellLocator);
         context.accept(recursiveCellFinder);

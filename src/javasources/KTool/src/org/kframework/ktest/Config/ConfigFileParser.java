@@ -10,6 +10,7 @@ import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
 import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -44,11 +45,17 @@ public class ConfigFileParser {
         // validate xml file structure
         Source schemaFile = new StreamSource(new File(getSchema()));
         Source xmlFile = new StreamSource(configFile);
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants
-                .W3C_XML_SCHEMA_NS_URI);
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(schemaFile);
         Validator validator = schema.newValidator();
-        validator.validate(xmlFile);
+        try {
+            validator.validate(xmlFile);
+        } catch (SAXException e) {
+            // unfortunately validator doesn't provide error locations so all we can say is this
+            GlobalSettings.kem.registerCriticalError(
+                    "Invalid config file formatting. Refer to the K manual for details. "
+                            + e.getMessage());
+        }
 
         // parse xml file
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();

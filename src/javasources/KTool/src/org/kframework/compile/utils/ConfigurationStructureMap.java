@@ -46,6 +46,8 @@ public class ConfigurationStructureMap implements
 
     @Override
     public  ConfigurationStructure get(Object o) {
+        assert o instanceof String : "unexpected argument type "
+                + o.getClass().getName() + "; expected String";
         return config.get(o);
     }
 

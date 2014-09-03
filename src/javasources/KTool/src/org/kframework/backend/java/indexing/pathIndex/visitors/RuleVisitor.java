@@ -3,6 +3,7 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Variable;
@@ -55,7 +56,7 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(Rule rule) {
-        Cell kCell = LookupCell.find(rule.leftHandSide(), K_CELL_NAME);
+        Cell kCell = LookupCell.find(rule.leftHandSide(), CellLabel.K);
         if (kCell != null){
             visit(kCell);
         }else{
@@ -68,7 +69,7 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(Cell cell) {
-        if (cell.getLabel().equals(K_CELL_NAME)){
+        if (cell.getLabel().equals(CellLabel.K)){
             cell.getContent().accept(this);
         } else if(cell.contentKind() == Kind.CELL_COLLECTION){
             super.visit(cell);

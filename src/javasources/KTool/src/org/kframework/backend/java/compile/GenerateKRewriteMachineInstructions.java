@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
@@ -120,34 +121,34 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
 
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-        String cellLabel = cell.getLabel();
+        String cellLabelName = cell.getLabel();
         if (status == Status.CONFIGURATION) {
             /* compute childrenCells */
 
             // TODO(YilongL): perhaps move the following computation to {@link
             // InitializeConfigurationStructure}
             for (String ancestor : cellStack) {
-                containingCells.get(ancestor).add(cellLabel);
+                containingCells.get(ancestor).add(cellLabelName);
             }
 
-            assert !containingCells.containsKey(cellLabel);
-            containingCells.put(cellLabel, new HashSet<String>());
-            containingCells.get(cellLabel).add(cellLabel);
+            assert !containingCells.containsKey(cellLabelName);
+            containingCells.put(cellLabelName, new HashSet<String>());
+            containingCells.get(cellLabelName).add(cellLabelName);
 
-            cellStack.push(cellLabel);
+            cellStack.push(cellLabelName);
             cell = (Cell) super.visit(cell, _);
             cellStack.pop();
             return cell;
         } else if (status == Status.RULE) {
-            if (!cellsToVisit.contains(cellLabel)) {
+            if (!cellsToVisit.contains(cellLabelName)) {
                 return cell;
             }
 
-            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
+            if (context.getConfigurationStructureMap().get(cellLabelName).isStarOrPlus()) {
                 schedule.add(Instruction.CHOICE);
             }
 
-            schedule.add(Instruction.GOTO(cellLabel));
+            schedule.add(Instruction.GOTO(CellLabel.of(cellLabelName)));
             cell = (Cell) super.visit(cell, _);
             schedule.add(Instruction.UP);
 

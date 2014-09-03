@@ -22,6 +22,7 @@ public class Attribute<T> extends ASTNode {
     public static final String BUILTIN_KEY = "builtin";
     public static final String FUNCTION_KEY = "function";
     public static final String PREDICATE_KEY = "predicate";
+    public static final String STREAM_KEY = "stream";
     public static final String ANYWHERE_KEY = Constants.ANYWHERE;
     public static final String PATTERN_KEY = "pattern";
     public static final String HOOK_KEY = "hook";

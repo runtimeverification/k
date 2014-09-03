@@ -19,6 +19,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -76,19 +77,25 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         return node;
     }
 
+    private Rule setCellsToCopyForUncompiledRule(Rule rule) {
+        if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
+            Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
+            rule = rule.shallowCopy();
+            if (hasGroundCell(rhs)) {
+                rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(ImmutableSet.of(rhs.getLabel()));
+            } else {
+                rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(ImmutableSet.<String>of());
+            }
+        } else {
+            rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(ImmutableSet.<String>of());
+        }
+        return rule;
+    }
+
     @Override
     public ASTNode visit(Rule rule, Void _)  {
         if (!rule.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
-            if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
-                Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
-                rule = rule.shallowCopy();
-                if (hasGroundCell(rhs)) {
-                    rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(Collections.singleton(rhs.getLabel()));
-                } else {
-                    rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(Collections.<String>emptySet());
-                }
-            }
-            return rule;
+            return setCellsToCopyForUncompiledRule(rule);
         }
 
         hasAssocCommMatching = false;
@@ -102,6 +109,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         if (hasAssocCommMatching) {
             rule = rule.shallowCopy();
             rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false);
+            rule = setCellsToCopyForUncompiledRule(rule);
             return rule;
         }
 

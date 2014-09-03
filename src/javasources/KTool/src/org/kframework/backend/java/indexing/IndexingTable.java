@@ -7,11 +7,15 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Constants;
 
@@ -196,8 +200,16 @@ public class IndexingTable implements Serializable, RuleIndex{
      */
     @Override
     public List<Rule> getRules(Term term) {
+        return getRulesFromCfgTermIdx(getConfigurationTermIndex(term));
+    }
+
+    @Override
+    public List<Rule> getRules(List<Cell<?>> indexingCells) {
+        return getRulesFromCfgTermIdx(getConfigurationTermIndex(indexingCells));
+    }
+
+    private List<Rule> getRulesFromCfgTermIdx(ConfigurationTermIndex cfgTermIdx) {
         Set<Rule> rules = new LinkedHashSet<>();
-        ConfigurationTermIndex cfgTermIdx = term.getConfigurationTermIndex(definition);
 
         /* give priority to IO rules */
         for (IndexingPair pair : cfgTermIdx.getInstreamIndexingPairs()) {
@@ -233,10 +245,53 @@ public class IndexingTable implements Serializable, RuleIndex{
         }
 
         rules.addAll(unindexedRules);
+
         return new ArrayList<>(rules);
+    }
+
+    private ConfigurationTermIndex getConfigurationTermIndex(List<Cell<?>> indexingCells) {
+        List<IndexingPair> kCellIndexingPairs = new ArrayList<>();
+        List<IndexingPair> instreamIndexingPairs = new ArrayList<>();
+        List<IndexingPair> outstreamIndexingPairs = new ArrayList<>();
+        int maxInputBufLen = 0;
+        int maxOutputBufLen = 0;
+
+        for (Cell<?> cell : indexingCells) {
+            CellLabel cellLabel = cell.getLabel();
+            String streamCellAttr = definition.context()
+                    .getConfigurationStructureMap().get(cellLabel.name()).cell
+                    .getCellAttribute(Attribute.STREAM_KEY);
+
+            if (cellLabel.equals(CellLabel.K)) {
+                kCellIndexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
+            } else if (Constants.STDIN.equals(streamCellAttr)) {
+                Term instream = cell.getContent();
+                instreamIndexingPairs.add(IndexingPair.getInstreamIndexingPair(instream, definition));
+                if (instream instanceof BuiltinList) {
+                    maxInputBufLen = Math.max(maxInputBufLen, ((BuiltinList) instream).concreteSize());
+                }
+            } else if (Constants.STDOUT.equals(streamCellAttr) || Constants.STDERR.equals(streamCellAttr)) {
+                Term outstream = cell.getContent();
+                outstreamIndexingPairs.add(IndexingPair.getOutstreamIndexingPair(outstream, definition));
+                if (outstream instanceof BuiltinList) {
+                    maxOutputBufLen = Math.max(maxOutputBufLen, ((BuiltinList) outstream).concreteSize());
+                }
+            } else {
+                assert false : "unexpected indexing cell " + cell;
+            }
+        }
+
+        return new ConfigurationTermIndex(kCellIndexingPairs,
+                instreamIndexingPairs, outstreamIndexingPairs,
+                maxInputBufLen, maxOutputBufLen);
+    }
+
+    private ConfigurationTermIndex getConfigurationTermIndex(Term term) {
+        return getConfigurationTermIndex(IndexingCellsCollector.getIndexingCells(term, definition));
     }
 
     public Map<Index, List<Rule>> getSimulationRuleTable() {
         return simulationRuleTable;
     }
+
 }

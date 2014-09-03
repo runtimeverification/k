@@ -155,8 +155,10 @@ public class TestSuite {
                 for (KRunProgram program : programs) {
                     StringBuilder krunLogCmd = new StringBuilder();
                     krunLogCmd.append(program.toLogString());
-                    if (program.outputFile != null)
+                    if (updateOut && program.outputFile != null)
                         krunLogCmd.append(" >").append(program.outputFile);
+                    else if (generateOut && program.newOutputFile != null)
+                        krunLogCmd.append(" >").append(program.newOutputFile);
                     if (program.inputFile != null)
                         krunLogCmd.append(" <").append(program.inputFile);
                     System.out.println(krunLogCmd.toString());
@@ -430,38 +432,18 @@ public class TestSuite {
         if (errorContents != null)
             errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
 
-        if (verbose)
-            printVerboseRunningMsg(program);
         StringMatcher matcher = strComparator;
         if (program.regex) {
             matcher = new RegexStringMatcher();
         }
-        Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
-                errorContentsAnn, program.toLogString(), matcher, timeout, verbose,
-                colorSetting, terminalColor, updateOut, generateOut, program.outputFile,
+        Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
+                outputContentsAnn, errorContentsAnn, program.toLogString(), matcher, timeout,
+                verbose, colorSetting, terminalColor, updateOut, generateOut, program.outputFile,
                 program.newOutputFile);
         p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);
         krunSteps++;
         return p;
-    }
-
-    private void printVerboseRunningMsg(KRunProgram program) {
-        StringBuilder b = new StringBuilder();
-        b.append("Running [");
-        b.append(program.toLogString());
-        b.append("]");
-        if (program.inputFile != null) {
-            b.append(" [input: ");
-            b.append(program.inputFile);
-            b.append("]");
-        }
-        if (program.outputFile != null) {
-            b.append(" [output: ");
-            b.append(program.outputFile);
-            b.append("]");
-        }
-        System.out.println(b);
     }
 
     private void printResult(boolean condition) {

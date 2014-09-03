@@ -76,4 +76,35 @@ public class StringUtilTest {
         for (int i = 0; i < 257; i++)
             Assert.assertEquals("Different values at position: " + i, all[i] , all2[i]);
     }
+
+    @Test
+    public void testSplitLine() {
+        String longLine = "http://www.kframework.org should be splitted";
+        Assert.assertEquals(
+                "http://www.kframework.org\nshould be\nsplitted",
+                StringUtil.splitLines(longLine, 10));
+        Assert.assertEquals(
+                "http://www.kframework.org\nshould be splitted",
+                StringUtil.splitLines(longLine, 20));
+        Assert.assertEquals(
+                "http://www.kframework.org\nshould\nbe\nsplitted",
+                StringUtil.splitLines(longLine, 0));
+        Assert.assertEquals(
+                "http://www.kframework.org should be\nsplitted",
+                StringUtil.splitLines(longLine, longLine.length()));
+        Assert.assertEquals(longLine, StringUtil.splitLines(longLine, longLine.length() + 1));
+
+        String multiLine =
+                "http://www.kframework.org\nshort enough line";
+        Assert.assertEquals(
+                "http://www.kframework.org\nshort enough line",
+                StringUtil.splitLines(multiLine, 30));
+        Assert.assertEquals(
+                "http://www.kframework.org\nshort enough\nline",
+                StringUtil.splitLines(multiLine, 13));
+        Assert.assertEquals(
+                "http://www.kframework.org\nshort\nenough\nline",
+                StringUtil.splitLines(multiLine, 10));
+    }
 }
+

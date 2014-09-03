@@ -2,6 +2,7 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
@@ -39,15 +40,15 @@ class CellVisitor extends BottomUpVisitor {
 
     @Override
     public void visit(Cell cell) {
-        if (cell.getLabel().equals("k")) {
+        if (cell.getLabel().equals(CellLabel.K)) {
             // get the pString from each k cell using a new visitor each time,
             // but accumulate the pStrings
             TermVisitor visitor = new TermVisitor(this.context, options, false);
             cell.getContent().accept(visitor);
             kCellPStings.addAll(visitor.getpStrings());
-        } else if (cell.getLabel().equals("out")) {
+        } else if (cell.getLabel().equals(CellLabel.of("out"))) {
             outCell = cell;
-        } else if (cell.getLabel().equals("in")) {
+        } else if (cell.getLabel().equals(CellLabel.of("in"))) {
             inCell = cell;
         } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
             super.visit(cell);

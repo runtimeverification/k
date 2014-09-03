@@ -31,7 +31,7 @@ import com.google.common.collect.Multimap;
 @SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
-    private final Multimap<String, Cell> cells;
+    private final Multimap<CellLabel, Cell> cells;
 
     /**
      * Only allow {@code Variable}s as base terms for now.
@@ -46,7 +46,7 @@ public class CellCollection extends Collection {
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasStar;
 
-    public CellCollection(Multimap<String, Cell> cells, Variable frame, Context context) {
+    public CellCollection(Multimap<CellLabel, Cell> cells, Variable frame, Context context) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
         this.baseTerms = frame != null ?
@@ -56,7 +56,7 @@ public class CellCollection extends Collection {
         this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
     }
 
-    public CellCollection(Multimap<String, Cell> cells, List<Variable> baseTerms, Context context) {
+    public CellCollection(Multimap<CellLabel, Cell> cells, List<Variable> baseTerms, Context context) {
         super(getFrame(baseTerms), Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
         this.baseTerms = ImmutableList.copyOf(baseTerms);
@@ -65,22 +65,22 @@ public class CellCollection extends Collection {
     }
 
     public CellCollection(Variable frame) {
-        this(ArrayListMultimap.<String, Cell>create(), frame, null);
+        this(ArrayListMultimap.<CellLabel, Cell>create(), frame, null);
     }
 
-    public CellCollection(Multimap<String, Cell> cells, Context context) {
+    public CellCollection(Multimap<CellLabel, Cell> cells, Context context) {
         this(cells, (Variable) null, context);
     }
 
     public CellCollection() {
-        this(ArrayListMultimap.<String, Cell>create(), (Variable) null, null);
+        this(ArrayListMultimap.<CellLabel, Cell>create(), (Variable) null, null);
     }
 
     public java.util.Collection<Cell> cells() {
         return cells.values();
     }
 
-    public Multimap<String, Cell> cellMap() {
+    public Multimap<CellLabel, Cell> cellMap() {
         return cells;
     }
 
@@ -88,11 +88,11 @@ public class CellCollection extends Collection {
         return baseTerms;
     }
 
-    public boolean containsKey(String label) {
+    public boolean containsKey(CellLabel label) {
         return cells.containsKey(label);
     }
 
-    public java.util.Collection<Cell> get(String label) {
+    public java.util.Collection<Cell> get(CellLabel label) {
         return cells.get(label);
     }
 
@@ -105,7 +105,7 @@ public class CellCollection extends Collection {
         return hasStar;
     }
 
-    public Set<String> labelSet() {
+    public Set<CellLabel> labelSet() {
         return cells.keySet();
     }
 
@@ -216,10 +216,10 @@ public class CellCollection extends Collection {
         return transformer.transform(this);
     }
 
-    private static int numOfTypesOfStarredSubcells(Multimap<String, Cell> cells, Context context) {
+    private static int numOfTypesOfStarredSubcells(Multimap<CellLabel, Cell> cells, Context context) {
         int count = 0;
-        for (String cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
+        for (CellLabel cellLabel : cells.keySet()) {
+            if (context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                 count++;
             } else {
                 assert cells.get(cellLabel).size() == 1:
@@ -268,7 +268,7 @@ public class CellCollection extends Collection {
         if (term.kind() == Kind.CELL && kind == Kind.CELL_COLLECTION) {
             if (term instanceof Cell) {
                 Cell cell = (Cell) term;
-                Multimap<String, Cell> cells = ArrayListMultimap.create();
+                Multimap<CellLabel, Cell> cells = ArrayListMultimap.create();
                 cells.put(cell.getLabel(), cell);
                 return new CellCollection(cells, context);
             } else {

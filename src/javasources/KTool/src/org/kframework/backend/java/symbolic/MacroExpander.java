@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.Rule;
@@ -63,15 +64,15 @@ public class MacroExpander extends TermTransformer {
         UninterpretedConstraint processedLookups
             = (UninterpretedConstraint) expandMacro(rule.lookups());
 
-        Map<String, Term> processedLhsOfReadCell = null;
-        Map<String, Term> processedRhsOfWriteCell = null;
+        Map<CellLabel, Term> processedLhsOfReadCell = null;
+        Map<CellLabel, Term> processedRhsOfWriteCell = null;
         if (rule.isCompiledForFastRewriting()) {
             processedLhsOfReadCell = new HashMap<>();
-            for (Map.Entry<String, Term> entry : rule.lhsOfReadCell().entrySet()) {
+            for (Map.Entry<CellLabel, Term> entry : rule.lhsOfReadCell().entrySet()) {
                 processedLhsOfReadCell.put(entry.getKey(), processTerm(entry.getValue()));
             }
             processedRhsOfWriteCell = new HashMap<>();
-            for (Map.Entry<String, Term> entry : rule.rhsOfWriteCell().entrySet()) {
+            for (Map.Entry<CellLabel, Term> entry : rule.rhsOfWriteCell().entrySet()) {
                 processedRhsOfWriteCell.put(entry.getKey(), processTerm(entry.getValue()));
             }
         }
