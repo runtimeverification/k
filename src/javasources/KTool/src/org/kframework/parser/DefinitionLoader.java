@@ -210,7 +210,8 @@ public class DefinitionLoader {
                 }
             }
 
-            new AddAutoIncludedModulesVisitor(context).visitNode(def);
+            if(autoinclude)
+                new AddAutoIncludedModulesVisitor(context).visitNode(def);
             // new CheckModulesAndFilesImportsDecl(context).visitNode(def);
             new CollectModuleImportsVisitor(context).visitNode(def);
 
