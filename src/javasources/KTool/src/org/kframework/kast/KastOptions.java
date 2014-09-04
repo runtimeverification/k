@@ -4,6 +4,7 @@ package org.kframework.kast;
 import java.io.File;
 import java.util.List;
 
+import com.beust.jcommander.IStringConverter;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
@@ -84,22 +85,28 @@ public final class KastOptions {
         }
     }
 
-    @Parameter(names={"--sort", "-s"}, description="The start sort for the default parser. " +
+    @Parameter(names={"--sort", "-s"}, converter=SortTypeConverter.class, description="The start sort for the default parser. " +
             "The default is the sort of $PGM from the configuration. A sort may also be specified " +
             "with the 'KRUN_SORT' environment variable, in which case it is used if the option is " +
             "not specified on the command line.")
-    // This one needs to be String in order for JCommander to be able to set it. The getter though returns Sort
-    private String sort;
+    private Sort sort;
+    public static class SortTypeConverter implements IStringConverter<Sort> {
+        // converts the command line argument into a Sort
+        @Override
+        public Sort convert(String arg) {
+            return Sort.of(arg);
+        }
+    }
 
     public Sort sort(Context context) {
         if (sort == null) {
             if (System.getenv("KRUN_SORT") != null) {
-                sort = System.getenv("KRUN_SORT");
+                sort = Sort.of(System.getenv("KRUN_SORT"));
             } else {
-                sort = context.startSymbolPgm.getName();
+                sort = context.startSymbolPgm;
             }
         }
-        return Sort.of(sort);
+        return sort;
     }
 
     @ParametersDelegate

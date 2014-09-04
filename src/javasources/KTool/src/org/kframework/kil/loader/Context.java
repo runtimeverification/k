@@ -583,19 +583,19 @@ public class Context implements Serializable {
             // add cons to productions that don't have it already
             if (p.containsAttribute("bracket")) {
                 // don't add cons to bracket production
-                String cons2 = StringUtil.escapeSortName(p.getSort().getName()) + "1Bracket";
+                String cons2 = StringUtil.escapeSort(p.getSort()) + "1Bracket";
                 conses.put(cons2, p);
             } else if (p.isLexical()) {
             } else if (p.isSubsort()) {
                 if (p.getKLabel() != null) {
-                    conses.put(StringUtil.escapeSortName(p.getSort().getName()) + "1" + StringUtil.getUniqueId() + "Syn", p);
+                    conses.put(StringUtil.escapeSort(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn", p);
                 }
             } else {
                 String cons;
                 if (p.isListDecl())
-                    cons = StringUtil.escapeSortName(p.getSort().getName()) + "1" + "ListSyn";
+                    cons = StringUtil.escapeSort(p.getSort()) + "1" + "ListSyn";
                 else
-                    cons = StringUtil.escapeSortName(p.getSort().getName()) + "1" + StringUtil.getUniqueId() + "Syn";
+                    cons = StringUtil.escapeSort(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn";
                 conses.put(cons, p);
             }
         }

@@ -55,8 +55,8 @@ public class DefinitionSDF {
         // print Sort -> K > A -> B > K -> Sort
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    " + StringUtil.escapeSortName(s.toString()) + " -> K");
-                // sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.toString()) + "\")}");
+                sdf.append("    " + StringUtil.escapeSort(s) + " -> K");
+                // sdf.append(" {cons(\"K12" + StringUtil.escapeSort(s) + "\")}");
                 sdf.append("\n");
             }
         }
@@ -65,16 +65,16 @@ public class DefinitionSDF {
             Sort s1 = subs.getSmallSort();
             Sort s2 = subs.getBigSort();
             if (!s1.isBaseSort() && !s2.isBaseSort()) {
-                sdf.append("    " + StringUtil.escapeSortName(s1.toString()) + " -> " + StringUtil.escapeSortName(s2.toString()));
-                // sdf.append(" {cons(\"" + StringUtil.escapeSortName(s2) + "12" + StringUtil.escapeSortName(s1) + "\")}");
+                sdf.append("    " + StringUtil.escapeSort(s1) + " -> " + StringUtil.escapeSort(s2));
+                // sdf.append(" {cons(\"" + StringUtil.escapeSort(s2) + "12" + StringUtil.escapeSort(s1) + "\")}");
                 sdf.append("\n");
             }
         }
         sdf.append("} .> {\n");
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    K -> " + StringUtil.escapeSortName(s.toString()));
-                // sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.toString()) + "12K\")}");
+                sdf.append("    K -> " + StringUtil.escapeSort(s));
+                // sdf.append(" {cons(\"" + StringUtil.escapeSort(s) + "12K\")}");
                 sdf.append("\n");
             }
         }
@@ -86,16 +86,16 @@ public class DefinitionSDF {
         // print Sort -> K > A -> B > K -> Sort
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    " + StringUtil.escapeSortName(s.toString()) + " -> K");
-                // sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.toString()) + "\")}");
+                sdf.append("    " + StringUtil.escapeSort(s) + " -> K");
+                // sdf.append(" {cons(\"K12" + StringUtil.escapeSort(s) + "\")}");
                 sdf.append("\n");
             }
         }
         sdf.append("} .> {\n");
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    K -> " + StringUtil.escapeSortName(s.toString()));
-                // sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.toString()) + "12K\")}");
+                sdf.append("    K -> " + StringUtil.escapeSort(s));
+                // sdf.append(" {cons(\"" + StringUtil.escapeSort(s) + "12K\")}");
                 sdf.append("\n");
             }
         }
@@ -106,16 +106,16 @@ public class DefinitionSDF {
         sdf.append("context-free priorities\n{\n");
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    K -> " + StringUtil.escapeSortName(s.toString()));
-                // sdf.append(" {cons(\"" + StringUtil.escapeSortName(s.toString()) + "12K\")}");
+                sdf.append("    K -> " + StringUtil.escapeSort(s));
+                // sdf.append(" {cons(\"" + StringUtil.escapeSort(s) + "12K\")}");
                 sdf.append("\n");
             }
         }
         sdf.append("} .> {\n");
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    " + StringUtil.escapeSortName(s.toString()) + " -> K");
-                // sdf.append(" {cons(\"K12" + StringUtil.escapeSortName(s.toString()) + "\")}");
+                sdf.append("    " + StringUtil.escapeSort(s) + " -> K");
+                // sdf.append(" {cons(\"K12" + StringUtil.escapeSort(s) + "\")}");
                 sdf.append("\n");
             }
         }
@@ -126,11 +126,11 @@ public class DefinitionSDF {
         for (Production p : psdfv.outsides) {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
-                sdf.append("    " + StringUtil.escapeSortName(si.getSort().toString()) + " " + StringUtil.enquoteCString(si.getSeparator()) + " " + StringUtil.escapeSortName(p.getSort().toString()) + " -> "
-                        + StringUtil.escapeSortName(p.getSort().toString()));
+                sdf.append("    " + StringUtil.escapeSort(si.getSort()) + " " + StringUtil.enquoteCString(si.getSeparator()) + " " + StringUtil.escapeSort(p.getSort()) + " -> "
+                        + StringUtil.escapeSort(p.getSort()));
                 sdf.append(" {cons(\"" + context.getConses().inverse().get(p) + "\")}\n");
-                sdf.append("    \"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort().toString()));
-                sdf.append(" {cons(\"" + StringUtil.escapeSortName(p.getSort().toString()) + "1Empty\")}\n");
+                sdf.append("    \"." + p.getSort() + "\" -> " + StringUtil.escapeSort(p.getSort()));
+                sdf.append(" {cons(\"" + StringUtil.escapeSort(p.getSort()) + "1Empty\")}\n");
             } else if (p.containsAttribute("bracket")) {
                 // don't add bracket attributes added by the user
             } else {
@@ -152,44 +152,44 @@ public class DefinitionSDF {
                         NonTerminal srt = (NonTerminal) itm;
                         // if we are on the first or last place and this sort is not a list, just print the sort
                         if (i == 0 || i == items.size() - 1) {
-                            sdf.append(StringUtil.escapeSortName(srt.toString()) + " ");
+                            sdf.append(StringUtil.escapeSort(srt) + " ");
                         } else {
                             // if this sort should be inserted to avoid the priority filter, then add it to the list
                             psdfv.insertSorts.add(srt);
                             String tempstr = srt.toString();
                             if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
                                 tempstr = "Bag";
-                            sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+                            sdf.append("InsertDz" + StringUtil.escapeSort(tempstr) + " ");
                         }
                     }
                 }
-                sdf.append("-> " + StringUtil.escapeSortName(p.getSort().toString()));
+                sdf.append("-> " + StringUtil.escapeSort(p.getSort()));
                 sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
             }
         }
         for (NonTerminal ss : psdfv.insertSorts)
-            sdf.append("    " + StringUtil.escapeSortName(ss.toString()) + "    -> InsertDz" + StringUtil.escapeSortName(ss.toString()) + "\n");
+            sdf.append("    " + StringUtil.escapeSort(ss) + "    -> InsertDz" + StringUtil.escapeSort(ss) + "\n");
 
         sdf.append("\n\n");
 
         // print variables, HOLEs, cast
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    VARID  \":" + s.toString() + "\"        -> " + StringUtil.escapeSortName(s.toString()) + "DzVar            {cons(\"" + StringUtil.escapeSortName(s.toString()) + "12Var\")}\n");
-                sdf.append("    VARID  \":" + s.toString() + "{\" TagListDz \"}\"        -> " + StringUtil.escapeSortName(s.toString()) + "DzVar            {cons(\"" + StringUtil.escapeSortName(s.toString()) + "12VarAttr\")}\n");
+                sdf.append("    VARID  \":" + s.toString() + "\"        -> " + StringUtil.escapeSort(s) + "DzVar            {cons(\"" + StringUtil.escapeSort(s) + "12Var\")}\n");
+                sdf.append("    VARID  \":" + s.toString() + "{\" TagListDz \"}\"        -> " + StringUtil.escapeSort(s) + "DzVar            {cons(\"" + StringUtil.escapeSort(s) + "12VarAttr\")}\n");
             }
         }
         // print variables, cast
         sdf.append("\n");
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("     K CastTypeDz \"" + s.toString() + "\"    -> VariableDz    {cons(\"" + StringUtil.escapeSortName(s.toString()) + "1Cast\")}\n");
-                sdf.append("     K CastTypeDz \"" + s.toString() + "{\" TagListDz \"}\"    -> VariableDz    {cons(\"" + StringUtil.escapeSortName(s.toString()) + "1CastAttr\")}\n");
+                sdf.append("     K CastTypeDz \"" + s.toString() + "\"    -> VariableDz    {cons(\"" + StringUtil.escapeSort(s) + "1Cast\")}\n");
+                sdf.append("     K CastTypeDz \"" + s.toString() + "{\" TagListDz \"}\"    -> VariableDz    {cons(\"" + StringUtil.escapeSort(s) + "1CastAttr\")}\n");
             }
         }
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("     " + StringUtil.escapeSortName(s.toString()) + "DzVar   -> " + StringUtil.escapeSortName(s.toString()) + "\n");
+                sdf.append("     " + StringUtil.escapeSort(s) + "DzVar   -> " + StringUtil.escapeSort(s) + "\n");
             }
         }
         sdf.append("     K CastTypeDz \"K\"                         -> VariableDz    {cons(\"K1Cast\")}\n");
@@ -202,7 +202,7 @@ public class DefinitionSDF {
 
         sdf.append("\n\n");
         for (Sort sort : psdfv.constantSorts) {
-            String s = StringUtil.escapeSortName(sort.toString());
+            String s = StringUtil.escapeSort(sort);
             sdf.append("    Dz" + s + "        -> " + s + "    {cons(\"" + s + "1Const\")}\n");
         }
 
@@ -217,14 +217,14 @@ public class DefinitionSDF {
         sdf.append("context-free restrictions\n");
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
-                sdf.append("    " + StringUtil.escapeSortName(s.toString()) + "DzVar -/- [a-zA-Z0-9]\n");
+                sdf.append("    " + StringUtil.escapeSort(s) + "DzVar -/- [a-zA-Z0-9]\n");
             }
         }
         sdf.append("    VariableDz -/- [a-zA-Z0-9]\n");
 
         sdf.append("lexical syntax\n");
         for (Production p : psdfv.constants) {
-            sdf.append("    " + p.getItems().get(0) + " -> Dz" + StringUtil.escapeSortName(p.getSort().toString()) + "\n");
+            sdf.append("    " + p.getItems().get(0) + " -> Dz" + StringUtil.escapeSort(p.getSort()) + "\n");
         }
 
         sdf.append("\n\n%% sort predicates\n");
@@ -260,11 +260,11 @@ public class DefinitionSDF {
 
         // lexical rules
         sdf.append("lexical syntax\n");
-        java.util.Set<String> lexerSorts = new HashSet<String>();
+        java.util.Set<Sort> lexerSorts = new HashSet<>();
         for (Production p : psdfv.lexical) {
             Lexical l = (Lexical) p.getItems().get(0);
-            lexerSorts.add(p.getSort().toString());
-            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort().toString()) + "Dz\n");
+            lexerSorts.add(p.getSort());
+            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSort(p.getSort()) + "Dz\n");
             if (l.getFollow() != null && !l.getFollow().equals("")) {
                 psdfv.restrictions.add(new Restrictions(new NonTerminal(p.getSort()), null, l.getFollow()));
             }
@@ -276,13 +276,13 @@ public class DefinitionSDF {
                     for (Terminal t : terminals.terminals) {
                         Matcher m = pat.matcher(t.getTerminal());
                         if (m.matches())
-                            sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSortName(p.getSort().toString()) + "Dz {reject}\n");
+                            sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSort(p.getSort()) + "Dz {reject}\n");
                     }
                 } else {
                     // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
                     // add rejects for all possible combinations
                     for (Terminal t : terminals.terminals) {
-                        sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSortName(p.getSort().toString()) + "Dz {reject}\n");
+                        sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSort(p.getSort()) + "Dz {reject}\n");
                     }
                 }
             }
@@ -290,8 +290,8 @@ public class DefinitionSDF {
 
         // adding cons over lexical rules
         sdf.append("context-free syntax\n");
-        for (String s : lexerSorts) {
-            sdf.append("    " + StringUtil.escapeSortName(s) + "Dz -> " + StringUtil.escapeSortName(s) + " {cons(\"" + StringUtil.escapeSortName(s) + "1Const\")}\n");
+        for (Sort s : lexerSorts) {
+            sdf.append("    " + StringUtil.escapeSort(s) + "Dz -> " + StringUtil.escapeSort(s) + " {cons(\"" + StringUtil.escapeSort(s) + "1Const\")}\n");
         }
         sdf.append("\n\n");
 
@@ -301,7 +301,7 @@ public class DefinitionSDF {
             if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
                 sdf.append("    " + r.getTerminal().toString() + " -/- " + r.getPattern() + "\n");
             else
-                sdf.append("    " + StringUtil.escapeSortName(r.getSort().toString()) + " -/- " + r.getPattern() + "\n");
+                sdf.append("    " + StringUtil.escapeSort(r.getNonTerminal()) + " -/- " + r.getPattern() + "\n");
         }
 
         return sdf;

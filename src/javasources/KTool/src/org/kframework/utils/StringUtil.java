@@ -4,6 +4,8 @@ package org.kframework.utils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.beust.jcommander.JCommander;
+import org.kframework.kil.NonTerminal;
+import org.kframework.kil.Sort;
 
 public class StringUtil {
     /**
@@ -371,7 +373,30 @@ public class StringUtil {
         }
     }
 
-    public static String escapeSortName(String str) {
+    /**
+     * Creates an SDF safe representation of a Sort name.
+     * @param nonTerminal String representation of the sort.
+     * @return textual representation of the Sort name.
+     */
+    public static String escapeSort(NonTerminal nonTerminal) {
+        return escapeSort(nonTerminal.getSort());
+    }
+
+    /**
+     * Creates an SDF safe representation of a Sort name.
+     * @param sort String representation of the sort.
+     * @return textual representation of the Sort name.
+     */
+    public static String escapeSort(Sort sort) {
+        return escapeSort(sort.toString());
+    }
+
+    /**
+     * Creates an SDF safe representation of a Sort name.
+     * @param str String representation of the sort.
+     * @return textual representation of the Sort name.
+     */
+    public static String escapeSort(String str) {
         str = str.replace("D", "Dd");
         str = str.replace("#", "Dz");
         return str;

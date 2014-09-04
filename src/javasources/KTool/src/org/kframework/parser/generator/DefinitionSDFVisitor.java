@@ -117,7 +117,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                 } else if (prd.isSubsort()) {
                     if (!prd.getSort().equals(Sort.KRESULT)) { // avoid KResult because it breaks subsortings in SDF
                         p.getProductions().add(prd);
-                        subsorts.add(new Subsort(prd.getSort().getName(), ((NonTerminal) prd.getItems().get(0)).getName()));
+                        subsorts.add(new Subsort(prd.getSort(), ((NonTerminal) prd.getItems().get(0)).getSort()));
                         // add the small sort to the user sorts to add it to the variable declarations
                         userSorts.add((NonTerminal) prd.getItems().get(0));
                     }
@@ -129,7 +129,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                 } else if (prd.isListDecl()) {
                     outsides.add(prd);
                     listProds.add(prd);
-                    subsorts.add(new Subsort(prd.getSort().getName(), ((UserList) prd.getItems().get(0)).getSort().getName()));
+                    subsorts.add(new Subsort(prd.getSort(), ((UserList) prd.getItems().get(0)).getSort()));
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -175,18 +175,18 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                                 NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
-                                    sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+                                    sdf.append(StringUtil.escapeSort(srt) + " ");
                                 } else {
                                     // if this sort should be inserted to avoid the priority filter, then add it to the list
                                     insertSorts.add(srt);
-                                    String tempstr = srt.getName();
+                                    String tempstr = srt.toString();
                                     if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
                                         tempstr = "Bag";
-                                    sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+                                    sdf.append("InsertDz" + StringUtil.escapeSort(tempstr) + " ");
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
+                        sdf.append("-> " + StringUtil.escapeSort(p.getSort()));
                         sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
                     }
                     sdf.append("} > ");

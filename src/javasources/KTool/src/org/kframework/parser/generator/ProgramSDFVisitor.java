@@ -161,18 +161,18 @@ public class ProgramSDFVisitor extends BasicVisitor {
                                 NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
-                                    sdf.append(StringUtil.escapeSortName(srt.toString()) + " ");
+                                    sdf.append(StringUtil.escapeSort(srt) + " ");
                                 } else {
                                     // if this sort should be inserted to avoid the priority filter, then add it to the list
                                     insertSorts.add(srt.getSort());
                                     String tempstr = srt.toString();
                                     if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
                                         tempstr = "Bag";
-                                    sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+                                    sdf.append("InsertDz" + StringUtil.escapeSort(tempstr) + " ");
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().toString()));
+                        sdf.append("-> " + StringUtil.escapeSort(p.getSort()));
                         sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
                     }
                     sdf.append("} > ");
