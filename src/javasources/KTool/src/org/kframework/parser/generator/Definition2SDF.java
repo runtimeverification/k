@@ -73,7 +73,7 @@ public class Definition2SDF {
         for (NonTerminal s : psdfv.userSorts) {
             if (!s.getSort().isBaseSort()) {
                 sdf.append("    K -> " + StringUtil.escapeSort(s));
-                 sdf.append(" {cons(\"" + StringUtil.escapeSort(s) + "12K\")}");
+                // sdf.append(" {cons(\"" + StringUtil.escapeSort(s) + "12K\")}");
                 sdf.append("\n");
             }
         }
