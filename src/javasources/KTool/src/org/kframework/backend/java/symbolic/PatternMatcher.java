@@ -246,19 +246,7 @@ public class PatternMatcher extends AbstractMatcher {
                     // TODO(YilongL): in the future, we may have to accumulate
                     // the substitution obtained from evaluating the side
                     // condition
-//                    sw.reset(); sw.start();
                     Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
-//                    sw.stop();
-//                    System.out.println(require + " : " + sw/* + "\t\t\t\t\t\t" + crntSubst*/);
-//                    if (require.toString().startsWith("isKResult")) {
-//                        Term term = ((KList) ((KItem) require).kList()).get(0);
-////                        sw2.reset();
-//                        sw2.start();
-//                        Term evalReq = context.definition().subsorts().isSubsortedEq(Sort.KRESULT, crntSubst.get(term).sort()) ? BoolToken.TRUE : BoolToken.FALSE;
-//                        sw2.stop();
-//                        System.out.println(require + " : " + sw2/* + "\t\t\t\t\t\t" + crntSubst*/);
-//                        assert evalReq.equals(evaluatedReq);
-//                    }
                     if (!evaluatedReq.equals(BoolToken.TRUE)) {
                         crntSubst = null;
                         break;
@@ -1008,7 +996,7 @@ public class PatternMatcher extends AbstractMatcher {
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
-                kList = new KList(terms);
+                kList = KList.concatenate(terms);
             }
         }
         match(kList, patternKItem.kList());

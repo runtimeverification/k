@@ -211,43 +211,31 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KList kList) {
-        List<Term> items = transformList(kList.getContents());
-
-        if (kList.hasFrame()) {
-            Variable frame;
-            Term transformedFrame = (Term) kList.frame().accept(this);
-
-            if (transformedFrame.kind() == Kind.KLIST) {
-                if (transformedFrame instanceof KList) {
-                    if (items == kList.getContents()) {
-                        items = new ArrayList<>(items);
-                    }
-                    items.addAll(((KList) transformedFrame).getContents());
-                    frame = ((KList) transformedFrame).hasFrame() ?
-                            ((KList) transformedFrame).frame() : null;
-                } else {
-                    frame = (Variable) transformedFrame;
-                }
-            } else {
-                assert transformedFrame.kind() == Kind.KITEM || transformedFrame.kind() == Kind.K;
-
-                if (items == kList.getContents()) {
-                    items = new ArrayList<>(items);
-                }
-                items.add(transformedFrame);
-                frame = null;
+        boolean changed = false;
+        // transform the contents
+        KList.Builder builder = KList.builder();
+        for (Term term : kList) {
+            Term transformedTerm = (Term) term.accept(this);
+            if (transformedTerm != term) {
+                changed = true;
             }
-
-            if (items != kList.getContents() || frame != kList.frame()) {
-                kList = new KList(items, frame);
-            }
-        } else {
-            if (items != kList.getContents()) {
-                kList = new KList(items);
-            }
+            builder.concatenate(transformedTerm);
         }
 
-        return kList;
+        if (kList.hasFrame()) {
+            Variable frame = kList.frame();
+            Term transformedFrame = (Term) frame.accept(this);
+            if (transformedFrame != frame) {
+                changed = true;
+            }
+            builder.concatenate(transformedFrame);
+        }
+
+        if (!changed) {
+            return kList;
+        } else {
+            return builder.build();
+        }
     }
 
     @Override
@@ -263,10 +251,9 @@ public class CopyOnWriteTransformer implements Transformer {
             builder.concatenate(transformedTerm);
         }
 
-        Term transformedFrame = null;
         if (kSequence.hasFrame()) {
             Variable frame = kSequence.frame();
-            transformedFrame = (Term) frame.accept(this);
+            Term transformedFrame = (Term) frame.accept(this);
             if (transformedFrame != frame) {
                 changed = true;
             }
@@ -611,30 +598,6 @@ public class CopyOnWriteTransformer implements Transformer {
             return BuiltinMgu.of(transformedConstraint, context);
         } else {
             return mgu;
-        }
-    }
-
-    protected List<Term> transformList(List<Term> list) {
-        // TODO(YilongL): avoid using index number to traverse the list, there
-        // is no guarantee that the underlying list is a random access list
-        ArrayList<Term> transformedList = null;
-        for (int index = 0; index < list.size(); ++index) {
-            Term transformedTerm = (Term) list.get(index).accept(this);
-            if (transformedList != null) {
-                transformedList.add(transformedTerm);
-            } else if (transformedTerm != list.get(index)) {
-                transformedList = new ArrayList<Term>(list.size());
-                for (int copyIndex = 0; copyIndex < index; ++copyIndex) {
-                    transformedList.add(list.get(copyIndex));
-                }
-                transformedList.add(transformedTerm);
-            }
-        }
-
-        if (transformedList != null) {
-            return transformedList;
-        } else {
-            return list;
         }
     }
 

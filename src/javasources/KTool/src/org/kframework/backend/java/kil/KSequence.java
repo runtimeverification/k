@@ -37,7 +37,7 @@ public class KSequence extends KCollection {
     private final ImmutableList<Term> contents;
 
     /**
-     * List of variables of sort K in contents.
+     * List of variables of sort K in {@link KSequence#contents}.
      */
     private final ImmutableList<Variable> kSequenceVariables;
 
@@ -160,9 +160,7 @@ public class KSequence extends KCollection {
             if (term instanceof KSequence) {
                 KSequence kseq = (KSequence) term;
                 contentsBuilder.addAll(kseq.contents);
-                if (kseq.hasFrame()) {
-                    frame = kseq.frame;
-                }
+                frame = kseq.frame;
             } else if (term instanceof Variable) {
                 assert term.sort().equals(Sort.KSEQUENCE) || term.kind().equals(Kind.KITEM);
                 if (term.sort().equals(Sort.KSEQUENCE)) {
@@ -180,6 +178,9 @@ public class KSequence extends KCollection {
             }
         }
 
+        /**
+         * Returns a newly-created canonicalized KSequence based on the contents of the builder.
+         */
         public Term build() {
             ImmutableList<Term> contents = contentsBuilder.build();
             if (contents.isEmpty()) {

@@ -69,7 +69,7 @@ public class BuiltinVisitorOperations {
             visitParams.set(0, term);
             term = KItem.of(
                     visitLabel,
-                    new KList(visitParams),
+                    KList.concatenate(visitParams),
                     context);
             return term.evaluate(context);
         }
@@ -78,7 +78,7 @@ public class BuiltinVisitorOperations {
             ifParams.set(0, term);
             KItem test = KItem.of(
                     ifLabel,
-                    new KList(ifParams),
+                    KList.concatenate(ifParams),
                     context);
             // TODO: Think about what happens when test has symbolic values in it.
             return test.evaluate(context) == BoolToken.TRUE;

@@ -27,64 +27,74 @@ import com.google.common.collect.ImmutableList;
  *
  * @author AndreiS
  */
-@SuppressWarnings("serial")
 public class KList extends KCollection {
 
     private static final String SEPARATOR_NAME = ",, ";
     private static final String IDENTITY_NAME = "." + Kind.KLIST;
-    public static final KList EMPTY = new KList((Variable) null);
+    public static final KList EMPTY = new KList(ImmutableList.<Term>of(), null, ImmutableList.<Variable>of());
 
     /**
      * A list of {@code Term}s contained in this {@code KList}.
      */
-    private ImmutableList<Term> contents;
-
-    private Sort sort;
-
-    public KList(List<Term> items, Variable frame) {
-        super(frame, Kind.KLIST);
-
-        ImmutableList.Builder<Term> normalizedItemsBuilder = ImmutableList.builder();
-        for (Term term : items) {
-            // TODO (AndreiS): fix KItem projection
-            if (!(term instanceof Variable) && !(term instanceof KItemProjection) && (term.kind() == kind)) {
-                assert term instanceof KList :
-                    "associative use of KList(" + items + ", " + frame + ")";
-
-                KList kList = (KList) term;
-
-                assert !kList.hasFrame() : "associative use of KCollection";
-
-                normalizedItemsBuilder.addAll(kList.contents);
-            } else {
-                normalizedItemsBuilder.add(term);
-            }
-        }
-        this.contents = normalizedItemsBuilder.build();
-    }
-
-    public KList(List<Term> items) {
-        this(items, null);
-    }
-
-    public KList(Variable frame) {
-        super(frame, Kind.KLIST);
-        this.contents = ImmutableList.of();
-    }
+    private final ImmutableList<Term> contents;
 
     /**
-     * Private constructor only used for building KList fragment.
-     * @param contents
-     * @param frame
+     * List of variables of sort KList in {@link KList#contents}.
      */
-    private KList(ImmutableList<Term> contents, Variable frame) {
+    private final ImmutableList<Variable> kListVariables;
+
+    /**
+     * Builds a single-element KList based on the given term. This method is
+     * necessary in addition to the {@code Builder} because the {@code Builder}
+     * will canonicalize its result and, thus, simply return the given term.
+     */
+    public static KList singleton(Term term) {
+        assert term.kind().equals(Kind.K) || term.kind.equals(Kind.KITEM);
+        return new KList(ImmutableList.of(term), null, ImmutableList.<Variable>of());
+    }
+
+    public static Term concatenate(Term... terms) {
+        Builder builder = builder();
+        for (Term term : terms) {
+            builder.concatenate(term);
+        }
+        return builder.build();
+    }
+
+    public static Term concatenate(List<Term> terms) {
+        Builder builder = builder();
+        for (Term term : terms) {
+            builder.concatenate(term);
+        }
+        return builder.build();
+    }
+
+    private KList(ImmutableList<Term> contents, Variable frame, ImmutableList<Variable> kListVariables) {
         super(frame, Kind.KLIST);
         this.contents = contents;
+        this.kListVariables = kListVariables;
     }
 
     @Override
-    public KCollection fragment(int fromIndex) {
-        return new KList(contents.subList(fromIndex, contents.size()), frame);
+    public Term fragment(int fromIndex) {
+        if (fromIndex == contents.size()) {
+            return hasFrame() ? frame : EMPTY;
+        } else {
+            if (kListVariables.isEmpty()) {
+                return new KList(contents.subList(fromIndex, contents.size()), frame, kListVariables);
+            } else {
+                /* YilongL: this case should never happen in practice because
+                 * this method should only be called by KList on the LHS */
+                int idx = 0;
+                for (int i = 0; i < fromIndex; i++) {
+                    if (contents.get(i) == kListVariables.get(idx)) {
+                        idx++;
+                    }
+                }
+                return new KList(contents.subList(fromIndex, contents.size()),
+                        frame, kListVariables.subList(idx, kListVariables.size()));
+            }
+        }
     }
 
     @Override
@@ -94,18 +104,12 @@ public class KList extends KCollection {
 
     @Override
     public final boolean isConcreteCollection() {
-        // TODO(YilongL): fix it
-        return !hasFrame();
+        return !hasFrame() && kListVariables.isEmpty();
     }
 
     @Override
     public Sort sort() {
-        if (sort != null) {
-            return sort;
-        }
-
-        sort = concreteSize() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KSEQUENCE;
-        return sort;
+        return concreteSize() == 1 && !hasFrame() ? contents.get(0).sort() : Sort.KLIST;
     }
 
     @Override
@@ -152,4 +156,61 @@ public class KList extends KCollection {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private final ImmutableList.Builder<Term> contentsBuilder = ImmutableList.builder();
+
+        private final ImmutableList.Builder<Variable> variablesBuilder = ImmutableList.builder();
+
+        private Variable frame = null;
+
+        public void concatenate(Term term) {
+            if (frame != null && !term.equals(EMPTY)) {
+                contentsBuilder.add(frame);
+                variablesBuilder.add(frame);
+                frame = null;
+            }
+
+            if (term instanceof KList) {
+                KList kList = (KList) term;
+                contentsBuilder.addAll(kList.contents);
+                frame = kList.frame;
+            } else if (term instanceof Variable) {
+                assert term.sort().equals(Sort.KLIST) || term.kind().equals(Kind.KITEM) || term.kind().equals(Kind.K);
+                if (term.sort().equals(Sort.KLIST)) {
+                    frame = (Variable) term;
+                } else {
+                    contentsBuilder.add(term);
+                }
+            } else if (term.kind().equals(Kind.KITEM) || term.kind().equals(Kind.K)) {
+                contentsBuilder.add(term);
+            } else if (term instanceof KItemProjection) {
+                // TODO(AndreiS): fix KItem projection
+                contentsBuilder.add(term);
+            } else {
+                assert false : "unexpected concatenated term" + term;
+            }
+        }
+
+        /**
+         * Returns a newly-created canonicalized KList based on the contents of the builder.
+         */
+        public Term build() {
+            ImmutableList<Term> contents = contentsBuilder.build();
+            if (contents.isEmpty()) {
+                return frame == null ? EMPTY : frame;
+            } else if (contents.size() == 1 && frame == null) {
+                return contents.get(0);
+            } else {
+                return new KList(contents, frame, variablesBuilder.build());
+            }
+        }
+
+    }
+
 }

@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
@@ -333,8 +332,8 @@ public class SymbolicUnifier extends AbstractUnifier {
         for (KItem pattern : patterns) {
             for (KItem otherPattern : otherPatterns) {
                 if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
-                    ImmutableList<Term> patternOutput = pattern.getPatternOutput();
-                    ImmutableList<Term> otherPatternOutput = otherPattern.getPatternOutput();
+                    List<Term> patternOutput = pattern.getPatternOutput();
+                    List<Term> otherPatternOutput = otherPattern.getPatternOutput();
                     for (int i = 0; i < patternOutput.size(); ++i) {
                         unify(patternOutput.get(i), otherPatternOutput.get(i));
                     }
@@ -893,7 +892,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
-                kList = new KList(terms);
+                kList = KList.concatenate(terms);
             }
         }
         unify(kList, patternKItem.kList());

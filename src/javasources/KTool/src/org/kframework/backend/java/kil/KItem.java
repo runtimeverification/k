@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
@@ -69,7 +68,8 @@ public final class KItem extends Term {
     private Boolean anywhereApplicable = null;
 
     public static KItem of(Term kLabel, Term kList, TermContext termContext) {
-        // TODO(AndreiS): remove defensive coding
+        /* YilongL: since KList.Builder always canonicalizes its result, the
+         * following conversion is necessary */
         kList = KCollection.upKind(kList, Kind.KLIST);
 
         if (kLabel instanceof KLabelConstant) {
@@ -596,11 +596,11 @@ public final class KItem extends Term {
         KList kList = (KList) kList();
 
         List<ConstrainedTerm> results = new ArrayList<>();
-        KList inputKList = new KList(getPatternInput());
-        KList outputKList = new KList(getPatternOutput());
+        Term inputKList = KList.concatenate(getPatternInput());
+        Term outputKList = KList.concatenate(getPatternOutput());
         for (Rule rule : context.definition().patternRules().get(kLabel)) {
-            KList ruleInputKList = new KList(((KItem) rule.leftHandSide()).getPatternInput());
-            KList ruleOutputKList = new KList(((KItem) rule.leftHandSide()).getPatternOutput());
+            Term ruleInputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternInput());
+            Term ruleOutputKList = KList.concatenate(((KItem) rule.leftHandSide()).getPatternOutput());
             SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
             unificationConstraint.add(inputKList, ruleInputKList);
             unificationConstraint.simplify();
@@ -651,19 +651,18 @@ public final class KItem extends Term {
         }
     }
 
-    public ImmutableList<Term> getPatternInput() {
+    public List<Term> getPatternInput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
         int inputCount = Integer.parseInt(
                 ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
-        return ImmutableList.copyOf(((KList) kList).getContents()).subList(0, inputCount);
+        return ((KList) kList).getContents().subList(0, inputCount);
     }
 
-    public ImmutableList<Term> getPatternOutput() {
+    public List<Term> getPatternOutput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
         int inputCount = Integer.parseInt(
                 ((KLabelConstant) kLabel).productions().get(0).getAttribute(Attribute.PATTERN_KEY));
-        return ImmutableList.copyOf(((KList) kList).getContents())
-                .subList(inputCount, ((KList) kList).getContents().size());
+        return ((KList) kList).getContents().subList(inputCount, ((KList) kList).getContents().size());
     }
 
     /**

@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.*;
@@ -114,8 +113,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
                         termList.set(idx, resultBindingExp);
                     }
 
-                    kList = new KList(ImmutableList.copyOf(termList));
-                    kItem = KItem.of(kLabel, kList, context);
+                    kItem = KItem.of(kLabel, KList.concatenate(termList), context);
                     return new DoneTransforming(kItem);
                 }
             }

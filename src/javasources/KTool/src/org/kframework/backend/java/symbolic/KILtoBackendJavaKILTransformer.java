@@ -160,7 +160,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Term kLabel = (Term) this.visitNode(node.getLabel());
         Term kList = (Term) this.visitNode(node.getChild());
         if (kList instanceof Variable) {
-            kList = new KList((Variable) kList);
+            kList = kList.sort().equals(Sort.KLIST) ? kList : KList.singleton(kList);
         }
         return KItem.of(kLabel, kList, TermContext.of(globalContext));
     }
@@ -242,12 +242,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             variable = (Variable) this.visitNode(list.remove(list.size() - 1));
         }
 
-        List<Term> items = Lists.newArrayListWithCapacity(list.size());
+        KList.Builder builder = KList.builder();
         for (org.kframework.kil.Term term : list) {
-            items.add((Term) this.visitNode(term));
+            builder.concatenate((Term) this.visitNode(term));
+        }
+        if (variable != null) {
+            builder.concatenate(variable);
         }
 
-        return new KList(items, variable);
+        return builder.build();
     }
 
     @Override
