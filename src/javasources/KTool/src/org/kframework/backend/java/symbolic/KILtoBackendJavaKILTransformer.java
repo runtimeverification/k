@@ -66,12 +66,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.beust.jcommander.internal.Sets;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 
@@ -256,15 +253,18 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(org.kframework.kil.Cell node, Void _)  {
         if (node.getContents() instanceof org.kframework.kil.Bag) {
-            CellCollection cellCollection = (CellCollection) this.visitNode(node.getContents());
-            return new Cell<CellCollection>(CellLabel.of(node.getLabel()), cellCollection);
+            Term contents = (Term) this.visitNode(node.getContents());
+            if (contents instanceof CellCollection) {
+                return new Cell<CellCollection>(CellLabel.of(node.getLabel()), (CellCollection) contents);
+            } else if (contents instanceof Cell) {
+                return new Cell<Cell<?>>(CellLabel.of(node.getLabel()), (Cell<?>) contents);
+            } else if (contents instanceof Variable) {
+                return new Cell<Variable>(CellLabel.of(node.getLabel()), (Variable) contents);
+            } else {
+                throw new RuntimeException();
+            }
         } else if (node.getContents() instanceof org.kframework.kil.Cell) {
-            Multimap<CellLabel, Cell> cells = ArrayListMultimap.create();
-            Cell<?> cell = (Cell<?>) this.visitNode(node.getContents());
-            cells.put(cell.getLabel(), cell);
-
-            return new Cell<CellCollection>(CellLabel.of(node.getLabel()),
-                    new CellCollection(cells, context));
+            return new Cell<Cell<?>>(CellLabel.of(node.getLabel()), (Cell<?>) this.visitNode(node.getContents()));
         } else {
             Term content = (Term) this.visitNode(node.getContents());
 
@@ -306,24 +306,23 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         org.kframework.kil.Bag.flatten(contents,
                 node.getContents());
 
-        Multimap<CellLabel, Cell> cells = ArrayListMultimap.create();
-        List<Variable> baseTerms = Lists.newArrayList();
+        CellCollection.Builder builder = CellCollection.builder(context);
         for (org.kframework.kil.Term term : contents) {
             if (term instanceof TermComment) {
                 continue;
             }
             if (term instanceof org.kframework.kil.Cell) {
                 Cell<?> cell = (Cell<?>) this.visitNode(term);
-                cells.put(cell.getLabel(), cell);
+                builder.add(cell);
             } else if (term instanceof org.kframework.kil.Variable
                     && (term.getSort().equals(org.kframework.kil.Sort.BAG))) {
-                baseTerms.add((Variable) this.visitNode(term));
+                builder.concatenate((Variable) this.visitNode(term));
             } else {
                 throw new RuntimeException();
             }
         }
 
-        return new CellCollection(cells, baseTerms, context);
+        return builder.build();
     }
 
     @Override

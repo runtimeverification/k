@@ -50,7 +50,7 @@ public class IndexingCellsCollector extends BottomUpVisitor {
             indexingCells.add(cell);
         };
 
-        if (cell.contentKind() == Kind.CELL_COLLECTION) {
+        if (cell.contentKind().isStructural()) {
             super.visit(cell);
         }
     }

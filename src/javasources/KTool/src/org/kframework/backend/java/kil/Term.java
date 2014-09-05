@@ -46,7 +46,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
             public void visit(Cell cell) {
                 if (cell.getLabel().equals(CellLabel.K)) {
                     indexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
-                } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
+                } else if (cell.contentKind().isStructural()) {
                     super.visit(cell);
                 }
             }

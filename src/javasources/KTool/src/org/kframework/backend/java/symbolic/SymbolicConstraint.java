@@ -686,12 +686,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private boolean checkKindMisMatch(Term leftHandSide, Term rightHandSide) {
         return leftHandSide.kind() == rightHandSide.kind()
-                || ((leftHandSide.kind() == Kind.KITEM
-                        || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) && (rightHandSide
-                        .kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide
-                        .kind() == Kind.KLIST))
-                || ((leftHandSide.kind() == Kind.CELL || leftHandSide.kind() == Kind.CELL_COLLECTION) && (rightHandSide
-                        .kind() == Kind.CELL || rightHandSide.kind() == Kind.CELL_COLLECTION));
+                || (leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational())
+                || (leftHandSide.kind().isStructural() && rightHandSide.kind().isStructural());
     }
 
     /**

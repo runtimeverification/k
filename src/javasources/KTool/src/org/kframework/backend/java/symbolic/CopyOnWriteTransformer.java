@@ -11,10 +11,6 @@ import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-
 
 /**
  * Performs transformation in post-order using a copy-on-write(COW) strategy.
@@ -58,44 +54,18 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean changed = false;
-        Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
-        for (Map.Entry<CellLabel, Cell> entry : cellCollection.cellMap().entries()) {
-            Cell<?> cell = (Cell<?>) entry.getValue().accept(this);
-            cellMap.put(entry.getKey(), cell);
-            changed = changed || cell != entry.getValue();
+        CellCollection.Builder builder = CellCollection.builder(context.definition().context());
+        for (Cell<?> cell : cellCollection.cellMap().values()) {
+            Cell<?> transformedCell = (Cell<?>) cell.accept(this);
+            builder.add(transformedCell);
+            changed = changed || cell != transformedCell;
         }
-        if (!changed) {
-            cellMap = cellCollection.cellMap();
+        for (Term term : cellCollection.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            builder.concatenate(transformedTerm);
+            changed = changed || term != transformedTerm;
         }
-
-        // starting from now, !changed <=> cellMap == cellCollection.cellMap()
-        List<Variable> transformedBaseTerms = Lists.newArrayList();
-        for (Variable variable : cellCollection.baseTerms()) {
-            Term transformedBaseTerm = (Term) variable.accept(this);
-            if (transformedBaseTerm instanceof CellCollection) {
-                if (!changed) {
-                    cellMap = ArrayListMultimap.create(cellCollection.cellMap());
-                    changed = true;
-                }
-
-                CellCollection transformedCellCollection = (CellCollection) transformedBaseTerm;
-                cellMap.putAll(transformedCellCollection.cellMap());
-                transformedBaseTerms.addAll(transformedCellCollection.baseTerms());
-            } else if (transformedBaseTerm instanceof Cell) {
-                if (!changed) {
-                    cellMap = ArrayListMultimap.create(cellCollection.cellMap());
-                    changed = true;
-                }
-
-                Cell<?> transformedCell = (Cell<?>) transformedBaseTerm;
-                cellMap.put(transformedCell.getLabel(), transformedCell);
-            } else {
-                changed = changed || variable != transformedBaseTerm;
-                transformedBaseTerms.add((Variable) transformedBaseTerm);
-            }
-        }
-
-        return changed ? new CellCollection(cellMap, transformedBaseTerms, definition.context()) : cellCollection;
+        return changed ? builder.build() : cellCollection;
     }
 
     @Override

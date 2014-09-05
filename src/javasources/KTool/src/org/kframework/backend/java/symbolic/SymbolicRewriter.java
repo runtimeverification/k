@@ -167,9 +167,7 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
                 leftHandSideConstraint.addAll(rule.requires());
 
-                CellCollection newTemp = new CellCollection();
-
-                newTemp.cellMap().put(((Cell<Term>)rule.leftHandSide()).getLabel(), (Cell<Term>)rule.leftHandSide());
+                CellCollection newTemp = CellCollection.singleton((Cell<Term>)rule.leftHandSide(), definition.context());
 
                 Cell<Term> newRuleTerm = new Cell<Term>(CellLabel.GENERATED_TOP, newTemp);
 
