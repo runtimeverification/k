@@ -164,18 +164,17 @@ public class MaudeFilter extends BackendFilter {
                     // ignore K constants declarations
                 } else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof UserList)) {
                     // user declared lists case
-                    UserList list = (UserList) p.getItems().get(0);
-                    if (!separators.contains(list.getSeparator())) {
-                        result.append("op _");
-                        result.append(StringUtil.escapeMaude(list.getSeparator()));
-                        result.append("_ : K K -> K [prec 120 metadata \"");
+                    if (!separators.contains(p.getLabel())) {
+                        result.append("op ");
+                        result.append(StringUtil.escapeMaude(p.getLabel()));
+                        result.append(" : K K -> K [prec 120 metadata \"");
                         this.visitNode(p.getAttributes());
                         result.append(" hybrid=()");
                         result.append("\"] .\n");
-                        result.append("op .List`{\"");
-                        result.append(list.getSeparator());
-                        result.append("\"`} : -> K .\n");
-                        separators.add(list.getSeparator());
+                        result.append("op ");
+                        result.append(StringUtil.escapeMaude(p.getTerminatorKLabel()));
+                        result.append(" : -> K .\n");
+                        separators.add(p.getLabel());
                     }
                 } else {
                     String maudelabel = p.getLabel();
@@ -472,10 +471,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(sort);
         } else {
             Production prd = context.listProductions.get(sort);
-            UserList ul = (UserList) prd.getItems().get(0);
-            result.append(".List`{\"");
-            result.append(ul.getSeparator());
-            result.append("\"`}");
+            result.append(StringUtil.escapeMaude(prd.getTerminatorKLabel()));
         }
         return null;
     }
