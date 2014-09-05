@@ -32,18 +32,29 @@ public class KSequence extends KCollection {
 
     private static final String SEPARATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = "." + Kind.K;
-    public static final KSequence EMPTY = (KSequence) builder().build();
+    public static final KSequence EMPTY = new KSequence(ImmutableList.<Term>of(), null, ImmutableList.<Variable>of());
 
     private final ImmutableList<Term> contents;
 
+    /**
+     * List of variables of sort K in contents.
+     */
+    private final ImmutableList<Variable> kSequenceVariables;
+
+    /**
+     * Builds a single-element KSequence based on the given term. This method is
+     * necessary in addition to the {@code Builder} because the {@code Builder}
+     * will canonicalize its result and, thus, simply return the given term.
+     */
     public static KSequence singleton(Term term) {
         assert term.kind().equals(Kind.KITEM);
-        return new KSequence(ImmutableList.of(term), null);
+        return new KSequence(ImmutableList.of(term), null, ImmutableList.<Variable>of());
     }
 
-    private KSequence(ImmutableList<Term> contents, Variable frame) {
+    private KSequence(ImmutableList<Term> contents, Variable frame, ImmutableList<Variable> kSequenceVariables) {
         super(frame, Kind.K);
         this.contents = contents;
+        this.kSequenceVariables = kSequenceVariables;
     }
 
     @Override
@@ -51,13 +62,31 @@ public class KSequence extends KCollection {
         if (fromIndex == contents.size()) {
             return hasFrame() ? frame : EMPTY;
         } else {
-            return new KSequence(contents.subList(fromIndex, contents.size()), frame);
+            if (kSequenceVariables.isEmpty()) {
+                return new KSequence(contents.subList(fromIndex, contents.size()), frame, kSequenceVariables);
+            } else {
+                /* YilongL: this case should never happen in practice because
+                 * this method should only be called by KSequence on the LHS */
+                int idx = 0;
+                for (int i = 0; i < fromIndex; i++) {
+                    if (contents.get(i) == kSequenceVariables.get(idx)) {
+                        idx++;
+                    }
+                }
+                return new KSequence(contents.subList(fromIndex, contents.size()),
+                        frame, kSequenceVariables.subList(idx, kSequenceVariables.size()));
+            }
         }
     }
 
     @Override
     public List<Term> getContents() {
         return contents;
+    }
+
+    @Override
+    public final boolean isConcreteCollection() {
+        return !hasFrame() && kSequenceVariables.isEmpty();
     }
 
     @Override
@@ -117,45 +146,48 @@ public class KSequence extends KCollection {
 
     public static class Builder {
 
-        private final ImmutableList.Builder<Term> builder = ImmutableList.builder();
+        private final ImmutableList.Builder<Term> contentsBuilder = ImmutableList.builder();
+        private final ImmutableList.Builder<Variable> variablesBuilder = ImmutableList.builder();
+        private Variable frame = null;
 
         public void concatenate(Term term) {
+            if (frame != null && !term.equals(EMPTY)) {
+                contentsBuilder.add(frame);
+                variablesBuilder.add(frame);
+                frame = null;
+            }
+
             if (term instanceof KSequence) {
                 KSequence kseq = (KSequence) term;
-                builder.addAll(kseq.contents);
+                contentsBuilder.addAll(kseq.contents);
                 if (kseq.hasFrame()) {
-                    builder.add(kseq.frame);
+                    frame = kseq.frame;
                 }
             } else if (term instanceof Variable) {
                 assert term.sort().equals(Sort.KSEQUENCE) || term.kind().equals(Kind.KITEM);
-                builder.add(term);
+                if (term.sort().equals(Sort.KSEQUENCE)) {
+                    frame = (Variable) term;
+                } else {
+                    contentsBuilder.add(term);
+                }
             } else if (term.kind().equals(Kind.KITEM)) {
-                builder.add(term);
+                contentsBuilder.add(term);
             } else if (term instanceof KItemProjection) {
                 // TODO(AndreiS): fix KItem projection
-                builder.add(term);
+                contentsBuilder.add(term);
             } else {
                 assert false : "unexpected concatenated term" + term;
             }
         }
 
         public Term build() {
-            ImmutableList<Term> contents = builder.build();
-            Variable frame = null;
-            if (!contents.isEmpty()) {
-                Term lastElem = contents.get(contents.size() - 1);
-                if (lastElem instanceof Variable && lastElem.kind().equals(Kind.K)) {
-                    frame = (Variable) lastElem;
-                    contents = contents.subList(0, contents.size() - 1);
-                }
-            }
-
-            if (contents.isEmpty() && frame != null) {
-                return frame;
+            ImmutableList<Term> contents = contentsBuilder.build();
+            if (contents.isEmpty()) {
+                return frame == null ? EMPTY : frame;
             } else if (contents.size() == 1 && frame == null) {
                 return contents.get(0);
             } else {
-                return new KSequence(contents, frame);
+                return new KSequence(contents, frame, variablesBuilder.build());
             }
         }
     }

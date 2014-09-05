@@ -93,6 +93,12 @@ public class KList extends KCollection {
     }
 
     @Override
+    public final boolean isConcreteCollection() {
+        // TODO(YilongL): fix it
+        return !hasFrame();
+    }
+
+    @Override
     public Sort sort() {
         if (sort != null) {
             return sort;

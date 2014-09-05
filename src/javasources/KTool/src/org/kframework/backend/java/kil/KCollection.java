@@ -61,12 +61,6 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    public final boolean isConcreteCollection() {
-        // TODO(YilongL): this might be problematic because KSequence on the RHS can have more than one variable of sort K.
-        return !hasFrame();
-    }
-
-    @Override
     public final boolean isExactSort() {
         if (concreteSize() == 1) {
             return !hasFrame() && this.get(0).isExactSort();
