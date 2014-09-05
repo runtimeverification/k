@@ -3,18 +3,18 @@ package org.kframework.compile.utils;
 
 import org.kframework.kil.Sort;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class MaudeHelper {
 
-    public static List<String> separators = new ArrayList<String>();
     public static Set<Sort> declaredSorts = new HashSet<>();
     public static Set<String> kLabels = new HashSet<String>();
 
-    public static Set<Sort> basicSorts = new HashSet<>();
+    public static boolean isBasicSort(Sort sort) {
+        return basicSorts.contains(sort);
+    }
+    private static Set<Sort> basicSorts = new HashSet<>();
     static {
         basicSorts.add(Sort.K);
         basicSorts.add(Sort.KITEM);
@@ -46,7 +46,10 @@ public class MaudeHelper {
         basicSorts.add(Sort.BUILTIN_PROP);
     }
 
-    public static Set<Sort> constantSorts = new HashSet<>();
+    public static boolean isConstantSort(Sort sort) {
+        return constantSorts.contains(sort);
+    }
+    private static Set<Sort> constantSorts = new HashSet<>();
     static {
         constantSorts.add(Sort.BUILTIN_BOOL);
         constantSorts.add(Sort.BUILTIN_INT);
