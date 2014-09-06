@@ -464,24 +464,27 @@ public class PatternMatcher extends AbstractMatcher {
          */
 
         if (subject.kind().isComputational()) {
-            assert pattern.kind().isComputational();
+            if (!pattern.kind().isComputational()) {
+                fail(subject, pattern);
+            }
 
             subject = KCollection.upKind(subject, pattern.kind());
             pattern = KCollection.upKind(pattern, subject.kind());
         }
 
         if (subject.kind() == Kind.CELL || subject.kind() == Kind.CELL_COLLECTION) {
+            if (!pattern.kind().isStructural()) {
+                fail(subject, pattern);
+            }
+
             Context context = termContext.definition().context();
             subject = CellCollection.upKind(subject, pattern.kind(), context);
             pattern = CellCollection.upKind(pattern, subject.kind(), context);
         }
 
-        // TODO(YilongL): may need to replace the following assertion to the
-        // method fail() in the future because it crashes the Java rewrite
-        // engine instead of just failing the pattern matching process
-        assert subject.kind() == pattern.kind():
-               "kind mismatch between " + subject + " (" + subject.kind() + ")"
-               + " and " + pattern + " (" + pattern.kind() + ")";
+        if (subject.kind() != pattern.kind()) {
+            fail(subject, pattern);
+        }
 
         if (pattern instanceof Variable) {
             Variable variable = (Variable) pattern;
