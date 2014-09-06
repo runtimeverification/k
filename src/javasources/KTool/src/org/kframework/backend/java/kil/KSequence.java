@@ -135,7 +135,7 @@ public class KSequence extends KCollection {
     }
 
     @Override
-    public PStack<Term> getContents() {
+    public List<Term> getContents() {
         return contents;
     }
 

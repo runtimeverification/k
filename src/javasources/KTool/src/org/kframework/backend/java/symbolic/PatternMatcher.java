@@ -732,7 +732,7 @@ public class PatternMatcher extends AbstractMatcher {
             } else {
                 // now we know otherCellMap.isEmpty() && otherCellCollection is free of frame
                 if (cellCollection.hasFrame()
-                        || cellMap.isEmpty()
+                        || !cellMap.isEmpty()
                         || cellCollection.get(starredCellLabel).size() != otherCellCollection
                                 .get(starredCellLabel).size()) {
                     fail(cellCollection, otherCellCollection);

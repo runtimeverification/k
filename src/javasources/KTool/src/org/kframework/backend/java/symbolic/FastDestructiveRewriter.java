@@ -108,7 +108,8 @@ public class FastDestructiveRewriter extends AbstractRewriter {
                     if (ENABLE_DEBUG_MODE) {
                         referenceResults = Lists.newArrayList();
                         for (Map<Variable, Term> subst : getMatchingResults(subject, rule)) {
-                            referenceResults.add(constructNewSubjectTerm(rule, subst));
+                            Term ref = TermCanonicalizer.canonicalize(constructNewSubjectTerm(rule, subst), termContext);
+                            referenceResults.add(ref);
                         }
 
                         /* eliminate sharing of mutable terms between subject and reference results */
@@ -121,7 +122,11 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
                         /* the result of rewrite machine must be in the reference results */
                         if (ENABLE_DEBUG_MODE) {
-                            assert referenceResults.contains(subject);
+                            assert referenceResults.contains(TermCanonicalizer.canonicalize(subject, termContext));
+                        }
+                    } else {
+                        if (ENABLE_DEBUG_MODE) {
+                            assert referenceResults.isEmpty();
                         }
                     }
                     Profiler.stopTimer(Profiler.REWRITE_WITH_KOMPILED_RULES_TIMER);
