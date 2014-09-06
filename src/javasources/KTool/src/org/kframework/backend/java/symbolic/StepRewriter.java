@@ -22,7 +22,7 @@ import com.google.common.base.Stopwatch;
 public class StepRewriter {
 
     private final Collection<Rule> rules;
-    private final Stopwatch stopwatch = new Stopwatch();
+    private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private Collection<ConstrainedTerm> constrainedTermResults = new ArrayList<ConstrainedTerm>();
     private Collection<Term> termResults = new ArrayList<Term>();
     private GlobalContext globalContext;

@@ -36,9 +36,9 @@ public class SymbolicRewriter {
 
     private final Definition definition;
     private final TransitionCompositeStrategy strategy;
-    private final Stopwatch stopwatch = new Stopwatch();
+    private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private int step;
-    private final Stopwatch ruleStopwatch = new Stopwatch();
+    private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;

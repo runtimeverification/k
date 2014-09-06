@@ -64,7 +64,7 @@ public class Profiler {
 
         private final String name;
 
-        private final Stopwatch stopwatch = new Stopwatch();
+        private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
         private int count = 0;
 
