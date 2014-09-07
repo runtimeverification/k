@@ -71,8 +71,12 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         }
         assert astNode instanceof CellCollection : "preTransformer should not modify type";
         cellCollection = (CellCollection) astNode;
-        cellCollection = (CellCollection) super.transform(cellCollection);
-        return cellCollection.accept(postTransformer);
+
+        Term term = (Term) super.transform(cellCollection);
+        if (term instanceof CellCollection) {
+            term = (Term) term.accept(postTransformer);
+        }
+        return term;
     }
 
     @Override
