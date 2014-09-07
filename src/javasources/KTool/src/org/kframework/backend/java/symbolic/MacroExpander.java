@@ -7,11 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 
 
 /**
@@ -23,11 +25,8 @@ import org.kframework.backend.java.kil.TermContext;
  */
 public class MacroExpander extends TermTransformer {
 
-    private final StepRewriter rewriter;
-
     public MacroExpander(TermContext context) {
         super(context);
-        rewriter = new StepRewriter(definition.macros(), context.global);
     }
 
     public Definition processDefinition() {
@@ -118,8 +117,17 @@ public class MacroExpander extends TermTransformer {
 
     @Override
     protected Term transformTerm(Term term) {
-        Term transformedTerm = rewriter.getOneSuccessor(term);
-        return transformedTerm != null ? transformedTerm : term;
+        return applyMacroRule(term);
+    }
+
+    private Term applyMacroRule(Term term) {
+        for (Rule rule : definition.macros()) {
+            for (Map<Variable, Term> subst : PatternMatcher.patternMatch(term, rule, context)) {
+                return rule.rightHandSide().substituteAndEvaluate(subst, context);
+            }
+        }
+
+        return term;
     }
 
 }
