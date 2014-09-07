@@ -44,9 +44,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -648,8 +653,8 @@ public class PatternMatcher extends AbstractMatcher {
             }
         }
 
-        Set<CellLabel> unifiableCellLabels = new HashSet<>(cellCollection.labelSet());
-        unifiableCellLabels.retainAll(otherCellCollection.labelSet());
+        ImmutableSet<CellLabel> unifiableCellLabels = ImmutableSet.copyOf(
+                Sets.intersection(cellCollection.labelSet(), otherCellCollection.labelSet()));
         int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
         int numOfOtherDiffCellLabels = otherCellCollection.labelSet().size() - unifiableCellLabels.size();
 
@@ -697,24 +702,25 @@ public class PatternMatcher extends AbstractMatcher {
                 fail(cellCollection, otherCellCollection);
             }
 
-            for (Iterator<CellLabel> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
-                CellLabel cellLabel = iter.next();
+            ListMultimap<CellLabel, Cell> remainingCellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
+
+            CellLabel starredCellLabel = null;
+            for (CellLabel cellLabel : unifiableCellLabels) {
                 if (!termContext.definition().context().getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     match(cellCollection.get(cellLabel).iterator().next(),
                             otherCellCollection.get(cellLabel).iterator().next());
-                    iter.remove();
+                } else {
+                    assert starredCellLabel == null;
+                    starredCellLabel = cellLabel;
                 }
             }
 
-            if (unifiableCellLabels.isEmpty()) {
+            if (starredCellLabel == null) {
                 // now we have different starred-cells in subject and pattern
                 fail(cellCollection, otherCellCollection);
-            } else {
-                assert unifiableCellLabels.size() == 1;
             }
-            CellLabel starredCellLabel = unifiableCellLabels.iterator().next();
 
             if (otherCellCollection.hasFrame()) {
                 if (cellCollection.get(starredCellLabel).size() < otherCellCollection.get(starredCellLabel).size()) {
@@ -765,11 +771,7 @@ public class PatternMatcher extends AbstractMatcher {
                         builder.add(cells[i]);
                     }
                 }
-                for (CellLabel cellLabel : cellCollection.labelSet()) {
-                    if (!unifiableCellLabels.contains(cellLabel)) {
-                        builder.putAll(cellLabel, cellCollection.get(cellLabel));
-                    }
-                }
+                builder.putAll(remainingCellMap);
                 if (frame != null) {
                     builder.concatenate(frame);
                 }
@@ -800,6 +802,18 @@ public class PatternMatcher extends AbstractMatcher {
                 multiSubstitutions.add(substitutions);
             }
         }
+    }
+
+    private ListMultimap<CellLabel, Cell> getRemainingCellMap(
+            CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
+        Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
+            @Override
+            public boolean apply(CellLabel cellLabel) {
+                return !labelsToRemove.contains(cellLabel);
+            }
+        };
+
+        return Multimaps.filterKeys(cellCollection.cellMap(), notRemoved);
     }
 
     private class SelectionGenerator {

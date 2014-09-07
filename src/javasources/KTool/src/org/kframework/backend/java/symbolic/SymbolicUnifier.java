@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -534,8 +533,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 //         */
 //        assert !(cellCollection.hasFrame() && otherCellCollection.hasFrame());
 
-        final Set<CellLabel> unifiableCellLabels = new HashSet<>(cellCollection.labelSet());
-        unifiableCellLabels.retainAll(otherCellCollection.labelSet());
+        ImmutableSet<CellLabel> unifiableCellLabels = ImmutableSet.copyOf(
+                Sets.intersection(cellCollection.labelSet(), otherCellCollection.labelSet()));
         int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
         int numOfOtherDiffCellLabels = otherCellCollection.labelSet().size() - unifiableCellLabels.size();
 
@@ -595,22 +594,21 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
             }
 
-            for (Iterator<CellLabel> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
-                CellLabel cellLabel = iter.next();
+            CellLabel starredCellLabel = null;
+            for (CellLabel cellLabel : unifiableCellLabels) {
                 if (!context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     unify(cellCollection.get(cellLabel).iterator().next(),
                             otherCellCollection.get(cellLabel).iterator().next());
-                    iter.remove();
+                } else {
+                    assert starredCellLabel == null;
+                    starredCellLabel = cellLabel;
                 }
             }
 
-            // YilongL: the assertion here must hold
-            if (unifiableCellLabels.isEmpty()) {
+            if (starredCellLabel == null) {
                 fail(cellCollection, otherCellCollection);
-            } else {
-                assert unifiableCellLabels.size() == 1;
             }
 
             if (cellCollection.concreteSize() < otherCellCollection.concreteSize()
@@ -619,9 +617,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
             }
 
-            CellLabel label = unifiableCellLabels.iterator().next();
-            Cell<?>[] cells = cellCollection.get(label).toArray(new Cell[1]);
-            Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
+            Cell<?>[] cells = cellCollection.get(starredCellLabel).toArray(new Cell[1]);
+            Cell<?>[] otherCells = otherCellCollection.get(starredCellLabel).toArray(new Cell[1]);
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
@@ -686,7 +683,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     private ListMultimap<CellLabel, Cell> getRemainingCellMap(
-            CellCollection cellCollection, final Set<CellLabel> labelsToRemove) {
+            CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
         Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
             @Override
             public boolean apply(CellLabel cellLabel) {
