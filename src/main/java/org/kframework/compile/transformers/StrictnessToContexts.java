@@ -57,14 +57,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                         this, prod);
                 continue;
             }
-            if (prod.isSyntacticSubsort()) {
-                Attributes attributes = prod.getAttributes();
-                prod = new Production(new NonTerminal(Sort.KLABEL),
-                        Collections.<ProductionItem>singletonList(new Terminal(prod.getKLabel())));
-                prod.setAttributes(attributes);
-                kLabelStrictness(prod, isSeq);
-                continue;
-            }
 
             if (prod.isConstant() && !prod.getSort().equals(Sort.KLABEL)) {
                 GlobalSettings.kem.registerCompilerError(

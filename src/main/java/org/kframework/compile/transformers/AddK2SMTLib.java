@@ -111,7 +111,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
             if (smtLbl.equals(""))
                 smtLbl = prod.getLabel();
 
-            if (prod.isSyntacticSubsort())
+            if (prod.isSubsort())
                 continue;
 
             // ignore syntactic lists for now

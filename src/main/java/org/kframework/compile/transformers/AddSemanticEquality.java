@@ -100,7 +100,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
 
         Set<Production> prods = node.getSyntaxByTag("", context);
         for (Production prod : prods) {
-            if (!prod.isSyntacticSubsort()
+            if (!prod.isSubsort()
                     && !prod.containsAttribute(Attribute.BRACKET.getKey())
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
                     && !prod.containsAttribute(Attribute.PREDICATE.getKey())

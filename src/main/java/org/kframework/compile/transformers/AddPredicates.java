@@ -105,7 +105,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
             result.add(rule);
 
             // define K2Sort for syntactic production (excluding subsorts)
-            if (!node.isSyntacticSubsort()) {
+            if (!node.isSubsort()) {
                 lhs = KApp.of(K2Sort, term);
                 rhs = StringBuiltin.kAppOf(sort.getName());
                 rule = new Rule(lhs, rhs, context);
