@@ -19,11 +19,11 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Sort;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
@@ -67,7 +67,7 @@ public class JavaClassesFactory {
         if (Constants.VAR.equals(element.getNodeName()))
             return new Variable(element);
         if (Constants.CONST.equals(element.getNodeName())) {
-            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.KLABEL)) {
+            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Sort.KLABEL.toString())) {
                 return new KLabelConstant(element);
             } else {
                 // builtin token or lexical token
@@ -76,7 +76,7 @@ public class JavaClassesFactory {
         }
         if (Constants.KAPP.equals(element.getNodeName()))
             return new KApp(element, context);
-        if (KSorts.KLIST.equals(element.getNodeName()))
+        if (Constants.KLIST.equals(element.getNodeName()))
             return new KList(element);
         if (Constants.EMPTY.equals(element.getNodeName()))
             return new ListTerminator(element, null);
@@ -86,9 +86,9 @@ public class JavaClassesFactory {
             return new Cell(element);
         if (Constants.BREAK.equals(element.getNodeName()))
             return new TermComment(element);
-        if (KSorts.BAG.equals(element.getNodeName()))
+        if (Constants.BAG.equals(element.getNodeName()))
             return new Bag(element);
-        if (KSorts.BAG_ITEM.equals(element.getNodeName()))
+        if (Constants.BAG_ITEM.equals(element.getNodeName()))
             return new BagItem(element);
         if (Constants.KSEQUENCE.equals(element.getNodeName()))
             return new KSequence(element);

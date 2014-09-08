@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class AddSemanticEquality extends CopyOnWriteTransformer {
 
-    public static final String EQUALITY_SORT = "EqualitySort";
+    public static final Sort EQUALITY_SORT = Sort.of("EqualitySort");
     public static final KLabelConstant EQUALITY_PREDICATE
             = KLabelConstant.of(AddPredicates.predicate(EQUALITY_SORT));
 
@@ -84,7 +84,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
             Sort sort = Sort.of(item.getKey());
             KLabelConstant sortEq = KLabelConstant.of(item.getValue(), context);
             if (sort.isComputationSort()) {
-                retNode.addSubsort(Sort.of(EQUALITY_SORT), sort, context);
+                retNode.addSubsort(EQUALITY_SORT, sort, context);
 
                 KList kList = new KList();
                 kList.add(Variable.getFreshVar(sort));

@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -34,11 +32,11 @@ public class MergeToTransformer extends CopyOnWriteTransformer {
 //            // Then, do "sort case" merging
 //            String sort = node.getContents().getSort();
 //            Cell newCell = node.shallowCopy();
-//            if (context.isSubsortedEq(KSorts.K, sort)) {
+//            if (context.isSubsortedEq(Sort.K, sort)) {
 //                // K: replace the entire content - this is mainly for the K cell
 //                newCell.setContents(lcontent);
 //                return newCell;
-//            } else if (sort.equals(KSorts.MAP)) {
+//            } else if (sort.equals(Sort.MAP)) {
 //                // Map: append all the MapItems except variables of any kind
 //                Map rmap = (Map) node.getContents();
 //                Map lmap = (Map) lcontent;

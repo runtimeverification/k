@@ -68,6 +68,9 @@ public class Constants {
     public static final String SHARED = "SHARED";
     public static final String PREDEFINED = "predefined";
     public static final String BREAK = "br";
+    public static final String BAG = "Bag";
+    public static final String BAG_ITEM = "BagItem";
+    public static final String KLIST = "KList";
     public static final String MACRO = "macro";
     public static final String STRUCTURAL = "structural";
     public static final String FUNCTION = "function";

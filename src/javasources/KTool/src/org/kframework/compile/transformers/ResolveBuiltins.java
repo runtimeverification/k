@@ -50,7 +50,7 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
             block.getProductions().add(p);
             Rule rule = new Rule();
             rule.setBody(new Rewrite(
-                    KApp.of(KLabelConstant.of(AddPredicates.predicate(sort.getName()), context),
+                    KApp.of(KLabelConstant.of(AddPredicates.predicate(sort), context),
                             new Variable(sort.getName(), sort)),
                     BoolBuiltin.TRUE, context));
             rule.addAttribute(Attribute.PREDICATE);

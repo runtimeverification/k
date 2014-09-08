@@ -114,7 +114,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
     public void setLabel(Term label) {
         assert label != null;
         // assertion disabled due to getSort relying on Context
-        //        assert label.getSort(context).equals(KSorts.KLABEL) || child instanceof Ambiguity:
+        //        assert label.getSort(context).equals(Sort.KLABEL) || child instanceof Ambiguity:
         //                "unexpected sort " + label.getSort(context) + " of KApp first argument " + label + ";"
         //                        + " expected KLabel";
         //
@@ -133,7 +133,7 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
     public void setChild(Term child) {
         assert child != null;
         // assertion disabled due to getSort relying on Context
-        //        assert child.getSort(context).equals(KSorts.KLIST) || child instanceof Ambiguity:
+        //        assert child.getSort(context).equals(Sort.KLIST) || child instanceof Ambiguity:
         //                "unexpected sort " + child.getSort(context) + " of KApp second argument " + child + ";"
         //                        + "; expected KList";
         //

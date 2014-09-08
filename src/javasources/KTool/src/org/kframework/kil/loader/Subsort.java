@@ -1,24 +1,21 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.kframework.kil.KSorts;
+import org.kframework.kil.Sort;
 
 public class Subsort {
-    private String bigSort, smallSort;
+    private Sort bigSort, smallSort;
 
-    public Subsort(String bigSort, String smallSort) {
+    public Subsort(Sort bigSort, Sort smallSort) {
         this.bigSort = bigSort;
         this.smallSort = smallSort;
     }
 
-    public String getBigSort() {
+    public Sort getBigSort() {
         return bigSort;
     }
 
-    public String getSmallSort() {
+    public Sort getSmallSort() {
         return smallSort;
     }
 

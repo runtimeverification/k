@@ -15,6 +15,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.NonTerminal;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -33,26 +34,26 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
     public Set<Production> outsides = new HashSet<Production>();
     public Set<Production> constants = new HashSet<Production>();
-    public Set<String> constantSorts = new HashSet<String>();
-    public Set<String> insertSorts = new HashSet<String>(); // list of inserted sorts that need to avoid the priority filter
-    public Set<String> startSorts = new HashSet<String>(); // list of sorts that are start symbols
+    public Set<Sort> constantSorts = new HashSet<>();
+    public Set<Sort> insertSorts = new HashSet<>(); // list of inserted sorts that need to avoid the priority filter
+    public Set<Sort> startSorts = new HashSet<>(); // list of sorts that are start symbols
     public Set<String> listSorts = new HashSet<String>(); // list of sorts declared as being list
-    public Set<String> userSort = new HashSet<String>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
+    public Set<Sort> userSort = new HashSet<>(); // list of sorts declared by the user (to be declared later as Start symbols if no declaration for Start was found)
     public StringBuilder sdf = new StringBuilder("");
     public List<Production> lexical = new ArrayList<Production>();
     public List<Restrictions> restrictions = new ArrayList<Restrictions>();
 
     public ProgramSDFVisitor(Context context) {
         super(context);
-        constantSorts.add("#Id");
-        constantSorts.add("#Bool");
-        constantSorts.add("#Int");
-        constantSorts.add("#String");
-        constantSorts.add("#Float");
+        constantSorts.add(Sort.BUILTIN_ID);
+        constantSorts.add(Sort.BUILTIN_BOOL);
+        constantSorts.add(Sort.BUILTIN_INT);
+        constantSorts.add(Sort.BUILTIN_FLOAT);
+        constantSorts.add(Sort.BUILTIN_STRING);
     }
 
     public Void visit(Syntax syn, Void _) {
-        userSort.add(syn.getDeclaredSort().getName());
+        userSort.add(syn.getDeclaredSort().getSort());
         List<PriorityBlock> priblocks = syn.getPriorityBlocks();
         processPriorities(priblocks);
         return null;
@@ -108,7 +109,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
             // filter the productions according to their form
             for (Production prd : prt.getProductions()) {
-                startSorts.add(prd.getSort().getName());
+                startSorts.add(prd.getSort());
 
                 if (prd.containsAttribute("notInPrograms")) {
                     // if a production has this attribute, don't add it to the list
@@ -116,15 +117,15 @@ public class ProgramSDFVisitor extends BasicVisitor {
                     lexical.add(prd);
                 } else if (prd.isSubsort()) {
                     p.getProductions().add(prd);
-                    startSorts.add(((NonTerminal) prd.getItems().get(0)).getName());
+                    startSorts.add(((NonTerminal) prd.getItems().get(0)).getSort());
                 } else if (prd.isConstant()) {
                     constants.add(prd);
-                    constantSorts.add(prd.getSort().getName());
+                    constantSorts.add(prd.getSort());
                 } else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
                     outsides.add(prd);
                 } else if (prd.getItems().get(0) instanceof UserList) {
                     outsides.add(prd);
-                    listSorts.add(prd.getSort().getName());
+                    listSorts.add(prd.getSort().toString());
                 } else {
                     p.getProductions().add(prd);
                 }
@@ -160,18 +161,18 @@ public class ProgramSDFVisitor extends BasicVisitor {
                                 NonTerminal srt = (NonTerminal) itm;
                                 // if we are on the first or last place and this sort is not a list, just print the sort
                                 if (i == 0 || i == items.size() - 1) {
-                                    sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+                                    sdf.append(StringUtil.escapeSort(srt) + " ");
                                 } else {
                                     // if this sort should be inserted to avoid the priority filter, then add it to the list
-                                    insertSorts.add(srt.getName());
-                                    String tempstr = srt.getName();
+                                    insertSorts.add(srt.getSort());
+                                    String tempstr = srt.toString();
                                     if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
                                         tempstr = "Bag";
-                                    sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+                                    sdf.append("InsertDz" + StringUtil.escapeSort(tempstr) + " ");
                                 }
                             }
                         }
-                        sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
+                        sdf.append("-> " + StringUtil.escapeSort(p.getSort()));
                         sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
                     }
                     sdf.append("} > ");

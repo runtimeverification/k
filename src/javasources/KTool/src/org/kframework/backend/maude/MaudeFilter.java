@@ -94,7 +94,7 @@ public class MaudeFilter extends BackendFilter {
               + "), .KList)";
             String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
             String valueKItem = "_`(_`)(#_(V:" + Sort.BUILTIN_STRING + ")" + ", .KList)";
-            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort.getName()) + ", "
+            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
                           + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
             result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
                           + ")) = " + tokenKItem + " .\n");
@@ -103,7 +103,7 @@ public class MaudeFilter extends BackendFilter {
           }
 
           for (Map.Entry<Sort, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
-            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey().getName()) + ", "
+            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
               + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
               + entry.getValue().type() + "), .KList))";
             result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");

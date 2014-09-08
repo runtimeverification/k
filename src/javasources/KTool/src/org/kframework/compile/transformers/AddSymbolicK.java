@@ -16,31 +16,30 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         super("Add symbolic constructors", context);
     }
 
-    public static final boolean allowSymbolic(String sort) {
-        return sort.equals(KSorts.LIST) || sort.equals(KSorts.SET) ||
-                sort.equals(KSorts.BAG) || sort.equals(KSorts.MAP) ||
+    public static final boolean allowSymbolic(Sort sort) {
+        return sort.equals(Sort.LIST) || sort.equals(Sort.SET) ||
+                sort.equals(Sort.BAG) || sort.equals(Sort.MAP) ||
                 allowKSymbolic(sort);
     }
 
-    public static final boolean allowKSymbolic(String sortName) {
-        Sort sort = Sort.of(sortName);
+    public static final boolean allowKSymbolic(Sort sort) {
         return sort.isComputationSort() && !sort.isBuiltinSort();
     }
 
-    public static final String symbolicConstructor(String sort) {
+    public static final String symbolicConstructor(Sort sort) {
         assert allowSymbolic(sort);
 
             return SymbolicConstructorPrefix + sort;
     }
 
-    public static final boolean isSymbolicConstructor(String sort) {
-        return sort.startsWith(SymbolicConstructorPrefix);
+    public static final boolean isSymbolicConstructor(Sort sort) {
+        return sort.getName().startsWith(SymbolicConstructorPrefix);
     }
 
-    public final Production getSymbolicProduction(String sortName) {
-        assert allowSymbolic(sortName);
+    public final Production getSymbolicProduction(Sort sort) {
+        assert allowSymbolic(sort);
 
-        return Production.makeFunction(Sort.of(sortName), symbolicConstructor(sortName), Sort.K, context);
+        return Production.makeFunction(sort, symbolicConstructor(sort), Sort.K, context);
     }
 
     public Term freshSymSortN(Sort sort, int n) {
@@ -63,9 +62,9 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         for (Sort sort : node.getAllSorts()) {
-            if (allowKSymbolic(sort.getName())) {
+            if (allowKSymbolic(sort)) {
                 //retNode.addProduction(sort, getSymbolicProduction(sort));
-                retNode.addConstant(Sort.KLABEL, symbolicConstructor(sort.getName()));
+                retNode.addConstant(Sort.KLABEL, symbolicConstructor(sort));
             }
         }
 

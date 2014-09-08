@@ -56,11 +56,10 @@ public class ProgramSDF {
         // automatically add a production of the type K ::= <start-sort>
         // this will allow the parser to accept any sort as input if the definition doesn't contain
         // a configuration, or the $PGM variable has sort K
-        for (String sortName : psdfv.startSorts) {
-            Sort sort = Sort.of(sortName);
-            if (!sort.isBaseSort() && !context.isListSort(sort)) {
+        for (Sort s : psdfv.startSorts) {
+            if (!s.isBaseSort() && !context.isListSort(s)) {
                 List<ProductionItem> pi = new ArrayList<>();
-                pi.add(new NonTerminal(sort));
+                pi.add(new NonTerminal(s));
                 Production prod = new Production(new NonTerminal(Sort.K), pi);
                 ks2gsf.visitNode(prod);
             }
@@ -79,10 +78,10 @@ public class ProgramSDF {
         sdf.append(psdfv.sdf);
 
         sdf.append("context-free start-symbols\n");
-        // sdf.append(StringUtil.escapeSortName(context.startSymbolPgm) + "\n");
-        for (String s : psdfv.startSorts) {
+        // sdf.append(StringUtil.escapeSort(context.startSymbolPgm) + "\n");
+        for (Sort s : psdfv.startSorts) {
             if (!s.equals("Start"))
-                sdf.append(StringUtil.escapeSortName(s) + " ");
+                sdf.append(StringUtil.escapeSort(s) + " ");
         }
         sdf.append("K\n");
 
@@ -91,7 +90,7 @@ public class ProgramSDF {
         for (Production p : psdfv.outsides) {
             if (p.isListDecl()) {
                 UserList si = (UserList) p.getItems().get(0);
-                sdf.append("    {" + StringUtil.escapeSortName(si.getSort().getName()) + " " + StringUtil.enquoteCString(si.getSeparator()) + "}" + si.getListType() + " -> " + StringUtil.escapeSortName(p.getSort().getName()));
+                sdf.append("    {" + StringUtil.escapeSort(si.getSort()) + " " + StringUtil.enquoteCString(si.getSeparator()) + "}" + si.getListType() + " -> " + StringUtil.escapeSort(p.getSort()));
                 sdf.append(" {cons(\"" + context.getConses().inverse().get(p) + "\")}\n");
             } else {
                 sdf.append("    ");
@@ -105,28 +104,28 @@ public class ProgramSDF {
                         NonTerminal srt = (NonTerminal) itm;
                         // if we are on the first or last place and this sort is not a list, just print the sort
                         if (i == 0 || i == items.size() - 1) {
-                            sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+                            sdf.append(StringUtil.escapeSort(srt) + " ");
                         } else {
                             // if this sort should be inserted to avoid the priority filter, then add it to the list
-                            psdfv.insertSorts.add(srt.getName());
-                            String tempstr = srt.getName();
+                            psdfv.insertSorts.add(srt.getSort());
+                            String tempstr = srt.toString();
                             if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
                                 tempstr = "Bag";
-                            sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+                            sdf.append("InsertDz" + StringUtil.escapeSort(tempstr) + " ");
                         }
                     }
                 }
-                sdf.append("-> " + StringUtil.escapeSortName(p.getSort().getName()));
+                sdf.append("-> " + StringUtil.escapeSort(p.getSort()));
                 sdf.append(SDFHelper.getSDFAttributes(p, context.getConses()) + "\n");
             }
         }
 
-        for (String ss : psdfv.insertSorts)
-            sdf.append("    " + StringUtil.escapeSortName(ss) + " -> InsertDz" + StringUtil.escapeSortName(ss) + "\n");
+        for (Sort ss : psdfv.insertSorts)
+            sdf.append("    " + StringUtil.escapeSort(ss) + " -> InsertDz" + StringUtil.escapeSort(ss) + "\n");
 
         sdf.append("\n\n");
-        for (String sort : psdfv.constantSorts) {
-            String s = StringUtil.escapeSortName(sort);
+        for (Sort sort : psdfv.constantSorts) {
+            String s = StringUtil.escapeSort(sort);
             sdf.append("    Dz" + s + "        -> " + s + "    {cons(\"" + s + "1Const\")}\n");
         }
 
@@ -139,10 +138,9 @@ public class ProgramSDF {
 
         sdf.append("\n%% start symbols subsorts\n");
         sdf.append("    KItem        -> K\n");
-        for (String s : psdfv.startSorts) {
-            Sort sort = Sort.of(s);
-            if (!sort.isBaseSort() && !context.isListSort(sort))
-                sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
+        for (Sort s : psdfv.startSorts) {
+            if (!s.isBaseSort() && !context.isListSort(s))
+                sdf.append("    " + StringUtil.escapeSort(s) + "        -> K\n");
         }
 
         //TODO(dwightguth): remove for modularization
@@ -153,19 +151,18 @@ public class ProgramSDF {
             sdf.append("    DzInt    -> UnitDz\n");
             sdf.append("    DzFloat    -> UnitDz\n");
             sdf.append("    DzString-> UnitDz\n");
-            for (String s : psdfv.startSorts) {
-                Sort sort = Sort.of(s);
-                if (!sort.isBaseSort() && !context.isListSort(sort))
+            for (Sort s : psdfv.startSorts) {
+                if (!s.isBaseSort() && !context.isListSort(s))
                     if (AddSymbolicK.allowKSymbolic(s)) {
                         sdf.append("    \"" + AddSymbolicK.symbolicConstructor(s) + "\"    \"(\" UnitDz \")\"    -> ");
-                        sdf.append(StringUtil.escapeSortName(s) + "    {cons(\"" + StringUtil.escapeSortName(s) + "1Symb\")}\n");
+                        sdf.append(StringUtil.escapeSort(s) + "    {cons(\"" + StringUtil.escapeSort(s) + "1Symb\")}\n");
                     }
             }
         }
 
         sdf.append("lexical syntax\n");
         for (Production prd : psdfv.constants) {
-            sdf.append("    " + prd.getItems().get(0) + " -> Dz" + StringUtil.escapeSortName(prd.getSort().getName()) + "\n");
+            sdf.append("    " + prd.getItems().get(0) + " -> Dz" + StringUtil.escapeSort(prd.getSort()) + "\n");
         }
 
         sdf.append("\n\n");
@@ -183,11 +180,11 @@ public class ProgramSDF {
 
         // lexical rules
         sdf.append("lexical syntax\n");
-        java.util.Set<String> lexerSorts = new HashSet<String>();
+        java.util.Set<Sort> lexerSorts = new HashSet<>();
         for (Production p : psdfv.lexical) {
             Lexical l = (Lexical) p.getItems().get(0);
-            lexerSorts.add(p.getSort().getName());
-            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz\n");
+            lexerSorts.add(p.getSort());
+            sdf.append("    " + l.getLexicalRule() + " -> " + StringUtil.escapeSort(p.getSort()) + "Dz\n");
             if (l.getFollow() != null && !l.getFollow().equals("")) {
                 psdfv.restrictions.add(new Restrictions(new NonTerminal(p.getSort()), null, l.getFollow()));
             }
@@ -199,13 +196,13 @@ public class ProgramSDF {
                     for (Terminal t : ctv.terminals) {
                         Matcher m = pat.matcher(t.getTerminal());
                         if (m.matches())
-                            sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
+                            sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSort(p.getSort()) + "Dz {reject}\n");
                     }
                 } else {
                     // if there is no regex attribute, then do it the old fashioned way, but way more inefficient
                     // add rejects for all possible combinations
                     for (Terminal t : ctv.terminals) {
-                        sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSortName(p.getSort().getName()) + "Dz {reject}\n");
+                        sdf.append("    " + t.toString() + " -> " + StringUtil.escapeSort(p.getSort()) + "Dz {reject}\n");
                     }
                 }
             }
@@ -213,8 +210,8 @@ public class ProgramSDF {
 
         // adding cons over lexical rules
         sdf.append("context-free syntax\n");
-        for (String s : lexerSorts) {
-            sdf.append("    " + StringUtil.escapeSortName(s) + "Dz -> " + StringUtil.escapeSortName(s) + " {cons(\"" + StringUtil.escapeSortName(s) + "1Const\")}\n");
+        for (Sort s : lexerSorts) {
+            sdf.append("    " + StringUtil.escapeSort(s) + "Dz -> " + StringUtil.escapeSort(s) + " {cons(\"" + StringUtil.escapeSort(s) + "1Const\")}\n");
         }
         sdf.append("\n\n");
 
@@ -224,7 +221,7 @@ public class ProgramSDF {
             if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
                 sdf.append("    " + StringUtil.enquoteCString(r.getTerminal().getTerminal()) + " -/- " + r.getPattern() + "\n");
             else
-                sdf.append("    " + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
+                sdf.append("    " + StringUtil.escapeSort(r.getNonTerminal()) + " -/- " + r.getPattern() + "\n");
         }
 
         return sdf;

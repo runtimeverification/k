@@ -2,6 +2,7 @@
 package org.kframework.krun.ioserver.commands;
 
 import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
@@ -14,14 +15,14 @@ import java.util.logging.Logger;
 public class CommandParse extends Command {
 
     private String stringToParse;
-    private String sort;
+    private Sort sort;
     protected Context context;
 
     public CommandParse(String[] args, Socket socket, Logger logger, Context context, FileSystem fs) {
         super(args, socket, logger, fs);
         this.context = context;
 
-        sort = args[1];
+        sort = Sort.of(args[1]);
         stringToParse = args[2];
     }
 

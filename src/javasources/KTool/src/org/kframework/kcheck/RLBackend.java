@@ -211,11 +211,10 @@ public abstract class RLBackend extends BasicBackend implements Backend {
             pattern = DefinitionLoader.parsePattern(
                     null, //K.pattern,
                     null,
-                    Sort.BAG.getName(),
+                    Sort.BAG,
                     context);
             //defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
-            pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern),
-                    null);
+            pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
             defaultPattern = (Rule) pattern;
         } catch (ParseFailedException e1) {
             e1.report();
