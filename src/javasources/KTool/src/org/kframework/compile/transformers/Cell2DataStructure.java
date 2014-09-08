@@ -76,7 +76,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             patternLabel = null;
         }
 
-        if (!rule.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
+        if (ruleData == null || !ruleData.isCompiledForFastRewriting()) {
             return super.visit(rule, _);
         }
 
@@ -119,9 +120,10 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             cellsOfInterest.addAll(cellMapLabelsToAdd);
 
             rule = rule.shallowCopy();
-            rule.getAttribute(JavaBackendRuleData.class).setCellsOfInterest(cellsOfInterest);
-            rule.getAttribute(JavaBackendRuleData.class).setLhsOfReadCell(lhsOfReadCell);
-            rule.getAttribute(JavaBackendRuleData.class).setRhsOfWriteCell(rhsOfWriteCell);
+            ruleData = ruleData.setCellsOfInterest(cellsOfInterest);
+            ruleData = ruleData.setRhsOfWriteCell(rhsOfWriteCell);
+            ruleData = ruleData.setLhsOfReadCell(lhsOfReadCell);
+            rule.addAttribute(JavaBackendRuleData.class, ruleData);
         }
 
         return rule;

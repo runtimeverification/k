@@ -108,7 +108,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
 
         rule = rule.shallowCopy();
-        rule.getAttribute(JavaBackendRuleData.class).setInstructions(schedule);
+        rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setInstructions(schedule));
 
 //        System.out.println(rule);
 //        System.out.println(rule.getCellsOfInterest());

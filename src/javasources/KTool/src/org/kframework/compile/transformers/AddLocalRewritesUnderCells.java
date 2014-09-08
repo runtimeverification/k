@@ -78,17 +78,19 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
     }
 
     private Rule setCellsToCopyForUncompiledRule(Rule rule) {
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
         if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
             Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
             rule = rule.shallowCopy();
             if (hasGroundCell(rhs)) {
-                rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(ImmutableSet.of(rhs.getLabel()));
+                ruleData = ruleData.setCellsToCopy(ImmutableSet.of(rhs.getLabel()));
             } else {
-                rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(ImmutableSet.<String>of());
+                ruleData = ruleData.setCellsToCopy(ImmutableSet.<String>of());
             }
         } else {
-            rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(ImmutableSet.<String>of());
+            ruleData = ruleData.setCellsToCopy(ImmutableSet.<String>of());
         }
+        rule.addAttribute(JavaBackendRuleData.class, ruleData);
         return rule;
     }
 
@@ -108,7 +110,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
         if (hasAssocCommMatching) {
             rule = rule.shallowCopy();
-            rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false);
+            rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false));
             rule = setCellsToCopyForUncompiledRule(rule);
             return rule;
         }
@@ -119,9 +121,11 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         crntRule = null;
 
         rule = rule.shallowCopy();
-        rule.getAttribute(JavaBackendRuleData.class).setLhsOfReadCell(lhsOfReadCell);
-        rule.getAttribute(JavaBackendRuleData.class).setRhsOfWriteCell(rhsOfWriteCell);
-        rule.getAttribute(JavaBackendRuleData.class).setCellsToCopy(cellsToCopy);
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
+        ruleData = ruleData.setLhsOfReadCell(lhsOfReadCell);
+        ruleData = ruleData.setRhsOfWriteCell(rhsOfWriteCell);
+        ruleData = ruleData.setCellsToCopy(cellsToCopy);
+        rule.addAttribute(JavaBackendRuleData.class, ruleData);
 
         return rule;
     }

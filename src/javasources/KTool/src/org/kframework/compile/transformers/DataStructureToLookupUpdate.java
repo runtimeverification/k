@@ -276,9 +276,10 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         returnNode.setBody(rewrite);
         returnNode.setRequires(requires);
         returnNode.setEnsures(ensures);
-        returnNode.getAttribute(JavaBackendRuleData.class).setLookups(lookups);
-        returnNode.getAttribute(JavaBackendRuleData.class).setConcreteDataStructureSize(new HashMap<>(returnNode.getAttribute(JavaBackendRuleData.class).getConcreteDataStructureSize()));
-        returnNode.getAttribute(JavaBackendRuleData.class).getConcreteDataStructureSize().putAll(concreteSize);
+        JavaBackendRuleData ruleData = returnNode.getAttribute(JavaBackendRuleData.class);
+        ruleData = ruleData.setLookups(lookups);
+        ruleData = ruleData.setConcreteDataStructureSize(concreteSize);
+        returnNode.addAttribute(JavaBackendRuleData.class, ruleData);
 
         location = null;
 

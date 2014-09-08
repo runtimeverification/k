@@ -78,11 +78,12 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule rule, Void _)  {
+        rule.addAttribute(JavaBackendRuleData.class, new JavaBackendRuleData());
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)
                 || rule.containsAttribute(Attribute.MACRO_KEY)
                 || rule.containsAttribute(Attribute.ANYWHERE_KEY)
                 || rule.containsAttribute(Attribute.PATTERN_KEY)) {
-            rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false);
+            rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false));
             return rule;
         }
 
@@ -113,12 +114,14 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         }
 
         rule = rule.shallowCopy();
-        rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(compiledForFastRewriting);
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
+        ruleData = ruleData.setCompiledForFastRewriting(compiledForFastRewriting);
         if (compiledForFastRewriting) {
-            rule.getAttribute(JavaBackendRuleData.class).setCellsOfInterest(cellsOfInterest);
-            rule.getAttribute(JavaBackendRuleData.class).setLhsOfReadCell(readCell2LHS);
-            rule.getAttribute(JavaBackendRuleData.class).setRhsOfWriteCell(writeCell2RHS);
+            ruleData = ruleData.setCellsOfInterest(cellsOfInterest);
+            ruleData = ruleData.setLhsOfReadCell(readCell2LHS);
+            ruleData = ruleData.setRhsOfWriteCell(writeCell2RHS);
         }
+        rule.addAttribute(JavaBackendRuleData.class, ruleData);
 
         return rule;
     }
