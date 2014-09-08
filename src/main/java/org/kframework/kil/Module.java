@@ -71,6 +71,14 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
         return mkl;
     }
 
+    /**
+     * Return a list of the sorts declared by
+     * items in this module, plus a few builtin
+     * sorts.
+     * Result will contain duplicates if
+     * multiple declarations mention the same sort.
+     * @return
+     */
     public java.util.Set<Sort> getAllSorts() {
         java.util.Set<Sort> sorts = new HashSet<>();
 

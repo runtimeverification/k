@@ -34,6 +34,9 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
         this(sort, new ArrayList<PriorityBlock>());
     }
 
+    /**
+     * The sort being declared.
+     */
     public NonTerminal getDeclaredSort() {
         return sort;
     }
