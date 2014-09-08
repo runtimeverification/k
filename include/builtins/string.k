@@ -113,7 +113,7 @@ module STRING-HOOKS
   rule replace(Source:K, _, _, 0) => Source
   rule replaceAll(Source:K, ToReplace:K, Replacement:K) => replace(Source, ToReplace, Replacement, countAllOccurences(Source, ToReplace))
 
-  rule ltrim(S:String) => replaceFirst(S, " ", "") when findString(S, " ", 0) ==Int 0
+  rule ltrim(S:String) => ltrim(replaceFirst(S, " ", "")) when findString(S, " ", 0) ==Int 0
   rule ltrim(S:String) => S when findString(S, " ", 0) =/=Int 0
   rule ltrim("") => ""
 
