@@ -18,7 +18,7 @@ public class ProgramProfile {
 
     /**
      * {@code true} if the program's expected results should be treated as a list of regular expressions, one
-     * per line. {@false} to use legacy comparator.
+     * per line. {@code false} to use legacy comparator.
      */
     private boolean regex;
 
