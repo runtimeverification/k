@@ -85,7 +85,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
                 }
 
                 for (Production production : productions) {
-                    if (!production.isSubsort()) {
+                    if (!production.isSyntacticSubsort()) {
                         continue sort1_loop;
                     }
                 }

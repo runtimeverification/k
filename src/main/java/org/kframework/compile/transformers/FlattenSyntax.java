@@ -60,7 +60,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             return node;
         if (!isComputation)
             return super.visit(node, _);
-        if (node.isSubsort() && node.getKLabel() == null)
+        if (node.isSubsort())
             return null;
         String arity = String.valueOf(node.getArity());
         Attributes attrs = node.getAttributes().shallowCopy();

@@ -60,7 +60,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
             }
         }
 
-        if (node.isSubsort()) {
+        if (node.isSyntacticSubsort()) {
             Sort sort = node.getSubsort().getSort();
             if (sort.isBaseSort() && !context.isSubsorted(node.getSort(), sort)) {
                 String msg = "Subsorting built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
@@ -94,7 +94,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
                         GlobalSettings.kem.registerCompilerError(msg, this, s);
                     }
                 }
-                if (s.getSort().equals(Sort.KRESULT) && !(node.isSubsort() && node.getSort().equals(Sort.KITEM))) {
+                if (s.getSort().equals(Sort.KRESULT) && !(node.isSyntacticSubsort() && node.getSort().equals(Sort.KITEM))) {
                     String msg = "KResult is only allowed in the left hand side of syntax.";
                     GlobalSettings.kem.registerCompilerError(msg, this, s);
                 }

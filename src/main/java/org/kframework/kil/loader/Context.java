@@ -587,9 +587,6 @@ public class Context implements Serializable {
                 conses.put(cons2, p);
             } else if (p.isLexical()) {
             } else if (p.isSubsort()) {
-                if (p.getKLabel() != null) {
-                    conses.put(StringUtil.escapeSort(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn", p);
-                }
             } else {
                 String cons;
                 if (p.isListDecl())

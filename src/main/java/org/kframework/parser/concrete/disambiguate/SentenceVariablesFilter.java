@@ -49,7 +49,7 @@ public class SentenceVariablesFilter extends ParseForestTransformer {
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
         super.visit(tc, _);
-        if (tc.getProduction().isSubsort()) {
+        if (tc.getProduction().isSyntacticSubsort()) {
             if (tc.getContents().get(0) instanceof Variable) {
                 return tc.getContents().get(0);
             }

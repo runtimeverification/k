@@ -52,19 +52,18 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             if (prod.isSubsort()) {
-                if (prod.getKLabel() == null) {
-                    GlobalSettings.kem.registerCompilerError(
-                            "Production is a subsort and cannot be strict.",
-                            this, prod);
-                    continue;
-                } else {
-                    Attributes attributes = prod.getAttributes();
-                    prod = new Production(new NonTerminal(Sort.KLABEL),
-                            Collections.<ProductionItem>singletonList(new Terminal(prod.getKLabel())));
-                    prod.setAttributes(attributes);
-                    kLabelStrictness(prod, isSeq);
-                    continue;
-                }
+                GlobalSettings.kem.registerCompilerError(
+                        "Production is a subsort and cannot be strict.",
+                        this, prod);
+                continue;
+            }
+            if (prod.isSyntacticSubsort()) {
+                Attributes attributes = prod.getAttributes();
+                prod = new Production(new NonTerminal(Sort.KLABEL),
+                        Collections.<ProductionItem>singletonList(new Terminal(prod.getKLabel())));
+                prod.setAttributes(attributes);
+                kLabelStrictness(prod, isSeq);
+                continue;
             }
 
             if (prod.isConstant() && !prod.getSort().equals(Sort.KLABEL)) {

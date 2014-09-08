@@ -35,7 +35,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
     public Void visit(Production prd, Void _) {
         if (!prd.getSort().isBaseSort())
             context.addSubsort(Sort.KITEM, prd.getSort());
-        if (prd.isSubsort()) {
+        if (prd.isSyntacticSubsort()) {
             if (!prd.containsAttribute("onlyLabel")
                     && !prd.containsAttribute("notInRules")) {
                 Sort sort = ((NonTerminal) prd.getItems().get(0)).getSort();
