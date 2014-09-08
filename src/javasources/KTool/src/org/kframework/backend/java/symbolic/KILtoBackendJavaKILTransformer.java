@@ -447,7 +447,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Rule node, Void _)  {
         assert node.getBody() instanceof org.kframework.kil.Rewrite;
 
-        concreteCollectionSize = node.getAttribute(JavaBackendRuleData.class).getConcreteDataStructureSize();
+        JavaBackendRuleData ruleData = node.getAttribute(JavaBackendRuleData.class);
+        if (ruleData == null) {
+            ruleData = new JavaBackendRuleData();
+        }
+        concreteCollectionSize = ruleData.getConcreteDataStructureSize();
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
         Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
@@ -464,7 +468,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
-        for (org.kframework.kil.BuiltinLookup lookup : node.getAttribute(JavaBackendRuleData.class).getLookups()) {
+        for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
             Kind kind;
@@ -521,21 +525,21 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         java.util.Map<CellLabel, Term> lhsOfReadCell = null;
         java.util.Map<CellLabel, Term> rhsOfWriteCell = null;
-        if (node.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
+        if (ruleData.isCompiledForFastRewriting()) {
             lhsOfReadCell = Maps.newHashMap();
-            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getAttribute(JavaBackendRuleData.class).getLhsOfReadCell().entrySet()) {
+            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getLhsOfReadCell().entrySet()) {
                 lhsOfReadCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
             }
             rhsOfWriteCell = Maps.newHashMap();
-            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getAttribute(JavaBackendRuleData.class).getRhsOfWriteCell().entrySet()) {
+            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getRhsOfWriteCell().entrySet()) {
                 rhsOfWriteCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
             }
         }
 
         java.util.Set<CellLabel> cellsToCopy = null;
-        if (node.getAttribute(JavaBackendRuleData.class).getCellsToCopy() != null) {
+        if (ruleData.getCellsToCopy() != null) {
             cellsToCopy = Sets.newHashSet();
-            for (String cellLabelName : node.getAttribute(JavaBackendRuleData.class).getCellsToCopy()) {
+            for (String cellLabelName : ruleData.getCellsToCopy()) {
                 cellsToCopy.add(CellLabel.of(cellLabelName));
             }
         }
@@ -548,11 +552,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 ensures,
                 freshVariables,
                 lookupsBuilder.build(),
-                node.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting(),
+                ruleData.isCompiledForFastRewriting(),
                 lhsOfReadCell,
                 rhsOfWriteCell,
                 cellsToCopy,
-                node.getAttribute(JavaBackendRuleData.class).getInstructions(),
+                ruleData.getInstructions(),
                 node,
                 globalContext.getDefinition());
 
