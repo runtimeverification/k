@@ -18,6 +18,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.SMTOptions;
 
@@ -81,7 +82,12 @@ public class KompileModule extends AbstractModule {
     }
 
     @Provides
-    Backend getBackend(KompileOptions options, Map<String, Backend> map) {
-        return map.get(options.backend);
+    Backend getBackend(KompileOptions options, Map<String, Backend> map, KExceptionManager kem) {
+        Backend backend = map.get(options.backend);
+        if (backend == null) {
+            kem.registerCriticalError("Invalid backend: " + options.backend
+                    + ". It should be one of [pdf|latex|html|maude|java|unparse|symbolic]");
+        }
+        return backend;
     }
 }
