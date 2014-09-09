@@ -7,7 +7,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Sort;

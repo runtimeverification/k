@@ -114,8 +114,8 @@ public class KTestOptions {
      * The list of steps separated by whitespace to be skipped.
      */
     @Parameter(names="--skip", description="The list of steps to be skipped, separated by whitespace. " +
-                        "A step is either [" + Constants.KOMPILE_STEP + "|" + Constants.PDF_STEP +
-                        "|" + Constants.KRUN_STEP + "].",
+                        "A step is either [" + "kompile" + "|" + "pdf" +
+                        "|" + "krun" + "].",
                         converter=KTestStepSetConverter.class)
     private Set<KTestStep> skips = EnumSet.noneOf(KTestStep.class);
 
@@ -222,15 +222,15 @@ public class KTestOptions {
             throw new ParameterException("target file format is not valid: " + ext +
                     "(should be .xml or .k)");
 
-        directory = getDirectoryArg(Constants.DIRECTORY_OPTION, _directory, currentDir);
-        programs = getDirectoryArg(Constants.PROGRAMS_OPTION, _programs,
+        directory = getDirectoryArg("directory", _directory, currentDir);
+        programs = getDirectoryArg("programs", _programs,
                 FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
-        results = getDirectoryArg(Constants.RESULTS_OPTION, _results,
+        results = getDirectoryArg("results", _results,
                 FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
 
         if (updateOut && generateOut) {
             throw new ParameterException("cannot have both options at once: --" +
-                Constants.UPDATE_OUT_OPTION + " and --" + Constants.GENERATE_OUT_OPTION);
+                    "update-out" + " and --" + "generate-out");
         }
     }
 

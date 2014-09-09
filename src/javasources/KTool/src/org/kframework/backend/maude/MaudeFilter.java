@@ -27,6 +27,7 @@ public class MaudeFilter extends BackendFilter {
     private boolean firstAttribute;
     ConfigurationStructureMap cfgStr;
     private Set<String> unusedTransitions;
+    private Set<String> separators = new HashSet<String>();
 
     public MaudeFilter(Context context) {
         super(context);
@@ -93,7 +94,7 @@ public class MaudeFilter extends BackendFilter {
               + "), .KList)";
             String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
             String valueKItem = "_`(_`)(#_(V:" + Sort.BUILTIN_STRING + ")" + ", .KList)";
-            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort.getName()) + ", "
+            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
                           + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
             result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
                           + ")) = " + tokenKItem + " .\n");
@@ -102,7 +103,7 @@ public class MaudeFilter extends BackendFilter {
           }
 
           for (Map.Entry<Sort, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
-            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey().getName()) + ", "
+            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
               + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
               + entry.getValue().type() + "), .KList))";
             result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
@@ -126,7 +127,7 @@ public class MaudeFilter extends BackendFilter {
                     ProductionItem item = p.getItems().get(0);
                     if (item instanceof NonTerminal) {
                         NonTerminal nt = (NonTerminal) item;
-                        if (!MaudeHelper.declaredSorts.contains(nt.getSort()) && !MaudeHelper.basicSorts.contains(nt.getSort())) {
+                        if (!MaudeHelper.declaredSorts.contains(nt.getSort()) && !MaudeHelper.isBasicSort(nt.getSort())) {
                             result.append("sort ");
                             result.append(p.getItems().get(0));
                             result.append(" .\n");
@@ -148,7 +149,7 @@ public class MaudeFilter extends BackendFilter {
                         msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
                         GlobalSettings.kem.registerCriticalError(msg, this, p);
                     }
-                    if (!MaudeHelper.constantSorts.contains(syn.getDeclaredSort().getSort()) || !syn.getDeclaredSort().getSort().equals(Sort.KLABEL) || !syn.getDeclaredSort().getSort().equals(Sort.CELL_LABEL)) {
+                    if (!MaudeHelper.isConstantSort(syn.getDeclaredSort().getSort()) || !syn.getDeclaredSort().getSort().equals(Sort.KLABEL) || !syn.getDeclaredSort().getSort().equals(Sort.CELL_LABEL)) {
                         result.append("op ");
                         result.append(StringUtil.escapeMaude(operation));
                         result.append(" : -> ");
@@ -163,18 +164,17 @@ public class MaudeFilter extends BackendFilter {
                     // ignore K constants declarations
                 } else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof UserList)) {
                     // user declared lists case
-                    UserList list = (UserList) p.getItems().get(0);
-                    if (!MaudeHelper.separators.contains(list.getSeparator())) {
-                        result.append("op _");
-                        result.append(StringUtil.escapeMaude(list.getSeparator()));
-                        result.append("_ : K K -> K [prec 120 metadata \"");
+                    if (!separators.contains(p.getLabel())) {
+                        result.append("op ");
+                        result.append(StringUtil.escapeMaude(p.getLabel()));
+                        result.append(" : K K -> K [prec 120 metadata \"");
                         this.visitNode(p.getAttributes());
                         result.append(" hybrid=()");
                         result.append("\"] .\n");
-                        result.append("op .List`{\"");
-                        result.append(list.getSeparator());
-                        result.append("\"`} : -> K .\n");
-                        MaudeHelper.separators.add(list.getSeparator());
+                        result.append("op ");
+                        result.append(StringUtil.escapeMaude(p.getTerminatorKLabel()));
+                        result.append(" : -> K .\n");
+                        separators.add(p.getLabel());
                     }
                 } else {
                     String maudelabel = p.getLabel();
@@ -466,15 +466,12 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public Void visit(ListTerminator empty, Void _) {
         Sort sort = empty.getSort();
-        if (MaudeHelper.basicSorts.contains(sort) || sort.isCellFragment()) {
+        if (MaudeHelper.isBasicSort(sort) || sort.isCellFragment()) {
             result.append(".");
             result.append(sort);
         } else {
             Production prd = context.listProductions.get(sort);
-            UserList ul = (UserList) prd.getItems().get(0);
-            result.append(".List`{\"");
-            result.append(ul.getSeparator());
-            result.append("\"`}");
+            result.append(StringUtil.escapeMaude(prd.getTerminatorKLabel()));
         }
         return null;
     }

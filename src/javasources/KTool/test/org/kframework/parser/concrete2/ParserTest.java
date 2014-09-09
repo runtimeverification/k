@@ -11,16 +11,13 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Constant;
-import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.parser.concrete2.Grammar.NonTerminal;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
@@ -360,7 +357,7 @@ public class ParserTest {
         RegExState resx = new RegExState("RegExStidx", nt1,Pattern.compile("x"), null);
 
         NonTerminalState nts1 = new NonTerminalState("NT1", nt1, nt1, false);
-        NonTerminalState nts2 = new NonTerminalState("NT2", nt1, nt1, false);//, label("AA"), KSorts.K);
+        NonTerminalState nts2 = new NonTerminalState("NT2", nt1, nt1, false);
 
         RuleState rs1 = new RuleState("RuleStateId1", nt1, new WrapLabelRule(label("x")));
         RuleState rs3 = new RuleState("RuleStateId2", nt1, new WrapLabelRule(label("AA")));

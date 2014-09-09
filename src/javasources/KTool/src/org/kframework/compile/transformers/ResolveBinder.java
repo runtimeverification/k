@@ -17,6 +17,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -34,11 +35,11 @@ import java.util.regex.Pattern;
 public class ResolveBinder extends CopyOnWriteTransformer {
 
     private static final KLabelConstant BINDER_PREDICATE
-            = KLabelConstant.of(AddPredicates.predicate("Binder"));
+            = KLabelConstant.of(AddPredicates.predicate(Sort.of("Binder")));
     private static final KLabelConstant BOUNDED_PREDICATE
-            = KLabelConstant.of(AddPredicates.predicate("Bound"));
+            = KLabelConstant.of(AddPredicates.predicate(Sort.of("Bound")));
     private static final KLabelConstant BOUNDING_PREDICATE
-            = KLabelConstant.of(AddPredicates.predicate("Bounding"));
+            = KLabelConstant.of(AddPredicates.predicate(Sort.of("Bounding")));
 
     private static final String REGEX
             = "\\s*(\\d+)(\\s*-\\>\\s*(\\d+))?\\s*(,?)";

@@ -1,0 +1,13 @@
+<T>
+    <tasks>
+        .Bag
+    </tasks>
+    <gtenv>
+        main |-> ((void) -> (void))
+        mulArray |-> ((((int) [ ]) [ ]), (((int) [ ]) [ ]) -> (((int) [ ]) [ ]
+          ))
+        printArray |-> ((((int) [ ]) [ ]) -> (void))
+        readArray |-> ((((int) [ ]) [ ]) -> (void))
+        transArray |-> ((((int) [ ]) [ ]) -> (((int) [ ]) [ ]))
+    </gtenv>
+</T>

@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
@@ -25,7 +24,7 @@ public class CheckSortTopUniqueness extends BasicVisitor {
         String msg = "Multiple top sorts found for " + node.getDeclaredSort() + ": ";
         int count = 0;
         if (context.isSubsorted(Sort.KLIST, node.getDeclaredSort().getSort())) {
-            msg += KSorts.KLIST + ", ";
+            msg += Sort.KLIST + ", ";
             count++;
         }
         if (context.isSubsorted(Sort.BAG, node.getDeclaredSort().getSort())) {

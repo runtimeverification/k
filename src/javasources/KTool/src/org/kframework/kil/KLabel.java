@@ -16,7 +16,7 @@ public abstract class KLabel extends Term {
         super(element);
         this.sort = Sort.KLABEL;
         //System.out.println(this.sort);
-        //assert this.sort.equals(KSorts.KLABEL);
+        //assert this.sort.equals(Sort.KLABEL);
     }
 
     protected KLabel(KLabel kLabel) {

@@ -13,6 +13,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
@@ -58,7 +59,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
                 Token token = (Token) (entry.getValue().getLabel());
                 terms.add(KApp.of(
                         KLabelConstant.of(AddPredicates.predicate(
-                                token.tokenSort().getName().replaceFirst("#", "")), context),
+                                Sort.of(token.tokenSort().getName().replaceFirst("#", ""))), context),
                         entry.getKey()));
             }
 

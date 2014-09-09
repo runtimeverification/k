@@ -10,6 +10,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
@@ -139,7 +140,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
             RunProcess rp = new RunProcess();
             org.kframework.kil.Term kast = rp.runParser(
                     ccOptions.parser(context),
-                    term1.stringValue(), true, term2.stringValue(), context);
+                    term1.stringValue(), true, Sort.of(term2.stringValue()), context);
             Term term = kilFactory.term(kast);
             term = term.evaluate(termContext);
             return term;

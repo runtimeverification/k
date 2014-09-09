@@ -48,13 +48,13 @@ public class ProgramLoader {
      * @param kappize
      *            If true, then apply KAppModifier to AST.
      */
-    public static ASTNode loadPgmAst(String content, Source source, Boolean kappize, String startSymbol, Context context)
+    public static ASTNode loadPgmAst(String content, Source source, Boolean kappize, Sort startSymbol, Context context)
             throws ParseFailedException {
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
         org.kframework.parser.concrete.KParser.ImportTblPgm(context.kompiled);
-        String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
+        String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol.toString());
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         XmlLoader.addSource(doc.getFirstChild(), source);
@@ -75,7 +75,7 @@ public class ProgramLoader {
         return out;
     }
 
-    public static ASTNode loadPgmAst(String content, Source source, String startSymbol, Context context) throws ParseFailedException {
+    public static ASTNode loadPgmAst(String content, Source source, Sort startSymbol, Context context) throws ParseFailedException {
         return loadPgmAst(content, source, true, startSymbol, context);
     }
 
@@ -84,10 +84,10 @@ public class ProgramLoader {
      *
      * Save it in kompiled cache under pgm.maude.
      */
-    public static Term processPgm(byte[] content, Source source, String startSymbol,
+    public static Term processPgm(byte[] content, Source source, Sort startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
-        if (!context.definedSorts.contains(Sort.of(startSymbol))) {
+        if (!context.definedSorts.contains(startSymbol)) {
             throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
                     "The start symbol must be declared in the definition. Found: " + startSymbol));
         }
@@ -129,7 +129,7 @@ public class ProgramLoader {
 
             String contentString = new String(content);
             Parser parser = new Parser(contentString);
-            out = parser.parse(grammar.get(startSymbol), 0);
+            out = parser.parse(grammar.get(startSymbol.toString()), 0);
             if (context.globalOptions.debug)
                 System.err.println("Raw: " + out + "\n");
             try {

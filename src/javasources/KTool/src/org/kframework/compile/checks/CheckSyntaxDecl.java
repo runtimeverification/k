@@ -4,7 +4,6 @@ package org.kframework.compile.checks;
 import java.util.HashMap;
 import java.util.List;
 
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sentence;
@@ -15,7 +14,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 /**

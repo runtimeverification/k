@@ -11,9 +11,11 @@ import java.lang.annotation.Target;
 import java.util.Set;
 
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
@@ -35,11 +37,16 @@ public class JCommanderModule extends AbstractModule  {
     protected void configure() {}
 
     @Provides
-    JCommander jcommander(@Options Set<Object> options, @Options Set<Class<?>> experimentalOptions) {
-        JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
-        jc.setProgramName("kompile");
-        jc.setParameterDescriptionComparator(new SortedParameterDescriptions(experimentalOptions.toArray(new Class<?>[experimentalOptions.size()])));
-        return jc;
+    JCommander jcommander(@Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem) {
+        try {
+            JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
+            jc.setProgramName("kompile");
+            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(experimentalOptions.toArray(new Class<?>[experimentalOptions.size()])));
+            return jc;
+        } catch (ParameterException e) {
+            kem.registerCriticalError(e.getMessage(), e);
+            throw new AssertionError("unreachable");
+        }
     }
 
     @Provides @Usage

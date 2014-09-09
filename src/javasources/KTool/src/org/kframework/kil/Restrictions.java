@@ -11,11 +11,11 @@ public class Restrictions extends ModuleItem {
     Terminal terminal;
     String pattern;
 
-    public NonTerminal getSort() {
+    public NonTerminal getNonTerminal() {
         return sort;
     }
 
-    public void setSort(NonTerminal sort) {
+    public void setNonTerminal(NonTerminal sort) {
         this.sort = sort;
     }
 

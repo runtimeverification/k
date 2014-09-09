@@ -4,7 +4,6 @@ package org.kframework.backend.maude;
 import org.kframework.backend.BackendFilter;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
 import org.kframework.kil.NonTerminal;

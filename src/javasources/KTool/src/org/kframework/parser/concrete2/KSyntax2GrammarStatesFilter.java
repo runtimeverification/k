@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.kframework.kil.Configuration;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;

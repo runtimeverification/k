@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;

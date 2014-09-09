@@ -319,7 +319,7 @@ public class KParser {
         IStrategoTerm result = null;
         try {
             try {
-                result = context.invokeStrategyCLI(java$Parse$String$Pgm_0_0.instance, StringUtil.escapeSortName(startSymbol), program);
+                result = context.invokeStrategyCLI(java$Parse$String$Pgm_0_0.instance, StringUtil.escapeSort(startSymbol), program);
             } finally {
                 context.getIOAgent().closeAllFiles();
             }
