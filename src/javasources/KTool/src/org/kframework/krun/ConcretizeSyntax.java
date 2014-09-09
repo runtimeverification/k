@@ -28,6 +28,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         if (r instanceof Term && !(r instanceof Variable)) {
             if (node.getAttributes().size() > 0) {
                 Cast c = new Cast((Term)r, context);
+                c.copyAttributesFrom(node);
                 return super.complete(node, c);
             }
         }

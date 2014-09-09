@@ -137,6 +137,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode complete(ASTNode node, ASTNode r) {
+        r.copyAttributesFrom(node);
+        return super.complete(node, r);
+    }
+
+    @Override
     public ASTNode visit(org.kframework.kil.KApp node, Void _)  {
         if (node.getLabel() instanceof org.kframework.kil.Token) {
             if (node.getLabel() instanceof BoolBuiltin) {

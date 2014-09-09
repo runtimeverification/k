@@ -48,6 +48,7 @@ public class CorrectCastPriorityFilter extends ParseForestTransformer {
                 var.setUserTyped(true);
                 var.setSort(cst.getSort());
                 var.setSyntactic(cst.getType() != CastType.SEMANTIC);
+                var.copyAttributesFrom(cst);
                 return var;
             }
         }
