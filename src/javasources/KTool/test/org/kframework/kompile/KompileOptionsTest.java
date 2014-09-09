@@ -2,21 +2,34 @@
 package org.kframework.kompile;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.kframework.backend.Backends;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
+import org.kframework.utils.general.GlobalSettings;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.beust.jcommander.JCommander;
 
+@RunWith(MockitoJUnitRunner.class)
 public class KompileOptionsTest {
 
     private KompileOptions options;
 
+    @Mock
+    KExceptionManager kem;
+
     @Before
     public void setUp() {
         options = new KompileOptions();
+        GlobalSettings.kem = kem;
+        doThrow(KEMException.class).when(kem).registerCriticalError(Matchers.anyString());
     }
 
     private void parse(String... args) {
