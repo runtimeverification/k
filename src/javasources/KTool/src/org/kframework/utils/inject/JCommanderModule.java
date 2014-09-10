@@ -10,6 +10,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Set;
 
+import org.kframework.main.Tool;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SortedParameterDescriptions;
@@ -37,10 +38,10 @@ public class JCommanderModule extends AbstractModule  {
     protected void configure() {}
 
     @Provides
-    JCommander jcommander(@Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem) {
+    JCommander jcommander(Tool tool, @Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem) {
         try {
             JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
-            jc.setProgramName("kompile");
+            jc.setProgramName(tool.name().toLowerCase());
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(experimentalOptions.toArray(new Class<?>[experimentalOptions.size()])));
             return jc;
         } catch (ParameterException e) {
