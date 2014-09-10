@@ -21,6 +21,7 @@ import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KItemProjection;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -133,6 +134,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         term = new MacroExpander(TermContext.of(globalContext)).processTerm((Term) this.visitNode(node));
 
         return term;
+    }
+
+    @Override
+    public ASTNode complete(ASTNode node, ASTNode r) {
+        r.copyAttributesFrom(node);
+        return super.complete(node, r);
     }
 
     @Override
@@ -446,7 +453,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.Rule node, Void _)  {
         assert node.getBody() instanceof org.kframework.kil.Rewrite;
 
-        concreteCollectionSize = node.getConcreteDataStructureSize();
+        JavaBackendRuleData ruleData = node.getAttribute(JavaBackendRuleData.class);
+        if (ruleData == null) {
+            ruleData = new JavaBackendRuleData();
+        }
+        concreteCollectionSize = ruleData.getConcreteDataStructureSize();
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
         Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
@@ -463,7 +474,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         UninterpretedConstraint.Builder lookupsBuilder = UninterpretedConstraint.builder();
-        for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
+        for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
             Variable base = (Variable) this.visitNode(lookup.base());
             Term key = (Term) this.visitNode(lookup.key());
             Kind kind;
@@ -520,21 +531,21 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         java.util.Map<CellLabel, Term> lhsOfReadCell = null;
         java.util.Map<CellLabel, Term> rhsOfWriteCell = null;
-        if (node.isCompiledForFastRewriting()) {
+        if (ruleData.isCompiledForFastRewriting()) {
             lhsOfReadCell = Maps.newHashMap();
-            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getLhsOfReadCell().entrySet()) {
+            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getLhsOfReadCell().entrySet()) {
                 lhsOfReadCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
             }
             rhsOfWriteCell = Maps.newHashMap();
-            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : node.getRhsOfWriteCell().entrySet()) {
+            for (java.util.Map.Entry<String, org.kframework.kil.Term> entry : ruleData.getRhsOfWriteCell().entrySet()) {
                 rhsOfWriteCell.put(CellLabel.of(entry.getKey()), (Term) this.visitNode(entry.getValue()));
             }
         }
 
         java.util.Set<CellLabel> cellsToCopy = null;
-        if (node.getCellsToCopy() != null) {
+        if (ruleData.getCellsToCopy() != null) {
             cellsToCopy = Sets.newHashSet();
-            for (String cellLabelName : node.getCellsToCopy()) {
+            for (String cellLabelName : ruleData.getCellsToCopy()) {
                 cellsToCopy.add(CellLabel.of(cellLabelName));
             }
         }
@@ -547,11 +558,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 ensures,
                 freshVariables,
                 lookupsBuilder.build(),
-                node.isCompiledForFastRewriting(),
+                ruleData.isCompiledForFastRewriting(),
                 lhsOfReadCell,
                 rhsOfWriteCell,
                 cellsToCopy,
-                node.getInstructions(),
+                ruleData.getInstructions(),
                 node,
                 globalContext.getDefinition());
 

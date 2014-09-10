@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -77,11 +78,12 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule rule, Void _)  {
+        rule.addAttribute(JavaBackendRuleData.class, new JavaBackendRuleData());
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)
                 || rule.containsAttribute(Attribute.MACRO_KEY)
                 || rule.containsAttribute(Attribute.ANYWHERE_KEY)
                 || rule.containsAttribute(Attribute.PATTERN_KEY)) {
-            rule.setCompiledForFastRewriting(false);
+            rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false));
             return rule;
         }
 
@@ -112,12 +114,14 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
         }
 
         rule = rule.shallowCopy();
-        rule.setCompiledForFastRewriting(compiledForFastRewriting);
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
+        ruleData = ruleData.setCompiledForFastRewriting(compiledForFastRewriting);
         if (compiledForFastRewriting) {
-            rule.setCellsOfInterest(cellsOfInterest);
-            rule.setLhsOfReadCell(readCell2LHS);
-            rule.setRhsOfWriteCell(writeCell2RHS);
+            ruleData = ruleData.setCellsOfInterest(cellsOfInterest);
+            ruleData = ruleData.setLhsOfReadCell(readCell2LHS);
+            ruleData = ruleData.setRhsOfWriteCell(writeCell2RHS);
         }
+        rule.addAttribute(JavaBackendRuleData.class, ruleData);
 
         return rule;
     }

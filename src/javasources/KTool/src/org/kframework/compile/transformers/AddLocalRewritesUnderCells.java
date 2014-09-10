@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
@@ -77,29 +78,31 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
     }
 
     private Rule setCellsToCopyForUncompiledRule(Rule rule) {
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
         if (((Rewrite) rule.getBody()).getRight() instanceof Cell) {
             Cell rhs =  (Cell) ((Rewrite) rule.getBody()).getRight();
             rule = rule.shallowCopy();
             if (hasGroundCell(rhs)) {
-                rule.setCellsToCopy(ImmutableSet.of(rhs.getLabel()));
+                ruleData = ruleData.setCellsToCopy(ImmutableSet.of(rhs.getLabel()));
             } else {
-                rule.setCellsToCopy(ImmutableSet.<String>of());
+                ruleData = ruleData.setCellsToCopy(ImmutableSet.<String>of());
             }
         } else {
-            rule.setCellsToCopy(ImmutableSet.<String>of());
+            ruleData = ruleData.setCellsToCopy(ImmutableSet.<String>of());
         }
+        rule.addAttribute(JavaBackendRuleData.class, ruleData);
         return rule;
     }
 
     @Override
     public ASTNode visit(Rule rule, Void _)  {
-        if (!rule.isCompiledForFastRewriting()) {
+        if (!rule.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
             return setCellsToCopyForUncompiledRule(rule);
         }
 
         hasAssocCommMatching = false;
-        lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
-        rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
+        lhsOfReadCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getLhsOfReadCell());
+        rhsOfWriteCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getRhsOfWriteCell());
         cellsToCopy.clear();
 
         crntRule = rule;
@@ -107,7 +110,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
         if (hasAssocCommMatching) {
             rule = rule.shallowCopy();
-            rule.setCompiledForFastRewriting(false);
+            rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false));
             rule = setCellsToCopyForUncompiledRule(rule);
             return rule;
         }
@@ -118,9 +121,11 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         crntRule = null;
 
         rule = rule.shallowCopy();
-        rule.setLhsOfReadCell(lhsOfReadCell);
-        rule.setRhsOfWriteCell(rhsOfWriteCell);
-        rule.setCellsToCopy(cellsToCopy);
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
+        ruleData = ruleData.setLhsOfReadCell(lhsOfReadCell);
+        ruleData = ruleData.setRhsOfWriteCell(rhsOfWriteCell);
+        ruleData = ruleData.setCellsToCopy(cellsToCopy);
+        rule.addAttribute(JavaBackendRuleData.class, ruleData);
 
         return rule;
     }
@@ -130,13 +135,13 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         if (crntRule == null) {
             return super.visit(cell, _);
         }
-        if (!crntRule.getCellsOfInterest().contains(cell.getLabel())
+        if (!crntRule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest().contains(cell.getLabel())
                 && outerWriteCell == null) {
             return super.visit(cell, _);
         }
 
         if (status == Status.LHS) {
-            if (crntRule.getReadCells().contains(cell.getLabel())) {
+            if (crntRule.getAttribute(JavaBackendRuleData.class).getReadCells().contains(cell.getLabel())) {
                 if (hasAssocCommMatching(cell)) {
                     hasAssocCommMatching = true;
                 }
@@ -150,7 +155,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
                     super.visit(cell, _);
                 }
             } else {
-                if (crntRule.getWriteCells().contains(cell.getLabel())) {
+                if (crntRule.getAttribute(JavaBackendRuleData.class).getWriteCells().contains(cell.getLabel())) {
                     rhsOfWriteCell.put(cell.getLabel(), cell.getContents());
 
                     outerWriteCell = cell.getLabel();

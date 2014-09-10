@@ -2,6 +2,7 @@
 package org.kframework.kil;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -12,6 +13,8 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
+import com.google.common.reflect.TypeToken;
+import com.google.inject.name.Names;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
@@ -151,6 +154,30 @@ public abstract class ASTNode implements Serializable {
         addAttribute(new Attribute<>(key, val));
     }
 
+    public <T> void addAttribute(Class<T> key, T val) {
+        addAttribute(Key.get(key), val);
+    }
+
+    public <T> void addAttribute(TypeToken<T> key, T val) {
+        addAttribute(Key.get(key), val);
+    }
+
+    public <T> void addAttribute(TypeToken<T> key, Annotation annotation, T val) {
+        addAttribute(Key.get(key, annotation), val);
+    }
+
+    public <T> void addAttribute(TypeToken<T> key, String annotation, T val) {
+        addAttribute(Key.get(key, Names.named(annotation)), val);
+    }
+
+    public <T> void addAttribute(Class<T> key, Annotation annotation, T val) {
+        addAttribute(Key.get(key, annotation), val);
+    }
+
+    public <T> void addAttribute(Class<T> key, String annotation, T val) {
+        addAttribute(Key.get(key, Names.named(annotation)), val);
+    }
+
     /**
      * Appends an attribute to the list of attributes.
      *
@@ -213,7 +240,29 @@ public abstract class ASTNode implements Serializable {
 
     public <T> T getAttribute(Class<T> cls) {
         return getAttribute(Key.get(cls));
-    }  /**
+    }
+
+    public <T> T getAttribute(Class<T> cls, Annotation annotation) {
+        return getAttribute(Key.get(cls, annotation));
+    }
+
+    public <T> T getAttribute(Class<T> cls, String annotation) {
+        return getAttribute(Key.get(cls, Names.named(annotation)));
+    }
+
+    public <T> T getAttribute(TypeToken<T> type) {
+        return getAttribute(Key.get(type));
+    }
+
+    public <T> T getAttribute(TypeToken<T> type, Annotation annotation) {
+        return getAttribute(Key.get(type, annotation));
+    }
+
+    public <T> T getAttribute(TypeToken<T> type, String annotation) {
+        return getAttribute(Key.get(type, Names.named(annotation)));
+    }
+
+    /**
      * Updates the value of an attribute in the list of attributes.
      *
      * @param key

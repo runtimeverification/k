@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.CellMap;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.kil.ASTNode;
@@ -75,7 +76,8 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             patternLabel = null;
         }
 
-        if (!rule.isCompiledForFastRewriting()) {
+        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
+        if (ruleData == null || !ruleData.isCompiledForFastRewriting()) {
             return super.visit(rule, _);
         }
 
@@ -84,9 +86,9 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         rule = (Rule) super.visit(rule, _);
         /* compiling cell to cell map changes the cells of interest used for fast rewriting */
         if (!cellMapLabels.isEmpty()) {
-            Set<String> cellsOfInterest = Sets.newHashSet(rule.getCellsOfInterest());
-            Map<String, Term> lhsOfReadCell = Maps.newHashMap(rule.getLhsOfReadCell());
-            Map<String, Term> rhsOfWriteCell = Maps.newHashMap(rule.getRhsOfWriteCell());
+            Set<String> cellsOfInterest = Sets.newHashSet(rule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest());
+            Map<String, Term> lhsOfReadCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getLhsOfReadCell());
+            Map<String, Term> rhsOfWriteCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getRhsOfWriteCell());
             Set<String> cellMapLabelsToAdd = Sets.newHashSet();
 
             Iterator<String> iter = cellsOfInterest.iterator();
@@ -118,9 +120,10 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             cellsOfInterest.addAll(cellMapLabelsToAdd);
 
             rule = rule.shallowCopy();
-            rule.setCellsOfInterest(cellsOfInterest);
-            rule.setLhsOfReadCell(lhsOfReadCell);
-            rule.setRhsOfWriteCell(rhsOfWriteCell);
+            ruleData = ruleData.setCellsOfInterest(cellsOfInterest);
+            ruleData = ruleData.setRhsOfWriteCell(rhsOfWriteCell);
+            ruleData = ruleData.setLhsOfReadCell(lhsOfReadCell);
+            rule.addAttribute(JavaBackendRuleData.class, ruleData);
         }
 
         return rule;

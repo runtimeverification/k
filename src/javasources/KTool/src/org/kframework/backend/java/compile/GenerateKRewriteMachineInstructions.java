@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.backend.java.rewritemachine.KAbstractRewriteMachine;
 import org.kframework.kil.ASTNode;
@@ -90,14 +91,14 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
 
     @Override
     public ASTNode visit(Rule rule, Void _)  {
-        if (!rule.isCompiledForFastRewriting()) {
+        if (!rule.getAttribute(JavaBackendRuleData.class).isCompiledForFastRewriting()) {
             return rule;
         }
 
         /* only visit cells of interest and their ancestors */
         cellsToVisit.clear();
         for (String cellLabel : containingCells.keySet()) {
-            if (!Collections.disjoint(containingCells.get(cellLabel), rule.getCellsOfInterest())) {
+            if (!Collections.disjoint(containingCells.get(cellLabel), rule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest())) {
                 cellsToVisit.add(cellLabel);
             }
         }
@@ -107,7 +108,7 @@ public class GenerateKRewriteMachineInstructions extends CopyOnWriteTransformer 
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
 
         rule = rule.shallowCopy();
-        rule.setInstructions(schedule);
+        rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setInstructions(schedule));
 
 //        System.out.println(rule);
 //        System.out.println(rule.getCellsOfInterest());

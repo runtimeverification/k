@@ -3,10 +3,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.compile.utils.MaudeHelper;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.Collection;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
@@ -68,6 +65,12 @@ public class FlattenTerms extends CopyOnWriteTransformer {
         public FlattenKSyntax(FlattenTerms t, Context context) {
             super("Flatten K Syntax", context);
             trans = t;
+        }
+
+        @Override
+        public ASTNode complete(ASTNode node, ASTNode r) {
+            r.copyAttributesFrom(node);
+            return super.complete(node, r);
         }
 
         @Override

@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
+import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BuiltinLookup;
@@ -162,7 +163,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             variables.addAll(requires.variables());
         }
 
-        List<BuiltinLookup> lookups = new ArrayList<>(node.getLookups());
+        List<BuiltinLookup> lookups = new ArrayList<>(node.getAttribute(JavaBackendRuleData.class).getLookups());
 
         for (VariableCache item : queue) {
             item.unmatchedVariables().removeAll(lhs.variables());
@@ -275,10 +276,10 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         returnNode.setBody(rewrite);
         returnNode.setRequires(requires);
         returnNode.setEnsures(ensures);
-        returnNode.setLookups(lookups);
-        returnNode.setConcreteDataStructureSize(
-                new HashMap<>(returnNode.getConcreteDataStructureSize()));
-        returnNode.getConcreteDataStructureSize().putAll(concreteSize);
+        JavaBackendRuleData ruleData = returnNode.getAttribute(JavaBackendRuleData.class);
+        ruleData = ruleData.setLookups(lookups);
+        ruleData = ruleData.setConcreteDataStructureSize(concreteSize);
+        returnNode.addAttribute(JavaBackendRuleData.class, ruleData);
 
         location = null;
 

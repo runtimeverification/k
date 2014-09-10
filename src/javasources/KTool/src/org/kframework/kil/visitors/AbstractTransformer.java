@@ -45,15 +45,4 @@ public abstract class AbstractTransformer<E extends Throwable> extends AbstractV
         return o != n;
     }
 
-    @Override
-    public ASTNode complete(ASTNode node, ASTNode r) {
-        ASTNode result = super.complete(node, r);
-        if (result != null) {
-            result.copyAttributesFrom(node);
-            result.setLocation(node.getLocation());
-            result.setSource(node.getSource());
-        }
-        return result;
-    }
-
 }
