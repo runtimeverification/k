@@ -88,9 +88,9 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
      * Should not be called on other types of productions.
      * @return the Sort object
      */
-    public NonTerminal getSubsort() {
+    public Sort getSubsort() {
         assert isSyntacticSubsort();
-        return (NonTerminal) items.get(0);
+        return getChildSort(0);
     }
 
     public boolean isLexical() {

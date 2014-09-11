@@ -70,8 +70,8 @@ public class CellTypesFilter extends ParseForestTransformer {
 
         @Override
         public ASTNode visit(Term trm, Void _) throws ParseFailedException {
-            if (!context.isSubsortedEq(expectedSort, trm.getSort()) &&
-                !(context.isSubsortedEq(Sort.KLIST, expectedSort) &&
+            if (!context.isSyntacticSubsortedEq(expectedSort, trm.getSort()) &&
+                !(context.isSyntacticSubsortedEq(Sort.KLIST, expectedSort) &&
                                 (trm.getSort().equals(Sort.KLIST) ||
                                 trm.getSort().equals(Sort.K) ||
                                 trm.getSort().equals(Sort.KITEM)))) {

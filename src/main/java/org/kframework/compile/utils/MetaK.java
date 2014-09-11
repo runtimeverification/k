@@ -232,7 +232,7 @@ public class MetaK {
 
     public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
         if (prod.isSubsort()) {
-            return Variable.getFreshVar(prod.getChildSort(0));
+            return Variable.getFreshVar(prod.getSubsort());
         }
         if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();

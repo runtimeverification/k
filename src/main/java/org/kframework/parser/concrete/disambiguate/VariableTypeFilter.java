@@ -32,7 +32,7 @@ public class VariableTypeFilter extends ParseForestTransformer {
         if (correctVar == null)
             return r;
         assert r.getExpectedSort() != null : "Expected sort Should not be null" + r;
-        if (!expected && context.isSubsortedEq(r.getSort(), correctVar.getSort()) || expected && context.isSubsortedEq(r.getExpectedSort(), correctVar.getExpectedSort())) {
+        if (!expected && context.isSyntacticSubsortedEq(r.getSort(), correctVar.getSort()) || expected && context.isSyntacticSubsortedEq(r.getExpectedSort(), correctVar.getExpectedSort())) {
             Variable newV = new Variable(r);
             if (!expected)
                 newV.setSort(correctVar.getSort());

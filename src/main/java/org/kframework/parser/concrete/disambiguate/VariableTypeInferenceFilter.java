@@ -95,7 +95,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     for (Sort sort : context.definedSorts) { // for every declared sort
                         boolean min = true;
                         for (String var : values) {
-                            if (!context.isSubsortedEq(Sort.of(var), sort)) {
+                            if (!context.isSyntacticSubsortedEq(Sort.of(var), sort)) {
                                 min = false;
                                 break;
                             }
@@ -113,7 +113,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         for (String vv1 : mins) {
                             boolean maxSort = true;
                             for (String vv2 : mins)
-                                if (context.isSubsorted(Sort.of(vv2), Sort.of(vv1)))
+                                if (context.isSyntacticSubsorted(Sort.of(vv2), Sort.of(vv1)))
                                     maxSort = false;
                             if (maxSort)
                                 maxSorts.add(vv1);
@@ -193,7 +193,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         for (Map.Entry<Location, Set<Variable>> ent : varLoc.entrySet()) {
                             Variable vmax = ent.getValue().iterator().next();
                             for (Variable vv1 : ent.getValue()) {
-                                if (context.isSubsorted(vv1.getSort(), vmax.getSort()))
+                                if (context.isSyntacticSubsorted(vv1.getSort(), vmax.getSort()))
                                     vmax = vv1;
                             }
                             ent.getValue().clear();
@@ -204,7 +204,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         Variable vmin = varLoc.entrySet().iterator().next().getValue().iterator().next();
                         for (Map.Entry<Location, Set<Variable>> ent : varLoc.entrySet()) {
                             Variable vloc = ent.getValue().iterator().next();
-                            if (context.isSubsorted(vmin.getSort(), vloc.getSort()))
+                            if (context.isSyntacticSubsorted(vmin.getSort(), vloc.getSort()))
                                 vmin = vloc;
                         }
 
@@ -280,7 +280,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     // for variables only, find maximum
                     boolean max = true;
                     for (Term t1 : amb.getContents()) {
-                        if (t1 != t && t1 instanceof Variable && context.isSubsorted(t1.getSort(), t.getSort())) {
+                        if (t1 != t && t1 instanceof Variable && context.isSyntacticSubsorted(t1.getSort(), t.getSort())) {
                             max = false;
                             break;
                         }
