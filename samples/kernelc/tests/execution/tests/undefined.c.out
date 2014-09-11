@@ -1,6 +1,8 @@
 <config>
     <struct>
-        listNode |-> next |-> struct listNode * value |-> int
+        listNode |-> 
+            next |-> struct listNode *
+            value |-> int
     </struct>
     <fun>
         main |-> functionBody (  , int , {  { struct listNode * x ; x = (( 
@@ -11,7 +13,7 @@
     <k>
         (* tv ( int * , member ( 2 , value ) )) ~> HOLE ~> "%d\n", HOLE ~> (
           printf ( HOLE )) ~> HOLE ; ~> return 0 ; ~> .Map ~> return tv ( void
-           , undef ) ; ~> .Map ~> .Map
+           , undef ) ; ~> .Map ~> .List{""} ~> .Map
     </k>
     <env>
         x |-> tv ( struct listNode * * , object ( 1 ) )
@@ -23,14 +25,17 @@
         ListItem ( callStackFrame ( .K , .Map ,  ) )
     </stack>
     <heap>
-        object ( 1 ) |-> tv ( struct listNode * , object ( 2 ) ) object ( 2 ) 
-          |-> next |-> tv ( struct listNode * , undef ) value |-> tv ( int , 
-          undef )
+        object ( 1 ) |-> tv ( struct listNode * , object ( 2 ) )
+        object ( 2 ) |-> 
+            next |-> tv ( struct listNode * , undef )
+            value |-> tv ( int , undef )
     </heap>
     <in>
-        ListItem ( #buffer ( "" ) ) ListItem ( #istream ( 0 ) )
+        ListItem ( #buffer ( "" ) )
+        ListItem ( #istream ( 0 ) )
     </in>
     <out>
-        ListItem ( #ostream ( 1 ) ) ListItem ( #buffer ( "" ) )
+        ListItem ( #ostream ( 1 ) )
+        ListItem ( #buffer ( "" ) )
     </out>
 </config>
