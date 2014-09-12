@@ -29,7 +29,7 @@ public class PrintSearchResult implements Transformation<Map<String, Term>, Stri
         StringBuilder sb = new StringBuilder();
         if (a.typeSafeGet(Boolean.class, IS_DEFAULT_PATTERN)) {
             sb.append("\n");
-            sb.append(prettyPrinter.run(substitution.get("B"), a));
+            sb.append(prettyPrinter.run(substitution.get("B:Bag"), a));
         } else {
             boolean empty = true;
 

@@ -38,18 +38,10 @@ public class SearchResult {
             substitution = new HashMap<String, Term>();
             for (Variable var : compilationInfo.getVars()) {
                 Term rawValue;
-                String varString = "";
-                // The backend doesn't keep sort information around so we want to
-                // match the variable name only.
-                for (String key : rawSubstitution.keySet()) {
-                    if (key.equals(var.getName())) {
-                        varString = key;
-                        break;
-                    }
-                }
-                rawValue = rawSubstitution.get(varString);
 
-                substitution.put(var.getName(), KRunState.concretize(rawValue, context));
+                rawValue = rawSubstitution.get(var.getName());
+
+                substitution.put(var.toString(), KRunState.concretize(rawValue, context));
             }
         }
         return substitution;
@@ -57,6 +49,10 @@ public class SearchResult {
 
     public Map<String, Term> getRawSubstitution() {
         return rawSubstitution;
+    }
+
+    public RuleCompilerSteps getCompilationInfo() {
+        return compilationInfo;
     }
 
     public KRunState getState() {

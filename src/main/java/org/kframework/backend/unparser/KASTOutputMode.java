@@ -1,5 +1,6 @@
 package org.kframework.backend.unparser;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.kframework.kil.ASTNode;
@@ -31,7 +32,11 @@ public class KASTOutputMode {
 
         @Override
         public Map<String, Term> run(SearchResult solution, Attributes a) {
-            return solution.getRawSubstitution();
+            Map<String, Term> result = new HashMap<>();
+            for (Map.Entry<String, Term> entry : solution.getRawSubstitution().entrySet()) {
+                result.put(solution.getCompilationInfo().getVar(entry.getKey()).toString(), entry.getValue());
+            }
+            return result;
         }
 
         @Override
