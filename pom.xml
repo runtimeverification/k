@@ -483,6 +483,7 @@
             <configuration>
               <includeTypes>jar</includeTypes>
               <includeScope>runtime</includeScope>
+              <useBaseVersion>false</useBaseVersion>
               <outputDirectory>${project.build.directory}/lib/java</outputDirectory>
             </configuration>
           </execution>
