@@ -1,8 +1,0 @@
-mod #SMT is
-	including #STRING-INTERFACE .
-
-	op #smtCall_ : #String -> #String
-	  [special (id-hook StringOpSymbol (smt)
-				op-hook stringSymbol (<Strings> : ~> #String))] .
-				
-endm
