@@ -34,7 +34,7 @@
     <stratego.package.dir>${stratego.src.dir}/org/kframework/parser/concrete/lib</stratego.package.dir>
     <config>tests/config.xml</config>
     <ktestDir>${project.basedir}</ktestDir>
-    <base>unified-builtins2</base>
+    <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
