@@ -156,19 +156,19 @@
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>com.microsoft.z3</artifactId>
-      <version>4.3.2.5a45711f22d9</version>
+      <version>4.3.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>${native.library.prefix}z3java</artifactId>
-      <version>4.3.2.5a45711f22d9</version>
+      <version>4.3.2-SNAPSHOT</version>
       <type>${native.library.type}</type>
       <classifier>${native.classifier}</classifier>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>libz3</artifactId>
-      <version>4.3.2.5a45711f22d9</version>
+      <version>4.3.2-SNAPSHOT</version>
       <type>${native.library.type}</type>
       <classifier>${native.classifier}</classifier>
     </dependency>
@@ -483,6 +483,7 @@
             <configuration>
               <includeTypes>jar</includeTypes>
               <includeScope>runtime</includeScope>
+              <useBaseVersion>false</useBaseVersion>
               <outputDirectory>${project.build.directory}/lib/java</outputDirectory>
             </configuration>
           </execution>
