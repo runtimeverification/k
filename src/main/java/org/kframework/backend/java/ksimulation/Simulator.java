@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.ksimulation;
 
 import org.kframework.kil.Attributes;

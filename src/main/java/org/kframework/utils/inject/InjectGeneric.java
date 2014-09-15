@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.utils.inject;
 
 import static java.lang.annotation.ElementType.FIELD;

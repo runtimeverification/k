@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.utils.inject;
 
 import java.io.File;
@@ -6,7 +7,6 @@ import java.io.PrintWriter;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.grapher.InjectorGrapher;
 import com.google.inject.grapher.graphviz.GraphvizGrapher;
 import com.google.inject.grapher.graphviz.GraphvizModule;
 import org.kframework.main.Main;
