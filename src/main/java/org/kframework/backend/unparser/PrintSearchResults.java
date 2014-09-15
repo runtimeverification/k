@@ -1,8 +1,7 @@
 package org.kframework.backend.unparser;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.kframework.kil.Attributes;
 import org.kframework.krun.api.SearchResult;
@@ -29,12 +28,11 @@ public class PrintSearchResults implements Transformation<SearchResults, String>
         StringBuilder sb = new StringBuilder();
         sb.append("Search results:");
         int i = 1;
-        List<String> solutionStrings = new ArrayList<>();
+        SortedSet<String> solutionStrings = new TreeSet<>();
         for (SearchResult solution : results.getSolutions()) {
             a.add(Boolean.class, PrintSearchResult.IS_DEFAULT_PATTERN, results.isDefaultPattern());
             solutionStrings.add(searchResultPrinter.run(solution, a));
         }
-        Collections.sort(solutionStrings);
         for (String solution : solutionStrings) {
             sb.append("\n\nSolution " + i + ":");
             sb.append(solution);
