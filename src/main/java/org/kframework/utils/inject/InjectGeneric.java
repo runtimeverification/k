@@ -10,5 +10,13 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
+/**
+ * An annotation used to manually inject a generic implementation
+ * of a generic interface for all possible type parameters.
+ * In order for this to work, it is necessary to use a TypeListener
+ * and a MembersInjector directly.
+ * @author dwightguth
+ *
+ */
 @BindingAnnotation @Target({ FIELD, METHOD }) @Retention(RUNTIME)
 public @interface InjectGeneric {}

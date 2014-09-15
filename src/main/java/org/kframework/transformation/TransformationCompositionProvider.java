@@ -13,6 +13,39 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 
+/**
+ * Represents a guided step to be taken in order to compose two transformations together.
+ * This provides an implementation for transformations which may require more than one step,
+ * by assuming that the transformation can either be completed in one step, or that
+ * an implementation can be found transforming P to Q and Q to R.
+ *
+ * The semantics of this provider are as follows:
+ *
+ * <ul>
+ * <li>If a transformation can be found from P to R, and transformations from both
+ * P to Q and Q to R cannot be found, return the transformation from P to R.
+ * <li>If transformations can be found from P to R, from P to Q, and from Q to R,
+ * throw a {@link AmbiguousTransformationException}.
+ * <li>If no transformation can be found from P to R, but transformations can be found
+ * from both P to Q and Q to R, return a transformation composed by first transforming
+ * the input to type Q using the first transformation, then transforming it to type R
+ * using the second transformation.
+ * <li>If no transformation can be found from P to R, and transformations from both
+ * P to Q and Q to R cannot be found, throw a {@link TransformationNotSatisfiedException}.
+ * <li>If the transformation implements the concrete transformation from {@link Void} to
+ * a final result through the intermediate of a {@link KRunResult}, and no transformation
+ * can be found to implement this step, use {@link Executor.Tool}. This special case
+ * allows there to exist exactly one transformation which is activated as a last resort
+ * if no other transformation of this type can be found (i.e. because the user
+ * did not specify any special options).
+ * </ul>
+ *
+ * @author dwightguth
+ *
+ * @param <P> The type of the input to the transformation
+ * @param <Q> A hint of a type that is expected to be used as an intermediate result while transforming the input.
+ * @param <R> The type of the output of the transformation.
+ */
 public class TransformationCompositionProvider<P, Q, R> implements TransformationProvider<Transformation<P, R>> {
 
     private final TransformationProvider<Transformation<P, Q>> firstStep;

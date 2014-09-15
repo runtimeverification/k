@@ -4,10 +4,29 @@ package org.kframework.transformation;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterDescription;
 
+/**
+ * Represents a set of information used to determine whether a particular
+ * transformation should be added to the list of active transformations.
+ * (see {@link ActivatedTransformationProvider}).
+ * @author dwightguth
+ *
+ */
 public interface ToolActivation {
 
+    /**
+     * Returns true if the current option set activates this transformation;
+     * false otherwise.
+     * @param jcommander
+     * @return
+     */
     boolean isActive(JCommander jcommander);
 
+    /**
+     * Represents a key of a transformation which activates if
+     * a particular option is specified (i.e. true or non-null).
+     * @author dwightguth
+     *
+     */
     public static class OptionActivation implements ToolActivation {
 
         private final String optionName;
@@ -63,6 +82,13 @@ public interface ToolActivation {
 
     }
 
+    /**
+     * Represents the key of a transformation which activates if a particular
+     * optino has a particular value.
+     * @author dwightguth
+     *
+     * @param <T> The type of the value of the option.
+     */
     public static class OptionValueActivation<T> implements ToolActivation {
 
         private final String optionName;
