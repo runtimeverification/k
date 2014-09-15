@@ -2,6 +2,8 @@
 package org.kframework.main;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.JarInfo;
@@ -30,12 +32,13 @@ public class KppFrontEnd extends FrontEnd {
         this.fileName = fileName;
     }
 
-    public static Module[] getModules(final String[] args) {
+    public static List<Module> getModules(final String[] args) {
         if (args.length != 1) {
             printBootError("Kpp takes exactly one file");
             return null;
         }
-        return new Module[] { new AbstractModule() {
+        List<Module> modules = new ArrayList<>();
+        modules.add(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(FrontEnd.class).to(KppFrontEnd.class);
@@ -43,7 +46,8 @@ public class KppFrontEnd extends FrontEnd {
                 bind(String.class).annotatedWith(FirstArg.class).toInstance(args[0]);
                 bind(GlobalOptions.class).toInstance(new GlobalOptions());
             }
-        }};
+        });
+        return modules;
     }
 
     public boolean run() {

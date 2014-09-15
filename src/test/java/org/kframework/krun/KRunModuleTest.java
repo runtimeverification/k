@@ -4,6 +4,7 @@ package org.kframework.krun;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,14 +26,14 @@ public class KRunModuleTest extends BaseTestCase {
     @Test
     public void testCreateInjection() {
         String[] argv = new String[] { "foo.c" };
-        Module[] modules = KRunFrontEnd.getModules(argv);
+        List<Module> modules = KRunFrontEnd.getModules(argv);
         Injector injector = Guice.createInjector(Modules.override(modules).with(new TestModule()));
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
     }
 
     public void testInvalidArguments() {
         String[] argv = new String[] { "--backend", "foobarbaz" };
-        Module[] modules = KRunFrontEnd.getModules(argv);
+        List<Module> modules = KRunFrontEnd.getModules(argv);
         assertNull(modules);
     }
 }

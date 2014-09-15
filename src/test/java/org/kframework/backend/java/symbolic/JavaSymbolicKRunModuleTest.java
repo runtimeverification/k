@@ -14,17 +14,19 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import java.util.List;
+
 public class JavaSymbolicKRunModuleTest extends BaseTestCase {
 
     @Test
     public void testCreateInjectionSimulation() {
         String[] argv = new String[] { "foo.c", "--simulation", "bar.c" };
-        Module[] modules = KRunFrontEnd.getModules(argv);
-        for (int i = 0; i < modules.length; i++) {
+        List<Module> modules = KRunFrontEnd.getModules(argv);
+        for (int i = 0; i < modules.size(); i++) {
             //we have to override private modules one at a time to override private bindings
-            if (modules[i] instanceof MainExecutionContextModule
-                    || modules[i] instanceof SimulationModule) {
-                modules[i] = Modules.override(modules[i]).with(new TestModule());
+            if (modules.get(i) instanceof MainExecutionContextModule
+                    || modules.get(i) instanceof SimulationModule) {
+                modules.set(i, Modules.override(modules.get(i)).with(new TestModule()));
             }
         }
         Injector injector = Guice.createInjector(modules);

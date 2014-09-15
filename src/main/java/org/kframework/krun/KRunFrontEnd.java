@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -392,7 +393,7 @@ public class KRunFrontEnd extends FrontEnd {
         }
     }
 
-    public static com.google.inject.Module[] getModules(String[] args) {
+    public static List<com.google.inject.Module> getModules(String[] args) {
         try {
             KRunOptions options = new KRunOptions();
             JavaExecutionOptions javaOptions = new JavaExecutionOptions();
@@ -401,22 +402,18 @@ public class KRunFrontEnd extends FrontEnd {
                 System.setProperty("java.awt.headless", "false");
             }
 
+            List<com.google.inject.Module> modules = new ArrayList<>();
+            modules.add(new KRunModule(options));
+            modules.add(new CommonModule());
+            modules.add(new JCommanderModule(args));
             if (options.experimental.simulation != null) {
-                return new com.google.inject.Module[] {
-                        new KRunModule(options),
-                        new CommonModule(),
-                        new JCommanderModule(args),
-                        new JavaSymbolicKRunModule.SimulationModule(),
-                        new JavaSymbolicKRunModule.MainExecutionContextModule(options),
-                        new JavaSymbolicKRunModule(javaOptions) };
+                modules.add(new JavaSymbolicKRunModule.SimulationModule());
+                modules.add(new JavaSymbolicKRunModule.MainExecutionContextModule(options));
             } else {
-                return new com.google.inject.Module[] {
-                        new KRunModule(options),
-                        new CommonModule(),
-                        new JCommanderModule(args),
-                        new KRunModule.NoSimulationModule(options),
-                        new JavaSymbolicKRunModule(javaOptions) };
+                modules.add(new KRunModule.NoSimulationModule(options));
             }
+            modules.add(new JavaSymbolicKRunModule(javaOptions));
+            return modules;
         } catch (ParameterException ex) {
             printBootError(ex.getMessage());
             return null;

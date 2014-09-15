@@ -58,7 +58,7 @@ public class KagregFrontEnd extends FrontEnd {
         this.kem = kem;
     }
 
-    public static Module[] getModules(final String[] args) {
+    public static List<Module> getModules(final String[] args) {
         if (args.length != 2) {
             printBootError("There must be exactly two K definitions as arguments to kagreg.");
             return null;
@@ -67,7 +67,9 @@ public class KagregFrontEnd extends FrontEnd {
         final GlobalOptions globalOptions = new GlobalOptions();
         globalOptions.verbose = true;
 
-        return new Module[] { new CommonModule(), new AbstractModule() {
+        List<Module> modules = new ArrayList<>();
+        modules.add(new CommonModule());
+        modules.add(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(FrontEnd.class).to(KagregFrontEnd.class);
@@ -76,7 +78,8 @@ public class KagregFrontEnd extends FrontEnd {
                 bind(String.class).annotatedWith(SecondArg.class).toInstance(args[1]);
                 bind(GlobalOptions.class).toInstance(globalOptions);
             }
-        }};
+        });
+        return modules;
     }
 
     @Override

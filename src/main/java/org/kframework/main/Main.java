@@ -50,7 +50,7 @@ public class Main {
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
                 switch (args[0]) {
                     case "-kompile":
-                        modules.addAll(Arrays.asList(KompileFrontEnd.getModules(args2)));
+                        modules.addAll(KompileFrontEnd.getModules(args2));
                         for (KModule kModule : kModules) {
                             List<Module> ms = kModule.getKompileModules();
                             if (ms != null) {
@@ -59,13 +59,13 @@ public class Main {
                         }
                         break;
                     case "-kagreg":
-                        modules = Arrays.asList(KagregFrontEnd.getModules(args2));
+                        modules = KagregFrontEnd.getModules(args2);
                         break;
                     case "-kcheck":
                         assert false : "kcheck no longer supported";
                         return;
                     case "-ktest":
-                        modules.addAll(Arrays.asList(KTestFrontEnd.getModules(args2)));
+                        modules.addAll(KTestFrontEnd.getModules(args2));
                         for (KModule kModule : kModules) {
                             List<Module> ms = kModule.getKTestModules();
                             if (ms != null) {
@@ -74,7 +74,7 @@ public class Main {
                         }
                         break;
                     case "-kast":
-                        modules.addAll(Arrays.asList(KastFrontEnd.getModules(args2)));
+                        modules.addAll(KastFrontEnd.getModules(args2));
                         for (KModule kModule : kModules) {
                             List<Module> ms = kModule.getKastModules();
                             if (ms != null) {
@@ -83,7 +83,7 @@ public class Main {
                         }
                         break;
                     case "-krun":
-                        modules.addAll(Arrays.asList(KRunFrontEnd.getModules(args2)));
+                        modules.addAll(KRunFrontEnd.getModules(args2));
                         for (KModule kModule : kModules) {
                             List<Module> ms = kModule.getKRunModules();
                             if (ms != null) {
@@ -92,7 +92,7 @@ public class Main {
                         }
                         break;
                     case "-kpp":
-                        modules = Arrays.asList(KppFrontEnd.getModules(args2));
+                        modules = KppFrontEnd.getModules(args2);
                         break;
                     default:
                         invalidJarArguments();
