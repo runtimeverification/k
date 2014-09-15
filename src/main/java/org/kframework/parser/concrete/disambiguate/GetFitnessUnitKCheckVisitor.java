@@ -67,10 +67,10 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
         if (termSort.getName().equals(""))
             return 0; // if it is amb it won't have a sort
         int score;
-        if (context.isSubsortedEq(declSort, termSort))
+        if (context.isSyntacticSubsortedEq(declSort, termSort))
             score = 0;
         // isSubsortEq(|"K", expect) ; <?"K"> place ; !-1
-        else if (context.isSubsortedEq(Sort.K, declSort) && termSort.equals(Sort.K))
+        else if (context.isSyntacticSubsortedEq(Sort.K, declSort) && termSort.equals(Sort.K))
             score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
         else {
             score = -1;

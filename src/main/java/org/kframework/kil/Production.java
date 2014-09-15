@@ -63,9 +63,24 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return "'.List{" + StringUtil.enquoteCString(getKLabel()) + "}";
     }
 
-
-    public boolean isSubsort() {
+    /**
+     * True if this production consists of a single nonterminal,
+     * even if it has an explicitly assigned label and so is
+     * not semantically a subsort declaration.
+     * @return
+     */
+    public boolean isSyntacticSubsort() {
         return items.size() == 1 && items.get(0) instanceof NonTerminal;
+    }
+
+    /**
+     * True if this production consists is a subsort declaration.
+     * It must consist of a single nonterminal, and not have an
+     * explicitly assigned label.
+     * @return
+     */
+    public boolean isSubsort() {
+        return isSyntacticSubsort() && getKLabel() == null;
     }
 
     /**
@@ -73,9 +88,9 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
      * Should not be called on other types of productions.
      * @return the Sort object
      */
-    public NonTerminal getSubsort() {
-        assert isSubsort();
-        return (NonTerminal) items.get(0);
+    public Sort getSubsort() {
+        assert isSyntacticSubsort();
+        return getChildSort(0);
     }
 
     public boolean isLexical() {
@@ -156,7 +171,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
 
     public String getKLabel() {
         String klabel = getAttribute("klabel");
-        if (klabel == null && isSubsort()) {
+        if (klabel == null && isSyntacticSubsort()) {
             return null;
         } else if (klabel == null) {
             if (sort.equals(Sort.KLABEL) && getArity() == 0)

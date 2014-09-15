@@ -1,17 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.KApp;
-import org.kframework.kil.ListTerminator;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.NonTerminal;
-import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Token;
-import org.kframework.kil.UserList;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KException;
@@ -31,30 +21,81 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         super("Add empty lists", context);
     }
 
+    /**
+     * If expectedSort is a list sort and term t is a single
+     * term of the element sort (or a subsort) rather than a list,
+     * wrap t into a single-element list.
+     * If t is neither a subsort of the expected list sort nor
+     * the expected element sort, records a hidden warning.
+     * Returns null if t was wrapped.
+     *
+     * @param t
+     * @param expectedSort
+     * @return wrapped t, or null if no change should be made
+     */
+    private Term wrapTerm(Term t, Sort expectedSort) {
+        if (isAddEmptyList(expectedSort, t.getSort())) {
+            if (!isUserListElement(expectedSort, t, context)) {
+                String msg = "Found sort '" + t.getSort() + "' where list sort '" + expectedSort + "' was expected. Moving on.";
+                GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
+            } else
+                return addEmpty(t, expectedSort);
+        }
+        return null;
+    }
+
+    public ASTNode visit(Rewrite r, Void _) {
+        Term left = r.getLeft();
+        final Sort target;
+        if (left instanceof TermCons) {
+            Production p = ((TermCons) left).getProduction();
+            if (p.containsAttribute(Attribute.FUNCTION_KEY) || p.containsAttribute(Attribute.PREDICATE_KEY)) {
+                target = left.getSort();
+            } else {
+                target = r.getSort();
+            }
+        } else {
+            target = r.getSort();
+        }
+
+        left = wrapTerm(r.getLeft(), target);
+        if (left != null) {
+            r.setLeft(left, context);
+        }
+        Term right = wrapTerm(r.getRight(), target);
+        if (right != null) {
+            r.setRight(right, context);
+        }
+        return super.visit(r, _);
+    }
+
+    @Override
+    public ASTNode visit(Cell c, Void _) {
+        Term t = c.getContents();
+        t = wrapTerm(t, context.getCellSort(c));
+        if (t != null) {
+            c.setContents(t);
+        }
+        return super.visit(c, _);
+    }
+
     @Override
     public ASTNode visit(TermCons tc, Void _) {
-        // traverse
         Production p = tc.getProduction();
 
         if (p.isListDecl()) {
             Term t = tc.getContents().get(0);
             UserList ul = (UserList) p.getItems().get(0);
-            if (isAddEmptyList(ul.getSort(), t.getSort())) {
-                if (!isUserListElement(ul.getSort(), t, context)) {
-                    String msg = "Found sort '" + t.getSort() + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
-                } else
-                    tc.getContents().set(0, addEmpty(t, ul.getSort()));
+            t = wrapTerm(t, ul.getSort());
+            if (t != null) {
+                tc.getContents().set(0, t);
             }
 
             // if the term should be a list, append the empty element
             t = tc.getContents().get(1);
-            if (isAddEmptyList(p.getSort(), t.getSort())) {
-                if (!isUserListElement(p.getSort(), t, context)) {
-                    String msg = "Found sort '" + t.getSort() + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
-                } else
-                    tc.getContents().set(1, addEmpty(t, tc.getProduction().getSort()));
+            t = wrapTerm(t, p.getSort());
+            if (t != null) {
+                tc.getContents().set(1, t);
             }
         } else {
             for (int i = 0, j = 0; j < p.getItems().size(); j++) {
@@ -63,16 +104,10 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
                     continue;
 
                 Sort sort = ((NonTerminal) pi).getSort();
-                if (context.isListSort(sort)) {
-                    Term t = tc.getContents().get(i);
-                    // if the term should be a list, append the empty element
-                    if (isAddEmptyList(sort, t.getSort())) {
-                        if (!isUserListElement(sort, t, context)) {
-                            String msg = "Found sort '" + t.getSort() + "' where list sort '" + sort + "' was expected. Moving on.";
-                            GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
-                        } else
-                            tc.getContents().set(i, addEmpty(t, sort));
-                    }
+                Term t = tc.getContents().get(i);
+                t = wrapTerm(t, sort);
+                if (t != null) {
+                    tc.getContents().set(i, t);
                 }
                 i++;
             }
@@ -93,7 +128,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
         }
 
         return !elementSort.equals(Sort.KITEM)
-               && context.isSubsortedEq(listSort, elementSort);
+               && context.isSubsortedEq(context.getListElementSort(listSort), elementSort);
     }
 
     public boolean isAddEmptyList(Sort expectedSort, Sort termSort) {

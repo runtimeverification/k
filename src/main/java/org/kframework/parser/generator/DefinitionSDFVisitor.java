@@ -114,7 +114,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
                     // if a production has this attribute, don't add it to the list
                 } else if (prd.isLexical()) {
                     lexical.add(prd);
-                } else if (prd.isSubsort()) {
+                } else if (prd.isSyntacticSubsort()) {
                     if (!prd.getSort().equals(Sort.KRESULT)) { // avoid KResult because it breaks subsortings in SDF
                         p.getProductions().add(prd);
                         subsorts.add(new Subsort(prd.getSort(), ((NonTerminal) prd.getItems().get(0)).getSort()));

@@ -85,6 +85,7 @@ public class Context implements Serializable {
 
     public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
+    private Poset<Sort> syntacticSubsorts = Poset.create();
     public java.util.Set<Sort> definedSorts = Sort.getBaseSorts();
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
@@ -149,7 +150,7 @@ public class Context implements Serializable {
         this.maxConfigurationLevel = maxConfigurationLevel;
     }
 
-    private void initSubsorts() {
+    private void initSubsorts(Poset<Sort> subsorts) {
         subsorts.addElement(Sort.KLABEL);
         subsorts.addRelation(Sort.KLIST, Sort.K);
         subsorts.addRelation(Sort.K, Sort.KITEM);
@@ -165,7 +166,8 @@ public class Context implements Serializable {
     @Deprecated @Inject(optional=true) public ColorOptions colorOptions;
 
     public Context() {
-        initSubsorts();
+        initSubsorts(subsorts);
+        initSubsorts(syntacticSubsorts);
     }
 
     public void addProduction(Production p) {
@@ -431,11 +433,20 @@ public class Context implements Serializable {
         subsorts.addRelation(bigSort, smallSort);
     }
 
+    public void addSyntacticSubsort(Sort bigSort, Sort smallSort) {
+        syntacticSubsorts.addRelation(bigSort, smallSort);
+    }
+
     /**
      * Computes the transitive closure of the subsort relation to make it
      * becomes a partial order set.
      */
     public void computeSubsortTransitiveClosure() {
+        computeSubsortTransitiveClosure(subsorts);
+        computeSubsortTransitiveClosure(syntacticSubsorts);
+   }
+
+    private void computeSubsortTransitiveClosure(Poset<Sort> subsorts) {
         List<Sort> circuit = subsorts.checkForCycles();
         if (circuit != null) {
             String msg = "Circularity detected in subsorts: ";
@@ -450,7 +461,7 @@ public class Context implements Serializable {
             for (Production prod2 : listProductions.values()) {
                 Sort sort1 = ((UserList) prod1.getItems().get(0)).getSort();
                 Sort sort2 = ((UserList) prod2.getItems().get(0)).getSort();
-                if (isSubsorted(sort1, sort2)) {
+                if (subsorts.isInRelation(sort1, sort2)) {
                     subsorts.addRelation(prod1.getSort(), prod2.getSort());
                 }
             }
@@ -480,6 +491,36 @@ public class Context implements Serializable {
         if (bigSort.equals(smallSort))
             return true;
         return subsorts.isInRelation(bigSort, smallSort);
+    }
+
+    /**
+     * Check to see if smallSort is a strict syntactic subsort of bigSort
+     * (any term parsing as smallSort also parses as bigSort).
+     * In particular, elements of a user cons list are syntactically
+     * but not semantically subsorted to the list type.
+     *
+     * @param bigSort
+     * @param smallSort
+     * @return
+     */
+    public boolean isSyntacticSubsorted(Sort bigSort, Sort smallSort) {
+        return syntacticSubsorts.isInRelation(bigSort, smallSort);
+    }
+
+    /**
+     * Check to see if smallSort is syntactically subsorted or equal to bigSort
+     * (any term parsing as smallSort also parses as bigSort).
+     * In particular, elements of a user cons list are syntactically
+     * but not semantically subsorted to the list type.
+     *
+     * @param bigSort
+     * @param smallSort
+     * @return
+     */
+    public boolean isSyntacticSubsortedEq(Sort bigSort, Sort smallSort) {
+        if (bigSort.equals(smallSort))
+            return true;
+        return syntacticSubsorts.isInRelation(bigSort, smallSort);
     }
 
     public boolean isTagGenerated(String key) {
@@ -587,9 +628,6 @@ public class Context implements Serializable {
                 conses.put(cons2, p);
             } else if (p.isLexical()) {
             } else if (p.isSubsort()) {
-                if (p.getKLabel() != null) {
-                    conses.put(StringUtil.escapeSort(p.getSort()) + "1" + StringUtil.getUniqueId() + "Syn", p);
-                }
             } else {
                 String cons;
                 if (p.isListDecl())
