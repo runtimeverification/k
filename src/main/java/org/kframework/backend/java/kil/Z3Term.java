@@ -70,7 +70,7 @@ public class Z3Term extends Term {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         throw new UnsupportedOperationException();
     }
 

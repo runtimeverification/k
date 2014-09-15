@@ -113,7 +113,7 @@ public class Cell<T extends Term> extends Term {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         return true;
     }
 

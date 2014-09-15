@@ -61,7 +61,7 @@ public class SMTLibTerm extends Term {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         throw new UnsupportedOperationException();
     }
 

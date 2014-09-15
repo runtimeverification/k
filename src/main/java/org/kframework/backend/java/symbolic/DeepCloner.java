@@ -39,7 +39,7 @@ public class DeepCloner {
 
         @Override
         protected Object fastClone(final Object o, final Map<Object, Object> clones) throws IllegalAccessException {
-            if (o instanceof Term && !((Term) o).hasCell()) {
+            if (o instanceof Term && !((Term) o).isMutable()) {
                 return o;
             } else {
                 return super.fastClone(o, clones);

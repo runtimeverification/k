@@ -15,6 +15,7 @@ import java.util.Set;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 
 
 /**
@@ -93,10 +94,10 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         boolean hasCell = false;
-        for (Term term : elements) {
-            hasCell = hasCell || term.hasCell();
+        for (Term term : Iterables.concat(elements, baseTerms())) {
+            hasCell = hasCell || term.isMutable();
             if (hasCell) {
                 return true;
             }
@@ -200,14 +201,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build());
-            if (builtinSet.collectionVariables.size() == 1
-                    && builtinSet.elements.isEmpty()
-                    && builtinSet.collectionPatterns.isEmpty()
-                    && builtinSet.collectionFunctions.isEmpty()) {
-                return builtinSet.collectionVariables.iterator().next();
-            } else {
-                return builtinSet;
-            }
+            return builtinSet.hasFrame() && builtinSet.elements.isEmpty() ? builtinSet.frame : builtinSet;
         }
     }
 

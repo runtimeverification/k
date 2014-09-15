@@ -10,7 +10,6 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 
 
 /**
@@ -33,7 +32,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      *            the start index of the fragment
      * @return a view of the specified fragment
      */
-    public abstract KCollection fragment(int fromIndex);
+    public abstract Term fragment(int fromIndex);
 
     public final Term get(int index) {
         return getContents().get(index);
@@ -61,20 +60,6 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    public final boolean isConcreteCollection() {
-        return !hasFrame();
-    }
-
-    /**
-     * {@code KCollection} is guaranteed to have only one frame; thus, they can
-     * always be used in the left-hand side of a rule.
-     */
-    @Override
-    public boolean isLHSView() {
-        return true;
-    }
-
-    @Override
     public final boolean isExactSort() {
         if (concreteSize() == 1) {
             return !hasFrame() && this.get(0).isExactSort();
@@ -93,9 +78,9 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     }
 
     @Override
-    protected final boolean computeHasCell() {
+    protected final boolean computeMutability() {
         for (Term term : getContents()) {
-            if (term.hasCell()) {
+            if (term.isMutable()) {
                 return true;
             }
         }
@@ -149,13 +134,18 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
         assert kind == Kind.KITEM || kind == Kind.K || kind == Kind.KLIST;
 
-        /* promote KItem to K, and then promote K to KList */
-        if (term.kind() == Kind.KITEM && (kind == Kind.K || kind == Kind.KLIST)) {
-            term = new KSequence(Lists.newArrayList(term));
+        if (term.kind() == kind) {
+            return term;
         }
 
-        if (term.kind() == Kind.K && kind == Kind.KLIST) {
-            term = new KList(Lists.newArrayList(term));
+        /* promote KItem to K */
+        if (kind == Kind.K && term.kind() == Kind.KITEM) {
+            return KSequence.singleton(term);
+        }
+
+        /* promote KItem or K to KList */
+        if (kind == Kind.KLIST && (term.kind() == Kind.KITEM || term.kind() == Kind.K)) {
+            return KList.singleton(term);
         }
 
         return term;

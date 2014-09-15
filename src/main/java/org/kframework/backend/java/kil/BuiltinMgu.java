@@ -97,7 +97,7 @@ public class BuiltinMgu extends Term {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         return false;
     }
 

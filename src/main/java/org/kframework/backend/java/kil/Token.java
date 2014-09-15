@@ -64,7 +64,7 @@ public abstract class Token extends Term implements Immutable {
     }
 
     @Override
-    protected final boolean computeHasCell() {
+    protected final boolean computeMutability() {
         return false;
     }
 

@@ -23,7 +23,7 @@ public class FastDestructiveRewriter extends AbstractRewriter {
 
     private final boolean ENABLE_DEBUG_MODE = false;
 
-    private final Stopwatch stopwatch = new Stopwatch();
+    private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
     private List<Cell<?>> indexingCells = Lists.newArrayList();
 

@@ -29,7 +29,7 @@ public class ConfigurationSubstitutionVisitor extends BasicVisitor {
 
     @Override
     public Void visit(Cell cell, Void _) {
-        if (cell.getContents() instanceof Bag) {
+        if (cell.getContents() instanceof Bag || cell.getContents() instanceof Cell) {
             super.visit(cell, _);
         } else {
             substitution.put(new Variable(cell.getLabel().toUpperCase(), cell.getContents().getSort()),

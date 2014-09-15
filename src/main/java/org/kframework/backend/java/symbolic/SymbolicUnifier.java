@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 
@@ -153,7 +153,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             otherTerm = KCollection.upKind(otherTerm, term.kind());
         }
 
-        if (term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION) {
+        if (term.kind().isStructural()) {
             Context context = termContext.definition().context();
             term = CellCollection.upKind(term, otherTerm.kind(), context);
             otherTerm = CellCollection.upKind(otherTerm, term.kind(), context);
@@ -333,8 +333,8 @@ public class SymbolicUnifier extends AbstractUnifier {
         for (KItem pattern : patterns) {
             for (KItem otherPattern : otherPatterns) {
                 if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
-                    ImmutableList<Term> patternOutput = pattern.getPatternOutput();
-                    ImmutableList<Term> otherPatternOutput = otherPattern.getPatternOutput();
+                    List<Term> patternOutput = pattern.getPatternOutput();
+                    List<Term> otherPatternOutput = otherPattern.getPatternOutput();
                     for (int i = 0; i < patternOutput.size(); ++i) {
                         unify(patternOutput.get(i), otherPatternOutput.get(i));
                     }
@@ -533,8 +533,10 @@ public class SymbolicUnifier extends AbstractUnifier {
 //         */
 //        assert !(cellCollection.hasFrame() && otherCellCollection.hasFrame());
 
-        Set<CellLabel> unifiableCellLabels = new HashSet<CellLabel>(cellCollection.labelSet());
-        unifiableCellLabels.retainAll(otherCellCollection.labelSet());
+        ImmutableSet<CellLabel> unifiableCellLabels = ImmutableSet.copyOf(
+                Sets.intersection(cellCollection.labelSet(), otherCellCollection.labelSet()));
+        int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
+        int numOfOtherDiffCellLabels = otherCellCollection.labelSet().size() - unifiableCellLabels.size();
 
         Context context = termContext.definition().context();
 
@@ -550,17 +552,24 @@ public class SymbolicUnifier extends AbstractUnifier {
                         otherCellCollection.get(label).iterator().next());
             }
 
-            Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
-            Multimap<CellLabel, Cell> otherCellMap = ArrayListMultimap.create();
-            computeDisjointCellMaps(unifiableCellLabels, cellCollection,
-                    cellMap, otherCellCollection, otherCellMap);
+            Variable frame = cellCollection.hasFrame() ? cellCollection.frame() : null;
+            Variable otherFrame = otherCellCollection.hasFrame()? otherCellCollection.frame() : null;
 
-            if (!addCellCollectionConstraint(
-                    cellMap,
-                    cellCollection.hasFrame() ? cellCollection.frame() : null,
-                    otherCellMap,
-                    otherCellCollection.hasFrame() ? otherCellCollection.frame() : null)) {
+            if (frame != null && otherFrame != null && (numOfDiffCellLabels > 0) && (numOfOtherDiffCellLabels > 0)) {
+                Variable variable = Variable.getFreshVariable(Sort.BAG);
+                fConstraint.add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, context));
+                fConstraint.add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, context), otherFrame);
+            } else if (frame == null && (numOfOtherDiffCellLabels > 0)
+                    || otherFrame == null && (numOfDiffCellLabels > 0)) {
                 fail(cellCollection, otherCellCollection);
+            } else if (frame == null && otherFrame == null) {
+                if (numOfDiffCellLabels > 0 || numOfOtherDiffCellLabels > 0) {
+                    fail(cellCollection, otherCellCollection);
+                }
+            } else {
+                fConstraint.add(
+                        CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), frame, context),
+                        CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), otherFrame, context));
             }
         }
         /* Case 2: both cell collections have explicitly specified starred-cells */
@@ -579,30 +588,27 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             // from now on, we assume that cellCollection is free of frame
-            Multimap<CellLabel, Cell> cellMap = ArrayListMultimap.create();
-            Multimap<CellLabel, Cell> otherCellMap = ArrayListMultimap.create();
-            computeDisjointCellMaps(unifiableCellLabels, cellCollection,
-                    cellMap, otherCellCollection, otherCellMap);
-            if (!otherCellMap.isEmpty()) {
+            ListMultimap<CellLabel, Cell> cellMap = getRemainingCellMap(cellCollection, unifiableCellLabels);
+
+            if (numOfOtherDiffCellLabels > 0) {
                 fail(cellCollection, otherCellCollection);
             }
 
-            for (Iterator<CellLabel> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
-                CellLabel cellLabel = iter.next();
+            CellLabel starredCellLabel = null;
+            for (CellLabel cellLabel : unifiableCellLabels) {
                 if (!context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     unify(cellCollection.get(cellLabel).iterator().next(),
                             otherCellCollection.get(cellLabel).iterator().next());
-                    iter.remove();
+                } else {
+                    assert starredCellLabel == null;
+                    starredCellLabel = cellLabel;
                 }
             }
 
-            // YilongL: the assertion here must hold
-            if (unifiableCellLabels.isEmpty()) {
+            if (starredCellLabel == null) {
                 fail(cellCollection, otherCellCollection);
-            } else {
-                assert unifiableCellLabels.size() == 1;
             }
 
             if (cellCollection.concreteSize() < otherCellCollection.concreteSize()
@@ -611,9 +617,8 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail(cellCollection, otherCellCollection);
             }
 
-            CellLabel label = unifiableCellLabels.iterator().next();
-            Cell<?>[] cells = cellCollection.get(label).toArray(new Cell[1]);
-            Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
+            Cell<?>[] cells = cellCollection.get(starredCellLabel).toArray(new Cell[1]);
+            Cell<?>[] otherCells = otherCellCollection.get(starredCellLabel).toArray(new Cell[1]);
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
@@ -640,18 +645,20 @@ public class SymbolicUnifier extends AbstractUnifier {
                     continue;
                 }
 
-                Multimap<CellLabel, Cell> cm = ArrayListMultimap.create();
+                CellCollection.Builder builder = CellCollection.builder(context);
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.selected.contains(i)) {
-                        cm.put(cells[i].getLabel(), cells[i]);
+                        builder.add(cells[i]);
                     }
                 }
-                cm.putAll(cellMap);
+                builder.putAll(cellMap);
+                Term cellColl = builder.build();
 
                 if (otherFrame != null) {
-                    fConstraint.add(new CellCollection(cm, context), otherFrame);
+                    fConstraint.add(cellColl, otherFrame);
                 } else {
-                    if (!cm.isEmpty()) fail(cellCollection, otherCellCollection);
+                    if (!cellColl.equals(CellCollection.EMPTY))
+                        fail(cellCollection, otherCellCollection);
                 }
                 constraints.add(fConstraint);
             } while (generator.generate());
@@ -675,23 +682,16 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
-    private void computeDisjointCellMaps(Set<CellLabel> unifiableCellLabels,
-            CellCollection cellCollection, Multimap<CellLabel, Cell> cellMap,
-            CellCollection otherCellCollection,
-            Multimap<CellLabel, Cell> otherCellMap) {
-        cellMap.clear();
-        for (CellLabel label : cellCollection.labelSet()) {
-            if (!unifiableCellLabels.contains(label)) {
-                cellMap.putAll(label, cellCollection.get(label));
+    private ListMultimap<CellLabel, Cell> getRemainingCellMap(
+            CellCollection cellCollection, final ImmutableSet<CellLabel> labelsToRemove) {
+        Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
+            @Override
+            public boolean apply(CellLabel cellLabel) {
+                return !labelsToRemove.contains(cellLabel);
             }
-        }
+        };
 
-        otherCellMap.clear();
-        for (CellLabel label : otherCellCollection.labelSet()) {
-            if (!unifiableCellLabels.contains(label)) {
-                otherCellMap.putAll(label, otherCellCollection.get(label));
-            }
-        }
+        return Multimaps.filterKeys(cellCollection.cellMap(), notRemoved);
     }
 
     private class SelectionGenerator {
@@ -751,64 +751,6 @@ public class SymbolicUnifier extends AbstractUnifier {
             return !selection.isEmpty();
         }
 
-    }
-
-    /**
-     * Private helper method to compute and add constraint(s) between two
-     * specialized cell collections. Two preconditions for the arguments: 1) The
-     * two specified cell collections shall have no common cell label in their
-     * explicit contents; 2) the first cell collection contains no starred-cell
-     * in its explicit content.
-     *
-     * @return true if the constraint addition does not make the unification to fail
-     */
-    private boolean addCellCollectionConstraint(
-            Multimap<CellLabel, Cell> cellMap,
-            Variable frame,
-            Multimap<CellLabel, Cell> otherCellMap,
-            Variable otherFrame) {
-        for (CellLabel cellLabel : cellMap.keySet()) {
-            assert !otherCellMap.containsKey(cellLabel);
-            assert cellMap.get(cellLabel).size() == 1;
-        }
-
-        Context context = termContext.definition().context();
-
-        if (frame != null) {
-            if (otherFrame != null) {
-                if (cellMap.isEmpty() && otherCellMap.isEmpty()) {
-                    fConstraint.add(frame, otherFrame);
-                } else if (cellMap.isEmpty()) {
-                    fConstraint.add(frame, new CellCollection(otherCellMap, otherFrame, context));
-                } else if (otherCellMap.isEmpty()) {
-                    fConstraint.add(new CellCollection(cellMap, frame, context), otherFrame);
-                } else {
-                    Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.asSort());
-                    fConstraint.add(frame, new CellCollection(otherCellMap, variable, context));
-                    fConstraint.add(new CellCollection(cellMap, variable, context), otherFrame);
-                }
-            } else {
-                if (!cellMap.isEmpty()) {
-                    return false;
-                }
-
-                fConstraint.add(frame, new CellCollection(otherCellMap, context));
-            }
-        } else {
-            if (otherFrame != null) {
-                if (!otherCellMap.isEmpty()) {
-                    return false;
-                }
-
-                fConstraint.add(new CellCollection(cellMap, context), otherFrame);
-            } else {
-                if (!cellMap.isEmpty() || !otherCellMap.isEmpty()) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     @Override
@@ -893,7 +835,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
-                kList = new KList(terms);
+                kList = KList.concatenate(terms);
             }
         }
         unify(kList, patternKItem.kList());

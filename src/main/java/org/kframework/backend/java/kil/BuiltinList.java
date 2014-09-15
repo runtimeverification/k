@@ -15,6 +15,7 @@ import org.kframework.kil.ASTNode;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 
@@ -115,12 +116,6 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    public boolean isLHSView() {
-        return baseTerms.isEmpty() || baseTerms.size() == 1
-                && (baseTerms.get(0) instanceof Variable);
-    }
-
-    @Override
     public boolean isExactSort() {
         return true;
     }
@@ -158,16 +153,10 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         boolean hasCell = false;
-        for (Term term : elementsLeft) {
-            hasCell = hasCell || term.hasCell();
-            if (hasCell) {
-                return true;
-            }
-        }
-        for (Term term : elementsRight) {
-            hasCell = hasCell || term.hasCell();
+        for (Term term : Iterables.concat(elements(), baseTerms)) {
+            hasCell = hasCell || term.isMutable();
             if (hasCell) {
                 return true;
             }
@@ -439,15 +428,7 @@ public class BuiltinList extends Collection {
                     baseTermsBuilder.build(),
                     elementsRightBuilder.build(),
                     baseTermTypesBuilder.build());
-
-            /* special case: only one List variable */
-            if (builtinList.concreteSize() == 0 && builtinList.baseTerms.size() == 1) {
-                Term base = builtinList.baseTerms.get(0);
-                if (base instanceof Variable && base.sort().equals(Sort.LIST)) {
-                    return base;
-                }
-            }
-            return builtinList;
+            return builtinList.hasFrame() && builtinList.concreteSize() == 0 ? builtinList.frame : builtinList;
         }
     }
 

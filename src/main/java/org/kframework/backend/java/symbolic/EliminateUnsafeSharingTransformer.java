@@ -43,7 +43,7 @@ public class EliminateUnsafeSharingTransformer extends PrePostTransformer {
         @Override
         public ASTNode transform(Term term) {
             // it's immutable and can be safely shared
-            if ((term instanceof Immutable) || !term.hasCell()) {
+            if ((term instanceof Immutable) || !term.isMutable()) {
                 return new DoneTransforming(term);
             }
 

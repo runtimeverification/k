@@ -96,10 +96,16 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         boolean hasCell = false;
         for (Map.Entry<Term, Term> entry : entries.entrySet()) {
-            hasCell = hasCell || entry.getKey().hasCell() || entry.getValue().hasCell();
+            hasCell = hasCell || entry.getKey().isMutable() || entry.getValue().isMutable();
+            if (hasCell) {
+                return true;
+            }
+        }
+        for (Term term : baseTerms()) {
+            hasCell = hasCell || term.isMutable();
             if (hasCell) {
                 return true;
             }
@@ -227,14 +233,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build());
-            if (builtinMap.collectionVariables.size() == 1
-                    && builtinMap.entries.isEmpty()
-                    && builtinMap.collectionPatterns.isEmpty()
-                    && builtinMap.collectionFunctions.isEmpty()) {
-                return builtinMap.collectionVariables.iterator().next();
-            } else {
-                return builtinMap;
-            }
+            return builtinMap.hasFrame() && builtinMap.entries.isEmpty() ? builtinMap.frame : builtinMap;
         }
     }
 }

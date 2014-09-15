@@ -78,7 +78,7 @@ public class SetLookup extends Term implements DataStructureLookup {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         throw new UnsupportedOperationException();
     }
 
