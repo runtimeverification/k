@@ -105,7 +105,6 @@
                   <arg value="diff" />
                   <arg value="${base}" />
                   <arg value="--name-only" />
-                  <arg value="--diff-filter=ACDMTUXB" />
                 </exec>
                 <condition property="git.diff.out" value="">
                   <isset property="git.diff.out" />
