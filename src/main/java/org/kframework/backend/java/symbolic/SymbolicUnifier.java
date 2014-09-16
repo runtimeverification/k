@@ -13,6 +13,7 @@ import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
@@ -27,6 +28,7 @@ import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
@@ -37,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -408,8 +409,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             for (KItem pattern : patterns) {
                 for (KItem otherPattern : otherPatterns) {
                     if (pattern.getPatternInput().equals(otherPattern.getPatternInput())) {
-                        ImmutableList<Term> patternOutput = pattern.getPatternOutput();
-                        ImmutableList<Term> otherPatternOutput = otherPattern.getPatternOutput();
+                        List<Term> patternOutput = pattern.getPatternOutput();
+                        List<Term> otherPatternOutput = otherPattern.getPatternOutput();
                         for (int i = 0; i < patternOutput.size(); ++i) {
                             unify(patternOutput.get(i), otherPatternOutput.get(i));
                         }

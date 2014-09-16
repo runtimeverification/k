@@ -356,9 +356,6 @@ public final class KRunOptions {
             return smtPrelude;
         }
 
-        @ParametersDelegate
-        public JavaExecutionOptions javaExecution = new JavaExecutionOptions();
-
         @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
         public File outputFile;
     }

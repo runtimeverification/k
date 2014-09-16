@@ -8,18 +8,13 @@ import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.utils.OS;
-import org.kframework.utils.file.KPaths;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
  * @author Traian
  */
 public class Z3Wrapper {
-
-    public static boolean initialized = false;
 
     public static Z3Wrapper Z3_WRAPPER;
     public static Z3Wrapper instance(Context context) {

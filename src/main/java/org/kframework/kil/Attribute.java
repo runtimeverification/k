@@ -25,6 +25,7 @@ public class Attribute<T> extends ASTNode {
     public static final String STREAM_KEY = "stream";
     public static final String ANYWHERE_KEY = Constants.ANYWHERE;
     public static final String PATTERN_KEY = "pattern";
+    public static final String PATTERN_FOLDING_KEY = "pattern-folding";
     public static final String HOOK_KEY = "hook";
     public static final String MACRO_KEY = "macro";
     public static final String LEMMA_KEY = "lemma";

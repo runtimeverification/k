@@ -658,12 +658,12 @@ public class SymbolicRewriter {
                     continue;
                 }
 
-                KSequence leftKContent = (KSequence) KCollection.upKind(term.term().getCellContentsByName("k").get(0), Kind.K);
-                KSequence rightKContent = (KSequence) KCollection.upKind(targetTerm.term().getCellContentsByName("k").get(0), Kind.K);
+                KSequence leftKContent = (KSequence) KCollection.upKind(term.term().getCellContentsByName(CellLabel.K).get(0), Kind.K);
+                KSequence rightKContent = (KSequence) KCollection.upKind(targetTerm.term().getCellContentsByName(CellLabel.K).get(0), Kind.K);
                 if (leftKContent.hasFrame() && rightKContent.hasFrame()
                         && leftKContent.frame().equals(rightKContent.frame())) {
-                    leftKContent = KSequence.of(ImmutableList.copyOf(leftKContent.getContents()), null);
-                    rightKContent = KSequence.of(ImmutableList.copyOf(rightKContent.getContents()), null);
+                    //leftKContent = KSequence.of(ImmutableList.copyOf(leftKContent.getContents()), null);
+                    //rightKContent = KSequence.of(ImmutableList.copyOf(rightKContent.getContents()), null);
                     BoolToken unifiable = MetaK.unifiable(
                             leftKContent,
                             rightKContent,
