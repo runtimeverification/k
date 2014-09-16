@@ -358,43 +358,17 @@ public class SymbolicUnifier extends AbstractUnifier {
             SymbolicConstraint constraint = new SymbolicConstraint(fConstraint.termContext());
             constraint.add(foldedMap, otherMap);
             constraint.simplify();
-            if (constraint.isFalse()) {
-                continue;
-            }
+            constraint.simplify();
+            //if (constraint.hasMapEqualities()) {
+            //    constraint.expandPatternsAndSimplify(false);
+            //}
+
             /* since here we have a non-deterministic choice to make, we only make a choice
              * if it eliminates all map equalities */
-            boolean mapEqualities = false;
-            for (SymbolicConstraint.Equality equality : constraint.equalities()) {
-                if (equality.leftHandSide() instanceof BuiltinMap
-                        && equality.rightHandSide() instanceof BuiltinMap) {
-                    mapEqualities = true;
-                }
-            }
-            if (!mapEqualities) {
+            if (!constraint.isFalse() && !constraint.hasMapEqualities()) {
                 fConstraint.addAll(constraint);
                 return true;
             }
-/*
-            SymbolicConstraint stashedConstrained = fConstraint;
-            fConstraint = new SymbolicConstraint(fConstraint.termContext());
-            try {
-                unifyMap(foldedMap, otherMap, false);
-
-                boolean mapEqualities = false;
-                for (SymbolicConstraint.Equality equality : fConstraint.equalities()) {
-                    if (equality.leftHandSide() instanceof BuiltinMap
-                            && equality.rightHandSide() instanceof BuiltinMap) {
-                        mapEqualities = true;
-                    }
-                }
-                if (!mapEqualities) {
-                    stashedConstrained.addAll(fConstraint);
-                    fConstraint = stashedConstrained;
-                    return true;
-                }
-            } catch (UnificationFailure e)  { }
-            fConstraint = stashedConstrained;
-*/
         }
 
         return false;
@@ -485,7 +459,6 @@ public class SymbolicUnifier extends AbstractUnifier {
                     && !remainingEntries.isEmpty()) {
                 fail(map, otherMap);
             }
-
 
             BuiltinMap.Builder builder = BuiltinMap.builder();
             builder.putAll(remainingEntries);

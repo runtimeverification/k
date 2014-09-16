@@ -29,6 +29,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.options.SMTSolver;
 
 import java.util.ArrayList;
@@ -854,7 +855,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         boolean result = false;
         try {
-            result = Z3Wrapper.instance().checkQuery(KILtoSMTLib.translateConstraint(this));
+            result = Z3Wrapper.instance(context.definition().context()).checkQuery(
+                    KILtoSMTLib.translateConstraint(this),
+                    50);
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
         }
@@ -951,7 +954,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //            if (DEBUG) {
 //                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
 //            }
-            if (!impliesSMT(left,right)) {
+            if (!impliesSMT(left,right, rightOnlyVariables, context.definition().context())) {
                 if (context.definition().context().globalOptions.debug) {
                     System.out.println("Failure!");
                 }
@@ -966,7 +969,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
 
-    private static boolean impliesSMT(SymbolicConstraint left, SymbolicConstraint right) {
+    private static boolean impliesSMT(
+            SymbolicConstraint left,
+            SymbolicConstraint right,
+            Set<Variable> rightOnlyVariables,
+            Context context) {
         boolean result = false;
         assert left.termContext().definition().context() == right.termContext().definition().context();
         if (left.termContext().definition().context().smtOptions.smt == SMTSolver.GAPPA) {
@@ -998,8 +1005,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //            System.out.println(constraint);
         } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
             try {
-                result = Z3Wrapper.instance().checkQuery(
-                        KILtoSMTLib.translateImplication(left, right));
+                result = Z3Wrapper.instance(context).checkQuery(
+                        KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
+                        5000);
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
             }
@@ -1319,29 +1327,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         boolean changed;
         do {
-            changed = false;
-            Set<Variable> keys = new HashSet<>(data.substitution.keySet());
-            for (Variable variable : keys) {
-                Term term = data.substitution.get(variable);
-                Term expandedTerm = term.expandPatterns(this, narrowing, context);
-                if (term != expandedTerm) {
-                    data.substitution.put(variable, expandedTerm);
-                    changed = true;
-                }
-            }
-
-            // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
-            for (int i = 0; i < data.equalities.size(); ++i) {
-                Equality equality = data.equalities.get(i);
-                Equality expandedEquality = equality.expandPatterns(this, narrowing);
-                if (equality != expandedEquality) {
-                    data.equalities.set(i, expandedEquality);
-                    changed = true;
-                }
-            }
-
-            /* force normalization to consider the changes made by this method */
-            data.isNormal = false;
+            changed = expandPatterns(narrowing);
             // TODO(AndreiS): move folding from here (this is way too fragile)
             /* simplify with pattern folding if not performing narrowing */
             if (!narrowing) {
@@ -1350,6 +1336,35 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 simplify();
             }
         } while (changed);
+    }
+
+    public boolean expandPatterns(boolean narrowing) {
+        boolean changed = false;
+        // TODO(AndreiS): patterns should be expanded before are put in the substitution
+        Set<Variable> keys = new HashSet<>(data.substitution.keySet());
+        for (Variable variable : keys) {
+            Term term = data.substitution.get(variable);
+            Term expandedTerm = term.expandPatterns(this, narrowing, context);
+            if (term != expandedTerm) {
+                data.substitution.put(variable, expandedTerm);
+                changed = true;
+            }
+        }
+
+        // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
+        for (int i = 0; i < data.equalities.size(); ++i) {
+            Equality equality = data.equalities.get(i);
+            Equality expandedEquality = equality.expandPatterns(this, narrowing);
+            if (equality != expandedEquality) {
+                data.equalities.set(i, expandedEquality);
+                changed = true;
+            }
+        }
+
+        /* force normalization to consider the changes made by this method */
+        data.isNormal = false;
+
+        return changed;
     }
 
     /**
@@ -1496,6 +1511,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
         return true;
+    }
+
+    public boolean hasMapEqualities() {
+        for (SymbolicConstraint.Equality equality : data.equalities) {
+            if (equality.leftHandSide() instanceof BuiltinMap
+                    && equality.rightHandSide() instanceof BuiltinMap) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

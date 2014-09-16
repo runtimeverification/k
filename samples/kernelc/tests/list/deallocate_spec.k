@@ -7,16 +7,21 @@ module DEALLOCATE-SPEC
 rule [loop-inv]:
   <struct>... STRUCT:Map ...</struct>
   <k>
-    while ( (x != tv ( void * , null )) ) { struct listNode * y ;
-    y = (x -> next) ; (free ( x )) ; x = y ; }
+    while(x != NULL) {
+      struct listNode *y;
+
+      y = x->next;
+      free(x);
+      x = y;
+    }
   =>
     .K
   ...</k>
   <env>...
-    x |-> tv(struct listNode * *, object(B:Int))
+    x |-> tv(struct listNode * *, object(LX:Int))
   ...</env>
   <heap>...
-    object(B) |-> tv (struct listNode *, LP:Pointer => null)
+    object(LX) |-> tv (struct listNode *, LP:Pointer => null)
     (list(LP)(_:IntSeq) => .Map)
   ...</heap>
 

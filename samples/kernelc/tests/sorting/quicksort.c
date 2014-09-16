@@ -1,16 +1,12 @@
 /*
  * Function that sorts the content of a singly linked list using quicksort.
  */
-
-
 #include <stdlib.h>
-
 
 struct listNode {
   int val;
   struct listNode *next;
 };
-
 
 struct listNode* append(struct listNode *x, struct listNode *y)
 /*@ rule <k> $ => return ?x; ...</k>
@@ -23,13 +19,13 @@ struct listNode* append(struct listNode *x, struct listNode *y)
   p = x;
   /*@ inv <heap>... lseg(x, p)(?A1), list(p)(?A2) ...</heap> 
           /\ A = ?A1 @ ?A2 /\ ~(p = 0) */
-  while (p->next != NULL)
+  while (p->next != NULL) {
     p = p->next;
+  }
   p->next = y;
 
   return x;
 }
-
 
 struct listNode* quicksort(struct listNode* x)
 /*@ rule <k> $ => return ?x; ...</k>
@@ -73,6 +69,3 @@ struct listNode* quicksort(struct listNode* x)
   return x;
 }
 
-
-//@ var v : Int
-//@ var A, B, C : Seq

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Debug;
@@ -152,13 +153,25 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         unificationConstraint.addAll(constraint.substitution());
         unificationConstraint.add(data.term, constrainedTerm.data.term);
         unificationConstraint.simplify();
-
         if (unificationConstraint.isFalse()) {
             return null;
         }
 
-        unificationConstraint.addAllThenSimplify(constrainedTerm.lookups, constrainedTerm.constraint);
+        /* apply pattern folding */
         unificationConstraint.simplify(true);
+        //unificationConstraint.simplify();
+        //unificationConstraint.addAllThenSimplify(constrainedTerm.lookups, constrainedTerm.constraint);
+        unificationConstraint.addAll(constrainedTerm.lookups);
+        unificationConstraint.addAll(constrainedTerm.constraint);
+        unificationConstraint.simplify(true);
+        if (unificationConstraint.isFalse()) {
+            return null;
+        }
+
+        unificationConstraint.expandPatternsAndSimplify(false);
+        // TODO(AndreiS): figure out when a map unification provided more data
+        unificationConstraint.expandPatternsAndSimplify(false);
+        unificationConstraint.expandPatternsAndSimplify(false);
         unificationConstraint.expandPatternsAndSimplify(false);
 
         final Set<Variable> variables = unificationConstraint.variableSet();
@@ -245,31 +258,33 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
-            if (SymbolicConstraint.TruthValue.FALSE ==
+            if (TruthValue.FALSE ==
                     candidate.addAllThenSimplify(constrainedTerm.lookups, constrainedTerm.constraint)) {
                 continue;
             }
 
-            boolean isMatching = candidate.isMatching(constrainedTerm.variableSet());
+            if (!candidate.isMatching(constrainedTerm.variableSet())) {
+                if (TruthValue.FALSE == candidate.addAllThenSimplify(constraint)) {
+                    continue;
+                }
 
-            if (SymbolicConstraint.TruthValue.FALSE == candidate.addAllThenSimplify(constraint)) {
-                continue;
-            }
-
-            // TODO(AndreiS): find a better place for pattern expansion
-            if (!isMatching) {
-                candidate.expandPatternsAndSimplify(true);
-            }
-
-            if (Tool.instance() != Tool.KOMPILE) {
+                if (Tool.instance() != Tool.KOMPILE) {
                 /*
                  * YilongL: had to disable checkUnsat in kompilation because the
                  * KILtoZ3 transformer often crash the Java backend; besides,
                  * this method may not be necessary for kompilation
                  */
-                if (candidate.checkUnsat()) {
-                    continue;
+                    if (candidate.checkUnsat()) {
+                        continue;
+                    }
                 }
+
+                // TODO(AndreiS): find a better place for pattern expansion
+                candidate.expandPatternsAndSimplify(true);
+            } else {
+                SymbolicConstraint clonedConstraint = new SymbolicConstraint(constraint, context);
+                clonedConstraint.addAll(candidate);
+                candidate = clonedConstraint;
             }
 
             solutions.add(candidate);

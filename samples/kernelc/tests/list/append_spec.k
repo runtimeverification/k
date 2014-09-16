@@ -28,7 +28,7 @@ rule [loop-inv]:
           val  |-> tv(int, ?E:Int)
           next |-> tv(struct listNode *, null)))
   ...</heap>
-ensures A @ B ==K ?C @ (?E::[])
+ensures A @ B ==K ?C @ ([?E])
 
 rule [func-spec]:
   <struct>... STRUCT:Map ...</struct>

@@ -1,16 +1,12 @@
 /*
  * Function that sorts the content of a singly linked list using bubble sort.
  */
-
-
 #include <stdlib.h>
-
 
 struct listNode {
   int val;
   struct listNode *next;
 };
-
 
 struct listNode* bubble_sort(struct listNode* x)
 /*@ rule <k> $ => return ?x; ...</k>
@@ -36,12 +32,12 @@ struct listNode* bubble_sort(struct listNode* x)
             /\ (isSorted(?B @ [?v]) \/ ~(change = 0)) */
     while (y->next != NULL) {
       if (y->val > y->next->val) {
-        int tmp;
+        int temp;
 
         change = 1;
-        tmp = y->val;
+        temp = y->val;
         y->val = y->next->val;
-        y->next->val = tmp;
+        y->next->val = temp;
       }
       y = y->next;
     }
@@ -49,8 +45,4 @@ struct listNode* bubble_sort(struct listNode* x)
 
   return x;
 }
-
-
-//@ var v, n : Int
-//@ var A, B, C, D : Seq
 

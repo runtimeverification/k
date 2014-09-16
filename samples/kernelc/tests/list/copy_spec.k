@@ -16,6 +16,7 @@ rule [loop-inv]:
       itery->next = node;
       iterx = iterx->next;
       itery = itery->next;
+      //breakpoint
     }
   =>
     .K
@@ -31,15 +32,15 @@ rule [loop-inv]:
     object(LY) |-> tv (struct listNode *, Y:Pointer)
     object(LIX) |-> tv (struct listNode *, IX:Pointer => ?_:Pointer)
     object(LIY) |-> tv (struct listNode *, object(IY:Int) => ?_:Pointer)
-    (lseg(X, IX)(A:IntSeq @ (V:Int::[]))
+    (lseg(X, IX)(A:IntSeq @ [V:Int])
      lseg(IX, null)(B:IntSeq)
      lseg(Y, object(IY))(A)
      object(IY) |-> (
           val  |-> tv(int, V)
           next |-> tv(struct listNode *, null))
      =>
-     lseg(X, null)(A @ (V::B))
-     lseg(Y, null)(A @ (V::B)))
+     lseg(X, null)(A @ [V] @ B)
+     lseg(Y, null)(A @ [V] @ B))
   ...</heap>
 
 rule [func-spec]:
