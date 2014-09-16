@@ -3,9 +3,9 @@ This is a readme file for the developers.
 
 # Prerequisites
 
-## Java Development Kit (required JDK7 or higher)
+## Java Development Kit (required JDK8 or higher)
 You can follow the instructions here: 
-http://docs.oracle.com/javase/7/docs/webnotes/install/index.html depending on 
+http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html depending on
 the type of your machine.
 
 To make sure that everything works you should be able to call `java -version` and
