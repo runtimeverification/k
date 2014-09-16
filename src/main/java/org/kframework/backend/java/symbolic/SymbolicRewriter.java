@@ -658,12 +658,25 @@ public class SymbolicRewriter {
                     continue;
                 }
 
-                KSequence leftKContent = (KSequence) KCollection.upKind(term.term().getCellContentsByName(CellLabel.K).get(0), Kind.K);
-                KSequence rightKContent = (KSequence) KCollection.upKind(targetTerm.term().getCellContentsByName(CellLabel.K).get(0), Kind.K);
-                if (leftKContent.hasFrame() && rightKContent.hasFrame()
-                        && leftKContent.frame().equals(rightKContent.frame())) {
-                    //leftKContent = KSequence.of(ImmutableList.copyOf(leftKContent.getContents()), null);
-                    //rightKContent = KSequence.of(ImmutableList.copyOf(rightKContent.getContents()), null);
+                Term leftKContent = KCollection.upKind(
+                        term.term().getCellContentsByName(CellLabel.K).get(0),
+                        Kind.K);
+                Variable leftFrame = null;
+                if (leftKContent instanceof KSequence && ((KSequence) leftKContent).hasFrame()) {
+                    leftFrame = ((KSequence) leftKContent).frame();
+                } else if (leftKContent instanceof Variable) {
+                    leftFrame = (Variable) leftKContent;
+                }
+                Term rightKContent = KCollection.upKind(
+                        targetTerm.term().getCellContentsByName(CellLabel.K).get(0),
+                        Kind.K);
+                Variable rightFrame = null;
+                if (rightKContent instanceof KSequence && ((KSequence) rightKContent).hasFrame()) {
+                    rightFrame = ((KSequence) rightKContent).frame();
+                } else if (rightKContent instanceof Variable) {
+                    rightFrame = (Variable) rightKContent;
+                }
+                if (leftFrame != null && rightFrame != null) {
                     BoolToken unifiable = MetaK.unifiable(
                             leftKContent,
                             rightKContent,
