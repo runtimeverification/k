@@ -10,7 +10,7 @@
 
   <modules>
     <module>k-core</module>
-    <module>k</module>
+    <module>k-distribution</module>
   </modules>
 
   <scm>
