@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 ### Imperative, Environment-Based Type Systems
 
 [MOVIE [10'11"]](http://youtu.be/WyUxdo7GhtE)

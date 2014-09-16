@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### Abrupt Changes of Control
 
 [MOVIE [6'28"]](http://youtu.be/UZ9iaus024g)

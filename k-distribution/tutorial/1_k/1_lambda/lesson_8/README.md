@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### Multiple Binding Constructs
 
 [MOVIE [2'40"]](http://youtu.be/Ox4uXDpcY64)

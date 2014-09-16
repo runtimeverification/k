@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ## Part 5: Defining Type Systems
 
 In this part of the tutorial we will show that defining type systems for

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### A Naive Environment-based Polymorphic Type Inferencer
 
 [MOVIE []]()

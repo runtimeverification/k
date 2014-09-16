@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 Global changes that need to be made:
 
 * Replace `when` in rules with `requires`

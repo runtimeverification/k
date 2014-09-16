@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### Syntax Modules and Basic K Commands
 
 [MOVIE [4'07"]](http://youtu.be/y5Tf1EZVj8E)

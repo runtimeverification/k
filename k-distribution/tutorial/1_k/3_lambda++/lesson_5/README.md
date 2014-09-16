@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 ### More Semantic Computation Items
 
 [MOVIE [5'19"]](http://youtu.be/dP3FW0kZN6k)

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### Generating Documentation; Latex Attributes
 
 [MOVIE [3'13"]](http://youtu.be/ULXA4e_6-DY)

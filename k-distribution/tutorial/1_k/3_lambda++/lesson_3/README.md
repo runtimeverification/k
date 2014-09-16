@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 ### Reusing Existing Semantics
 
 [MOVIE [3'21"]](http://youtu.be/tW4KRdgBIGo)

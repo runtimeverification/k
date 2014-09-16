@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### Derived Constructs, Extending Predefined Syntax
 
 [MOVIE [5'10"]](http://youtu.be/qZWiBaN7zrw)

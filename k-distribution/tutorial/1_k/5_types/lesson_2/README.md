@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 ### Substitution-Based Higher-Order Type Systems
 
 [MOVIE [6'52"]](http://youtu.be/7P2QtR9jM2o)

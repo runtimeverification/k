@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ## Part 3: Defining LAMBDA++
 
 Here you will learn how to define language constructs which abruptly change

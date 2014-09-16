@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 # K Tutorial
 ##### [Grigore Rosu](http://fsl.cs.illinois.edu/grosu) (<grosu@illinois.edu>)
 

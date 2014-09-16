@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 ### Semantic (Non-Syntactic) Computation Items
 
 [MOVIE [8'02"]](http://youtu.be/BYhQQW6swfc)

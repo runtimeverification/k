@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
 ### A Naive Substitution-Based Type Inferencer
 
 [MOVIE []]()
