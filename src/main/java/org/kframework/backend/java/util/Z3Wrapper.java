@@ -8,6 +8,7 @@ import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.io.IOException;
 
@@ -50,8 +51,8 @@ public class Z3Wrapper {
             result = solver.check() == Status.UNSATISFIABLE;
             context.dispose();
         } catch (Z3Exception e) {
-            System.err.println("failed to translate smtlib expression:\n" + SMT_PRELUDE + query);
-            e.printStackTrace();
+            GlobalSettings.kem.registerCriticalWarning(
+                    "failed to translate smtlib expression:\n" + SMT_PRELUDE + query);
         }
         return result;
     }
