@@ -5,8 +5,9 @@ Users who checked out the sources should follow the instructions in src/README.m
 1. Prerequisites:
   * Java Runtime Edition version 7 or higher (http://java.com/en/download/index.jsp)
     * To make sure java is installed properly, call `java -version` in a terminal.
-  * (On Windows only) Visual C++ 2012 Redistributable Package 
-    (http://www.microsoft.com/en-us/download/details.aspx?id=30679)
+  * (On Windows only) Visual C++ 2010 Redistributable Package 
+    (32-bit: http://www.microsoft.com/en-us/download/details.aspx?id=8328,
+    64-bit: http://www.microsoft.com/en-us/download/details.aspx?id=13523)
     * Make sure to download the 64-bit version if you are using a 64-bit JRE,
       and the 32-bit version if you are using a 32-bit JRE.
 
