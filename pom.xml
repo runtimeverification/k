@@ -105,6 +105,7 @@
                   <arg value="diff" />
                   <arg value="${base}" />
                   <arg value="--name-only" />
+                  <arg value="--diff-filter=ACDMTUXB" />
                 </exec>
                 <condition property="git.diff.out" value="">
                   <isset property="git.diff.out" />
@@ -133,6 +134,7 @@
             </goals>
           </execution>
         </executions>
+        <inherited>false</inherited>
         <configuration>
           <doCheck>false</doCheck>
           <doUpdate>false</doUpdate>
@@ -154,7 +156,7 @@
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>**/com/davekoelle/**,src/main/sdf/syntax/Integration.sdf</excludes>
+              <excludes>**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
             </configuration>
           </execution>
           <execution>

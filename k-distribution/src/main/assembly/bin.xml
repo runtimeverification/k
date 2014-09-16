@@ -20,9 +20,6 @@
       <directory>${project.basedir}</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
-        <include>INSTALL*</include>
-        <include>LICENSE*</include>
-        <include>README*</include>
         <include>documentation/**</include>
         <include>include/**</include>
         <include>samples/**</include>
@@ -33,6 +30,16 @@
         <exclude>**/.*/**</exclude>
         <exclude>**/*-kompiled/**</exclude>
       </excludes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.parent.basedir}</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>INSTALL*</include>
+        <include>LICENSE*</include>
+        <include>README*</include>
+        <include>CHANGELOG*</include>
+      </includes>
     </fileSet>
     <fileSet>
       <directory>${project.build.scriptSourceDirectory}/bin</directory>
