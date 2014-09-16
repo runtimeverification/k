@@ -4,6 +4,8 @@ package org.kframework.kompile;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -33,19 +35,20 @@ import com.google.inject.Module;
 
 public class KompileFrontEnd extends FrontEnd {
 
-    public static Module[] getModules(String[] args) {
+    public static List<Module> getModules(String[] args) {
         try {
             KompileOptions options = new KompileOptions();
 
             final Context context = new Context();
             context.kompileOptions = options;
 
-            return new Module[] {
-                    new KompileModule(context, options),
-                    new JCommanderModule(args),
-                    new CommonModule(),
-                    new JavaSymbolicCommonModule(),
-                    new JavaSymbolicKompileModule() };
+            List<Module> modules = new ArrayList<>();
+            modules.add(new KompileModule(context, options));
+            modules.add(new JCommanderModule(args));
+            modules.add(new CommonModule());
+            modules.add(new JavaSymbolicCommonModule());
+            modules.add(new JavaSymbolicKompileModule());
+            return modules;
         } catch (ParameterException ex) {
             printBootError(ex.getMessage());
             return null;
