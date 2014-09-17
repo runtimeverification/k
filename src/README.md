@@ -42,7 +42,7 @@ and the 32-bit version if you are using a 32-bit JRE.
 # Install
 Checkout this directory in your desired location and call `mvn package` from the main
 directory to build the distribution. For convenient usage, you can update
-your $PATH with <checkout-dir>/target/release/k/bin (strongly recommended, but optional).
+your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly recommended, but optional).
 
 You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
 which will significantly speed up the incremental build process.
@@ -76,7 +76,7 @@ maven repository containing a zip and tar.gz of the distribution.
 The functionality to create a tagged release is currently incomplete.
 
 # Compiling definitions and running programs
-Assuming target/release/k/bin is in your path, you can compile definitions using
+Assuming k-distribution/target/release/k/bin is in your path, you can compile definitions using
 the `kompile` command.  To execute a program you can use `krun`.
 
 # Cross platform compilation
