@@ -676,7 +676,7 @@ public class SymbolicRewriter {
                 } else if (rightKContent instanceof Variable) {
                     rightFrame = (Variable) rightKContent;
                 }
-                if (leftFrame != null && rightFrame != null) {
+                if (leftFrame != null && rightFrame != null && leftFrame.equals(rightFrame)) {
                     BoolToken unifiable = MetaK.unifiable(
                             leftKContent,
                             rightKContent,

@@ -26,7 +26,7 @@ module LIST-PATTERN
 
   syntax IntSeq ::= filterIntSeq(Int, IntSeq)   [function, smtlib(smt_seq_filter)]
   rule filterIntSeq(V, L1 @ L2) => filterIntSeq(V, L1) @ filterIntSeq(V, L2)    [lemma]
-  // TODO(AndreiS): this lemma is put directly in z3 because of ite issue 
+  // TODO(AndreiS): this lemma is put directly in z3 because of ite issue
   //rule filterIntSeq(V, [E]) => #if V =/=K E #then [E] #else [] #fi              [lemma]
   rule filterIntSeq(V, []) => []                                                [lemma]
 
@@ -45,6 +45,7 @@ module LIST-PATTERN
   rule intseq2intset([]) => .IntSet   [lemma, smt-lemma]
 
   syntax Bool ::= sorted(IntSeq)    [function, smtlib(smt_seq_sorted)]
+  // TODO(AndreiS): add support for specifying Z3 triggers
   //rule sorted(L1 @ L2)
   //  => intseq2intset(L1) <=IntSet intseq2intset(L2) andBool sorted(L1) andBool sorted(L2)
   //  [smt-lemma]

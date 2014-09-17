@@ -17,8 +17,10 @@
     <program name="comm_assoc.simple">
       <krun-option name="--prove" value="verification/comm_assoc_spec.k" />
     </program>
+<!-- TODO(AndreiS): uncomment this test when we support AC unification
     <program name="head.simple">
-      <krun-option name="--prove" value="verification/head_spec.k" />
+      <krun-option name="\-\-prove" value="verification/head_spec.k" />
     </program>
+-->
   </test>
 </tests>
