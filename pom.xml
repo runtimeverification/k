@@ -149,6 +149,7 @@
             <goals>
               <goal>check</goal>
             </goals>
+            <inherited>false</inherited>
             <configuration>
               <sourceDirectory>${project.basedir}</sourceDirectory>
               <includes>${git.modified.files}</includes>
@@ -163,6 +164,7 @@
             <goals>
               <goal>check</goal>
             </goals>
+            <inherited>false</inherited>
             <configuration>
               <sourceDirectory>${project.basedir}</sourceDirectory>
               <includes>**/*.k</includes>
