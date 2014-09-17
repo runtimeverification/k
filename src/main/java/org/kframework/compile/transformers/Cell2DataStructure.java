@@ -1,11 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.transformers;
 
-import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.CellMap;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.CellDataStructure;
@@ -18,24 +16,17 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KItemProjection;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Translates a builtin data structure (list, map, set) from a {@link Cell} representation
@@ -53,8 +44,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
     public static final String MAP_CELL_CELL_LABEL_PREFIX = "value-cell-label-prefix-";
 
-    private Set<String> cellMapLabels = Sets.newHashSet();
-    private String patternLabel;
+    protected String patternLabel;
 
     public Cell2DataStructure(Context context) {
         super("Transform cells with key attribute to maps", context);
@@ -66,76 +56,10 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode visit(Rule rule, Void _) {
-        // TODO(AndreiS): should only be applied once
-        makeCellDataStructures();
-        if ((rule.getBody().getSort().equals(Sort.BAG) || rule.getBody().getSort().equals(Sort.BAG_ITEM))
-                && rule.containsAttribute(Attribute.PATTERN_KEY)) {
-            patternLabel = ((Cell) ((Rewrite) rule.getBody()).getLeft()).getLabel();
-        } else {
-            patternLabel = null;
-        }
-
-        JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
-        if (ruleData == null || !ruleData.isCompiledForFastRewriting()) {
-            return super.visit(rule, _);
-        }
-
-        cellMapLabels.clear();
-
-        rule = (Rule) super.visit(rule, _);
-        /* compiling cell to cell map changes the cells of interest used for fast rewriting */
-        if (!cellMapLabels.isEmpty()) {
-            Set<String> cellsOfInterest = Sets.newHashSet(rule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest());
-            Map<String, Term> lhsOfReadCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getLhsOfReadCell());
-            Map<String, Term> rhsOfWriteCell = Maps.newHashMap(rule.getAttribute(JavaBackendRuleData.class).getRhsOfWriteCell());
-            Set<String> cellMapLabelsToAdd = Sets.newHashSet();
-
-            Iterator<String> iter = cellsOfInterest.iterator();
-            while (iter.hasNext()) {
-                String cellLabel = iter.next();
-
-                Set<String> intersect = Sets.intersection(
-                                context.getConfigurationStructureMap().get(cellLabel).ancestorIds,
-                                cellMapLabels);
-                /* lift the cell of interest to the level of cell map */
-                if (!intersect.isEmpty()) {
-                    iter.remove();
-
-                    assert intersect.size() == 1;
-                    String cellMapLabel = intersect.iterator().next();
-                    cellMapLabelsToAdd.add(cellMapLabel);
-
-                    /* update lhsOfReadCell & rhsOfWriteCell accordingly */
-                    if (lhsOfReadCell.containsKey(cellLabel)) {
-                        lhsOfReadCell.put(cellMapLabel, null);
-                        lhsOfReadCell.remove(cellLabel);
-                    }
-                    if (rhsOfWriteCell.containsKey(cellLabel)) {
-                        rhsOfWriteCell.put(cellMapLabel, null);
-                        rhsOfWriteCell.remove(cellLabel);
-                    }
-                }
-            }
-            cellsOfInterest.addAll(cellMapLabelsToAdd);
-
-            rule = rule.shallowCopy();
-            ruleData = ruleData.setCellsOfInterest(cellsOfInterest);
-            ruleData = ruleData.setRhsOfWriteCell(rhsOfWriteCell);
-            ruleData = ruleData.setLhsOfReadCell(lhsOfReadCell);
-            rule.addAttribute(JavaBackendRuleData.class, ruleData);
-        }
-
-        return rule;
-    }
-
-    @Override
     public ASTNode visit(Cell cell, Void _)  {
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
             return super.visit(cell, _);
-        } else if (cellDataStructure instanceof CellMap) {
-            cellMapLabels.add(cellDataStructure.dataStructureCellLabel());
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());
@@ -282,7 +206,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         return new MapBuiltin(mapSort, terms, entries);
     }
 
-    private void makeCellDataStructures() {
+    protected void makeCellDataStructures() {
         for (ConfigurationStructure cell : context.getConfigurationStructureMap().values()) {
             makeCellDataStructure(cell);
         }
