@@ -5,13 +5,18 @@ import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.CellMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.CellDataStructure;
+import org.kframework.kil.CellList;
+import org.kframework.kil.DataStructureBuiltin;
+import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -21,15 +26,16 @@ import java.util.Set;
 
 /**
  * Java-backend-specific version of {@code Cell2DataStructure} which modifies
- * the {@code JavaBackendRuleData} accordingly.
+ * the {@code JavaBackendRuleData} accordingly and deals with pattern label used
+ * by matching logic prover.
  *
  * @see Cell2DataStructure
- *
- * @author YilongL
  */
 public class JavaBackendCell2DataStructure extends Cell2DataStructure {
 
     private Set<String> cellMapLabels = Sets.newHashSet();
+
+    private String patternLabel;
 
     public JavaBackendCell2DataStructure(Context context) {
         super(context);
@@ -102,10 +108,40 @@ public class JavaBackendCell2DataStructure extends Cell2DataStructure {
     @Override
     public ASTNode visit(Cell cell, Void _)  {
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
-        if (cellDataStructure instanceof CellMap) {
+        if (cellDataStructure == null) {
+            return super.visit(cell, _);
+        } else if (cellDataStructure instanceof CellMap) {
             cellMapLabels.add(cellDataStructure.dataStructureCellLabel());
         }
-        return super.visit(cell, _);
+
+        Bag cellContent = normalizeCellContent(cell.getContents());
+        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
+            cellContent = new Bag(cellContent.getContents().subList(
+                    0,
+                    cellContent.getContents().size() - 1));
+        }
+
+        DataStructureBuiltin dataStructureBuiltin;
+        if (cellDataStructure instanceof CellList) {
+            dataStructureBuiltin = getListBuiltin(cellContent, (CellList) cellDataStructure);
+        } else if (cellDataStructure instanceof CellMap) {
+            dataStructureBuiltin = getMapBuiltin(cellContent, (CellMap) cellDataStructure);
+        } else {
+            assert false;
+            return null;
+        }
+
+        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
+            MapBuiltin mapBuiltin = (MapBuiltin) dataStructureBuiltin;
+            if (!(mapBuiltin.baseTerms().size() == 1 && mapBuiltin.elements().isEmpty())) {
+                return mapBuiltin;
+            } else {
+                return mapBuiltin.baseTerms().iterator().next();
+            }
+        }
+        Cell returnCell = cell.shallowCopy();
+        returnCell.setContents(dataStructureBuiltin);
+        return returnCell;
     }
 
 }

@@ -44,8 +44,6 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
     public static final String MAP_CELL_CELL_LABEL_PREFIX = "value-cell-label-prefix-";
 
-    protected String patternLabel;
-
     public Cell2DataStructure(Context context) {
         super("Transform cells with key attribute to maps", context);
     }
@@ -57,17 +55,15 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _)  {
+     // TODO(AndreiS): should only be applied once
+        makeCellDataStructures();
+
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
             return super.visit(cell, _);
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());
-        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
-            cellContent = new Bag(cellContent.getContents().subList(
-                    0,
-                    cellContent.getContents().size() - 1));
-        }
 
         DataStructureBuiltin dataStructureBuiltin;
         if (cellDataStructure instanceof CellList) {
@@ -79,20 +75,12 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             return null;
         }
 
-        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
-            MapBuiltin mapBuiltin = (MapBuiltin) dataStructureBuiltin;
-            if (!(mapBuiltin.baseTerms().size() == 1 && mapBuiltin.elements().isEmpty())) {
-                return mapBuiltin;
-            } else {
-                return mapBuiltin.baseTerms().iterator().next();
-            }
-        }
         Cell returnCell = cell.shallowCopy();
         returnCell.setContents(dataStructureBuiltin);
         return returnCell;
     }
 
-    private Bag normalizeCellContent(Term content) {
+    protected Bag normalizeCellContent(Term content) {
         if (content instanceof Bag) {
             return Bag.flatten((Bag) content);
         } else if (content instanceof Cell
@@ -105,7 +93,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         }
     }
 
-    private ListBuiltin getListBuiltin(Bag cellContent, CellList cellList) {
+    protected ListBuiltin getListBuiltin(Bag cellContent, CellList cellList) {
         DataStructureSort listSort = context.dataStructureSortOf(
                 DataStructureSort.DEFAULT_LIST_SORT);
 
@@ -158,7 +146,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         return ListBuiltin.of(listSort, terms, elementsLeft, elementsRight);
     }
 
-    private MapBuiltin getMapBuiltin(Bag cellContent, CellMap cellMap) {
+    protected MapBuiltin getMapBuiltin(Bag cellContent, CellMap cellMap) {
         DataStructureSort mapSort = context.dataStructureSortOf(
                 DataStructureSort.DEFAULT_MAP_SORT);
 
