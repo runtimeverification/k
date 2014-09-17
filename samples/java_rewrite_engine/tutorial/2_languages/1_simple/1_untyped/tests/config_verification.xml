@@ -6,6 +6,7 @@
         programs="../verification"
         results="../verification"
         extension="simple"
+        exclude="head"
         >
     <kompile-option name="--backend" value="java" />
     <program name="reverse.simple">
