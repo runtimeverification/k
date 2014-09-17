@@ -41,7 +41,7 @@ public class Debug {
             ConstrainedTerm subject, ConstrainedTerm pattern, List<?> solutions) {
         if (ENABLE_DEBUG_MODE) {
             System.out.printf(
-                    "###unify %s###\nsubject = %s\npattern = %s\nsols = %s\n",
+                    "###unify %s###%nsubject = %s%npattern = %s%nsols = %s%n",
                     numOfInvoc, subject, pattern, solutions);
         }
     }

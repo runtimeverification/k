@@ -26,7 +26,9 @@ public class ResourceExtractor {
     }
 
     public static void ExtractDefSDF(File basePath) {
-        basePath.mkdirs();
+        if (!basePath.mkdirs()) {
+            GlobalSettings.kem.registerInternalError("Could not create directory " + basePath);
+        }
         Extract("/Concrete.sdf", new File(basePath.getAbsoluteFile() + "/Concrete.sdf"));
         Extract("/Common.sdf", new File(basePath.getAbsoluteFile() + "/Common.sdf"));
         Extract("/KBuiltinsBasic.sdf", new File(basePath.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
@@ -35,7 +37,9 @@ public class ResourceExtractor {
     }
 
     public static void ExtractGroundSDF(File basePath) {
-        basePath.mkdirs();
+        if (!basePath.mkdirs()) {
+            GlobalSettings.kem.registerInternalError("Could not create directory " + basePath);
+        }
         Extract("/Concrete.sdf", new File(basePath.getAbsoluteFile() + "/Concrete.sdf"));
         Extract("/Common.sdf", new File(basePath.getAbsoluteFile() + "/Common.sdf"));
         Extract("/KBuiltinsBasic.sdf", new File(basePath.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
@@ -43,7 +47,9 @@ public class ResourceExtractor {
     }
 
     public static void ExtractProgramSDF(File basePath) {
-        basePath.mkdirs();
+        if (!basePath.mkdirs()) {
+            GlobalSettings.kem.registerInternalError("Could not create directory " + basePath);
+        }
         Extract("/Common.sdf", new File(basePath.getAbsoluteFile() + "/Common.sdf"));
         Extract("/KBuiltinsBasic.sdf", new File(basePath.getAbsoluteFile() + "/KBuiltinsBasic.sdf"));
     }

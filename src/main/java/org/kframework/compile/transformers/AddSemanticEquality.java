@@ -36,7 +36,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
     public static final KLabelConstant EQUALITY_PREDICATE
             = KLabelConstant.of(AddPredicates.predicate(EQUALITY_SORT));
 
-    private Map<String, String> equalities = new HashMap<String, String>();
+    private Map<Sort, String> equalities = new HashMap<>();
 
     @Override
     public ASTNode visit(Module node, Void _)  {
@@ -53,7 +53,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 if (prod.getArity() == 2)
                     if (prod.getChildSort(0).equals(prod.getChildSort(1)))
                         if (!equalities.containsKey(prod.getChildSort(0)))
-                            equalities.put(prod.getChildSort(0).getName(), prod.getKLabel());
+                            equalities.put(prod.getChildSort(0), prod.getKLabel());
                         else
                             GlobalSettings.kem.registerCriticalError(
                                     "redeclaration of equality for sort " + prod.getChildSort(0),
@@ -80,8 +80,8 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
         retNode.addConstant(EQUALITY_PREDICATE);
 
         /* defer =K to =Sort for sorts with equality */
-        for(Map.Entry<String, String> item : equalities.entrySet()) {
-            Sort sort = Sort.of(item.getKey());
+        for(Map.Entry<Sort, String> item : equalities.entrySet()) {
+            Sort sort = item.getKey();
             KLabelConstant sortEq = KLabelConstant.of(item.getValue(), context);
             if (sort.isComputationSort()) {
                 retNode.addSubsort(EQUALITY_SORT, sort, context);

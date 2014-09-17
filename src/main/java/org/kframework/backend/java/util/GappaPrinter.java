@@ -288,7 +288,7 @@ public class GappaPrinter extends BottomUpVisitor {
 
     @Override
     public void visit(Variable variable) {
-        if (!variable.sort().equals("Float")) {
+        if (!variable.sort().equals(Sort.FLOAT)) {
             exception =  new GappaPrinterException("Variable " + variable + " is not Float.");
             return;
         }

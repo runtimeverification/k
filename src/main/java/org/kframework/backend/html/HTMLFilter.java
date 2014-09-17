@@ -7,7 +7,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.loader.*;
 import org.kframework.utils.file.FileUtil;
 
 import java.awt.*;
@@ -497,7 +496,7 @@ public class HTMLFilter extends BackendFilter {
 
     @Override
     public Void visit(Attribute entry, Void _) {
-        if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
+        if (entry.getLocation() == null)
             return null;
         if (context.isParsingTag(entry.getKey()))
             return null;

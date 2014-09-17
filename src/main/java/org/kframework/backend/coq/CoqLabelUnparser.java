@@ -119,7 +119,7 @@ public class CoqLabelUnparser extends NonCachingVisitor {
                 visitNestedKLists((KList)child);
             } else if (child instanceof Variable) {
                 Variable klistVar = (Variable)child;
-                assert (klistVar.getSort().equals("KList"));
+                assert (klistVar.getSort().equals(Sort.KLIST));
                 builder.append(klistVar.getName());
                 builder.append(":KList");
             } else {
@@ -294,13 +294,13 @@ public class CoqLabelUnparser extends NonCachingVisitor {
                 continue;
             } else if (t instanceof Variable) {
                 Variable v = (Variable)t;
-                if (v.getSort().equals("Bag")) {
+                if (v.getSort().equals(Sort.BAG)) {
                     continue;
                 }
             } else if (t instanceof Bracket) {
                 Bracket r = (Bracket)t;
                 if (r.getContent() instanceof Rewrite
-                    && r.getContent().getSort().equals("Bag")) {
+                    && r.getContent().getSort().equals(Sort.BAG)) {
                     continue;
                 }
             }

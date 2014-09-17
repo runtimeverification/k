@@ -3,17 +3,15 @@ package org.kframework.utils.inject;
 
 import java.io.File;
 
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.api.KRun;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
@@ -24,7 +22,12 @@ public class DefinitionLoadingModule extends AbstractModule {
     }
 
     @Provides @Singleton
-    Context context(BinaryLoader loader, DefinitionLoadingOptions options, GlobalOptions global, Stopwatch sw) {
+    Context context(
+            BinaryLoader loader,
+            DefinitionLoadingOptions options,
+            GlobalOptions global,
+            Stopwatch sw,
+            KExceptionManager kem) {
         Context context = loader.loadOrDie(Context.class, new File(options.definition(),
                 "context.bin").getAbsolutePath());
 
@@ -34,7 +37,9 @@ public class DefinitionLoadingModule extends AbstractModule {
                 options.definition().getParent() + File.separator
                         + ".k");
         if (!context.dotk.exists()) {
-            context.dotk.mkdirs();
+            if (!context.dotk.mkdirs()) {
+                kem.registerCriticalError("could not create directory " + context.dotk);
+            }
         }
         context.kompiled = options.definition();
 

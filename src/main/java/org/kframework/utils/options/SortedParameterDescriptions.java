@@ -1,13 +1,14 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.utils.options;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Set;
 
 import com.beust.jcommander.ParameterDescription;
 import com.google.common.collect.Sets;
 
-public class SortedParameterDescriptions implements Comparator<ParameterDescription> {
+public class SortedParameterDescriptions implements Comparator<ParameterDescription>, Serializable {
 
     private Set<Class<?>> experimentalClasses;
 

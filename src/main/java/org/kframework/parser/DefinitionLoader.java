@@ -231,7 +231,9 @@ public class DefinitionLoader {
                     || !new File(context.kompiled, "Ground.tbl").exists()) {
                 try {
                     // delete the file with the cached/partially parsed rules
-                    new File(cacheFile).delete();
+                    if (!new File(cacheFile).delete()) {
+                        kem.registerCriticalError("Could not delete file " + cacheFile);
+                    }
                     // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                     if (!documentation) {

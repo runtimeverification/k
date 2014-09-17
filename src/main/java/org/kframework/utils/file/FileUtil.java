@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -105,14 +104,6 @@ public class FileUtil {
         throw new AssertionError("unreachable");
     }
 
-    // create a file with the specified name, create parent directory if it doesn't exist
-    public static File createFile(String file) {
-            File file1 = new File(file);
-            File f2 = new File(file1.getParent());
-            f2.mkdirs();
-            return file1;
-    }
-
     // generate an unique name for a folder with the name dirName
     public static String generateUniqueFolderName(String dirName) {
         DateFormat df = new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss-");
@@ -125,10 +116,11 @@ public class FileUtil {
      * Loads the properties from the given file into the given Properties object.
      */
     public static void loadProperties(Properties properties, Class<?> cls, String resourcePath) throws IOException {
-        InputStream inStream = cls.getResourceAsStream(resourcePath);
-        if (inStream == null) {
-            throw new IOException("Could not find resource " + resourcePath);
+        try (InputStream inStream = cls.getResourceAsStream(resourcePath)) {
+            if (inStream == null) {
+                throw new IOException("Could not find resource " + resourcePath);
+            }
+            properties.load(inStream);
         }
-        properties.load(inStream);
     }
 }

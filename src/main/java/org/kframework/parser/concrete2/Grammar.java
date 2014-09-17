@@ -288,6 +288,26 @@ public class Grammar implements Serializable {
             final int key;
             public OrderingInfo(int key) { this.key = key; }
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
+            @Override
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + key;
+                return result;
+            }
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj)
+                    return true;
+                if (obj == null)
+                    return false;
+                if (getClass() != obj.getClass())
+                    return false;
+                OrderingInfo other = (OrderingInfo) obj;
+                if (key != other.key)
+                    return false;
+                return true;
+            }
         }
 
         public NonTerminal(String name) {
@@ -359,6 +379,26 @@ public class Grammar implements Serializable {
             final int key;
             public OrderingInfo(int key) { this.key = key; }
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
+            @Override
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + key;
+                return result;
+            }
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj)
+                    return true;
+                if (obj == null)
+                    return false;
+                if (getClass() != obj.getClass())
+                    return false;
+                OrderingInfo other = (OrderingInfo) obj;
+                if (key != other.key)
+                    return false;
+                return true;
+            }
             public String toString() { return Integer.toString(key); }
         }
 

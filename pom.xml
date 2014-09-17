@@ -215,6 +215,19 @@
 -->
   </dependencies>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <includeFilterFile>src/main/config/findbugs-include.xml</includeFilterFile>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <build>
     <resources>
       <resource>
