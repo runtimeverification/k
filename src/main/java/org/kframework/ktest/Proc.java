@@ -141,18 +141,25 @@ public class Proc<T> implements Runnable {
 
     @Override
     public void run() {
-        ProcOutput debugOutput = null;
-        if (options.isVerbose() && options.getDebug()) {
-            // We want to print stack traces but we can't use error output with stack traces
-            // in output comparisons. So we make two runs:
-            // 1) We pass --debug and collect output with stack trace.
-            // 2) We don't pass --debug and use output for comparison.
+        if (options.getDebug()) {
             String[] debugArgs = Arrays.copyOf(args, args.length + 1);
-            debugArgs[args.length] = "--debug";
-            debugOutput = runProc(debugArgs, true);
+            if (expectedErr != null) {
+                // We want to use --debug and compare error outputs too. In this case we need to
+                // make two runs:
+                // 1) We pass --debug and collect output with stack trace.
+                // 2) We don't pass --debug and use output for comparison.
+                ProcOutput debugOutput = runProc(debugArgs, true);
+                procOutput = runProc(args, false);
+                handlePgmResult(procOutput, debugOutput);
+            } else {
+                // Make one run with --debug
+                procOutput = runProc(args, false);
+                handlePgmResult(procOutput, null);
+            }
+        } else {
+            procOutput = runProc(args, false);
+            handlePgmResult(procOutput, null);
         }
-        procOutput = runProc(args, false);
-        handlePgmResult(procOutput, debugOutput);
     }
 
     private ProcOutput runProc(String[] args, boolean debug) {
