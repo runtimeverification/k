@@ -12,6 +12,7 @@ import java.util.Stack;
 
 import org.apache.commons.collections4.set.UnmodifiableSet;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.Table;
 
@@ -283,6 +284,8 @@ public class Poset<T> implements Serializable {
         private T big, small;
 
         public Tuple(T big, T small) {
+            Preconditions.checkNotNull(big);
+            Preconditions.checkNotNull(small);
             this.big = big;
             this.small = small;
         }
@@ -291,8 +294,8 @@ public class Poset<T> implements Serializable {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((big == null) ? 0 : big.hashCode());
-            result = prime * result + ((small == null) ? 0 : small.hashCode());
+            result = prime * result + big.hashCode();
+            result = prime * result + small.hashCode();
             return result;
         }
 
@@ -306,15 +309,9 @@ public class Poset<T> implements Serializable {
             if (getClass() != obj.getClass())
                 return false;
             Tuple<?> other = (Tuple<?>) obj;
-            if (big == null) {
-                if (other.big != null)
-                    return false;
-            } else if (!big.equals(other.big))
+            if (!big.equals(other.big))
                 return false;
-            if (small == null) {
-                if (other.small != null)
-                    return false;
-            } else if (!small.equals(other.small))
+            if (!small.equals(other.small))
                 return false;
             return true;
         }

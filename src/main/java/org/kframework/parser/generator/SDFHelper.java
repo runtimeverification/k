@@ -9,6 +9,7 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 
 public class SDFHelper {
@@ -56,9 +57,7 @@ public class SDFHelper {
             for (Terminal t2 : terminals) {
                 if (!t1.equals(t2)) {
                     if (t1.getTerminal().startsWith(t2.getTerminal())) {
-                        Tuple tt = new Tuple();
-                        tt.key = t1.getTerminal();
-                        tt.value = t2.getTerminal();
+                        Tuple tt = new Tuple(t1.getTerminal(), t2.getTerminal());
                         String ending = tt.key.substring(tt.value.length());
                         if (ending.matches(varid))
                             mytuples.add(tt);
@@ -92,15 +91,22 @@ public class SDFHelper {
      *
      */
     private final static class Tuple {
-        public String key;
-        public String value;
+        private String key;
+        private String value;
+
+        public Tuple(String key, String value) {
+            Preconditions.checkNotNull(key);
+            Preconditions.checkNotNull(value);
+            this.key = key;
+            this.value = value;
+        }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((key == null) ? 0 : key.hashCode());
-            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            result = prime * result + key.hashCode();
+            result = prime * result + value.hashCode();
             return result;
         }
         @Override
@@ -112,15 +118,9 @@ public class SDFHelper {
             if (getClass() != obj.getClass())
                 return false;
             Tuple other = (Tuple) obj;
-            if (key == null) {
-                if (other.key != null)
-                    return false;
-            } else if (!key.equals(other.key))
+            if (!key.equals(other.key))
                 return false;
-            if (value == null) {
-                if (other.value != null)
-                    return false;
-            } else if (!value.equals(other.value))
+            if (!value.equals(other.value))
                 return false;
             return true;
         }
