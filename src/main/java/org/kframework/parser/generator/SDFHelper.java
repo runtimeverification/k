@@ -49,14 +49,14 @@ public class SDFHelper {
     }
 
     public static String getFollowRestrictionsForTerminals(Set<Terminal> terminals) {
-        Set<Ttuple> mytuples = new HashSet<Ttuple>();
+        Set<Tuple> mytuples = new HashSet<Tuple>();
         String varid = "[A-Z][a-zA-Z0-9\\']*";
 
         for (Terminal t1 : terminals) {
             for (Terminal t2 : terminals) {
                 if (!t1.equals(t2)) {
                     if (t1.getTerminal().startsWith(t2.getTerminal())) {
-                        Ttuple tt = new Ttuple();
+                        Tuple tt = new Tuple();
                         tt.key = t1.getTerminal();
                         tt.value = t2.getTerminal();
                         String ending = tt.key.substring(tt.value.length());
@@ -69,7 +69,7 @@ public class SDFHelper {
 
         String sdf = "lexical restrictions\n";
         sdf += "    %% follow restrictions\n";
-        for (Ttuple tt : mytuples) {
+        for (Tuple tt : mytuples) {
             sdf += "    " + StringUtil.enquoteCString(tt.value) + " -/- ";
             String ending = tt.key.substring(tt.value.length());
             for (int i = 0; i < ending.length(); i++) {
@@ -91,7 +91,7 @@ public class SDFHelper {
      * @author RaduFmse
      *
      */
-    private final static class Ttuple {
+    private final static class Tuple {
         public String key;
         public String value;
 
@@ -111,7 +111,7 @@ public class SDFHelper {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            Ttuple other = (Ttuple) obj;
+            Tuple other = (Tuple) obj;
             if (key == null) {
                 if (other.key != null)
                     return false;
