@@ -105,6 +105,7 @@ public class KRunModule extends AbstractModule {
 
         ThrowingProviderBinder throwingBinder = ThrowingProviderBinder.create(binder());
 
+        // bind Transformation<P, Q> to TransformationProvider<Transformation<P, Q>>
         bindListener(Matchers.any(), new TypeListener() {
 
             @Override
@@ -124,23 +125,27 @@ public class KRunModule extends AbstractModule {
             }
         });
 
+        // bind providers for atomic transformations activated by options
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<ASTNode, String>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<ASTNode, String>>() {}));
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunState, ASTNode>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<KRunState, ASTNode>>() {}));
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<SearchResult, Map<String, Term>>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<SearchResult, Map<String, Term>>>() {}));
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunResult<?>, String>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<KRunResult<?>, String>>() {}));
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<Void, KRunResult<?>>>() {}).to(Key.get(new TypeLiteral<ActivatedTransformationProvider<Void, KRunResult<?>>>() {}));
 
+        // bind providers for transformations that are on universally
         bind(new TypeLiteral<TransformationProvider<Transformation<Transition, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<Transition, String>, PrintTransition>>() {});
         bind(new TypeLiteral<TransformationProvider<Transformation<SearchResults, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<SearchResults, String>, PrintSearchResults>>() {});
         bind(new TypeLiteral<TransformationProvider<Transformation<Map<String, Term>, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<Map<String, Term>, String>, PrintSearchResult>>() {});
         bind(new TypeLiteral<TransformationProvider<Transformation<KRunGraph, String>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<KRunGraph, String>, PrintKRunGraph>>() {});
         bind(new TypeLiteral<TransformationProvider<Transformation<String, Void>>>() {}).to(new TypeLiteral<BasicTransformationProvider<Transformation<String, Void>, WriteOutput>>() {});
 
+        // bind providers for transformatinos composed of smaller transformations
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<Void, Void>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<Void, KRunResult<?>, Void>>() {}));
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunState, String>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<KRunState, ASTNode, String>>() {}));
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<SearchResult, String>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<SearchResult, Map<String, Term>, String>>() {}));
         throwingBinder.bind(TransformationProvider.class, new TypeLiteral<Transformation<KRunResult<?>, Void>>() {}).to(Key.get(new TypeLiteral<TransformationCompositionProvider<KRunResult<?>, String, Void>>() {}));
 
+        //bind option activations to the transformations they activate
         MapBinder<ToolActivation, Transformation<Void, Void>> mainTools = MapBinder.newMapBinder(
                 binder(), TypeLiteral.get(ToolActivation.class), new TypeLiteral<Transformation<Void, Void>>() {});
         MapBinder<ToolActivation, Transformation<Void, KRunResult<?>>> krunResultTools = MapBinder.newMapBinder(
@@ -177,19 +182,13 @@ public class KRunModule extends AbstractModule {
                 astNodePrinters.addBinding(new ToolActivation.OptionValueActivation<>("--output", mode)).to(PrintTerm.class);
             }
         }
-
-        Multibinder<Transformation<?, ?>> transformations = Multibinder.newSetBinder(binder(),
-                new TypeLiteral<Transformation<?, ?>>() {});
-        transformations.addBinding().to(PrintSearchResult.class);
-        transformations.addBinding().to(PrintKRunGraph.class);
-        transformations.addBinding().to(PrintTransition.class);
-
     }
 
     public static class CommonModule extends AbstractModule {
 
         @Override
         protected void configure() {
+            //bind backend implementations of tools to their interfaces
             MapBinder<String, Executor> executorBinder = MapBinder.newMapBinder(
                     binder(), String.class, Executor.class);
             executorBinder.addBinding(Backends.MAUDE).to(MaudeExecutor.class);
