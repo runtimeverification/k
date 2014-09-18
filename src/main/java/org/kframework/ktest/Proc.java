@@ -153,7 +153,7 @@ public class Proc<T> implements Runnable {
                 handlePgmResult(procOutput, debugOutput);
             } else {
                 // Make one run with --debug
-                procOutput = runProc(args, false);
+                procOutput = runProc(args, true);
                 handlePgmResult(procOutput, null);
             }
         } else {
