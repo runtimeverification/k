@@ -1,4 +1,0 @@
-
-<result>
- closure-lambda( (Map2KLabel .) , x , ((lambda f . f)  (lambda y . (if true then (x  7) else (x  y)))) )
-</result>

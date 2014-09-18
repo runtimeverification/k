@@ -680,15 +680,15 @@ public class MaudeKRun implements KRun {
         assertXML(child.size() == 1);
         String sort = child.get(0).getAttribute("sort");
         String op = child.get(0).getAttribute("op");
-        assertXML(op.equals("_`(_`)") && sort.equals(Sort.KITEM));
+        assertXML(op.equals("_`(_`)") && sort.equals(Sort.KITEM.toString()));
         child = XmlUtil.getChildElements(child.get(0));
         assertXML(child.size() == 2);
         sort = child.get(0).getAttribute("sort");
         op = child.get(0).getAttribute("op");
-        assertXML(op.equals("#_") && sort.equals(Sort.KLABEL));
+        assertXML(op.equals("#_") && sort.equals(Sort.KLABEL.toString()));
         sort = child.get(1).getAttribute("sort");
         op = child.get(1).getAttribute("op");
-        assertXML(op.equals(".KList") && sort.equals(Sort.KLIST));
+        assertXML(op.equals(".KList") && sort.equals(Sort.KLIST.toString()));
         child = XmlUtil.getChildElements(child.get(0));
         assertXML(child.size() == 1);
         elem = child.get(0);

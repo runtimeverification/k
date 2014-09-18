@@ -100,7 +100,7 @@ public class TestSuite {
                 System.out.println(tc.toKompileLogString());
         }
         if (!skips.contains(KTestStep.PDF)) {
-            List<TestCase> pdfSteps = filterSkips(tests, KTestStep.PDF);
+            List<TestCase> pdfSteps = collectPDFDefs(filterSkips(tests, KTestStep.PDF));
             for (TestCase tc : pdfSteps)
                 System.out.println(tc.toPdfLogString());
         }
@@ -215,6 +215,24 @@ public class TestSuite {
     }
 
     /**
+     * Filter test cases with same definitions for PDF step.
+     * @param tests list of test cases to filter.
+     * @return test cases with unique definition files.
+     */
+    private List<TestCase> collectPDFDefs(List<TestCase> tests) {
+        Set<String> pdfDefs = new HashSet<>();
+        List<TestCase> ret = new ArrayList<>();
+        for (TestCase tc : tests) {
+            String def = tc.getDefinition();
+            if (!pdfDefs.contains(def)) {
+                pdfDefs.add(def);
+                ret.add(tc);
+            }
+        }
+        return ret;
+    }
+
+    /**
      * Run pdf tests.
      * @param tests list of tests to run pdf step
      * @return whether all run successfully or not
@@ -222,11 +240,12 @@ public class TestSuite {
      */
     private boolean runPDFSteps(List<TestCase> tests) throws InterruptedException {
         List<Proc<TestCase>> ps = new ArrayList<>();
-        int len = tests.size();
+        List<TestCase> pdfTests = collectPDFDefs(tests);
+        int len = pdfTests.size();
         System.out.format("Generate PDF files...(%d in total)%n", len);
         startTpe();
         long startTime = System.currentTimeMillis();
-        for (TestCase tc : tests) {
+        for (TestCase tc : pdfTests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(), options);
             p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
