@@ -59,6 +59,7 @@ public class KTestFrontEnd extends FrontEnd {
             JarInfo jarInfo) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo);
         this.options = options;
+        this.options.setDebug(globalOptions.debug);
         this.kem = kem;
     }
 

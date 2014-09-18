@@ -178,6 +178,11 @@ public class KTestOptions {
     private boolean dry = false;
 
     /**
+     * Enable debugging. When enabled, KTest passes --debug to spawned processes.
+     */
+    private boolean debug = false;
+
+    /**
      * Copy constructor.
      * @param obj KTestOptions object to copy
      */
@@ -199,6 +204,7 @@ public class KTestOptions {
         this.ignoreWS = obj.ignoreWS;
         this.ignoreBalancedParens = obj.ignoreBalancedParens;
         this.dry = obj.dry;
+        this.debug = obj.debug;
     }
 
     /**
@@ -302,8 +308,16 @@ public class KTestOptions {
         return dry;
     }
 
+    public boolean getDebug() {
+        return debug;
+    }
+
     public int getThreads() {
         return threads;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public KTestOptions setDirectory(String directory) {
