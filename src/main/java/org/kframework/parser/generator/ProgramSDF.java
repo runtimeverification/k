@@ -67,8 +67,9 @@ public class ProgramSDF {
         }
 
         // save the new parser info
-        if (!new File(context.kompiled, "pgm").mkdirs()) {
-            GlobalSettings.kem.registerInternalError("Could not create file " + new File(context.kompiled, "pgm"));
+        File pgm = new File(context.kompiled, "pgm");
+        if (!pgm.exists() && !pgm.mkdirs()) {
+            GlobalSettings.kem.registerInternalError("Could not create directory " + pgm);
         }
         BinaryLoader.instance().saveOrDie(context.kompiled.getPath()+ "/pgm/newParser.bin", ks2gsf.getGrammar());
 

@@ -94,7 +94,7 @@ public class KompileFrontEnd extends FrontEnd {
         }
 
         context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
-        if (!context.dotk.mkdirs()) {
+        if (!context.dotk.exists() && !context.dotk.mkdirs()) {
             kem.registerCriticalError("Could not create directory " + context.dotk);
         }
 
@@ -116,7 +116,7 @@ public class KompileFrontEnd extends FrontEnd {
         if (backend.generatesDefinition()) {
                 context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.kompiled);
-                if (!context.kompiled.mkdirs()) {
+                if (!context.kompiled.exists() && !context.kompiled.mkdirs()) {
                     kem.registerCriticalError("Could not create directory " + context.kompiled);
                 }
         }
