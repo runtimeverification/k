@@ -143,6 +143,7 @@ public class Proc<T> implements Runnable {
     public void run() {
         if (options.getDebug()) {
             String[] debugArgs = Arrays.copyOf(args, args.length + 1);
+            debugArgs[args.length] = "--debug";
             if (expectedErr != null) {
                 // We want to use --debug and compare error outputs too. In this case we need to
                 // make two runs:
