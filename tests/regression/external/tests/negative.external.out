@@ -1,0 +1,5 @@
+<k>
+    pperror ( 
+      "failed: returned a non-zero exit code: 1 Stdout: null Stderr: cat: tests/b.txt: No such file or directory\n"
+       )
+</k>
