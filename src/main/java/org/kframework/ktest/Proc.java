@@ -80,7 +80,7 @@ public class Proc<T> implements Runnable {
     /**
      * Whether the process succeeded or not.
      */
-    private boolean success = false;
+    private boolean success;
 
     /**
      * Reason of failure. null if process is not started yet or it's succeeded.
@@ -129,6 +129,7 @@ public class Proc<T> implements Runnable {
         this.options = options;
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
+        success = options.dry;
     }
 
     public Proc(T obj, String[] args, File workingDir, KTestOptions options) {
@@ -148,61 +149,80 @@ public class Proc<T> implements Runnable {
                 // 2) We don't pass --debug and use output for comparison.
                 ProcOutput debugOutput = runProc(debugArgs);
                 procOutput = runProc(args);
-                handlePgmResult(procOutput, debugOutput);
+                if (!options.dry) {
+                    handlePgmResult(procOutput, debugOutput);
+                }
             } else {
                 // Make one run with --debug
                 procOutput = runProc(args);
-                handlePgmResult(procOutput, null);
+                if (!options.dry) {
+                    handlePgmResult(procOutput, null);
+                }
             }
         } else {
             procOutput = runProc(args);
-            handlePgmResult(procOutput, null);
+            if (!options.dry) {
+                handlePgmResult(procOutput, null);
+            }
         }
     }
 
     private ProcOutput runProc(String[] args) {
-        ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
-        pb.environment().put("kompile", ExecNames.getKompile());
-        pb.environment().put("krun", ExecNames.getKrun());
-        pb.environment().put("kast", ExecNames.getKast());
-
-        try {
-            if (options.isVerbose()) {
-                printVerboseRunningMsg(toLogString(args));
-            }
-            long startTime = System.currentTimeMillis();
-            Process proc = pb.start();
-
-            // I'm using a different naming convention because this is more intuitive for me
-            InputStream errorStream = proc.getErrorStream(); // program's error stream
-            InputStream outStream = proc.getInputStream(); // program's output stream
-            OutputStream inStream = proc.getOutputStream(); // program's input stream
-
-            // pass input to process
-            IOUtils.write(procInput, inStream);
-            inStream.close();
-
-            // asynchronously read outputs
-            final ExecutorService service = Executors.newFixedThreadPool(2);
-            final Future<String> outputGobbler = service.submit(new StreamGobbler(outStream));
-            final Future<String> errorGobbler  = service.submit(new StreamGobbler(errorStream));
-
-            int returnCode = wait(proc);
-            timeDelta += System.currentTimeMillis() - startTime;
+        if (options.dry) {
+            StringBuilder dryStr = new StringBuilder();
+            dryStr.append(toLogString(args));
+            if (options.getUpdateOut() && outputFile != null)
+                dryStr.append(" >").append(outputFile);
+            else if (options.getGenerateOut() && newOutputFile != null)
+                dryStr.append(" >").append(newOutputFile);
+            if (inputFile != null)
+                dryStr.append(" <").append(inputFile);
+            System.out.println(dryStr.toString());
+            return null;
+        } else {
+            ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
+            pb.environment().put("kompile", ExecNames.getKompile());
+            pb.environment().put("krun", ExecNames.getKrun());
+            pb.environment().put("kast", ExecNames.getKast());
 
             try {
-                return new ProcOutput(outputGobbler.get(), errorGobbler.get(), returnCode);
-            } catch (ExecutionException e) {
-                // program was killed before producing output,
-                // set pgmOut and pgmErr null manually, in case one of the outputs is produced
-                // but other is not (not sure if that's possible, just to make sure..)
-                return new ProcOutput(null, null, returnCode);
+                if (options.isVerbose()) {
+                    printVerboseRunningMsg(toLogString(args));
+                }
+                long startTime = System.currentTimeMillis();
+                Process proc = pb.start();
+
+                // I'm using a different naming convention because this is more intuitive for me
+                InputStream errorStream = proc.getErrorStream(); // program's error stream
+                InputStream outStream = proc.getInputStream(); // program's output stream
+                OutputStream inStream = proc.getOutputStream(); // program's input stream
+
+                // pass input to process
+                IOUtils.write(procInput, inStream);
+                inStream.close();
+
+                // asynchronously read outputs
+                final ExecutorService service = Executors.newFixedThreadPool(2);
+                final Future<String> outputGobbler = service.submit(new StreamGobbler(outStream));
+                final Future<String> errorGobbler = service.submit(new StreamGobbler(errorStream));
+
+                int returnCode = wait(proc);
+                timeDelta += System.currentTimeMillis() - startTime;
+
+                try {
+                    return new ProcOutput(outputGobbler.get(), errorGobbler.get(), returnCode);
+                } catch (ExecutionException e) {
+                    // program was killed before producing output,
+                    // set pgmOut and pgmErr null manually, in case one of the outputs is produced
+                    // but other is not (not sure if that's possible, just to make sure..)
+                    return new ProcOutput(null, null, returnCode);
+                }
+            } catch (IOException | InterruptedException e) {
+                GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
+                reportErr("program failed with exception: " + e.getMessage());
             }
-        } catch (IOException | InterruptedException e) {
-            GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
-            reportErr("program failed with exception: " + e.getMessage());
+            return null; // unreachable
         }
-        return null; // unreachable
     }
 
     /**

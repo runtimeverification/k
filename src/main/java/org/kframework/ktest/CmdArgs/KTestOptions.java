@@ -175,7 +175,7 @@ public class KTestOptions {
      */
     @Parameter(names="--dry", description="Dry run: print out the " +
                 "command to be executed without actual execution.")
-    private boolean dry = false;
+    public boolean dry = false;
 
     /**
      * Enable debugging. When enabled, KTest passes --debug to spawned processes.
@@ -302,10 +302,6 @@ public class KTestOptions {
 
     public boolean getGenerateReport() {
         return generateReport;
-    }
-
-    public boolean getDry() {
-        return dry;
     }
 
     public boolean getDebug() {

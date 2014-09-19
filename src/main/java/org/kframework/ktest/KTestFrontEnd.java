@@ -66,13 +66,7 @@ public class KTestFrontEnd extends FrontEnd {
     public boolean run() {
         try {
             options.validateArgs();
-            TestSuite testSuite = makeTestSuite(options.getTargetFile(), options);
-            if (options.getDry()) {
-                testSuite.dryRun();
-                return true;
-            } else {
-                return testSuite.run();
-            }
+            return makeTestSuite(options.getTargetFile(), options).run();
         } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
                 TransformerException | ParameterException e) {
             kem.registerCriticalError(e.getMessage(), e);
