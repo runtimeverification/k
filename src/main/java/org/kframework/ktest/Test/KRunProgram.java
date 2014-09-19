@@ -54,15 +54,4 @@ public class KRunProgram {
         }
         return argsArr;
     }
-
-    /**
-     * @return String to be used in logging.
-     */
-    public String toLogString() {
-        if (OS.current() == OS.WIN) {
-            // OS is WIN, getKrunCmd will return args escaped
-            return StringUtils.join(getKrunCmd(), ' ');
-        }
-        return StringUtil.escapeShell(getKrunCmd(), OS.current());
-    }
 }

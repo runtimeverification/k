@@ -153,7 +153,7 @@ public class TestCase {
      */
     public String[] getKompileCmd() {
         assert new File(getDefinition()).isFile();
-        List<String> stringArgs = new ArrayList<String>();
+        List<String> stringArgs = new ArrayList<>();
         stringArgs.add(ExecNames.getKompile());
         stringArgs.add(getDefinition());
         for (PgmArg kompileOpt : kompileOpts) {
@@ -166,16 +166,6 @@ public class TestCase {
             }
         }
         return argsArr;
-    }
-
-    /**
-     * @return String representation of kompile command to be used in logging.
-     */
-    public String toKompileLogString() {
-        if (OS.current() == OS.WIN) {
-            return StringUtils.join(getKompileCmd(), ' ');
-        }
-        return StringUtil.escapeShell(getKompileCmd(), OS.current());
     }
 
     /**
@@ -220,16 +210,6 @@ public class TestCase {
             }
         }
         return argsArr;
-    }
-
-    /**
-     * @return String representation of PDF command to be used in logging.
-     */
-    public String toPdfLogString() {
-        if (OS.current() == OS.WIN) {
-            return StringUtils.join(getPdfCmd(), ' ');
-        }
-        return StringUtil.escapeShell(getPdfCmd(), OS.current());
     }
 
     public void setKompileOpts(List<PgmArg> kompileOpts) {

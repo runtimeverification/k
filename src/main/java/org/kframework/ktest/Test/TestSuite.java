@@ -97,12 +97,12 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KOMPILE)) {
             List<TestCase> kompileSteps = filterSkips(tests, KTestStep.KOMPILE);
             for (TestCase tc : kompileSteps)
-                System.out.println(tc.toKompileLogString());
+                System.out.println(Proc.toLogString(tc.getKompileCmd()));
         }
         if (!skips.contains(KTestStep.PDF)) {
             List<TestCase> pdfSteps = collectPDFDefs(filterSkips(tests, KTestStep.PDF));
             for (TestCase tc : pdfSteps)
-                System.out.println(tc.toPdfLogString());
+                System.out.println(Proc.toLogString(tc.getPdfCmd()));
         }
         if (!skips.contains(KTestStep.KRUN)) {
             List<TestCase> krunSteps = filterSkips(tests, KTestStep.KRUN);
@@ -110,7 +110,7 @@ public class TestSuite {
                 List<KRunProgram> programs = tc.getPrograms();
                 for (KRunProgram program : programs) {
                     StringBuilder krunLogCmd = new StringBuilder();
-                    krunLogCmd.append(program.toLogString());
+                    krunLogCmd.append(Proc.toLogString(program.getKrunCmd()));
                     if (options.getUpdateOut() && program.outputFile != null)
                         krunLogCmd.append(" >").append(program.outputFile);
                     else if (options.getGenerateOut() && program.newOutputFile != null)
@@ -147,8 +147,7 @@ public class TestSuite {
         startTpe();
         for (TestCase tc : tests) {
             if (tc.hasPosixOnly()) {
-                Proc<TestCase> p =
-                        new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(), options);
+                Proc<TestCase> p = new Proc<>(tc, tc.getPosixOnlyCmd(), options);
                 ps.add(p);
                 p.setWorkingDir(tc.getWorkingDir());
                 tpe.execute(p);
@@ -190,7 +189,7 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         startTpe();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(), options);
+            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), options);
             p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
@@ -246,7 +245,7 @@ public class TestSuite {
         startTpe();
         long startTime = System.currentTimeMillis();
         for (TestCase tc : pdfTests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(), options);
+            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), options);
             p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
@@ -407,7 +406,7 @@ public class TestSuite {
             matcher = new RegexStringMatcher();
         }
         Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
-                outputContentsAnn, errorContentsAnn, program.toLogString(), matcher, options,
+                outputContentsAnn, errorContentsAnn, matcher, options,
                 program.outputFile, program.newOutputFile);
         p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);

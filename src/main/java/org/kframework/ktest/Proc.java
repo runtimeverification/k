@@ -2,9 +2,12 @@
 package org.kframework.ktest;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.StringMatcher.MatchFailure;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.OS;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
@@ -53,11 +56,6 @@ public class Proc<T> implements Runnable {
      * Input string to pass to program.
      */
     private final String procInput;
-
-    /**
-     * String to be used while logging the process results.
-     */
-    private final String logStr;
 
     /**
      * Comparator to compare program outputs with expected outputs.
@@ -112,30 +110,28 @@ public class Proc<T> implements Runnable {
      *                    program fails with an error
      * @param expectedErr null if not testing for error output, error messages are ignored when
      *                    program returns 0
-     * @param logStr String representation of the process
      * @param strComparator comparator object to compare program outputs with expected outputs
      * @param outputFile output file to be updated when --update-out is used
      * @param newOutputFile output file to generated when --generate-out is used
      */
     public Proc(T obj, String[] args, String inputFile, String procInput,
                 Annotated<String, String> expectedOut, Annotated<String, String> expectedErr,
-                String logStr, StringMatcher strComparator, KTestOptions options,
-                String outputFile, String newOutputFile) {
+                StringMatcher strComparator, KTestOptions options, String outputFile,
+                String newOutputFile) {
         this.obj = obj;
         this.args = args;
         this.inputFile = inputFile;
         this.procInput = procInput;
         this.expectedOut = expectedOut;
         this.expectedErr = expectedErr;
-        this.logStr = logStr;
         this.strComparator = strComparator;
         this.options = options;
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
     }
 
-    public Proc(T obj, String[] args, String logStr, KTestOptions options) {
-        this(obj, args, null, "", null, null, logStr, options.getDefaultStringMatcher(), options,
+    public Proc(T obj, String[] args, KTestOptions options) {
+        this(obj, args, null, "", null, null, options.getDefaultStringMatcher(), options,
                 null, null);
     }
 
@@ -149,21 +145,21 @@ public class Proc<T> implements Runnable {
                 // make two runs:
                 // 1) We pass --debug and collect output with stack trace.
                 // 2) We don't pass --debug and use output for comparison.
-                ProcOutput debugOutput = runProc(debugArgs, true);
-                procOutput = runProc(args, false);
+                ProcOutput debugOutput = runProc(debugArgs);
+                procOutput = runProc(args);
                 handlePgmResult(procOutput, debugOutput);
             } else {
                 // Make one run with --debug
-                procOutput = runProc(args, true);
+                procOutput = runProc(args);
                 handlePgmResult(procOutput, null);
             }
         } else {
-            procOutput = runProc(args, false);
+            procOutput = runProc(args);
             handlePgmResult(procOutput, null);
         }
     }
 
-    private ProcOutput runProc(String[] args, boolean debug) {
+    private ProcOutput runProc(String[] args) {
         ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
         pb.environment().put("kompile", ExecNames.getKompile());
         pb.environment().put("krun", ExecNames.getKrun());
@@ -171,7 +167,7 @@ public class Proc<T> implements Runnable {
 
         try {
             if (options.isVerbose()) {
-                printVerboseRunningMsg(debug);
+                printVerboseRunningMsg(toLogString(args));
             }
             long startTime = System.currentTimeMillis();
             Process proc = pb.start();
@@ -254,6 +250,13 @@ public class Proc<T> implements Runnable {
         this.workingDir = workingDir;
     }
 
+    public static String toLogString(String[] args) {
+        if (OS.current() == OS.WIN) {
+            return StringUtils.join(args, ' ');
+        }
+        return StringUtil.escapeShell(args, OS.current());
+    }
+
     private int wait(final Process proc) throws InterruptedException {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -275,6 +278,7 @@ public class Proc<T> implements Runnable {
         String red = ColorUtil.RgbToAnsi(
                 Color.RED, options.getColorSetting(), options.getTerminalColor());
         boolean verbose = options.isVerbose();
+        String logStr = toLogString(args);
         if (normalOutput.returnCode == 0) {
 
             boolean doGenerateOut = false;
@@ -391,14 +395,11 @@ public class Proc<T> implements Runnable {
         reason = "Timeout";
     }
 
-    private void printVerboseRunningMsg(boolean debug) {
+    private void printVerboseRunningMsg(String logStr) {
         StringBuilder b = new StringBuilder();
         b.append("Running [");
         b.append(logStr);
         b.append("]");
-        if (debug) {
-            b.append(" [with --debug]");
-        }
         if (inputFile != null) {
             b.append(" [input: ");
             b.append(inputFile);
