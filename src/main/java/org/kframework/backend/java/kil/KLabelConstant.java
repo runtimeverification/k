@@ -104,7 +104,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
                         "Cannot determine if the KLabel " + label
                         + " is a pattern symbol because there are multiple productions associated with this KLabel: "
                         + productions;
-                assert smtlib == production.getAttribute(Attribute.SMTLIB_KEY) :
+                assert smtlib == null && production.getAttribute(Attribute.SMTLIB_KEY) == null || smtlib.equals(production.getAttribute(Attribute.SMTLIB_KEY)) :
                         "Cannot determine the smtlib attribute of the KLabel " + label
                         + " because there are multiple productions associated with this KLabel: "
                         + productions;

@@ -304,7 +304,7 @@ public class ColorUtil {
     }
 
     private static float toFloat(Object rawColor) {
-        return rawColor instanceof Integer ? (float) (int) rawColor : (float) (double) rawColor;
+        return rawColor instanceof Integer ? (float) (Integer) rawColor : (float) (double) rawColor;
     }
 
     private static Color getColorByRgb(String rgb) {

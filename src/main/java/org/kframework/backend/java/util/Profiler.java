@@ -49,7 +49,7 @@ public class Profiler {
 
     public static void printResult() {
         if (ENABLE_PROFILING_MODE) {
-            System.err.printf("%s(mc=%s, eval=%s[%s, %s], rew=%s) + %s\n",
+            System.err.printf("%s(mc=%s, eval=%s[%s, %s], rew=%s) + %s%n",
                     REWRITE_WITH_KOMPILED_RULES_TIMER, PATTERN_MATCH_TIMER,
                     EVALUATE_SIDE_CONDITIONS_TIMER,
                     EVALUATE_LOOKUP_CHOICE_TIMER, EVALUATE_REQUIRES_TIMER,

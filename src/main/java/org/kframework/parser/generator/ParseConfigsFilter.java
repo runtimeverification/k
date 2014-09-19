@@ -112,7 +112,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
 
                 if (globalOptions.debug) {
                     try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
-                        f.format("Parsing config: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime2), ss.getSource(), ss.getLocation());
+                        f.format("Parsing config: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime2), ss.getSource(), ss.getLocation());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -4,6 +4,7 @@ package org.kframework.ktest;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,6 +18,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -50,8 +52,11 @@ public class ReportGen {
 
     public void save() throws ParserConfigurationException, TransformerException, IOException {
         File junitFolder = new File("junit-reports");
-        if (!junitFolder.isDirectory())
-            junitFolder.mkdirs();
+        if (!junitFolder.isDirectory()) {
+            if (!junitFolder.mkdirs()) {
+                GlobalSettings.kem.registerCriticalError("Could not create directory " + junitFolder);
+            }
+        }
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();

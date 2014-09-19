@@ -9,6 +9,7 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 
 public class SDFHelper {
@@ -49,16 +50,14 @@ public class SDFHelper {
     }
 
     public static String getFollowRestrictionsForTerminals(Set<Terminal> terminals) {
-        Set<Ttuple> mytuples = new HashSet<Ttuple>();
+        Set<Tuple> mytuples = new HashSet<Tuple>();
         String varid = "[A-Z][a-zA-Z0-9\\']*";
 
         for (Terminal t1 : terminals) {
             for (Terminal t2 : terminals) {
                 if (!t1.equals(t2)) {
                     if (t1.getTerminal().startsWith(t2.getTerminal())) {
-                        Ttuple tt = new Ttuple();
-                        tt.key = t1.getTerminal();
-                        tt.value = t2.getTerminal();
+                        Tuple tt = new Tuple(t1.getTerminal(), t2.getTerminal());
                         String ending = tt.key.substring(tt.value.length());
                         if (ending.matches(varid))
                             mytuples.add(tt);
@@ -69,7 +68,7 @@ public class SDFHelper {
 
         String sdf = "lexical restrictions\n";
         sdf += "    %% follow restrictions\n";
-        for (Ttuple tt : mytuples) {
+        for (Tuple tt : mytuples) {
             sdf += "    " + StringUtil.enquoteCString(tt.value) + " -/- ";
             String ending = tt.key.substring(tt.value.length());
             for (int i = 0; i < ending.length(); i++) {
@@ -91,21 +90,39 @@ public class SDFHelper {
      * @author RaduFmse
      *
      */
-    private static class Ttuple {
-        public String key;
-        public String value;
+    private final static class Tuple {
+        private String key;
+        private String value;
 
-        public boolean equals(Object o) {
-            if (o.getClass() == Ttuple.class)
-                return false;
-            Ttuple tt = (Ttuple) o;
-            if (key.equals(tt.key) && value.equals(tt.value))
-                return true;
-            return false;
+        public Tuple(String key, String value) {
+            Preconditions.checkNotNull(key);
+            Preconditions.checkNotNull(value);
+            this.key = key;
+            this.value = value;
         }
 
+        @Override
         public int hashCode() {
-            return key.hashCode() + value.hashCode();
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + key.hashCode();
+            result = prime * result + value.hashCode();
+            return result;
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Tuple other = (Tuple) obj;
+            if (!key.equals(other.key))
+                return false;
+            if (!value.equals(other.value))
+                return false;
+            return true;
         }
     }
 }

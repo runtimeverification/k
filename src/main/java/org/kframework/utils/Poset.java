@@ -12,6 +12,7 @@ import java.util.Stack;
 
 import org.apache.commons.collections4.set.UnmodifiableSet;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.Table;
 
@@ -19,7 +20,7 @@ public class Poset<T> implements Serializable {
 
     private boolean cacheEnabled = false;
 
-    private java.util.Set<Tuple> relations = new HashSet<>();
+    private java.util.Set<Tuple<T>> relations = new HashSet<>();
     private java.util.Set<T> elements = new HashSet<>();
 
     public static <T> Poset<T> create() {
@@ -39,25 +40,25 @@ public class Poset<T> implements Serializable {
     }
 
     public void addRelation(T big, T small) {
-        relations.add(new Tuple(big, small));
+        relations.add(new Tuple<T>(big, small));
         elements.add(big);
         elements.add(small);
         invalidateCache();
     }
 
     public boolean isInRelation(T big, T small) {
-        return relations.contains(new Tuple(big, small));
+        return relations.contains(new Tuple<T>(big, small));
     }
 
     public void transitiveClosure() {
         boolean finished = false;
         while (!finished) {
             finished = true;
-            Set<Tuple> ssTemp = new HashSet<Tuple>();
-            for (Tuple s1 : relations) {
-                for (Tuple s2 : relations) {
+            Set<Tuple<T>> ssTemp = new HashSet<Tuple<T>>();
+            for (Tuple<T> s1 : relations) {
+                for (Tuple<T> s2 : relations) {
                     if (s1.big.equals(s2.small)) {
-                        Tuple sTemp = new Tuple(s2.big, s1.small);
+                        Tuple<T> sTemp = new Tuple<T>(s2.big, s1.small);
                         if (!relations.contains(sTemp)) {
                             ssTemp.add(sTemp);
                             finished = false;
@@ -73,7 +74,7 @@ public class Poset<T> implements Serializable {
         boolean maxim = true;
         do {
             maxim = true;
-            for (Tuple sbs : relations) {
+            for (Tuple<T> sbs : relations) {
                 if (sbs.small.equals(start)) {
                     start = sbs.big;
                     maxim = false;
@@ -279,30 +280,42 @@ public class Poset<T> implements Serializable {
         upperBound.cache = ArrayTable.create(elements, elements);
     }
 
-    private class Tuple implements Serializable {
+    private static final class Tuple<T> implements Serializable {
         private T big, small;
 
         public Tuple(T big, T small) {
+            Preconditions.checkNotNull(big);
+            Preconditions.checkNotNull(small);
             this.big = big;
             this.small = small;
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (o == null)
-                return false;
-            if (o.getClass() == Tuple.class) {
-                @SuppressWarnings("unchecked")
-                Tuple s1 = (Tuple) o;
-                return s1.big.equals(big) && s1.small.equals(small);
-            }
-            return false;
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + big.hashCode();
+            result = prime * result + small.hashCode();
+            return result;
         }
 
+
         @Override
-        public int hashCode() {
-            return big.hashCode() + small.hashCode();
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Tuple<?> other = (Tuple<?>) obj;
+            if (!big.equals(other.big))
+                return false;
+            if (!small.equals(other.small))
+                return false;
+            return true;
         }
+
 
         @Override
         public String toString() {
@@ -320,7 +333,7 @@ public class Poset<T> implements Serializable {
         Set<T> nodes = new HashSet<>();
         Set<T> visited = new HashSet<>();
 
-        for (Tuple t : relations) {
+        for (Tuple<T> t : relations) {
             nodes.add(t.big);
             nodes.add(t.small);
         }
@@ -339,7 +352,7 @@ public class Poset<T> implements Serializable {
                     T currentNode = nodesStack.peek();
                     while (currentIterator.hasNext()) {
                         T nextNode = currentIterator.next();
-                        if (relations.contains(new Tuple(nextNode, currentNode))) {
+                        if (relations.contains(new Tuple<T>(nextNode, currentNode))) {
                             if (nodesStack.contains(nextNode)) {
                                 List<T> circuit = new ArrayList<>();
                                 for (int i = nodesStack.indexOf(nextNode); i < nodesStack.size(); i++) {

@@ -96,7 +96,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                     } catch (NumberFormatException e) {
                         GlobalSettings.kem.registerCompilerError(
                                 "Expecting a number between 1 and " + prod.getArity() + ", but found " + strictAttr + " as a" +
-                                        " strict position in " + strictAttrs,
+                                        " strict position in " + Arrays.toString(strictAttrs),
                                 this, prod);
                     }
                 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
@@ -485,7 +486,7 @@ public class CopyOnWriteTransformer implements Transformer {
         for (Term conditionItem : rule.ensures()) {
             processedEnsures.add((Term) conditionItem.accept(this));
         }
-        List<Variable> processedFreshVariables = new ArrayList<Variable>(
+        Set<Variable> processedFreshVariables = new HashSet<Variable>(
                 rule.freshVariables().size());
         for (Variable variable : rule.freshVariables()) {
             processedFreshVariables.add((Variable) variable.accept(this));

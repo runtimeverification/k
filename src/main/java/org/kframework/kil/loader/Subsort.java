@@ -3,7 +3,7 @@ package org.kframework.kil.loader;
 
 import org.kframework.kil.Sort;
 
-public class Subsort {
+public final class Subsort {
     private Sort bigSort, smallSort;
 
     public Subsort(Sort bigSort, Sort smallSort) {

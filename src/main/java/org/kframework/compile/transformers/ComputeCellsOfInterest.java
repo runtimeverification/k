@@ -185,6 +185,7 @@ public class ComputeCellsOfInterest extends CopyOnWriteTransformer {
                 }
             }
 
+            assert cell != null : "could not determine cell under rewrite";
             String parentCellLabel = context.getConfigurationStructureMap().get(cell).parent.id;
             if (parentCellLabel.equals(MetaK.Constants.generatedCfgAbsTopCellLabel)) {
                 compiledForFastRewriting = false;
