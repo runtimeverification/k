@@ -134,4 +134,7 @@ module URIS
 
   rule 'String2K(#noparse) => #noparse [simplification]
 
+  syntax KItem ::= "#external" "(" String ")" [function, klabel(#external), hook(#IO:#external)]
+  rule #external(Cmd:String) => #tcpRequest("external\x01" +String Cmd +String "\x01")
+
 endmodule

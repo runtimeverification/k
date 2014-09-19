@@ -21,6 +21,8 @@ import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
+import java.util.Map;
+import java.util.HashMap;
 
 
 /**
@@ -149,10 +151,33 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
         }
     }
 
-    private KItem processIOException(String errno, TermContext termContext) {
+    @Override
+    public Term external(StringToken term, TermContext termContext) {
+        RunProcess rp = new RunProcess();
+        Map<String, String> environment = new HashMap<>();
+        String[] args = term.stringValue().split("\001", -1);
+        //for (String c : args) { System.out.println(c); }
+        rp.execute(environment, args);
+
+        if (rp.getExitCode() == 0) {
+            String result = rp.getStdout() != null ? rp.getStdout() : "";
+            return StringToken.of(result.trim());
+        } else {
+            return processIOException("tcpError(_)",
+                StringToken.of("failed: returned a non-zero exit code: " + rp.getExitCode() +
+                    " Stdout: " + rp.getStdout() + " Stderr: " + rp.getErr()),
+                termContext);
+        }
+    }
+
+    private KItem processIOException(String errno, Term klist, TermContext termContext) {
         String klabelString = "'#" + errno;
         KLabelConstant klabel = KLabelConstant.of(klabelString, context);
         assert def.kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
-        return KItem.of(klabel, KList.EMPTY, termContext);
+        return KItem.of(klabel, klist, termContext);
+    }
+
+    private KItem processIOException(String errno, TermContext termContext) {
+        return processIOException(errno, KList.EMPTY, termContext);
     }
 }
