@@ -2,7 +2,6 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.Config.InvalidConfigError;
@@ -188,13 +187,6 @@ public class TestCase {
     public String[] getPosixOnlyCmd() {
         assert new File(posixInitScript).isFile();
         return new String[] { posixInitScript };
-    }
-
-    /**
-     * @return String representation of posixInitScript command to be used in logging.
-     */
-    public String toPosixOnlyLogString() {
-        return StringUtil.escapeShell(getPosixOnlyCmd(), OS.current());
     }
 
     /**

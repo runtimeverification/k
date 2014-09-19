@@ -2,7 +2,6 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.ExecNames;
 import org.kframework.ktest.PgmArg;
 import org.kframework.utils.OS;
@@ -40,7 +39,7 @@ public class KRunProgram {
      * @return command array to pass process builder
      */
     public String[] getKrunCmd() {
-        List<String> stringArgs = new ArrayList<String>();
+        List<String> stringArgs = new ArrayList<>();
         stringArgs.add(ExecNames.getKrun());
         stringArgs.add(pgmPath);
         for (PgmArg arg : args) {

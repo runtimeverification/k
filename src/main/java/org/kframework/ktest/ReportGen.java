@@ -11,7 +11,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -74,9 +73,7 @@ public class ReportGen {
     }
 
     private void writeXmlFile(File targetFile, Element elem)
-            throws TransformerConfigurationException,
-            TransformerFactoryConfigurationError, TransformerException,
-            IOException, FileNotFoundException {
+            throws TransformerFactoryConfigurationError, TransformerException, IOException {
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty("indent", "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
