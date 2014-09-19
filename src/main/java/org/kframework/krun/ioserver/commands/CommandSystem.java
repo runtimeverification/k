@@ -12,12 +12,12 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.HashMap;
 
-public class CommandExternal extends Command {
+public class CommandSystem extends Command {
 
     private String[] cmd;
     protected Context context;
 
-    public CommandExternal(String[] args, Socket socket, Logger logger, Context context, FileSystem fs) {
+    public CommandSystem(String[] args, Socket socket, Logger logger, Context context, FileSystem fs) {
         super(args, socket, logger, fs);
         this.context = context;
 
@@ -32,12 +32,8 @@ public class CommandExternal extends Command {
         Map<String, String> environment = new HashMap<>();
         rp.execute(environment, cmd);
 
-        if (rp.getExitCode() == 0) {
-            String result = rp.getStdout() != null ? rp.getStdout() : "";
-            succeed(result.trim());
-        } else {
-            fail("failed: returned a non-zero exit code: " + rp.getExitCode() +
-                " Stdout: " + rp.getStdout() + " Stderr: " + rp.getErr());
-        }
+        String stdout = rp.getStdout() != null ? rp.getStdout() : "";
+        String stderr = rp.getErr()    != null ? rp.getErr()    : "";
+        succeed(Integer.toString(rp.getExitCode()), stdout.trim(), stderr.trim(), "#EOL");
     }
 }

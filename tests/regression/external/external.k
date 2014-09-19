@@ -5,9 +5,9 @@ syntax KItem ::= "pp" "(" K ")" [function]
                | "ppsucceed" "(" String ")"
                | "pperror" "(" String ")"
 
-rule S:String => pp(#external("cat\x01" +String S))
+rule S:String => pp(#system("cat\x01" +String S))
 
-rule pp(S:String) => ppsucceed(S)
-rule pp(#tcpError(S:String)) => pperror(S)
+rule pp(#systemResult(ExitCode:Int, Stdout:String, Stderr:String)) => ppsucceed(Stdout) when ExitCode ==Int 0
+rule pp(#systemResult(ExitCode:Int, Stdout:String, Stderr:String)) => pperror(Stderr) when ExitCode =/=Int 0
 
 endmodule

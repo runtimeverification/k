@@ -152,22 +152,23 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
     }
 
     @Override
-    public Term external(StringToken term, TermContext termContext) {
+    public Term system(StringToken term, TermContext termContext) {
         RunProcess rp = new RunProcess();
         Map<String, String> environment = new HashMap<>();
         String[] args = term.stringValue().split("\001", -1);
         //for (String c : args) { System.out.println(c); }
         rp.execute(environment, args);
 
-        if (rp.getExitCode() == 0) {
-            String result = rp.getStdout() != null ? rp.getStdout() : "";
-            return StringToken.of(result.trim());
-        } else {
-            return processIOException("tcpError(_)",
-                StringToken.of("failed: returned a non-zero exit code: " + rp.getExitCode() +
-                    " Stdout: " + rp.getStdout() + " Stderr: " + rp.getErr()),
-                termContext);
-        }
+        KLabelConstant klabel = KLabelConstant.of("'#systemResult(_,_,_)", context);
+        /*
+        String klabelString = "'#systemResult(_,_,_)";
+        KLabelConstant klabel = KLabelConstant.of(klabelString, context);
+        assert def.kLabels().contains(klabel) : "No KLabel in definition for " + klabelString;
+        */
+        String stdout = rp.getStdout() != null ? rp.getStdout() : "";
+        String stderr = rp.getErr()    != null ? rp.getErr()    : "";
+        return KItem.of(klabel, KList.concatenate(IntToken.of(rp.getExitCode()),
+            StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext);
     }
 
     private KItem processIOException(String errno, Term klist, TermContext termContext) {

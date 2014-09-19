@@ -52,7 +52,7 @@ public class DummyBuiltinIOOperations implements BuiltinIOOperations {
     }
 
     @Override
-    public Term external(StringToken term, TermContext termContext) {
+    public Term system(StringToken term, TermContext termContext) {
         return null;
     }
 }
