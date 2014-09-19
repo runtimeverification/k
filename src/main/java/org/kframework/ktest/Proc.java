@@ -154,7 +154,7 @@ public class Proc<T> implements Runnable {
                 }
             } else {
                 // Make one run with --debug
-                procOutput = runProc(args);
+                procOutput = runProc(debugArgs);
                 if (!options.dry) {
                     handlePgmResult(procOutput, null);
                 }
