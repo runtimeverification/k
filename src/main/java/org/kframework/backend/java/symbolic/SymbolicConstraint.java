@@ -915,14 +915,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (left.isFalse()) continue;
 
             if (context.definition().context().globalOptions.debug) {
-                System.out.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
+                System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
             right = left.simplifyConstraint(right);
             right.orientSubstitution(rightOnlyVariables);
             if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
                 if (context.definition().context().globalOptions.debug) {
-                    System.out.println("Implication proved by simplification");
+                    System.err.println("Implication proved by simplification");
                 }
                 continue;
             }
@@ -933,7 +933,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
                 if (context.definition().context().globalOptions.debug) {
-                    System.out.println("Split on " + condition);
+                    System.err.println("Split on " + condition);
                 }
                 SymbolicConstraint left1 = new SymbolicConstraint(left, context);
                 left1.add(condition, BoolToken.TRUE);
@@ -948,12 +948,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //            }
             if (!impliesSMT(left,right)) {
                 if (context.definition().context().globalOptions.debug) {
-                    System.out.println("Failure!");
+                    System.err.println("Failure!");
                 }
                 return false;
             } else {
                 if (context.definition().context().globalOptions.debug) {
-                    System.out.println("Proved!");
+                    System.err.println("Proved!");
                 }
             }
         }
@@ -985,7 +985,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
             input += "(" + gterm2 + ")";
             if (left.termContext().definition().context().globalOptions.debug) {
-                System.out.println("Verifying " + input);
+                System.err.println("Verifying " + input);
             }
             if (GappaServer.proveTrue(input))
                 result = true;
