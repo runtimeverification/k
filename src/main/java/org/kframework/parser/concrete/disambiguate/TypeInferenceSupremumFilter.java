@@ -68,7 +68,7 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
                     for (Term t1 : group) {
                         boolean max = true;
                         for (Term t2 : group)
-                            if (t1 != t2 && context.isSubsorted(t2.getSort(), t1.getSort()))
+                            if (t1 != t2 && context.isSyntacticSubsorted(t2.getSort(), t1.getSort()))
                                 max = false;
                         if (max)
                             maxterms.add(t1);
@@ -91,7 +91,7 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
             return false;
         if (big.getItems().size() != small.getItems().size())
             return false;
-        if (!context.isSubsortedEq(big.getSort(), small.getSort()))
+        if (!context.isSyntacticSubsortedEq(big.getSort(), small.getSort()))
             return false;
         for (int i = 0; i < big.getItems().size(); i++) {
             if (!(big.getItems().get(i) instanceof Terminal && small.getItems().get(i) instanceof Terminal) &&
@@ -102,12 +102,12 @@ public class TypeInferenceSupremumFilter extends ParseForestTransformer {
             } else if (big.getItems().get(i) instanceof NonTerminal) {
                 Sort bigSort = ((NonTerminal) big.getItems().get(i)).getSort();
                 Sort smallSort = ((NonTerminal) small.getItems().get(i)).getSort();
-                if (!context.isSubsortedEq(bigSort, smallSort))
+                if (!context.isSyntacticSubsortedEq(bigSort, smallSort))
                     return false;
             } else if (big.getItems().get(i) instanceof UserList) {
                 Sort bigSort = ((UserList) big.getItems().get(i)).getSort();
                 Sort smallSort = ((UserList) small.getItems().get(i)).getSort();
-                if (!context.isSubsortedEq(bigSort, smallSort))
+                if (!context.isSyntacticSubsortedEq(bigSort, smallSort))
                     return false;
             } else
                 continue;

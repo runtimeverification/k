@@ -83,7 +83,7 @@ public class MapKeyChoice extends Term implements DataStructureChoice {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         throw new UnsupportedOperationException();
     }
 

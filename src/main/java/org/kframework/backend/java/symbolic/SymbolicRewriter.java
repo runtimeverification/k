@@ -36,9 +36,9 @@ public class SymbolicRewriter {
 
     private final Definition definition;
     private final TransitionCompositeStrategy strategy;
-    private final Stopwatch stopwatch = new Stopwatch();
+    private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private int step;
-    private final Stopwatch ruleStopwatch = new Stopwatch();
+    private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
@@ -167,9 +167,7 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
                 leftHandSideConstraint.addAll(rule.requires());
 
-                CellCollection newTemp = new CellCollection();
-
-                newTemp.cellMap().put(((Cell<Term>)rule.leftHandSide()).getLabel(), (Cell<Term>)rule.leftHandSide());
+                CellCollection newTemp = CellCollection.singleton((Cell<Term>)rule.leftHandSide(), definition.context());
 
                 Cell<Term> newRuleTerm = new Cell<Term>(CellLabel.GENERATED_TOP, newTemp);
 

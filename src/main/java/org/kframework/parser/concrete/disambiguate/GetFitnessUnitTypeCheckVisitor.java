@@ -45,7 +45,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
     public Void visit(Collection node, Void _) {
         super.visit(node, _);
         for (Term t : node.getContents()) {
-            if (!context.isSubsortedEq(node.getSort(), t.getSort()))
+            if (!context.isSyntacticSubsortedEq(node.getSort(), t.getSort()))
                 score += -1;
         }
         return null;
@@ -77,10 +77,10 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
     private int getFitnessUnit3(Sort declSort, Sort termSort) {
         int score;
-        if (context.isSubsortedEq(declSort, termSort))
+        if (context.isSyntacticSubsortedEq(declSort, termSort))
             score = 0;
         // isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0
-        else if (context.isSubsortedEq(Sort.K, termSort) && (declSort.equals(Sort.K) || termSort.equals(Sort.K)))
+        else if (context.isSyntacticSubsortedEq(Sort.K, termSort) && (declSort.equals(Sort.K) || termSort.equals(Sort.K)))
             score = 0; // do nothing when you have a K
         else {
             score = -1;

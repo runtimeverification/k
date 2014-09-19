@@ -25,7 +25,7 @@ public class PriorityFilter extends ParseForestTransformer {
                 tc.getContents().set(0, (Term) new PriorityFilter2(tc, Side.LEFT, context).visitNode(tc.getContents().get(0)));
                 tc.getContents().set(1, (Term) new PriorityFilter2(tc, Side.RIGHT, context).visitNode(tc.getContents().get(1)));
             }
-        } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
+        } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSyntacticSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
                     // look for the outermost element

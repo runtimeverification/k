@@ -234,7 +234,7 @@ public class KLabelConstant extends KLabel implements MaximalSharing {
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         return false;
     }
 

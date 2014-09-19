@@ -50,7 +50,7 @@ public class CorrectKSeqFilter extends ParseForestTransformer {
         if (tc.getProduction().isListDecl()) {
             tc.getContents().set(0, (Term) secondFilter.visitNode(tc.getContents().get(0)));
             tc.getContents().set(1, (Term) secondFilter.visitNode(tc.getContents().get(1)));
-        } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
+        } else if (!tc.getProduction().isConstant() && !tc.getProduction().isSyntacticSubsort()) {
             for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
                 if (tc.getProduction().getItems().get(i) instanceof NonTerminal) {
                     // look for the outermost element

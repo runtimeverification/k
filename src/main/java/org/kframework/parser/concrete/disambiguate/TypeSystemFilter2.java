@@ -43,7 +43,7 @@ public class TypeSystemFilter2 extends LocalTransformer {
         if ((!trm.getSort().equals(Sort.K) &&
              !trm.getSort().equals(Sort.KITEM) &&
              !trm.getSort().equals(Sort.KRESULT)))
-            if (!context.isSubsortedEq(maxSort, trm.getSort()))
+            if (!context.isSyntacticSubsortedEq(maxSort, trm.getSort()))
                 error = true;
         if (error) {
             KException kex = new KException(

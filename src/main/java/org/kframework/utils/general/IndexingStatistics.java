@@ -17,19 +17,19 @@ import java.util.List;
  */
 public class IndexingStatistics {
     //TODO(OwolabiL): Make this a Singleton class instead
-    public static Stopwatch totalRewriteStopwatch = new Stopwatch();
-    public static Stopwatch totalKrunStopwatch = new Stopwatch();
-    public static Stopwatch totalSearchStopwatch = new Stopwatch();
-    public static Stopwatch indexConstructionStopWatch = new Stopwatch();
-    public static Stopwatch getRulesForTermStopWatch = new Stopwatch();
-    public static Stopwatch getPStringFromTermStopWatch = new Stopwatch();
-    public static Stopwatch findMatchingIndicesStopWatch = new Stopwatch();
-    public static Stopwatch rewriteStepStopWatch = new Stopwatch();
-    public static Stopwatch rewritingStopWatch = new Stopwatch();
-    public static Stopwatch preProcessStopWatch = new Stopwatch();
-    public static Stopwatch kilTransformationStopWatch = new Stopwatch();
-    public static Stopwatch getPStringStopwatch = new Stopwatch();
-    public static Stopwatch traverseCellsStopwatch = new Stopwatch();
+    public static Stopwatch totalRewriteStopwatch = Stopwatch.createUnstarted();
+    public static Stopwatch totalKrunStopwatch = Stopwatch.createUnstarted();
+    public static Stopwatch totalSearchStopwatch = Stopwatch.createUnstarted();
+    public static Stopwatch indexConstructionStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch getRulesForTermStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch getPStringFromTermStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch findMatchingIndicesStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch rewriteStepStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch rewritingStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch preProcessStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch kilTransformationStopWatch = Stopwatch.createUnstarted();
+    public static Stopwatch getPStringStopwatch = Stopwatch.createUnstarted();
+    public static Stopwatch traverseCellsStopwatch = Stopwatch.createUnstarted();
 
     public static List<Number> timesForRuleSelection = new ArrayList<>();
     public static List<Number> timesForGettingPStringsFromTerm = new ArrayList<>();

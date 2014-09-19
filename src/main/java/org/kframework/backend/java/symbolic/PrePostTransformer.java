@@ -71,8 +71,12 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         }
         assert astNode instanceof CellCollection : "preTransformer should not modify type";
         cellCollection = (CellCollection) astNode;
-        cellCollection = (CellCollection) super.transform(cellCollection);
-        return cellCollection.accept(postTransformer);
+
+        Term term = (Term) super.transform(cellCollection);
+        if (term instanceof CellCollection) {
+            term = (Term) term.accept(postTransformer);
+        }
+        return term;
     }
 
     @Override
@@ -214,8 +218,13 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         }
         assert astNode instanceof KList : "preTransformer should not modify type";
         kList = (KList) astNode;
-        kList = (KList) super.transform(kList);
-        return kList.accept(postTransformer);
+        // TODO(YilongL): why not apply postTransformer if term is not a KList?
+        Term term = (Term) super.transform(kList);
+        if (term instanceof KList) {
+            // TODO(YilongL): why cast it to KList?
+            term = (KList) term.accept(postTransformer);
+        }
+        return term;
     }
 
     @Override
@@ -226,10 +235,13 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         }
         assert astNode instanceof KSequence : "preTransformer should not modify type";
         kSequence = (KSequence) astNode;
-        Term t =  (Term) super.transform(kSequence);
-        if (t instanceof KSequence)
-            t = (KSequence) t.accept(postTransformer);
-        return t;
+        Term term =  (Term) super.transform(kSequence);
+        // TODO(YilongL): why not apply postTransformer if term is not a KSequence?
+        if (term instanceof KSequence) {
+            // TODO(YilongL): why cast it to KSequence?
+            term = (KSequence) term.accept(postTransformer);
+        }
+        return term;
     }
 
     @Override

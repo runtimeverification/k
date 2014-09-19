@@ -71,7 +71,7 @@ public class RuleVisitor extends LocalVisitor {
     public void visit(Cell cell) {
         if (cell.getLabel().equals(CellLabel.K)){
             cell.getContent().accept(this);
-        } else if(cell.contentKind() == Kind.CELL_COLLECTION){
+        } else if(cell.contentKind().isStructural()){
             super.visit(cell);
         }
     }

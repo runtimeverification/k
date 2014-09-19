@@ -25,7 +25,7 @@ import com.google.common.base.Stopwatch;
 
 public class GroundRewriter extends AbstractRewriter {
 
-    private final Stopwatch stopwatch = new Stopwatch();
+    private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private boolean transition;
 
     public GroundRewriter(Definition definition, TermContext termContext) {

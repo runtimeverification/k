@@ -30,6 +30,8 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import java.util.List;
+
 public class JavaSymbolicKRunModuleTest extends BaseTestCase {
 
     @Mock
@@ -48,7 +50,7 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
         String[] argv = new String[] { "foo.c" };
         Module[] definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(argv);
         Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
-        Module[] modules = KRunFrontEnd.getModules(argv, definitionSpecificModuleOverride);
+        List<Module> modules = KRunFrontEnd.getModules(argv, definitionSpecificModuleOverride);
         Injector injector = Guice.createInjector(modules);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(Executor.class, Main.class));

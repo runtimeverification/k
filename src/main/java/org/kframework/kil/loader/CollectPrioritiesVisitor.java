@@ -35,12 +35,12 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
             PriorityBlock pb2 = node.getPriorityBlocks().get(i + 1);
             for (Production prd1 : pb1.getProductions()) {
                 // allow priorities only between productions that have a sort at the left or right
-                if (prd1.isSubsort() || prd1.isConstant())
+                if (prd1.isSyntacticSubsort() || prd1.isConstant())
                     continue;
                 if (!(prd1.getItems().get(0) instanceof NonTerminal) && !(prd1.getItems().get(prd1.getItems().size() - 1) instanceof NonTerminal))
                     continue;
                 for (Production prd2 : pb2.getProductions()) {
-                    if (prd2.isSubsort() || prd2.isConstant())
+                    if (prd2.isSyntacticSubsort() || prd2.isConstant())
                         continue;
                     if (!(prd2.getItems().get(0) instanceof NonTerminal) && !(prd2.getItems().get(prd2.getItems().size() - 1) instanceof NonTerminal))
                         continue;
@@ -69,10 +69,10 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
                     Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel(), context);
                     // add all the relations between all the productions annotated with tag1 and tag 2
                     for (Production p1 : prods1) {
-                        if (p1.isSubsort() && p1.getKLabel() == null)
+                        if (p1.isSubsort())
                             continue;
                         for (Production p2 : prods2) {
-                            if (p2.isSubsort() && p2.getKLabel() == null)
+                            if (p2.isSubsort())
                                 continue;
                             context.addPriority(p1.getKLabel(), p2.getKLabel());
                         }

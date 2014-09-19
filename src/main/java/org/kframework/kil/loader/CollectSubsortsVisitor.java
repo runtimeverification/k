@@ -23,33 +23,36 @@ public class CollectSubsortsVisitor extends BasicVisitor {
     }
 
     public Void visit(Syntax syn, Void _) {
-        if (syn.getPriorityBlocks().size() == 0) {
-            Sort sort = syn.getDeclaredSort().getSort();
-            if (!sort.equals(Sort.KITEM)) {
-                context.addSubsort(Sort.KITEM, sort);
-            }
+        Sort sort = syn.getDeclaredSort().getSort();
+        if (!sort.isBaseSort()) {
+            context.addSubsort(Sort.KITEM, sort);
+            context.addSyntacticSubsort(Sort.KITEM, sort);
         }
         return super.visit(syn, _);
     }
 
     public Void visit(Production prd, Void _) {
-        if (!prd.getSort().isBaseSort())
-            context.addSubsort(Sort.KITEM, prd.getSort());
         if (prd.isSubsort()) {
+            context.addSubsort(prd.getSort(), prd.getSubsort());
+        }
+
+        if (!prd.getSort().isBaseSort())
+            context.addSyntacticSubsort(Sort.KITEM, prd.getSort());
+        if (prd.isSyntacticSubsort()) {
             if (!prd.containsAttribute("onlyLabel")
                     && !prd.containsAttribute("notInRules")) {
                 Sort sort = ((NonTerminal) prd.getItems().get(0)).getSort();
-                context.addSubsort(prd.getSort(), sort);
+                context.addSyntacticSubsort(prd.getSort(), sort);
             }
         } else if (prd.isListDecl()) {
             UserList srt = (UserList) prd.getItems().get(0);
-            context.addSubsort(prd.getSort(), srt.getSort());
+            context.addSyntacticSubsort(prd.getSort(), srt.getSort());
         } else {
             for (ProductionItem pi : prd.getItems()) {
                 if (pi instanceof NonTerminal) {
                     Sort s = ((NonTerminal) pi).getSort();
                     if (!s.isBaseSort())
-                        context.addSubsort(Sort.KITEM, s);
+                        context.addSyntacticSubsort(Sort.KITEM, s);
                 }
             }
         }

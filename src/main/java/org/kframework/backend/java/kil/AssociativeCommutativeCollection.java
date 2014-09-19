@@ -82,10 +82,4 @@ public abstract class AssociativeCommutativeCollection extends Collection {
         return isConcreteCollection() && super.isGround();
     }
 
-    @Override
-    public boolean isLHSView() {
-        // TODO(AndreiS): this method should be removed in later commits
-        throw new UnsupportedOperationException();
-    }
-
 }

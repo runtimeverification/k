@@ -2,6 +2,8 @@
 package org.kframework.kast;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.IndentationOptions;
@@ -28,13 +30,14 @@ import com.google.inject.Provider;
 
 public class KastFrontEnd extends FrontEnd {
 
-    public static Module[] getModules(String[] args) {
+    public static List<Module> getModules(String[] args) {
         KastOptions options = new KastOptions();
 
-        return new Module[] {
-                new KastModule(options),
-                new JCommanderModule(args),
-                new CommonModule() };
+        List<Module> modules = new ArrayList<>();
+        modules.add(new KastModule(options));
+        modules.add(new JCommanderModule(args));
+        modules.add(new CommonModule());
+        return modules;
     }
 
     private final KastOptions options;

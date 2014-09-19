@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -16,11 +15,14 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Multiset;
 
 
 /**
@@ -34,17 +36,18 @@ import com.google.common.collect.Multimap;
 @SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
+    public static final CellCollection EMPTY = new CellCollection(
+            ImmutableListMultimap.<CellLabel, Cell> of(),
+            ImmutableMultiset.<Variable> of(),
+            false);
+
     /**
      * Choose {@code ListMultimap} over {@code SetMultimap} because we need to
      * be able to store identical cells.
      */
-    // TODO(YilongL): make it immutable?
-    private final ListMultimap<CellLabel, Cell> cells;
+    private final ImmutableListMultimap<CellLabel, Cell> cells;
 
-    /**
-     * Only allow {@code Variable}s as base terms for now.
-     */
-    private final Set<Variable> baseTerms;
+    private final ImmutableMultiset<Variable> collectionVariables;
 
     /**
      * Contains {@code true} if the explicitly specified part of this cell
@@ -54,47 +57,106 @@ public class CellCollection extends Collection {
     // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasStar;
 
-    public CellCollection(Multimap<CellLabel, Cell> cells, Variable frame, Context context) {
-        super(frame, Kind.CELL_COLLECTION);
-        // TODO(YilongL): implement builder pattern for this!
-        this.cells = ArrayListMultimap.create(cells);
-        this.baseTerms = frame != null ?
-                Collections.<Variable>singleton(frame) :
-                Collections.<Variable>emptySet();
-
-        this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
+    public static CellCollection singleton(Cell cell, Context context) {
+        return new CellCollection(
+                ImmutableListMultimap.of(cell.getLabel(), cell),
+                ImmutableMultiset.<Variable> of(),
+                context);
     }
 
-    public CellCollection(Multimap<CellLabel, Cell> cells, List<Variable> baseTerms, Context context) {
-        super(getFrame(baseTerms), Kind.CELL_COLLECTION);
-        this.cells = ArrayListMultimap.create(cells);
-        this.baseTerms = ImmutableSet.copyOf(baseTerms);
-
-        this.hasStar = numOfTypesOfStarredSubcells(cells, context) > 0;
+    public static Term concatenate(Context context, Term... terms) {
+        Builder builder = builder(context);
+        for (Term term : terms) {
+            builder.concatenate(term);
+        }
+        return builder.build();
     }
 
-    public CellCollection(Variable frame) {
-        this(ArrayListMultimap.<CellLabel, Cell>create(), frame, null);
+    /**
+     * Static helper method which creates canonicalized cell collection
+     * according to the given contents.
+     */
+    public static Term of(ListMultimap<CellLabel, Cell> cells, Variable frame,
+            Context context) {
+        if (cells.isEmpty()) {
+            return frame == null ? EMPTY : frame;
+        } else if (cells.size() == 1 && frame == null) {
+            return cells.values().iterator().next();
+        } else {
+            return new CellCollection(
+                    ImmutableListMultimap.copyOf(cells),
+                    frame != null ? ImmutableMultiset.of(frame) : ImmutableMultiset.<Variable>of(),
+                    numOfMultiplicityCellLabels(cells, context) > 0);
+        }
     }
 
-    public CellCollection(Multimap<CellLabel, Cell> cells, Context context) {
-        this(cells, (Variable) null, context);
+    /**
+     * Builds a new {@code CellCollection} by removing all the given cell
+     * labels.
+     */
+    public Term removeAll(final Set<CellLabel> labelsToRemove, Context context) {
+        Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
+            @Override
+            public boolean apply(CellLabel cellLabel) {
+                return !labelsToRemove.contains(cellLabel);
+            }
+        };
+
+        ImmutableListMultimap<CellLabel, Cell> cellMap = ImmutableListMultimap
+                .copyOf(Multimaps.filterKeys(cells, notRemoved));
+        return new CellCollection(cellMap, collectionVariables, context);
     }
 
-    public CellCollection() {
-        this(ArrayListMultimap.<CellLabel, Cell>create(), (Variable) null, null);
+    private CellCollection(ImmutableListMultimap<CellLabel, Cell> cells,
+            ImmutableMultiset<Variable> collectionVariables,
+            Context context) {
+        this(cells, collectionVariables, numOfMultiplicityCellLabels(cells, context) > 0);
+    }
+
+    private CellCollection(ImmutableListMultimap<CellLabel, Cell> cells,
+            ImmutableMultiset<Variable> collectionVariables,
+            boolean hasStar) {
+        super(computeFrame(collectionVariables), Kind.CELL_COLLECTION);
+        this.cells = cells;
+        this.collectionVariables = collectionVariables;
+        this.hasStar = hasStar;
+    }
+
+    private static Variable computeFrame(ImmutableMultiset<Variable> collectionVariables) {
+        return (collectionVariables.size() == 1) ? collectionVariables.iterator().next() : null;
+    }
+
+    private static int numOfMultiplicityCellLabels(ListMultimap<CellLabel, Cell> cells, Context context) {
+        int count = 0;
+        for (CellLabel cellLabel : cells.keySet()) {
+            if (context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
+                count++;
+            } else {
+                assert cells.get(cellLabel).size() == 1:
+                        "cell label " + cellLabel + " does not have multiplicity='*', "
+                        + "but multiple cells found " + cells;
+            }
+        }
+
+        assert count <= 1 :
+            "Multiple types of starred cells in one cell collection not supported at present";
+        return count;
     }
 
     public java.util.Collection<Cell> cells() {
         return cells.values();
     }
 
-    public Multimap<CellLabel, Cell> cellMap() {
+    public ListMultimap<CellLabel, Cell> cellMap() {
         return cells;
     }
 
-    public Set<Variable> baseTerms() {
-        return baseTerms;
+    public Multiset<Term> baseTerms() {
+        return ImmutableMultiset.<Term>copyOf(collectionVariables);
+    }
+
+    public Multiset<Variable> collectionVariables() {
+        return collectionVariables;
     }
 
     public boolean containsKey(CellLabel label) {
@@ -120,7 +182,7 @@ public class CellCollection extends Collection {
 
     @Override
     public boolean isEmpty() {
-        return cells.isEmpty() && baseTerms.isEmpty();
+        return cells.isEmpty() && isConcreteCollection();
     }
 
     @Override
@@ -129,23 +191,8 @@ public class CellCollection extends Collection {
     }
 
     @Override
-    public boolean hasFrame() {
-        assert isLHSView() : "This CellCollection cannot be used in the left-hand side of a rule";
-        return super.hasFrame();
-    }
-
-    @Override
     public final boolean isConcreteCollection() {
-        return baseTerms.isEmpty();
-    }
-
-    /**
-     * Checks if this {@code CellCollection} contains at most one
-     * {@code Variable} as its frame variable.
-     */
-    @Override
-    public boolean isLHSView() {
-        return baseTerms.size() <= 1;
+        return collectionVariables.isEmpty();
     }
 
     @Override
@@ -169,7 +216,7 @@ public class CellCollection extends Collection {
         }
 
         CellCollection collection = (CellCollection) object;
-        if (!baseTerms.equals(collection.baseTerms)) {
+        if (!collectionVariables.equals(collection.collectionVariables)) {
             return false;
         }
 
@@ -195,13 +242,13 @@ public class CellCollection extends Collection {
     @Override
     protected int computeHash() {
         int hashCode = 1;
-        hashCode = hashCode * Utils.HASH_PRIME + baseTerms.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + collectionVariables.hashCode();
         return hashCode;
     }
 
     @Override
-    protected boolean computeHasCell() {
+    protected boolean computeMutability() {
         return true;
     }
 
@@ -214,7 +261,7 @@ public class CellCollection extends Collection {
             for (Cell cell : cells.values()) {
                 stringBuilder.append(cell);
             }
-            Iterator<Variable> iter = baseTerms.iterator();
+            Iterator<Term> iter = baseTerms().iterator();
             while (iter.hasNext()) {
                 stringBuilder.append(iter.next());
                 if (iter.hasNext()) {
@@ -245,34 +292,67 @@ public class CellCollection extends Collection {
         return transformer.transform(this);
     }
 
-    private static int numOfTypesOfStarredSubcells(Multimap<CellLabel, Cell> cells, Context context) {
-        int count = 0;
-        for (CellLabel cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().get(cellLabel.name()).isStarOrPlus()) {
-                count++;
+    public static Builder builder(Context context) {
+        return new Builder(context);
+    }
+
+    public static class Builder {
+
+        private final ImmutableListMultimap.Builder<CellLabel, Cell> cellsBuilder = ImmutableListMultimap.builder();
+
+        private final ImmutableMultiset.Builder<Variable> collectionVariablesBuilder = ImmutableMultiset.builder();
+
+        private final Context context;
+
+        private Builder(Context context) {
+            this.context = context;
+        }
+
+        public void add(Cell cell) {
+            cellsBuilder.put(cell.getLabel(), cell);
+        }
+
+        public void putAll(ListMultimap<CellLabel, Cell> cellMap) {
+            cellsBuilder.putAll(cellMap);
+        }
+
+        public void putAll(CellLabel cellLabel, java.util.Collection<Cell> cells) {
+            cellsBuilder.putAll(cellLabel, cells);
+        }
+
+        public void concatenate(Term term) {
+            if (term instanceof CellCollection) {
+                CellCollection cellCol = (CellCollection) term;
+                cellsBuilder.putAll(cellCol.cells);
+                collectionVariablesBuilder.addAll(cellCol.collectionVariables);
+            } else if (term instanceof Cell) {
+                add((Cell) term);
+            } else if (term instanceof Variable) {
+                collectionVariablesBuilder.add((Variable) term);
             } else {
-                assert cells.get(cellLabel).size() == 1:
-                        "cell label " + cellLabel + " does not have multiplicity='*', "
-                        + "but multiple cells found " + cells;
+                assert false : "unexpected concatenated term " + term;
             }
         }
 
-        assert count <= 1 :
-            "Multiple types of starred cells in one cell collection not supported at present";
-        return count;
+        public Term build() {
+            ImmutableListMultimap<CellLabel, Cell> cells = cellsBuilder.build();
+            ImmutableMultiset<Variable> collectionVariables = collectionVariablesBuilder.build();
+            if (cells.isEmpty()) {
+                switch (collectionVariables.size()) {
+                    case 0:  return EMPTY;
+                    case 1:  return collectionVariables.iterator().next();
+                    default: return new CellCollection(cells, collectionVariables, context);
+                }
+            } else {
+                if (cells.size() == 1 && collectionVariables.isEmpty()) {
+                    return cells.values().iterator().next();
+                } else {
+                    return new CellCollection(cells, collectionVariables, context);
+                }
+            }
+        }
     }
 
-    /**
-     * Private helper method that gets the frame variable from a list of base
-     * terms.
-     *
-     * @param baseTerms
-     * @return the frame if there is only one variable in the base terms;
-     *         otherwise, {@code null}
-     */
-    private static Variable getFrame(List<Variable> baseTerms) {
-        return (baseTerms.size() == 1) ? baseTerms.get(0) : null;
-    }
 
     /**
      * Promotes a given {@link Term} to a given {@link Kind}. The {@code Kind}s
@@ -290,20 +370,11 @@ public class CellCollection extends Collection {
      * @return the resulting term after kind promotion
      */
     public static Term upKind(Term term, Kind kind, Context context) {
-        assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
-        assert kind == Kind.CELL || kind == Kind.CELL_COLLECTION;
+        assert term.kind().isStructural() && kind.isStructural();
 
         /* promote Cell to CellCollection */
-        if (term.kind() == Kind.CELL && kind == Kind.CELL_COLLECTION) {
-            if (term instanceof Cell) {
-                Cell cell = (Cell) term;
-                Multimap<CellLabel, Cell> cells = ArrayListMultimap.create();
-                cells.put(cell.getLabel(), cell);
-                return new CellCollection(cells, context);
-            } else {
-                // do nothing since we cannot simply promote a variable from
-                // sort BagItem to Bag
-            }
+        if (term instanceof Cell && kind == Kind.CELL_COLLECTION) {
+            return CellCollection.singleton((Cell) term, context);
         }
 
         return term;
@@ -323,7 +394,7 @@ public class CellCollection extends Collection {
      * @return the resulting term after kind degradation
      */
     public static Term downKind(Term term) {
-        assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
+        assert term.kind().isStructural();
 
         if (term instanceof CellCollection
                 && ((CellCollection) term).baseTerms().isEmpty()

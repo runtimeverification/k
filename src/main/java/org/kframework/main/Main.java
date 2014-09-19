@@ -2,8 +2,12 @@
 package org.kframework.main;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ServiceLoader;
 
+import org.apache.commons.io.FilenameUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kagreg.KagregFrontEnd;
 import org.kframework.kast.KastFrontEnd;
@@ -18,6 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.Message;
+import org.kframework.utils.file.JarInfo;
 
 public class Main {
 
@@ -30,6 +35,7 @@ public class Main {
         AnsiConsole.systemInstall();
 
         if (args.length >= 1) {
+
             Injector injector = getInjector(args);
             KExceptionManager kem = injector.getInstance(KExceptionManager.class);
             kem.installForUncaughtExceptions();
@@ -50,11 +56,29 @@ public class Main {
     }
 
     public static Injector getInjector(String[] args) {
-        Module[] modules;
+        KPluginClassLoader loader = new KPluginClassLoader();
+        loader.addPath(
+                FilenameUtils.concat(JarInfo.getKBase(false),
+                        FilenameUtils.concat("lib", "plugins")));
+
+        ServiceLoader<KModule> kLoader = ServiceLoader.load(KModule.class, loader);
+        List<KModule> kModules = new ArrayList<>();
+        for (KModule m : kLoader) {
+            kModules.add(m);
+        }
+
+        List<Module> modules = new ArrayList<>();
+
         String[] args2 = Arrays.copyOfRange(args, 1, args.length);
             switch (args[0]) {
                 case "-kompile":
-                    modules = KompileFrontEnd.getModules(args2);
+                    modules.addAll(KompileFrontEnd.getModules(args2));
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKompileModules();
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
                     break;
                 case "-kagreg":
                     modules = KagregFrontEnd.getModules(args2);
@@ -62,13 +86,31 @@ public class Main {
                 case "-kcheck":
                     throw new AssertionError("kcheck no longer supported");
                 case "-ktest":
-                    modules = KTestFrontEnd.getModules(args2);
+                    modules.addAll(KTestFrontEnd.getModules(args2));
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKTestModules();
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
                     break;
                 case "-kast":
-                    modules = KastFrontEnd.getModules(args2);
+                    modules.addAll(KastFrontEnd.getModules(args2));
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKastModules();
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
                     break;
                 case "-krun":
-                    modules = KRunFrontEnd.getModules(args2, KRunFrontEnd.getDefinitionSpecificModules(args2));
+                    modules.addAll(KRunFrontEnd.getModules(args2));
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKRunModules();
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
                     break;
                 case "-kpp":
                     modules = KppFrontEnd.getModules(args2);
@@ -77,7 +119,7 @@ public class Main {
                     invalidJarArguments();
                     throw new AssertionError("unreachable");
         }
-        if (modules == null) {
+        if (modules.size() == 0) {
             //boot error, we should have printed it already
             System.exit(1);
         }

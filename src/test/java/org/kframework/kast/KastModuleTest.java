@@ -10,12 +10,14 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import java.util.List;
+
 public class KastModuleTest extends BaseTestCase {
 
     @Test
     public void testCreateInjection() {
         String[] argv = new String[] { "foo.c" };
-        Module[] modules = KastFrontEnd.getModules(argv);
+        List<Module> modules = KastFrontEnd.getModules(argv);
         Injector injector = Guice.createInjector(Modules.override(modules).with(new TestModule()));
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KastFrontEnd);
     }

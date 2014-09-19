@@ -4,6 +4,7 @@ package org.kframework.krun;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -19,6 +20,7 @@ import org.kframework.main.FrontEnd;
 import org.kframework.transformation.Transformation;
 import org.kframework.transformation.TransformationProvider;
 import org.kframework.utils.BaseTestCase;
+
 import static org.mockito.Mockito.*;
 
 import com.google.inject.Guice;
@@ -91,7 +93,7 @@ public class KRunModuleTest extends BaseTestCase {
     private Injector buildInjector(String[] argv) {
         Module[] definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(argv);
         Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
-        Module[] modules = KRunFrontEnd.getModules(argv, definitionSpecificModuleOverride);
+        List<Module> modules = KRunFrontEnd.getModules(argv, definitionSpecificModuleOverride);
         Injector injector = Guice.createInjector(modules);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(new TypeLiteral<TransformationProvider<Transformation<Void, Void>>>() {}));
@@ -100,7 +102,7 @@ public class KRunModuleTest extends BaseTestCase {
 
     public void testInvalidArguments() {
         String[] argv = new String[] { "--backend", "foobarbaz" };
-        Module[] modules = KRunFrontEnd.getModules(argv, KRunFrontEnd.getDefinitionSpecificModules(argv));
+        List<Module> modules = KRunFrontEnd.getModules(argv, KRunFrontEnd.getDefinitionSpecificModules(argv));
         assertNull(modules);
     }
 }

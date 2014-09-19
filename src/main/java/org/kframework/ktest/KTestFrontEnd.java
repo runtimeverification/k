@@ -31,13 +31,14 @@ import java.util.*;
 
 public class KTestFrontEnd extends FrontEnd {
 
-    public static Module[] getModules(String[] args) {
+    public static List<Module> getModules(String[] args) {
         KTestOptions options = new KTestOptions();
 
-        return new Module[] {
-                new KTestModule(options),
-                new JCommanderModule(args),
-                new CommonModule() };
+        List<Module> modules = new ArrayList<>();
+        modules.add(new KTestModule(options));
+        modules.add(new JCommanderModule(args));
+        modules.add(new CommonModule());
+        return modules;
     }
 
     private final KTestOptions options;

@@ -29,7 +29,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     protected final Kind kind;
     // protected final boolean normalized;
 
-    private Boolean hasCell = null;
+    private Boolean mutable = null;
 
     protected Term(Kind kind) {
         this.kind = kind;
@@ -46,7 +46,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
             public void visit(Cell cell) {
                 if (cell.getLabel().equals(CellLabel.K)) {
                     indexingPairs.add(IndexingPair.getKCellIndexingPair(cell, definition));
-                } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
+                } else if (cell.contentKind().isStructural()) {
                     super.visit(cell);
                 }
             }
@@ -81,17 +81,17 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * @return {@code true} if this term has {@code Cell} inside; otherwise,
      *         {@code false}
      */
-    public final boolean hasCell() {
-        if (hasCell == null) {
-            hasCell = computeHasCell();
+    public final boolean isMutable() {
+        if (mutable == null) {
+            mutable = computeMutability();
         }
-        return hasCell;
+        return mutable;
     }
 
     /**
      * Checks if this term has {@code Cell} inside.
      */
-    protected abstract boolean computeHasCell();
+    protected abstract boolean computeMutability();
 
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating

@@ -50,7 +50,7 @@ class CellVisitor extends BottomUpVisitor {
             outCell = cell;
         } else if (cell.getLabel().equals(CellLabel.of("in"))) {
             inCell = cell;
-        } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
+        } else if (cell.contentKind().isStructural()) {
             super.visit(cell);
         }
     }

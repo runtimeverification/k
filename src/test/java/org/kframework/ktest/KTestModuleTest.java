@@ -11,13 +11,15 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
+import java.util.List;
+
 
 public class KTestModuleTest extends BaseTestCase {
 
     @Test
     public void testCreateInjection() {
         String[] argv = new String[] { "foo.c" };
-        Module[] modules = KTestFrontEnd.getModules(argv);
+        List<Module> modules = KTestFrontEnd.getModules(argv);
         Injector injector = Guice.createInjector(modules);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KTestFrontEnd);
     }
