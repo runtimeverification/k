@@ -104,7 +104,8 @@ public class Main {
                     }
                     break;
                 case "-krun":
-                    modules.addAll(KRunFrontEnd.getModules(args2));
+                    Module[] definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(args2);
+                    modules.addAll(KRunFrontEnd.getModules(args2, definitionSpecificModules));
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKRunModules();
                         if (ms != null) {
