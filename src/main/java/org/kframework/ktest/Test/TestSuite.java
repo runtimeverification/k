@@ -147,9 +147,9 @@ public class TestSuite {
         startTpe();
         for (TestCase tc : tests) {
             if (tc.hasPosixOnly()) {
-                Proc<TestCase> p = new Proc<>(tc, tc.getPosixOnlyCmd(), options);
+                Proc<TestCase> p =
+                        new Proc<>(tc, tc.getPosixOnlyCmd(), tc.getWorkingDir(), options);
                 ps.add(p);
-                p.setWorkingDir(tc.getWorkingDir());
                 tpe.execute(p);
             } else {
                 successfulTests.add(tc);
@@ -189,8 +189,7 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         startTpe();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), options);
-            p.setWorkingDir(tc.getWorkingDir());
+            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.getWorkingDir(), options);
             ps.add(p);
             tpe.execute(p);
             kompileSteps++;
@@ -245,8 +244,7 @@ public class TestSuite {
         startTpe();
         long startTime = System.currentTimeMillis();
         for (TestCase tc : pdfTests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), options);
-            p.setWorkingDir(tc.getWorkingDir());
+            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.getWorkingDir(), options);
             ps.add(p);
             tpe.execute(p);
             pdfSteps++;
@@ -406,9 +404,8 @@ public class TestSuite {
             matcher = new RegexStringMatcher();
         }
         Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
-                outputContentsAnn, errorContentsAnn, matcher, options,
+                outputContentsAnn, errorContentsAnn, matcher, new File(program.defPath), options,
                 program.outputFile, program.newOutputFile);
-        p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);
         krunSteps++;
         return p;

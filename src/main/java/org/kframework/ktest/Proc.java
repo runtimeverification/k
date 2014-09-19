@@ -35,7 +35,7 @@ public class Proc<T> implements Runnable {
     /**
      * Directory to spawn process from.
      */
-    private File workingDir;
+    private final File workingDir;
 
     /**
      * Expected program output with location information for output file.
@@ -116,8 +116,8 @@ public class Proc<T> implements Runnable {
      */
     public Proc(T obj, String[] args, String inputFile, String procInput,
                 Annotated<String, String> expectedOut, Annotated<String, String> expectedErr,
-                StringMatcher strComparator, KTestOptions options, String outputFile,
-                String newOutputFile) {
+                StringMatcher strComparator, File workingDir, KTestOptions options,
+                String outputFile, String newOutputFile) {
         this.obj = obj;
         this.args = args;
         this.inputFile = inputFile;
@@ -125,14 +125,15 @@ public class Proc<T> implements Runnable {
         this.expectedOut = expectedOut;
         this.expectedErr = expectedErr;
         this.strComparator = strComparator;
+        this.workingDir = workingDir;
         this.options = options;
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
     }
 
-    public Proc(T obj, String[] args, KTestOptions options) {
-        this(obj, args, null, "", null, null, options.getDefaultStringMatcher(), options,
-                null, null);
+    public Proc(T obj, String[] args, File workingDir, KTestOptions options) {
+        this(obj, args, null, "", null, null, options.getDefaultStringMatcher(), workingDir,
+                options, null, null);
     }
 
     @Override
@@ -240,14 +241,6 @@ public class Proc<T> implements Runnable {
      */
     public String getPgmErr() {
         return procOutput.stderr;
-    }
-
-    public File getWorkingDir() {
-        return workingDir;
-    }
-
-    public void setWorkingDir(File workingDir) {
-        this.workingDir = workingDir;
     }
 
     public static String toLogString(String[] args) {
