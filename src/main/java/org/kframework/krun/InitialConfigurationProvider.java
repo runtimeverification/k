@@ -26,11 +26,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -41,6 +37,8 @@ public class InitialConfigurationProvider implements Provider<Term> {
     private final ConfigurationCreationOptions options;
     private final Configuration cfg;
     private final boolean io;
+    private final KExceptionManager kem;
+    private final RunProcess rp;
 
     //public final String kdir;
 
@@ -52,19 +50,23 @@ public class InitialConfigurationProvider implements Provider<Term> {
             ConfigurationCreationOptions ccOptions,
             Stopwatch sw,
             Context context,
-            Configuration cfg) {
+            Configuration cfg,
+            KExceptionManager kem,
+            RunProcess rp) {
         this.context = context;
         this.sw = sw;
         this.options = ccOptions;
         this.cfg = cfg;
         this.io = krunOptions.io();
+        this.kem = kem;
+        this.rp = rp;
     }
 
     public Term get() {
 
         if (options.term()) {
             sw.printIntermediate("Parse term");
-            return new RunProcess().runParserOrDie(options.parser(context),
+            return rp.runParserOrDie(options.parser(context),
                     options.pgm(), false, null, context);
         }
 
@@ -75,11 +77,11 @@ public class InitialConfigurationProvider implements Provider<Term> {
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
             if (!context.configVarSorts.containsKey(name)) {
-                GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.CRITICAL,
-                        "User specified configuration variable " + name + " which does not exist."));
+                kem.registerCriticalWarning(
+                        "User specified configuration variable " + name + " which does not exist.");
             }
             Sort sort = context.configVarSorts.get(name);
-            Term parsed = new RunProcess().runParserOrDie(parser, value, false, sort, context);
+            Term parsed = rp.runParserOrDie(parser, value, false, sort, context);
             parsed = (Term) new ResolveVariableAttribute(context).visitNode(parsed);
             output.put("$" + name, parsed);
         }
@@ -118,11 +120,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
                 buffer = br.readLine();
             }
         } catch (IOException e) {
-            if (context.globalOptions.debug) {
-                e.printStackTrace();
-            }
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                    "IO error detected reading from stdin"));
+            kem.registerInternalError("IO error detected reading from stdin", e);
         }
         if (buffer == null) {
             return "";
@@ -139,7 +137,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
             cfgCleaned = Bag.EMPTY;
         } else {
             if (!(cfgCleanedNode instanceof Configuration)) {
-                GlobalSettings.kem.registerInternalError(
+                kem.registerInternalError(
                         "Configuration Cleaner failed.", cfg);
             }
             cfgCleaned = ((Configuration) cfgCleanedNode).getBody();

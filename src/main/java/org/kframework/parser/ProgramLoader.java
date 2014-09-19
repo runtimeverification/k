@@ -40,6 +40,8 @@ import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+
 public class ProgramLoader {
 
     /**
@@ -84,7 +86,7 @@ public class ProgramLoader {
      *
      * Save it in kompiled cache under pgm.maude.
      */
-    public static Term processPgm(byte[] content, Source source, Sort startSymbol,
+    public static Term processPgm(String content, Source source, Sort startSymbol,
             Context context, ParserType whatParser) throws ParseFailedException {
         Stopwatch.instance().printIntermediate("Importing Files");
         if (!context.definedSorts.contains(startSymbol)) {
@@ -115,7 +117,7 @@ public class ProgramLoader {
             }
             out = ((Rule) out).getBody();
         } else if (whatParser == ParserType.BINARY) {
-            try (ByteArrayInputStream in = new ByteArrayInputStream(content)) {
+            try (ByteArrayInputStream in = new ByteArrayInputStream(Base64.decode(content))) {
                 out = BinaryLoader.instance().loadOrDie(Term.class, in);
             } catch (IOException e) {
                 GlobalSettings.kem.registerInternalError("Error reading from binary file", e);

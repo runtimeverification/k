@@ -17,6 +17,7 @@ import java.util.Set;
 public class RuleCompilerSteps extends CompilerSteps<Rule> {
 
     private Set<Variable> vars;
+    private Set<Variable> rawVars;
 
     /**
      * Used in the search process to compute the substitution to be displayed
@@ -25,6 +26,17 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
      */
     public Set<Variable> getVars() {
         return vars;
+    }
+
+    public Variable getVar(String name) {
+        // The backend doesn't keep sort information around so we want to
+        // match the variable name only.
+        for (Variable var : rawVars) {
+            if (name.equals(var.getName())) {
+                return var;
+            }
+        }
+        return null;
     }
 
     public RuleCompilerSteps(Context context) {
@@ -46,11 +58,18 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
     @Override
     public Rule compile(Rule def, String stepName) throws CompilerStepDone {
         vars = new HashSet<>();
+        addVarsOfRule(def, vars);
+        rawVars = new HashSet<>();
+        def = super.compile(def, stepName);
+        addVarsOfRule(def, rawVars);
+        return def;
+    }
+
+    private void addVarsOfRule(Rule def, Set<Variable> vars) {
         vars.addAll(def.getBody().variables());
         if (def.getRequires() != null)
             vars.addAll(def.getRequires().variables());
         if (def.getEnsures() != null)
             vars.addAll(def.getEnsures().variables());
-        return super.compile(def, stepName);
     }
 }

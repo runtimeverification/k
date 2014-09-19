@@ -6,6 +6,8 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.JarInfo;
 
+import com.beust.jcommander.ParameterException;
+
 public abstract class FrontEnd {
 
     protected abstract boolean run();
@@ -38,7 +40,11 @@ public abstract class FrontEnd {
             } else if (globalOptions.version) {
                 jarInfo.printVersionMessage();
             } else {
-                succeeded = run();
+                try {
+                    succeeded = run();
+                } catch (ParameterException e) {
+                    kem.registerCriticalError(e.getMessage(), e);
+                }
                 kem.print();
             }
         } catch (KExceptionManager.KEMException e) {

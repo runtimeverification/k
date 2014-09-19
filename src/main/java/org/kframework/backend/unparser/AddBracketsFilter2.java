@@ -6,7 +6,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ColorSetting;
-import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.parser.DefinitionLoader;
 
 import java.io.IOException;
@@ -102,7 +101,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
             }
             return result;
         }
-        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, OutputMode.SMART, true, context);
+        UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, OutputModes.SMART, true, context);
         unparser.visitNode(ast);
         String unparsed = unparser.getResult();
         try {

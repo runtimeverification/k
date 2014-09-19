@@ -113,6 +113,10 @@ public class KExceptionManager {
         register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, null, null);
     }
 
+    public void registerCompilerWarning(String message, Throwable e) {
+        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, e, null, null);
+    }
+
     public void registerCompilerWarning(String message, ASTNode node) {
         register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, node.getLocation(), node.getSource());
     }
@@ -157,29 +161,33 @@ public class KExceptionManager {
     }
 
     private void registerInternal(KException exception) {
-        exceptions.add(exception);
-        if (exception.type == ExceptionType.ERROR) {
-            throw new KEMException(exception);
+        synchronized(exceptions) {
+            exceptions.add(exception);
+            if (exception.type == ExceptionType.ERROR) {
+                throw new KEMException(exception);
+            }
         }
     }
 
     public void print() {
-        Collections.sort(exceptions, new Comparator<KException>() {
-            @Override
-            public int compare(KException arg0, KException arg1) {
-                return arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose));
-            }
-        });
-        KException last = null;
-        for (KException e : exceptions) {
-            if (!options.warnings.includesExceptionType(e.type))
-                continue;
+        synchronized(exceptions) {
+            Collections.sort(exceptions, new Comparator<KException>() {
+                @Override
+                public int compare(KException arg0, KException arg1) {
+                    return arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose));
+                }
+            });
+            KException last = null;
+            for (KException e : exceptions) {
+                if (!options.warnings.includesExceptionType(e.type))
+                    continue;
 
-            if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
-                continue;
+                if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
+                    continue;
+                }
+                System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
+                last = e;
             }
-            System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
-            last = e;
         }
     }
 
@@ -192,6 +200,11 @@ public class KExceptionManager {
         private KEMException(KException e) {
             super(e.getException());
             this.exception = e;
+        }
+
+        @Override
+        public String getMessage() {
+            return exception.toString();
         }
     }
 

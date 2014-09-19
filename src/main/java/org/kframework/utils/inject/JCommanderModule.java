@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
 import java.util.Set;
 
 import org.kframework.main.Tool;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SortedParameterDescriptions;
@@ -20,6 +21,7 @@ import com.beust.jcommander.ParameterException;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 
 public class JCommanderModule extends AbstractModule  {
 
@@ -38,11 +40,12 @@ public class JCommanderModule extends AbstractModule  {
     protected void configure() {}
 
     @Provides
-    JCommander jcommander(Tool tool, @Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem) {
+    JCommander jcommander(Tool tool, @Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem, Stopwatch sw) {
         try {
             JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
             jc.setProgramName(tool.name().toLowerCase());
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(experimentalOptions.toArray(new Class<?>[experimentalOptions.size()])));
+            sw.printIntermediate("Parse command line options");
             return jc;
         } catch (ParameterException e) {
             kem.registerCriticalError(e.getMessage(), e);

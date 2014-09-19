@@ -21,7 +21,7 @@
     </repository>
     <repository>
       <id>runtime-verification.snapshots</id>
-      <name>Runtime Verification Snapshot Repository</name>
+      <name>runtime verification snapshot repository</name>
       <url>http://office.runtimeverification.com:8888/repository/snapshots</url>
       <snapshots><enabled>true</enabled></snapshots>
       <releases><enabled>false</enabled></releases>
@@ -48,12 +48,27 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>3.0</version>
+      <version>4.0-beta4</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-multibindings</artifactId>
-      <version>3.0</version>
+      <version>4.0-beta4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-grapher</artifactId>
+      <version>4.0-beta4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-throwingproviders</artifactId>
+      <version>4.0-beta4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>3.0.0</version>
     </dependency>
     <dependency>
       <groupId>net.sf.jung</groupId>

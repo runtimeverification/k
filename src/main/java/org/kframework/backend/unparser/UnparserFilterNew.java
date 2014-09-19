@@ -5,8 +5,6 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
-import org.kframework.krun.KRunOptions;
-import org.kframework.krun.KRunOptions.OutputMode;
 import org.kframework.utils.ColorUtil;
 
 import com.davekoelle.AlphanumComparator;
@@ -30,7 +28,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
     private int inTerm = 0;
     private ColorSetting color = ColorSetting.OFF;
     private Color terminalColor = Color.black;
-    private final KRunOptions.OutputMode outputMode;
+    private final OutputModes outputMode;
     private boolean annotateLocation;
     public static int TAB = 4;
     private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
@@ -55,22 +53,22 @@ public class UnparserFilterNew extends NonCachingVisitor {
     }
 
     public UnparserFilterNew(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
-        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, OutputMode.PRETTY, context);
+        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, OutputModes.PRETTY, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, OutputMode outputMode, org.kframework.kil.loader.Context context) {
+    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, OutputModes outputMode, org.kframework.kil.loader.Context context) {
         this(inConfiguration, color, outputMode, false, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, OutputMode outputMode, boolean annotateLocation, org.kframework.kil.loader.Context context) {
+    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, OutputModes outputMode, boolean annotateLocation, org.kframework.kil.loader.Context context) {
         super(context);
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
-        this.addParentheses = outputMode != OutputMode.SMART;
+        this.addParentheses = outputMode != OutputModes.SMART;
         this.annotateLocation = annotateLocation;
         this.outputMode = outputMode;
-        if (outputMode == OutputMode.NO_WRAP) {
+        if (outputMode == OutputModes.NO_WRAP) {
             indenter.setWidth(-1);
         }
         if (context.colorOptions != null) {
@@ -433,7 +431,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
 
                 indenter.write(temp.get(1).getTerminal());
             }
-        } else if ((outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
+        } else if ((outputMode == OutputModes.PRETTY || outputMode == OutputModes.NO_WRAP) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
 
             String rawLabel = null;
             List<Terminal> temp = this.findRightSyntax(label.getSort());
@@ -533,7 +531,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
             java.util.List<Term> contents = termCons.getContents();
             this.visitNode(contents.get(0));
             if (!(contents.get(1) instanceof ListTerminator)
-                    || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))) {
+                    || (! (outputMode == OutputModes.PRETTY || outputMode == OutputModes.NO_WRAP) && ! (outputMode == OutputModes.KORE))) {
                 indenter.write(separator + " ");
                 this.visitNode(contents.get(1));
             }
@@ -543,7 +541,7 @@ public class UnparserFilterNew extends NonCachingVisitor {
                 ProductionItem productionItem = production.getItems().get(i);
                 if (!(productionItem instanceof Terminal)) {
                     Term subterm = termCons.getContents().get(where);
-                    if(!(subterm instanceof ListTerminator) || (! (outputMode == OutputMode.PRETTY || outputMode == OutputMode.NO_WRAP) && ! (outputMode == OutputMode.KORE))){
+                    if(!(subterm instanceof ListTerminator) || (! (outputMode == OutputModes.PRETTY || outputMode == OutputModes.NO_WRAP) && ! (outputMode == OutputModes.KORE))){
                         if (subterm instanceof TermCons && !isDataStructure(termCons.getProduction()) && isDataStructure(((TermCons) subterm).getProduction())) {
                             indenter.endLine();
                             indenter.indent(TAB);

@@ -155,7 +155,6 @@ public class Definition extends JavaSymbolicObject {
         return context;
     }
 
-    @Inject
     public void setContext(Context context) {
         this.context = context;
     }

@@ -29,30 +29,24 @@ import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
-import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 
 public class KompileFrontEnd extends FrontEnd {
 
     public static List<Module> getModules(String[] args) {
-        try {
-            KompileOptions options = new KompileOptions();
+        KompileOptions options = new KompileOptions();
 
-            final Context context = new Context();
-            context.kompileOptions = options;
+        final Context context = new Context();
+        context.kompileOptions = options;
 
-            List<Module> modules = new ArrayList<>();
-            modules.add(new KompileModule(context, options));
-            modules.add(new JCommanderModule(args));
-            modules.add(new CommonModule());
-            modules.add(new JavaSymbolicCommonModule());
-            modules.add(new JavaSymbolicKompileModule());
-            return modules;
-        } catch (ParameterException ex) {
-            printBootError(ex.getMessage());
-            return null;
-        }
+        List<Module> modules = new ArrayList<>();
+        modules.add(new KompileModule(context, options));
+        modules.add(new JCommanderModule(args));
+        modules.add(new CommonModule());
+        modules.add(new JavaSymbolicCommonModule());
+        modules.add(new JavaSymbolicKompileModule());
+        return modules;
     }
 
 
