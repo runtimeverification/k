@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -26,6 +27,8 @@ public abstract class Token extends Term implements Immutable {
             return BoolToken.of(Boolean.parseBoolean(value));
         } else if (sort.equals(IntToken.SORT)) {
             return IntToken.of(value);
+        } else if (sort.equals(FloatToken.SORT)) {
+            return FloatToken.of(value);
         } else {
             return UninterpretedToken.of(sort, value);
         }

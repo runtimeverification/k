@@ -174,6 +174,11 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(FloatToken floatToken) {
+        return transform((Token) floatToken);
+    }
+
+    @Override
     public ASTNode transform(StringToken stringToken) {
         return transform((Token) stringToken);
     }

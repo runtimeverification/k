@@ -25,6 +25,7 @@ public interface Transformer {
     public ASTNode transform(CellCollection cellCollection);
     public ASTNode transform(Collection collection);
     public ASTNode transform(ConstrainedTerm constrainedTerm);
+    public ASTNode transform(FloatToken floatToken);
     public ASTNode transform(Hole hole);
     public ASTNode transform(IntToken intToken);
     public ASTNode transform(KLabelConstant kLabelConstant);
