@@ -6,9 +6,7 @@ import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
-import org.kframework.utils.file.JarInfo;
-
-import java.io.File;
+import org.kframework.kil.loader.Context;
 import java.io.IOException;
 
 /**
@@ -18,17 +16,24 @@ public class Z3Wrapper {
 
     public static boolean initialized = false;
 
-    public static final Z3Wrapper Z3_WRAPPER = new Z3Wrapper();
-    public static Z3Wrapper instance() {
+    public static Z3Wrapper Z3_WRAPPER;
+    public static Z3Wrapper instance(Context context) {
+        if (Z3_WRAPPER == null) {
+            Z3_WRAPPER = new Z3Wrapper(context);
+        }
         return Z3_WRAPPER;
     }
 
     public final String SMT_PRELUDE;
+    private String logic;
 
-    public Z3Wrapper() {
+    public Z3Wrapper(Context context) {
         String s = "";
         try {
-            s = new String(Files.toByteArray(new File(JarInfo.getZ3PreludePath())));
+            if (context.krunOptions.experimental.smtPrelude() != null) {
+                s = new String(Files.toByteArray(context.krunOptions.experimental.smtPrelude()));
+                logic = context.krunOptions.experimental.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -39,7 +44,7 @@ public class Z3Wrapper {
         boolean result = false;
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            Solver solver = context.mkSolver();
+            Solver solver = logic != null ? context.mkSolver(logic) : context.mkSolver();
             solver.add(context.parseSMTLIB2String(SMT_PRELUDE + query, null, null, null, null));
             result = solver.check() == Status.UNSATISFIABLE;
             context.dispose();

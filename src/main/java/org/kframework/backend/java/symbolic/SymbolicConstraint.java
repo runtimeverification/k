@@ -29,6 +29,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.options.SMTSolver;
 
 import java.util.ArrayList;
@@ -47,7 +48,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -853,7 +853,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         boolean result = false;
         try {
-            result = Z3Wrapper.instance().checkQuery(KILtoSMTLib.translateConstraint(this));
+            result = Z3Wrapper.instance(context.definition().context()).checkQuery(KILtoSMTLib.translateConstraint(this));
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
         }
@@ -946,7 +946,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //            if (DEBUG) {
 //                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
 //            }
-            if (!impliesSMT(left,right)) {
+            if (!impliesSMT(left,right, context.definition().context())) {
                 if (context.definition().context().globalOptions.debug) {
                     System.out.println("Failure!");
                 }
@@ -961,7 +961,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
 
-    private static boolean impliesSMT(SymbolicConstraint left, SymbolicConstraint right) {
+    private static boolean impliesSMT(SymbolicConstraint left, SymbolicConstraint right, Context context) {
         boolean result = false;
         assert left.termContext().definition().context() == right.termContext().definition().context();
         if (left.termContext().definition().context().smtOptions.smt == SMTSolver.GAPPA) {
@@ -993,7 +993,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //            System.out.println(constraint);
         } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
             try {
-                result = Z3Wrapper.instance().checkQuery(
+                result = Z3Wrapper.instance(context).checkQuery(
                         KILtoSMTLib.translateImplication(left, right));
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
