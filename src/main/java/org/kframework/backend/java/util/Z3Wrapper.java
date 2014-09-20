@@ -7,6 +7,9 @@ import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.file.JarInfo;
+
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -33,6 +36,8 @@ public class Z3Wrapper {
             if (context.krunOptions.experimental.smtPrelude() != null) {
                 s = new String(Files.toByteArray(context.krunOptions.experimental.smtPrelude()));
                 logic = context.krunOptions.experimental.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
+            } else {
+                s = new String(Files.toByteArray(new File(JarInfo.getZ3PreludePath())));
             }
         } catch (IOException e) {
             e.printStackTrace();
