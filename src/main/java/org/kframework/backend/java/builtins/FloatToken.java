@@ -14,8 +14,10 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.FloatBuiltin;
 import org.kframework.mpfr.BigFloat;
+import org.kframework.utils.general.GlobalSettings;
 
 public class FloatToken extends Token implements MaximalSharing {
 
@@ -119,6 +121,35 @@ public class FloatToken extends Token implements MaximalSharing {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
+    }
+
+    /**
+     * Get the exponent and significand of a term of sort Float assumed to have
+     * a exponent and a significand attributes. Throws an error if the term does
+     * not declare them.
+     */
+    public static Pair<Integer, Integer> getExponentAndSignificandOrDie(ASTNode t) {
+        Pair<Integer, Integer> pair = getExponentAndSignificand(t);
+        if (pair == null) {
+            GlobalSettings.kem.registerCriticalError("Expected floating point number variable to declare an exponent and a significand." +
+                    " For example, F:Float{exponent(11), significand(53)} for a double-precision floating point number.");
+        }
+        return pair;
+    }
+
+    public static Pair<Integer, Integer> getExponentAndSignificand(ASTNode t) {
+        String exponent = t.getAttribute(Attribute.EXPONENT_KEY);
+        String significand = t.getAttribute(Attribute.SIGNIFICAND_KEY);
+        if (exponent == null || significand == null) {
+            return null;
+        }
+        try {
+            return Pair.of(Integer.parseInt(exponent), Integer.parseInt(significand));
+        } catch (NumberFormatException e) {
+            GlobalSettings.kem.registerCriticalError("Expected variable attributes 'exponent' and 'significand' to " +
+                    "be integers, found: " + t.getAttribute(Attribute.EXPONENT_KEY) + " " + t.getAttribute(Attribute.SIGNIFICAND_KEY), e);
+            throw new AssertionError("unreachable");
+        }
     }
 
     /**

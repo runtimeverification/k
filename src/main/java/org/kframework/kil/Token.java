@@ -24,6 +24,8 @@ public abstract class Token extends KLabel {
             return BoolBuiltin.of(value);
         } else if (sort.equals(Sort.BUILTIN_INT)) {
             return IntBuiltin.of(value);
+        } else if (sort.equals(Sort.BUILTIN_FLOAT)) {
+            return FloatBuiltin.of(value);
         } else if (sort.equals(Sort.BUILTIN_STRING)) {
             /* TODO(andreis): unescape string */
             return StringBuiltin.of(value);
@@ -44,6 +46,8 @@ public abstract class Token extends KLabel {
             return BoolBuiltin.kAppOf(value);
         } else if (sort.equals(Sort.BUILTIN_INT) || sort.equals(Sort.INT)) {
             return IntBuiltin.kAppOf(value);
+        } else if (sort.equals(Sort.BUILTIN_FLOAT) || sort.equals(Sort.FLOAT)) {
+            return FloatBuiltin.kAppOf(value);
         } else if (sort.equals(Sort.BUILTIN_STRING) || sort.equals(Sort.STRING)) {
             return StringBuiltin.kAppOf(StringUtil.unquoteKString(value));
         } else {

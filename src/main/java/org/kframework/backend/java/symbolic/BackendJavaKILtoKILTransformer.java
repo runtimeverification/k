@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
@@ -277,6 +278,11 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     @Override
     public ASTNode transform(ConstrainedTerm constrainedTerm) {
         throw new UnsupportedOperationException("Not implemented, yet");
+    }
+
+    @Override
+    public ASTNode transform(FloatToken floatToken) {
+        return transform((Token) floatToken);
     }
 
     @Override

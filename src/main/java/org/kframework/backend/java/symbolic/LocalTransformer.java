@@ -76,6 +76,11 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(FloatToken floatToken) {
+        return transform((Token) floatToken);
+    }
+
+    @Override
     public ASTNode transform(Hole hole) {
         return transform((Term) hole);
     }
