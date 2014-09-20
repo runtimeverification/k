@@ -27,4 +27,6 @@
 
     <!--<include file="binary_search_tree//config.xml" more-results="." />-->
     <include file="binary_search_tree/config.xml" />
+
+    <include file="cd2d/config.xml" />
 </tests>
