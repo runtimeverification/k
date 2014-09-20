@@ -1,8 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
@@ -70,6 +72,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "int_max",
             "int_min",
             "int_abs",
+            /* extra float theory */
+            "remainder",
+            "min",
+            "max",
+            "==",
             /* bit vector theory */
             "concat",
             "extract",
@@ -272,9 +279,14 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             assert false : "getSortName should be called with a sorted node";
             return null;
         }
-        return s == Sort.BIT_VECTOR ?
-                "(_ BitVec " + BitVector.getBitwidthOrDie(node) + ")" :
-                s.name();
+        if (s == Sort.BIT_VECTOR) {
+            return "(_ BitVec " + BitVector.getBitwidthOrDie(node) + ")";
+        } else if (s == Sort.FLOAT) {
+            Pair<Integer, Integer> pair = FloatToken.getExponentAndSignificandOrDie(node);
+            return "(_ FP " + pair.getLeft() + " " + pair.getRight() + ")";
+        } else {
+            return s.name();
+        }
     }
 
     public KILtoSMTLib(boolean skipEqualities) {
@@ -399,6 +411,16 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(IntToken intToken) {
         return new SMTLibTerm(Long.toString(intToken.longValue()));
+    }
+
+    @Override
+    public ASTNode transform(FloatToken floatToken) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(
+                "((_ asFloat %d %d) roundNearestTiesToEven %s 0)",
+                floatToken.exponent(), floatToken.bigFloatValue().precision(),
+                floatToken.bigFloatValue().toString("%Rf")));
+        return new SMTLibTerm(sb.toString());
     }
 
     @Override
