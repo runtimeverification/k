@@ -29,7 +29,7 @@ module FLOAT-HOOKS
                 | isOrdinary(Float)     [function, smtlib((== #1 #1))] // TODO(YilongL): add the hook once mpfr-java adds binding for mpfr_number_p
   syntax MInt ::= significandFloat(Float) [function, hook(#FLOAT:significand)]
 
-  syntax Float ::= NaN(Int, Int) [klabel(fp_NaN), smtlib((as NaN (_ FP #1 #2)))]
+  syntax Float ::= fpNaN(Int, Int) [smtlib((as NaN (_ FP #1 #2)))]
 
   syntax Float ::= "--Float" Float             [function, smtlib(-), hook(#FLOAT:neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(#FLOAT:pow)]

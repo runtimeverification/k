@@ -11,7 +11,7 @@ rule [max-spec]:
   =>
     tv(double, Z:Float{exponent(11), significand(53)})
   ...</k>
-requires X =/=K NaN(11, 53) andBool Y =/=K NaN(11, 53)
+requires X =/=K fpNaN(11, 53) andBool Y =/=K fpNaN(11, 53)
 ensures Z ==Float maxFloat(X, Y)
 
 rule [min-spec]:
@@ -21,7 +21,7 @@ rule [min-spec]:
   =>
     tv(double, Z:Float{exponent(11), significand(53)})
   ...</k>
-requires X =/=K NaN(11, 53) andBool Y =/=K NaN(11, 53)
+requires X =/=K fpNaN(11, 53) andBool Y =/=K fpNaN(11, 53)
 ensures Z ==Float minFloat(X, Y)
 
 rule [sqs-spec]:
