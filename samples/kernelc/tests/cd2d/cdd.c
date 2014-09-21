@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 #include <stdio.h>
 
 double max(double a, double b){
