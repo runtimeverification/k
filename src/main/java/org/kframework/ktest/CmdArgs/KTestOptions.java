@@ -175,7 +175,12 @@ public class KTestOptions {
      */
     @Parameter(names="--dry", description="Dry run: print out the " +
                 "command to be executed without actual execution.")
-    private boolean dry = false;
+    public boolean dry = false;
+
+    /**
+     * Enable debugging. When enabled, KTest passes --debug to spawned processes.
+     */
+    private boolean debug = false;
 
     /**
      * Copy constructor.
@@ -199,6 +204,7 @@ public class KTestOptions {
         this.ignoreWS = obj.ignoreWS;
         this.ignoreBalancedParens = obj.ignoreBalancedParens;
         this.dry = obj.dry;
+        this.debug = obj.debug;
     }
 
     /**
@@ -298,12 +304,16 @@ public class KTestOptions {
         return generateReport;
     }
 
-    public boolean getDry() {
-        return dry;
+    public boolean getDebug() {
+        return debug;
     }
 
     public int getThreads() {
         return threads;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public KTestOptions setDirectory(String directory) {

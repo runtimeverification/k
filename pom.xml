@@ -350,6 +350,7 @@
                   <arg value="${config}" />
                   <arg value="-v" />
                   <arg value="--report" />
+                  <arg value="--debug" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>

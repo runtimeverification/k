@@ -74,53 +74,20 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
 
-        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.GREEN : Color.RED,
-                options.getColorSetting(), options.getTerminalColor());
-        String msg = ret ? "SUCCESS" : "FAIL (see details above)";
-        System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
+        if (!options.dry) {
+            String colorCode = ColorUtil.RgbToAnsi(ret ? Color.GREEN : Color.RED,
+                    options.getColorSetting(), options.getTerminalColor());
+            String msg = ret ? "SUCCESS" : "FAIL (see details above)";
+            System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
-        printTimeInfo();
+            printTimeInfo();
 
-        // save reports
-        if (reportGen != null)
-            reportGen.save();
+            // save reports
+            if (reportGen != null)
+                reportGen.save();
+        }
 
         return ret;
-    }
-
-    /**
-     * Print the commands that would be executed, but do not execute them.
-     * (inspired by GNU Make)
-     */
-    public void dryRun() {
-        Set<KTestStep> skips = options.getSkips();
-        if (!skips.contains(KTestStep.KOMPILE)) {
-            List<TestCase> kompileSteps = filterSkips(tests, KTestStep.KOMPILE);
-            for (TestCase tc : kompileSteps)
-                System.out.println(tc.toKompileLogString());
-        }
-        if (!skips.contains(KTestStep.PDF)) {
-            List<TestCase> pdfSteps = collectPDFDefs(filterSkips(tests, KTestStep.PDF));
-            for (TestCase tc : pdfSteps)
-                System.out.println(tc.toPdfLogString());
-        }
-        if (!skips.contains(KTestStep.KRUN)) {
-            List<TestCase> krunSteps = filterSkips(tests, KTestStep.KRUN);
-            for (TestCase tc : krunSteps) {
-                List<KRunProgram> programs = tc.getPrograms();
-                for (KRunProgram program : programs) {
-                    StringBuilder krunLogCmd = new StringBuilder();
-                    krunLogCmd.append(program.toLogString());
-                    if (options.getUpdateOut() && program.outputFile != null)
-                        krunLogCmd.append(" >").append(program.outputFile);
-                    else if (options.getGenerateOut() && program.newOutputFile != null)
-                        krunLogCmd.append(" >").append(program.newOutputFile);
-                    if (program.inputFile != null)
-                        krunLogCmd.append(" <").append(program.inputFile);
-                    System.out.println(krunLogCmd.toString());
-                }
-            }
-        }
     }
 
     private List<TestCase> filterSkips(List<TestCase> tests, KTestStep step) {
@@ -137,7 +104,8 @@ public class TestSuite {
      * @return list of test cases that run successfully
      * @throws InterruptedException
      */
-    private List<TestCase> runPosixOnlySteps(List<TestCase> tests) throws InterruptedException {
+    private List<TestCase> runPosixOnlySteps(List<TestCase> tests)
+            throws InterruptedException {
         assert OS.current().isPosix;
         int len = tests.size();
         List<TestCase> successfulTests = new ArrayList<>(len);
@@ -148,9 +116,8 @@ public class TestSuite {
         for (TestCase tc : tests) {
             if (tc.hasPosixOnly()) {
                 Proc<TestCase> p =
-                        new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(), options);
+                        new Proc<>(tc, tc.getPosixOnlyCmd(), tc.getWorkingDir(), options);
                 ps.add(p);
-                p.setWorkingDir(tc.getWorkingDir());
                 tpe.execute(p);
             } else {
                 successfulTests.add(tc);
@@ -163,8 +130,10 @@ public class TestSuite {
             TestCase tc = p.getObj();
             if (p.isSuccess())
                 successfulTests.add(tc);
-            makeReport(p, makeRelative(tc.getDefinition()),
-                    FilenameUtils.getName(tc.getPosixInitScript()));
+            if (!options.dry) {
+                makeReport(p, makeRelative(tc.getDefinition()),
+                        FilenameUtils.getName(tc.getPosixInitScript()));
+            }
         }
 
         printResult(successfulTests.size() == len);
@@ -181,7 +150,8 @@ public class TestSuite {
      * @return list of test cases that run successfully
      * @throws InterruptedException
      */
-    private List<TestCase> runKompileSteps(List<TestCase> tests) throws InterruptedException {
+    private List<TestCase> runKompileSteps(List<TestCase> tests)
+            throws InterruptedException {
         int len = tests.size();
         List<TestCase> successfulTests = new ArrayList<>(len);
         List<Proc<TestCase>> ps = new ArrayList<>(len);
@@ -190,8 +160,7 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         startTpe();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(), options);
-            p.setWorkingDir(tc.getWorkingDir());
+            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.getWorkingDir(), options);
             ps.add(p);
             tpe.execute(p);
             kompileSteps++;
@@ -205,8 +174,10 @@ public class TestSuite {
             TestCase tc = p.getObj();
             if (p.isSuccess())
                 successfulTests.add(tc);
-            makeReport(p, makeRelative(tc.getDefinition()),
-                    FilenameUtils.getName(tc.getDefinition()));
+            if (!options.dry) {
+                makeReport(p, makeRelative(tc.getDefinition()),
+                        FilenameUtils.getName(tc.getDefinition()));
+            }
         }
 
         printResult(successfulTests.size() == len);
@@ -246,8 +217,7 @@ public class TestSuite {
         startTpe();
         long startTime = System.currentTimeMillis();
         for (TestCase tc : pdfTests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(), options);
-            p.setWorkingDir(tc.getWorkingDir());
+            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.getWorkingDir(), options);
             ps.add(p);
             tpe.execute(p);
             pdfSteps++;
@@ -261,8 +231,10 @@ public class TestSuite {
             TestCase tc = p.getObj();
             if (!p.isSuccess())
                 ret = false;
-            makeReport(p, makeRelative(tc.getDefinition()),
-                    FilenameUtils.getBaseName(tc.getDefinition()) + ".pdf");
+            if (!options.dry) {
+                makeReport(p, makeRelative(tc.getDefinition()),
+                        FilenameUtils.getBaseName(tc.getDefinition()) + ".pdf");
+            }
         }
 
         printResult(ret);
@@ -279,18 +251,23 @@ public class TestSuite {
     private boolean runKRunSteps(List<TestCase> tests) throws InterruptedException {
         List<TestCase> kompileSuccesses = new LinkedList<>();
 
-        // collect definitions that are not yet kompiled and kompile them first
-        ArrayList<TestCase> notKompiled = new ArrayList<>();
-        for (TestCase tc : tests) {
-            if (!tc.isDefinitionKompiled())
-                notKompiled.add(tc);
-            else
-                kompileSuccesses.add(tc);
-        }
+        if (options.dry) {
+            // just assume all required definitions are already compiled
+            kompileSuccesses = tests;
+        } else {
+            // collect definitions that are not yet kompiled and kompile them first
+            ArrayList<TestCase> notKompiled = new ArrayList<>();
+            for (TestCase tc : tests) {
+                if (!tc.isDefinitionKompiled())
+                    notKompiled.add(tc);
+                else
+                    kompileSuccesses.add(tc);
+            }
 
-        if (!notKompiled.isEmpty()) {
-            System.out.println("Kompiling definitions that are not yet kompiled.");
-            kompileSuccesses.addAll(runKompileSteps(notKompiled));
+            if (!notKompiled.isEmpty()) {
+                System.out.println("Kompiling definitions that are not yet kompiled.");
+                kompileSuccesses.addAll(runKompileSteps(notKompiled));
+            }
         }
 
         // at this point we have a subset of tests that are successfully kompiled,
@@ -407,9 +384,8 @@ public class TestSuite {
             matcher = new RegexStringMatcher();
         }
         Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
-                outputContentsAnn, errorContentsAnn, program.toLogString(), matcher, options,
+                outputContentsAnn, errorContentsAnn, matcher, new File(program.defPath), options,
                 program.outputFile, program.newOutputFile);
-        p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);
         krunSteps++;
         return p;

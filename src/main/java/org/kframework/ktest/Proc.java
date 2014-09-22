@@ -2,13 +2,17 @@
 package org.kframework.ktest;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.StringMatcher.MatchFailure;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.OS;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
 import java.io.*;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
@@ -31,7 +35,7 @@ public class Proc<T> implements Runnable {
     /**
      * Directory to spawn process from.
      */
-    private File workingDir;
+    private final File workingDir;
 
     /**
      * Expected program output with location information for output file.
@@ -39,19 +43,9 @@ public class Proc<T> implements Runnable {
     private final Annotated<String, String> expectedOut;
 
     /**
-     * Output produced by program.
-     */
-    private String pgmOut;
-
-    /**
      * Expected program error.
      */
     private final Annotated<String, String> expectedErr;
-
-    /**
-     * Error produced by program.
-     */
-    private String pgmErr;
 
     /**
      * Process' input source.
@@ -62,11 +56,6 @@ public class Proc<T> implements Runnable {
      * Input string to pass to program.
      */
     private final String procInput;
-
-    /**
-     * String to be used while logging the process results.
-     */
-    private final String logStr;
 
     /**
      * Comparator to compare program outputs with expected outputs.
@@ -91,7 +80,7 @@ public class Proc<T> implements Runnable {
     /**
      * Whether the process succeeded or not.
      */
-    private boolean success = false;
+    private boolean success;
 
     /**
      * Reason of failure. null if process is not started yet or it's succeeded.
@@ -101,7 +90,12 @@ public class Proc<T> implements Runnable {
     /**
      * How long did process take.
      */
-    private long timeDelta;
+    private long timeDelta = 0;
+
+    /**
+     * Output of the process.
+     */
+    private ProcOutput procOutput = new ProcOutput(null, null, -1);
 
     public static final int SIGTERM = 143;
 
@@ -116,14 +110,13 @@ public class Proc<T> implements Runnable {
      *                    program fails with an error
      * @param expectedErr null if not testing for error output, error messages are ignored when
      *                    program returns 0
-     * @param logStr String representation of the process
      * @param strComparator comparator object to compare program outputs with expected outputs
      * @param outputFile output file to be updated when --update-out is used
      * @param newOutputFile output file to generated when --generate-out is used
      */
     public Proc(T obj, String[] args, String inputFile, String procInput,
                 Annotated<String, String> expectedOut, Annotated<String, String> expectedErr,
-                String logStr, StringMatcher strComparator, KTestOptions options,
+                StringMatcher strComparator, File workingDir, KTestOptions options,
                 String outputFile, String newOutputFile) {
         this.obj = obj;
         this.args = args;
@@ -131,66 +124,104 @@ public class Proc<T> implements Runnable {
         this.procInput = procInput;
         this.expectedOut = expectedOut;
         this.expectedErr = expectedErr;
-        this.logStr = logStr;
         this.strComparator = strComparator;
+        this.workingDir = workingDir;
         this.options = options;
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
+        success = options.dry;
     }
 
-    public Proc(T obj, String[] args, String logStr, KTestOptions options) {
-        this(obj, args, null, "", null, null, logStr, options.getDefaultStringMatcher(), options,
-                null, null);
+    public Proc(T obj, String[] args, File workingDir, KTestOptions options) {
+        this(obj, args, null, "", null, null, options.getDefaultStringMatcher(), workingDir,
+                options, null, null);
     }
 
     @Override
     public void run() {
-        // TODO: what happens when a process is run multiple times?
-        ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
-        pb.environment().put("kompile", ExecNames.getKompile());
-        pb.environment().put("krun", ExecNames.getKrun());
-        pb.environment().put("kast", ExecNames.getKast());
-
-        try {
-            if (options.isVerbose()) {
-                printVerboseRunningMsg();
+        if (options.getDebug()) {
+            String[] debugArgs = Arrays.copyOf(args, args.length + 1);
+            debugArgs[args.length] = "--debug";
+            if (expectedErr != null) {
+                // We want to use --debug and compare error outputs too. In this case we need to
+                // make two runs:
+                // 1) We pass --debug and collect output with stack trace.
+                // 2) We don't pass --debug and use output for comparison.
+                ProcOutput debugOutput = runProc(debugArgs);
+                procOutput = runProc(args);
+                if (!options.dry) {
+                    handlePgmResult(procOutput, debugOutput);
+                }
+            } else {
+                // Make one run with --debug
+                procOutput = runProc(debugArgs);
+                if (!options.dry) {
+                    handlePgmResult(procOutput, null);
+                }
             }
-            long startTime = System.currentTimeMillis();
-            Process proc = pb.start();
+        } else {
+            procOutput = runProc(args);
+            if (!options.dry) {
+                handlePgmResult(procOutput, null);
+            }
+        }
+    }
 
-            // I'm using a different naming convention because this is more intuitive for me
-            InputStream errorStream = proc.getErrorStream(); // program's error stream
-            InputStream outStream = proc.getInputStream(); // program's output stream
-            OutputStream inStream = proc.getOutputStream(); // program's input stream
-
-            // pass input to process
-            IOUtils.write(procInput, inStream);
-            inStream.close();
-
-            // asynchronously read outputs
-            final ExecutorService service = Executors.newFixedThreadPool(2);
-            final Future<String> outputGobbler = service.submit(new StreamGobbler(outStream));
-            final Future<String> errorGobbler  = service.submit(new StreamGobbler(errorStream));
-
-            int returnCode = wait(proc);
-            timeDelta = System.currentTimeMillis() - startTime;
+    private ProcOutput runProc(String[] args) {
+        if (options.dry) {
+            StringBuilder dryStr = new StringBuilder();
+            dryStr.append(toLogString(args));
+            if (options.getUpdateOut() && outputFile != null)
+                dryStr.append(" >").append(outputFile);
+            else if (options.getGenerateOut() && newOutputFile != null)
+                dryStr.append(" >").append(newOutputFile);
+            if (inputFile != null)
+                dryStr.append(" <").append(inputFile);
+            System.out.println(dryStr.toString());
+            return null;
+        } else {
+            ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
+            pb.environment().put("kompile", ExecNames.getKompile());
+            pb.environment().put("krun", ExecNames.getKrun());
+            pb.environment().put("kast", ExecNames.getKast());
 
             try {
-                pgmOut = outputGobbler.get();
-                pgmErr = errorGobbler.get();
-            } catch (ExecutionException e) {
-                // program was killed before producing output,
-                // set pgmOut and pgmErr null manually, in case one of the outputs is produced
-                // but other is not (not sure if that's possible, just to make sure..)
-                pgmOut = null;
-                pgmErr = null;
-            }
+                if (options.isVerbose()) {
+                    printVerboseRunningMsg(toLogString(args));
+                }
+                long startTime = System.currentTimeMillis();
+                Process proc = pb.start();
 
-            handlePgmResult(returnCode);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
-            reportErr("program failed with exception: " + e.getMessage());
+                // I'm using a different naming convention because this is more intuitive for me
+                InputStream errorStream = proc.getErrorStream(); // program's error stream
+                InputStream outStream = proc.getInputStream(); // program's output stream
+                OutputStream inStream = proc.getOutputStream(); // program's input stream
+
+                // pass input to process
+                IOUtils.write(procInput, inStream);
+                inStream.close();
+
+                // asynchronously read outputs
+                final ExecutorService service = Executors.newFixedThreadPool(2);
+                final Future<String> outputGobbler = service.submit(new StreamGobbler(outStream));
+                final Future<String> errorGobbler = service.submit(new StreamGobbler(errorStream));
+
+                int returnCode = wait(proc);
+                timeDelta += System.currentTimeMillis() - startTime;
+
+                try {
+                    return new ProcOutput(outputGobbler.get(), errorGobbler.get(), returnCode);
+                } catch (ExecutionException e) {
+                    // program was killed before producing output,
+                    // set pgmOut and pgmErr null manually, in case one of the outputs is produced
+                    // but other is not (not sure if that's possible, just to make sure..)
+                    return new ProcOutput(null, null, returnCode);
+                }
+            } catch (IOException | InterruptedException e) {
+                GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
+                reportErr("program failed with exception: " + e.getMessage());
+            }
+            return null; // unreachable
         }
     }
 
@@ -221,7 +252,7 @@ public class Proc<T> implements Runnable {
      *         producing output (i.e. when killed because of timeout)
      */
     public String getPgmOut() {
-        return pgmOut;
+        return procOutput.stdout;
     }
 
     /**
@@ -229,15 +260,14 @@ public class Proc<T> implements Runnable {
      *         producing error output (i.e. when killed because of timeout)
      */
     public String getPgmErr() {
-        return pgmErr;
+        return procOutput.stderr;
     }
 
-    public File getWorkingDir() {
-        return workingDir;
-    }
-
-    public void setWorkingDir(File workingDir) {
-        this.workingDir = workingDir;
+    public static String toLogString(String[] args) {
+        if (OS.current() == OS.WIN) {
+            return StringUtils.join(args, ' ');
+        }
+        return StringUtil.escapeShell(args, OS.current());
     }
 
     private int wait(final Process proc) throws InterruptedException {
@@ -256,13 +286,13 @@ public class Proc<T> implements Runnable {
     /**
      * Compare expected outputs with program outputs, set `reason' and `success' variables,
      * print information messages.
-     * @param returnCode return code of the process
      */
-    private void handlePgmResult(int returnCode) throws IOException {
+    private void handlePgmResult(ProcOutput normalOutput, ProcOutput debugOutput) {
         String red = ColorUtil.RgbToAnsi(
                 Color.RED, options.getColorSetting(), options.getTerminalColor());
         boolean verbose = options.isVerbose();
-        if (returnCode == 0) {
+        String logStr = toLogString(args);
+        if (normalOutput.returnCode == 0) {
 
             boolean doGenerateOut = false;
 
@@ -275,7 +305,7 @@ public class Proc<T> implements Runnable {
                 doGenerateOut = true;
             } else {
                 try {
-                    strComparator.matches(expectedOut.getObj(), pgmOut);
+                    strComparator.matches(expectedOut.getObj(), normalOutput.stdout);
 
                     // outputs match
                     success = true;
@@ -296,15 +326,23 @@ public class Proc<T> implements Runnable {
 
             // https://github.com/kframework/k/wiki/Manual-(to-be-processed)#ktest-automatic-output-generation
             if (options.getUpdateOut() && outputFile != null) {
-                IOUtils.write(pgmOut, new FileOutputStream(new File(outputFile)));
                 System.out.println("Updating output file: " + outputFile);
+                try {
+                    IOUtils.write(normalOutput.stdout, new FileOutputStream(new File(outputFile)));
+                } catch (IOException e) {
+                    GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
+                }
             }
             if (doGenerateOut && options.getGenerateOut() && newOutputFile != null) {
-                IOUtils.write(pgmOut, new FileOutputStream(new File(newOutputFile)));
                 System.out.println("Generating output file: " + newOutputFile);
+                try {
+                    IOUtils.write(normalOutput.stdout, new FileOutputStream(new File(newOutputFile)));
+                } catch (IOException e) {
+                    GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
+                }
             }
 
-        } else if (returnCode == SIGTERM) {
+        } else if (normalOutput.returnCode == SIGTERM) {
 
             // TODO: is it possible for program to be killed because of something other than
             //       timeout? (full memory etc.)
@@ -319,12 +357,15 @@ public class Proc<T> implements Runnable {
                 // we're not comparing error outputs
                 System.out.format("%sERROR: [%s] failed with error (time: %d ms)%s%n",
                         red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
-                if (verbose)
-                    System.out.format("error was: %s%n", pgmErr);
-                reportErr(pgmErr);
+                if (debugOutput != null) {
+                    System.out.format("error was: %s%n", debugOutput.stderr);
+                } else if (verbose) {
+                    System.out.format("error was: %s%n", normalOutput.stderr);
+                }
+                reportErr(normalOutput.stderr);
             } else {
                 try {
-                    strComparator.matches(expectedErr.getObj(), pgmErr);
+                    strComparator.matches(expectedErr.getObj(), normalOutput.stderr);
                     // error outputs match
                     success = true;
                     if (verbose)
@@ -335,6 +376,12 @@ public class Proc<T> implements Runnable {
                         "%sERROR: [%s] throwed error, but expected error message doesn't match " +
                         "%s (time: %d ms)%s%n",
                         red, logStr, expectedErr.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
+                    if (debugOutput != null) {
+                        System.out.format("error output was (except the stack trace): %s%n",
+                                debugOutput.stderr);
+                    } else if (verbose) {
+                        System.out.format("error output was: %s%n", normalOutput.stderr);
+                    }
                     reportErrMatch(e.getMessage());
                 }
             }
@@ -361,7 +408,7 @@ public class Proc<T> implements Runnable {
         reason = "Timeout";
     }
 
-    private void printVerboseRunningMsg() {
+    private void printVerboseRunningMsg(String logStr) {
         StringBuilder b = new StringBuilder();
         b.append("Running [");
         b.append(logStr);
@@ -377,6 +424,18 @@ public class Proc<T> implements Runnable {
             b.append("]");
         }
         System.out.println(b);
+    }
+}
+
+class ProcOutput {
+    public final String stdout;
+    public final String stderr;
+    public final int returnCode;
+
+    public ProcOutput(String stdout, String stderr, int returnCode) {
+        this.stdout = stdout;
+        this.stderr = stderr;
+        this.returnCode = returnCode;
     }
 }
 

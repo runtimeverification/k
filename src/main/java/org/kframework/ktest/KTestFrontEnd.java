@@ -54,19 +54,14 @@ public class KTestFrontEnd extends FrontEnd {
             JarInfo jarInfo) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo);
         this.options = options;
+        this.options.setDebug(globalOptions.debug);
         this.kem = kem;
     }
 
     public boolean run() {
         try {
             options.validateArgs();
-            TestSuite testSuite = makeTestSuite(options.getTargetFile(), options);
-            if (options.getDry()) {
-                testSuite.dryRun();
-                return true;
-            } else {
-                return testSuite.run();
-            }
+            return makeTestSuite(options.getTargetFile(), options).run();
         } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
                 TransformerException | ParameterException e) {
             kem.registerCriticalError(e.getMessage(), e);

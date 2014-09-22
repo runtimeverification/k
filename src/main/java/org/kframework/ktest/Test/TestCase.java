@@ -2,7 +2,6 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.Config.InvalidConfigError;
@@ -153,7 +152,7 @@ public class TestCase {
      */
     public String[] getKompileCmd() {
         assert new File(getDefinition()).isFile();
-        List<String> stringArgs = new ArrayList<String>();
+        List<String> stringArgs = new ArrayList<>();
         stringArgs.add(ExecNames.getKompile());
         stringArgs.add(getDefinition());
         for (PgmArg kompileOpt : kompileOpts) {
@@ -166,16 +165,6 @@ public class TestCase {
             }
         }
         return argsArr;
-    }
-
-    /**
-     * @return String representation of kompile command to be used in logging.
-     */
-    public String toKompileLogString() {
-        if (OS.current() == OS.WIN) {
-            return StringUtils.join(getKompileCmd(), ' ');
-        }
-        return StringUtil.escapeShell(getKompileCmd(), OS.current());
     }
 
     /**
@@ -201,13 +190,6 @@ public class TestCase {
     }
 
     /**
-     * @return String representation of posixInitScript command to be used in logging.
-     */
-    public String toPosixOnlyLogString() {
-        return StringUtil.escapeShell(getPosixOnlyCmd(), OS.current());
-    }
-
-    /**
      * @return command array to pass process builder
      */
     public String[] getPdfCmd() {
@@ -220,16 +202,6 @@ public class TestCase {
             }
         }
         return argsArr;
-    }
-
-    /**
-     * @return String representation of PDF command to be used in logging.
-     */
-    public String toPdfLogString() {
-        if (OS.current() == OS.WIN) {
-            return StringUtils.join(getPdfCmd(), ' ');
-        }
-        return StringUtil.escapeShell(getPdfCmd(), OS.current());
     }
 
     public void setKompileOpts(List<PgmArg> kompileOpts) {
