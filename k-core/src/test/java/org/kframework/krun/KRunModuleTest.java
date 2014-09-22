@@ -14,7 +14,6 @@ import org.kframework.kil.Term;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
-import org.kframework.krun.tools.GuiDebugger;
 import org.kframework.krun.tools.LtlModelChecker;
 import org.kframework.main.FrontEnd;
 import org.kframework.transformation.Transformation;
@@ -82,13 +81,6 @@ public class KRunModuleTest extends BaseTestCase {
             }
             throw e;
         }
-    }
-
-    @Test
-    public void testCreateInjectionGuiDebugger() {
-        String[] argv = new String[] { "foo.c", "--debugger-gui" };
-        Injector injector = buildInjector(argv);
-        injector.getInstance(GuiDebugger.class);
     }
 
     private Injector buildInjector(String[] argv) {

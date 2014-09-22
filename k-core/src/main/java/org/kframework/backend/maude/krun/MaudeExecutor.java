@@ -522,8 +522,7 @@ public class MaudeExecutor implements Executor {
             patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
         }
         cmd.append(patternString).append(" .");
-        boolean showGraph = options.graph || options.experimental.debugger()
-                || options.experimental.debuggerGui();
+        boolean showGraph = options.graph || options.experimental.debugger();
         if (showGraph) {
             cmd.append("\nshow search graph .");
         }
