@@ -5,7 +5,7 @@ if [ -z "$K_OPTS" ];
   then export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation"
 fi
 if "$(dirname "$0")/../lib/checkJava"; then
-  java -Djava.awt.headless=true $K_OPTS -ea -jar "$(dirname "$0")/../lib/java/k-core-${artifact.version}.jar" -ktest "$@"
+  java -Djava.awt.headless=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -ktest "$@"
 else
   exit 1
 fi

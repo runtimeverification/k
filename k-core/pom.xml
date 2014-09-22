@@ -287,12 +287,6 @@
           <systemPropertyVariables>
             <java.awt.headless>true</java.awt.headless>
           </systemPropertyVariables>
-          <workingDirectory>src/test/resources</workingDirectory>
-          <environmentVariables>
-            <LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</LD_LIBRARY_PATH>
-            <DYLD_LIBRARY_PATH>${env.DYLD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</DYLD_LIBRARY_PATH>
-            <PATH>${env.PATH}${path.separator}${project.build.directory}/lib/native</PATH>
-          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -300,10 +294,6 @@
         <version>2.5</version>
         <configuration>
           <archive>
-            <manifest>
-              <mainClass>org.kframework.main.Main</mainClass>
-              <addClasspath>true</addClasspath>
-            </manifest>
             <manifestEntries>
               <Implementation-Revision>${buildNumber}</Implementation-Revision>
               <Implementation-Branch>${scmBranch}</Implementation-Branch>
@@ -312,6 +302,13 @@
             </manifestEntries>
           </archive>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -343,19 +340,6 @@
                 </artifactItem>
               </artifactItems>
               <outputDirectory>target/sdf/bin</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-native-dependencies</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <stripVersion>true</stripVersion>
-              <stripClassifier>true</stripClassifier>
-              <includeTypes>${native.library.type}</includeTypes>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
             </configuration>
           </execution>
         </executions>

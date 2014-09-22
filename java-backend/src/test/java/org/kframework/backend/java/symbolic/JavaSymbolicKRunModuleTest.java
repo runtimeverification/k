@@ -22,7 +22,9 @@ import org.kframework.utils.BaseTestCase;
 import org.kframework.utils.inject.Main;
 import org.mockito.Mock;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -48,9 +50,11 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
     public void testCreateInjectionJava() {
         context.kompileOptions.backend = "java";
         String[] argv = new String[] { "foo.c" };
-        Module[] definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(argv);
+        List<Module> definitionSpecificModules = Lists.newArrayList(KRunFrontEnd.getDefinitionSpecificModules(argv));
+        definitionSpecificModules.addAll(new JavaBackendKModule().getDefinitionSpecificKRunModules());
         Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
-        List<Module> modules = KRunFrontEnd.getModules(argv, definitionSpecificModuleOverride);
+        List<Module> modules = Lists.newArrayList(KRunFrontEnd.getModules(argv, ImmutableList.of(definitionSpecificModuleOverride)));
+        modules.addAll(new JavaBackendKModule().getKRunModules(ImmutableList.of(definitionSpecificModuleOverride)));
         Injector injector = Guice.createInjector(modules);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(Executor.class, Main.class));

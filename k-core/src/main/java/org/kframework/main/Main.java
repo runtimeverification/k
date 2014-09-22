@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ServiceLoader;
 
-import org.apache.commons.io.FilenameUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kagreg.KagregFrontEnd;
 import org.kframework.kast.KastFrontEnd;
@@ -22,7 +21,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.Message;
-import org.kframework.utils.file.JarInfo;
 
 public class Main {
 
@@ -56,12 +54,7 @@ public class Main {
     }
 
     public static Injector getInjector(String[] args) {
-        KPluginClassLoader loader = new KPluginClassLoader();
-        loader.addPath(
-                FilenameUtils.concat(JarInfo.getKBase(false),
-                        FilenameUtils.concat("lib", "plugins")));
-
-        ServiceLoader<KModule> kLoader = ServiceLoader.load(KModule.class, loader);
+        ServiceLoader<KModule> kLoader = ServiceLoader.load(KModule.class);
         List<KModule> kModules = new ArrayList<>();
         for (KModule m : kLoader) {
             kModules.add(m);
@@ -104,10 +97,18 @@ public class Main {
                     }
                     break;
                 case "-krun":
-                    Module[] definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(args2);
+                    List<Module> definitionSpecificModules = new ArrayList<>();
+                    definitionSpecificModules.addAll(KRunFrontEnd.getDefinitionSpecificModules(args2));
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getDefinitionSpecificKRunModules();
+                        if (ms != null) {
+                            definitionSpecificModules.addAll(ms);
+                        }
+                    }
+
                     modules.addAll(KRunFrontEnd.getModules(args2, definitionSpecificModules));
                     for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKRunModules();
+                        List<Module> ms = kModule.getKRunModules(definitionSpecificModules);
                         if (ms != null) {
                             modules.addAll(ms);
                         }

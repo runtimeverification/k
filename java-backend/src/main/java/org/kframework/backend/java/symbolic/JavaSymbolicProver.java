@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.compile.DataStructureToLookupUpdate;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.ConfigurationSubstitutionVisitor;
 import org.kframework.compile.utils.MetaK;
@@ -22,6 +22,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.tools.Prover;
+
 import com.google.inject.Inject;
 
 public class JavaSymbolicProver implements Prover {
