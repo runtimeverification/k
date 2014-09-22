@@ -25,7 +25,7 @@ public class JarInfo {
         return file;
     }
 
-    private static final String JAR_PATH = "target/release/k/lib/java/k-3.0.jar";
+    private static final String JAR_PATH = "../k-distribution/target/release/k/lib/java/k-core-3.0.jar";
     public static final String MAUDE_LIB_DIR = "/lib/maude/lib";
 
     /**
