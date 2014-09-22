@@ -14,14 +14,14 @@
 
 4.2 Model-checking
     
-    `krun --parser "kast -groundParser" programs/pgm-2.imp --search`
+    `krun --parser "kast --parser ground" programs/pgm-2.imp --search`
 
 4.3 Bounded model-checking
     
-    `krun --parser "kast -groundParser" programs/pgm-1.imp --search --depth 5`
+    `krun --parser "kast --parser ground" programs/pgm-1.imp --search --depth 5`
 
 4.4 Pattern search
     
-    `krun --parser "kast -groundParser" programs/pgm-1.imp --search --bound=1 \\
+    `krun --parser "kast --parser ground" programs/pgm-1.imp --search --bound=1 \\
     --pattern="< T > < goal > < k > .K </ k > B1:Bag </ goal > < goal > \\
     < k > .K </ k > B2:Bag </ goal > </ T >"`
