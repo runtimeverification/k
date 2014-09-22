@@ -178,6 +178,9 @@ public class IOServer {
         if (command.equals("parse")) {
             return new CommandParse(args, socket, logger, context, fs);
         }
+        if (command.equals("system")) {
+            return new CommandSystem(args, socket, logger, context, fs);
+        }
 
         return new CommandUnknown(args, socket, logger, fs); //, (long) 0);
     }

@@ -14,4 +14,5 @@ public interface BuiltinIOOperations {
     public Term putc(IntToken term1, IntToken term2, TermContext termContext);
     public Term write(IntToken term1, StringToken term2, TermContext termContext);
     public Term parse(StringToken term1, StringToken term2, TermContext termContext);
+    public Term system(StringToken term, TermContext termContext);
 }

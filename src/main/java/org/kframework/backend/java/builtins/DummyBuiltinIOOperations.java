@@ -50,4 +50,9 @@ public class DummyBuiltinIOOperations implements BuiltinIOOperations {
             TermContext termContext) {
         return null;
     }
+
+    @Override
+    public Term system(StringToken term, TermContext termContext) {
+        return null;
+    }
 }

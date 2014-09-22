@@ -134,4 +134,14 @@ module URIS
 
   rule 'String2K(#noparse) => #noparse [simplification]
 
+// ------------------------------
+// System
+
+  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(#IO:#system)]
+                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+
+  rule #system(Cmd:String) => #systemTypes(#string2klist(#tcpRequest("system\x01" +String Cmd +String "\x01")<:TCPAnswer))
+  syntax KItem ::= #systemTypes(KList) [function]
+  rule #systemTypes(ExitCode:String,,Stdout:String,,Stderr:String,,"#EOL") => #systemResult(String2Int(ExitCode),Stdout,Stderr)
+
 endmodule

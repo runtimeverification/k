@@ -444,5 +444,10 @@
            programs="issue720/tests"
            results="issue720/tests" />
 
+  <include file="external/tests/config.xml"
+           directory="external"
+           programs="external/tests"
+           results="external/tests" />
+
 </tests>
 
