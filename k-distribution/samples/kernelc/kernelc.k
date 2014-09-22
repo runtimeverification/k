@@ -3,6 +3,7 @@ require "modules/verification_lemmas.k"
 require "kernelc-syntax.k"
 require "kernelc-semantics.k"
 require "patterns/int_set.k"
+require "patterns/int_list.k"
 require "patterns/list_pattern.k"
 require "patterns/tree_pattern.k"
 
