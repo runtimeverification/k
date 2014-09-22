@@ -857,7 +857,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         try {
             result = Z3Wrapper.instance(context.definition().context()).checkQuery(
                     KILtoSMTLib.translateConstraint(this),
-                    50);
+                    50,
+                    context.definition().context());
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
         }
@@ -1007,7 +1008,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             try {
                 result = Z3Wrapper.instance(context).checkQuery(
                         KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
-                        5000);
+                        5000,
+                        context);
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
             }

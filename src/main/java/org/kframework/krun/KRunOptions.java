@@ -356,6 +356,9 @@ public final class KRunOptions {
             return smtPrelude;
         }
 
+        @Parameter(names="--z3-executable", description="Path to the SMT prelude file.")
+        public boolean z3Executable = false;
+
         @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
         public File outputFile;
     }

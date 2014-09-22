@@ -8,9 +8,10 @@ import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.OS;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.IOException;
+import java.io.*;
 
 /**
  * @author Traian
@@ -39,7 +40,15 @@ public class Z3Wrapper {
         SMT_PRELUDE = s;
     }
 
-    public boolean checkQuery(String query, int timeout) {
+    public boolean checkQuery(String query, int timeout, Context context) {
+        if (context.krunOptions.experimental.z3Executable) {
+            return checkQueryWithExternalProcess(query, timeout);
+        } else {
+            return checkQueryWithLibrary(query, timeout);
+        }
+    }
+
+    public boolean checkQueryWithLibrary(String query, int timeout) {
         boolean result = false;
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
@@ -55,6 +64,33 @@ public class Z3Wrapper {
                     "failed to translate smtlib expression:\n" + SMT_PRELUDE + query);
         }
         return result;
+    }
+
+    public boolean checkQueryWithExternalProcess(String query, int timeout) {
+        String result = "";
+        try {
+            do {
+                ProcessBuilder pb = new ProcessBuilder(
+                        OS.current().getNativeExecutable("z3").getAbsolutePath(),
+                        "-in",
+                        "-smt2",
+                        "-T:" + timeout * .001 + 1);
+                pb.redirectInput(ProcessBuilder.Redirect.PIPE);
+                pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
+                Process z3Process = pb.start();
+                BufferedWriter input = new BufferedWriter(new OutputStreamWriter(
+                    z3Process.getOutputStream()));
+                BufferedReader output = new BufferedReader(new InputStreamReader(
+                    z3Process.getInputStream()));
+                input.write(SMT_PRELUDE + query + "(check-sat)\n");
+                input.flush();
+                result = output.readLine();
+                z3Process.destroy();
+            } while (result == null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result.equals("unsat");
     }
 }
 
