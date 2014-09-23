@@ -177,7 +177,7 @@
       <artifactId>z3</artifactId>
       <version>4.3.2-SNAPSHOT</version>
       <type>${native.exe.type}</type>
-      <classifier>${native.os.classifier}
+      <classifier>${native.classifier}
     </classifier>
     </dependency>
     <dependency>

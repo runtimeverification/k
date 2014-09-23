@@ -53,10 +53,6 @@ public class JarInfo {
         return null;
     }
 
-    public static String getZ3PreludePath() {
-        return getKBase(false) + "/include/z3/prelude.smt2";
-    }
-
     private final KExceptionManager kem;
 
     @Inject
