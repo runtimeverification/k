@@ -77,7 +77,8 @@ public class KAbstractRewriteMachine {
             /* take the first match that also satisfies the side-condition as solution */
             ExtendedSubstitution solution = null;
             for (ExtendedSubstitution extSubst : normalizedExtSubsts) {
-                Map<Variable, Term> updatedSubst = evaluateConditions(extSubst.substitution());
+                Map<Variable, Term> updatedSubst = NonACPatternMatcher
+                        .evaluateConditions(rule, extSubst.substitution(), context);
                 if (updatedSubst != null) {
                     /* update the substitution according to the result of evaluation */
                     extSubst.setSubst(updatedSubst);
@@ -202,20 +203,6 @@ public class KAbstractRewriteMachine {
                 }
             }
         }
-    }
-
-    /**
-     * Evaluates the side-conditions of a rule according to a given
-     * substitution.
-     *
-     * @param substitution
-     * @return the updated substitution on success; otherwise, {@code null}
-     */
-    private Map<Variable, Term> evaluateConditions(Map<Variable, Term> substitution) {
-        List<Map<Variable, Term>> results = PatternMatcher.evaluateConditions(
-                rule, Collections.singletonList(substitution), context);
-        assert results.size() <= 1;
-        return results.isEmpty() ? null : results.get(0);
     }
 
     private Instruction nextInstruction() {

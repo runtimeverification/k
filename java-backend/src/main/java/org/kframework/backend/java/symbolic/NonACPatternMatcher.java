@@ -2,10 +2,15 @@
 package org.kframework.backend.java.symbolic;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.FreshOperations;
+import org.kframework.backend.java.builtins.TermEquality;
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
@@ -14,10 +19,12 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.Profiler;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayDeque;
@@ -51,9 +58,16 @@ public class NonACPatternMatcher {
 
     private boolean failed = false;
 
+    private final boolean matchOnFunctionSymbol;
+
     private final TermContext termContext;
 
     public NonACPatternMatcher(TermContext context) {
+        this(false, context);
+    }
+
+    public NonACPatternMatcher(boolean matchOnFunctionSymbol, TermContext context) {
+        this.matchOnFunctionSymbol = matchOnFunctionSymbol;
         this.termContext = context;
     }
 
@@ -67,6 +81,13 @@ public class NonACPatternMatcher {
      * @return the substitution if the matching succeeds; otherwise, {@code null}
      */
     public Map<Variable, Term> patternMatch(Term subject, Term pattern) {
+        /*
+         * We make no assumption about whether the subject will be ground in the
+         * matching algorithm. As for the pattern, all symbolic terms inside it
+         * must be variables (no function KLabels, KItem projections, or
+         * data-structure lookup/update).
+         */
+
         substitution = Maps.newHashMapWithExpectedSize(32);
         tasks.clear();
         taskBuffer.clear();
@@ -106,7 +127,7 @@ public class NonACPatternMatcher {
                 /* add substitution */
                 addSubstitution(variable, subject);
             } else {
-                check(!subject.isSymbolic());
+                check(!subject.isSymbolic() || matchOnFunctionSymbol);
                 if (failed) {
                     return false;
                 }
@@ -234,7 +255,8 @@ public class NonACPatternMatcher {
 
         /* there will be no AC-matching involved if at least one of the cell
          * collections doesn't contain any multiplicity cell */
-        assert (!cellCollection.hasMultiplicityCell() || !otherCellCollection.hasMultiplicityCell());
+        assert (!cellCollection.hasMultiplicityCell() || !otherCellCollection.hasMultiplicityCell()) :
+            "AC-matching not supported; consider using the AC pattern matcher instead";
 
         for (CellLabel label : unifiableCellLabels) {
             /* these are non-multiplicity cells for sure */
@@ -360,6 +382,118 @@ public class NonACPatternMatcher {
 
     private void match(KLabelInjection kLabelInjection, KLabelInjection pattern) {
         addMatchingTask(kLabelInjection.term(), pattern.term());
+    }
+
+
+    /**
+     * Matches a subject term against a rule. Returns the instantiation when the
+     * rule can be applied for sure (all side-conditions are cleared). Note
+     * that, however, {@code null} doesn't mean that this rule cannot apply
+     * definitely; it is possible that side-conditions are blocked by symbolic
+     * argument(s).
+     *
+     * @param subject
+     *            the subject term
+     * @param rule
+     *            the rule
+     * @param context
+     *            the term context
+     * @return the instantiation of variables
+     */
+    public static Map<Variable, Term> patternMatch(Term subject, Rule rule, TermContext context) {
+        NonACPatternMatcher matcher = new NonACPatternMatcher(rule.isFunction() || rule.isLemma(), context);
+
+        Map<Variable, Term> result = matcher.patternMatch(subject, rule.leftHandSide());
+        return result != null ? evaluateConditions(rule, result, context) : null;
+    }
+
+    /**
+     * Evaluates the side-conditions of a rule against a list of possible
+     * instantiations.
+     *
+     * @param rule
+     * @param substitutions
+     * @param context
+     * @return a list of instantiations that satisfy the side-conditions; each
+     *         of which is updated with extra bindings introduced during the
+     *         evaluation
+     */
+    public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitutions,
+            TermContext context) {
+        /* handle fresh variables, data structure lookups, and side conditions */
+
+        Map<Variable, Term> crntSubst = substitutions;
+        /* add bindings for fresh variables used in the rule */
+        for (Variable variable : rule.freshVariables()) {
+            crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
+        }
+
+        /* evaluate data structure lookups/choices and add bindings for them */
+        for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+            // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
+            Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
+                    equality.leftHandSide() : equality.rightHandSide();
+                    Term nonLookupOrChoice = equality.leftHandSide() == lookupOrChoice ?
+                            equality.rightHandSide() : equality.leftHandSide();
+                    assert lookupOrChoice instanceof DataStructureLookupOrChoice :
+                        "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
+
+                    Term evalLookupOrChoice = PatternMatcher.evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
+
+                    boolean resolved = false;
+                    if (evalLookupOrChoice instanceof Bottom
+                            || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
+                        /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
+
+                        // when the operation is pending, it is not really a valid match
+                        // for example, matching ``<env>... X |-> V ...</env>''
+                        // against ``<env> Rho </env>'' will result in a pending
+                        // choice operation due to the unknown ``Rho''.
+                    } else {
+                        if (nonLookupOrChoice instanceof Variable) {
+                            Variable variable = (Variable) nonLookupOrChoice;
+                            if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
+                                Term term = crntSubst.put(variable, evalLookupOrChoice);
+                                resolved = term == null || BoolToken.TRUE.equals(
+                                        TermEquality.eq(term, evalLookupOrChoice, context));
+                            }
+                        } else {
+                            // the non-lookup term is not a variable and thus requires further pattern matching
+                            // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
+                            //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
+                            NonACPatternMatcher lookupMatcher = new NonACPatternMatcher(rule.isLemma(), context);
+                            Map<Variable, Term> lookupResult = lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice);
+                            if (lookupResult != null) {
+                                resolved = true;
+                                crntSubst = PatternMatcher.composeSubstitution(crntSubst, lookupResult);
+                            }
+                        }
+                    }
+
+                    if (!resolved) {
+                        crntSubst = null;
+                        break;
+                    }
+        }
+
+
+        /* evaluate side conditions */
+        if (crntSubst != null) {
+            Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
+            for (Term require : rule.requires()) {
+                // TODO(YilongL): in the future, we may have to accumulate
+                // the substitution obtained from evaluating the side
+                // condition
+                Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
+                if (!evaluatedReq.equals(BoolToken.TRUE)) {
+                    crntSubst = null;
+                    break;
+                }
+            }
+            Profiler.stopTimer(Profiler.EVALUATE_REQUIRES_TIMER);
+        }
+
+        return crntSubst;
     }
 
 }

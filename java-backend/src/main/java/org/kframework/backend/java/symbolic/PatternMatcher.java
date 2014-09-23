@@ -94,7 +94,7 @@ public class PatternMatcher extends AbstractMatcher {
      */
     private boolean isStarNested;
 
-    private final boolean isLemma;
+    private final boolean matchOnFunctionSymbol;
 
     private final TermContext termContext;
 
@@ -138,40 +138,14 @@ public class PatternMatcher extends AbstractMatcher {
      *         variables in the pattern to sub-terms in the subject)
      */
     public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(rule.isLemma(), context);
+        PatternMatcher matcher = new PatternMatcher(rule.isFunction() || rule.isLemma(), context);
 
-        boolean failed = true;
-        if (rule.isFunction()) {
-            /* match function rule */
-            if (subject instanceof KItem) {
-                KItem kItem = (KItem) subject;
-                Term kLabel = kItem.kLabel();
-                Term kList = kItem.kList();
-                if (kLabel.equals(rule.definedKLabel())) {
-                    failed = !matcher.patternMatch(kList, ((KItem) rule.leftHandSide()).kList());
-                }
-            }
-        } else {
-            /* match normal rewrite rule */
-            failed = !matcher.patternMatch(subject, rule.leftHandSide());
-        }
-
-        if (failed) {
+        if (!matcher.patternMatch(subject, rule.leftHandSide())) {
             return Collections.emptyList();
         }
 
         return evaluateConditions(rule,
                     getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions), context);
-    }
-
-    public static Map<Variable, Term> nonAssocCommPatternMatch(Term subject, Term pattern, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(false, context);
-        if (!matcher.patternMatch(subject, pattern)) {
-            return null;
-        } else {
-            assert matcher.multiSubstitutions.isEmpty();
-            return matcher.fSubstitution;
-        }
     }
 
     /**
@@ -280,7 +254,7 @@ public class PatternMatcher extends AbstractMatcher {
      *            the substitution map
      * @return the evaluated data structure lookup or choice operation
      */
-    private static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
+    public static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
         Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
 
         Term evalLookupOrChoice = null;
@@ -415,7 +389,7 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     private PatternMatcher(boolean isLemma, TermContext context) {
-        this.isLemma = isLemma;
+        this.matchOnFunctionSymbol = isLemma;
         this.termContext = context;
         multiSubstitutions = new ArrayList<>();
     }
@@ -490,7 +464,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* add substitution */
             addSubstitution(variable, subject);
-        } else if (subject.isSymbolic() && !isLemma) {
+        } else if (subject.isSymbolic() && !matchOnFunctionSymbol) {
             fail(subject, pattern);
         } else {
             /* match */

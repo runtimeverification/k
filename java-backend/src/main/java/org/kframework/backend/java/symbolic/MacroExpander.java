@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -23,7 +23,7 @@ import org.kframework.backend.java.kil.Variable;
  * @author AndreiS
  *
  */
-public class MacroExpander extends TermTransformer {
+public class MacroExpander extends CopyOnWriteTransformer {
 
     public MacroExpander(TermContext context) {
         super(context);
@@ -119,13 +119,15 @@ public class MacroExpander extends TermTransformer {
     }
 
     @Override
-    protected Term transformTerm(Term term) {
+    public Term transform(KItem kItem) {
+        Term term = (Term) super.transform(kItem);
         return applyMacroRule(term);
     }
 
     private Term applyMacroRule(Term term) {
         for (Rule rule : definition.macros()) {
-            for (Map<Variable, Term> subst : PatternMatcher.patternMatch(term, rule, context)) {
+            Map<Variable, Term> subst = NonACPatternMatcher.patternMatch(term, rule, context);
+            if (subst != null) {
                 return rule.rightHandSide().substituteAndEvaluate(subst, context);
             }
         }
