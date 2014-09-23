@@ -74,7 +74,7 @@ public class Z3Wrapper {
                         OS.current().getNativeExecutable("z3").getAbsolutePath(),
                         "-in",
                         "-smt2",
-                        "-T:" + timeout * .001 + 1);
+                        "-t:" + timeout);
                 pb.redirectInput(ProcessBuilder.Redirect.PIPE);
                 pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
                 Process z3Process = pb.start();
