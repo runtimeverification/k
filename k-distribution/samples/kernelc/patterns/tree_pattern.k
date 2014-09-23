@@ -28,18 +28,18 @@ module TREE-PATTERN
     => node(I, tree_mirror(TR), tree_mirror(TL))
   rule tree_mirror(leaf) => leaf
 
-  syntax IntSeq ::= "tree2inorder" "(" Tree ")"     [function, smtlib(smt_tree2inorder)]
+  syntax List ::= "tree2inorder" "(" Tree ")"     [function, smtlib(smt_tree2inorder)]
   rule tree2inorder(node(I:Int, TL:Tree, TR:Tree))
-    => tree2inorder(TL) @ [I] @ tree2inorder(TR)
-  rule tree2inorder(leaf) => []
-  syntax IntSeq ::= "tree2preorder" "(" Tree ")"    [function, smtlib(smt_tree2preorder)]
+    => tree2inorder(TL) ListItem(I) tree2inorder(TR)
+  rule tree2inorder(leaf) => .List
+  syntax List ::= "tree2preorder" "(" Tree ")"    [function, smtlib(smt_tree2preorder)]
   rule tree2preorder(node(I:Int, TL:Tree, TR:Tree))
-    => [I] @ tree2preorder(TL) @ tree2preorder(TR)
-  rule tree2preorder(leaf) => []
-  syntax IntSeq ::= "tree2postorder" "(" Tree ")"   [function, smtlib(smt_tree2postorder)]
+    => ListItem(I) tree2preorder(TL) tree2preorder(TR)
+  rule tree2preorder(leaf) => .List
+  syntax List ::= "tree2postorder" "(" Tree ")"   [function, smtlib(smt_tree2postorder)]
   rule tree2postorder(node(I:Int, TL:Tree, TR:Tree))
-    => tree2postorder(TL) @ tree2postorder(TR) @ [I]
-  rule tree2postorder(leaf) => []
+    => tree2postorder(TL) tree2postorder(TR) ListItem(I)
+  rule tree2postorder(leaf) => .List
 
   syntax Map ::= "tree" "(" Pointer ")" "(" Tree ")"    [pattern(1)]
   rule tree(object(P:Int))(node(I:Int, TL:Tree, TR:Tree))
@@ -79,11 +79,6 @@ module TREE-PATTERN
 
   rule tree_height(T:Tree) >=Int 0 => true    [smt-lemma]
 
-  // TODO(YilongL): should probably go somewhere else; needs a better name...
-  syntax Int ::= bool2Int(Bool)                 [function, smtlib(smt_bool2int)]
-  rule bool2Int(true) => 1
-  rule bool2Int(false) => 0
-
   // TreeSeq datatype, treeList pattern, and treeseq2intseq function
   syntax TreeSeq ::= Tree "::TS" TreeSeq
                    | ".TreeSeq"
@@ -101,8 +96,8 @@ module TREE-PATTERN
     [pattern]
   rule treeList(null)(.TreeSeq) => .Map   [pattern]
 
-  syntax IntSeq ::= "treeseq2intseq" "(" TreeSeq ")"    [function, smtlib(smt_treeseq2intseq)]
+  syntax List ::= "treeseq2intseq" "(" TreeSeq ")"    [function, smtlib(smt_treeseq2intseq)]
   rule treeseq2intseq(T ::TS TS)
-    => treeseq2intseq(TS) @ tree2inorder(T)
-  rule treeseq2intseq(.TreeSeq) => []
+    => treeseq2intseq(TS) tree2inorder(T)
+  rule treeseq2intseq(.TreeSeq) => .List
 endmodule
