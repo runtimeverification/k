@@ -13,7 +13,7 @@
     <k>
         (* tv ( int * , member ( 2 , value ) )) ~> HOLE ~> "%d\n", HOLE ~> (
           printf ( HOLE )) ~> HOLE ; ~> return 0 ; ~> .Map ~> return tv ( void
-           , undef ) ; ~> .Map ~> .List{""} ~> .Map
+           , undef ) ;
     </k>
     <env>
         x |-> tv ( struct listNode * * , object ( 1 ) )

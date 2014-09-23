@@ -4,6 +4,7 @@ package org.kframework.compile.transformers;
 import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.BuiltinLookup;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListLookup;
@@ -123,7 +124,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                "expected rewrite at the top of rule " + node + ". "
                + "DataStructureToLookupUpdate pass should be applied after ResolveRewrite pass.";
 
-        if (context.krunOptions != null && context.krunOptions.experimental.prove() != null) {
+        if (context.krunOptions != null && context.krunOptions.experimental.prove() != null
+                || node.containsAttribute(Attribute.PATTERN_FOLDING_KEY)) {
             return node;
         }
 

@@ -20,11 +20,9 @@
     </test>
 
     <include file="simple/config.xml" />
-
     <include file="list/config.xml" />
-
     <include file="tree/config.xml" />
-
-    <!--<include file="binary_search_tree//config.xml" more-results="." />-->
+    <include file="sorting/config.xml" />
     <include file="binary_search_tree/config.xml" />
+    <include file="avl_tree/config.xml" />
 </tests>

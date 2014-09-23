@@ -341,7 +341,8 @@ public class Rule extends JavaSymbolicObject {
     }
 
     public boolean isFunction() {
-        return containsAttribute(Attribute.FUNCTION_KEY);
+        return containsAttribute(Attribute.FUNCTION_KEY)
+               && !containsAttribute(Attribute.PATTERN_FOLDING_KEY);
     }
 
     public boolean isAnywhere() {

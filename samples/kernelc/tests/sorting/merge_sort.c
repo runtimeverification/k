@@ -1,16 +1,13 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that sorts the contents of a singly linked list using merge sort.
  */
-
-
 #include <stdlib.h>
-
 
 struct listNode {
   int val;
   struct listNode *next;
 };
-
 
 struct listNode* merge_sort(struct listNode* x)
 /*@ rule <k> $ => return ?x; ...</k>
@@ -72,19 +69,15 @@ struct listNode* merge_sort(struct listNode* x)
       p->next = z;
       z = z->next;
     }
-		
+
     p = p->next;
   }
-	
+
   if (y != NULL)
     p->next = y;
   else
     p->next = z;
-	
+
   return x;
 }
-
-
-//@ var v, n : Int
-//@ var A, B, C : Seq
 

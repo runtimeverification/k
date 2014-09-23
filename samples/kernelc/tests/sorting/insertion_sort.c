@@ -1,16 +1,13 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that sorts the content of a singly linked list using insertion sort.
  */
-
-
 #include <stdlib.h>
-
 
 struct listNode {
   int val;
   struct listNode *next;
 };
-
 
 struct listNode* insertion_sort(struct listNode* x)
 /*@ rule <k> $ => return ?x; ...</k>
@@ -36,8 +33,9 @@ struct listNode* insertion_sort(struct listNode* x)
         /*@ inv <heap>... lseg(y,z)(?B), z |-> [?v,?n],
                           list(?n)(?C), n |-> [nval,0] ...</heap>
                 /\ D = ?B @ [?v] @ ?C /\ ?v < nval */
-        while (z->next != NULL && z->next->val < n->val)
+        while (z->next != NULL && z->next->val < n->val) {
           z = z->next;
+        }
 
         n->next = z->next;
         z->next = n;
@@ -55,6 +53,3 @@ struct listNode* insertion_sort(struct listNode* x)
   return y;
 }
 
-
-//@ var v, nval : Int
-//@ var A, B, C, D : Seq

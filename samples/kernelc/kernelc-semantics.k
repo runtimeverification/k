@@ -27,9 +27,9 @@ module KERNELC-SEMANTICS
   syntax Value ::= Int
                  | Pointer
                  | "undef"
-  syntax Pointer ::= "object" "(" Int ")"
+  syntax Pointer ::= "object" "(" Int ")"           [smtlib(smt_pointer_object)]
                    | "member" "(" Int "," Id ")"
-                   | "null"
+                   | "null"                         [smtlib(smt_pointer_null)]
 
 
   /*
@@ -78,8 +78,9 @@ module KERNELC-SEMANTICS
   /*
    * Structural statements
    */
-  rule S:Statement Ss:Statements => S ~> Ss   [structural]
-  rule .Statements => .K                      [structural]
+  rule S1:Statement S2:Statement Ss:Statements => S1 ~> S2 Ss   [structural]
+  rule S:Statement .Statements => S                             [structural]
+  rule .Statements => .K                                        [structural]
 
 
   /*
@@ -95,7 +96,9 @@ module KERNELC-SEMANTICS
   rule
     <k> { VDs:VariableDeclarations Ss:Statements } => VDs ~> Ss ~> Env ...</k>
     <env> Env:Map </env>
+    requires VDs =/=K .VariableDeclarations
     [structural]
+  rule { .VariableDeclarations Ss:Statements } => Ss    [structural]
   rule
     <k> Env:Map => deleteLocals(values(BlockEnv -Map Env)) ...</k>
     <env> BlockEnv:Map => Env </env>
@@ -403,6 +406,6 @@ module KERNELC-SEMANTICS
           B:Block)
     => X = TV; bindParameters(PDs, EEs, B)
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
-    => B
+    => B .Statements
 endmodule
 

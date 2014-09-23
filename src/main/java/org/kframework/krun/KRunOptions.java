@@ -336,6 +336,20 @@ public final class KRunOptions {
         @ParametersDelegate
         public SMTOptions smt = new SMTOptions();
 
+        @Parameter(names="--smt_prelude", description="Path to the SMT prelude file.")
+        private File smtPrelude;
+
+        public File smtPrelude() {
+            if (smtPrelude == null) return null;
+            if (!smtPrelude.exists() || smtPrelude.isDirectory()) {
+                throw new ParameterException("File not found: SMT prelude " + smtPrelude + ".");
+            }
+            return smtPrelude;
+        }
+
+        @Parameter(names="--z3-executable", description="Path to the SMT prelude file.")
+        public boolean z3Executable = false;
+
         @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
         public File outputFile;
     }

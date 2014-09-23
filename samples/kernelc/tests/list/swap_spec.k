@@ -12,6 +12,10 @@ rule
   =>
     tv(struct listNode *, ?LP:Pointer)
   ...</k>
-  <heap>... list(LP)(V1:Int :: V2:Int :: L:IntSeq) => list(?LP)(V2 :: V1 :: L) ...</heap>
+  <heap>...
+    lseg(LP, null)([V1:Int] @ [V2:Int] @ L:IntSeq)
+  =>
+    lseg(?LP, null)([V2] @ [V1] @ L)
+  ...</heap>
 
 endmodule

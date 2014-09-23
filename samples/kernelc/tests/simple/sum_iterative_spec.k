@@ -30,5 +30,6 @@ rule
   =>
     tv(int, (N +Int 1) *Int N /Int 2)
   ...</k>
+requires N >=Int 0
 
 endmodule

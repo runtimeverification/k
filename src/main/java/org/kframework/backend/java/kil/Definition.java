@@ -48,6 +48,7 @@ public class Definition extends JavaSymbolicObject {
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> anywhereRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
+    private final List<Rule> patternFoldingRules = new ArrayList<>();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
     private transient Context context;
@@ -97,13 +98,15 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public void addRule(Rule rule) {
-        if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
+        if (rule.isFunction()) {
             functionRules.put(rule.definedKLabel(), rule);
             if (rule.isSortPredicate()) {
                 sortPredicateRules.put((KLabelConstant) rule.sortPredicateArgument().kLabel(), rule);
             }
         } else if (rule.containsAttribute(Attribute.PATTERN_KEY)) {
             patternRules.put(rule.definedKLabel(), rule);
+        } else if (rule.containsAttribute(Attribute.PATTERN_FOLDING_KEY)) {
+            patternFoldingRules.add(rule);
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
         } else if (rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
@@ -176,6 +179,10 @@ public class Definition extends JavaSymbolicObject {
 
     public Multimap<KLabelConstant, Rule> patternRules() {
         return patternRules;
+    }
+
+    public List<Rule> patternFoldingRules() {
+        return patternFoldingRules;
     }
 
     public Set<KLabelConstant> frozenKLabels() {

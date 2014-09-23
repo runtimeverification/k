@@ -3,39 +3,8 @@
 module TREE-PATTERN
   imports MAP
   imports KERNELC-SEMANTICS
+  imports INT-SET
   imports LIST-PATTERN
-
-  syntax IntSet ::= IntSet "U" IntSet           [function, smtlib(smt_set_cup)]
-                  | ".IntSet"                   [function, smtlib(smt_set_emp)]
-                  | "{" Int "}"                 [function, smtlib(smt_set_sin), klabel(smt_set_sin)]
-                  | IntSet "-IntSet" IntSet     [function, smtlib(smt_set_dif)]
-  syntax Bool ::= Int "inIntSet" IntSet         [function, smtlib(smt_set_mem)]
-                | IntSet  "<IntSet" IntSet      [function, smtlib(smt_set_lt)]
-                | IntSet "<=IntSet" IntSet      [function, smtlib(smt_set_le)]
-  rule I:Int inIntSet (S1:IntSet U S2:IntSet)
-    => (I inIntSet S1) orBool (I inIntSet S2)
-    [lemma]
-  rule _:Int inIntSet .IntSet => false                  [lemma]
-  rule I1:Int inIntSet { I2:Int } => I1 ==K I2          [lemma]
-  rule S:IntSet <IntSet (S1:IntSet U S2:IntSet)
-    => (S:IntSet <IntSet S1:IntSet) andBool (S:IntSet <IntSet S2:IntSet)
-    [lemma]
-  rule (S1:IntSet U S2:IntSet) <IntSet S:IntSet
-    => (S1:IntSet <IntSet S:IntSet) andBool (S2:IntSet <IntSet S:IntSet)
-    [lemma]
-  rule _:IntSet <IntSet .IntSet => true                 [lemma]
-  rule .IntSet <IntSet _:IntSet => true                 [lemma]
-  rule { I1:Int } <IntSet { I2:Int } => I1 <Int I2      [lemma]
-  rule S:IntSet <=IntSet (S1:IntSet U S2:IntSet)
-    => (S:IntSet <=IntSet S1:IntSet) andBool (S:IntSet <=IntSet S2:IntSet)
-    [lemma]
-  rule (S1:IntSet U S2:IntSet) <=IntSet S:IntSet
-    => (S1:IntSet <=IntSet S:IntSet) andBool (S2:IntSet <=IntSet S:IntSet)
-    [lemma]
-  rule _:IntSet <=IntSet .IntSet => true                [lemma]
-  rule .IntSet <=IntSet _:IntSet => true                [lemma]
-  rule { I1:Int } <=IntSet { I2:Int } => I1 <=Int I2    [lemma]
-  rule .IntSet -IntSet _:IntSet => .IntSet              [lemma]
 
   syntax Tree ::= "node" "(" Int "," Tree "," Tree ")"
                 | "leaf"
@@ -45,9 +14,11 @@ module TREE-PATTERN
     => { I } U (tree_keys(TL) U tree_keys(TR))
   rule tree_keys(leaf) => .IntSet
   syntax Int ::= "tree_height" "(" Tree ")"     [function, smtlib(smt_tree_height)]
+
   rule tree_height(node(I:Int, TL:Tree, TR:Tree))
     => 1 +Int maxInt(tree_height(TL), tree_height(TR))
   rule tree_height(leaf) => 0
+
   syntax Int ::= "tree_size" "(" Tree ")"       [function, smtlib(smt_tree_size)]
   rule tree_size(node(_:Int, TL:Tree, TR:Tree))
     => 1 +Int tree_size(TL) +Int tree_size(TR)
@@ -59,15 +30,15 @@ module TREE-PATTERN
 
   syntax IntSeq ::= "tree2inorder" "(" Tree ")"     [function, smtlib(smt_tree2inorder)]
   rule tree2inorder(node(I:Int, TL:Tree, TR:Tree))
-    => tree2inorder(TL) @ (I :: tree2inorder(TR))
+    => tree2inorder(TL) @ [I] @ tree2inorder(TR)
   rule tree2inorder(leaf) => []
   syntax IntSeq ::= "tree2preorder" "(" Tree ")"    [function, smtlib(smt_tree2preorder)]
   rule tree2preorder(node(I:Int, TL:Tree, TR:Tree))
-    => I :: tree2preorder(TL) @ tree2preorder(TR)
+    => [I] @ tree2preorder(TL) @ tree2preorder(TR)
   rule tree2preorder(leaf) => []
   syntax IntSeq ::= "tree2postorder" "(" Tree ")"   [function, smtlib(smt_tree2postorder)]
   rule tree2postorder(node(I:Int, TL:Tree, TR:Tree))
-    => tree2postorder(TL) @ tree2postorder(TR) @ (I :: [])
+    => tree2postorder(TL) @ tree2postorder(TR) @ [I]
   rule tree2postorder(leaf) => []
 
   syntax Map ::= "tree" "(" Pointer ")" "(" Tree ")"    [pattern(1)]

@@ -38,7 +38,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.BOOL,
             Sort.INT,
             Sort.BIT_VECTOR,
-            Sort.of("IntSet"));
+            Sort.of("IntSet"),
+            Sort.of("IntSeq"));
     public static final ImmutableSet<Sort> RESERVED_Z3_SORTS = ImmutableSet.of(
             Sort.LIST,
             Sort.SET,
@@ -104,11 +105,18 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             "smt_set_cup",
             "smt_set_cap",
             "smt_set_com",
-            "smt_set_sin",
+            "smt_set_ele",
             "smt_set_dif",
             "smt_set_sub",
             "smt_set_lt",
             "smt_set_le",
+            /* associative sequence theory */
+            "smt_seq_concat",
+            "smt_seq_elem",
+            "smt_seq_nil",
+            "smt_seq2set",
+            "smt_seq_sorted",
+            "smt_seq_filter",
             /* bool2int */
             "smt_bool2int");
 
@@ -129,7 +137,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     public static String translateImplication(
             SymbolicConstraint leftHandSide,
-            SymbolicConstraint rightHandSide) {
+            SymbolicConstraint rightHandSide,
+            Set<Variable> rightHandSideOnlyVariables) {
         KILtoSMTLib leftTransformer = new KILtoSMTLib(true);
         KILtoSMTLib rightTransformer = new KILtoSMTLib(false);
         String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
@@ -139,13 +148,15 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                 leftHandSide.termContext().definition(),
                 Sets.union(leftTransformer.variables(), rightTransformer.variables())));
         sb.append(getAxioms(leftHandSide.termContext().definition()));
-        sb.append(getConstantDeclarations(leftTransformer.variables()));
+        sb.append(getConstantDeclarations(Sets.difference(
+                Sets.union(leftTransformer.variables(), rightTransformer.variables()),
+                rightHandSideOnlyVariables)));
         sb.append("(assert (and ");
         sb.append(leftExpression);
         sb.append(" (not ");
-        Set<Variable> rightHandSideOnlyVariables = Sets.difference(
+        rightHandSideOnlyVariables = Sets.intersection(
                 rightTransformer.variables(),
-                leftTransformer.variables());
+                rightHandSideOnlyVariables);
         if (!rightHandSideOnlyVariables.isEmpty()) {
             sb.append("(exists (");
             sb.append(getQuantifiedVariables(rightHandSideOnlyVariables));
@@ -213,15 +224,25 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
                     KILtoSMTLib transformer = new KILtoSMTLib(false);
                     String leftExpression = ((SMTLibTerm) rule.leftHandSide().accept(transformer)).expression();
                     String rightExpression = ((SMTLibTerm) rule.rightHandSide().accept(transformer)).expression();
-                    sb.append("(assert (forall (");
-                    sb.append(getQuantifiedVariables(transformer.variables()));
-                    sb.append(") (! (= ");
+                    sb.append("(assert ");
+                    if (!transformer.variables().isEmpty()) {
+                        sb.append("(forall (");
+                        sb.append(getQuantifiedVariables(transformer.variables()));
+                        sb.append(") ");
+                        //sb.append(") (! ");
+                    }
+                    sb.append("(= ");
                     sb.append(leftExpression);
                     sb.append(" ");
                     sb.append(rightExpression);
-                    sb.append(") :pattern(");
-                    sb.append(leftExpression);
-                    sb.append("))))\n");
+                    sb.append(")");
+                    //sb.append(" :pattern(");
+                    //sb.append(leftExpression);
+                    //sb.append(")");
+                    if (!transformer.variables().isEmpty()) {
+                        sb.append(")");
+                    }
+                    sb.append(")\n");
                 } catch (UnsupportedOperationException e) { }
             }
         }
@@ -253,7 +274,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             String sortName;
             sortName = getSortName(variable);
             sb.append(sortName);
-            sb.append(")\n");
+            sb.append(")");
         }
         return sb.toString();
     }

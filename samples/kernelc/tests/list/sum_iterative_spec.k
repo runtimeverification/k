@@ -15,12 +15,12 @@ rule [loop-inv]:
     .K
   ...</k>
   <env>...
-    x |-> tv (struct listNode * * , object(P1:Int))
-    s |-> tv (int *, object(P2:Int))
+    x |-> tv (struct listNode * * , object(LX:Int))
+    s |-> tv (int *, object(LS:Int))
   ...</env>
   <heap>...
-    object(P1) |-> tv (struct listNode *, LP:Pointer => null)
-    object(P2) |-> tv (int, S:Int => S +Int sum(A))
+    object(LX) |-> tv (struct listNode *, LP:Pointer => null)
+    object(LS) |-> tv (int, S:Int => S +Int sum(A))
     list(LP)(A:IntSeq)
   ...</heap>
 
