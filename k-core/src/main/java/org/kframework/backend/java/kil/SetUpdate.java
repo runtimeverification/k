@@ -95,7 +95,11 @@ public class SetUpdate extends Term implements DataStructureUpdate {
 
     @Override
     protected boolean computeMutability() {
-        throw new UnsupportedOperationException();
+        boolean mutable = set.isMutable();
+        for (Term term : removeSet) {
+            mutable = mutable || term.isMutable();
+        }
+        return mutable;
     }
 
     @Override
