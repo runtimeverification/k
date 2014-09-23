@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 /*
  * Function that sorts the content of a singly linked list using quicksort.
  */
