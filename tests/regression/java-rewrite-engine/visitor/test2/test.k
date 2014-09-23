@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 require "modules/k-functional-visitor.k"
 
 module TEST
