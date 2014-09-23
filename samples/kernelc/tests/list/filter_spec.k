@@ -37,7 +37,7 @@ rule [loop-inv2]:
   <k>
     while(y->next != NULL) {
       struct listNode* z;
-  
+
       z = y->next;
       if(z->val == v) {
         y->next = z->next;

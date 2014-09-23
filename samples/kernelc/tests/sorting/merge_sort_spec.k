@@ -9,12 +9,12 @@ rule [mergesort-loop-inv1]:
   <k>
     while (x != NULL) {
       struct listNode* t;
-  
+
       t = x;
       x = x->next;
       t->next = y;
       y = t;
-  
+
       if (x != NULL) {
         t = x;
         x = x->next;
@@ -55,7 +55,7 @@ rule [mergesort-loop-inv2]:
         p->next = z;
         z = z->next;
       }
-  
+
       p = p->next;
     }
     ~>

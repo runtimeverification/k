@@ -9,19 +9,19 @@ rule [insertion-sort-loop-inv1]:
   <k>
     while (x != NULL) {
       struct listNode* n;
-  
+
       n = x;
       x = x->next;
       n->next = NULL;
       if (y != NULL) {
         if (y->val < n->val) {
           struct listNode* z;
-  
+
           z = y;
           while (z->next != NULL && z->next->val < n->val) {
             z = z->next;
           }
-  
+
           n->next = z->next;
           z->next = n;
         }
@@ -32,7 +32,7 @@ rule [insertion-sort-loop-inv1]:
       }
       else {
         y = n;
-      }              
+      }
     }
   =>
     .K

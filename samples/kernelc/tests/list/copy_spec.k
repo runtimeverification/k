@@ -9,7 +9,7 @@ rule [loop-inv]:
   <k>
     while(iterx) {
       struct listNode *node;
- 
+
       node = (struct listNode *) malloc(sizeof(struct listNode));
       node->val = iterx->val;
       node->next = NULL;

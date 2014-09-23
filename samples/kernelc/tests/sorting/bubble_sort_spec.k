@@ -9,13 +9,13 @@ rule [bubble-sort-loop-inv1]:
   <k>
     while (change) {
       struct listNode* y;
-  
+
       change = 0;
       y = x;
       while (y->next != NULL) {
         if (y->val > y->next->val) {
           int temp;
-  
+
           change = 1;
           temp = y->val;
           y->val = y->next->val;

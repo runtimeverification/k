@@ -29,7 +29,7 @@ rule [append-loop-inv]:
           next |-> tv(struct listNode *, null)))
   ...</heap>
 ensures A @ B ==K ?C @ ([?E])
-  
+
 rule [append-func-spec]:
   <struct>... STRUCT:Map ...</struct>
   <fun>... FUN:Map ...</fun>
@@ -47,7 +47,7 @@ rule [quick-loop-inv]:
   <k>
     while(x != NULL) {
       struct listNode* t;
-  
+
       t = x;
       x = x->next;
       if (t->val < p->val) {
