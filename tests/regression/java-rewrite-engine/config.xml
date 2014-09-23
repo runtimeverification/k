@@ -122,9 +122,9 @@
   </test>
 
   <test
-      definition="visitor/imp.k"
-      programs="visitor"
-      results="visitor"
+      definition="visitor/test1/imp.k"
+      programs="visitor/test1"
+      results="visitor/test1"
       extension="imp" >
     <kompile-option name="--backend" value="java" />
     <all-programs>
@@ -133,13 +133,35 @@
   </test>
 
   <test
-      definition="visitor/imp.k"
-      programs="visitor"
-      results="visitor"
+      definition="visitor/test1/imp.k"
+      programs="visitor/test1"
+      results="visitor/test1"
+      extension="imp" >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="visitor/test1/imp.k"
+      programs="visitor/test1"
+      results="visitor/test1"
       extension="imp" >
     <kompile-option name="--directory" value="maude_kompiled" />
     <all-programs>
       <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="visitor/test2/test.k"
+      programs="visitor/test2"
+      results="visitor/test2"
+      extension="test" >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
 
