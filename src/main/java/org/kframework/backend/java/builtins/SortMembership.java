@@ -37,7 +37,7 @@ public class SortMembership {
         assert kItem.kLabel() instanceof KLabelConstant;
         assert kItem.kList() instanceof KList
                 && ((KList) kItem.kList()).concreteSize() == 1
-                && !((KList) kItem.kList()).hasFrame();
+                && ((KList) kItem.kList()).isConcreteCollection() : "unexpected argument: " + kItem.kList();
 
         Sort predicateSort = ((KLabelConstant) kItem.kLabel()).getPredicateSort();
         if (!definition.allSorts().contains(predicateSort)) {
