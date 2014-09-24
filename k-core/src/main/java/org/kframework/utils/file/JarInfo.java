@@ -38,7 +38,8 @@ public class JarInfo {
     public static String getKBase(boolean windowfy) {
         // String env = System.getenv("K_BASE");
         String path = new File(JarInfo.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
-        path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/" + JAR_PATH;
+        if (!path.endsWith(".jar") || new File(path).getParentFile().getName().equals("target"))
+            path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/" + JAR_PATH;
         try {
             String decodedPath = URLDecoder.decode(path, "UTF-8");
             File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile();
