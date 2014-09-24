@@ -60,12 +60,5 @@
       <directory>src/main/maude</directory>
       <outputDirectory>/lib/maude/lib</outputDirectory>
     </fileSet>
-    <fileSet>
-      <directory>${project.build.directory}</directory>
-      <outputDirectory>/lib/java</outputDirectory>
-      <includes>
-        <include>*.jar</include>
-      </includes>
-    </fileSet>
   </fileSets>
 </assembly>

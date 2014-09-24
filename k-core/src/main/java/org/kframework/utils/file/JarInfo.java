@@ -25,7 +25,7 @@ public class JarInfo {
         return file;
     }
 
-    private static final String JAR_PATH = "../k-distribution/target/release/k/lib/java/k-core-3.0.jar";
+    private static final String JAR_PATH = "k-distribution/target/release/k/lib/java/k-core-3.0.jar";
     public static final String MAUDE_LIB_DIR = "/lib/maude/lib";
 
     /**
@@ -38,8 +38,7 @@ public class JarInfo {
     public static String getKBase(boolean windowfy) {
         // String env = System.getenv("K_BASE");
         String path = new File(JarInfo.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
-        if (!path.endsWith(".jar"))
-            path = new File(path).getParentFile().getParentFile().getAbsolutePath() + "/" + JAR_PATH;
+        path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/" + JAR_PATH;
         try {
             String decodedPath = URLDecoder.decode(path, "UTF-8");
             File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile();

@@ -9,7 +9,7 @@
     <version>3.5-SNAPSHOT</version>
   </parent>
   <artifactId>k-distribution</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <name>K Framework Tool Distribution</name>
 
