@@ -63,6 +63,18 @@ public class BuiltinVisitorOperations {
                     }
                 }
             });
+            postTransformer.addTransformer(new LocalTransformer(context) {
+                @Override
+                public ASTNode transform(KItem kItem) {
+                    /* TODO(YilongL): we need a way to pass the
+                     * `copyOnShareSubstAndEval` argument of
+                     * KItem#evaluateFunction to the evaluation of builtin
+                     * function that needs such information; or even better, a
+                     * new mechanism for invoking builtin functions */
+                    return kItem.evaluateFunction(true/*to be safe*/, context);
+                }
+            });
+
         }
 
         private Term visitNode(Term term) {
@@ -71,7 +83,7 @@ public class BuiltinVisitorOperations {
                     visitLabel,
                     KList.concatenate(visitParams),
                     context);
-            return term.evaluate(context);
+            return ((KItem) term).evaluateFunction(true/*to be safe*/, context);
         }
 
         private boolean evaluateGuard(Term term) {
