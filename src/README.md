@@ -50,7 +50,7 @@ which will significantly speed up the incremental build process.
 # IDE Setup
 
 ## Eclipse
-To autogenerate an Eclipse project for K, run `mvn eclipse:eclipse` on the
+To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
 command line. Then go to
 File->Import->General->Existing projects into workspace, and select
 the directory of the installation.  
