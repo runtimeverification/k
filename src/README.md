@@ -53,7 +53,8 @@ which will significantly speed up the incremental build process.
 To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
 command line. Then go to
 File->Import->General->Existing projects into workspace, and select
-the directory of the installation.  
+the directory of the installation. You should only add the leaves to the workspace, because
+eclipse does not support hierarchical projects.
 
 ## IntelliJ IDEA
 
