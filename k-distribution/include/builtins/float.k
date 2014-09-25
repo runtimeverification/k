@@ -26,10 +26,12 @@ module FLOAT-HOOKS
                | exponentBitsFloat(Float) [function, hook(#FLOAT:exponentBits)]
 
   syntax Bool ::= signFloat(Float)      [function, hook(#FLOAT:sign)]
-                | isOrdinary(Float)     [function, smtlib((== #1 #1))] // TODO(YilongL): add the hook once mpfr-java adds binding for mpfr_number_p
+                | isNaN(Float)          [function, smtlib((not (== #1 #1)))]
   syntax MInt ::= significandFloat(Float) [function, hook(#FLOAT:significand)]
 
-  syntax Float ::= fpNaN(Int, Int) [smtlib((as NaN (_ FP #1 #2)))]
+  syntax Float ::= fpNaN(Int, Int)              [smtlib((as NaN (_ FP #1 #2)))]
+                 | plusInfinity(Int, Int)       [smtlib((as plusInfinity (_ FP #1 #2)))]
+                 | minusInfinity(Int, Int)      [smtlib((as minusInfinity (_ FP #1 #2)))]
 
   syntax Float ::= "--Float" Float             [function, smtlib(-), hook(#FLOAT:neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(#FLOAT:pow)]
@@ -61,7 +63,7 @@ module FLOAT-HOOKS
                 | Float ">=Float" Float       [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:ge)]
                 | Float ">Float" Float        [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:gt)]
                 | Float "==Float" Float       [function, left, smtlib(==), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:eq)]
-                | Float "=/=Float" Float      [function, left, smtlib(distinct), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+                | Float "=/=Float" Float      [function, left, smtlib((not (== #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
 
   rule F1:Float =/=Float F2:Float => notBool(F1 ==Float F2)

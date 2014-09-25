@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
@@ -34,7 +35,7 @@ public class Z3Wrapper {
         logic = "";
         try {
             if (context.krunOptions.experimental.smtPrelude() != null) {
-                s = new String(Files.toByteArray(context.krunOptions.experimental.smtPrelude()));
+                s = Files.toString(context.krunOptions.experimental.smtPrelude(), Charsets.UTF_8);
                 logic = context.krunOptions.experimental.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
             }
         } catch (IOException e) {
