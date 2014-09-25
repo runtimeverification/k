@@ -3,9 +3,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kframework.k</groupId>
-  <artifactId>k</artifactId>
+  <artifactId>parent</artifactId>
+  <packaging>pom</packaging>
   <version>3.5-SNAPSHOT</version>
-  <name>K Framework Tool</name>
+  <name>K Framework Tool Parent</name>
+
+  <modules>
+    <module>k-core</module>
+    <module>k-distribution</module>
+  </modules>
 
   <scm>
     <connection>scm:git:https://github.com/kframework/k.git</connection>
@@ -21,7 +27,7 @@
     </repository>
     <repository>
       <id>runtime-verification.snapshots</id>
-      <name>runtime verification snapshot repository</name>
+      <name>Runtime Verification Snapshot Repository</name>
       <url>http://office.runtimeverification.com:8888/repository/snapshots</url>
       <snapshots><enabled>true</enabled></snapshots>
       <releases><enabled>false</enabled></releases>
@@ -29,128 +35,12 @@
   </repositories>
 
   <properties>
-    <sdf.resource.dir>${basedir}/src/main/sdf/syntax</sdf.resource.dir>
-    <stratego.src.dir>${basedir}/target/generated-sources/sdf</stratego.src.dir>
-    <stratego.package.dir>${stratego.src.dir}/org/kframework/parser/concrete/lib</stratego.package.dir>
-    <config>tests/config.xml</config>
-    <ktestDir>${project.basedir}</ktestDir>
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>18.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-      <version>4.0-beta4</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-multibindings</artifactId>
-      <version>4.0-beta4</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-grapher</artifactId>
-      <version>4.0-beta4</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-throwingproviders</artifactId>
-      <version>4.0-beta4</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-api</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.3.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-collections4</artifactId>
-      <version>4.0</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-visualization</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-algorithms</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>1.35-custom</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-graph-impl</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.mpfr_java</groupId>
-      <artifactId>mpfr_java</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.mpfr_java</groupId>
-      <artifactId>mpfr_java</artifactId>
-      <version>1.0</version>
-      <classifier>${native.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-io</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.fusesource.jansi</groupId>
-      <artifactId>jansi</artifactId>
-      <version>1.11</version>
-    </dependency>
-    <dependency>
-      <groupId>jline</groupId>
-      <artifactId>jline</artifactId>
-      <version>0.9.94</version>
-    </dependency>
-    <dependency>
-      <groupId>org.pcollections</groupId>
-      <artifactId>pcollections</artifactId>
-      <version>2.1.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.java-diff-utils</groupId>
-      <artifactId>diffutils</artifactId>
-      <version>1.3.0</version>
-    </dependency>
-    <dependency>
-      <groupId>uk.com.robust-it</groupId>
-      <artifactId>cloning</artifactId>
-      <version>1.9.0</version>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -163,79 +53,6 @@
       <version>1.9.5</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>strategoxt</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>com.microsoft.z3</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>${native.library.prefix}z3java</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-      <type>${native.library.type}</type>
-      <classifier>${native.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>libz3</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-      <type>${native.library.type}</type>
-      <classifier>${native.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>z3</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.classifier}
-    </classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>maude</artifactId>
-      <version>2.6</version>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>gappa</artifactId>
-      <version>1.0</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.os.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>sdf2table</artifactId>
-      <version>1.0</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.os.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>strj</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>implodePT</artifactId>
-      <version>1.0</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.os.classifier}</classifier>
-      <scope>provided</scope>
-    </dependency>
-<!--
-    <dependency>
-      <groupId></groupId>
-      <artifactId></artifactId>
-      <version></version>
-    </dependency>
--->
   </dependencies>
 
   <reporting>
@@ -252,14 +69,6 @@
   </reporting>
 
   <build>
-    <resources>
-      <resource>
-        <directory>${sdf.resource.dir}</directory>
-      </resource>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -275,13 +84,13 @@
           <artifactId>maven-resources-plugin</artifactId>
           <version>2.6</version>
         </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
-      <plugin>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.5.1</version>
-      </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.5</version>
@@ -295,12 +104,6 @@
             </fileset>
           </filesets>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-        <version>1.0-alpha-8</version>
-        <extensions>true</extensions>
       </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -332,221 +135,6 @@
               <goal>run</goal>
             </goals>
           </execution>
-          <execution>
-            <id>generate-sdf</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <target>
-                <property name="compile_classpath" refid="maven.compile.classpath" />
-                <copy todir="target/sdf" preservelastmodified="true">
-                  <fileset dir="src/main/sdf" />
-                </copy>
-                <ant antfile="buildsig.xml" dir="target/sdf" />
-                <ant antfile="buildstr.xml" dir="target/sdf" />
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>exec-ktest</id>
-            <phase>integration-test</phase>
-            <configuration>
-              <target>
-                <exec dir="${ktestDir}" executable="${project.build.directory}/release/k/bin/ktest${native.script.extension}">
-                  <arg value="${config}" />
-                  <arg value="-v" />
-                  <arg value="--report" />
-                  <arg value="--debug" />
-                </exec>
-              </target>
-              <skip>${skipKTest}</skip>
-              <failOnError>false</failOnError>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>cleanup-ktest</id>
-            <phase>post-integration-test</phase>
-            <configuration>
-              <target>
-                <move file="${ktestDir}/junit-reports" tofile="target/ktest-reports" failonerror="false" />
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>generate-plugin-dir</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <tasks>
-                <mkdir dir="target/lib/plugins"/>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>javacc-maven-plugin</artifactId>
-        <version>2.6</version>
-        <executions>
-          <execution>
-            <id>javacc</id>
-            <goals>
-              <goal>javacc</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.9</version>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${stratego.src.dir}</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.17</version>
-	<configuration>
-          <workingDirectory>src/test/resources</workingDirectory>
-          <environmentVariables>
-            <LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</LD_LIBRARY_PATH>
-            <DYLD_LIBRARY_PATH>${env.DYLD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</DYLD_LIBRARY_PATH>
-            <PATH>${env.PATH}${path.separator}${project.build.directory}/lib/native</PATH>
-          </environmentVariables>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.17</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>verify-ktest</id>
-            <goals>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <skipITs>${skipKTest}</skipITs>
-              <reportsDirectory>${project.build.directory}/ktest-reports</reportsDirectory>
-              <summaryFile>${project.build.directory}/ktest-reports/summary.xml</summaryFile>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>org.kframework.main.Main</mainClass>
-              <addClasspath>true</addClasspath>
-            </manifest>
-            <manifestEntries>
-              <Implementation-Revision>${buildNumber}</Implementation-Revision>
-              <Implementation-Branch>${scmBranch}</Implementation-Branch>
-              <Implementation-Date>${timestamp}</Implementation-Date>
-              <Implementation-Version>${project.version}</Implementation-Version>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
-        <executions>
-          <execution>
-            <id>copy-build-dependencies</id>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <phase>initialize</phase>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.kframework.dependencies</groupId>
-                  <artifactId>sdf2table</artifactId>
-                  <version>1.0</version>
-                  <type>${native.exe.type}</type>
-                  <classifier>${native.os.classifier}</classifier>
-                  <destFileName>sdf2table${native.exe.extension}</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.kframework.dependencies</groupId>
-                  <artifactId>implodePT</artifactId>
-                  <version>1.0</version>
-                  <type>${native.exe.type}</type>
-                  <classifier>${native.os.classifier}</classifier>
-                  <destFileName>implodePT${native.exe.extension}</destFileName>
-                </artifactItem>
-              </artifactItems>
-              <outputDirectory>target/sdf/bin</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-native-dependencies</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <stripVersion>true</stripVersion>
-              <stripClassifier>true</stripClassifier>
-              <includeTypes>${native.library.type}</includeTypes>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-java-dependencies</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeTypes>jar</includeTypes>
-              <includeScope>runtime</includeScope>
-              <useBaseVersion>false</useBaseVersion>
-              <outputDirectory>${project.build.directory}/lib/java</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>unpack-zip-dependencies</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeTypes>zip</includeTypes>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/lib</outputDirectory>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -560,35 +148,12 @@
             </goals>
           </execution>
         </executions>
+        <inherited>false</inherited>
         <configuration>
           <doCheck>false</doCheck>
           <doUpdate>false</doUpdate>
           <shortRevisionLength>7</shortRevisionLength>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <formats>
-                <format>dir</format>
-              </formats>
-              <finalName>release</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
-        </executions>
-        <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/bin.xml</descriptor>
-          </descriptors>
-       </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -599,13 +164,14 @@
             <goals>
               <goal>check</goal>
             </goals>
+            <inherited>false</inherited>
             <configuration>
               <sourceDirectory>${project.basedir}</sourceDirectory>
               <includes>${git.modified.files}</includes>
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>**/com/davekoelle/**,src/main/sdf/syntax/Integration.sdf</excludes>
+              <excludes>**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
             </configuration>
           </execution>
           <execution>
@@ -613,6 +179,7 @@
             <goals>
               <goal>check</goal>
             </goals>
+            <inherited>false</inherited>
             <configuration>
               <sourceDirectory>${project.basedir}</sourceDirectory>
               <includes>**/*.k</includes>
@@ -706,36 +273,6 @@
         <native.path.variable>PATH</native.path.variable>
         <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
       </properties>
-      <dependencies>
-        <dependency>
-          <groupId>org.kframework.dependencies</groupId>
-          <artifactId>cygwin1</artifactId>
-          <version>1.0</version>
-          <type>dll</type>
-        </dependency>
-      </dependencies>
-      <build>
-      <plugins>
-        <plugin>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.8</version>
-          <executions>
-            <execution>
-              <id>copy-windows-dependencies</id>
-              <goals>
-                <goal>copy-dependencies</goal>
-              </goals>
-              <phase>initialize</phase>
-              <configuration>
-                <includeArtifactIds>cygwin1</includeArtifactIds>
-                <outputDirectory>target/sdf/bin</outputDirectory>
-                  <stripVersion>true</stripVersion>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-      </build>
     </profile>
 
     <profile>

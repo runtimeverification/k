@@ -1,0 +1,161 @@
+/* Copyright (c) 2013-2014 K Team. All Rights Reserved. */
+.bold
+{
+font-weight: bold;
+}
+.italic
+{
+font-style: italic;
+}
+em
+{
+font-style: italic;
+}
+.large
+{
+font-size: large;
+}
+.xlarge
+{
+font-size: x-large;
+}
+.courier
+{
+font-family: courier;
+}
+.attribute
+{
+color: blue;
+}
+.center
+{
+text-align: center;
+}
+.textCentered
+{
+text-align: center;
+display: inline-block;
+vertical-align: top;
+min-width: 2em;
+}
+.rewrite
+{
+padding: 0;
+padding-left: 2px;
+padding-right: 2px;
+margin: 0;
+border-collapse: collapse;
+text-align: center;
+display: inline-block;
+vertical-align: top;
+min-width: 2em;
+}
+.rewriteLeft
+{
+border-bottom-style:solid;
+border-bottom-color:black;
+border-bottom-width:1.5px;
+}
+
+.cell
+{
+font-style:normal;
+font-weight:normal;
+display: inline-block;
+vertical-align: top;
+text-align:left;
+}
+hr.rewriteLine
+{
+color: black;
+background-color: black;
+height: 1.5px;
+padding: 0px;
+}
+/*
+hr.reduce:after
+{
+width: 0;
+height: 0;
+border-left : 6px solid transparent;
+border-right : 6px solid transparent;
+border-top : 6px solid black;
+position: absolute;
+content: "";
+}
+*/
+.tab
+{
+display: inline-block;
+padding : 2px;
+margin-left : 0;
+border-top : 3px solid;
+border-left : 3px solid;
+border-right : 3px solid;
+text-align: left;
+}
+.tab.curvedEdge
+{
+position: relative;
+left: 30px;
+top : 3px;
+}
+.tab.straightEdge
+{
+position: relative;
+left: 8px;
+top : 3px;
+}
+.block
+{
+color : black;
+border-width: 3px;
+display: inline-block; 
+padding: 10px;
+padding-left: 20px;
+padding-right: 20px;
+border-radius: 30px;
+border-style: solid;
+min-width: 60px;
+text-align: left;
+}
+.commentBlock
+{
+color : black;
+border-width: 1px;
+display: inline-block; 
+padding: 10px;
+padding-left: 20px;
+padding-right: 20px;
+border-radius: 30px;
+border-style: solid;
+text-align: left;
+}
+.block.right
+{
+border-top-right-radius: 0px;
+border-bottom-right-radius: 0px;
+border-right-style: dotted;
+}
+.block.left
+{
+border-top-left-radius: 0px;
+border-bottom-left-radius: 0px;
+border-left-style: dotted;
+}
+.defaultColor
+{
+border-color: #000000;
+background-color: #FFFFFF;
+}
+.definitionComment
+{
+border-color: #000000;
+background-color: #f2f2f2;
+}
+.moduleComment
+{
+border-color: #000000;
+background-color: #e5e5e5;
+}
+
