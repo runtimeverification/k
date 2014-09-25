@@ -23,12 +23,25 @@ public class ConcreteCollectionVariable extends Variable {
         return concreteSize;
     }
 
-    public boolean matchConcreteSize(Term term) {
+    public boolean match(Term term) {
         if (term instanceof ConcreteCollectionVariable) {
             return concreteCollectionSize() == ((ConcreteCollectionVariable) term).concreteCollectionSize();
         } else if (term instanceof Collection) {
             Collection collection = (Collection) term;
             return collection.isConcreteCollection() ? collection.concreteSize() == concreteSize : false;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean unify(Term term) {
+        if (term instanceof ConcreteCollectionVariable) {
+            return concreteCollectionSize() == ((ConcreteCollectionVariable) term).concreteCollectionSize();
+        } else if (term instanceof Collection) {
+            Collection collection = (Collection) term;
+            return collection.isConcreteCollection() ?
+                collection.concreteSize() == concreteSize :
+                collection.concreteSize() <= concreteSize;
         } else {
             return false;
         }
