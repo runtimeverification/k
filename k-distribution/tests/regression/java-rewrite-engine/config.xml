@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+
+<tests>
+<!-- begin Java Rewrite Engine tests -->
+
+  <test
+      definition="io/test1/test.k"
+      extension="test"
+      programs="io/test1/programs"
+      results="io/test1/tests"
+      posixInitScript="io/test1/prepare.sh"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--parser" value="kast --parser ground" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="io/test2/test.k"
+      extension="test"
+      programs="io/test2/programs"
+      results="io/test2/tests"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+
+  <test
+      definition="strings/test.k"
+      programs="strings/programs"
+      results="strings/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--parser" value="kast --parser ground" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="list/test1/list-test1.k"
+      programs="list/test1/programs"
+      results="list/test1/tests"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="list/test2/list-test2.k"
+      programs="list/test2/programs"
+      results="list/test2/tests"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="list/issue146/test.k"
+      programs="list/issue146/programs"
+      results="list/issue146/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="list/issue709/test.k"
+      programs="list/issue709/programs"
+      results="list/issue709/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="set/test1/test1.k"
+      programs="set/test1/programs"
+      results="set/test1/tests"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+  <test
+      definition="set/test2/test2.k"
+      programs="set/test2/programs"
+      results="set/test2/tests"
+      extension="issue"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="visitor/test1/imp.k"
+      programs="visitor/test1"
+      results="visitor/test1"
+      extension="imp" >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="visitor/test1/imp.k"
+      programs="visitor/test1"
+      results="visitor/test1"
+      extension="imp" >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="visitor/test1/imp.k"
+      programs="visitor/test1"
+      results="visitor/test1"
+      extension="imp" >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="visitor/test2/test.k"
+      programs="visitor/test2"
+      results="visitor/test2"
+      extension="test" >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="cell_map/test.k"
+      programs="cell_map"
+      results="cell_map"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <kompile-option name="--legacy-kast" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+  <test
+      definition="cell_list/test.k"
+      programs="cell_list"
+      results="cell_list"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <kompile-option name="--legacy-kast" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+
+
+  <test
+      definition="cell_map/test.k"
+      programs="cell_map"
+      results="cell_map"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+  <test
+      definition="cell_list/test.k"
+      programs="cell_list"
+      results="cell_list"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="rhs_map_constructor/test.k"
+      programs="rhs_map_constructor"
+      results="rhs_map_constructor"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+  <test
+      definition="rhs_list_constructor/test.k"
+      programs="rhs_list_constructor"
+      results="rhs_list_constructor"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="pattern_matching/test.k"
+      programs="pattern_matching"
+      results="pattern_matching"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+  </test>
+
+  <test
+      definition="smt_model/test.k"
+      programs="smt_model"
+      results="smt_model"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--warnings" value="none" />
+  </test>
+
+<!--
+  <test
+      definition="data_structure_iteration/test1/test.k"
+      programs="data_structure_iteration/test1"
+      results="data_structure_iteration/test1"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+-->
+  <test
+      definition="data_structure_iteration/test2/test.k"
+      programs="data_structure_iteration/test2"
+      results="data_structure_iteration/test2"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="machine_integers/test.k"
+      programs="machine_integers"
+      results="machine_integers"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="machine_integers/test.k"
+      programs="machine_integers"
+      results="machine_integers"
+      extension="test"
+      >
+    <kompile-option name="--directory" value="maude_kompiled" />
+    <all-programs>
+      <krun-option name="--directory" value="maude_kompiled" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="bag/test.k"
+      programs="bag"
+      results="bag"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="multiple_subsorts/test.k"
+      programs="multiple_subsorts"
+      results="multiple_subsorts"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs regex="true">
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+    </all-programs>
+  </test>
+
+  <include file="user_substitution/tests/config.xml" directory="user_substitution" />
+
+  <test
+      definition="anywhere/test1/test.k"
+      programs="anywhere/test1/programs"
+      results="anywhere/test1/tests"
+      extension="test"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--smt" value="none" />
+      <krun-option name="--output" value="pretty" />
+    </all-programs>
+  </test>
+
+<!-- end Java Rewrite Engine tests -->
+</tests>

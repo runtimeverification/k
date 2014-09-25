@@ -1,0 +1,105 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
+require "../../kernelc.k"
+
+module INSERTION-SORT-SPEC
+  imports KERNELC
+
+rule [insertion-sort-loop-inv1]:
+  <struct>... STRUCT:Map ...</struct>
+  <k>
+    while (x != NULL) {
+      struct listNode* n;
+
+      n = x;
+      x = x->next;
+      n->next = NULL;
+      if (y != NULL) {
+        if (y->val < n->val) {
+          struct listNode* z;
+
+          z = y;
+          while (z->next != NULL && z->next->val < n->val) {
+            z = z->next;
+          }
+
+          n->next = z->next;
+          z->next = n;
+        }
+        else {
+          n->next = y;
+          y = n;
+        }
+      }
+      else {
+        y = n;
+      }
+    }
+  =>
+    .K
+  ...</k>
+  <env>...
+    x |-> tv(struct listNode * *, object(LX:Int))
+    y |-> tv(struct listNode * *, object(LY:Int))
+  ...</env>
+  <heap>...
+    object(LX) |-> tv (struct listNode *, X:Pointer => null)
+    object(LY) |-> tv (struct listNode *, Y1:Pointer => ?Y2:Pointer)
+    (lseg(Y1, null)(A1:IntSeq)
+     lseg(X, null)(B:IntSeq)
+     =>
+     lseg(?Y2, null)(?A2:IntSeq))
+ ...</heap>
+requires sorted(A1)
+ensures sorted(?A2) andBool intseq2intset(A1) U intseq2intset(B) ==K intseq2intset(?A2)
+
+rule [insertion-sort-loop-inv2]:
+  <struct>... STRUCT:Map ...</struct>
+  <k>
+    while (z->next != NULL && z->next->val < n->val) {
+      z = z->next;
+    }
+    ~>
+    n->next = z->next;
+    z->next = n;
+    .Statements
+  =>
+    .K
+  ...</k>
+  <env>...
+    y |-> tv(struct listNode * *, object(LY:Int))
+    z |-> tv(struct listNode * *, object(LZ:Int))
+    n |-> tv(struct listNode * *, object(LN:Int))
+  ...</env>
+  <heap>...
+    object(LY) |-> tv(struct listNode *, Y:Pointer)
+    object(LZ) |-> tv(struct listNode *, object(Z:Int) => ?_:Pointer)
+    object(LN) |-> tv(struct listNode *, object(N:Int))
+    (object(Z) |-> (
+        val  |-> tv(int, V:Int)
+        next |-> tv(struct listNode *, P:Pointer))
+     object(N) |-> (
+        val  |-> tv(int, NV:Int)
+        next |-> tv(struct listNode *, null))
+     lseg(Y, object(Z))(A1:IntSeq)
+     lseg(P, null)(B:IntSeq)
+     =>
+     lseg(Y, null)(?A2:IntSeq))
+ ...</heap>
+requires sorted(A1 @ [V] @ B) andBool V <Int NV
+ensures sorted(?A2)
+  andBool intseq2intset(A1) U intseq2intset(B) U { V } U { NV } ==K intseq2intset(?A2)
+
+rule [insertion-sort-func-spec]:
+  <struct>... STRUCT:Map ...</struct>
+  <fun>... FUN:Map ...</fun>
+  <k>
+    insertion_sort(tv(struct listNode *, X1:Pointer))
+  =>
+    tv(struct listNode *, ?X2:Pointer)
+  ...</k>
+  <heap>...
+    lseg(X1, null)(A1:IntSeq) => lseg(?X2, null)(?A2:IntSeq)
+  ...</heap>
+ensures sorted(?A2) andBool intseq2intset(A1) ==K intseq2intset(?A2)
+endmodule
+
