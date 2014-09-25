@@ -27,12 +27,15 @@ public class Z3Wrapper {
     }
 
     public final String SMT_PRELUDE;
+    private String logic;
 
     public Z3Wrapper(Context context) {
         String s = "";
+        logic = "";
         try {
             if (context.krunOptions.experimental.smtPrelude() != null) {
                 s = new String(Files.toByteArray(context.krunOptions.experimental.smtPrelude()));
+                logic = context.krunOptions.experimental.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,7 +55,7 @@ public class Z3Wrapper {
         boolean result = false;
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            Solver solver = context.mkSolver();
+            Solver solver = logic != null ? context.mkSolver(logic) : context.mkSolver();
             Params params = context.mkParams();
             params.add("timeout", timeout);
             solver.setParameters(params);
