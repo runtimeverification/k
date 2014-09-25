@@ -10,6 +10,8 @@
 .idea
 .classpath
 .settings/
+java-backend/.project
+k-distribution/.project
 *~
 junit-reports
 samples/test/
