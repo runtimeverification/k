@@ -42,7 +42,7 @@ and the 32-bit version if you are using a 32-bit JRE.
 # Install
 Checkout this directory in your desired location and call `mvn package` from the main
 directory to build the distribution. For convenient usage, you can update
-your $PATH with <checkout-dir>/target/release/k/bin (strongly recommended, but optional).
+your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly recommended, but optional).
 
 You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
 which will significantly speed up the incremental build process.
@@ -50,10 +50,11 @@ which will significantly speed up the incremental build process.
 # IDE Setup
 
 ## Eclipse
-To autogenerate an Eclipse project for K, run `mvn eclipse:eclipse` on the
+To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
 command line. Then go to
 File->Import->General->Existing projects into workspace, and select
-the directory of the installation.  
+the directory of the installation. You should only add the leaves to the workspace, because
+eclipse does not support hierarchical projects.
 
 ## IntelliJ IDEA
 
@@ -76,7 +77,7 @@ maven repository containing a zip and tar.gz of the distribution.
 The functionality to create a tagged release is currently incomplete.
 
 # Compiling definitions and running programs
-Assuming target/release/k/bin is in your path, you can compile definitions using
+Assuming k-distribution/target/release/k/bin is in your path, you can compile definitions using
 the `kompile` command.  To execute a program you can use `krun`.
 
 # Cross platform compilation
