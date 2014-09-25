@@ -4,6 +4,9 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+
+import java.util.List;
 
 
 /**
@@ -40,6 +43,30 @@ public abstract class Collection extends Term {
 
         this.frame = frame;
     }
+
+    public Term toLabelRepresentation(TermContext context) {
+        DataStructureSort sort = context.definition().context().dataStructureSortOf(
+                sort().toFrontEnd());
+        List<Term> components = getLabelRepresentationComponents(context);
+
+        if (components.isEmpty()) {
+            return KItem.of(
+                    KLabelConstant.of(sort.unitLabel(), context.definition().context()),
+                    KList.EMPTY,
+                    context);
+        }
+
+        Term result = components.get(components.size() - 1);
+        for (int i = components.size() - 2; i >= 0; --i) {
+            result = KItem.of(
+                    KLabelConstant.of(sort.constructorLabel(), context.definition().context()),
+                    KList.concatenate(components.get(i), result),
+                    context);
+        }
+        return result;
+    }
+
+    abstract protected List<Term> getLabelRepresentationComponents(TermContext context);
 
     /**
      * Checks if this {@code Collection} contains a frame variable.

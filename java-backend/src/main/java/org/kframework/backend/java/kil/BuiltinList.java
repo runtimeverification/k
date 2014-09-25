@@ -1,16 +1,18 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-
 package org.kframework.backend.java.kil;
 
-import java.util.List;
-
-import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.ListUtils;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -224,6 +226,35 @@ public class BuiltinList extends Collection {
         } else {
             return identity;
         }
+    }
+
+    @Override
+    protected List<Term> getLabelRepresentationComponents(TermContext context) {
+        DataStructureSort sort = context.definition().context().dataStructureSortOf(
+                sort().toFrontEnd());
+
+        ArrayList<Term> components = new ArrayList<>();
+        for (Term element : elementsLeft) {
+            components.add(KItem.of(
+                    KLabelConstant.of(sort.elementLabel(), context.definition().context()),
+                    KList.singleton(element),
+                    context));
+        }
+        for (Term term : baseTerms) {
+            if (term instanceof BuiltinList) {
+                components.addAll(((BuiltinList) term).getLabelRepresentationComponents(context));
+            } else {
+                components.add(term);
+            }
+        }
+        for (Term element : elementsRight) {
+            components.add(KItem.of(
+                    KLabelConstant.of(sort.elementLabel(), context.definition().context()),
+                    KList.singleton(element),
+                    context));
+        }
+
+        return components;
     }
 
     public static Builder builder() {

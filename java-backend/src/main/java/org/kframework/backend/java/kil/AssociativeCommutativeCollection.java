@@ -1,6 +1,8 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
+import java.util.List;
+
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
@@ -82,4 +84,8 @@ public abstract class AssociativeCommutativeCollection extends Collection {
         return isConcreteCollection() && super.isGround();
     }
 
+    @Override
+    protected List<Term> getLabelRepresentationComponents(TermContext context) {
+        throw new UnsupportedOperationException();
+    }
 }

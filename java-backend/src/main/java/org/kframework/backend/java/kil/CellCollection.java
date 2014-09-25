@@ -287,6 +287,11 @@ public class CellCollection extends Collection {
     }
 
     @Override
+    protected List<Term> getLabelRepresentationComponents(TermContext context) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void accept(Unifier unifier, Term pattern) {
         unifier.unify(this, pattern);
     }

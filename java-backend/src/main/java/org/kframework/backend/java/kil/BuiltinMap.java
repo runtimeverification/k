@@ -10,6 +10,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.map.UnmodifiableMap;
