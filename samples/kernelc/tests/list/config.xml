@@ -13,22 +13,27 @@
         <program name="head.c">
           <krun-option name="--prove" value="tests/list/head_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
         </program>
         <program name="tail.c">
           <krun-option name="--prove" value="tests/list/tail_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
         </program>
         <program name="add.c">
           <krun-option name="--prove" value="tests/list/add_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
         </program>
         <program name="swap.c">
           <krun-option name="--prove" value="tests/list/swap_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
         </program>
         <program name="deallocate.c">
           <krun-option name="--prove" value="tests/list/deallocate_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/list.smt2" />
+          <krun-option name="--z3-executable" />
         </program>
         <program name="length_recursive.c">
           <krun-option name="--prove" value="tests/list/length_recursive_spec.k" />
