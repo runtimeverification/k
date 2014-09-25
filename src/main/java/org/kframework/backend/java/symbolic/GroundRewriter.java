@@ -39,7 +39,9 @@ public class GroundRewriter extends AbstractRewriter {
         subject = super.rewrite(subject, bound);
 
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch + "]");
+        if (termContext.definition().context().krunOptions.experimental.statistics) {
+            System.err.println("[" + step + ", " + stopwatch + "]");
+        }
 
         return subject;
     }
@@ -166,7 +168,9 @@ public class GroundRewriter extends AbstractRewriter {
                 searchResults.add(map);
             }
             stopwatch.stop();
-            System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+            if (termContext.definition().context().krunOptions.experimental.statistics) {
+                System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+            }
             return searchResults;
         }
 
@@ -239,7 +243,9 @@ public class GroundRewriter extends AbstractRewriter {
         }
 
         stopwatch.stop();
-        System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+        if (termContext.definition().context().krunOptions.experimental.statistics) {
+            System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+        }
 
         return searchResults;
     }
