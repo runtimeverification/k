@@ -71,8 +71,10 @@ public class FastDestructiveRewriter extends AbstractRewriter {
         }
 
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch + "]");
-        Profiler.printResult();
+        if (termContext.definition().context().krunOptions.experimental.statistics) {
+            System.err.println("[" + step + ", " + stopwatch + "]");
+            Profiler.printResult();
+        }
 
         return subject;
     }

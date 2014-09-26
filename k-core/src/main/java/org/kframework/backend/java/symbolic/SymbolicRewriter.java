@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -24,8 +23,6 @@ import org.kframework.utils.general.IndexingStatistics;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
-import org.kframework.krun.api.io.FileSystem;
-
 import com.google.common.base.Stopwatch;
 import com.google.inject.Inject;
 
@@ -76,7 +73,9 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch + "]");
+        if (definition.context().krunOptions.experimental.statistics) {
+            System.err.println("[" + step + ", " + stopwatch + "]");
+        }
 
         return constrainedTerm;
     }
@@ -594,41 +593,11 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
-
-        return searchResults;
-    }
-
-
-    public List<ConstrainedTerm> prove(List<Rule> rules, FileSystem fs, TermContext context) {
-        stopwatch.start();
-
-        List<ConstrainedTerm> proofResults = new ArrayList<ConstrainedTerm>();
-        for (Rule rule : rules) {
-            /* rename rule variables */
-            Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
-
-            SymbolicConstraint sideConstraint = new SymbolicConstraint(context);
-            sideConstraint.addAll(rule.requires());
-            ConstrainedTerm initialTerm = new ConstrainedTerm(
-                    rule.leftHandSide().substituteWithBinders(freshSubstitution, context),
-                    rule.lookups().getSymbolicConstraint(context).substituteWithBinders(
-                            freshSubstitution,
-                            context),
-                    sideConstraint.substituteWithBinders(freshSubstitution, context),
-                    context);
-
-            ConstrainedTerm targetTerm = new ConstrainedTerm(
-                    rule.rightHandSide().substituteWithBinders(freshSubstitution, context),
-                    context);
-
-            proofResults.addAll(proveRule(initialTerm, targetTerm, rules));
+        if (definition.context().krunOptions.experimental.statistics) {
+            System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
 
-        stopwatch.stop();
-        System.err.println("[" + stopwatch + "]");
-
-        return proofResults;
+        return searchResults;
     }
 
     public List<ConstrainedTerm> proveRule(
