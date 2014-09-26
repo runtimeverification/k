@@ -17,5 +17,4 @@
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-krun tests/closed-variable-capture.lambda"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="k-core"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Djava.awt.headless=true"/>
-<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="/home/dwightguth/k/k-distribution/tutorial/1_k/1_lambda/lesson_1"/>
 </launchConfiguration>
