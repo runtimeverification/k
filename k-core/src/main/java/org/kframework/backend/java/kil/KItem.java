@@ -128,10 +128,12 @@ public final class KItem extends Term {
             /* not a KLabelConstant or the kList contains a frame variable */
             if (kLabel instanceof KLabelInjection) {
                 assert kList.equals(KList.EMPTY);
+                isExactSort = true;
+            } else {
+                isExactSort = false;
             }
 
             sort = kind.asSort();
-            isExactSort = false;
         }
     }
 
