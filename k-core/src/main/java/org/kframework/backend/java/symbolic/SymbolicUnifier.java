@@ -210,10 +210,10 @@ public class SymbolicUnifier extends AbstractUnifier {
             // TODO(YilongL): can we move this adhoc code to another place?
             /* special case for concrete collections  */
             if (term instanceof ConcreteCollectionVariable
-                    && !((ConcreteCollectionVariable) term).matchConcreteSize(otherTerm)) {
+                    && !((ConcreteCollectionVariable) term).unify(otherTerm)) {
                 fail(term, otherTerm);
             } else if (otherTerm instanceof ConcreteCollectionVariable
-                    && !((ConcreteCollectionVariable) otherTerm).matchConcreteSize(term)) {
+                    && !((ConcreteCollectionVariable) otherTerm).unify(term)) {
                 fail(term, otherTerm);
             }
 

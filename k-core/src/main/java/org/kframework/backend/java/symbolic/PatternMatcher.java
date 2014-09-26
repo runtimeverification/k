@@ -485,7 +485,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* special case for concrete collections  */
             if (variable instanceof ConcreteCollectionVariable
-                    && !((ConcreteCollectionVariable) variable).matchConcreteSize(subject)) {
+                    && !((ConcreteCollectionVariable) variable).match(subject)) {
                 fail(variable, subject);
             }
 
