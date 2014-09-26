@@ -15,7 +15,6 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Kind;
@@ -309,76 +308,52 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
-            if (!options.generateTests) {
-                if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
-                    return !leftHandSide.sort().equals(rightHandSide.sort());
-                } else if (leftHandSide.isExactSort()) {
-                    return !definition.subsorts().isSubsortedEq(
-                            rightHandSide.sort(),
-                            leftHandSide.sort());
-                } else if (rightHandSide.isExactSort()) {
-                    return !definition.subsorts().isSubsortedEq(
-                            leftHandSide.sort(),
-                            rightHandSide.sort());
-                } else {
-                    if (leftHandSide instanceof Variable && rightHandSide instanceof KItem
-                            && ((KItem) rightHandSide).kLabel() instanceof KLabelConstant
-                            && ((KLabelConstant) ((KItem) rightHandSide).kLabel()).isConstructor()) {
-                        boolean flag = false;
-                        //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) rightHandSide).kLabel()).label())) {
-                        for (Production production : ((KLabelConstant) ((KItem) rightHandSide).kLabel()).productions()) {
-                            if (definition.subsorts().isSubsortedEq(
-                                    leftHandSide.sort(),
-                                    Sort.of(production.getSort()))) {
-                                flag = true;
-                            }
-                        }
-                        if (!flag) {
-                            return true;
-                        }
-                    }
-                    if (rightHandSide instanceof Variable && leftHandSide instanceof KItem
-                            && ((KItem) leftHandSide).kLabel() instanceof KLabelConstant
-                            && ((KLabelConstant) ((KItem) leftHandSide).kLabel()).isConstructor()) {
-                        boolean flag = false;
-                        //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) leftHandSide).kLabel()).label())) {
-                        for (Production production : ((KLabelConstant) ((KItem) leftHandSide).kLabel()).productions()) {
-                            if (definition.subsorts().isSubsortedEq(
-                                    rightHandSide.sort(),
-                                    Sort.of(production.getSort()))) {
-                                flag = true;
-                            }
-                        }
-                        if (!flag) {
-                            return true;
-                        }
-                    }
-                    return !definition.subsorts().hasCommonSubsort(
-                            leftHandSide.sort(),
-                            rightHandSide.sort());
-                }
+            if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
+                return !leftHandSide.sort().equals(rightHandSide.sort());
+            } else if (leftHandSide.isExactSort()) {
+                return !definition.subsorts().isSubsortedEq(
+                        rightHandSide.sort(),
+                        leftHandSide.sort());
+            } else if (rightHandSide.isExactSort()) {
+                return !definition.subsorts().isSubsortedEq(
+                        leftHandSide.sort(),
+                        rightHandSide.sort());
             } else {
-                if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
-                        && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
-                    for (Sort pms : ((KItem) leftHandSide).possibleMinimalSorts()) {
-                        if (definition.subsorts().isSubsortedEq(rightHandSide.sort(), pms)) {
-                            return false;
+                if (leftHandSide instanceof Variable && rightHandSide instanceof KItem
+                        && ((KItem) rightHandSide).kLabel() instanceof KLabelConstant
+                        && ((KLabelConstant) ((KItem) rightHandSide).kLabel()).isConstructor()) {
+                    boolean flag = false;
+                    //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) rightHandSide).kLabel()).label())) {
+                    for (Production production : ((KLabelConstant) ((KItem) rightHandSide).kLabel()).productions()) {
+                        if (definition.subsorts().isSubsortedEq(
+                                leftHandSide.sort(),
+                                Sort.of(production.getSort()))) {
+                            flag = true;
                         }
                     }
-                    return true;
-                } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
-                        && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
-                    for (Sort pms : ((KItem) rightHandSide).possibleMinimalSorts()) {
-                        if (definition.subsorts().isSubsortedEq(leftHandSide.sort(), pms)) {
-                            return false;
-                        }
+                    if (!flag) {
+                        return true;
                     }
-                    return true;
-                } else {
-                    return definition.subsorts().hasCommonSubsort(
-                        (leftHandSide).sort(),
-                        (rightHandSide).sort());
                 }
+                if (rightHandSide instanceof Variable && leftHandSide instanceof KItem
+                        && ((KItem) leftHandSide).kLabel() instanceof KLabelConstant
+                        && ((KLabelConstant) ((KItem) leftHandSide).kLabel()).isConstructor()) {
+                    boolean flag = false;
+                    //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) leftHandSide).kLabel()).label())) {
+                    for (Production production : ((KLabelConstant) ((KItem) leftHandSide).kLabel()).productions()) {
+                        if (definition.subsorts().isSubsortedEq(
+                                rightHandSide.sort(),
+                                Sort.of(production.getSort()))) {
+                            flag = true;
+                        }
+                    }
+                    if (!flag) {
+                        return true;
+                    }
+                }
+                return !definition.subsorts().hasCommonSubsort(
+                        leftHandSide.sort(),
+                        rightHandSide.sort());
             }
         }
     }
