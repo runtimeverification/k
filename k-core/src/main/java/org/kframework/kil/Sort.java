@@ -28,6 +28,7 @@ public class Sort implements Serializable {
 
     public static final Sort ID = Sort.of("Id");
     public static final Sort INT = Sort.of("Int");
+    public static final Sort FLOAT = Sort.of("Float");
     public static final Sort BOOL = Sort.of("Bool");
     public static final Sort STRING = Sort.of("String");
 

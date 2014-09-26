@@ -57,6 +57,29 @@ public class FloatBuiltin extends Token {
         return of(new BigFloat(value, BinaryMathContext.BINARY32), BinaryMathContext.BINARY32_EXPONENT_BITS);
     }
 
+    /**
+     * Returns a {@link FloatBuiltin} representing the given {@link String} value.
+     *
+     * @param value
+     * @return
+     */
+    public static FloatBuiltin of(String value) {
+        Pair<BigFloat, Integer> pair = FloatBuiltin.parseKFloat(value);
+        return of(pair.getLeft(), pair.getRight());
+    }
+
+    /**
+     * Returns a {@link KApp} representing a {@link FloatBuiltin} with the given {@link String} representation applied to an empty {@link KList}.
+     *
+     * @param value
+     * @return
+     */
+    public static KApp kAppOf(String value) {
+        assert value != null;
+
+        return KApp.of(FloatBuiltin.of(value));
+    }
+
     private final BigFloat value;
     private final int exponent;
 
