@@ -49,12 +49,16 @@ module K-IO
     when findChar(S, Delimiters, 0) =/=Int -1 [stdin]
 
   // a hack: handle the case when we read integers without the help of the IO server
-//  rule (ListItem(#parseInput("Int", Delimiters:String)) => ListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1)))) ListItem(#buffer(S:String => "")) when findChar(S, Delimiters, 0) =/=Int -1 andBool lengthString(S) >Int 1 [stdin]
-
+/*  rule (ListItem(#parseInput("Int", Delimiters:String))
+       => ListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1))))
+       ListItem(#buffer(S:String => ""))
+    when findChar(S, Delimiters, 0) =/=Int -1
+       andBool lengthString(S) >Int 1 [stdin]
+*/
   rule (ListItem(#parseInput(Sort:String, Delimiters:String))
        => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort)))
        ListItem(#buffer(S:String => ""))
-       ListItem(#istream(_))
+       _:List
     when findChar(S, Delimiters, 0) =/=Int -1
        andBool Sort =/=String "String"
        andBool lengthString(S) >Int 1 [stdin]
