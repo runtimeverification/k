@@ -26,7 +26,7 @@ public class NullStrategy implements Strategy {
     }
 
     public boolean hasNext() {
-        return rules != null;
+        return rules != null && !rules.isEmpty();
     }
 
     private Collection<Rule> rules;

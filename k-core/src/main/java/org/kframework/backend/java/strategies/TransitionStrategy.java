@@ -38,8 +38,8 @@ public class TransitionStrategy implements Strategy {
      * if it contains a transition tag, otherwise put it in the structural list.
      */
     public void reset(Collection<Rule> rules) {
-        transition = new LinkedList<Rule>();
-        structural = new LinkedList<Rule>();
+        transition = new LinkedList<>();
+        structural = new LinkedList<>();
         for (Rule r : rules) {
             boolean t = false;
             for (String s : tags) {
@@ -78,7 +78,8 @@ public class TransitionStrategy implements Strategy {
      * lists is still non-null.
      */
     public boolean hasNext() {
-        return structural != null || transition != null;
+        return (structural != null && !structural.isEmpty())
+                || (transition != null && !transition.isEmpty());
     }
 
     private Collection<Rule> transition;

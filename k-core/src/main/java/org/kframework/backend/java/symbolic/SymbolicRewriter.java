@@ -234,7 +234,7 @@ public class SymbolicRewriter {
                 IndexingStatistics.rewritingStopWatch.start();
             }
             transition = strategy.nextIsTransition();
-            ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
+            ArrayList<Rule> rules = new ArrayList<>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
                 rulesTried++;
