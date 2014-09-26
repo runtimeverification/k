@@ -3,10 +3,7 @@ package org.kframework.backend.java.strategies;
 
 import org.kframework.backend.java.kil.Rule;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * A CompositeStrategy is used to combine multiple to strategies together in
@@ -35,7 +32,7 @@ import java.util.Iterator;
 
 public class CompositeStrategy implements Strategy {
     public CompositeStrategy() {
-        stack = new LinkedList<Strategy>();
+        stack = new LinkedList<>();
     }
 
     public void push(Strategy s) {
@@ -76,48 +73,35 @@ public class CompositeStrategy implements Strategy {
     }
 
     /**
-     * Recursively search for the next set of rules starting at the the top of
-     * the stack. Only recurse down the stack if the top has no more equivalence
+     * Search for the next set of rules starting at the the top of
+     * the stack. Only search down the stack if the top has no more equivalence
      * classes to return.
      */
     public Collection<Rule> next() {
-        if (stack.isEmpty()) {
-            return null;
+        while (!stack.isEmpty()) {
+            Strategy s = stack.pop();
+            if (s.hasNext()) {
+                Collection<Rule> ret = s.next();
+                stack.push(s);
+                return ret;
+            }
         }
-        // If the top of the stack doesn't have a next class to return, then
-        // pop it off the stack and try again. Once we find a next class we
-        // will pull it back up the recursion, applying it to each successive
-        // strategy on the way back up.
-        if (!stack.peekFirst().hasNext()) {
-            // Pop the first element so the subsequent recursive call to next()
-            // will be operating on the next strategy in the stack.
-            Strategy top = stack.pollFirst();
-            // Apply the result of the recursive call to the top strategy.
-            top.reset(next());
-            stack.addFirst(top);
-        }
-        // TODO(YilongL): I have no idea why children.peekFirst().next() could
-        // return duplicate elements.
-        return new LinkedHashSet<Rule>(stack.peekFirst().next());
+        throw new NoSuchElementException("No equivalence classes left in the CompositeStrategy. " +
+                "Have you checked hasNext()?");
     }
 
     /**
-     * Recursively check to see if there is a next class by checking each
+     * Search in strategy stack to see if there is a next class by checking each
      * strategy.hasNext(), starting at the top of the stack and ending early
      * once we encounter a true.
      */
     public boolean hasNext() {
-        if (stack.isEmpty()) {
-            return false;
+        for (Strategy s : stack) {
+            if (s.hasNext()) {
+                return true;
+            }
         }
-        boolean result = stack.peekFirst().hasNext();
-        // If the top item doesn't have a next class, pop it off and recurse.
-        if (!result) {
-            Strategy top = stack.pollFirst();
-            result = hasNext();
-            stack.addFirst(top);
-        }
-        return result;
+        return false;
     }
 
     private LinkedList<Strategy> stack;
