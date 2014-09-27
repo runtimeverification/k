@@ -1,4 +1,4 @@
-(set-option :smt.mbqi.max_iterations 10)
+(set-option :smt.mbqi.max_iterations 15)
 
 ; int extra
 (define-fun int_max ((x Int) (y Int)) Int (ite (< x y) y x))
