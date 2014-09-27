@@ -19,6 +19,7 @@ import java.io.*;
  */
 public class Z3Wrapper {
 
+    private static final int Z3_RESTART_LIMIT = 3;
     public static Z3Wrapper Z3_WRAPPER;
     public static Z3Wrapper instance(Context context) {
         if (Z3_WRAPPER == null) {
@@ -29,8 +30,11 @@ public class Z3Wrapper {
 
     public final String SMT_PRELUDE;
     private String logic;
+    private final Context context;
 
     public Z3Wrapper(Context context) {
+        this.context = context;
+
         String s = "";
         logic = "";
         try {
@@ -73,7 +77,7 @@ public class Z3Wrapper {
     public boolean checkQueryWithExternalProcess(String query, int timeout) {
         String result = "";
         try {
-            do {
+            for (int i = 0; i < Z3_RESTART_LIMIT; i++) {
                 ProcessBuilder pb = new ProcessBuilder(
                         OS.current().getNativeExecutable("z3").getAbsolutePath(),
                         "-in",
@@ -90,9 +94,19 @@ public class Z3Wrapper {
                 input.flush();
                 result = output.readLine();
                 z3Process.destroy();
-            } while (result == null);
+
+                if (result != null) {
+                    break;
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (result == null) {
+            result = "unknown";
+            if (context.globalOptions.debug) {
+                System.err.println("Z3 crashed on query:\n" + SMT_PRELUDE + query + "(check-sat)\n");
+            }
         }
         return result.equals("unsat");
     }
