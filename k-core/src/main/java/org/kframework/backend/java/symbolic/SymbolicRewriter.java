@@ -627,24 +627,11 @@ public class SymbolicRewriter {
                     continue;
                 }
 
-                Term leftKContent = KCollection.upKind(
-                        term.term().getCellContentsByName(CellLabel.K).get(0),
-                        Kind.K);
-                Variable leftFrame = null;
-                if (leftKContent instanceof KSequence && ((KSequence) leftKContent).hasFrame()) {
-                    leftFrame = ((KSequence) leftKContent).frame();
-                } else if (leftKContent instanceof Variable) {
-                    leftFrame = (Variable) leftKContent;
-                }
-                Term rightKContent = KCollection.upKind(
-                        targetTerm.term().getCellContentsByName(CellLabel.K).get(0),
-                        Kind.K);
-                Variable rightFrame = null;
-                if (rightKContent instanceof KSequence && ((KSequence) rightKContent).hasFrame()) {
-                    rightFrame = ((KSequence) rightKContent).frame();
-                } else if (rightKContent instanceof Variable) {
-                    rightFrame = (Variable) rightKContent;
-                }
+                // TODO(YilongL): the `get(0)` seems hacky
+                Term leftKContent = term.term().getCellContentsByName(CellLabel.K).get(0);
+                Variable leftFrame = KSequence.getFrame(leftKContent);
+                Term rightKContent = targetTerm.term().getCellContentsByName(CellLabel.K).get(0);
+                Variable rightFrame = KSequence.getFrame(rightKContent);
                 if (leftFrame != null && rightFrame != null && leftFrame.equals(rightFrame)) {
                     BoolToken unifiable = MetaK.unifiable(
                             leftKContent,

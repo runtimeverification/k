@@ -51,6 +51,23 @@ public class KSequence extends KCollection {
         return new KSequence(ImmutableList.of(term), null, ImmutableList.<Variable>of());
     }
 
+    /**
+     * Retrieves the frame variable of a given term representing a potentially
+     * canonicalized {@code KSequence}.
+     */
+    public static Variable getFrame(Term term) {
+        if (term instanceof Variable && term.sort().equals(Sort.KSEQUENCE)) {
+            return (Variable) term;
+        } else if (term.kind() == Kind.KITEM) {
+            return null;
+        } else if (term instanceof KSequence) {
+            return ((KSequence) term).frame;
+        } else {
+            assert false : "unexpected argument: " + term;
+            return null;
+        }
+    }
+
     private KSequence(ImmutableList<Term> contents, Variable frame, ImmutableList<Variable> kSequenceVariables) {
         super(frame, Kind.K);
         this.contents = contents;
