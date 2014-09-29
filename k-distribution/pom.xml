@@ -105,6 +105,7 @@
         <version>2.4</version>
         <executions>
           <execution>
+            <id>assembly-dir</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -114,6 +115,21 @@
                 <format>dir</format>
               </formats>
               <finalName>release</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+          <execution>
+            <id>assembly-archive</id>
+            <phase>install</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <formats>
+                <format>tar.gz</format>
+                <format>zip</format>
+              </formats>
+              <finalName>k-nightly-${native.classifier}</finalName>
               <appendAssemblyId>false</appendAssemblyId>
             </configuration>
           </execution>
