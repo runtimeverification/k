@@ -81,7 +81,9 @@ public class KList extends KCollection {
             return hasFrame() ? frame : EMPTY;
         } else {
             if (kListVariables.isEmpty()) {
-                return new KList(contents.subList(fromIndex, contents.size()), frame, kListVariables);
+                return fromIndex + 1 == contents.size() ?
+                        contents.get(fromIndex) :
+                        new KList(contents.subList(fromIndex, contents.size()), frame, kListVariables);
             } else {
                 /* YilongL: this case should never happen in practice because
                  * this method should only be called by KList on the LHS */
@@ -202,6 +204,10 @@ public class KList extends KCollection {
          */
         public Term build() {
             ImmutableList<Term> contents = contentsBuilder.build();
+            if (frame != null) {
+                variablesBuilder.add(frame);
+            }
+
             if (contents.isEmpty()) {
                 return frame == null ? EMPTY : frame;
             } else if (contents.size() == 1 && frame == null) {

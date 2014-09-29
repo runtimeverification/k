@@ -808,7 +808,7 @@ public class PatternMatcher extends AbstractMatcher {
          * specified starred-cell; therefore, no need to worry about AC-matching
          * at all!
          */
-        if (!cellCollection.hasStar() || !otherCellCollection.hasStar()) {
+        if (!cellCollection.hasMultiplicityCell() || !otherCellCollection.hasMultiplicityCell()) {
             for (CellLabel label : unifiableCellLabels) {
                 assert cellCollection.get(label).size() == 1
                         && otherCellCollection.get(label).size() == 1;
