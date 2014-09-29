@@ -8,6 +8,7 @@ import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
 import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.util.*;
@@ -86,6 +87,13 @@ public class TestCase {
     }
 
     public static TestCase makeTestCaseFromK(KTestOptions cmdArgs) {
+        // give a warning if 'programs' is specified using the command line argument,
+        // but 'extension' is not.
+        if (cmdArgs.programsSpecified() && cmdArgs.getExtensions().isEmpty()) {
+            GlobalSettings.kem.registerCompilerWarning("'programs' attribute is given, " +
+                    "but 'extension' is not. ktest won't run any programs.");
+        }
+
         Annotated<String, LocationData> targetFile =
                 new Annotated<>(cmdArgs.getTargetFile(), new LocationData());
 

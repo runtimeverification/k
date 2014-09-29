@@ -252,6 +252,10 @@ public class KTestOptions {
         return programs;
     }
 
+    public boolean programsSpecified() {
+        return _programs != null;
+    }
+
     public String getResults() {
         return results;
     }
