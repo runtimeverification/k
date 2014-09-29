@@ -110,7 +110,8 @@ public class KompileFrontEnd extends FrontEnd {
         if (backend.generatesDefinition()) {
                 context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.kompiled);
-                if (!context.kompiled.exists() && !context.kompiled.mkdirs()) {
+                if (options.mainDefinitionFile().exists()
+                        && !context.kompiled.exists() && !context.kompiled.mkdirs()) {
                     kem.registerCriticalError("Could not create directory " + context.kompiled);
                 }
         }
