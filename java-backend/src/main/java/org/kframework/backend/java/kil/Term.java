@@ -12,6 +12,7 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.util.Utils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -101,30 +102,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * TermContext)}.
      */
     public Term evaluate(TermContext context) {
-        return evaluate(null, context);
-    }
-
-    /**
-     * Returns a new {@code Term} instance obtained from this term by evaluating
-     * pending functions and predicates.
-     * <p>
-     * This method carries a symbolic constraint as argument for two reasons: 1)
-     * at the time when this method is called, the symbolic constraint
-     * associated with the outer constrained term which contains this term may
-     * not been properly simplified and normalized, which means the evaluation
-     * process may still need the information of this constraint when performing
-     * unification; 2) the evaluation process may create new constraints in
-     * certain cases (e.g., in test generation).
-     *
-     * @param constraint
-     *            the symbolic constraint of the {@link ConstrainedTerm} which
-     *            contains this {@code Term}
-     * @param context
-     *            the term context
-     * @return the result {@code Term} instance
-     */
-    public Term evaluate(SymbolicConstraint constraint, TermContext context) {
-        return Evaluator.evaluate(this, constraint, context);
+        return Evaluator.evaluate(this, context);
     }
 
     /**
@@ -162,10 +140,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
             }
         }
 
-        // YilongL: comment out the slow implementation
-//        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
-//        transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
-//        return (Term) accept(transformer);
         SubstituteAndEvaluateTransformer transformer = new SubstituteAndEvaluateTransformer(substitution, context);
         return (Term) this.accept(transformer);
     }
@@ -237,7 +211,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     public Term expandPatterns(SymbolicConstraint constraint, boolean narrowing, TermContext context) {
-        return PatternExpander.expand(this, constraint, narrowing, context);
+        PatternExpander expander = new PatternExpander(constraint, narrowing, context);
+        return (Term) this.accept(expander);
     }
 
     @Override

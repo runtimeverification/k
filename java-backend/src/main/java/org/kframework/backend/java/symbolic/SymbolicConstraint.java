@@ -503,9 +503,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
 
-        private Equality expandPatterns(SymbolicConstraint constraint, boolean narrow) {
-            Term returnLeftHandSide = leftHandSide.expandPatterns(constraint, narrow, context);
-            Term returnRightHandSide = rightHandSide.expandPatterns(constraint, narrow, context);
+        private Equality expandPatterns(SymbolicConstraint constraint, boolean narrowing) {
+            Term returnLeftHandSide = leftHandSide.expandPatterns(constraint, narrowing, context);
+            Term returnRightHandSide = rightHandSide.expandPatterns(constraint, narrowing, context);
             if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
                 return new Equality(returnLeftHandSide, returnRightHandSide);
             } else {
