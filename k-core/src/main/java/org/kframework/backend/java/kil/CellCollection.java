@@ -15,13 +15,10 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.DataStructureSort.Label;
 import org.kframework.kil.loader.Context;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Multiset;
 
 
@@ -50,12 +47,11 @@ public class CellCollection extends Collection {
     private final ImmutableMultiset<Variable> collectionVariables;
 
     /**
-     * Contains {@code true} if the explicitly specified part of this cell
-     * collection contains one or more types of cells whose multiplicity
-     * attributes are {@code "*"}'s; otherwise, {@code false}.
+     * Specifies if the explicit content of this cell collection contains
+     * multiplicity cell.
      */
     // TODO(AndreiS): handle multiplicity='+'
-    private final boolean hasStar;
+    private final boolean hasMultiplicityCell;
 
     public static CellCollection singleton(Cell cell, Context context) {
         return new CellCollection(
@@ -91,20 +87,38 @@ public class CellCollection extends Collection {
     }
 
     /**
+     * Static helper method which creates canonicalized cell collection
+     * according to the given contents.
+     */
+    public static Term of(ListMultimap<CellLabel, Cell> cells,
+            Multiset<Variable> collectionVariables, Context context) {
+        if (cells.isEmpty()) {
+            if (collectionVariables.isEmpty()) {
+                return EMPTY;
+            } else if (collectionVariables.size() == 1) {
+                return collectionVariables.iterator().next();
+            }
+        } else if (cells.size() == 1 && collectionVariables.isEmpty()) {
+            return cells.values().iterator().next();
+        }
+
+        return new CellCollection(ImmutableListMultimap.copyOf(cells),
+                ImmutableMultiset.copyOf(collectionVariables),
+                numOfMultiplicityCellLabels(cells, context) > 0);
+    }
+
+    /**
      * Builds a new {@code CellCollection} by removing all the given cell
      * labels.
      */
-    public Term removeAll(final Set<CellLabel> labelsToRemove, Context context) {
-        Predicate<CellLabel> notRemoved = new Predicate<CellLabel>() {
-            @Override
-            public boolean apply(CellLabel cellLabel) {
-                return !labelsToRemove.contains(cellLabel);
+    public Term removeAll(Set<CellLabel> labelsToRemove, Context context) {
+        ImmutableListMultimap.Builder<CellLabel, Cell> builder = ImmutableListMultimap.builder();
+        for (CellLabel cellLabel : cells.keySet()) {
+            if (!labelsToRemove.contains(cellLabel)) {
+                builder.putAll(cellLabel, cells.get(cellLabel));
             }
-        };
-
-        ImmutableListMultimap<CellLabel, Cell> cellMap = ImmutableListMultimap
-                .copyOf(Multimaps.filterKeys(cells, notRemoved));
-        return new CellCollection(cellMap, collectionVariables, context);
+        }
+        return CellCollection.of(builder.build(), collectionVariables, context);
     }
 
     private CellCollection(ImmutableListMultimap<CellLabel, Cell> cells,
@@ -115,11 +129,11 @@ public class CellCollection extends Collection {
 
     private CellCollection(ImmutableListMultimap<CellLabel, Cell> cells,
             ImmutableMultiset<Variable> collectionVariables,
-            boolean hasStar) {
+            boolean hasMultiplicityCell) {
         super(computeFrame(collectionVariables), Kind.CELL_COLLECTION);
         this.cells = cells;
         this.collectionVariables = collectionVariables;
-        this.hasStar = hasStar;
+        this.hasMultiplicityCell = hasMultiplicityCell;
     }
 
     private static Variable computeFrame(ImmutableMultiset<Variable> collectionVariables) {
@@ -172,8 +186,8 @@ public class CellCollection extends Collection {
      * one or more types of cells whose multiplicity attributes are {@code "*"}
      * 's.
      */
-    public boolean hasStar() {
-        return hasStar;
+    public boolean hasMultiplicityCell() {
+        return hasMultiplicityCell;
     }
 
     public Set<CellLabel> labelSet() {

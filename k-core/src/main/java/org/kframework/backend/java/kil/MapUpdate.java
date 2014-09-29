@@ -105,7 +105,14 @@ public class MapUpdate extends Term implements DataStructureUpdate {
 
     @Override
     protected boolean computeMutability() {
-        throw new UnsupportedOperationException();
+        boolean mutable = map.isMutable();
+        for (Term term : removeSet) {
+            mutable = mutable || term.isMutable();
+        }
+        for (Map.Entry<Term, Term> entry : updateMap.entrySet()) {
+            mutable = mutable || entry.getKey().isMutable() || entry.getValue().isMutable();
+        }
+        return mutable;
     }
 
     @Override

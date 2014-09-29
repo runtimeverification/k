@@ -115,7 +115,7 @@ public class ListUpdate extends Term implements DataStructureUpdate {
 
     @Override
     protected boolean computeMutability() {
-        throw new UnsupportedOperationException();
+        return list.isMutable();
     }
 
     @Override

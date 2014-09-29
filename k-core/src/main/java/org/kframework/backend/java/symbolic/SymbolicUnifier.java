@@ -609,7 +609,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
         CellCollection otherCellCollection = (CellCollection) term;
 
-        if (cellCollection.hasStar() && !otherCellCollection.hasStar()) {
+        if (cellCollection.hasMultiplicityCell() && !otherCellCollection.hasMultiplicityCell()) {
             /* swap the two specified cell collections in order to reduce to the case 1 below */
             unify(otherCellCollection, cellCollection);
             return;
@@ -633,7 +633,7 @@ public class SymbolicUnifier extends AbstractUnifier {
          * CASE 1: cellCollection has no explicitly specified starred-cell;
          * therefore, no need to worry about AC-unification at all!
          */
-        if (!cellCollection.hasStar()) {
+        if (!cellCollection.hasMultiplicityCell()) {
             for (CellLabel label : unifiableCellLabels) {
                 assert cellCollection.get(label).size() == 1
                         && otherCellCollection.get(label).size() == 1;

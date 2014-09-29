@@ -1329,12 +1329,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
+        // TODO(YilongL): this is too ad-hoc; fix it once we allow sub-terms to carry constraint as well
+        int origSize = data.equalities.size();
         for (int i = 0; i < data.equalities.size(); ++i) {
-            Equality equality = data.equalities.get(i);
+            Equality equality = data.equalities.remove(i);
             Equality expandedEquality = equality.expandPatterns(this, narrowing);
+            data.equalities.addFirst(expandedEquality);
             if (equality != expandedEquality) {
-                data.equalities.set(i, expandedEquality);
                 changed = true;
+                if (data.equalities.size() != origSize) {
+                    break;
+                }
             }
         }
 
