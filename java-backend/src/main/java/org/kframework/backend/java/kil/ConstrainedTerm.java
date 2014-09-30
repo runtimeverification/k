@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.TruthValue;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-import org.kframework.main.Tool;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
@@ -196,10 +195,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * @return solutions to the unification problem
      */
     public List<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
-        if (!data.term.kind.equals(constrainedTerm.data.term.kind)) {
-            return Collections.emptyList();
-        }
-
         /* unify the subject term and the pattern term without considering those associated constraints */
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.add(data.term, constrainedTerm.data.term);
@@ -220,15 +215,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                     continue;
                 }
 
-                if (Tool.instance() != Tool.KOMPILE) {
-                /*
-                 * YilongL: had to disable checkUnsat in kompilation because the
-                 * KILtoZ3 transformer often crash the Java backend; besides,
-                 * this method may not be necessary for kompilation
-                 */
-                    if (candidate.checkUnsat()) {
-                        continue;
-                    }
+                if (candidate.checkUnsat()) {
+                    continue;
                 }
 
                 // TODO(AndreiS): find a better place for pattern expansion

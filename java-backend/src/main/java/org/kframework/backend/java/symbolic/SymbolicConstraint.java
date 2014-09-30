@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
@@ -232,18 +233,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return data.falsifyingEquality;
     }
 
-    public enum TruthValue { TRUE, UNKNOWN, FALSE }
-
-
-    public class Implication {
-        SymbolicConstraint left;
-        SymbolicConstraint right;
-
-        public Implication(SymbolicConstraint left, SymbolicConstraint right) {
-            this.left = left; this.right = right;
-        }
-    }
-
     public static class EqualityOperations {
 
         private final Provider<Definition> definitionProvider;
@@ -363,7 +352,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     public class Equality {
 
         public static final String SEPARATOR = " =? ";
-
 
         private final Term leftHandSide;
         private final Term rightHandSide;
@@ -887,13 +875,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
         assert !constraint.isFalse();
 
-        LinkedList<Implication> implications = new LinkedList<>();
-        implications.add(new Implication(this, constraint));
+        LinkedList<Pair<SymbolicConstraint, SymbolicConstraint>> implications = new LinkedList<>();
+        implications.add(Pair.of(this, constraint));
         while (!implications.isEmpty()) {
-            Implication implication = implications.remove();
+            Pair<SymbolicConstraint, SymbolicConstraint> implication = implications.remove();
 
-            SymbolicConstraint left = implication.left;
-            SymbolicConstraint right = implication.right;
+            SymbolicConstraint left = implication.getLeft();
+            SymbolicConstraint right = implication.getRight();
             if (left.isFalse()) continue;
 
             if (context.definition().context().globalOptions.debug) {
@@ -920,10 +908,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 }
                 SymbolicConstraint left1 = new SymbolicConstraint(left, context);
                 left1.add(condition, BoolToken.TRUE);
-                implications.add(new Implication(left1, new SymbolicConstraint(right,context)));
+                implications.add(Pair.of(left1, new SymbolicConstraint(right,context)));
                 SymbolicConstraint left2 = new SymbolicConstraint(left, context);
                 left2.add(condition, BoolToken.FALSE);
-                implications.add(new Implication(left2, new SymbolicConstraint(right,context)));
+                implications.add(Pair.of(left2, new SymbolicConstraint(right,context)));
                 continue;
             }
 //            if (DEBUG) {
