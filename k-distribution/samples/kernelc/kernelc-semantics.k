@@ -25,6 +25,7 @@ module KERNELC-SEMANTICS
 
   syntax TypedValue ::= "tv" "(" Type "," Value ")"
   syntax Value ::= Int
+                 | Float
                  | Pointer
                  | "undef"
   syntax Pointer ::= "object" "(" Int ")"           [smtlib(smt_pointer_object)]
@@ -271,6 +272,39 @@ module KERNELC-SEMANTICS
     tv(int, I1:Int) <  tv(int, I2:Int) => bool2int(I1 <Int  I2)
     [structural]
 
+  rule F:Float => tv(double, F)                         [structural]
+  rule -tv(double, F:Float) => tv(double, --Float F)    [structural]
+  rule
+    tv(double, F1:Float) + tv(double, F2:Float) => tv(double, F1 +Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) - tv(double, F2:Float) => tv(double, F1 -Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) * tv(double, F2:Float) => tv(double, F1 *Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) / tv(double, F2:Float) => tv(double, F1 /Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) % tv(double, F2:Float) => tv(double, F1 %Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) ^ tv(double, F2:Float) => tv(double, F1 ^Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) >= tv(double, F2:Float) => bool2int(F1 >=Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) > tv(double, F2:Float) => bool2int(F1 >Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) <= tv(double, F2:Float) => bool2int(F1 <=Float F2)
+    [structural]
+  rule
+    tv(double, F1:Float) < tv(double, F2:Float) => bool2int(F1 <Float F2)
+    [structural]
+
   rule
     tv(T:Type, V1:Value) == tv(T, V2:Value) => bool2int(V1 ==K  V2)
     [structural]
@@ -321,6 +355,7 @@ module KERNELC-SEMANTICS
    * Sizeof
    */
   rule sizeof(int) => tv(int, 1)        [structural]
+  rule sizeof(double) => tv(int, 1)     [structural]
   rule sizeof(T:Type *) => tv(int, 1)   [structural]
   rule
     <k> sizeof(struct S:Id) => tv(int, size(Members)) ...</k>
@@ -408,4 +443,3 @@ module KERNELC-SEMANTICS
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
     => B .Statements
 endmodule
-

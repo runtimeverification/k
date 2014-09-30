@@ -20,10 +20,12 @@ module KERNELC-SYNTAX
   syntax VariableDeclarations ::= List{VariableDeclaration, ""}
 
   syntax Type ::= IntType
+                | FloatType
                 | "void"
                 | Type "*"
                 | "struct" Id
   syntax IntType ::= "int"
+  syntax FloatType ::= "double"
 
   syntax Statement ::=
       Expression "=" Expression ";"                         [seqstrict(2)]
@@ -79,6 +81,7 @@ module KERNELC-SYNTAX
     > left: Expression "||" Expression                  [seqstrict(1)]
     > right: Expression "?" Expression ":" Expression
   syntax Constant ::= Int
+                    | Float
                     | "NULL"
                     | String
   syntax Expressions ::= List{Expression, ","}          [seqstrict]
@@ -111,5 +114,6 @@ module KERNELC-SYNTAX
               | "quicksort" | "merge_sort" | "bubble_sort" | "insertion_sort"
   syntax Id ::= "listNode" | "stackNode" | "val" | "next"
   syntax Id ::= "treeNode" | "node" | "value" | "left" | "right"
+  syntax Id ::= "sqs" | "sqv" | "dot" | "tau_vv" | "horizontal_los"
   syntax Id ::= "a" | "b" | "c" | "x" | "y" | "z" | "t" | "u" | "v" | "p" | "n" | "s" | "l" | "ln" | "tn" | "sn" | "temp" | "min" | "iterx" | "itery" | "change"
 endmodule

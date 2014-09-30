@@ -25,4 +25,6 @@
     <include file="sorting/config.xml" />
     <include file="binary_search_tree/config.xml" />
     <include file="avl_tree/config.xml" />
+
+    <include file="cd2d/config.xml" />
 </tests>

@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
@@ -18,6 +19,7 @@ import java.io.*;
  */
 public class Z3Wrapper {
 
+    private static final int Z3_RESTART_LIMIT = 3;
     public static Z3Wrapper Z3_WRAPPER;
     public static Z3Wrapper instance(Context context) {
         if (Z3_WRAPPER == null) {
@@ -27,12 +29,18 @@ public class Z3Wrapper {
     }
 
     public final String SMT_PRELUDE;
+    private String logic;
+    private final Context context;
 
     public Z3Wrapper(Context context) {
+        this.context = context;
+
         String s = "";
+        logic = "";
         try {
             if (context.krunOptions.experimental.smtPrelude() != null) {
-                s = new String(Files.toByteArray(context.krunOptions.experimental.smtPrelude()));
+                s = Files.toString(context.krunOptions.experimental.smtPrelude(), Charsets.UTF_8);
+                logic = context.krunOptions.experimental.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,7 +60,7 @@ public class Z3Wrapper {
         boolean result = false;
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            Solver solver = context.mkSolver();
+            Solver solver = logic != null ? context.mkSolver(logic) : context.mkSolver();
             Params params = context.mkParams();
             params.add("timeout", timeout);
             solver.setParameters(params);
@@ -69,7 +77,7 @@ public class Z3Wrapper {
     public boolean checkQueryWithExternalProcess(String query, int timeout) {
         String result = "";
         try {
-            do {
+            for (int i = 0; i < Z3_RESTART_LIMIT; i++) {
                 ProcessBuilder pb = new ProcessBuilder(
                         OS.current().getNativeExecutable("z3").getAbsolutePath(),
                         "-in",
@@ -86,9 +94,19 @@ public class Z3Wrapper {
                 input.flush();
                 result = output.readLine();
                 z3Process.destroy();
-            } while (result == null);
+
+                if (result != null) {
+                    break;
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (result == null) {
+            result = "unknown";
+            if (context.globalOptions.debug) {
+                System.err.println("Z3 crashed on query:\n" + SMT_PRELUDE + query + "(check-sat)\n");
+            }
         }
         return result.equals("unsat");
     }
