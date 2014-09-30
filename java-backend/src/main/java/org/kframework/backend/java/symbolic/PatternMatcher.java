@@ -545,6 +545,12 @@ public class PatternMatcher extends AbstractMatcher {
             this.fail(builtinList, pattern);
         }
 
+        if (isLemma) {
+            builtinList.toLabelRepresentation(termContext).accept(
+                    this,
+                    ((BuiltinList) pattern).toLabelRepresentation(termContext));
+        }
+
         throw new UnsupportedOperationException(
                 "list matching is only supported when one of the lists is a variable.");
     }
