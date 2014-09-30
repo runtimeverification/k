@@ -24,6 +24,12 @@
       <artifactId>k-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.kframework.k</groupId>
+      <artifactId>java-backend</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -63,18 +69,6 @@
               <goal>run</goal>
             </goals>
           </execution>
-          <execution>
-            <id>generate-plugin-dir</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <tasks>
-                <mkdir dir="target/lib/plugins"/>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -96,6 +90,49 @@
               <skipITs>${skipKTest}</skipITs>
               <reportsDirectory>${project.build.directory}/ktest-reports</reportsDirectory>
               <summaryFile>${project.build.directory}/ktest-reports/summary.xml</summaryFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <id>copy-java-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeTypes>jar</includeTypes>
+              <includeScope>runtime</includeScope>
+              <useBaseVersion>false</useBaseVersion>
+              <outputDirectory>${project.build.directory}/lib/java</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>unpack-zip-dependencies</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeTypes>zip</includeTypes>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-native-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <stripVersion>true</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <includeTypes>${native.library.type}</includeTypes>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -139,48 +176,6 @@
             <descriptor>src/main/assembly/bin.xml</descriptor>
           </descriptors>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
-        <executions>
-          <execution>
-            <id>copy-java-dependencies</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeTypes>jar</includeTypes>
-              <includeScope>runtime</includeScope>
-              <useBaseVersion>false</useBaseVersion>
-              <outputDirectory>${project.build.directory}/lib/java</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>unpack-zip-dependencies</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeTypes>zip</includeTypes>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/lib</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-native-dependencies</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <stripVersion>true</stripVersion>
-              <stripClassifier>true</stripClassifier>
-              <includeTypes>${native.library.type}</includeTypes>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

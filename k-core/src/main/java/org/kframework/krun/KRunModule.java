@@ -3,11 +3,10 @@ package org.kframework.krun;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
+
 import org.kframework.backend.Backends;
-import org.kframework.backend.java.kil.GlobalContext;
-import org.kframework.backend.java.kil.KilFactory;
-import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.maude.krun.MaudeExecutor;
 import org.kframework.backend.maude.krun.MaudeModelChecker;
 import org.kframework.backend.unparser.BinaryOutputMode;
@@ -60,10 +59,10 @@ import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
@@ -74,6 +73,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.spi.DefaultElementVisitor;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import com.google.inject.throwingproviders.ThrowingProviderBinder;
@@ -199,6 +201,9 @@ public class KRunModule extends AbstractModule {
             ltlBinder.addBinding(Backends.MAUDE).to(MaudeModelChecker.class);
             ltlBinder.addBinding(Backends.SYMBOLIC).to(MaudeModelChecker.class);
 
+            MapBinder.newMapBinder(
+                    binder(), String.class, Prover.class);
+
             bind(Debugger.class).to(ExecutorDebugger.class);
 
             bind(Term.class).toProvider(InitialConfigurationProvider.class);
@@ -238,46 +243,35 @@ public class KRunModule extends AbstractModule {
     public static class MainExecutionContextModule extends PrivateModule {
 
         private final KRunOptions options;
-        private final ImmutableList<Module> definitionSpecificModules;
+        private final List<Module> definitionSpecificModules;
 
-        public MainExecutionContextModule(KRunOptions options, Module... definitionSpecificModules) {
+        public MainExecutionContextModule(KRunOptions options, List<Module> definitionSpecificModules) {
             this.options = options;
-            this.definitionSpecificModules = ImmutableList.copyOf(definitionSpecificModules);
+            this.definitionSpecificModules = definitionSpecificModules;
         }
 
         @Override
         protected void configure() {
+            for (Element element : Elements.getElements(definitionSpecificModules)) {
+                element.acceptVisitor(new DefaultElementVisitor<Void>() {
+                    @Override
+                    public <T> Void visit(Binding<T> binding) {
+                        Key<T> key = binding.getKey();
+                        if (key.getAnnotation() == null && key.getAnnotationType() == null) {
+                            bind(key.getTypeLiteral()).annotatedWith(Main.class).to(key.getTypeLiteral());
+                            expose(key.getTypeLiteral()).annotatedWith(Main.class);
+                        }
+                        return null;
+                    }
+                });
+            }
             for (Module m : definitionSpecificModules) {
                 install(m);
             }
 
             bind(ConfigurationCreationOptions.class).toInstance(options.configurationCreation);
-
-            bind(Term.class).annotatedWith(Main.class).to(Term.class).in(Singleton.class);
-            bind(SymbolicRewriter.class).annotatedWith(Main.class).to(SymbolicRewriter.class);
-            bind(GlobalContext.class).annotatedWith(Main.class).to(GlobalContext.class);
-            bind(KilFactory.class).annotatedWith(Main.class).to(KilFactory.class);
-            bind(Context.class).annotatedWith(Main.class).to(Context.class);
-            bind(KompileOptions.class).annotatedWith(Main.class).to(KompileOptions.class);
-
-            bind(Debugger.class).annotatedWith(Main.class).to(Debugger.class);
-            bind(LtlModelChecker.class).annotatedWith(Main.class).to(LtlModelChecker.class);
-            bind(Executor.class).annotatedWith(Main.class).to(Executor.class);
             bind(GuiDebugger.class).annotatedWith(Main.class).to(GuiDebugger.class);
-            bind(Prover.class).annotatedWith(Main.class).to(Prover.class);
-
-            expose(Term.class).annotatedWith(Main.class);
-            expose(SymbolicRewriter.class).annotatedWith(Main.class);
-            expose(GlobalContext.class).annotatedWith(Main.class);
-            expose(KilFactory.class).annotatedWith(Main.class);
-            expose(Context.class).annotatedWith(Main.class);
-            expose(KompileOptions.class).annotatedWith(Main.class);
-
-            expose(Debugger.class).annotatedWith(Main.class);
-            expose(LtlModelChecker.class).annotatedWith(Main.class);
-            expose(Executor.class).annotatedWith(Main.class);
             expose(GuiDebugger.class).annotatedWith(Main.class);
-            expose(Prover.class).annotatedWith(Main.class);
         }
     }
 }

@@ -23,6 +23,7 @@ import org.kframework.utils.BaseTestCase;
 
 import static org.mockito.Mockito.*;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -91,9 +92,9 @@ public class KRunModuleTest extends BaseTestCase {
     }
 
     private Injector buildInjector(String[] argv) {
-        Module[] definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(argv);
+        List<Module> definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(argv);
         Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
-        List<Module> modules = KRunFrontEnd.getModules(argv, definitionSpecificModuleOverride);
+        List<Module> modules = KRunFrontEnd.getModules(argv, ImmutableList.of(definitionSpecificModuleOverride));
         Injector injector = Guice.createInjector(modules);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(new TypeLiteral<TransformationProvider<Transformation<Void, Void>>>() {}));

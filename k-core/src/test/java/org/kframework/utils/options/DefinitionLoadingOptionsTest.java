@@ -15,8 +15,8 @@ public class DefinitionLoadingOptionsTest {
     @Test
     public void testReadDefinition() throws IOException {
         DefinitionLoadingOptions options = new DefinitionLoadingOptions();
-        new JCommander(options, "--directory", ".");
-        assertEquals(new File("test-kompiled").getCanonicalPath(), options.definition().getCanonicalPath());
+        new JCommander(options, "--directory", "src/test/resources");
+        assertEquals(new File("src/test/resources/test-kompiled").getCanonicalPath(), options.definition().getCanonicalPath());
         assertTrue(options.definition().exists());
         assertTrue(options.definition().isDirectory());
     }

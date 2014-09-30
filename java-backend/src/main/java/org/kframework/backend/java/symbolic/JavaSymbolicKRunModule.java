@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import java.io.File;
+import java.util.List;
 
 import org.kframework.backend.java.builtins.BuiltinIOOperations;
 import org.kframework.backend.java.builtins.BuiltinIOOperationsImpl;
@@ -23,9 +24,9 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.Spec;
+
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
@@ -49,7 +50,6 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         bind(JavaExecutionOptions.class).toInstance(options);
         bind(Boolean.class).annotatedWith(FreshRules.class).toInstance(false);
 
-
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().toInstance(options);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
@@ -67,6 +67,10 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         protected void configure() {
             install(new JavaSymbolicCommonModule());
             bind(BuiltinIOOperations.class).to(BuiltinIOOperationsImpl.class);
+
+            bind(SymbolicRewriter.class);
+            bind(KilFactory.class);
+            bind(GlobalContext.class);
 
             MapBinder<String, Prover> proverBinder = MapBinder.newMapBinder(
                     binder(), String.class, Prover.class);
@@ -88,10 +92,10 @@ public class JavaSymbolicKRunModule extends AbstractModule {
 
     public static class SimulationModule extends PrivateModule {
 
-        private final ImmutableList<Module> definitionSpecificModules;
+        private final List<Module> definitionSpecificModules;
 
-        public SimulationModule(Module... definitionSpecificModules) {
-            this.definitionSpecificModules = ImmutableList.copyOf(definitionSpecificModules);
+        public SimulationModule(List<Module> definitionSpecificModules) {
+            this.definitionSpecificModules = definitionSpecificModules;
         }
 
         @Override

@@ -1,5 +1,5 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-package org.kframework.compile.transformers;
+package org.kframework.backend.java.compile;
 
 import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.utils.KilProperty;

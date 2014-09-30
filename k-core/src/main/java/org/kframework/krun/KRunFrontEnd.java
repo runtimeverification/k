@@ -1,11 +1,8 @@
 // Copyright (c) 2010-2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.backend.java.symbolic.JavaSymbolicKRunModule;
 import org.kframework.kil.Attributes;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -22,31 +19,27 @@ import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 
 public class KRunFrontEnd extends FrontEnd {
 
-    public static Module[] getDefinitionSpecificModules(String[] argv) {
-        return new com.google.inject.Module[] {
+    public static List<Module> getDefinitionSpecificModules(String[] argv) {
+        return ImmutableList.<Module>of(
                 new KRunModule.CommonModule(),
-                new DefinitionLoadingModule(),
-                new JavaSymbolicKRunModule.CommonModule()
-        };
+                new DefinitionLoadingModule()
+        );
     }
 
-    public static List<Module> getModules(String[] args, Module... definitionSpecificModules) {
+    public static List<Module> getModules(String[] args, List<Module> definitionSpecificModules) {
         KRunOptions options = new KRunOptions();
-        JavaExecutionOptions javaOptions = new JavaExecutionOptions();
 
-        List<Module> modules = new ArrayList<>();
-        modules.add(new KRunModule(options));
-        modules.add(new CommonModule());
-        modules.add(new JCommanderModule(args));
-        modules.add(new JavaSymbolicKRunModule(javaOptions));
-        modules.add(new KRunModule.MainExecutionContextModule(options, definitionSpecificModules));
-        modules.add(new JavaSymbolicKRunModule.SimulationModule(definitionSpecificModules));
-        return modules;
+        return ImmutableList.<Module>of(
+                new KRunModule(options),
+                new CommonModule(),
+                new JCommanderModule(args),
+                new KRunModule.MainExecutionContextModule(options, definitionSpecificModules));
     }
 
 
