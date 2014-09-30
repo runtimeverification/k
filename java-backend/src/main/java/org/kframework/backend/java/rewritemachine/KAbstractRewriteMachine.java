@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.DeepCloner;
+import org.kframework.backend.java.symbolic.NonACPatternMatcher;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.util.Profiler;
@@ -49,6 +50,8 @@ public class KAbstractRewriteMachine {
     private boolean success = true;
     private boolean isStarNested = false;
 
+    private final NonACPatternMatcher patternMatcher;
+
     private final TermContext context;
 
     private KAbstractRewriteMachine(Rule rule, Cell<?> subject, TermContext context) {
@@ -56,6 +59,7 @@ public class KAbstractRewriteMachine {
         this.subject = subject;
         this.instructions = rule.instructions();
         this.context = context;
+        this.patternMatcher = new NonACPatternMatcher(context);
     }
 
     public static boolean rewrite(Rule rule, Term subject, TermContext context) {
@@ -73,7 +77,8 @@ public class KAbstractRewriteMachine {
             /* take the first match that also satisfies the side-condition as solution */
             ExtendedSubstitution solution = null;
             for (ExtendedSubstitution extSubst : normalizedExtSubsts) {
-                Map<Variable, Term> updatedSubst = evaluateConditions(extSubst.substitution());
+                Map<Variable, Term> updatedSubst = NonACPatternMatcher
+                        .evaluateConditions(rule, extSubst.substitution(), context);
                 if (updatedSubst != null) {
                     /* update the substitution according to the result of evaluation */
                     extSubst.setSubst(updatedSubst);
@@ -120,8 +125,8 @@ public class KAbstractRewriteMachine {
             Profiler.startTimer(Profiler.PATTERN_MATCH_TIMER);
             /* there should be no AC-matching under the crntCell (violated rule
              * has been filtered out by the compiler) */
-            Map<Variable, Term> subst = PatternMatcher.nonAssocCommPatternMatch(
-                    crntCell.getContent(), getReadCellLHS(cellLabel), context);
+            Map<Variable, Term> subst = patternMatcher.patternMatch(
+                    crntCell.getContent(), getReadCellLHS(cellLabel));
 
             if (subst == null) {
                 success = false;
@@ -198,20 +203,6 @@ public class KAbstractRewriteMachine {
                 }
             }
         }
-    }
-
-    /**
-     * Evaluates the side-conditions of a rule according to a given
-     * substitution.
-     *
-     * @param substitution
-     * @return the updated substitution on success; otherwise, {@code null}
-     */
-    private Map<Variable, Term> evaluateConditions(Map<Variable, Term> substitution) {
-        List<Map<Variable, Term>> results = PatternMatcher.evaluateConditions(
-                rule, Collections.singletonList(substitution), context);
-        assert results.size() <= 1;
-        return results.isEmpty() ? null : results.get(0);
     }
 
     private Instruction nextInstruction() {
