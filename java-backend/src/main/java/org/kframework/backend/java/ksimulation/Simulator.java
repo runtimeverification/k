@@ -1,33 +1,42 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.ksimulation;
 
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.KilFactory;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.kil.Attributes;
 import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.transformation.Transformation;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.Main;
+import org.kframework.utils.inject.Spec;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class Simulator implements Transformation<Void, KRunResult<?>> {
 
-    private final Waitor waitor;
+    private final KExceptionManager kem;
 
     @Inject
-    Simulator(Waitor waitor) {
-        this.waitor = waitor;
+    Simulator(
+            @Main SymbolicRewriter impl,
+            @Spec SymbolicRewriter spec,
+            @Main Provider<org.kframework.kil.Term> implTerm,
+            @Spec Provider<org.kframework.kil.Term> specTerm,
+            @Main GlobalContext implGlobalContext,
+            @Spec GlobalContext specGlobalContext,
+            @Main KilFactory implFactory,
+            @Spec KilFactory specFactory,
+            KExceptionManager kem) {
+        this.kem = kem;
     }
 
     @Override
     public KRunProofResult<?> run(Void v, Attributes a) {
-        waitor.init();
-        waitor.start();
-        try {
-            waitor.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return new KRunProofResult<Void>(false, null);
-        }
-        return new KRunProofResult<Void>(true, null);
+        kem.registerCriticalError("--simulation is not currently supported");
+        throw new AssertionError("unreachable");
     }
 
     @Override

@@ -10,7 +10,6 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.ksimulation.Simulator;
-import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunOptions;
@@ -26,7 +25,6 @@ import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.Spec;
 
 import com.beust.jcommander.JCommander;
-import com.google.common.base.Optional;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
@@ -119,8 +117,6 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             expose(Context.class).annotatedWith(Spec.class);
 
             expose(Simulator.class).annotatedWith(Main.class);
-
-            expose(new TypeLiteral<Optional<Waitor>>() {});
         }
 
         @Provides
@@ -130,11 +126,6 @@ public class JavaSymbolicKRunModule extends AbstractModule {
                     options.experimental.simulation.toArray(
                             new String[options.experimental.simulation.size()]));
             return simulationCCOptions;
-        }
-
-        @Provides
-        Optional<Waitor> waitor(Waitor waitor) {
-            return Optional.of(waitor);
         }
     }
 }
