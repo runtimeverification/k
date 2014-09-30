@@ -236,7 +236,7 @@ public class BottomUpVisitor implements Visitor {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
-        for (SymbolicConstraint.Equality equality : node.equalities()) {
+        for (Equality equality : node.equalities()) {
             equality.leftHandSide().accept(this);
             equality.rightHandSide().accept(this);
         }

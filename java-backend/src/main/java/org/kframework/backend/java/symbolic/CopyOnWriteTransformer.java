@@ -556,7 +556,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     (Term) entry.getValue().accept(this));
         }
 
-        for (SymbolicConstraint.Equality equality : symbolicConstraint.equalities()) {
+        for (Equality equality : symbolicConstraint.equalities()) {
             transformedSymbolicConstraint.add(
                     (Term) equality.leftHandSide().accept(this),
                     (Term) equality.rightHandSide().accept(this));

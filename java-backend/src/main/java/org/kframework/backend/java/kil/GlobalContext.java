@@ -4,7 +4,8 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.kil.KItem.KItemOperations;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.EqualityOperations;
+import org.kframework.backend.java.symbolic.Equality;
+import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.krun.api.io.FileSystem;
 
 import com.google.inject.Inject;
@@ -15,14 +16,14 @@ public class GlobalContext {
     private Definition def;
     public final FileSystem fs;
     public final BuiltinFunction builtins;
-    public final EqualityOperations equalityOps;
+    public final Equality.EqualityOperations equalityOps;
     public final KItemOperations kItemOps;
 
     @Inject
     public GlobalContext(
             FileSystem fs,
             BuiltinFunction builtins,
-            EqualityOperations equalityOps,
+            Equality.EqualityOperations equalityOps,
             KItemOperations kItemOps) {
         this.fs = fs;
         this.builtins = builtins;

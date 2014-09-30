@@ -148,7 +148,7 @@ public class SymbolicUnifier extends AbstractUnifier {
      *            the given equality
      * @return true if the unification succeeds; otherwise, false
      */
-    public boolean unify(SymbolicConstraint.Equality equality) {
+    public boolean unify(Equality equality) {
         try {
             isStarNested = false;
             // YilongL: is it correct to simply clear the multiConstraints?

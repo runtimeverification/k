@@ -529,8 +529,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         assert leftHandSide.kind() == rightHandSide.kind()
-               || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST)
-                   && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
+                || leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational();
 
         concreteCollectionSize = Collections.emptyMap();
 
