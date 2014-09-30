@@ -127,7 +127,7 @@ public class NonACPatternMatcher {
                 /* add substitution */
                 addSubstitution(variable, subject);
             } else {
-                check(!subject.isSymbolic() || matchOnFunctionSymbol);
+                check(!subject.isSymbolic() || subject instanceof KItem && matchOnFunctionSymbol);
                 if (failed) {
                     return false;
                 }

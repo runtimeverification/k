@@ -464,7 +464,7 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* add substitution */
             addSubstitution(variable, subject);
-        } else if (subject.isSymbolic() && !matchOnFunctionSymbol) {
+        } else if (subject.isSymbolic() && (!(subject instanceof KItem) || !matchOnFunctionSymbol)) {
             fail(subject, pattern);
         } else {
             /* match */
