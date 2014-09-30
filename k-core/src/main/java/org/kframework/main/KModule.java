@@ -9,7 +9,8 @@ public interface KModule {
 
     public List<Module> getKompileModules();
     public List<Module> getKastModules();
-    public List<Module> getKRunModules();
+    public List<Module> getKRunModules(List<Module> definitionSpecificModules);
+    public List<Module> getDefinitionSpecificKRunModules();
     public List<Module> getKTestModules();
 
 }

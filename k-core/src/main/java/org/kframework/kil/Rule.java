@@ -1,12 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.kframework.backend.java.kil.JavaBackendRuleData;
-import org.kframework.backend.java.rewritemachine.Instruction;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;

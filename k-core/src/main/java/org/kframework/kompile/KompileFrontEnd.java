@@ -10,8 +10,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
-import org.kframework.backend.java.symbolic.JavaSymbolicCommonModule;
-import org.kframework.backend.java.symbolic.JavaSymbolicKompileModule;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
@@ -44,8 +42,6 @@ public class KompileFrontEnd extends FrontEnd {
         modules.add(new KompileModule(context, options));
         modules.add(new JCommanderModule(args));
         modules.add(new CommonModule());
-        modules.add(new JavaSymbolicCommonModule());
-        modules.add(new JavaSymbolicKompileModule());
         return modules;
     }
 
@@ -110,7 +106,8 @@ public class KompileFrontEnd extends FrontEnd {
         if (backend.generatesDefinition()) {
                 context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.kompiled);
-                if (!context.kompiled.exists() && !context.kompiled.mkdirs()) {
+                if (options.mainDefinitionFile().exists()
+                        && !context.kompiled.exists() && !context.kompiled.mkdirs()) {
                     kem.registerCriticalError("Could not create directory " + context.kompiled);
                 }
         }

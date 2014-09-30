@@ -46,11 +46,6 @@
       <version>4.0-beta4</version>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.0</version>
-    </dependency>
-    <dependency>
       <groupId>net.sf.jung</groupId>
       <artifactId>jung-api</artifactId>
       <version>2.0.1</version>
@@ -117,50 +112,14 @@
       <version>0.9.94</version>
     </dependency>
     <dependency>
-      <groupId>org.pcollections</groupId>
-      <artifactId>pcollections</artifactId>
-      <version>2.1.2</version>
-    </dependency>
-    <dependency>
       <groupId>com.googlecode.java-diff-utils</groupId>
       <artifactId>diffutils</artifactId>
       <version>1.3.0</version>
     </dependency>
     <dependency>
-      <groupId>uk.com.robust-it</groupId>
-      <artifactId>cloning</artifactId>
-      <version>1.9.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.kframework.dependencies</groupId>
       <artifactId>strategoxt</artifactId>
       <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>com.microsoft.z3</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>${native.library.prefix}z3java</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-      <type>${native.library.type}</type>
-      <classifier>${native.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>libz3</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-      <type>${native.library.type}</type>
-      <classifier>${native.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.z3</groupId>
-      <artifactId>z3</artifactId>
-      <version>4.3.2-SNAPSHOT</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.classifier}</classifier>
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
@@ -264,15 +223,29 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+          <shortRevisionLength>7</shortRevisionLength>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.17</version>
 	<configuration>
-          <workingDirectory>src/test/resources</workingDirectory>
-          <environmentVariables>
-            <LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</LD_LIBRARY_PATH>
-            <DYLD_LIBRARY_PATH>${env.DYLD_LIBRARY_PATH}${path.separator}${project.build.directory}/lib/native</DYLD_LIBRARY_PATH>
-            <PATH>${env.PATH}${path.separator}${project.build.directory}/lib/native</PATH>
-          </environmentVariables>
+          <systemPropertyVariables>
+            <java.awt.headless>true</java.awt.headless>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -280,10 +253,6 @@
         <version>2.5</version>
         <configuration>
           <archive>
-            <manifest>
-              <mainClass>org.kframework.main.Main</mainClass>
-              <addClasspath>true</addClasspath>
-            </manifest>
             <manifestEntries>
               <Implementation-Revision>${buildNumber}</Implementation-Revision>
               <Implementation-Branch>${scmBranch}</Implementation-Branch>
@@ -292,6 +261,13 @@
             </manifestEntries>
           </archive>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -323,19 +299,6 @@
                 </artifactItem>
               </artifactItems>
               <outputDirectory>target/sdf/bin</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-native-dependencies</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <stripVersion>true</stripVersion>
-              <stripClassifier>true</stripClassifier>
-              <includeTypes>${native.library.type}</includeTypes>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
             </configuration>
           </execution>
         </executions>

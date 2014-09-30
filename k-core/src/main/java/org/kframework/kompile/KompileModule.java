@@ -86,7 +86,7 @@ public class KompileModule extends AbstractModule {
         Backend backend = map.get(options.backend);
         if (backend == null) {
             kem.registerCriticalError("Invalid backend: " + options.backend
-                    + ". It should be one of [pdf|latex|html|maude|java|unparse|symbolic]");
+                    + ". It should be one of " + map.keySet());
         }
         return backend;
     }
