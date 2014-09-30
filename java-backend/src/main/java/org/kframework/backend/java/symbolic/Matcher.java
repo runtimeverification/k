@@ -14,7 +14,6 @@ import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
@@ -44,7 +43,6 @@ public interface Matcher {
     public void match(KLabelInjection kLabelInjection, Term pattern);
     public void match(KList kList, Term pattern);
     public void match(KSequence kSequence, Term pattern);
-    public void match(MetaVariable metaVariable, Term pattern);
     public void match(Term subject, Term pattern);
     public void match(Token token, Term pattern);
     public void match(Variable variable, Term pattern);

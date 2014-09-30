@@ -25,7 +25,6 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -223,7 +222,7 @@ public class PatternMatcher extends AbstractMatcher {
                         if (checkOrderedSortedCondition(variable, evalLookupOrChoice, context)) {
                             Term term = crntSubst.put(variable, evalLookupOrChoice);
                             resolved = term == null || BoolToken.TRUE.equals(
-                                    new TermEquality().eq(term, evalLookupOrChoice, context));
+                                    TermEquality.eq(term, evalLookupOrChoice, context));
                         }
                     } else {
                         // the non-lookup term is not a variable and thus requires further pattern matching
@@ -1048,16 +1047,8 @@ public class PatternMatcher extends AbstractMatcher {
         if(!(pattern instanceof KLabelInjection)) {
             fail(kLabelInjection, pattern);
         }
+
         KLabelInjection otherKLabelInjection = (KLabelInjection) pattern;
-
-        Kind injectionKind = kLabelInjection.term().kind();
-        Kind otherInjectionKind = otherKLabelInjection.term().kind();
-        if (injectionKind != otherInjectionKind
-                && !(injectionKind.isComputational() && otherInjectionKind.isComputational())
-                && !(injectionKind.isStructural() && otherInjectionKind.isStructural())) {
-            fail(kLabelInjection, otherKLabelInjection);
-        }
-
         match(kLabelInjection.term(), otherKLabelInjection.term());
     }
 
@@ -1158,15 +1149,6 @@ public class PatternMatcher extends AbstractMatcher {
             }
         } else {
             fail(kCollection, pattern);
-        }
-    }
-
-    @Override
-    public void match(MetaVariable metaVariable, Term pattern) {
-        assert !(pattern instanceof Variable);
-
-        if (!metaVariable.equals(pattern)) {
-            fail(metaVariable, pattern);
         }
     }
 

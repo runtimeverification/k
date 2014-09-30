@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.DeepCloner;
+import org.kframework.backend.java.symbolic.NonACPatternMatcher;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.util.Profiler;
@@ -49,6 +50,8 @@ public class KAbstractRewriteMachine {
     private boolean success = true;
     private boolean isStarNested = false;
 
+    private final NonACPatternMatcher patternMatcher;
+
     private final TermContext context;
 
     private KAbstractRewriteMachine(Rule rule, Cell<?> subject, TermContext context) {
@@ -56,6 +59,7 @@ public class KAbstractRewriteMachine {
         this.subject = subject;
         this.instructions = rule.instructions();
         this.context = context;
+        this.patternMatcher = new NonACPatternMatcher(context);
     }
 
     public static boolean rewrite(Rule rule, Term subject, TermContext context) {
@@ -120,8 +124,8 @@ public class KAbstractRewriteMachine {
             Profiler.startTimer(Profiler.PATTERN_MATCH_TIMER);
             /* there should be no AC-matching under the crntCell (violated rule
              * has been filtered out by the compiler) */
-            Map<Variable, Term> subst = PatternMatcher.nonAssocCommPatternMatch(
-                    crntCell.getContent(), getReadCellLHS(cellLabel), context);
+            Map<Variable, Term> subst = patternMatcher.patternMatch(
+                    crntCell.getContent(), getReadCellLHS(cellLabel));
 
             if (subst == null) {
                 success = false;
