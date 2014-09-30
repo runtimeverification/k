@@ -3,10 +3,10 @@
         .Bag
     </tasks>
     <gtenv>
+        a |-> ((int) [ ])
         app0 |-> (((void) -> (void)) -> (void))
         app1 |-> (((void) -> (int)) -> (int))
         app2 |-> (((int) -> (int)), (int) -> (int))
-        a |-> ((int) [ ])
         double |-> ((int) -> (int))
         hodouble |-> ((void) -> ((int) -> (int)))
         hoid |-> ((void) -> ((int) -> (int)))

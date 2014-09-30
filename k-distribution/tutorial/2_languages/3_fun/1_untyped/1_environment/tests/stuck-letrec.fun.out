@@ -2,4 +2,5 @@ Search results:
 
 Solution 1:
 V:K -->
-x ~> HOLE ~> 2, HOLE ~> assignTo ( x, y , HOLE ) ~> y ~> env ( .Map )
+x ~> '_`,_(HOLE,, '.List`{"'_`,_"`}(.KList)) ~> 2, HOLE ~> assignTo ( x, y , 
+  HOLE ) ~> y ~> env ( .Map )

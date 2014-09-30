@@ -43,7 +43,7 @@ public class ListTerminator extends Term {
     @Override
     public String toString() {
         if (separator != null && sort.equals(Sort.K)) {
-            return ".List{" + StringUtil.enquoteKString(separator) + "}";
+            return "'.List`{" + StringUtil.enquoteCString(StringUtil.escapeMaude(separator)) + "`}(.KList)";
         } else {
         return "." + sort;
     }

@@ -60,8 +60,9 @@ public class KRunState implements Serializable, Comparable<KRunState> {
             result = (Term) new ConcretizeSyntax(context).visitNode(result);
             result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
             result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
+            result = (Term) new ConcretizeSyntax.RemoveEmptyLists(context).visitNode(result);
+            result = (Term) new AddBracketsFilter(context).visitNode(result);
             if (context.krunOptions.output == OutputModes.SMART) {
-                result = (Term) new AddBracketsFilter(context).visitNode(result);
                 try {
                     /* collect existing free variables in the result */
                     final Set<Variable> existingFreeVariables = new HashSet<Variable>();
