@@ -101,6 +101,13 @@ Common error messages:
    + ``git` might not be installed on your system. Make sure that you can execute
       `git` from the command line.
 
+- `1) Error injecting constructor, java.lang.Error: Unresolved compilation problems:
+        The import org.kframework.parser.outer.Outer cannot be resolved
+        Outer cannot be resolved`
+   + You may run into this issue if target/generated-sources/javacc is not added to the
+     build path of your IDE. Generally this is solved by regenerating your project /
+     re-syncing it with the pom.xml.
+
 If something unexpected happens and the project fails to build, try `mvn clean` and
 rebuild the entire project. Generally speaking, however, the project should build incrementally
 without needing to be cleaned first.
