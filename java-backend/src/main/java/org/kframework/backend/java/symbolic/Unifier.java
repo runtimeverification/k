@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
@@ -21,12 +22,15 @@ import org.kframework.backend.java.kil.Token;
  * which uses double dispatch to reduce an invocation of {@code unify} with two generic {@link
  * Term} arguments to an invocation of {@code unify} with the first argument of the actual class.
  *
+ * @see Unifiable
+ *
  * @author AndreiS
  */
 public interface Unifier {
 
     public String getName();
 
+    public void unify(Bottom bottom, Term term);
     public void unify(BuiltinList builtinList, Term term);
     public void unify(BuiltinMap builtinMap, Term term);
     public void unify(BuiltinSet builtinSet, Term term);

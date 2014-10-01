@@ -537,6 +537,11 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     @Override
+    public void match(Bottom bottom, Term pattern) {
+        fail(bottom, pattern);
+    }
+
+    @Override
     public void match(BuiltinList builtinList, Term pattern) {
         assert !(pattern instanceof Variable);
 

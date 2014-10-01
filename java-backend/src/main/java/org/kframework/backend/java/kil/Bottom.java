@@ -78,11 +78,13 @@ public class Bottom extends Term implements MaximalSharing {
 
     @Override
     public void accept(Matcher matcher, Term pattern) {
-        // TODO(YilongL): why not throw an exception here?
+        matcher.match(this, pattern);
     }
 
     @Override
-    public void accept(Unifier unifier, Term pattern) { }
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
 
     @Override
     public void accept(Visitor visitor) { }

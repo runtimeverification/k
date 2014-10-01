@@ -141,12 +141,12 @@ public class Variable extends Term implements Immutable {
 
     @Override
     public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
+        throw new UnsupportedOperationException();
     }
 
     @Override

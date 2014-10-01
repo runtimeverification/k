@@ -1,6 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
@@ -29,6 +30,7 @@ public interface Matcher {
 
     public String getName();
 
+    public void match(Bottom bottom, Term pattern);
     public void match(BuiltinList builtinList, Term pattern);
     public void match(BuiltinMap builtinMap, Term pattern);
     public void match(BuiltinSet builtinSet, Term pattern);
