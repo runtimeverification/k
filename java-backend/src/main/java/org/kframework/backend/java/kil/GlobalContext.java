@@ -15,7 +15,7 @@ public class GlobalContext {
     private Definition def;
     public final FileSystem fs;
     public final BuiltinFunction builtins;
-    public final SymbolicConstraintOperations equalityOps;
+    public final SymbolicConstraintOperations constraintOps;
     public final KItemOperations kItemOps;
 
     @Inject
@@ -26,7 +26,7 @@ public class GlobalContext {
             KItemOperations kItemOps) {
         this.fs = fs;
         this.builtins = builtins;
-        this.equalityOps = equalityOps;
+        this.constraintOps = equalityOps;
         this.kItemOps = kItemOps;
     }
 

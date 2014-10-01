@@ -528,7 +528,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         public boolean isFalse() {
-            return context.global().equalityOps.isFalse(this);
+            return context.global().constraintOps.isFalse(this);
         }
 
         /**
@@ -890,7 +890,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean checkUnsat() {
-        return context.global().equalityOps.checkUnsat(this);
+        return context.global().constraintOps.checkUnsat(this);
     }
 
     /**
@@ -1003,7 +1003,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             SymbolicConstraint right,
             Set<Variable> rightOnlyVariables) {
         assert left.context == right.context;
-        return left.context.global().equalityOps.impliesSMT(left, right, rightOnlyVariables);
+        return left.context.global().constraintOps.impliesSMT(left, right, rightOnlyVariables);
     }
 
     /**
