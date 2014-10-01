@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
@@ -52,8 +53,18 @@ public class Equality {
             rightHandSide = kList.get(1);
         }
 
-        this.leftHandSide = canonicalize(leftHandSide);
-        this.rightHandSide = canonicalize(rightHandSide);
+        /* arrange the leftHandSide and rightHandSide according to the natural
+         * ordering defined for {@code Term} */
+        leftHandSide = canonicalize(leftHandSide);
+        rightHandSide = canonicalize(rightHandSide);
+        if (leftHandSide.compareTo(rightHandSide) > 0) {
+            Term term = leftHandSide;
+            leftHandSide = rightHandSide;
+            rightHandSide = term;
+        }
+
+        this.leftHandSide = leftHandSide;
+        this.rightHandSide = rightHandSide;
         this.context = context;
     }
 
@@ -155,13 +166,14 @@ public class Equality {
     }
 
     /**
-     * TODO(YilongL): add comment!
-     * @return
+     * Specifies whether this equality can be further decomposed by the
+     * unification algorithm of {@code SymbolicUnifier}.
      */
     public boolean isSimplifiableByCurrentAlgorithm() {
         return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic()
                 && !(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap)
-                && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList);
+                && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList)
+                && !(leftHandSide instanceof BuiltinSet) && !(rightHandSide instanceof BuiltinSet);
     }
 
     @Override
