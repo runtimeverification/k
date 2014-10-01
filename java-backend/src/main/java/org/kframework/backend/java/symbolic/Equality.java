@@ -5,13 +5,11 @@ package org.kframework.backend.java.symbolic;
 import java.util.Map;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
@@ -23,8 +21,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.Production;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -225,50 +221,34 @@ public class Equality {
             Definition definition = definitionProvider.get();
             Term leftHandSide = equality.leftHandSide;
             Term rightHandSide = equality.rightHandSide;
+            // TODO(YilongL): why do you want to build a false equality (i.e., determined by SymbolicUnifier) in the first place?
             if (leftHandSide instanceof Bottom || rightHandSide instanceof Bottom) {
                 return true;
             }
 
             /* both leftHandSide & rightHandSide must have been evaluated before
              * this method is invoked */
+            // TODO(YilongL): this doesn't look right; first, we should not rely
+            // on the fact that functions have been evaluated; second, why not
+            // let the SymbolicUnifier do its job but use equals?
             if (leftHandSide.isGround() && rightHandSide.isGround()) {
                 return !leftHandSide.equals(rightHandSide);
             }
 
-            if (leftHandSide instanceof ConcreteCollectionVariable
-                    && !((ConcreteCollectionVariable) leftHandSide).unify(rightHandSide)) {
-                return true;
-            } else if (rightHandSide instanceof ConcreteCollectionVariable
-                    && !((ConcreteCollectionVariable) rightHandSide).unify(leftHandSide)) {
-                return true;
-            }
-
+            // TODO(YilongL): I think occurs check should be handled in SymbolicUnifier instead
             if (leftHandSide instanceof Variable
                     && rightHandSide instanceof org.kframework.backend.java.kil.Collection
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).concreteSize() != 0
-                    && leftHandSide.equals(((org.kframework.backend.java.kil.Collection) rightHandSide).frame())) {
+                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).collectionVariables().contains(leftHandSide)
+                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).concreteSize() != 0) {
                 return true;
             } else if (rightHandSide instanceof Variable
                     && leftHandSide instanceof org.kframework.backend.java.kil.Collection
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).hasFrame()
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).concreteSize() != 0
-                    && rightHandSide.equals(((org.kframework.backend.java.kil.Collection) leftHandSide).frame())) {
+                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).collectionVariables().contains(rightHandSide)
+                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).concreteSize() != 0) {
                 return true;
             }
 
-            if (leftHandSide instanceof Variable
-                    && rightHandSide instanceof AssociativeCommutativeCollection
-                    && ((AssociativeCommutativeCollection) rightHandSide).collectionVariables().contains(leftHandSide)
-                    && ((AssociativeCommutativeCollection) rightHandSide).concreteSize() != 0) {
-                return true;
-            } else if (rightHandSide instanceof Variable
-                    && leftHandSide instanceof AssociativeCommutativeCollection
-                    && ((AssociativeCommutativeCollection) leftHandSide).collectionVariables().contains(rightHandSide)
-                    && ((AssociativeCommutativeCollection) leftHandSide).concreteSize() != 0) {
-                return true;
-            }
-
+            // TODO(YilongL): handle this in SymbolicUnifier?
             if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
                 return !leftHandSide.sort().equals(rightHandSide.sort());
             } else if (leftHandSide.isExactSort()) {
@@ -280,41 +260,24 @@ public class Equality {
                         leftHandSide.sort(),
                         rightHandSide.sort());
             } else {
-                if (leftHandSide instanceof Variable && rightHandSide instanceof KItem
-                        && ((KItem) rightHandSide).kLabel() instanceof KLabelConstant
-                        && ((KLabelConstant) ((KItem) rightHandSide).kLabel()).isConstructor()) {
-                    boolean flag = false;
-                    //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) rightHandSide).kLabel()).label())) {
-                    for (Production production : ((KLabelConstant) ((KItem) rightHandSide).kLabel()).productions()) {
-                        if (definition.subsorts().isSubsortedEq(
-                                leftHandSide.sort(),
-                                Sort.of(production.getSort()))) {
-                            flag = true;
-                        }
+                boolean unifiable = false;
+                if (leftHandSide instanceof Variable && rightHandSide instanceof KItem) {
+                    for (Sort sort : ((KItem) rightHandSide).possibleSorts()) {
+                        unifiable = unifiable || definition.subsorts().isSubsortedEq(leftHandSide.sort(), sort);
                     }
-                    if (!flag) {
+                    if (!unifiable) {
+                        return true;
+                    }
+                } else if (rightHandSide instanceof Variable && leftHandSide instanceof KItem) {
+                    for (Sort sort : ((KItem) leftHandSide).possibleSorts()) {
+                        unifiable = unifiable || definition.subsorts().isSubsortedEq(rightHandSide.sort(), sort);
+                    }
+                    if (!unifiable) {
                         return true;
                     }
                 }
-                if (rightHandSide instanceof Variable && leftHandSide instanceof KItem
-                        && ((KItem) leftHandSide).kLabel() instanceof KLabelConstant
-                        && ((KLabelConstant) ((KItem) leftHandSide).kLabel()).isConstructor()) {
-                    boolean flag = false;
-                    //for (Production production : definition.context().productionsOf(((KLabelConstant) ((KItem) leftHandSide).kLabel()).label())) {
-                    for (Production production : ((KLabelConstant) ((KItem) leftHandSide).kLabel()).productions()) {
-                        if (definition.subsorts().isSubsortedEq(
-                                rightHandSide.sort(),
-                                Sort.of(production.getSort()))) {
-                            flag = true;
-                        }
-                    }
-                    if (!flag) {
-                        return true;
-                    }
-                }
-                return !definition.subsorts().hasCommonSubsort(
-                        leftHandSide.sort(),
-                        rightHandSide.sort());
+
+                return !definition.subsorts().hasCommonSubsort(leftHandSide.sort(), rightHandSide.sort());
             }
         }
     }

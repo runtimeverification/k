@@ -3,7 +3,6 @@ package org.kframework.backend.java.kil;
 
 import java.util.EnumMap;
 
-import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -43,6 +42,10 @@ public class Bottom extends Term implements MaximalSharing {
         return false;
     }
 
+    /**
+     * Returns {@code false} so that the unifier/matcher will continue to
+     * unify/match it against another term and fail as expected.
+     */
     @Override
     public boolean isSymbolic() {
         return false;
