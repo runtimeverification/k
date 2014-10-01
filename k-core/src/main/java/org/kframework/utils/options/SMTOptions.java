@@ -1,11 +1,12 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.utils.options;
 
+import java.io.File;
 import java.io.Serializable;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.google.inject.Inject;
-import com.google.inject.ProvidedBy;
 
 public class SMTOptions implements Serializable {
 
@@ -25,4 +26,18 @@ public class SMTOptions implements Serializable {
             return SMTSolver.class;
         }
     }
+
+    @Parameter(names="--smt_prelude", description="Path to the SMT prelude file.")
+    private File smtPrelude;
+
+    public File smtPrelude() {
+        if (smtPrelude == null) return null;
+        if (!smtPrelude.exists() || smtPrelude.isDirectory()) {
+            throw new ParameterException("File not found: SMT prelude " + smtPrelude + ".");
+        }
+        return smtPrelude;
+    }
+
+    @Parameter(names="--z3-executable", description="Path to the SMT prelude file.")
+    public boolean z3Executable = false;
 }

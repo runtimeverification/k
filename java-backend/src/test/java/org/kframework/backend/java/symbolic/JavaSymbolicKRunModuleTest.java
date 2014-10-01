@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.ksimulation.Simulator;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Production;
+import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
@@ -62,6 +63,15 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
         injector.getInstance(Key.get(GuiDebugger.class, Main.class));
         injector.getInstance(Key.get(Prover.class, Main.class));
         injector.getInstance(Key.get(Simulator.class, Main.class));
+    }
+
+    @Test
+    public void testCreateInjectionJavaKompile() {
+        String[] argv = new String[] { "foo.k", "--backend", "java" };
+        List<Module> modules = Lists.newArrayList(KompileFrontEnd.getModules(argv));
+        modules.addAll(new JavaBackendKModule().getKompileModules());
+        Injector injector = Guice.createInjector(modules);
+        assertTrue(injector.getInstance(FrontEnd.class) instanceof KompileFrontEnd);
     }
 
     public class TestModule extends AbstractModule {

@@ -13,6 +13,8 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.options.SMTOptions;
+
 import java.io.*;
 
 /**
@@ -24,13 +26,13 @@ public class Z3Wrapper {
 
     public final String SMT_PRELUDE;
     private String logic;
-    private final KRunOptions options;
+    private final SMTOptions options;
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
 
     @Inject
     public Z3Wrapper(
-            KRunOptions options,
+            SMTOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions) {
         this.options = options;
@@ -40,9 +42,9 @@ public class Z3Wrapper {
         String s = "";
         logic = "";
         try {
-            if (options.experimental.smtPrelude() != null) {
-                s = Files.toString(options.experimental.smtPrelude(), Charsets.UTF_8);
-                logic = options.experimental.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
+            if (options.smtPrelude() != null) {
+                s = Files.toString(options.smtPrelude(), Charsets.UTF_8);
+                logic = options.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -51,7 +53,7 @@ public class Z3Wrapper {
     }
 
     public boolean checkQuery(String query, int timeout) {
-        if (options.experimental.z3Executable) {
+        if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout);
         } else {
             return checkQueryWithLibrary(query, timeout);
