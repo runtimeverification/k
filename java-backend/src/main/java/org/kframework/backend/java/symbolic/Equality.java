@@ -9,12 +9,14 @@ import org.kframework.backend.java.kil.AssociativeCommutativeCollection;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -70,7 +72,17 @@ public class Equality {
     }
 
     private Term canonicalize(Term term) {
-        return term instanceof KList ? KCollection.downKind(term) : term;
+        if (term.kind() == Kind.K || term.kind() == Kind.KLIST) {
+            term = KCollection.downKind(term);
+        }
+        if (term.kind() == Kind.CELL_COLLECTION) {
+            term = CellCollection.downKind(term);
+        }
+        return term;
+
+        // TODO(YilongL): unable to assume that KList is the only possible
+        // non-canonicalized term because SymbolicUnifier still use upkind a lot
+        // return term instanceof KList ? KCollection.downKind(term) : term;
     }
 
     public TruthValue truthValue() {
