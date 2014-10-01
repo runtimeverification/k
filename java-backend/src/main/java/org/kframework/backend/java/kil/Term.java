@@ -217,7 +217,18 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
 
     @Override
     public final int compareTo(Term o) {
-        return toString().compareTo(o.toString());
+        /* implement compareTo() in a way that the expensive toString() is
+         * rarely called */
+        int result = hashCode() - o.hashCode();
+        if (result != 0) {
+            return result;
+        } else if (equals(o)) {
+            return 0;
+        } else {
+            /* Note: since the equality has been checked, it's okay that the
+             * two different terms might have the same string representation */
+            return toString().compareTo(o.toString());
+        }
     }
 
     /**
