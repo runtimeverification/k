@@ -12,7 +12,6 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -299,8 +298,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<Term>(CellLabel.of(node.getLabel()), content);
             } else if (content instanceof KItemProjection) {
                 return new Cell<KItemProjection>(CellLabel.of(node.getLabel()), (KItemProjection) content);
-            } else if (content instanceof BuiltinMgu) {
-                return new Cell<BuiltinMgu>(CellLabel.of(node.getLabel()), (BuiltinMgu) content);
             } else {
                 throw new RuntimeException();
             }

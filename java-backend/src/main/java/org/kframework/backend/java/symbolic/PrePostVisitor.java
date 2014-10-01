@@ -393,13 +393,4 @@ public class PrePostVisitor implements Visitor {
         node.constraint().accept(this);
         node.accept(postVisitor);
     }
-
-    @Override
-    public void visit(BuiltinMgu mgu) {
-        preVisitor.resetProceed();
-        mgu.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        mgu.constraint().accept(this);
-        mgu.accept(postVisitor);
-    }
 }

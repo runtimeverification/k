@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -33,7 +32,6 @@ public interface Matcher {
     public void match(BuiltinList builtinList, Term pattern);
     public void match(BuiltinMap builtinMap, Term pattern);
     public void match(BuiltinSet builtinSet, Term pattern);
-    public void match(BuiltinMgu builtinMgu, Term pattern);
     public void match(Cell cell, Term pattern);
     public void match(CellCollection cellCollection, Term pattern);
     public void match(Hole hole, Term pattern);

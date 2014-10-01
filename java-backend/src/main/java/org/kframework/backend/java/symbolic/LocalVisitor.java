@@ -216,9 +216,4 @@ public class LocalVisitor implements Visitor {
     public void visit(Variable variable) {
         visit((Term) variable);
     }
-
-    @Override
-    public void visit(BuiltinMgu mgu) {
-        visit((Term) mgu);
-    }
 }

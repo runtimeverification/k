@@ -255,12 +255,6 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(BuiltinMgu mgu) {
-        // TODO(YilongL): properly translate the Mgu into KItem form using the toK function
-        return transformJavaBackendSpecificTerm(mgu);
-    }
-
-    @Override
     public ASTNode transform(BitVector bitVector) {
         return transform((Token) bitVector);
     }

@@ -4,7 +4,6 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -523,17 +522,6 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         throw new UnsupportedOperationException(
                 "set matching is only supported when one of the sets is a variable.");
-    }
-
-    @Override
-    public void unify(BuiltinMgu builtinMgu, Term term) {
-        assert !(term instanceof Variable);
-        if (!(term instanceof BuiltinMgu)) {
-            this.fail(builtinMgu, term);
-        }
-
-        throw new UnsupportedOperationException(
-                "Mgu matching is only supported when one of the Mgu's is a variable.");
     }
 
     /**

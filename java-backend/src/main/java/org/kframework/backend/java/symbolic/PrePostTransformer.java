@@ -433,18 +433,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         return variable.accept(postTransformer);
     }
 
-    @Override
-    public ASTNode transform(BuiltinMgu mgu) {
-        ASTNode astNode = mgu.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof BuiltinMgu : "preTransformer should not modify type";
-        mgu = (BuiltinMgu) astNode;
-        mgu = (BuiltinMgu) super.transform(mgu);
-        return mgu.accept(postTransformer);
-    }
-
     protected class DoneTransforming extends ASTNode {
         public DoneTransforming(ASTNode node) {
             contents = node;

@@ -575,14 +575,4 @@ public class CopyOnWriteTransformer implements Transformer {
         return variable;
     }
 
-    @Override
-    public ASTNode transform(BuiltinMgu mgu) {
-        SymbolicConstraint transformedConstraint = (SymbolicConstraint) mgu.constraint().accept(this);
-        if (transformedConstraint == mgu.constraint()) {
-            return BuiltinMgu.of(transformedConstraint, context);
-        } else {
-            return mgu;
-        }
-    }
-
 }

@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -31,7 +30,6 @@ public interface Unifier {
     public void unify(BuiltinList builtinList, Term term);
     public void unify(BuiltinMap builtinMap, Term term);
     public void unify(BuiltinSet builtinSet, Term term);
-    public void unify(BuiltinMgu builtinMgu, Term term);
     public void unify(Cell cell, Term term);
     public void unify(CellCollection cellCollection, Term term);
     public void unify(Hole hole, Term term);
