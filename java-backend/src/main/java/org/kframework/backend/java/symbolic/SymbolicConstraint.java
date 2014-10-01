@@ -9,7 +9,6 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -238,7 +237,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     public final Data data;
 
     private final TermContext context;
-    private final Definition definition;
 
     /**
      * The symbolic unifier associated with this constraint. There is an
@@ -256,7 +254,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     public SymbolicConstraint(Data data, TermContext context) {
         this.data = data;
         this.context = context;
-        this.definition = context.definition();
         this.unifier = new SymbolicUnifier(this, data.unifierData, context);
     }
 
@@ -309,9 +306,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         if (equalitiesWriteProtected) {
             Equality equality = new Equality(leftHandSide, rightHandSide, context);
-            if (equality.isFalse()) {
+            if (equality.truthValue() == TruthValue.FALSE) {
                 falsify(equality);
-            } else if (equality.isUnknown()) {
+            } else if (equality.truthValue() == TruthValue.UNKNOWN) {
                 equalityBuffer.add(equality);
                 data.isNormal = false;
             }
@@ -363,7 +360,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         // assume the truthValue to be TRUE or UNKNOWN from now on
         Equality equality = new Equality(leftHandSide, rightHandSide, context);
-        if (equality.isUnknown()){
+        if (equality.truthValue() == TruthValue.UNKNOWN){
             if (putInSubst) {
                 Term origVal = data.substitution.put((Variable) leftHandSide, rightHandSide);
                 if (origVal == null) {
@@ -374,7 +371,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 data.isNormal = false;
             }
             data.truthValue = TruthValue.UNKNOWN;
-        } else if (equality.isFalse()) {
+        } else if (equality.truthValue() == TruthValue.FALSE) {
             if (putInSubst) {
                 data.substitution.put((Variable) leftHandSide, rightHandSide);
             } else {
@@ -905,10 +902,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             Equality equality = data.equalities.get(i).substituteAndEvaluate(data.substitution);
             data.equalities.set(i, equality);
 
-            if (equality.isTrue()) {
+            if (equality.truthValue() == TruthValue.TRUE) {
                 equalitiesToRemove.add(i);
                 continue;
-            } else if (equality.isFalse()) {
+            } else if (equality.truthValue() == TruthValue.FALSE) {
                 falsify(equality);
                 return;
             }
@@ -956,9 +953,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     Equality previousEquality = data.equalities.get(j).substituteAndEvaluate(tempSubst);
                     data.equalities.set(j, previousEquality);
 
-                    if (previousEquality.isTrue()) {
+                    if (previousEquality.truthValue() == TruthValue.TRUE) {
                         equalitiesToRemove.add(j);
-                    } else if (previousEquality.isFalse()) {
+                    } else if (previousEquality.truthValue() == TruthValue.FALSE) {
                         falsify(previousEquality);
                         return;
                     }
@@ -1155,7 +1152,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
              * 3) there is no order between sortOfParVar & sortOfSubst
              * Only case 1) represents a pattern matching
              */
-            if (!definition.subsorts().isSubsortedEq(sortOfPatVar, sortOfSubst)) {
+            if (!context.definition().subsorts().isSubsortedEq(sortOfPatVar, sortOfSubst)) {
                 return false;
             }
 

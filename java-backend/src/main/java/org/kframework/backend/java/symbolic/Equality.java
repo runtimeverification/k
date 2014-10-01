@@ -26,7 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * An equality between two canonicalized terms (with variables).
+ * An equality between two canonicalized terms.
  */
 public class Equality {
 
@@ -34,9 +34,9 @@ public class Equality {
 
     private final Term leftHandSide;
     private final Term rightHandSide;
-    // TODO(YilongL): cache the result of isTrue/isFalse/isUnknown
-//    private TruthValue truthValue = TruthValue.UNKNOWN;
     private final TermContext context;
+
+    private TruthValue truthValue = null;
 
     public Equality(Term leftHandSide, Term rightHandSide, TermContext context) {
         // TODO(YilongL): this seems a little bit ad-hoc...
@@ -73,29 +73,29 @@ public class Equality {
         return term instanceof KList ? KCollection.downKind(term) : term;
     }
 
-    /**
-     * Checks if this equality is true.
-     *
-     * @return true if this equality is definitely true; otherwise, false
-     */
-    public boolean isTrue() {
+    public TruthValue truthValue() {
+        if (truthValue != null) {
+            return truthValue;
+        }
+
+        if (isTrue()) {
+            truthValue = TruthValue.TRUE;
+        } else if (isFalse()) {
+            truthValue = TruthValue.FALSE;
+        } else {
+            truthValue = TruthValue.UNKNOWN;
+        }
+        return truthValue;
+    }
+
+    private boolean isTrue() {
         return !(leftHandSide instanceof Bottom)
                 && !(rightHandSide instanceof Bottom)
                 && leftHandSide.equals(rightHandSide);
     }
 
-    public boolean isFalse() {
+    private boolean isFalse() {
         return context.global().equalityOps.isFalse(this);
-    }
-
-    /**
-     * Checks if the truth value of this equality is unknown.
-     *
-     * @return {@code true} if the truth value of this equality cannot be decided
-     *         currently; otherwise, {@code false}
-     */
-    public boolean isUnknown() {
-        return !isTrue() && !isFalse();
     }
 
     /**
@@ -192,9 +192,10 @@ public class Equality {
         }
 
         /**
-         * Checks if this equality is false.
+         * Checks if a given equality is false.
          *
-         * @return true if this equality is definitely false; otherwise, false
+         * @return {@code true} if this equality is definitely false; otherwise,
+         *         {@code false}
          */
         public boolean isFalse(Equality equality) {
             Definition definition = definitionProvider.get();
