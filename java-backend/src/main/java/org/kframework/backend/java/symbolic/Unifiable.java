@@ -13,6 +13,14 @@ import org.kframework.backend.java.kil.Term;
  */
 public interface Unifiable {
 
+    /**
+     * Class listed in the {@code Unifier} should implement this method to accept
+     * the given unifier; otherwise, it should throw an
+     * {@code UnsupportedOperationException}.
+     *
+     * @param unifier
+     * @param pattern
+     */
     public void accept(Unifier unifier, Term pattern);
 
 }

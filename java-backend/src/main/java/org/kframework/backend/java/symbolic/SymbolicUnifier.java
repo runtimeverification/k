@@ -1,11 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BitVector;
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -19,15 +14,10 @@ import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -525,19 +515,6 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
-    public void unify(MapUpdate mapUpdate, Term term) {
-        // this method is only used during macro expansion of rewrite rules
-        assert !(term instanceof Variable);
-
-        if (!(term instanceof MapUpdate)) {
-            this.fail(mapUpdate, term);
-        }
-
-        throw new UnsupportedOperationException(
-                "Currently, mapUpdate can only be matched with a variable.");
-    }
-
-    @Override
     public void unify(BuiltinSet builtinSet, Term term) {
         assert !(term instanceof Variable);
         if (!(term instanceof BuiltinSet)) {
@@ -546,19 +523,6 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         throw new UnsupportedOperationException(
                 "set matching is only supported when one of the sets is a variable.");
-    }
-
-    @Override
-    public void unify(SetUpdate setUpdate, Term term) {
-        // this method is only used during macro expansion of rewrite rules
-        assert !(term instanceof Variable);
-
-        if (!(term instanceof SetUpdate)) {
-            this.fail(setUpdate, term);
-        }
-
-        throw new UnsupportedOperationException(
-                "Currently, setUpdate can only be matched with a variable.");
     }
 
     @Override
@@ -852,34 +816,14 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
-    public void unify(KLabelFreezer kLabelFreezer, Term term) {
-        assert !(term instanceof Variable);
-
-        if(!(term instanceof KLabelFreezer)) {
-            fail(kLabelFreezer, term);
-        }
-
-        KLabelFreezer otherKLabelFreezer = (KLabelFreezer) term;
-        unify(kLabelFreezer.term(), otherKLabelFreezer.term());
-    }
-
-    @Override
     public void unify(KLabelInjection kLabelInjection, Term term) {
         assert !(term instanceof Variable);
 
         if(!(term instanceof KLabelInjection)) {
             fail(kLabelInjection, term);
         }
+
         KLabelInjection otherKLabelInjection = (KLabelInjection) term;
-
-        Kind injectionKind = kLabelInjection.term().kind();
-        Kind otherInjectionKind = otherKLabelInjection.term().kind();
-        if (injectionKind != otherInjectionKind
-                && !(injectionKind.isComputational() && otherInjectionKind.isComputational())
-                && !(injectionKind.isStructural() && otherInjectionKind.isStructural())) {
-            fail(kLabelInjection, otherKLabelInjection);
-        }
-
         unify(kLabelInjection.term(), otherKLabelInjection.term());
     }
 
@@ -940,51 +884,6 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
-    public void unify(UninterpretedToken uninterpretedToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!uninterpretedToken.equals(term)) {
-            fail(uninterpretedToken, term);
-        }
-    }
-
-    @Override
-    public void unify(BitVector bitVector, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!bitVector.equals(term)) {
-            fail(bitVector, term);
-        }
-    }
-
-    @Override
-    public void unify(BoolToken boolToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!boolToken.equals(term)) {
-            fail(boolToken, term);
-        }
-    }
-
-    @Override
-    public void unify(IntToken intToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!intToken.equals(term)) {
-            fail(intToken, term);
-        }
-    }
-
-    @Override
-    public void unify(StringToken stringToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!stringToken.equals(term)) {
-            fail(stringToken, term);
-        }
-    }
-
-    @Override
     public void unify(KList kList, Term term) {
         assert !(term instanceof Variable);
 
@@ -1035,21 +934,6 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
             }
         }
-    }
-
-    @Override
-    public void unify(MetaVariable metaVariable, Term term) {
-        // TODO(YilongL): not sure about the assertion below
-        // assert !(term instanceof Variable);
-
-        if (!metaVariable.equals(term)) {
-            fail(metaVariable, term);
-        }
-    }
-
-    @Override
-    public void unify(Variable variable, Term term) {
-        unify((Term) variable, term);
     }
 
     @Override
