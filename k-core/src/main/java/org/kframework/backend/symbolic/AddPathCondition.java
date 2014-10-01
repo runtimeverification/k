@@ -22,7 +22,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.options.SMTSolver;
 
 /**
  * Add path condition cell to rules. Since this step is right after
@@ -107,7 +106,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
             Attributes atts = node.getAttributes();
             Term cond = condition;
-            if (context.smtOptions.smt != SMTSolver.NONE) {
+            //if (context.smtOptions.smt != SMTSolver.NONE) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition, context));
@@ -117,7 +116,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                   node.getAttributes().add(Attribute.TRANSITION);
                   node.setAttributes(node.getAttributes().shallowCopy());
                 }
-            }
+            //}
 
             node = node.shallowCopy();
             node.setBody(new Rewrite(left, right, context));

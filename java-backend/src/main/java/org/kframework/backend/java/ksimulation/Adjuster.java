@@ -17,8 +17,6 @@ import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.utils.options.SMTSolver;
-
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
@@ -57,10 +55,10 @@ public class Adjuster {
             return false;
         }
 
-        if(implElem.termContext().definition().context().smtOptions.smt == SMTSolver.NONE){
+        //if(implElem.termContext().definition().context().smtOptions.smt == SMTSolver.NONE){
 
-            return implside.term().equals(specside.term());
-        }
+        //    return implside.term().equals(specside.term());
+        //}
 
         Map<Variable,Variable> implVars =
                 implside.constraint().rename(implside.term().variableSet());
