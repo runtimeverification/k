@@ -104,8 +104,13 @@ public class KSequence extends KCollection {
     }
 
     @Override
+    public ImmutableList<Variable> collectionVariables() {
+        return kSequenceVariables;
+    }
+
+    @Override
     public final boolean isConcreteCollection() {
-        return !hasFrame() && kSequenceVariables.isEmpty();
+        return kSequenceVariables.isEmpty();
     }
 
     @Override
