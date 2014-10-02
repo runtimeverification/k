@@ -893,80 +893,86 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         data.equalities.addAll(equalityBuffer);
         equalityBuffer.clear();
 
-        List<Integer> equalitiesToRemove = new ArrayList<>();
-        for (int i = 0; i < data.equalities.size(); ++i) {
-            // YilongL: no need to evaluate after substitution because the LHS
-            // of the rule and the subject term should have no function symbol
-            // inside; in other words, only side conditions need to be evaluated
-            // and they should have been taken care of in method add(Term,Term)
-            Equality equality = data.equalities.get(i).substituteAndEvaluate(data.substitution);
-            data.equalities.set(i, equality);
+        boolean substChanged;
+        do {
+            substChanged = false;
+            Iterator<Equality> iter = data.equalities.iterator();
+            while (iter.hasNext()) {
+                Equality equality = iter.next();
+                Equality evalEquality = equality.substituteAndEvaluate(data.substitution);
+                boolean equalityChanged = equality != evalEquality;
 
-            if (equality.truthValue() == TruthValue.TRUE) {
-                equalitiesToRemove.add(i);
-                continue;
-            } else if (equality.truthValue() == TruthValue.FALSE) {
-                falsify(equality);
-                return;
-            }
+                if (evalEquality.truthValue() == TruthValue.TRUE) {
+                    iter.remove();
+                    continue;
+                } else if (evalEquality.truthValue() == TruthValue.FALSE) {
+                    falsify(evalEquality);
+                    return;
+                }
 
-            Variable variable;
-            Term term;
-            // TODO(AndreiS): the sort of a variable may become more specific
-            /* when possible, substitute the anonymous variable */
-            if (equality.leftHandSide() instanceof Variable
-                    && equality.rightHandSide() instanceof Variable
-                    && ((Variable) equality.rightHandSide()).isAnonymous()) {
-                variable = (Variable) equality.rightHandSide();
-                term = equality.leftHandSide();
-            } else if (equality.leftHandSide() instanceof Variable) {
-                variable = (Variable) equality.leftHandSide();
-                term = equality.rightHandSide();
-            } else if (equality.rightHandSide() instanceof Variable) {
-                variable = (Variable) equality.rightHandSide();
-                term = equality.leftHandSide();
-            } else {
-                continue;
-            }
+                Map<Variable, Term> substToAdd = Maps.newHashMap();
+                Term leftHandSide = evalEquality.leftHandSide();
+                Term rightHandSide = evalEquality.rightHandSide();
+                if (leftHandSide instanceof Variable
+                        && rightHandSide instanceof Variable) {
+                    if (leftHandSide.sort().equals(rightHandSide.sort())) {
+                        if (((Variable) rightHandSide).isAnonymous()) {
+                            substToAdd.put((Variable) rightHandSide, leftHandSide);
+                        } else {
+                            substToAdd.put((Variable) leftHandSide, rightHandSide);
+                        }
+                    } else {
+                        Sort glb = context.definition().subsorts().getGLBSort(leftHandSide.sort(), rightHandSide.sort());
+                        if (glb != null) {
+                            Variable variable = Variable.getFreshVariable(glb);
+                            substToAdd.put((Variable) leftHandSide, variable);
+                            substToAdd.put((Variable) rightHandSide, variable);
+                        } else {
+                            if (equalityChanged) {
+                                iter.remove();
+                                equalityBuffer.add(evalEquality);
+                            }
+                            continue;
+                        }
+                    }
+                } else if (leftHandSide instanceof Variable) {
+                    substToAdd.put((Variable) leftHandSide, rightHandSide);
+                } else if (rightHandSide instanceof Variable) {
+                    substToAdd.put((Variable) rightHandSide, leftHandSide);
+                } else {
+                    if (equalityChanged) {
+                        iter.remove();
+                        equalityBuffer.add(evalEquality);
+                    }
+                    continue;
+                }
 
-            /* cycle found */
-            if (term.variableSet().contains(variable)) {
-                continue;
-            }
+                boolean occursCheck = false;
+                for (Variable key : substToAdd.keySet()) {
+                    occursCheck = occursCheck || substToAdd.get(key).variableSet().contains(key);
+                }
 
-            equalitiesToRemove.add(i);
-
-            Map<Variable, Term> tempSubst = Collections.singletonMap(variable, term);
-            composeSubstitution(tempSubst, context, false);
-            if (data.truthValue == TruthValue.FALSE) {
-                return;
-            }
-
-            for (int j = 0; j < i; ++j) {
-                /*
-                 * Do not modify the previousEquality if it has been added to
-                 * the HashSet equalitiesToRemove since this may result in
-                 * inconsistent hashCodes in the HashSet; besides, there is no
-                 * need to do so
-                 */
-                if (!equalitiesToRemove.contains(j)) {
-                    Equality previousEquality = data.equalities.get(j).substituteAndEvaluate(tempSubst);
-                    data.equalities.set(j, previousEquality);
-
-                    if (previousEquality.truthValue() == TruthValue.TRUE) {
-                        equalitiesToRemove.add(j);
-                    } else if (previousEquality.truthValue() == TruthValue.FALSE) {
-                        falsify(previousEquality);
+                if (!occursCheck) {
+                    iter.remove();
+                    // TODO(YilongL): composeSubstitution seems ad-hoc... FIXME!
+                    composeSubstitution(substToAdd, context, false);
+                    if (data.truthValue == TruthValue.FALSE) {
                         return;
+                    }
+
+                    substChanged = true;
+                    break;
+                } else {
+                    if (equalityChanged) {
+                        iter.remove();
+                        equalityBuffer.add(evalEquality);
                     }
                 }
             }
-        }
 
-        Collections.sort(equalitiesToRemove);
-        for (int i = equalitiesToRemove.size() - 1; i >= 0; --i) {
-            data.equalities.remove((int) equalitiesToRemove.get(i));
-        }
+            data.equalities.addAll(equalityBuffer);
+            equalityBuffer.clear();
+        } while (substChanged);
     }
 
     public void expandPatternsAndSimplify(boolean narrowing) {
