@@ -46,11 +46,13 @@
       <outputDirectory>/bin</outputDirectory>
       <filtered>true</filtered>
       <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
     </fileSet>
     <fileSet>
       <directory>${project.build.scriptSourceDirectory}/lib</directory>
       <outputDirectory>/lib</outputDirectory>
       <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/lib</directory>
