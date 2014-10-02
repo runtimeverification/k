@@ -3,7 +3,6 @@ package org.kframework.kil;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 
@@ -46,7 +45,6 @@ public class Attribute<T> extends ASTNode {
     public static final Attribute<String> MACRO = Attribute.of(MACRO_KEY, "");
     public static final Attribute<String> ANYWHERE = Attribute.of("anywhere", "");
     public static final Attribute<String> TRANSITION = Attribute.of("transition", "");
-    public static final Attribute<String> SYMBOLIC = Attribute.of(SymbolicBackend.SYMBOLIC, "");
     public static final Attribute<String> NOT_IN_RULES = Attribute.of("notInRules", "");
     public static final Attribute<String> VARIABLE = Attribute.of("variable", "");
     public static final Attribute<String> SUPERCOOL = Attribute.of("supercool", "");

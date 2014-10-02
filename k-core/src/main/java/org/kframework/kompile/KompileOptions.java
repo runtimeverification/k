@@ -124,15 +124,6 @@ public final class KompileOptions implements Serializable {
         @Parameter(names="--no-prelude", description="Do not include anything automatically.")
         public boolean noPrelude = false;
 
-        @Parameter(names="--symbolic-rules", listConverter=StringListConverter.class, description="Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public List<String> symbolicRules = Collections.emptyList();
-
-        @Parameter(names="--non-symbolic-rules", listConverter=StringListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public List<String> nonSymbolicRules = Collections.emptyList();
-
-        @Parameter(names="--kore", description="Generate kore files of a given k definition")
-        public boolean kore = false;
-
         @Parameter(names="--loud", description="Prints 'Done' at the end if all is ok.")
         public boolean loud = false;
 

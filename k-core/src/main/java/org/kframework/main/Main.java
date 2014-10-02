@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 import org.fusesource.jansi.AnsiConsole;
-import org.kframework.kagreg.KagregFrontEnd;
 import org.kframework.kast.KastFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
@@ -73,11 +72,6 @@ public class Main {
                         }
                     }
                     break;
-                case "-kagreg":
-                    modules = KagregFrontEnd.getModules(args2);
-                    break;
-                case "-kcheck":
-                    throw new AssertionError("kcheck no longer supported");
                 case "-ktest":
                     modules.addAll(KTestFrontEnd.getModules(args2));
                     for (KModule kModule : kModules) {
