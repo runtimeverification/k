@@ -7,6 +7,7 @@
 .recommenders
 .cache
 .idea
+.project
 .classpath
 .settings/
 java-backend/.project
