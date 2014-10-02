@@ -18,7 +18,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 
 import java.io.Serializable;
 import java.io.IOException;
@@ -97,7 +96,6 @@ public class KRunState implements Serializable, Comparable<KRunState> {
                         "Could not load parser: brackets may be unsound"));
                 }
             }
-            result = (Term) new TokenVariableToSymbolic(context).visitNode(result);
         } catch (ParseFailedException e) {
             e.report();
         }

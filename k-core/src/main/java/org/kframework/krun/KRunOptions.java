@@ -284,16 +284,6 @@ public final class KRunOptions {
             return debugger;
         }
 
-        @Parameter(names="--debugger-gui", description="Run an execution in debug mode with graphical interface.")
-        private boolean debuggerGui = false;
-
-        public boolean debuggerGui() {
-            if (debuggerGui && search()) {
-                throw new ParameterException("Cannot specify --search with --debug-gui. In order to search inside the debugger, use the step-all command.");
-            }
-            return debuggerGui;
-        }
-
         @Parameter(names="--trace", description="Turn on maude trace.")
         public boolean trace = false;
 

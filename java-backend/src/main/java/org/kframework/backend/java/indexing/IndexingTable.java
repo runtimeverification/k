@@ -36,7 +36,6 @@ public class IndexingTable implements Serializable, RuleIndex{
     private Map<Index, List<Rule>> coolingRuleTable;
     private Map<Index, List<Rule>> instreamRuleTable;
     private Map<Index, List<Rule>> outstreamRuleTable;
-    private Map<Index, List<Rule>> simulationRuleTable;
     private List<Rule> unindexedRules;
     private final Definition definition;
 
@@ -90,7 +89,6 @@ public class IndexingTable implements Serializable, RuleIndex{
         ImmutableMap.Builder<Index, List<Rule>> coolingMapBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Index, List<Rule>> instreamMapBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Index, List<Rule>> outstreamMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> simulationMapBuilder = ImmutableMap.builder();
 
         for (Index index : indices) {
             ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
@@ -98,7 +96,6 @@ public class IndexingTable implements Serializable, RuleIndex{
             ImmutableList.Builder<Rule> coolingListBuilder = ImmutableList.builder();
             ImmutableList.Builder<Rule> instreamListBuilder = ImmutableList.builder();
             ImmutableList.Builder<Rule> outstreamListBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> simulationListBuilder = ImmutableList.builder();
 
             for (Rule rule : definition.rules()) {
                 if (rule.containsAttribute("heat")) {
@@ -116,10 +113,6 @@ public class IndexingTable implements Serializable, RuleIndex{
                 } else if (rule.containsAttribute(Constants.STDOUT) || rule.containsAttribute(Constants.STDERR)) {
                     if (index.isUnifiable(rule.indexingPair().first)) {
                         outstreamListBuilder.add(rule);
-                    }
-                } else if (rule.containsAttribute("alphaRule")){
-                    if(index.isUnifiable(rule.indexingPair().first)) {
-                        simulationListBuilder.add(rule);
                     }
                 } else {
                     if (index.isUnifiable(rule.indexingPair().first)) {
@@ -147,17 +140,12 @@ public class IndexingTable implements Serializable, RuleIndex{
             if (!rules.isEmpty()) {
                 outstreamMapBuilder.put(index, rules);
             }
-            rules = simulationListBuilder.build();
-            if(!rules.isEmpty()){
-                simulationMapBuilder.put(index, rules);
-            }
         }
         heatingRuleTable = heatingMapBuilder.build();
         coolingRuleTable = coolingMapBuilder.build();
         instreamRuleTable = instreamMapBuilder.build();
         outstreamRuleTable = outstreamMapBuilder.build();
         ruleTable = mapBuilder.build();
-        simulationRuleTable = simulationMapBuilder.build();
 
         ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
         for (Rule rule : definition.rules()) {
@@ -288,10 +276,6 @@ public class IndexingTable implements Serializable, RuleIndex{
 
     private ConfigurationTermIndex getConfigurationTermIndex(Term term) {
         return getConfigurationTermIndex(IndexingCellsCollector.getIndexingCells(term, definition));
-    }
-
-    public Map<Index, List<Rule>> getSimulationRuleTable() {
-        return simulationRuleTable;
     }
 
 }

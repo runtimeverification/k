@@ -14,10 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
-import org.kframework.backend.java.indexing.Index;
-import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.kil.*;
 import org.kframework.utils.general.IndexingStatistics;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
@@ -45,10 +42,6 @@ public class SymbolicRewriter {
     private RuleIndex ruleIndex;
     private final boolean indexingStats;
 
-    /*
-     * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
-     * the indication that the rule will be used as simulation
-     */
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions) {
         this.definition = definition;
@@ -84,38 +77,6 @@ public class SymbolicRewriter {
         return rewrite(constrainedTerm, -1);
     }
 
-    /* author: Liyi Li
-     * a function return all the next steps of a given term
-     */
-    public ArrayList<ConstrainedTerm> rewriteAll(ConstrainedTerm constrainedTerm){
-
-        computeRewriteStep(constrainedTerm);
-
-        return (ArrayList<ConstrainedTerm>) results;
-    }
-
-    /*
-     * author: Liyi Li
-     * return the rules for simulations only
-     */
-    public Map<Index, List<Rule>> getSimulationMap(){
-        return ((IndexingTable) ruleIndex).getSimulationRuleTable();
-    }
-
-    /*
-     * author: Liyi Li
-     * return the rules for simulations only
-     */
-    private List<Rule> getSimulationRules(Term term) {
-        List<Rule> rules = new ArrayList<Rule>();
-        for (IndexingPair pair : term.getKCellIndexingPairs(definition)) {
-            if (((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first) != null) {
-                rules.addAll(((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first));
-            }
-        }
-        return rules;
-    }
-
     /**
      * Gets the rules that could be applied to a given term according to the
      * rule indexing mechanism.
@@ -144,69 +105,6 @@ public class SymbolicRewriter {
 
     private ConstrainedTerm getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
-    }
-
-    /*
-     * author : Liyi Li
-     * computer steps by rules of simulation
-     */
-    @SuppressWarnings("unchecked")
-    public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
-        // Applying a strategy to a list of rules divides the rules up into
-        // equivalence classes of rules. We iterate through these equivalence
-        // classes one at a time, seeing which one contains rules we can apply.
-        //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
-        strategy.reset(getSimulationRules(constrainedTerm.term()));
-        while (strategy.hasNext()) {
-            transition = strategy.nextIsTransition();
-            List<Rule> rules = ((List<Rule>)strategy.next());
-
-            for (Rule rule : rules) {
-                ruleStopwatch.reset();
-                ruleStopwatch.start();
-
-                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
-                        constrainedTerm.termContext());
-                leftHandSideConstraint.addAll(rule.requires());
-
-                CellCollection newTemp = CellCollection.singleton((Cell<Term>)rule.leftHandSide(), definition.context());
-
-                Cell<Term> newRuleTerm = new Cell<Term>(CellLabel.GENERATED_TOP, newTemp);
-
-                ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
-                        newRuleTerm,
-                        rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
-                        leftHandSideConstraint,
-                        constrainedTerm.termContext());
-
-                SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm);
-                if (constraint == null) {
-                    continue;
-                }
-                constraint.addAll(rule.ensures());
-
-                /* rename rule variables in the constraints */
-                Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
-
-                Term result = rule.rightHandSide();
-                /* rename rule variables in the rule RHS */
-                result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
-                /* apply the constraints substitution on the rule RHS */
-                result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
-                /* evaluate pending functions in the rule RHS */
-                //result = result.evaluate(constrainedTerm.termContext());
-                /* eliminate anonymous variables */
-                constraint.eliminateAnonymousVariables(constrainedTerm.variableSet());
-
-                /* return first solution */
-                return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());
-            }
-
-        }
-        //System.out.println("Result: " + results.toString());
-        //System.out.println();
-
-        return null;
     }
 
     private void computeRewriteStep(ConstrainedTerm constrainedSubject, int successorBound) {

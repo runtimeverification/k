@@ -16,7 +16,6 @@ import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
-import org.kframework.krun.tools.GuiDebugger;
 import org.kframework.krun.tools.Prover;
 import org.kframework.main.FrontEnd;
 import org.kframework.utils.BaseTestCase;
@@ -60,7 +59,6 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(Executor.class, Main.class));
         injector.getInstance(Key.get(Debugger.class, Main.class));
-        injector.getInstance(Key.get(GuiDebugger.class, Main.class));
         injector.getInstance(Key.get(Prover.class, Main.class));
         injector.getInstance(Key.get(Simulator.class, Main.class));
     }
