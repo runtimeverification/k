@@ -215,18 +215,33 @@ public class KRunModule extends AbstractModule {
         }
 
         @Provides
-        Executor getExecutor(KompileOptions options, Map<String, Provider<Executor>> map) {
-            return map.get(options.backend).get();
+        Executor getExecutor(KompileOptions options, Map<String, Provider<Executor>> map, KExceptionManager kem) {
+            Provider<Executor> provider = map.get(options.backend);
+            if (provider == null) {
+                kem.registerCriticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
+                        + map.keySet());
+            }
+            return provider.get();
         }
 
         @Provides
-        LtlModelChecker getModelChecker(KompileOptions options, Map<String, Provider<LtlModelChecker>> map) {
-            return map.get(options.backend).get();
+        LtlModelChecker getModelChecker(KompileOptions options, Map<String, Provider<LtlModelChecker>> map, KExceptionManager kem) {
+            Provider<LtlModelChecker> provider = map.get(options.backend);
+            if (provider == null) {
+                kem.registerCriticalError("Backend " + options.backend + " does not support ltl model checking. Supported backends are: "
+                        + map.keySet());
+            }
+            return provider.get();
         }
 
         @Provides
-        Prover getProver(KompileOptions options, Map<String, Provider<Prover>> map) {
-            return map.get(options.backend).get();
+        Prover getProver(KompileOptions options, Map<String, Provider<Prover>> map, KExceptionManager kem) {
+            Provider<Prover> provider = map.get(options.backend);
+            if (provider == null) {
+                kem.registerCriticalError("Backend " + options.backend + " does not support program verification. Supported backends are: "
+                        + map.keySet());
+            }
+            return provider.get();
         }
 
         @Provides @Singleton
