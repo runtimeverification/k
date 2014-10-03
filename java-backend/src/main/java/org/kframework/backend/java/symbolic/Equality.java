@@ -49,15 +49,17 @@ public class Equality {
             rightHandSide = kList.get(1);
         }
 
-        /* arrange the leftHandSide and rightHandSide according to the natural
-         * ordering defined for {@code Term} */
         leftHandSide = canonicalize(leftHandSide);
         rightHandSide = canonicalize(rightHandSide);
-        if (leftHandSide.compareTo(rightHandSide) > 0) {
-            Term term = leftHandSide;
-            leftHandSide = rightHandSide;
-            rightHandSide = term;
-        }
+        // TODO(YilongL): unable to do the following because the order of lhs
+        // and rhs matters when checking implication
+//        /* arrange the leftHandSide and rightHandSide according to the natural
+//         * ordering defined for {@code Term} */
+//        if (leftHandSide.compareTo(rightHandSide) > 0) {
+//            Term term = leftHandSide;
+//            leftHandSide = rightHandSide;
+//            rightHandSide = term;
+//        }
 
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;

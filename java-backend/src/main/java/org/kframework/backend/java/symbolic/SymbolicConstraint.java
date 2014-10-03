@@ -915,26 +915,32 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 Term rightHandSide = evalEquality.rightHandSide();
                 if (leftHandSide instanceof Variable
                         && rightHandSide instanceof Variable) {
-                    if (leftHandSide.sort().equals(rightHandSide.sort())) {
-                        if (((Variable) rightHandSide).isAnonymous()) {
-                            substToAdd.put((Variable) rightHandSide, leftHandSide);
-                        } else {
-                            substToAdd.put((Variable) leftHandSide, rightHandSide);
-                        }
+                    if (((Variable) rightHandSide).isAnonymous()) {
+                        substToAdd.put((Variable) rightHandSide, leftHandSide);
                     } else {
-                        Sort glb = context.definition().subsorts().getGLBSort(leftHandSide.sort(), rightHandSide.sort());
-                        if (glb != null) {
-                            Variable variable = Variable.getFreshVariable(glb);
-                            substToAdd.put((Variable) leftHandSide, variable);
-                            substToAdd.put((Variable) rightHandSide, variable);
-                        } else {
-                            if (equalityChanged) {
-                                iter.remove();
-                                equalityBuffer.add(evalEquality);
-                            }
-                            continue;
-                        }
+                        substToAdd.put((Variable) leftHandSide, rightHandSide);
                     }
+                    /* TODO(YilongL): investigate why the following code will break the prover */
+//                    if (leftHandSide.sort().equals(rightHandSide.sort())) {
+//                        if (((Variable) rightHandSide).isAnonymous()) {
+//                            substToAdd.put((Variable) rightHandSide, leftHandSide);
+//                        } else {
+//                            substToAdd.put((Variable) leftHandSide, rightHandSide);
+//                        }
+//                    } else {
+//                        Sort glb = context.definition().subsorts().getGLBSort(leftHandSide.sort(), rightHandSide.sort());
+//                        if (glb != null) {
+//                            Variable variable = Variable.getFreshVariable(glb);
+//                            substToAdd.put((Variable) leftHandSide, variable);
+//                            substToAdd.put((Variable) rightHandSide, variable);
+//                        } else {
+//                            if (equalityChanged) {
+//                                iter.remove();
+//                                equalityBuffer.add(evalEquality);
+//                            }
+//                            continue;
+//                        }
+//                    }
                 } else if (leftHandSide instanceof Variable) {
                     substToAdd.put((Variable) leftHandSide, rightHandSide);
                 } else if (rightHandSide instanceof Variable) {
