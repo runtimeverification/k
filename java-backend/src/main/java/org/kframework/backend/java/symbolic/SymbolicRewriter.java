@@ -599,8 +599,4 @@ public class SymbolicRewriter {
         return proofResults;
     }
 
-    public Definition getDefinition() {
-        return definition;
-    }
-
 }
