@@ -2,5 +2,15 @@
 <!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
 
 <tests>
+  <!-- Tutorial Languages and Programs. -->
+  <include file="../tutorial/tests/config.xml" directory="tutorial" />
+
+  <!-- Include the tests for the new parser. -->
+  <include file="newparser/config.xml"
+           directory="tests/newparser" skip="pdf" />
+
   <include file="../samples/tests/config.xml" directory="samples" />
+
+  <include file="regression/config.xml" directory="tests/regression" skip="pdf" />
 </tests>
+
