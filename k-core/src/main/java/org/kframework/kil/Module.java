@@ -6,7 +6,7 @@ import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -80,7 +80,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
      * @return
      */
     public java.util.Set<Sort> getAllSorts() {
-        java.util.Set<Sort> sorts = new HashSet<>();
+        java.util.Set<Sort> sorts = new LinkedHashSet<>();
 
         for (ModuleItem mi : items) {
             List<Sort> list = mi.getAllSorts();
