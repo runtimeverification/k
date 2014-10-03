@@ -1039,7 +1039,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         @SuppressWarnings("unchecked")
         Map.Entry<Variable, Term>[] entries = data.substitution.entrySet().toArray(new Map.Entry[data.substitution.size()]);
         for (Map.Entry<Variable, Term> subst : entries) {
-            Term term = subst.getValue().substitute(substMap, context);
+            Term term = subst.getValue().substituteAndEvaluate(substMap, context);
             if (term != subst.getValue()) {
                 checkTruthValBeforePutIntoConstraint(subst.getKey(), term, true);
             }
