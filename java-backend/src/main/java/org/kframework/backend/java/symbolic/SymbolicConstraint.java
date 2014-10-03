@@ -28,9 +28,9 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
+import org.kframework.main.GlobalOptions;
+import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -244,15 +244,23 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    public static class EqualityOperations {
+    public static class SymbolicConstraintOperations {
 
         private final Provider<Definition> definitionProvider;
-        private final JavaExecutionOptions options;
+        private final SMTOptions smtOptions;
+        private final Z3Wrapper z3;
+        private final GlobalOptions globalOptions;
 
         @Inject
-        public EqualityOperations(Provider<Definition> definitionProvider, JavaExecutionOptions options) {
+        public SymbolicConstraintOperations(
+                Provider<Definition> definitionProvider,
+                SMTOptions smtOptions,
+                Z3Wrapper z3,
+                GlobalOptions globalOptions) {
             this.definitionProvider = definitionProvider;
-            this.options = options;
+            this.smtOptions = smtOptions;
+            this.z3 = z3;
+            this.globalOptions = globalOptions;
         }
 
         /**
@@ -355,6 +363,70 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         rightHandSide.sort());
             }
         }
+
+        public boolean checkUnsat(SymbolicConstraint constraint) {
+            if (smtOptions.smt != SMTSolver.Z3) {
+                return false;
+            }
+
+            constraint.normalize();
+            if (constraint.isSubstitution()) {
+                return false;
+            }
+
+            boolean result = false;
+            try {
+                result = z3.checkQuery(
+                        KILtoSMTLib.translateConstraint(constraint),
+                        50);
+            } catch (UnsupportedOperationException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        public boolean impliesSMT(SymbolicConstraint left,
+                SymbolicConstraint right, Set<Variable> rightOnlyVariables) {
+            boolean result = false;
+            assert left.termContext().definition().context() == right.termContext().definition().context();
+            if (smtOptions.smt == SMTSolver.GAPPA) {
+
+                GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(left);
+                String gterm1 = premises.result;
+                GappaPrinter.GappaPrintResult conclusion = GappaPrinter.toGappa(right);
+                if (conclusion.exception != null) {
+                    System.err.print(conclusion.exception.getMessage());
+                    System.err.println(" Cannot prove the full implication!");
+                    return false;
+                }
+                String gterm2 = conclusion.result;
+                String input = "";
+                Set<String> variables = new HashSet<>();
+                variables.addAll(premises.variables);
+                variables.addAll(conclusion.variables);
+                for (String variable : variables) {
+                    GappaServer.addVariable(variable);
+                }
+                if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
+                input += "(" + gterm2 + ")";
+                if (globalOptions.debug) {
+                    System.err.println("Verifying " + input);
+                }
+                if (GappaServer.proveTrue(input))
+                    result = true;
+
+//                System.out.println(constraint);
+            } else if (smtOptions.smt == SMTSolver.Z3) {
+                try {
+                    result = z3.checkQuery(
+                            KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
+                            5000);
+                } catch (UnsupportedOperationException e) {
+                    e.printStackTrace();
+                }
+            }
+            return  result;
+        }
     }
 
     /**
@@ -456,7 +528,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         public boolean isFalse() {
-            return context.global().equalityOps.isFalse(this);
+            return context.global().constraintOps.isFalse(this);
         }
 
         /**
@@ -818,25 +890,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean checkUnsat() {
-        if (termContext().definition().context().smtOptions.smt != SMTSolver.Z3) {
-            return false;
-        }
-
-        normalize();
-        if (isSubstitution()) {
-            return false;
-        }
-
-        boolean result = false;
-        try {
-            result = Z3Wrapper.instance(context.definition().context()).checkQuery(
-                    KILtoSMTLib.translateConstraint(this),
-                    50,
-                    context.definition().context());
-        } catch (UnsupportedOperationException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return context.global().constraintOps.checkUnsat(this);
     }
 
     /**
@@ -929,7 +983,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 //            if (DEBUG) {
 //                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
 //            }
-            if (!impliesSMT(left,right, rightOnlyVariables, context.definition().context())) {
+            if (!impliesSMT(left,right, rightOnlyVariables)) {
                 if (context.definition().context().globalOptions.debug) {
                     System.err.println("Failure!");
                 }
@@ -947,48 +1001,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private static boolean impliesSMT(
             SymbolicConstraint left,
             SymbolicConstraint right,
-            Set<Variable> rightOnlyVariables,
-            Context context) {
-        boolean result = false;
-        assert left.termContext().definition().context() == right.termContext().definition().context();
-        if (left.termContext().definition().context().smtOptions.smt == SMTSolver.GAPPA) {
-
-            GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(left);
-            String gterm1 = premises.result;
-            GappaPrinter.GappaPrintResult conclusion = GappaPrinter.toGappa(right);
-            if (conclusion.exception != null) {
-                System.err.print(conclusion.exception.getMessage());
-                System.err.println(" Cannot prove the full implication!");
-                return false;
-            }
-            String gterm2 = conclusion.result;
-            String input = "";
-            Set<String> variables = new HashSet<>();
-            variables.addAll(premises.variables);
-            variables.addAll(conclusion.variables);
-            for (String variable : variables) {
-                GappaServer.addVariable(variable);
-            }
-            if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
-            input += "(" + gterm2 + ")";
-            if (left.termContext().definition().context().globalOptions.debug) {
-                System.err.println("Verifying " + input);
-            }
-            if (GappaServer.proveTrue(input))
-                result = true;
-
-//            System.out.println(constraint);
-        } else if (left.termContext().definition().context().smtOptions.smt == SMTSolver.Z3) {
-            try {
-                result = Z3Wrapper.instance(context).checkQuery(
-                        KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
-                        5000,
-                        context);
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-            }
-        }
-        return  result;
+            Set<Variable> rightOnlyVariables) {
+        assert left.context == right.context;
+        return left.context.global().constraintOps.impliesSMT(left, right, rightOnlyVariables);
     }
 
     /**
