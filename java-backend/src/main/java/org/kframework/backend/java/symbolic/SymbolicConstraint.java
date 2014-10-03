@@ -7,7 +7,6 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
@@ -735,10 +734,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         data.falsifyingEquality = equality;
     }
 
-    /**
-     * TODO(YilongL):Gets solutions to this symbolic constraint?
-     * @return
-     */
     public Collection<SymbolicConstraint> getMultiConstraints() {
         if (!unifier.data.multiConstraints.isEmpty()) {
             assert unifier.data.multiConstraints.size() <= 2;
@@ -781,6 +776,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return simplify(false);
     }
 
+    public TruthValue simplifyModuloPatternFolding() {
+        return simplify(true);
+    }
+
     /**
      * Simplifies this symbolic constraint as much as possible. Decomposes large
      * equalities into small ones using unification.
@@ -789,7 +788,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @return the truth value of this symbolic constraint after simplification
      */
-    public TruthValue simplify(boolean fold) {
+    private TruthValue simplify(boolean fold) {
         if (data.truthValue != TruthValue.UNKNOWN) {
             return data.truthValue;
         }
@@ -961,7 +960,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 if (!occursCheck) {
                     iter.remove();
                     // TODO(YilongL): composeSubstitution seems ad-hoc... FIXME!
-                    composeSubstitution(substToAdd, context, false);
+                    composeSubstitution(substToAdd, context);
                     if (data.truthValue == TruthValue.FALSE) {
                         return;
                     }
@@ -986,7 +985,36 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         boolean changed;
         do {
-            changed = expandPatterns(narrowing);
+            changed = false;
+            // TODO(AndreiS): patterns should be expanded before are put in the substitution
+            Set<Variable> keys = new HashSet<>(data.substitution.keySet());
+            for (Variable variable : keys) {
+                Term term = data.substitution.get(variable);
+                Term expandedTerm = term.expandPatterns(this, narrowing, context);
+                if (term != expandedTerm) {
+                    data.substitution.put(variable, expandedTerm);
+                    changed = true;
+                }
+            }
+
+            // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
+            // TODO(YilongL): this is too ad-hoc; fix it once we allow sub-terms to carry constraint as well
+            int origSize = data.equalities.size();
+            for (int i = 0; i < data.equalities.size(); ++i) {
+                Equality equality = data.equalities.remove(i);
+                Equality expandedEquality = equality.expandPatterns(this, narrowing);
+                data.equalities.addFirst(expandedEquality);
+                if (equality != expandedEquality) {
+                    changed = true;
+                    if (data.equalities.size() != origSize) {
+                        break;
+                    }
+                }
+            }
+
+            /* force normalization to consider the changes made by this method */
+            data.isNormal = false;
+
             // TODO(AndreiS): move folding from here (this is way too fragile)
             /* simplify with pattern folding if not performing narrowing */
             if (!narrowing) {
@@ -997,40 +1025,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         } while (changed);
     }
 
-    public boolean expandPatterns(boolean narrowing) {
-        boolean changed = false;
-        // TODO(AndreiS): patterns should be expanded before are put in the substitution
-        Set<Variable> keys = new HashSet<>(data.substitution.keySet());
-        for (Variable variable : keys) {
-            Term term = data.substitution.get(variable);
-            Term expandedTerm = term.expandPatterns(this, narrowing, context);
-            if (term != expandedTerm) {
-                data.substitution.put(variable, expandedTerm);
-                changed = true;
-            }
-        }
-
-        // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
-        // TODO(YilongL): this is too ad-hoc; fix it once we allow sub-terms to carry constraint as well
-        int origSize = data.equalities.size();
-        for (int i = 0; i < data.equalities.size(); ++i) {
-            Equality equality = data.equalities.remove(i);
-            Equality expandedEquality = equality.expandPatterns(this, narrowing);
-            data.equalities.addFirst(expandedEquality);
-            if (equality != expandedEquality) {
-                changed = true;
-                if (data.equalities.size() != origSize) {
-                    break;
-                }
-            }
-        }
-
-        /* force normalization to consider the changes made by this method */
-        data.isNormal = false;
-
-        return changed;
-    }
-
     /**
      * Private helper method that composes a specified substitution map with the
      * substitution map of this symbolic constraint.
@@ -1039,12 +1033,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the specified substitution map
      * @param context
      *            the term context
-     * @param mayInvalidateNormality
-     *            whether this operation may cause
-     *            {@link SymbolicConstraint#data.isNormal} to be {@code false}
      */
     private void composeSubstitution(Map<Variable, Term> substMap,
-            TermContext context, boolean mayInvalidateNormality) {
+            TermContext context) {
         @SuppressWarnings("unchecked")
         Map.Entry<Variable, Term>[] entries = data.substitution.entrySet().toArray(new Map.Entry[data.substitution.size()]);
         for (Map.Entry<Variable, Term> subst : entries) {
@@ -1061,10 +1052,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         assert variables.isEmpty() :
             "There shall be no common variables in the two substitution maps to be composed.";
         data.substitution.putAll(substMap);
-
-        if (mayInvalidateNormality) {
-            data.isNormal = false;
-        }
     }
 
     /**
@@ -1107,31 +1094,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         return (SymbolicConstraint) accept(new BinderSubstitutionTransformer(substitution, context));
-    }
-
-    /**
-     * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint by
-     * substituting variable with term.
-     */
-    public SymbolicConstraint substituteWithBinders(Variable variable, Term term, TermContext context) {
-        return substituteWithBinders(Collections.singletonMap(variable, term), context);
-    }
-
-    /**
-     * Checks if the rule application that produces this symbolic constraint is
-     * driven by pattern matching instead of narrowing. This method should only
-     * be called from the symbolic constraint that is returned by the method
-     * {@code ConstrainedTerm#unify(ConstrainedTerm)}.
-     *
-     * @param pattern
-     *            the pattern term, which is the left-hand side of a rule plus
-     *            side conditions
-     * @return {@code true} if the rule application is driven by pattern
-     *         matching and all side conditions are successfully dissolved;
-     *         otherwise, {@code false}
-     */
-    public boolean isMatching(ConstrainedTerm pattern) {
-        return isMatching(pattern.variableSet());
     }
 
     /**

@@ -137,10 +137,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
 
         /* apply pattern folding */
-        unificationConstraint.simplify(true);
+        unificationConstraint.simplifyModuloPatternFolding();
         unificationConstraint.addAll(constrainedTerm.lookups);
         unificationConstraint.addAll(constrainedTerm.constraint);
-        unificationConstraint.simplify(true);
+        unificationConstraint.simplifyModuloPatternFolding();
         if (unificationConstraint.isFalse()) {
             return null;
         }
