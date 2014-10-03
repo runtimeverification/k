@@ -9,7 +9,6 @@ import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
-import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -25,7 +24,6 @@ public class Z3Wrapper {
     private static final int Z3_RESTART_LIMIT = 3;
 
     public final String SMT_PRELUDE;
-    private String logic;
     private final SMTOptions options;
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
@@ -40,11 +38,9 @@ public class Z3Wrapper {
         this.globalOptions = globalOptions;
 
         String s = "";
-        logic = "";
         try {
             if (options.smtPrelude() != null) {
                 s = Files.toString(options.smtPrelude(), Charsets.UTF_8);
-                logic = options.smtPrelude().getName().equals("floating_point.smt2") ? "QF_FPA" : null;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -64,7 +60,7 @@ public class Z3Wrapper {
         boolean result = false;
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            Solver solver = logic != null ? context.mkSolver(logic) : context.mkSolver();
+            Solver solver = context.mkSolver();
             Params params = context.mkParams();
             params.add("timeout", timeout);
             solver.setParameters(params);
