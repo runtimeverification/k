@@ -12,6 +12,7 @@
     <module>k-core</module>
     <module>k-distribution</module>
     <module>java-backend</module>
+    <module>maude-backend</module>
   </modules>
 
   <scm>

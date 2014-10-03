@@ -10,7 +10,6 @@ import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.latex.DocumentationBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
-import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.unparser.UnflattenBackend;
 import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.kil.loader.Context;
@@ -58,7 +57,6 @@ public class KompileModule extends AbstractModule {
         mapBinder.addBinding(Backends.LATEX).to(LatexBackend.class);
         mapBinder.addBinding(Backends.DOC).to(DocumentationBackend.class);
         mapBinder.addBinding(Backends.HTML).to(HtmlBackend.class);
-        mapBinder.addBinding(Backends.MAUDE).to(KompileBackend.class);
         mapBinder.addBinding(Backends.UNPARSE).to(UnparserBackend.class);
         mapBinder.addBinding(Backends.UNFLATTEN).to(UnflattenBackend.class);
         mapBinder.addBinding(Backends.COQ).to(CoqBackend.class);

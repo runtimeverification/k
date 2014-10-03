@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.kframework.backend.maude.MaudeBackendKModule;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Term;
 import org.kframework.krun.api.SearchResult;
@@ -22,6 +23,7 @@ import org.kframework.utils.BaseTestCase;
 
 import static org.mockito.Mockito.*;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -84,9 +86,11 @@ public class KRunModuleTest extends BaseTestCase {
     }
 
     private Injector buildInjector(String[] argv) {
-        List<Module> definitionSpecificModules = KRunFrontEnd.getDefinitionSpecificModules(argv);
+        List<Module> definitionSpecificModules = Lists.newArrayList(KRunFrontEnd.getDefinitionSpecificModules(argv));
+        definitionSpecificModules.addAll(new MaudeBackendKModule().getDefinitionSpecificKRunModules());
         Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
-        List<Module> modules = KRunFrontEnd.getModules(argv, ImmutableList.of(definitionSpecificModuleOverride));
+        List<Module> modules = Lists.newArrayList(KRunFrontEnd.getModules(argv, ImmutableList.of(definitionSpecificModuleOverride)));
+        modules.addAll(new MaudeBackendKModule().getKRunModules(ImmutableList.of(definitionSpecificModuleOverride)));
         Injector injector = Guice.createInjector(modules);
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(new TypeLiteral<TransformationProvider<Transformation<Void, Void>>>() {}));

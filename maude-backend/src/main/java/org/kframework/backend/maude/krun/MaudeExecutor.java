@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.io.FileUtils;
 import org.kframework.backend.maude.MaudeFilter;
+import org.kframework.backend.maude.MaudeKRunOptions;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.BackendTerm;
@@ -98,6 +99,7 @@ public class MaudeExecutor implements Executor {
     private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
     private final KRunOptions options;
+    private final MaudeKRunOptions maudeOptions;
     private final Stopwatch sw;
     private final Context context;
 
@@ -110,12 +112,14 @@ public class MaudeExecutor implements Executor {
             KompileOptions kompileOptions,
             Stopwatch sw,
             Context context,
-            KExceptionManager kem) {
+            KExceptionManager kem,
+            MaudeKRunOptions maudeOptions) {
         this.options = options;
         this.sw = sw;
         this.context = context;
         this.kompileOptions = kompileOptions;
         this.kem = kem;
+        this.maudeOptions = maudeOptions;
 
 
         krunTempDir = new File(context.dotk, FileUtil.generateUniqueFolderName("krun"));
@@ -148,7 +152,7 @@ public class MaudeExecutor implements Executor {
         KRunner runner = new KRunner(new File(context.kompiled, "main.maude"),
                     outFile, errFile, inFile, xmlOutFile,
                     kompileOptions.mainModule(),
-                    options.experimental.logIO, !ioServer, context);
+                    maudeOptions.logIO, !ioServer, context);
         returnValue = runner.run();
         if (errFile.exists()) {
             String content = FileUtil.getFileContent(errFile.getAbsolutePath());
@@ -171,10 +175,10 @@ public class MaudeExecutor implements Executor {
         maudeFilter.visitNode(cfg);
         StringBuilder cmd = new StringBuilder();
 
-        if(options.experimental.trace) {
+        if(maudeOptions.trace) {
             cmd.append("set trace on .\n");
         }
-        if(options.experimental.profile) {
+        if(maudeOptions.profile) {
             cmd.append("set profile on .\n");
         }
 
@@ -182,7 +186,7 @@ public class MaudeExecutor implements Executor {
             .append(setCounter()).append(maude_cmd).append(" ")
             .append(maudeFilter.getResult()).append(" .\n");
 
-        if(options.experimental.profile) {
+        if(maudeOptions.profile) {
             cmd.append("show profile .\n");
         }
 
@@ -498,7 +502,7 @@ public class MaudeExecutor implements Executor {
                                         RuleCompilerSteps compilationInfo)
             throws KRunExecutionException {
         StringBuilder cmd = new StringBuilder();
-        if (options.experimental.trace) {
+        if (maudeOptions.trace) {
           cmd.append("set trace on .\n");
         }
         cmd.append("set show command off .\n").append(setCounter()).append("search ");

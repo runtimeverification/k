@@ -24,7 +24,6 @@ public class KompileBackend extends BasicBackend {
 
     @Override
     public Definition firstStep(Definition javaDef) {
-        String propPath = "/hooks/";
         Properties specialMaudeHooks = new Properties();
         Properties maudeHooks = new Properties();
         try {

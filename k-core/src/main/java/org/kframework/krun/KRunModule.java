@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.Backends;
-import org.kframework.backend.maude.krun.MaudeExecutor;
-import org.kframework.backend.maude.krun.MaudeModelChecker;
 import org.kframework.backend.unparser.BinaryOutputMode;
 import org.kframework.backend.unparser.KASTOutputMode;
 import org.kframework.backend.unparser.NoOutputMode;
@@ -189,15 +187,11 @@ public class KRunModule extends AbstractModule {
         @Override
         protected void configure() {
             //bind backend implementations of tools to their interfaces
-            MapBinder<String, Executor> executorBinder = MapBinder.newMapBinder(
+            MapBinder.newMapBinder(
                     binder(), String.class, Executor.class);
-            executorBinder.addBinding(Backends.MAUDE).to(MaudeExecutor.class);
-            executorBinder.addBinding(Backends.SYMBOLIC).to(MaudeExecutor.class);
 
-            MapBinder<String, LtlModelChecker> ltlBinder = MapBinder.newMapBinder(
+            MapBinder.newMapBinder(
                     binder(), String.class, LtlModelChecker.class);
-            ltlBinder.addBinding(Backends.MAUDE).to(MaudeModelChecker.class);
-            ltlBinder.addBinding(Backends.SYMBOLIC).to(MaudeModelChecker.class);
 
             MapBinder.newMapBinder(
                     binder(), String.class, Prover.class);
