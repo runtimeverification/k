@@ -22,8 +22,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Poset;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.options.SMTOptions;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -161,7 +159,6 @@ public class Context implements Serializable {
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     @Deprecated @Inject public transient GlobalOptions globalOptions;
     @Deprecated public KompileOptions kompileOptions;
-    @Deprecated @Inject(optional=true) public transient SMTOptions smtOptions;
     @Deprecated @Inject(optional=true) public KRunOptions krunOptions;
     @Deprecated @Inject(optional=true) public ColorOptions colorOptions;
 

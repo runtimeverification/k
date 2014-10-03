@@ -199,18 +199,24 @@
   </build>
   <profiles>
     <profile>
-      <id>linux</id>
+      <id>linux32</id>
       <activation>
+        <property>
+          <name>platform</name>
+          <value>linux32</value>
+        </property>
         <os>
           <family>Unix</family>
           <name>!mac os x</name>
+          <arch>i386</arch>
         </os>
       </activation>
       <properties>
+        <native.arch.classifier>32</native.arch.classifier>
         <native.library.type>so</native.library.type>
         <native.library.prefix>lib</native.library.prefix>
         <native.os.classifier>linux</native.os.classifier>
-        <native.classifier>linux${native.arch.classifier}</native.classifier>
+        <native.classifier>linux32</native.classifier>
         <native.script.type>sh</native.script.type>
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension></native.exe.extension>
@@ -219,8 +225,38 @@
       </properties>
     </profile>
     <profile>
-      <id>mac</id>
+      <id>linux64</id>
       <activation>
+        <property>
+          <name>platform</name>
+          <value>linux64</value>
+        </property>
+        <os>
+          <family>Unix</family>
+          <name>!mac os x</name>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <native.arch.classifier>64</native.arch.classifier>
+        <native.library.type>so</native.library.type>
+        <native.library.prefix>lib</native.library.prefix>
+        <native.os.classifier>linux</native.os.classifier>
+        <native.classifier>linux64</native.classifier>
+        <native.script.type>sh</native.script.type>
+        <native.exe.type>uexe</native.exe.type>
+        <native.exe.extension></native.exe.extension>
+        <native.script.extension></native.script.extension>
+        <native.path.variable>LD_LIBRARY_PATH</native.path.variable>
+      </properties>
+    </profile>
+    <profile>
+      <id>osx</id>
+      <activation>
+        <property>
+          <name>platform</name>
+          <value>osx</value>
+        </property>
         <os>
           <family>mac</family>
         </os>
@@ -238,17 +274,23 @@
       </properties>
     </profile>
     <profile>
-      <id>windows</id>
+      <id>windows32</id>
       <activation>
+        <property>
+          <name>platform</name>
+          <value>windows32</value>
+        </property>
         <os>
-          <family>Windows</family>
+          <family>windows</family>
+          <arch>x86</arch>
         </os>
       </activation>
       <properties>
+        <native.arch.classifier>32</native.arch.classifier>
         <native.library.type>dll</native.library.type>
         <native.library.prefix></native.library.prefix>
         <native.os.classifier>windows</native.os.classifier>
-        <native.classifier>windows${native.arch.classifier}</native.classifier>
+        <native.classifier>windows32</native.classifier>
         <native.script.type>bat</native.script.type>
         <native.exe.type>exe</native.exe.type>
         <native.exe.extension>.exe</native.exe.extension>
@@ -257,61 +299,30 @@
         <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
       </properties>
     </profile>
-
     <profile>
-      <id>amd64</id>
+      <id>windows64</id>
       <activation>
+        <property>
+          <name>platform</name>
+          <value>windows64</value>
+        </property>
         <os>
+          <family>windows</family>
           <arch>amd64</arch>
         </os>
       </activation>
       <properties>
         <native.arch.classifier>64</native.arch.classifier>
-      </properties>
-    </profile>
-    <profile>
-      <id>x64</id>
-      <activation>
-        <os>
-          <arch>x64</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>64</native.arch.classifier>
-      </properties>
-    </profile>
-    <profile>
-      <id>x86_64</id>
-      <activation>
-        <os>
-          <arch>x86_64</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>64</native.arch.classifier>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>x86</id>
-      <activation>
-        <os>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>32</native.arch.classifier>
-      </properties>
-    </profile>
-    <profile>
-      <id>i386</id>
-      <activation>
-        <os>
-          <arch>i386</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>32</native.arch.classifier>
+        <native.library.type>dll</native.library.type>
+        <native.library.prefix></native.library.prefix>
+        <native.os.classifier>windows</native.os.classifier>
+        <native.classifier>windows64</native.classifier>
+        <native.script.type>bat</native.script.type>
+        <native.exe.type>exe</native.exe.type>
+        <native.exe.extension>.exe</native.exe.extension>
+        <native.script.extension>.bat</native.script.extension>
+        <native.path.variable>PATH</native.path.variable>
+        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
       </properties>
     </profile>
   </profiles>

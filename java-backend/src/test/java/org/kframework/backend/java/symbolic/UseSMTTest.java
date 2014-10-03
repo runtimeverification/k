@@ -16,7 +16,7 @@ import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
+import org.kframework.backend.java.symbolic.SymbolicConstraint.SymbolicConstraintOperations;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
@@ -38,23 +38,24 @@ public class UseSMTTest {
     Definition definition;
 
     @Mock
-    Equality.EqualityOperations equalityOps;
+    SymbolicConstraintOperations constraintOps;
+
 
     @Before
     public void setUp() {
         when(tc.definition()).thenReturn(definition);
         when(tc.definition().context()).thenReturn(context);
         when(definition.functionRules()).thenReturn(HashMultimap.<KLabelConstant, Rule>create());
-        context.smtOptions = new SMTOptions();
-        context.smtOptions.smt = SMTSolver.Z3;
         context.productions = new HashSet<>();
-        when(tc.global()).thenReturn(new GlobalContext(null, null, equalityOps, null));
+        when(tc.global()).thenReturn(new GlobalContext(null, null, null, constraintOps, null));
     }
 
     @Test
     public void testGetModel() {
         System.err.println(System.getProperty("java.library.path"));
         BuiltinMap.Builder builder = new BuiltinMap.Builder();
-        assertEquals(builder.build(), UseSMT.checkSat(BoolToken.TRUE, tc));
+        SMTOptions options = new SMTOptions();
+        options.smt = SMTSolver.Z3;
+        assertEquals(builder.build(), new UseSMT(options).checkSat(BoolToken.TRUE, tc));
     }
 }
