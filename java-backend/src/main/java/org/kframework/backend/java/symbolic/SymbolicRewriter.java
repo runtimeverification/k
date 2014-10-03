@@ -9,14 +9,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.*;
-import org.kframework.utils.general.IndexingStatistics;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
@@ -40,12 +37,10 @@ public class SymbolicRewriter {
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
     private RuleIndex ruleIndex;
-    private final boolean indexingStats;
 
     @Inject
     public SymbolicRewriter(Definition definition, KompileOptions kompileOptions, JavaExecutionOptions javaOptions) {
         this.definition = definition;
-        this.indexingStats = javaOptions.indexingStats;
         ruleIndex = definition.getIndex();
 
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
@@ -86,21 +81,7 @@ public class SymbolicRewriter {
      * @return a list of rules that could be applied
      */
     private List<Rule> getRules(Term term) {
-        List<Rule> rules = new ArrayList<>();
-        if (indexingStats){
-            IndexingStatistics.getRulesForTermStopWatch.reset();
-            IndexingStatistics.getRulesForTermStopWatch.start();
-        }
-
-        rules.addAll(ruleIndex.getRules(term));
-
-        if (indexingStats){
-            IndexingStatistics.rulesSelectedAtEachStep.add(rules.size());
-            long elapsed =
-                    IndexingStatistics.getRulesForTermStopWatch.stop().elapsed(TimeUnit.MICROSECONDS);
-            IndexingStatistics.timesForRuleSelection.add(elapsed);
-        }
-        return rules;
+        return ruleIndex.getRules(term);
     }
 
     private ConstrainedTerm getTransition(int n) {
@@ -109,10 +90,6 @@ public class SymbolicRewriter {
 
     private void computeRewriteStep(ConstrainedTerm constrainedSubject, int successorBound) {
         int rulesTried = 0;
-        if (indexingStats){
-            IndexingStatistics.rewriteStepStopWatch.reset();
-            IndexingStatistics.rewriteStepStopWatch.start();
-        }
         results.clear();
         appliedRules.clear();
 
@@ -127,10 +104,6 @@ public class SymbolicRewriter {
         strategy.reset(getRules(constrainedSubject.term()));
 
         while (strategy.hasNext()) {
-            if (indexingStats){
-                IndexingStatistics.rewritingStopWatch.reset();
-                IndexingStatistics.rewritingStopWatch.start();
-            }
             transition = strategy.nextIsTransition();
             ArrayList<Rule> rules = new ArrayList<>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
@@ -153,21 +126,7 @@ public class SymbolicRewriter {
 //                    }
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
-                    if (indexingStats){
-                        IndexingStatistics.rulesTried.add(rulesTried);
-                        if (IndexingStatistics.rewritingStopWatch.isRunning()){
-                            IndexingStatistics.rewritingStopWatch.stop();
-                        }
-                        IndexingStatistics.timesForRewriting.add(
-                                IndexingStatistics.rewritingStopWatch.elapsed(TimeUnit.MICROSECONDS));
-                    }
                     if (results.size() == successorBound) {
-                        if (indexingStats) {
-                            IndexingStatistics.rewriteStepStopWatch.stop();
-                            long elapsed =
-                                    IndexingStatistics.rewriteStepStopWatch.elapsed(TimeUnit.MICROSECONDS);
-                            IndexingStatistics.timesForRewriteSteps.add(elapsed);
-                        }
                         return;
                     }
                 }
@@ -176,13 +135,6 @@ public class SymbolicRewriter {
             // we are done, as we can't match rules from two equivalence classes
             // in the same step.
             if (results.size() > 0) {
-                //TODO(OwolabiL): Remove duplication
-                if (indexingStats){
-                    IndexingStatistics.rewriteStepStopWatch.stop();
-                    long elapsed =
-                            IndexingStatistics.rewriteStepStopWatch.elapsed(TimeUnit.MICROSECONDS);
-                    IndexingStatistics.timesForRewriteSteps.add(elapsed);
-                }
                 return;
             }
         }

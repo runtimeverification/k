@@ -7,7 +7,6 @@ import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
-import com.google.inject.ProvidedBy;
 
 public final class JavaExecutionOptions {
 
@@ -33,14 +32,11 @@ public final class JavaExecutionOptions {
         return concreteExecution() && patternMatching && !search;
     }
 
-    @Parameter(names="--indexing-stats", description="Measure indexing-related information.")
-    public boolean indexingStats = false;
-
     @Parameter(names="--pattern-matching", description="Use pattern-matching rather than "
         + "unification to drive rewriting in the Java backend.")
     public boolean patternMatching = false;
 
-    @Parameter(names="--rule-index", converter=RuleIndexConveter.class, description="Choose a technique for indexing the rules. <rule-index> is one of [table|path]. (Default: table). This only has effect with '--backend java'.")
+    @Parameter(names="--rule-index", converter=RuleIndexConveter.class, description="Choose a technique for indexing the rules. <rule-index> is one of [table]. (Default: table). This only has effect with '--backend java'.")
     public IndexingAlgorithm ruleIndex = IndexingAlgorithm.RULE_TABLE;
 
     public static class RuleIndexConveter extends BaseEnumConverter<IndexingAlgorithm> {

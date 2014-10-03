@@ -3,8 +3,6 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.utils.general.IndexingStatistics;
-
 import com.google.inject.Inject;
 
 public class KilFactory {
@@ -28,15 +26,6 @@ public class KilFactory {
      * Java Rewrite Engine internal representation ({@link org.kframework.backend.java.kil.Term}).
      */
     public Term term(org.kframework.kil.Term kilTerm) {
-      if (options.indexingStats){
-          IndexingStatistics.kilTransformationStopWatch.start();
-      }
-
-      Term term = transformer.transformTerm(kilTerm, definition);
-
-      if (options.indexingStats){
-          IndexingStatistics.kilTransformationStopWatch.stop();
-      }
-      return term;
+      return transformer.transformTerm(kilTerm, definition);
     }
 }
