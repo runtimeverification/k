@@ -49,6 +49,11 @@ which will significantly speed up the incremental build process.
 
 # IDE Setup
 
+## General
+
+You should run K from the k-distribution project, because it is the only project to have the complete
+classpath and therefore all backends.
+
 ## Eclipse
 To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
 command line. Then go to
