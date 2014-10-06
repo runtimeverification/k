@@ -263,8 +263,6 @@ public final class KRunOptions {
     public Experimental experimental = new Experimental();
 
     public final class Experimental {
-        @Parameter(names="--log-io", description="Make the IO server create logs.", arity=1, converter=OnOffConverter.class)
-        public boolean logIO;
 
         @Parameter(names="--simulation", description="Simulation property of two programs in two semantics.",
                 listConverter=StringListConverter.class)
@@ -283,12 +281,6 @@ public final class KRunOptions {
             }
             return debugger;
         }
-
-        @Parameter(names="--trace", description="Turn on maude trace.")
-        public boolean trace = false;
-
-        @Parameter(names="--profile", description="Turn on maude profiler.")
-        public boolean profile = false;
 
         @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
         private String ltlmc;

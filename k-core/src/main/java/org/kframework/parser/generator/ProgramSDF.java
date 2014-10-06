@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.kframework.backend.Backends;
-import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
@@ -145,23 +143,6 @@ public class ProgramSDF {
         for (Sort s : psdfv.startSorts) {
             if (!s.isBaseSort() && !context.isListSort(s))
                 sdf.append("    " + StringUtil.escapeSort(s) + "        -> K\n");
-        }
-
-        //TODO(dwightguth): remove for modularization
-        if (context.kompileOptions.backend.equals(Backends.SYMBOLIC)) {
-            sdf.append("\ncontext-free syntax\n");
-            sdf.append("    DzId    -> UnitDz\n");
-            sdf.append("    DzBool    -> UnitDz\n");
-            sdf.append("    DzInt    -> UnitDz\n");
-            sdf.append("    DzFloat    -> UnitDz\n");
-            sdf.append("    DzString-> UnitDz\n");
-            for (Sort s : psdfv.startSorts) {
-                if (!s.isBaseSort() && !context.isListSort(s))
-                    if (AddSymbolicK.allowKSymbolic(s)) {
-                        sdf.append("    \"" + AddSymbolicK.symbolicConstructor(s) + "\"    \"(\" UnitDz \")\"    -> ");
-                        sdf.append(StringUtil.escapeSort(s) + "    {cons(\"" + StringUtil.escapeSort(s) + "1Symb\")}\n");
-                    }
-            }
         }
 
         sdf.append("lexical syntax\n");

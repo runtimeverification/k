@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.ioserver.commands;
 
-import org.kframework.backend.maude.MaudeFilter;
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;

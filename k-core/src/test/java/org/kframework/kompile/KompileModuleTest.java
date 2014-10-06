@@ -13,7 +13,7 @@ public class KompileModuleTest {
 
     @Test
     public void testCreateInjection() {
-        String[] argv = new String[] { "test.k" };
+        String[] argv = new String[] { "test.k", "--backend", "latex" };
         Injector injector = Guice.createInjector(KompileFrontEnd.getModules(argv));
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KompileFrontEnd);
     }
