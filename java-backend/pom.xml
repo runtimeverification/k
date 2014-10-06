@@ -115,18 +115,21 @@
           <artifactId>vcomp100</artifactId>
           <version>10.0</version>
           <type>dll</type>
+          <classifier>${native.arch.classifier}</classifier>
         </dependency>
         <dependency>
           <groupId>com.microsoft.z3</groupId>
           <artifactId>msvcp100</artifactId>
           <version>10.0</version>
           <type>dll</type>
+          <classifier>${native.arch.classifier}</classifier>
         </dependency>
         <dependency>
           <groupId>com.microsoft.z3</groupId>
           <artifactId>msvcr100</artifactId>
           <version>10.0</version>
           <type>dll</type>
+          <classifier>${native.arch.classifier}</classifier>
         </dependency>
       </dependencies>
     </profile>
