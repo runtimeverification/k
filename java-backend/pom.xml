@@ -100,4 +100,35 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+        </os>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.microsoft.z3</groupId>
+          <artifactId>vcomp100</artifactId>
+          <version>10.0</version>
+          <type>dll</type>
+        </dependency>
+        <dependency>
+          <groupId>com.microsoft.z3</groupId>
+          <artifactId>msvcp100</artifactId>
+          <version>10.0</version>
+          <type>dll</type>
+        </dependency>
+        <dependency>
+          <groupId>com.microsoft.z3</groupId>
+          <artifactId>msvcr100</artifactId>
+          <version>10.0</version>
+          <type>dll</type>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 </project>
