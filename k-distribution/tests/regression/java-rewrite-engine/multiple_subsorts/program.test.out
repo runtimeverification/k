@@ -1,3 +1,1 @@
-<k>
-    true
-</k>
+true ~> _\d+:KResult ==K _\d+:Sort
