@@ -549,6 +549,11 @@ public class PatternMatcher extends AbstractMatcher {
             builtinList.toLabelRepresentation(termContext).accept(
                     this,
                     ((BuiltinList) pattern).toLabelRepresentation(termContext));
+            // TODO(AndreiS): this is an ad-hoc evaluation
+            for (Map.Entry<Variable, Term> entry : fSubstitution.entrySet()) {
+                entry.setValue(entry.getValue().evaluate(termContext));
+            }
+            return;
         }
 
         throw new UnsupportedOperationException(

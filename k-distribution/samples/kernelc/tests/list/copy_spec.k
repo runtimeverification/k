@@ -32,15 +32,15 @@ rule [loop-inv]:
     object(LY) |-> tv (struct listNode *, Y:Pointer)
     object(LIX) |-> tv (struct listNode *, IX:Pointer => ?_:Pointer)
     object(LIY) |-> tv (struct listNode *, object(IY:Int) => ?_:Pointer)
-    (lseg(X, IX)(A:IntSeq @ [V:Int])
-     lseg(IX, null)(B:IntSeq)
+    (lseg(X, IX)(A:List ListItem(V:Int))
+     lseg(IX, null)(B:List)
      lseg(Y, object(IY))(A)
      object(IY) |-> (
           val  |-> tv(int, V)
           next |-> tv(struct listNode *, null))
      =>
-     lseg(X, null)(A @ [V] @ B)
-     lseg(Y, null)(A @ [V] @ B))
+     lseg(X, null)(A ListItem(V) B)
+     lseg(Y, null)(A ListItem(V) B))
   ...</heap>
 
 rule [func-spec]:
@@ -51,6 +51,6 @@ rule [func-spec]:
   =>
     tv(struct listNode *, ?Y:Pointer)
   ...</k>
-  <heap>... lseg(X, null)(A:IntSeq) (.Map  => lseg(?Y, null)(A)) ...</heap>
+  <heap>... lseg(X, null)(A:List) (.Map  => lseg(?Y, null)(A)) ...</heap>
 endmodule
 

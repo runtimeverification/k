@@ -201,7 +201,9 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build());
-            return builtinSet.hasFrame() && builtinSet.elements.isEmpty() ? builtinSet.frame : builtinSet;
+            return builtinSet.baseTerms().size() == 1 && builtinSet.concreteSize() == 0 ?
+                    builtinSet.baseTerms().iterator().next() :
+                    builtinSet;
         }
     }
 

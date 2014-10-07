@@ -17,4 +17,14 @@ public class BuiltinListOperations {
         return BuiltinList.concatenate(term1, term2);
     }
 
+    public static Term unit(TermContext context) {
+        return BuiltinList.EMPTY_LIST;
+    }
+
+    public static Term element(Term element, TermContext context) {
+        BuiltinList.Builder builder = BuiltinList.builder();
+        builder.addItem(element);
+        return builder.build();
+    }
+
 }

@@ -255,8 +255,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             changed = true;
             unify(list.get(-i), otherList.get(-i));
         }
-        List<Term> remainingElementsRight = list.elementsRight().subList(0, size);
-        List<Term> otherRemainingElementsRight = otherList.elementsRight().subList(0, size);
+        List<Term> remainingElementsRight = list.elementsRight().subList(0, list.elementsRight().size() - size);
+        List<Term> otherRemainingElementsRight = otherList.elementsRight().subList(0, otherList.elementsRight().size() - size);
 
         List<Term> remainingBaseTerms = list.baseTerms();
         List<Term> otherRemainingBaseTerms = otherList.baseTerms();
@@ -474,6 +474,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             Term otherRemainingMap = otherBuilder.build();
 
             if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable
+                    //|| (remainingMap.equals(BuiltinMap.EMPTY_MAP) && otherRemainingMap.equals(BuiltinMap.EMPTY_MAP))) {
                     || ((BuiltinMap) remainingMap).isEmpty() && ((BuiltinMap) otherRemainingMap).isEmpty()) {
                 /* equality eliminated */
                 if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable) {

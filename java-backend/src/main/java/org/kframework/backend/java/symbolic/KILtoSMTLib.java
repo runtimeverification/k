@@ -183,7 +183,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             }
         }
         for (Variable variable : variables) {
-            sorts.add(variable.sort());
+            sorts.add(renameSort(variable.sort()));
         }
 
         if (!Sets.intersection(sorts, RESERVED_Z3_SORTS).isEmpty()) {

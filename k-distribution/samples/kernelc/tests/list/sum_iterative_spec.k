@@ -21,7 +21,7 @@ rule [loop-inv]:
   <heap>...
     object(LX) |-> tv (struct listNode *, LP:Pointer => null)
     object(LS) |-> tv (int, S:Int => S +Int sum(A))
-    list(LP)(A:IntSeq)
+    list(LP)(A:List)
   ...</heap>
 
 rule [func-spec]:
@@ -33,7 +33,7 @@ rule [func-spec]:
     tv(int, sum(A))
   ...</k>
   <heap>...
-    list(LP)(A:IntSeq)
+    list(LP)(A:List)
   ...</heap>
 
 endmodule

@@ -293,6 +293,26 @@ public class BuiltinList extends Collection {
         public boolean isList() {
             return type == BaseTermType.LIST;
         }
+
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            if (!(object instanceof BaseTerm)) {
+                return false;
+            }
+
+            BaseTerm baseTerm = (BaseTerm) object;
+            return term.equals(baseTerm.term) && type.equals(baseTerm.type);
+        }
+
+        public int hashCode() {
+            int hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + type.hashCode();
+            return hashCode;
+        }
     }
 
     private enum BuilderStatus {
@@ -459,7 +479,9 @@ public class BuiltinList extends Collection {
                     baseTermsBuilder.build(),
                     elementsRightBuilder.build(),
                     baseTermTypesBuilder.build());
-            return builtinList.hasFrame() && builtinList.concreteSize() == 0 ? builtinList.frame : builtinList;
+            return builtinList.baseTerms().size() == 1 && builtinList.concreteSize() == 0 ?
+                   builtinList.baseTerms().get(0) :
+                   builtinList;
         }
     }
 
