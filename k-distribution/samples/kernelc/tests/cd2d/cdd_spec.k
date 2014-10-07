@@ -34,6 +34,16 @@ rule [sqs-spec]:
 requires minusInfinity(11,53) <Float X andBool X <Float plusInfinity(11,53) andBool minusInfinity(11,53) <Float Y andBool Y <Float plusInfinity(11,53)
 ensures Z ==Float X *Float X +Float Y *Float Y
 
+rule [sqv-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    sqv(tv(double, X:Float{exponent(11), significand(53)}), tv(double, Y:Float{exponent(11), significand(53)}))
+  =>
+    tv(double, Z:Float{exponent(11), significand(53)})
+  ...</k>
+requires minusInfinity(11,53) <Float X andBool X <Float plusInfinity(11,53) andBool minusInfinity(11,53) <Float Y andBool Y <Float plusInfinity(11,53)
+ensures Z ==Float X *Float X +Float Y *Float Y
+
 rule [dot-spec]:
   <fun>... FUN:Map ...</fun>
   <k>
@@ -53,5 +63,16 @@ rule [horizontal-los-spec]:
     tv(int, 1)
   ...</k>
 requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool horizontalLosR(Sx, Sy, 5.0)
+
+rule [tau-vv-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    tau_vv(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}), tv(double, Vx:Float{exponent(11), significand(53)}), tv(double, Vy:Float{exponent(11), significand(53)}))
+  =>
+    tv(double, Z:Float{exponent(11), significand(53)})
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
+ensures Z ==Float tauR(Sx, Sy, Vx, Vy, 0.0, 300.0)
 
 endmodule

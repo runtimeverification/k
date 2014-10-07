@@ -23,7 +23,14 @@ module CDD-SPEC-AUX
   syntax Float ::= sqR(Float, Float) [function]
   rule sqR(X:Float, Y:Float) => X *Float X +Float Y *Float Y
 
+  syntax Float ::= dotR(Float,Float,Float,Float) [function]
+  rule dotR(Ax:Float, Ay:Float, Bx:Float, By:Float)
+    => Ax *Float Bx +Float Ay *Float By
+
   syntax Bool ::= horizontalLosR(Float, Float, Float) [function]
   rule horizontalLosR(Sx, Sy, D) => sqR(Sx, Sy) <=Float D *Float D
 
+  syntax Float ::= tauR(Float, Float, Float, Float, Float, Float) [function]
+  rule tauR(Ux:Float, Uy:Float, Vx:Float, Vy:Float, B:Float, T:Float) =>
+    minFloat(maxFloat(B *Float sqR(Vx, Vy), --Float dotR(Ux, Uy, Vx, Vy)), T *Float sqR(Vx, Vy))
 endmodule

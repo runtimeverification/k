@@ -32,11 +32,10 @@ double tau_vv(double s_x, double s_y, double v_x, double v_y){
 }
 
 double omega_vv(double s_x, double s_y, double v_x, double v_y){
-    double tau;
+  double tau;
 
-    tau = tau_vv(s_x, s_y, v_x, v_y);
-    return sqv(v_x, v_y)*sqv(s_x, s_y) + (2 * tau)* dot(s_x, s_y, v_x, v_y) + tau*tau - 5.0*5.0*sqv(v_x,v_y);
-
+  tau = tau_vv(s_x, s_y, v_x, v_y);
+  return sqv(v_x, v_y)*sqv(s_x, s_y) + (2 * tau)* dot(s_x, s_y, v_x, v_y) + tau*tau - 5.0*5.0*sqv(v_x,v_y);
 }
 
 int cd2d(double s_x, double s_y, double v_x, double v_y){

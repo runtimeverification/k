@@ -2,6 +2,7 @@
 package org.kframework.backend.java.util;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.microsoft.z3.Params;
@@ -15,6 +16,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SMTOptions;
 
 import java.io.*;
+import java.util.Set;
 
 /**
  * @author Traian
@@ -22,6 +24,8 @@ import java.io.*;
 public class Z3Wrapper {
 
     private static final int Z3_RESTART_LIMIT = 3;
+
+    private static final Set<String> Z3_QUERY_RESULTS = ImmutableSet.of("unknown", "sat", "unsat");
 
     public final String SMT_PRELUDE;
     private final SMTOptions options;
@@ -106,6 +110,10 @@ public class Z3Wrapper {
             result = "unknown";
             if (globalOptions.debug) {
                 System.err.println("Z3 crashed on query:\n" + SMT_PRELUDE + query + "(check-sat)\n");
+            }
+        } else if (result != null) {
+            if (globalOptions.debug && !Z3_QUERY_RESULTS.contains(result)) {
+                System.err.println("Unexpected Z3 query result:\n" + result);
             }
         }
         return result.equals("unsat");
