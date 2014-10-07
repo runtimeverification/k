@@ -28,8 +28,6 @@ import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.tools.Executor;
-import org.kframework.utils.general.IndexingStatistics;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -64,15 +62,7 @@ public class JavaSymbolicExecutor implements Executor {
 
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
-        if (javaOptions.indexingStats){
-            IndexingStatistics.totalKrunStopwatch.start();
-            KRunResult<KRunState> result = internalRun(cfg, -1);
-            IndexingStatistics.totalKrunStopwatch.stop();
-            IndexingStatistics.print();
-            return result;
-        } else{
-            return internalRun(cfg, -1);
-        }
+        return internalRun(cfg, -1);
     }
 
     private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
@@ -87,10 +77,6 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
-        if (javaOptions.indexingStats){
-            IndexingStatistics.preProcessStopWatch.start();
-        }
-
         Term term = kilFactory.term(cfg);
         TermContext termContext = TermContext.of(globalContext);
         term = term.evaluate(termContext);
@@ -102,18 +88,7 @@ public class JavaSymbolicExecutor implements Executor {
         } else {
             SymbolicConstraint constraint = new SymbolicConstraint(termContext);
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
-            if (javaOptions.indexingStats){
-                IndexingStatistics.preProcessStopWatch.stop();
-            }
-            ConstrainedTerm rewriteResult;
-            if (javaOptions.indexingStats) {
-                IndexingStatistics.totalRewriteStopwatch.start();
-                rewriteResult = getSymbolicRewriter().rewrite(constrainedTerm, bound);
-                IndexingStatistics.totalRewriteStopwatch.stop();
-            } else {
-                rewriteResult = getSymbolicRewriter().rewrite(constrainedTerm, bound);
-            }
-            return rewriteResult;
+            return getSymbolicRewriter().rewrite(constrainedTerm, bound);
         }
     }
 
@@ -126,10 +101,6 @@ public class JavaSymbolicExecutor implements Executor {
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
-
-        if (javaOptions.indexingStats){
-            IndexingStatistics.totalSearchStopwatch.start();
-        }
 
         List<Rule> claims = Collections.emptyList();
         if (bound == null) {
@@ -191,10 +162,6 @@ public class JavaSymbolicExecutor implements Executor {
                 null,
                 false));
 
-        if (javaOptions.indexingStats){
-            IndexingStatistics.totalSearchStopwatch.stop();
-            IndexingStatistics.print();
-        }
         return searchResultsKRunResult;
     }
 
