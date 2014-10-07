@@ -26,7 +26,7 @@ module FLOAT-HOOKS
                | exponentBitsFloat(Float) [function, hook(#FLOAT:exponentBits)]
 
   syntax Bool ::= signFloat(Float)      [function, hook(#FLOAT:sign)]
-                | isNaN(Float)          [function, smtlib((not (== #1 #1)))]
+                | isNaN(Float)          [function, smtlib((not (== #1 #1))), hook(#FLOAT:isNaN)]
   syntax MInt ::= significandFloat(Float) [function, hook(#FLOAT:significand)]
 
   syntax Float ::= fpNaN(Int, Int)              [smtlib((as NaN (_ FP #1 #2)))]
