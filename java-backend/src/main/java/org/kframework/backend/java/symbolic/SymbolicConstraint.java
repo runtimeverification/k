@@ -258,7 +258,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             try {
                 result = z3.checkQuery(
                         KILtoSMTLib.translateConstraint(constraint),
-                        50);
+                        smtOptions.z3CnstrTimeout);
             } catch (UnsupportedOperationException e) {
                 e.printStackTrace();
             }
@@ -299,7 +299,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             } else if (smtOptions.smt == SMTSolver.Z3) {
                 try {
                     result = z3.checkQuery(
-                            KILtoSMTLib.translateImplication(left, right, rightOnlyVariables));
+                            KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
+                            smtOptions.z3ImplTimeout);
                 } catch (UnsupportedOperationException e) {
                     e.printStackTrace();
                 }

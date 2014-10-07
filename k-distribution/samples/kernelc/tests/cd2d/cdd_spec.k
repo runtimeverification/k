@@ -45,4 +45,13 @@ requires isValidDistance(Ux) andBool isValidDistance(Uy) andBool
          isValidVelocity(Vx) andBool isValidVelocity(Vy)
 ensures Z ==Float Ux *Float Vx +Float Uy *Float Vy
 
+rule [horizontal-los-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    horizontal_los(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}))
+  =>
+    tv(int, 1)
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool horizontalLosR(Sx, Sy, 5.0)
+
 endmodule

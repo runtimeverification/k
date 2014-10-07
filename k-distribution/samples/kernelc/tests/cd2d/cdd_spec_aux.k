@@ -20,4 +20,10 @@ module CDD-SPEC-AUX
   syntax Bool ::= isValidVelocity(Float) [function]
   rule isValidVelocity(X:Float) => (--Float VE_MAX) <=Float X andBool X <=Float VE_MAX
 
+  syntax Float ::= sqR(Float, Float) [function]
+  rule sqR(X:Float, Y:Float) => X *Float X +Float Y *Float Y
+
+  syntax Bool ::= horizontalLosR(Float, Float, Float) [function]
+  rule horizontalLosR(Sx, Sy, D) => sqR(Sx, Sy) <=Float D *Float D
+
 endmodule

@@ -22,7 +22,6 @@ int horizontal_los(double s_x, double s_y)
   double sqD;
   double E_hlos;
   sqS = sqs(s_x, s_y);
-  //sqS = 5.0*5.0;
   sqD = 5.0*5.0;
   E_hlos = 1.4551915228366851806640625E-11;
   return (sqS - sqD <= E_hlos);
