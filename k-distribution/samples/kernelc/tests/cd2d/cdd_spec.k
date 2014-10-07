@@ -34,8 +34,6 @@ rule [sqs-spec]:
 requires minusInfinity(11,53) <Float X andBool X <Float plusInfinity(11,53) andBool minusInfinity(11,53) <Float Y andBool Y <Float plusInfinity(11,53)
 ensures Z ==Float X *Float X +Float Y *Float Y
 
-// TODO(YilongL): unable to prove the following because QF_FPA is too slow right now
-/*
 rule [dot-spec]:
   <fun>... FUN:Map ...</fun>
   <k>
@@ -43,8 +41,10 @@ rule [dot-spec]:
   =>
     tv(double, Z:Float{exponent(11), significand(53)})
   ...</k>
-requires isOrdinary(Ux) andBool isOrdinary(Uy) andBool isOrdinary(Vx) andBool isOrdinary(Vy)
+requires (-5.00) <Float Ux andBool Ux <Float 5.00 andBool
+         (-5.00) <Float Uy andBool Uy <Float 5.00 andBool
+         (-5.00) <Float Vx andBool Vx <Float 5.00 andBool
+         (-5.00) <Float Vy andBool Vy <Float 5.00
 ensures Z ==Float Ux *Float Vx +Float Uy *Float Vy
-*/
 
 endmodule

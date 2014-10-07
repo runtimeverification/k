@@ -299,8 +299,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             } else if (smtOptions.smt == SMTSolver.Z3) {
                 try {
                     result = z3.checkQuery(
-                            KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
-                            5000);
+                            KILtoSMTLib.translateImplication(left, right, rightOnlyVariables));
                 } catch (UnsupportedOperationException e) {
                     e.printStackTrace();
                 }

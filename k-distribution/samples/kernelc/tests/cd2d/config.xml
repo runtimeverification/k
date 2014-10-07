@@ -14,6 +14,7 @@
           <krun-option name="--prove" value="tests/cd2d/cdd_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/floating_point.smt2" />
           <krun-option name="--z3-executable" />
+          <krun-option name="--z3-timeout" value="8000" />
         </program>
     </test>
 

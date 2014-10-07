@@ -48,6 +48,10 @@ public class Z3Wrapper {
         SMT_PRELUDE = s;
     }
 
+    public boolean checkQuery(String query) {
+        return checkQuery(query, options.z3Timeout);
+    }
+
     public boolean checkQuery(String query, int timeout) {
         if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout);

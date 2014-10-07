@@ -41,6 +41,6 @@ public class SMTOptions implements Serializable {
     @Parameter(names="--z3-executable", description="Invokes Z3 as an external process.")
     public boolean z3Executable = false;
 
-    @Parameter(names="--z3-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking implication.")
+    @Parameter(names="--z3-timeout", description="The default soft timeout (in milli seconds) of each Z3 query.")
     public int z3Timeout = 5000;
 }
