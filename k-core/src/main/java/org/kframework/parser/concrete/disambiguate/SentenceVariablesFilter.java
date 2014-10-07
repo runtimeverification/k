@@ -60,7 +60,7 @@ public class SentenceVariablesFilter extends ParseForestTransformer {
     @Override
     public ASTNode visit(Variable var, Void _) throws ParseFailedException {
         if (config) {
-            if (!var.getName().startsWith("$")) {
+            if (!(var.getName().startsWith("$") || var.isFreshConstant() || var.isFreshVariable())) {
                 String msg = "In the configuration you can only have external variables, not: '" + var.getName() + "' (starts with '$').";
                 KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, var.getSource(), var.getLocation());
                 throw new VariableTypeClashException(kex);
