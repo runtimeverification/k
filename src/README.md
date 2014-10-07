@@ -32,13 +32,6 @@ option to make git accessible in the command line too.
 
 You can test if it works by calling `mvn -version` in a Terminal.
 
-## (On Windows only) Visual C++ 2012 Redistributable Package
-This is a dependency of the Z3 JNI library. You can download it here: 
-http://www.microsoft.com/en-us/download/details.aspx?id=30679
-
-Make sure to download the 64-bit version if you are using a 64-bit JRE,
-and the 32-bit version if you are using a 32-bit JRE.
-
 # Install
 Checkout this directory in your desired location and call `mvn package` from the main
 directory to build the distribution. For convenient usage, you can update
