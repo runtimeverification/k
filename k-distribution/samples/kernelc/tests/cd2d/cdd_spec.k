@@ -73,6 +73,17 @@ rule [tau-vv-spec]:
   ...</k>
 requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
          isValidVelocity(Vx) andBool isValidVelocity(Vy)
-ensures Z ==Float tauR(Sx, Sy, Vx, Vy, 0.0, 300.0)
+ensures Z ==Float tauR(Sx, Sy, Vx, Vy)
+
+rule [omega-vv-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    omega_vv(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}), tv(double, Vx:Float{exponent(11), significand(53)}), tv(double, Vy:Float{exponent(11), significand(53)}))
+  =>
+    tv(double, Z:Float{exponent(11), significand(53)})
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
+ensures Z ==Float omegaR(Sx, Sy, Vx, Vy)
 
 endmodule

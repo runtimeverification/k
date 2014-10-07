@@ -30,7 +30,11 @@ module CDD-SPEC-AUX
   syntax Bool ::= horizontalLosR(Float, Float, Float) [function]
   rule horizontalLosR(Sx, Sy, D) => sqR(Sx, Sy) <=Float D *Float D
 
-  syntax Float ::= tauR(Float, Float, Float, Float, Float, Float) [function]
-  rule tauR(Ux:Float, Uy:Float, Vx:Float, Vy:Float, B:Float, T:Float) =>
-    minFloat(maxFloat(B *Float sqR(Vx, Vy), --Float dotR(Ux, Uy, Vx, Vy)), T *Float sqR(Vx, Vy))
+  syntax Float ::= tauR(Float, Float, Float, Float) [function]
+  rule tauR(Ux:Float, Uy:Float, Vx:Float, Vy:Float) =>
+    minFloat(maxFloat(0.0 *Float sqR(Vx, Vy), --Float dotR(Ux, Uy, Vx, Vy)), 300.0 *Float sqR(Vx, Vy))
+
+  syntax Float ::= omegaR(Float, Float, Float, Float) [function]
+  rule omegaR(Ux:Float, Uy:Float, Vx:Float, Vy:Float) =>
+    sqR(Vx, Vy) *Float sqR(Ux, Uy) +Float 2.0 *Float tauR(Ux, Uy, Vx, Vy) *Float dotR(Ux, Uy, Vx, Vy) +Float tauR(Ux, Uy, Vx, Vy) *Float tauR(Ux, Uy, Vx, Vy) -Float 5.0 *Float 5.0 *Float sqR(Vx, Vy)
 endmodule
