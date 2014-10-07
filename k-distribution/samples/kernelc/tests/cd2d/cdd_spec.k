@@ -41,10 +41,8 @@ rule [dot-spec]:
   =>
     tv(double, Z:Float{exponent(11), significand(53)})
   ...</k>
-requires (-5.00) <Float Ux andBool Ux <Float 5.00 andBool
-         (-5.00) <Float Uy andBool Uy <Float 5.00 andBool
-         (-5.00) <Float Vx andBool Vx <Float 5.00 andBool
-         (-5.00) <Float Vy andBool Vy <Float 5.00
+requires isValidDistance(Ux) andBool isValidDistance(Uy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
 ensures Z ==Float Ux *Float Vx +Float Uy *Float Vy
 
 endmodule
