@@ -869,7 +869,7 @@ public class PatternMatcher extends AbstractMatcher {
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
-                        match(cells[generator.selection.get(i)], otherCells[i]);
+                        match(cells[generator.getSelection(i)], otherCells[i]);
                     }
                 } catch (PatternMatchingFailure e) {
                     continue;
@@ -877,7 +877,7 @@ public class PatternMatcher extends AbstractMatcher {
 
                 CellCollection.Builder builder = CellCollection.builder(termContext.definition().context());
                 for (int i = 0; i < cells.length; ++i) {
-                    if (!generator.selected.contains(i)) {
+                    if (!generator.isSelected(i)) {
                         builder.add(cells[i]);
                     }
                 }
@@ -924,65 +924,6 @@ public class PatternMatcher extends AbstractMatcher {
         };
 
         return Multimaps.filterKeys(cellCollection.cellMap(), notRemoved);
-    }
-
-    private class SelectionGenerator {
-
-        private final int size;
-        private final int coSize;
-        public List<Integer> selection;
-        public Set<Integer> selected;
-        private int index;
-
-        public SelectionGenerator(int size, int coSize) {
-            assert size <= coSize;
-
-            this.size = size;
-            this.coSize = coSize;
-            selection = new ArrayList<Integer>();
-            selected = new HashSet<Integer>();
-            for (int i = 0; i < size; ++i) {
-                selection.add(i);
-                selected.add(i);
-            }
-        }
-
-        private void pop() {
-            index = selection.remove(selection.size() - 1);
-            selected.remove(index);
-            ++index;
-        }
-
-        private void push() {
-            selection.add(index);
-            selected.add(index);
-            index = 0;
-        }
-
-        public boolean generate() {
-            if (selection.isEmpty()) return false;
-            pop();
-            while (selection.size() != size) {
-                if (index == coSize) {
-                    if (selection.isEmpty()) {
-                        break;
-                    } else {
-                        pop();
-                        continue;
-                    }
-                }
-
-                if (!selected.contains(index)) {
-                    push();
-                    continue;
-                }
-
-                ++index;
-            }
-
-            return !selection.isEmpty();
-        }
-
     }
 
     @Override
