@@ -168,7 +168,17 @@ public class NonACPatternMatcher {
                         return false;
                     }
                 } else if (subject instanceof Token) {
-                    check(subject.equals(pattern));
+                    if (subject.kind() == Kind.KITEM) {
+                        if (pattern instanceof KSequence) {
+                            match((Token) subject, (KSequence) pattern);
+                        } else if (pattern instanceof KList) {
+                            match((Token) subject, (KList) pattern);
+                        } else {
+                            check(subject.equals(pattern));
+                        }
+                    } else {
+                        check(subject.equals(pattern));
+                    }
                 } else if (subject instanceof KLabelInjection) {
                     if (pattern instanceof KLabelInjection) {
                         match((KLabelInjection) subject, (KLabelInjection) pattern);
@@ -230,7 +240,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(cell, pattern.cells().iterator().next());
-            addSubstitution(pattern.frame(), CellCollection.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), CellCollection.EMPTY);
+            }
         }
     }
 
@@ -320,7 +332,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(kItem, pattern.get(0));
-            addSubstitution(pattern.frame(), KSequence.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KSequence.EMPTY);
+            }
         }
     }
 
@@ -328,7 +342,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(kItem, pattern.get(0));
-            addSubstitution(pattern.frame(), KList.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KList.EMPTY);
+            }
         }
     }
 
@@ -336,7 +352,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(kSequence, pattern.get(0));
-            addSubstitution(pattern.frame(), KList.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KList.EMPTY);
+            }
         }
     }
 
@@ -371,6 +389,26 @@ public class NonACPatternMatcher {
             // kCollection.size() == length
             for (int index = 0; index < otherLen; ++index) {
                 addMatchingTask(kCollection.get(index), pattern.get(index));
+            }
+        }
+    }
+
+    private void match(Token token, KSequence pattern) {
+        check(pattern.concreteSize() == 1);
+        if (!failed) {
+            addMatchingTask(token, pattern.get(0));
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KSequence.EMPTY);
+            }
+        }
+    }
+
+    private void match(Token token, KList pattern) {
+        check(pattern.concreteSize() == 1);
+        if (!failed) {
+            addMatchingTask(token, pattern.get(0));
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KList.EMPTY);
             }
         }
     }
