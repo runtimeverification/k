@@ -10,13 +10,11 @@ import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
 
 
 /**
@@ -39,12 +37,10 @@ public interface Matcher {
     public void match(Hole hole, Term pattern);
     public void match(KItem kItem, Term pattern);
     public void match(KLabelConstant kLabelConstant, Term pattern);
-    public void match(KLabelFreezer kLabelFreezer, Term pattern);
     public void match(KLabelInjection kLabelInjection, Term pattern);
     public void match(KList kList, Term pattern);
     public void match(KSequence kSequence, Term pattern);
     public void match(Term subject, Term pattern);
     public void match(Token token, Term pattern);
-    public void match(Variable variable, Term pattern);
 
 }

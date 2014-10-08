@@ -543,8 +543,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(BuiltinList builtinList, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof BuiltinList)) {
             this.fail(builtinList, pattern);
         }
@@ -555,8 +553,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(BuiltinMap builtinMap, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof BuiltinMap)) {
             this.fail(builtinMap, pattern);
         }
@@ -707,8 +703,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(BuiltinSet builtinSet, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof BuiltinSet)) {
             this.fail(builtinSet, pattern);
         }
@@ -723,8 +717,6 @@ public class PatternMatcher extends AbstractMatcher {
      */
     @Override
     public void match(Cell cell, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof Cell)) {
             this.fail(cell, pattern);
         }
@@ -744,8 +736,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(CellCollection cellCollection, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof CellCollection)) {
             fail(cellCollection, pattern);
         }
@@ -928,29 +918,13 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(KLabelConstant kLabelConstant, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!kLabelConstant.equals(pattern)) {
             fail(kLabelConstant, pattern);
         }
     }
 
     @Override
-    public void match(KLabelFreezer kLabelFreezer, Term pattern) {
-        assert !(pattern instanceof Variable);
-
-        if(!(pattern instanceof KLabelFreezer)) {
-            fail(kLabelFreezer, pattern);
-        }
-
-        KLabelFreezer otherKLabelFreezer = (KLabelFreezer) pattern;
-        match(kLabelFreezer.term(), otherKLabelFreezer.term());
-    }
-
-    @Override
     public void match(KLabelInjection kLabelInjection, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if(!(pattern instanceof KLabelInjection)) {
             fail(kLabelInjection, pattern);
         }
@@ -961,8 +935,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(Hole hole, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!hole.equals(pattern)) {
             fail(hole, pattern);
         }
@@ -970,8 +942,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(KItem kItem, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof KItem)) {
             fail(kItem, pattern);
         }
@@ -1008,8 +978,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(Token token, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!token.equals(pattern)) {
             fail(token, pattern);
         }
@@ -1017,8 +985,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(KList kList, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if(!(pattern instanceof KList)) {
             fail(kList, pattern);
         }
@@ -1029,8 +995,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(KSequence kSequence, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof KSequence)) {
             this.fail(kSequence, pattern);
         }
@@ -1057,13 +1021,6 @@ public class PatternMatcher extends AbstractMatcher {
         } else {
             fail(kCollection, pattern);
         }
-    }
-
-    @Override
-    public void match(Variable variable, Term pattern) {
-        assert !(pattern instanceof Variable);
-
-        fail(variable, pattern);
     }
 
     @Override
