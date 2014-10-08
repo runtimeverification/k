@@ -86,4 +86,14 @@ requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
          isValidVelocity(Vx) andBool isValidVelocity(Vy)
 ensures Z ==Float omegaR(Sx, Sy, Vx, Vy)
 
+rule [cd2d-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    cd2d(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}), tv(double, Vx:Float{exponent(11), significand(53)}), tv(double, Vy:Float{exponent(11), significand(53)}))
+  =>
+    tv(int, 1)
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
+
 endmodule

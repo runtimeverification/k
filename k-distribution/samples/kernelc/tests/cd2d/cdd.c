@@ -44,9 +44,3 @@ int cd2d(double s_x, double s_y, double v_x, double v_y){
   E_cd2d = 1.0;
   return  (horizontal_los(s_x, s_y)) ||  (omega_vv(s_x, s_y, v_x, v_y) <= E_cd2d);
 }
-
-/*int main()
-{
-  printf("%d ", cd2d(0.0, 0.0, 0.0, 0.0));
-  return 0;
-}*/
