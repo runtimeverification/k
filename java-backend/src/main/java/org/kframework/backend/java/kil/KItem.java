@@ -367,7 +367,7 @@ public final class KItem extends Term {
 
                 for (Rule rule : definition.functionRules().get(kLabelConstant)) {
                     /* function rules should be applied by pattern match rather than unification */
-                    Map<Variable, Term> solution = NonACPatternMatcher.patternMatch(kItem, rule, context);
+                    Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
                     if (solution == null) {
                         continue;
                     }
@@ -469,7 +469,7 @@ public final class KItem extends Term {
          * anywhere rules in KLabelConstant */
         for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
             /* anywhere rules should be applied by pattern match rather than unification */
-            Map<Variable, Term> solution = NonACPatternMatcher.patternMatch(this, rule, context);
+            Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
             if (solution != null) {
                 Term rightHandSide = rule.rightHandSide();
                 if (copyOnShareSubstAndEval) {

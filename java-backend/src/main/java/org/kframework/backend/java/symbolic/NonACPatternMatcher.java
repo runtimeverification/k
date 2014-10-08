@@ -400,7 +400,7 @@ public class NonACPatternMatcher {
      *            the term context
      * @return the instantiation of variables
      */
-    public static Map<Variable, Term> patternMatch(Term subject, Rule rule, TermContext context) {
+    public static Map<Variable, Term> match(Term subject, Rule rule, TermContext context) {
         NonACPatternMatcher matcher = new NonACPatternMatcher(rule.isFunction() || rule.isLemma(), context);
 
         Map<Variable, Term> result = matcher.patternMatch(subject, rule.leftHandSide());
@@ -408,15 +408,14 @@ public class NonACPatternMatcher {
     }
 
     /**
-     * Evaluates the side-conditions of a rule against a list of possible
-     * instantiations.
+     * Evaluates the side-conditions of a rule according to a given
+     * substitution and updates the substitution accordingly.
      *
      * @param rule
      * @param substitution
      * @param context
-     * @return a list of instantiations that satisfy the side-conditions; each
-     *         of which is updated with extra bindings introduced during the
-     *         evaluation
+     * @return the updated substitution if it satisfies the side-condition;
+     *         otherwise, {@code null}
      */
     public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitution,
             TermContext context) {
