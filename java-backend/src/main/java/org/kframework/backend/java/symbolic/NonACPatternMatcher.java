@@ -93,7 +93,7 @@ public class NonACPatternMatcher {
         taskBuffer.clear();
         tasks.addFirst(Pair.of(subject, pattern));
         failed = false;
-        return match() ? java.util.Collections.unmodifiableMap(substitution) : null;
+        return match() ? substitution : null;
     }
 
     private void check(boolean condition) {
@@ -412,17 +412,17 @@ public class NonACPatternMatcher {
      * instantiations.
      *
      * @param rule
-     * @param substitutions
+     * @param substitution
      * @param context
      * @return a list of instantiations that satisfy the side-conditions; each
      *         of which is updated with extra bindings introduced during the
      *         evaluation
      */
-    public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitutions,
+    public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitution,
             TermContext context) {
         /* handle fresh variables, data structure lookups, and side conditions */
 
-        Map<Variable, Term> crntSubst = substitutions;
+        Map<Variable, Term> crntSubst = substitution;
         /* add bindings for fresh variables used in the rule */
         for (Variable variable : rule.freshVariables()) {
             crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
