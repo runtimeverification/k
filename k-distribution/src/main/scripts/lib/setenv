@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+if java -version 2>&1 | grep "64-Bit" >& /dev/null; then
+  ARCH=64;
+else
+  ARCH=32;
+fi
+
+if [ `uname` = 'Darwin' ]; then
+  export PATH=$PATH:"$(dirname "$0")/native/osx"
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$(dirname "$0")/native/osx"
+elif [[ `uname` == *MINGW* || `uname` == *CYGWIN* ]]; then
+  export PATH=$PATH:"$(dirname "$0")/native/windows":"$(dirname "$0")/native/windows$ARCH":"$(dirname "$0")/native/$ARCH"
+else
+  export PATH=$PATH:"$(dirname "$0")/native/linux":"$(dirname "$0")/native/linux$ARCH"
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$(dirname "$0")/native/linux$ARCH"
+fi

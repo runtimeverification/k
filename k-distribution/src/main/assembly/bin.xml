@@ -9,10 +9,20 @@
       <dependencySet>
         <outputDirectory>/lib/native</outputDirectory>
         <includes>
-          <include>*:${native.exe.type}:*</include>
+          <include>*:exe:*</include>
+          <include>*:uexe:*</include>
         </includes>
-        <outputFileNameMapping>${artifact.artifactId}${native.exe.extension}</outputFileNameMapping>
+        <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}.${artifact.type}</outputFileNameMapping>
         <fileMode>775</fileMode>
+      </dependencySet>
+      <dependencySet>
+        <outputDirectory>/lib/native</outputDirectory>
+        <includes>
+          <include>*:dll:*</include>
+          <include>*:so:*</include>
+          <include>*:dylib:*</include>
+        </includes>
+        <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}.${artifact.type}</outputFileNameMapping>
       </dependencySet>
     </dependencySets>
   <fileSets>

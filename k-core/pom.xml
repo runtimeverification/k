@@ -85,12 +85,38 @@
       <artifactId>mpfr_java</artifactId>
       <version>1.0.1</version>
     </dependency>
+
     <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
       <version>1.0.1</version>
-      <classifier>${native.classifier}</classifier>
+      <classifier>linux64</classifier>
     </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>linux32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>osx</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>windows64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>windows32</classifier>
+    </dependency>
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -127,13 +153,29 @@
       <version>2.6</version>
       <type>zip</type>
     </dependency>
+
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
       <artifactId>sdf2table</artifactId>
       <version>1.0</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.os.classifier}</classifier>
+      <type>uexe</type>
+      <classifier>linux</classifier>
     </dependency>
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
+      <artifactId>sdf2table</artifactId>
+      <version>1.0</version>
+      <type>uexe</type>
+      <classifier>osx</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
+      <artifactId>sdf2table</artifactId>
+      <version>1.0</version>
+      <type>exe</type>
+      <classifier>windows</classifier>
+    </dependency>
+
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
       <artifactId>strj</artifactId>

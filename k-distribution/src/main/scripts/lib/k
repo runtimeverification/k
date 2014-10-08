@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+source "$(dirname "$0")/setenv"
+ulimit -s `ulimit -H -s`
+if [ -z "$K_OPTS" ];
+  then export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation"
+fi
+if "$(dirname "$0")/checkJava"; then
+  java -Djava.awt.headless=true $K_OPTS -ea -cp "$(dirname "$0")/java/*" org.kframework.main.Main "$@"
+else
+  exit 1
+fi
