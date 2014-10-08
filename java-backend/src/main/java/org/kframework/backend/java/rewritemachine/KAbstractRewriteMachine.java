@@ -18,9 +18,9 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.DeepCloner;
 import org.kframework.backend.java.symbolic.NonACPatternMatcher;
-import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.util.Profiler;
+import org.kframework.backend.java.util.RewriteEngineUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -77,8 +77,8 @@ public class KAbstractRewriteMachine {
             /* take the first match that also satisfies the side-condition as solution */
             ExtendedSubstitution solution = null;
             for (ExtendedSubstitution extSubst : normalizedExtSubsts) {
-                Map<Variable, Term> updatedSubst = NonACPatternMatcher
-                        .evaluateConditions(rule, extSubst.substitution(), context);
+                Map<Variable, Term> updatedSubst = RewriteEngineUtils.
+                        evaluateConditions(rule, extSubst.substitution(), context);
                 if (updatedSubst != null) {
                     /* update the substitution according to the result of evaluation */
                     extSubst.setSubst(updatedSubst);
@@ -131,7 +131,7 @@ public class KAbstractRewriteMachine {
             if (subst == null) {
                 success = false;
             } else {
-                Map<Variable, Term> composedSubst = PatternMatcher.composeSubstitution(fExtSubst.substitution(), subst);
+                Map<Variable, Term> composedSubst = RewriteEngineUtils.composeSubstitution(fExtSubst.substitution(), subst);
                 if (composedSubst == null) {
                     success = false;
                 } else {
@@ -240,7 +240,7 @@ public class KAbstractRewriteMachine {
     }
 
     /**
-     * Similar to {@link PatternMatcher#getMultiSubstitutions(Map, Collection)}
+     * Similar to {@link RewriteEngineUtils#getMultiSubstitutions(Map, Collection)}
      * except that this method operates on {@code ExtendedSubstitution}.
      */
     private static List<ExtendedSubstitution> getCNFExtendedSubstitutions(
@@ -253,7 +253,7 @@ public class KAbstractRewriteMachine {
 
             if (multiExtSubsts.size() == 1) {
                 for (ExtendedSubstitution extSubst : multiExtSubsts.get(0)) {
-                    Map<Variable, Term> composedSubst = PatternMatcher
+                    Map<Variable, Term> composedSubst = RewriteEngineUtils
                             .composeSubstitution(fSubst.substitution(), extSubst.substitution());
                     if (composedSubst != null) {
                         List<Cell<?>> composedWrtCells = ListUtils.union(fSubst.writeCells(), extSubst.writeCells());
@@ -263,7 +263,7 @@ public class KAbstractRewriteMachine {
             } else {
                 for (ExtendedSubstitution subst1 : multiExtSubsts.get(0)) {
                     for (ExtendedSubstitution subst2 : multiExtSubsts.get(1)) {
-                        Map<Variable, Term> composedSubst = PatternMatcher
+                        Map<Variable, Term> composedSubst = RewriteEngineUtils
                                 .composeSubstitution(
                                         fSubst.substitution(),
                                         subst1.substitution(),

@@ -77,7 +77,7 @@ public abstract class AbstractRewriter {
      * </p>
      */
     protected final List<Map<Variable,Term>> getMatchingResults(Term subject, Rule rule) {
-        return PatternMatcher.patternMatch(subject, rule, termContext);
+        return PatternMatcher.match(subject, rule, termContext);
     }
 
     /**

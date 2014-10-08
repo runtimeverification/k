@@ -327,7 +327,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         while (!queue.isEmpty()) {
             BuiltinMap candidate = queue.remove();
             for (Rule rule : termContext.definition().patternFoldingRules()) {
-                for (Map<Variable, Term> substitution : PatternMatcher.patternMatch(candidate, rule, termContext)) {
+                for (Map<Variable, Term> substitution : PatternMatcher.match(candidate, rule, termContext)) {
                     BuiltinMap result = (BuiltinMap) rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
                     if (foldedMaps.add(result)) {
                         queue.add(result);
