@@ -545,7 +545,7 @@ public class PatternMatcher extends AbstractMatcher {
             this.fail(builtinList, pattern);
         }
 
-        if (isLemma) {
+        if (matchOnFunctionSymbol) {
             builtinList.toLabelRepresentation(termContext).accept(
                     this,
                     ((BuiltinList) pattern).toLabelRepresentation(termContext));

@@ -20,15 +20,15 @@ rule [append-loop-inv]:
   <heap>...
     object(LX) |-> tv (struct listNode *, X:Pointer)
     object(LP) |-> tv (struct listNode *, object(P1:Int) => object(?P2:Int))
-    (lseg(X, object(P1))(A:IntSeq)
-     lseg(object(P1), null)(B:IntSeq)
+    (lseg(X, object(P1))(A:List)
+     lseg(object(P1), null)(B:List)
      =>
-     lseg(X, object(?P2))(?C:IntSeq)
+     lseg(X, object(?P2))(?C:List)
      object(?P2) |-> (
           val  |-> tv(int, ?E:Int)
           next |-> tv(struct listNode *, null)))
   ...</heap>
-ensures A @ B ==K ?C @ ([?E])
+ensures A B ==K ?C ListItem(?E)
 
 rule [append-func-spec]:
   <struct>... STRUCT:Map ...</struct>
@@ -39,7 +39,7 @@ rule [append-func-spec]:
     tv(struct listNode *, ?P:Pointer)
   ...</k>
   <heap>...
-    lseg(X, null)(A:IntSeq) lseg(Y, null)(B:IntSeq) => lseg(?P, null)(A @ B)
+    lseg(X, null)(A:List) lseg(Y, null)(B:List) => lseg(?P, null)(A B)
   ...</heap>
 
 rule [quick-loop-inv]:
@@ -76,16 +76,16 @@ rule [quick-loop-inv]:
     object(P) |-> (
         val  |-> tv(int, V:Int)
         next |-> tv(struct listNode *, null))
-    (lseg(X, null)(A:IntSeq)
-     lseg(Y1, null)(B1:IntSeq)
-     lseg(Z1, null)(C1:IntSeq)
+    (lseg(X, null)(A:List)
+     lseg(Y1, null)(B1:List)
+     lseg(Z1, null)(C1:List)
      =>
-     lseg(?Y2, null)(?B2:IntSeq)
-     lseg(?Z2, null)(?C2:IntSeq))
+     lseg(?Y2, null)(?B2:List)
+     lseg(?Z2, null)(?C2:List))
  ...</heap>
-requires intseq2intset(B1) <=IntSet { V } andBool { V } <=IntSet intseq2intset(C1)
-ensures intseq2intset(?B2) <=IntSet { V } andBool { V } <=IntSet intseq2intset(?C2)
-  andBool intseq2intset(A) U intseq2intset(B1) U intseq2intset(C1) ==K intseq2intset(?B2) U intseq2intset(?C2)
+requires list2set(B1) <=IntSet { V } andBool { V } <=IntSet list2set(C1)
+ensures list2set(?B2) <=IntSet { V } andBool { V } <=IntSet list2set(?C2)
+  andBool list2set(A) U list2set(B1) U list2set(C1) ==K list2set(?B2) U list2set(?C2)
 
 rule [quicksort-func-spec]:
   <struct>... STRUCT:Map ...</struct>
@@ -96,8 +96,8 @@ rule [quicksort-func-spec]:
     tv(struct listNode *, ?X2:Pointer)
   ...</k>
   <heap>...
-    lseg(X1, null)(A1:IntSeq) => lseg(?X2, null)(?A2:IntSeq)
+    lseg(X1, null)(A1:List) => lseg(?X2, null)(?A2:List)
   ...</heap>
-ensures sorted(?A2) andBool intseq2intset(A1) ==K intseq2intset(?A2)
+ensures sorted(?A2) andBool list2set(A1) ==K list2set(?A2)
 endmodule
 
