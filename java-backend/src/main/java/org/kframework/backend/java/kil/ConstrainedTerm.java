@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.TruthValue;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.Debug;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-import org.kframework.main.Tool;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
@@ -123,25 +121,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     public SymbolicConstraint lookups() {
         return lookups;
     }
-    /*
-    public SymbolicConstraint match(ConstrainedTerm constrainedTerm, Definition definition) {
-        SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
-        unificationConstraint.add(term, constrainedTerm.term);
-        unificationConstraint.simplify();
-        if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
-            return null;
-        }
-
-        unificationConstraint.addAll(constrainedTerm.lookups);
-        unificationConstraint.simplify();
-        if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
-            return null;
-        }
-
-
-    }
-    */
-
 
     /**
      * Checks if this constrained term implies the given constrained term, assuming the variables
@@ -158,12 +137,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
 
         /* apply pattern folding */
-        unificationConstraint.simplify(true);
-        //unificationConstraint.simplify();
-        //unificationConstraint.addAllThenSimplify(constrainedTerm.lookups, constrainedTerm.constraint);
+        unificationConstraint.simplifyModuloPatternFolding();
         unificationConstraint.addAll(constrainedTerm.lookups);
         unificationConstraint.addAll(constrainedTerm.constraint);
-        unificationConstraint.simplify(true);
+        unificationConstraint.simplifyModuloPatternFolding();
         if (unificationConstraint.isFalse()) {
             return null;
         }
@@ -206,13 +183,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return unificationConstraint;
     }
 
-    ///**
-    // * Simplify map lookups.
-    // */
-    //public ConstrainedTerm simplifyLookups() {
-    //    for (SymbolicConstraint.Equality equality : constraint.equalities())
-    //}
-
     public Term term() {
         return data.term;
     }
@@ -225,29 +195,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * @return solutions to the unification problem
      */
     public List<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
-        int numOfInvoc = Debug.incDebugMethodCounter();
-        if (numOfInvoc == Integer.MAX_VALUE) {
-            Debug.setBreakPointHere();
-        }
-
-        List<SymbolicConstraint> solutions = unifyImpl(constrainedTerm);
-
-        Debug.printUnifyResult(numOfInvoc, this, constrainedTerm, solutions);
-        return solutions;
-    }
-
-    /**
-     * The actual implementation of the unify() method.
-     *
-     * @param constrainedTerm
-     *            another constrained term
-     * @return solutions to the unification problem
-     */
-    private List<SymbolicConstraint> unifyImpl(ConstrainedTerm constrainedTerm) {
-        if (!data.term.kind.equals(constrainedTerm.data.term.kind)) {
-            return Collections.emptyList();
-        }
-
         /* unify the subject term and the pattern term without considering those associated constraints */
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.add(data.term, constrainedTerm.data.term);
@@ -268,15 +215,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                     continue;
                 }
 
-                if (Tool.instance() != Tool.KOMPILE) {
-                /*
-                 * YilongL: had to disable checkUnsat in kompilation because the
-                 * KILtoZ3 transformer often crash the Java backend; besides,
-                 * this method may not be necessary for kompilation
-                 */
-                    if (candidate.checkUnsat()) {
-                        continue;
-                    }
+                if (candidate.checkUnsat()) {
+                    continue;
                 }
 
                 // TODO(AndreiS): find a better place for pattern expansion

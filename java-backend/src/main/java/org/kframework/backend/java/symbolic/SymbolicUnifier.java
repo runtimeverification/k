@@ -1,15 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BitVector;
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -19,15 +13,10 @@ import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -148,7 +137,7 @@ public class SymbolicUnifier extends AbstractUnifier {
      *            the given equality
      * @return true if the unification succeeds; otherwise, false
      */
-    public boolean unify(SymbolicConstraint.Equality equality) {
+    public boolean unify(Equality equality) {
         try {
             isStarNested = false;
             // YilongL: is it correct to simply clear the multiConstraints?
@@ -171,9 +160,6 @@ public class SymbolicUnifier extends AbstractUnifier {
      */
     @Override
     public void unify(Term term, Term otherTerm) {
-        if (term instanceof Bottom || otherTerm instanceof Bottom) {
-            fail(term, otherTerm);
-        }
         if (term.kind().isComputational()) {
             assert otherTerm.kind().isComputational();
 
@@ -498,9 +484,12 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
-    public void unify(BuiltinList builtinList, Term term) {
-        assert !(term instanceof Variable);
+    public void unify(Bottom bottom, Term term) {
+        fail(bottom, term);
+    }
 
+    @Override
+    public void unify(BuiltinList builtinList, Term term) {
         if (!(term instanceof BuiltinList)) {
             this.fail(builtinList, term);
         }
@@ -511,13 +500,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(BuiltinMap builtinMap, Term term) {
-        assert !(term instanceof Variable);
-
         if (!(term instanceof BuiltinMap)) {
             this.fail(builtinMap, term);
         }
-//        if (builtinMap.equals(BuiltinMap.EMPTY) && term.equals(BuiltinMap.EMPTY))
-//            return;
 
         //throw new UnsupportedOperationException(
         //        "map matching is only supported when one of the maps is a variable.");
@@ -525,21 +510,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
-    public void unify(MapUpdate mapUpdate, Term term) {
-        // this method is only used during macro expansion of rewrite rules
-        assert !(term instanceof Variable);
-
-        if (!(term instanceof MapUpdate)) {
-            this.fail(mapUpdate, term);
-        }
-
-        throw new UnsupportedOperationException(
-                "Currently, mapUpdate can only be matched with a variable.");
-    }
-
-    @Override
     public void unify(BuiltinSet builtinSet, Term term) {
-        assert !(term instanceof Variable);
         if (!(term instanceof BuiltinSet)) {
             this.fail(builtinSet, term);
         }
@@ -548,38 +519,12 @@ public class SymbolicUnifier extends AbstractUnifier {
                 "set matching is only supported when one of the sets is a variable.");
     }
 
-    @Override
-    public void unify(SetUpdate setUpdate, Term term) {
-        // this method is only used during macro expansion of rewrite rules
-        assert !(term instanceof Variable);
-
-        if (!(term instanceof SetUpdate)) {
-            this.fail(setUpdate, term);
-        }
-
-        throw new UnsupportedOperationException(
-                "Currently, setUpdate can only be matched with a variable.");
-    }
-
-    @Override
-    public void unify(BuiltinMgu builtinMgu, Term term) {
-        assert !(term instanceof Variable);
-        if (!(term instanceof BuiltinMgu)) {
-            this.fail(builtinMgu, term);
-        }
-
-        throw new UnsupportedOperationException(
-                "Mgu matching is only supported when one of the Mgu's is a variable.");
-    }
-
     /**
      * Two cells can be unified if and only if they have the same cell label and
      * their contents can be unified.
      */
     @Override
     public void unify(Cell cell, Term term) {
-        assert !(term instanceof Variable);
-
         if (!(term instanceof Cell)) {
             this.fail(cell, term);
         }
@@ -602,8 +547,6 @@ public class SymbolicUnifier extends AbstractUnifier {
      */
     @Override
     public void unify(CellCollection cellCollection, Term term) {
-        assert !(term instanceof Variable);
-
         if (!(term instanceof CellCollection)) {
             fail(cellCollection, term);
         }
@@ -844,49 +787,23 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KLabelConstant kLabelConstant, Term term) {
-        assert !(term instanceof Variable);
-
         if (!kLabelConstant.equals(term)) {
             fail(kLabelConstant, term);
         }
     }
 
     @Override
-    public void unify(KLabelFreezer kLabelFreezer, Term term) {
-        assert !(term instanceof Variable);
-
-        if(!(term instanceof KLabelFreezer)) {
-            fail(kLabelFreezer, term);
-        }
-
-        KLabelFreezer otherKLabelFreezer = (KLabelFreezer) term;
-        unify(kLabelFreezer.term(), otherKLabelFreezer.term());
-    }
-
-    @Override
     public void unify(KLabelInjection kLabelInjection, Term term) {
-        assert !(term instanceof Variable);
-
         if(!(term instanceof KLabelInjection)) {
             fail(kLabelInjection, term);
         }
+
         KLabelInjection otherKLabelInjection = (KLabelInjection) term;
-
-        Kind injectionKind = kLabelInjection.term().kind();
-        Kind otherInjectionKind = otherKLabelInjection.term().kind();
-        if (injectionKind != otherInjectionKind
-                && !(injectionKind.isComputational() && otherInjectionKind.isComputational())
-                && !(injectionKind.isStructural() && otherInjectionKind.isStructural())) {
-            fail(kLabelInjection, otherKLabelInjection);
-        }
-
         unify(kLabelInjection.term(), otherKLabelInjection.term());
     }
 
     @Override
     public void unify(Hole hole, Term term) {
-        assert !(term instanceof Variable);
-
         if (!hole.equals(term)) {
             fail(hole, term);
         }
@@ -894,8 +811,6 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KItem kItem, Term term) {
-        assert !(term instanceof Variable);
-
         if (!(term instanceof KItem)) {
             fail(kItem, term);
         }
@@ -932,62 +847,13 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(Token token, Term term) {
-        assert !(term instanceof Variable);
-
         if (!token.equals(term)) {
             fail(token, term);
         }
     }
 
     @Override
-    public void unify(UninterpretedToken uninterpretedToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!uninterpretedToken.equals(term)) {
-            fail(uninterpretedToken, term);
-        }
-    }
-
-    @Override
-    public void unify(BitVector bitVector, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!bitVector.equals(term)) {
-            fail(bitVector, term);
-        }
-    }
-
-    @Override
-    public void unify(BoolToken boolToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!boolToken.equals(term)) {
-            fail(boolToken, term);
-        }
-    }
-
-    @Override
-    public void unify(IntToken intToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!intToken.equals(term)) {
-            fail(intToken, term);
-        }
-    }
-
-    @Override
-    public void unify(StringToken stringToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!stringToken.equals(term)) {
-            fail(stringToken, term);
-        }
-    }
-
-    @Override
     public void unify(KList kList, Term term) {
-        assert !(term instanceof Variable);
-
         if(!(term instanceof KList)){
             fail(kList, term);
         }
@@ -998,8 +864,6 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KSequence kSequence, Term term) {
-        assert !(term instanceof Variable);
-
         if (!(term instanceof KSequence)) {
             this.fail(kSequence, term);
         }
@@ -1035,21 +899,6 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
             }
         }
-    }
-
-    @Override
-    public void unify(MetaVariable metaVariable, Term term) {
-        // TODO(YilongL): not sure about the assertion below
-        // assert !(term instanceof Variable);
-
-        if (!metaVariable.equals(term)) {
-            fail(metaVariable, term);
-        }
-    }
-
-    @Override
-    public void unify(Variable variable, Term term) {
-        unify((Term) variable, term);
     }
 
     @Override

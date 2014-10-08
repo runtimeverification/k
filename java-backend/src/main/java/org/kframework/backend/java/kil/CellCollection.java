@@ -169,7 +169,7 @@ public class CellCollection extends Collection {
         return ImmutableMultiset.<Term>copyOf(collectionVariables);
     }
 
-    public Multiset<Variable> collectionVariables() {
+    public ImmutableMultiset<Variable> collectionVariables() {
         return collectionVariables;
     }
 

@@ -556,7 +556,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     (Term) entry.getValue().accept(this));
         }
 
-        for (SymbolicConstraint.Equality equality : symbolicConstraint.equalities()) {
+        for (Equality equality : symbolicConstraint.equalities()) {
             transformedSymbolicConstraint.add(
                     (Term) equality.leftHandSide().accept(this),
                     (Term) equality.rightHandSide().accept(this));
@@ -573,16 +573,6 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(Variable variable) {
         return variable;
-    }
-
-    @Override
-    public ASTNode transform(BuiltinMgu mgu) {
-        SymbolicConstraint transformedConstraint = (SymbolicConstraint) mgu.constraint().accept(this);
-        if (transformedConstraint == mgu.constraint()) {
-            return BuiltinMgu.of(transformedConstraint, context);
-        } else {
-            return mgu;
-        }
     }
 
 }

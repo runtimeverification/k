@@ -4,6 +4,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.kil.KItem.KItemOperations;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.SymbolicConstraintOperations;
 import org.kframework.krun.api.io.FileSystem;
 
@@ -15,6 +16,7 @@ public class GlobalContext {
     private Definition def;
     public final FileSystem fs;
     public final BuiltinFunction builtins;
+    public final EqualityOperations equalityOps;
     public final SymbolicConstraintOperations constraintOps;
     public final KItemOperations kItemOps;
 
@@ -22,11 +24,13 @@ public class GlobalContext {
     public GlobalContext(
             FileSystem fs,
             BuiltinFunction builtins,
-            SymbolicConstraintOperations equalityOps,
+            EqualityOperations equalityOps,
+            SymbolicConstraintOperations constraintOps,
             KItemOperations kItemOps) {
         this.fs = fs;
         this.builtins = builtins;
-        this.constraintOps = equalityOps;
+        this.equalityOps = equalityOps;
+        this.constraintOps = constraintOps;
         this.kItemOps = kItemOps;
     }
 

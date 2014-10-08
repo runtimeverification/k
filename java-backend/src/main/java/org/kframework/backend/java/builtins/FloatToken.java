@@ -7,11 +7,8 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.kil.MaximalSharing;
 import org.kframework.backend.java.kil.Sort;
-import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -101,16 +98,6 @@ public class FloatToken extends Token implements MaximalSharing {
     public boolean equals(Object object) {
         /* IntToken instances are cached */
         return this == object;
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
     }
 
     @Override

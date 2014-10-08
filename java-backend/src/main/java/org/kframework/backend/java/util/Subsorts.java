@@ -64,6 +64,10 @@ public class Subsorts implements Serializable {
         return bigSort == smallSort || isSubsorted(bigSort, smallSort);
     }
 
+    public Sort getGLBSort(Sort... sorts) {
+        return getGLBSort(Sets.newHashSet(sorts));
+    }
+
     /**
      * TODO(YilongL): delegates this method to Context#getGLBSort once all
      * string representation of sorts are eliminated

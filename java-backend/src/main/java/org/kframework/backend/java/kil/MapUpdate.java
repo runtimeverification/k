@@ -144,8 +144,7 @@ public class MapUpdate extends Term implements DataStructureUpdate {
 
     @Override
     public void accept(Unifier unifier, Term pattern) {
-        // TODO(YilongL): throw an exception instead?
-        unifier.unify(this, pattern);
+        throw new UnsupportedOperationException();
     }
 
     @Override

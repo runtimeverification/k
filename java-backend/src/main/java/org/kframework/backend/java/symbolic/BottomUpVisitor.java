@@ -236,7 +236,7 @@ public class BottomUpVisitor implements Visitor {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
-        for (SymbolicConstraint.Equality equality : node.equalities()) {
+        for (Equality equality : node.equalities()) {
             equality.leftHandSide().accept(this);
             equality.rightHandSide().accept(this);
         }
@@ -265,10 +265,5 @@ public class BottomUpVisitor implements Visitor {
     @Override
     public void visit(Variable variable) {
         visit((Term) variable);
-    }
-
-    @Override
-    public void visit(BuiltinMgu mgu) {
-        visit((Term) mgu);
     }
 }

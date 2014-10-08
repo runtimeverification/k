@@ -3,10 +3,7 @@ package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.MaximalSharing;
 import org.kframework.backend.java.kil.Sort;
-import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -73,16 +70,6 @@ public final class BoolToken extends Token implements MaximalSharing {
     @Override
     public boolean equals(Object object) {
         return this == object;
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
     }
 
     @Override

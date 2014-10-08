@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,7 @@ public final class KItem extends Term {
     private final Term kList;
     private final boolean isExactSort;
     private final Sort sort;
+    private final Set<Sort> possibleSorts;
     private Boolean evaluable = null;
     private Boolean anywhereApplicable = null;
 
@@ -83,11 +85,16 @@ public final class KItem extends Term {
     }
 
     KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
+        this(kLabel, kList, sort, isExactSort, Collections.singleton(sort));
+    }
+
+    private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort, Set<Sort> possibleSorts) {
         super(Kind.KITEM);
         this.kLabel = kLabel;
         this.kList = kList;
         this.sort = sort;
         this.isExactSort = isExactSort;
+        this.possibleSorts = possibleSorts;
     }
 
     private KItem(Term kLabel, Term kList, TermContext termContext) {
@@ -112,6 +119,7 @@ public final class KItem extends Term {
                 if (cacheTabVal != null) {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
+                    possibleSorts = cacheTabVal.possibleSorts;
                     return;
                 }
             }
@@ -124,6 +132,7 @@ public final class KItem extends Term {
 
             sort = cacheTabVal.sort;
             isExactSort = cacheTabVal.isExactSort;
+            possibleSorts = cacheTabVal.possibleSorts;
         } else {
             /* not a KLabelConstant or the kList contains a frame variable */
             if (kLabel instanceof KLabelInjection) {
@@ -134,6 +143,7 @@ public final class KItem extends Term {
             }
 
             sort = kind.asSort();
+            possibleSorts = Collections.singleton(sort);
         }
     }
 
@@ -220,8 +230,9 @@ public final class KItem extends Term {
         }
         /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
+        possibleSorts.add(sort);
 
-        return new CacheTableValue(sort, isExactSort);
+        return new CacheTableValue(sort, isExactSort, possibleSorts);
     }
 
     public boolean isEvaluable(TermContext context) {
@@ -521,14 +532,8 @@ public final class KItem extends Term {
         return sort;
     }
 
-    /**
-     * @return a unmodifiable view of the possible minimal sorts of this
-     *         {@code KItem} when its {@code KLabel} is a constructor;
-     *         otherwise, null;
-     */
-    public Set<Sort> possibleMinimalSorts() {
-        // TODO(YilongL): reconsider the use of this method when doing test generation
-        throw new UnsupportedOperationException();
+    public Set<Sort> possibleSorts() {
+        return Collections.unmodifiableSet(possibleSorts);
     }
 
     @Override
@@ -724,10 +729,12 @@ public final class KItem extends Term {
 
         final Sort sort;
         final boolean isExactSort;
+        final Set<Sort> possibleSorts;
 
-        CacheTableValue(Sort sort, boolean isExactSort) {
+        CacheTableValue(Sort sort, boolean isExactSort, Set<Sort> possibleSorts) {
             this.sort = sort;
             this.isExactSort = isExactSort;
+            this.possibleSorts = possibleSorts;
         }
     }
 

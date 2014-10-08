@@ -7,7 +7,6 @@ import org.kframework.backend.java.builtins.TermEquality;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -538,6 +537,11 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     @Override
+    public void match(Bottom bottom, Term pattern) {
+        fail(bottom, pattern);
+    }
+
+    @Override
     public void match(BuiltinList builtinList, Term pattern) {
         assert !(pattern instanceof Variable);
 
@@ -711,18 +715,6 @@ public class PatternMatcher extends AbstractMatcher {
 
         throw new UnsupportedOperationException(
                 "set matching is only supported when one of the sets is a variable.");
-    }
-
-    @Override
-    public void match(BuiltinMgu builtinMgu, Term pattern) {
-        assert !(pattern instanceof Variable);
-
-        if (!(pattern instanceof BuiltinMgu)) {
-            this.fail(builtinMgu, pattern);
-        }
-
-        throw new UnsupportedOperationException(
-                "Mgu matching is only supported when one of the Mgu's is a variable.");
     }
 
     /**

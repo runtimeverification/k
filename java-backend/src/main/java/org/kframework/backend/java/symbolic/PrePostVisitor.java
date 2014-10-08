@@ -370,7 +370,7 @@ public class PrePostVisitor implements Visitor {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }
-        for (SymbolicConstraint.Equality equality : node.equalities()) {
+        for (Equality equality : node.equalities()) {
             equality.leftHandSide().accept(this);
             equality.rightHandSide().accept(this);
         }
@@ -392,14 +392,5 @@ public class PrePostVisitor implements Visitor {
         node.lookups().accept(this);
         node.constraint().accept(this);
         node.accept(postVisitor);
-    }
-
-    @Override
-    public void visit(BuiltinMgu mgu) {
-        preVisitor.resetProceed();
-        mgu.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        mgu.constraint().accept(this);
-        mgu.accept(postVisitor);
     }
 }
