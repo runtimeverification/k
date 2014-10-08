@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
@@ -13,8 +14,11 @@ import org.kframework.backend.java.kil.TermContext;
  */
 public class BuiltinListOperations {
 
-    public static Term constructor(BuiltinList term1, BuiltinList term2, TermContext context) {
-        return BuiltinList.concatenate(term1, term2);
+    public static Term constructor(Term list1, Term list2, TermContext context) {
+        if (list1.sort() != Sort.LIST || list2.sort() != Sort.LIST) {
+            throw new IllegalArgumentException();
+        }
+        return BuiltinList.concatenate(list1, list2);
     }
 
     public static Term unit(TermContext context) {
