@@ -21,6 +21,10 @@ public class SMTOptions implements Serializable {
 
     public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> {
 
+        public SMTSolverConverter(String optionName) {
+            super(optionName);
+        }
+
         @Override
         public Class<SMTSolver> enumClass() {
             return SMTSolver.class;

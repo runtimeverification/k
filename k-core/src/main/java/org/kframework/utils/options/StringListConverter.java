@@ -2,6 +2,7 @@
 package org.kframework.utils.options;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
@@ -22,6 +23,9 @@ public class StringListConverter implements IStringConverter<List<String>> {
     public List<String> convert(String val) {
         //split on whitespace not preceded by a backslash
         String[] parts = val.split("(?<!\\\\)\\s+");
+        if (parts.length == 1 && parts[0].isEmpty()) {
+            return Collections.emptyList();
+        }
         List<String> result = new ArrayList<>();
         for (String part : parts) {
             result.add(part.trim().replaceAll("\\\\(\\s)", "$1"));
