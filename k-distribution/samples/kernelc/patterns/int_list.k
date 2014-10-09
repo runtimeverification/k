@@ -26,14 +26,6 @@ module INT-LIST
   rule filterIntSeq(V, []) => []                                                [lemma]
 */
 
-  /* lemmas */
-  //rule [] @ L => L                        [lemma, smt-lemma]
-  //rule L @ [] => L                        [lemma, smt-lemma]
-  //rule (L1 @ L2) @ L3 => L1 @ (L2 @ L3)   [lemma, smt-lemma]
-
-  //rule L1 @ L2 ==K [] => L1 ==K [] andBool L2 ==K []    [smt-lemma]
-  //rule [_] ==K [] => false                              [smt-lemma]
-
   syntax IntSet ::= list2set(List)   [function, smtlib(smt_seq2set)]
   rule list2set(L1:List L2:List) => list2set(L1) U list2set(L2)
     [lemma, smt-lemma]

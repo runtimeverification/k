@@ -6,7 +6,15 @@ import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multisets;
 
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -2,23 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kil.loader.Context;
 
@@ -88,7 +72,15 @@ public class NonACPatternMatcher {
         taskBuffer.clear();
         tasks.addFirst(Pair.of(subject, pattern));
         failed = false;
-        return match() ? substitution : null;
+        if (match()) {
+            if (termContext.definition().context().krunOptions != null
+                    && termContext.definition().context().krunOptions.experimental.prove() != null) {
+                PatternMatcher.evaluateSubstitution(substitution, termContext);
+            }
+            return substitution;
+        } else {
+            return null;
+        }
     }
 
     private void check(boolean condition) {
@@ -187,6 +179,12 @@ public class NonACPatternMatcher {
                     }
                 } else if (subject instanceof Hole) {
                     check(subject.equals(pattern));
+                } else if (subject instanceof BuiltinList && matchOnFunctionSymbol) {
+                    if (pattern instanceof BuiltinList) {
+                        match((BuiltinList) subject, (BuiltinList) pattern);
+                    } else {
+                        return false;
+                    }
                 } else {
                     assert false : "unreachable";
                 }
@@ -417,6 +415,11 @@ public class NonACPatternMatcher {
         addMatchingTask(kLabelInjection.term(), pattern.term());
     }
 
+    private void match(BuiltinList builtinList, BuiltinList pattern) {
+        addMatchingTask(
+                builtinList.toLabelRepresentation(termContext),
+                pattern.toLabelRepresentation(termContext));
+    }
 
     /**
      * Matches a subject term against a rule. Returns the instantiation when the

@@ -294,9 +294,7 @@ public class PatternMatcher extends AbstractMatcher {
                     this,
                     ((BuiltinList) pattern).toLabelRepresentation(termContext));
             // TODO(AndreiS): this is an ad-hoc evaluation
-            for (Map.Entry<Variable, Term> entry : fSubstitution.entrySet()) {
-                entry.setValue(entry.getValue().evaluate(termContext));
-            }
+            evaluateSubstitution(fSubstitution, termContext);
             return;
         }
 
@@ -779,6 +777,12 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public String getName() {
         return this.getClass().toString();
+    }
+
+    public static void evaluateSubstitution(Map<Variable, Term> substitution, TermContext context) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            entry.setValue(entry.getValue().evaluate(context));
+        }
     }
 
 }

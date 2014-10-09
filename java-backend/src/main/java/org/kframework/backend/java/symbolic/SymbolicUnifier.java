@@ -460,8 +460,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             Term otherRemainingMap = otherBuilder.build();
 
             if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable
-                    //|| (remainingMap.equals(BuiltinMap.EMPTY_MAP) && otherRemainingMap.equals(BuiltinMap.EMPTY_MAP))) {
-                    || ((BuiltinMap) remainingMap).isEmpty() && ((BuiltinMap) otherRemainingMap).isEmpty()) {
+                    || (remainingMap.equals(BuiltinMap.EMPTY_MAP) && otherRemainingMap.equals(BuiltinMap.EMPTY_MAP))) {
                 /* equality eliminated */
                 if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable) {
                     stashedConstraint.add(remainingMap, otherRemainingMap);
