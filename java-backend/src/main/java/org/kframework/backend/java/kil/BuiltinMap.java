@@ -9,6 +9,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.Map;
 import org.apache.commons.collections4.map.UnmodifiableMap;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -154,6 +156,29 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    @Override
+    protected List<Term> getLabelRepresentationComponents(TermContext context) {
+        DataStructureSort sort = context.definition().context().dataStructureSortOf(
+                sort().toFrontEnd());
+
+        ArrayList<Term> components = Lists.newArrayList();
+        entries.entrySet().stream().forEach(entry ->
+                components.add(KItem.of(
+                        KLabelConstant.of(sort.elementLabel(), context.definition().context()),
+                        KList.concatenate(entry.getKey(), entry.getValue()),
+                        context)));
+
+        for (Term term : baseTerms()) {
+            if (term instanceof BuiltinMap) {
+                components.addAll(((BuiltinMap) term).getLabelRepresentationComponents(context));
+            } else {
+                components.add(term);
+            }
+        }
+
+        return components;
     }
 
     public static Builder builder() {

@@ -83,9 +83,4 @@ public abstract class AssociativeCommutativeCollection extends Collection {
     public final boolean isGround() {
         return isConcreteCollection() && super.isGround();
     }
-
-    @Override
-    protected List<Term> getLabelRepresentationComponents(TermContext context) {
-        throw new UnsupportedOperationException();
-    }
 }

@@ -11,6 +11,7 @@ import org.kframework.kil.DataStructureSort;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.apache.commons.collections4.ListUtils;
 
@@ -241,13 +242,14 @@ public class BuiltinList extends Collection {
         DataStructureSort sort = context.definition().context().dataStructureSortOf(
                 sort().toFrontEnd());
 
-        ArrayList<Term> components = new ArrayList<>();
-        for (Term element : elementsLeft) {
-            components.add(KItem.of(
-                    KLabelConstant.of(sort.elementLabel(), context.definition().context()),
-                    KList.singleton(element),
-                    context));
-        }
+        ArrayList<Term> components = Lists.newArrayList();
+        Consumer<Term> addElementToComponents = element ->
+                components.add(KItem.of(
+                        KLabelConstant.of(sort.elementLabel(), context.definition().context()),
+                        KList.singleton(element),
+                        context));
+
+        elementsLeft.stream().forEach(addElementToComponents);
         for (Term term : baseTerms) {
             if (term instanceof BuiltinList) {
                 components.addAll(((BuiltinList) term).getLabelRepresentationComponents(context));
@@ -255,12 +257,7 @@ public class BuiltinList extends Collection {
                 components.add(term);
             }
         }
-        for (Term element : elementsRight) {
-            components.add(KItem.of(
-                    KLabelConstant.of(sort.elementLabel(), context.definition().context()),
-                    KList.singleton(element),
-                    context));
-        }
+        elementsRight.stream().forEach(addElementToComponents);
 
         return components;
     }
