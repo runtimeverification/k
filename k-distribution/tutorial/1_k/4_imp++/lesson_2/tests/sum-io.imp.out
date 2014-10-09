@@ -1,12 +1,12 @@
 <T>
     <k>
-        "Add numbers up to (<= 0 to quit)? " ~> HOLE ~> print ( HOLE ) ;
-           ~> n = (read ( )) ; ~> if ( (n <= 0) ) { halt ; } else { s = 0 ; 
-          while ( (! (n <= 0)) ) { s = (s + n) ; n = (n + -1) ; } print ( 
-          "Sum = ", s, "\n" ) ; } ~> while ( true ) { print ( 
-          "Add numbers up to (<= 0 to quit)? " ) ; n = (read ( )) ; if ( (n <=
-           0) ) { halt ; } else { s = 0 ; while ( (! (n <= 0)) ) { s = (s + n)
-           ; n = (n + -1) ; } print ( "Sum = ", s, "\n" ) ; } }
+        "Add numbers up to (<= 0 to quit)? " ~> HOLE, .AExps ~> print ( 
+          HOLE ) ; ~> n = read ( ) ; ~> if ( n <= 0 ) { halt ; } else { (s = 0
+           ; while ( ! n <= 0 ) { s = s + n ; n = n + -1 ; }) print ( "Sum = "
+          , s, "\n" ) ; } ~> while ( true ) { (print ( 
+          "Add numbers up to (<= 0 to quit)? " ) ; n = read ( ) ;) if ( n <= 0
+           ) { halt ; } else { (s = 0 ; while ( ! n <= 0 ) { s = s + n ; n = n
+           + -1 ; }) print ( "Sum = ", s, "\n" ) ; } }
     </k>
     <env>
         n |-> 1

@@ -2,16 +2,25 @@
 package org.kframework.krun;
 
 import org.kframework.backend.kore.ToKAppTransformer;
+import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.Cell2DataStructure;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.*;
+import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 
+import com.davekoelle.AlphanumComparator;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ConcretizeSyntax extends CopyOnWriteTransformer {
@@ -27,7 +36,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     public ASTNode complete(ASTNode node, ASTNode r) {
         if (r instanceof Term && !(r instanceof Variable)) {
             if (node.getAttributes().size() > 0) {
-                Cast c = new Cast((Term)r, context);
+                Cast c = new Cast((Term)r, CastType.SYNTACTIC, context);
                 c.copyAttributesFrom(node);
                 return super.complete(node, c);
             }
@@ -43,7 +52,6 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         } catch (ParseFailedException e) {
             //type error, so don't disambiguate
         }
-        t = new RemoveEmptyLists(context).visitNode(t);
         return t;
     }
 
@@ -58,7 +66,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 Term child = tcParent.getContents().get(i);
                 internalTransform(tcParent, i, child);
             }
-            return tcParent;
+            return super.visit(tcParent, _);
         }
 
         private void internalTransform(TermCons tcParent, int i, Term child) {
@@ -119,7 +127,6 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                                 newContents.set(i, l.getTerm());
                             }
                         } else {
-                            newContents.set(i, newContents.get(i).shallowCopy());
                         }
                     }
                     possibleTerms.add(new TermCons(p.getSort(), newContents, p));
@@ -152,10 +159,9 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
                 }
             }
         } else if (label instanceof Token) {
-            assert child instanceof KList;
-            assert ((KList)child).getContents().size() == 0;
-            return kapp;
-            }
+            Token token = (Token) label;
+            return new Constant(token.tokenSort(), token.value(), null);
+        }
         return super.visit(kapp, null);
     }
 
@@ -189,8 +195,54 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         if (contents.size() == 1) {
             return contents.get(0);
         }
+        Map<Term, String> unparsedTerms = new HashMap<>();
+        for (Term t : contents) {
+            UnparserFilterNew filter = new UnparserFilterNew(context);
+            filter.visitNode(t);
+            unparsedTerms.put(t, filter.getResult());
+        }
+        Collections.sort(contents, new UnparserBagItemComparator(unparsedTerms));
         return new Bag(contents);
     }
+
+    private class UnparserBagItemComparator implements Comparator<Term> {
+
+        private Map<Term, String> unparsedResults;
+
+        private AlphanumComparator comparator = new AlphanumComparator();
+
+        public UnparserBagItemComparator(java.util.Map<Term, String> unparsedResults) {
+            this.unparsedResults = unparsedResults;
+        }
+
+
+        @Override
+        public int compare(Term o1, Term o2) {
+            // case 1: one of o1 and o2 is a cell
+            if ((o1 instanceof Cell) && !(o2 instanceof Cell)
+                    || !(o1 instanceof Cell) && (o2 instanceof Cell)) {
+                return o1 instanceof Cell ? -1 : 1;
+            }
+
+            // case 2: o1 and o2 are cells with different labels
+            if (o1 instanceof Cell && o2 instanceof Cell
+                    && (!((Cell) o1).getLabel().equals(((Cell) o2).getLabel()))) {
+                Cell c1 = (Cell) o1;
+                Cell c2 = (Cell) o2;
+                ConfigurationStructureMap sons = context.getConfigurationStructureMap().get(c1.getLabel()).parent.sons;
+                assert sons == context.getConfigurationStructureMap().get(c2.getLabel()).parent.sons;
+                return sons.positionOf(c1.getLabel()) < sons.positionOf(c2.getLabel()) ? -1 : 1;
+            }
+
+            // case 3: neither o1 nor o2 is a cell
+            // case 4: o1 and o2 are cells with the same label
+            String s1 = unparsedResults.get(o1);
+            String s2 = unparsedResults.get(o2);
+            return comparator.compare(s1, s2);
+        }
+
+    };
+
 
     @Override
     public ASTNode visit(MapBuiltin map, Void _) {

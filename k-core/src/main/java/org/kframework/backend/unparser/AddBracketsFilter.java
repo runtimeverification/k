@@ -462,7 +462,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 } else if (assoc == Associativity.RIGHT && !inversePriority) {
                     return true;
-                } else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture, Associativity.RIGHT)) {
+                } else if (assoc == Associativity.LEFT && !inversePriority && !getAssociativity(inner, rightCapture, Associativity.LEFT)) {
                     return true;
                 }
             }
@@ -475,7 +475,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
                     return true;
                 } else if (assoc == Associativity.LEFT && !inversePriority) {
                     return true;
-                } else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture, Associativity.LEFT)) {
+                } else if (assoc == Associativity.RIGHT && !inversePriority && !getAssociativity(inner, leftCapture, Associativity.RIGHT)) {
                     return true;
                 }
             }

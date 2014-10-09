@@ -322,10 +322,10 @@ public abstract class DataStructureBuiltin extends Term implements Interfaces.Co
             return KApp.of(sort().unitLabel());
         }
 
-        Term current = items.get(items.size() - 1);
+        Term current = items.get(0);
 
-        for(int i = items.size() - 2; i >= 0; --i){
-            current = KApp.of(sort().constructorLabel(), items.get(i), current);
+        for(int i = 1; i < items.size(); i++){
+            current = KApp.of(sort().constructorLabel(), current, items.get(i));
         }
 
         return current;

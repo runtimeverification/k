@@ -1,7 +1,7 @@
 <k>
-    foo ( true , '`(`) , x ,  )
+    foo ( true , '`(`) , x , .Exps )
 </k>
 <in>
-    ListItem(#buffer ( "" ))
-    ListItem(#istream ( 0 ))
+    ListItem ( #buffer ( "" ) )
+    ListItem ( #istream ( 0 ) )
 </in>
