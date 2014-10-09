@@ -1,5 +1,5 @@
 @ECHO off
-for /f "delims=" %%i in ('java -version 2>&1') do set VERSION=%%i
+for /f "delims=" %%i in ('java -version 2^>^&1') do set VERSION=%%i
 if not %version:64-Bit=% == %version% (
   set ARCH=64
 ) else (
