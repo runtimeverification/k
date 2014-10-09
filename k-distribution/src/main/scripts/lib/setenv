@@ -5,14 +5,15 @@ else
   ARCH=32;
 fi
 
+K_LIB_DIR="$(dirname $(readlink -e "$0"))"
 if [ `uname` = 'Darwin' ]; then
-  export PATH=$PATH:"$(dirname "$0")/native/osx"
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$(dirname "$0")/native/osx"
+  export PATH=$PATH:"$K_LIB_DIR/native/osx"
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
 elif [[ `uname` == *MINGW* || `uname` == *CYGWIN* ]]; then
-  export PATH=$PATH:"$(dirname "$0")/native/windows":"$(dirname "$0")/native/windows$ARCH":"$(dirname "$0")/native/$ARCH"
+  export PATH=$PATH:"$K_LIB_DIR/native/windows":"$K_LIB_DIR/native/windows$ARCH":"$K_LIB_DIR/native/$ARCH"
 else
-  export PATH=$PATH:"$(dirname "$0")/native/linux":"$(dirname "$0")/native/linux$ARCH"
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$(dirname "$0")/native/linux$ARCH"
+  export PATH=$PATH:"$K_LIB_DIR/native/linux":"$K_LIB_DIR/native/linux$ARCH"
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$K_LIB_DIR/native/linux$ARCH"
 fi
 
 export CYGWIN=nodosfilewarning
