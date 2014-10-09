@@ -6,19 +6,24 @@ import org.kframework.kil.visitors.Visitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /** A module. */
 public class Module extends DefinitionItem implements Interfaces.MutableList<ModuleItem, Enum<?>> {
     private String name;
-    private List<ModuleItem> items = new ArrayList<ModuleItem>();
+    private List<ModuleItem> items = new ArrayList<>();
+
+    // lazily computed set of sorts.
+    private Set<Sort> sorts;
 
     public Module(Module m) {
         super(m);
         this.name = m.name;
         this.items = m.items;
+        this.sorts = m.sorts;
     }
 
     public Module() {
@@ -32,6 +37,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
 
     public void appendModuleItem(ModuleItem item) {
         this.items.add(item);
+        this.sorts = null;
     }
 
     public void setName(String name) {
@@ -44,6 +50,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
 
     public void setItems(List<ModuleItem> items) {
         this.items = items;
+        this.sorts = null;
     }
 
     public List<ModuleItem> getItems() {
@@ -60,7 +67,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     }
 
     public List<String> getModuleKLabels() {
-        List<String> mkl = new LinkedList<String>();
+        List<String> mkl = new LinkedList<>();
 
         for (ModuleItem mi : items) {
             List<String> list = mi.getKLabels();
@@ -79,9 +86,11 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
      * multiple declarations mention the same sort.
      * @return
      */
-    public java.util.Set<Sort> getAllSorts() {
-        java.util.Set<Sort> sorts = new HashSet<>();
-
+    public Set<Sort> getAllSorts() {
+        if (sorts != null) {
+            return sorts;
+        }
+        sorts = new LinkedHashSet<>();
         for (ModuleItem mi : items) {
             List<Sort> list = mi.getAllSorts();
             if (list != null)
@@ -104,8 +113,9 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
 
     public Module addModuleItems(List<ModuleItem> rules) {
         Module result = new Module(this);
-        List<ModuleItem> items = new ArrayList<ModuleItem>(this.items);
+        List<ModuleItem> items = new ArrayList<>(this.items);
         items.addAll(rules);
+        this.sorts = null;
         result.setItems(items);
         return result;
     }
@@ -129,26 +139,27 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     }
 
     public void addProduction(Sort sort, ProductionItem prodItem) {
-        List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
+        List<ProductionItem> prodItems = new LinkedList<>();
         prodItems.add(prodItem);
         this.addProduction(sort, new Production(new NonTerminal(sort), prodItems));
     }
 
     public void addProduction(Sort sort, Production prod) {
-        List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
+        List<PriorityBlock> pbs = new LinkedList<>();
         PriorityBlock pb = new PriorityBlock();
         pbs.add(pb);
 
-        List<Production> prods = new LinkedList<Production>();
+        List<Production> prods = new LinkedList<>();
         pb.setProductions(prods);
 
         prods.add(prod);
 
         this.items.add(new Syntax(new NonTerminal(sort), pbs));
+        this.sorts = null;
     }
 
     public List<Rule> getRules() {
-        List<Rule> list = new LinkedList<Rule>();
+        List<Rule> list = new LinkedList<>();
         for (ModuleItem moduleItem : items) {
             if (moduleItem instanceof Rule) {
                 list.add((Rule) moduleItem);
@@ -162,7 +173,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
      * Returns a {@code Collection} of {@link Production} instances associated with the given sort.
      */
     public Collection<Production> getProductionsOf(Sort sort) {
-        Collection<Production> productions = new ArrayList<Production>();
+        Collection<Production> productions = new ArrayList<>();
         for (ModuleItem item : items) {
             if (!(item instanceof Syntax)) {
                 continue;
@@ -186,6 +197,7 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     @Override
     public void setChildren(List<ModuleItem> children, Enum<?> _) {
         this.items = children;
+        this.sorts = null;
     }
 
 }
