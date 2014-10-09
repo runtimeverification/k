@@ -32,12 +32,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
@@ -88,7 +90,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          *
          * @see SymbolicConstraint#data.equalities
          */
-        public Map<Variable, Term> substitution;
+        public LinkedHashMap<Variable, Term> substitution;
         public TruthValue truthValue;
         /**
          * Stores the minimal equality causing this constraint to become false.
@@ -98,7 +100,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         public SymbolicUnifier.Data unifierData;
 
-        public Data(LinkedList<Equality> equalities, Map<Variable, Term> substitution,
+        public Data(LinkedList<Equality> equalities, LinkedHashMap<Variable, Term> substitution,
                 TruthValue truthValue, boolean isNormal, SymbolicUnifier.Data unifierData) {
             this.equalities = equalities;
             this.substitution = substitution;
@@ -350,7 +352,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public SymbolicConstraint(TermContext context) {
         this(new Data(
-                new LinkedList<Equality>(), new HashMap<Variable, Term>(), TruthValue.TRUE, true,
+                Lists.newLinkedList(), Maps.newLinkedHashMap(), TruthValue.TRUE, true,
                 new SymbolicUnifier.Data()),
                 context);
     }
