@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -48,7 +49,7 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         Module transformedNode = node.shallowCopy();
         transformedNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-        Set<String> separators = new HashSet<String>();
+        Set<String> separators = new LinkedHashSet<>();
         for (Production production : context.listProductions.values()) {
             UserList userList = (UserList) production.getItems().get(0);
             separators.add(userList.getSeparator());

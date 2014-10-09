@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
+import java.util.List;
+
 public class PosetTest {
 
     private Poset<String> poset;
@@ -69,5 +71,14 @@ public class PosetTest {
         poset.addRelation("LUB", "B1");
         poset.transitiveClosure();
         Assert.assertEquals("LUB", poset.getLUB(Sets.newHashSet("B0", "B1")));
+    }
+
+    @Test
+    public void testCircularity() throws Exception {
+        poset.addRelation("S1", "S2");
+        poset.addRelation("S2", "S1");
+        List<String> circle = poset.checkForCycles();
+        Assert.assertNotNull("The circuit should have 2 elements.", circle);
+        Assert.assertEquals("The circuit should have 2 elements.", 2, circle.size());
     }
 }

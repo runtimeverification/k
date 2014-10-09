@@ -3,7 +3,8 @@ Here are instructions for installing K from the release zip/tgz archive.
 Users who checked out the sources should follow the instructions in src/README.md.
 
 1. Prerequisites:
-  * Java Runtime Edition version 7 or higher (http://java.com/en/download/index.jsp)
+  * Java Runtime Edition version 8 or higher
+    (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
     * To make sure java is installed properly, call `java -version` in a terminal.
 
 2. Install:

@@ -1,26 +1,18 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.TermEquality;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.DataStructureChoice;
-import org.kframework.backend.java.kil.DataStructureLookup;
-import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
@@ -30,7 +22,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.Profiler;
+import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
@@ -38,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +38,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -63,7 +53,7 @@ public class PatternMatcher extends AbstractMatcher {
     /**
      * Represents the substitution after the pattern matching.
      */
-    private Map<Variable, Term> fSubstitution = new HashMap<Variable, Term>();
+    private Map<Variable, Term> fSubstitution = new HashMap<>();
 
     /**
      * Represents a conjunction of multiple collections of substitutions; each
@@ -97,6 +87,14 @@ public class PatternMatcher extends AbstractMatcher {
     private final boolean matchOnFunctionSymbol;
 
     private final TermContext termContext;
+
+    public Map<Variable, Term> substitution() {
+        return Collections.unmodifiableMap(fSubstitution);
+    }
+
+    public Collection<Collection<Map<Variable, Term>>> multiSubstitutions() {
+        return Collections.unmodifiableCollection(multiSubstitutions);
+    }
 
     /**
      * Checks if the subject term matches the pattern.
@@ -137,258 +135,18 @@ public class PatternMatcher extends AbstractMatcher {
      *         rule (each instantiation is represented as a substitution mapping
      *         variables in the pattern to sub-terms in the subject)
      */
-    public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
+    public static List<Map<Variable, Term>> match(Term subject, Rule rule, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(rule.isFunction() || rule.isLemma(), context);
 
         if (!matcher.patternMatch(subject, rule.leftHandSide())) {
             return Collections.emptyList();
         }
 
-        return evaluateConditions(rule,
-                    getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions), context);
+        return RewriteEngineUtils.evaluateConditions(rule,
+                    RewriteEngineUtils.getMultiSubstitutions(matcher.fSubstitution, matcher.multiSubstitutions), context);
     }
 
-    /**
-     * Evaluates the side-conditions of a rule against a list of possible
-     * instantiations.
-     *
-     * @param rule
-     * @param substitutions
-     * @param context
-     * @return a list of instantiations that satisfy the side-conditions; each
-     *         of which is updated with extra bindings introduced during the
-     *         evaluation
-     */
-    public static List<Map<Variable, Term>> evaluateConditions(Rule rule, List<Map<Variable, Term>> substitutions,
-            TermContext context) {
-        /* handle fresh variables, data structure lookups, and side conditions */
-        List<Map<Variable, Term>> results = Lists.newArrayList();
-        for (Map<Variable, Term> crntSubst : substitutions) {
-            /* add bindings for fresh variables used in the rule */
-            for (Variable variable : rule.freshVariables()) {
-                crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
-            }
-
-            /* evaluate data structure lookups/choices and add bindings for them */
-            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-                // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
-                Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
-                        equality.leftHandSide() : equality.rightHandSide();
-                Term nonLookupOrChoice = equality.leftHandSide() == lookupOrChoice ?
-                        equality.rightHandSide() : equality.leftHandSide();
-                assert lookupOrChoice instanceof DataStructureLookupOrChoice :
-                    "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
-
-                Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
-
-                boolean resolved = false;
-                if (evalLookupOrChoice instanceof Bottom
-                        || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
-                    /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
-
-                    // when the operation is pending, it is not really a valid match
-                    // for example, matching ``<env>... X |-> V ...</env>''
-                    // against ``<env> Rho </env>'' will result in a pending
-                    // choice operation due to the unknown ``Rho''.
-                } else {
-                    if (nonLookupOrChoice instanceof Variable) {
-                        Variable variable = (Variable) nonLookupOrChoice;
-                        if (checkOrderedSortedCondition(variable, evalLookupOrChoice, context)) {
-                            Term term = crntSubst.put(variable, evalLookupOrChoice);
-                            resolved = term == null || BoolToken.TRUE.equals(
-                                    TermEquality.eq(term, evalLookupOrChoice, context));
-                        }
-                    } else {
-                        // the non-lookup term is not a variable and thus requires further pattern matching
-                        // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
-                        //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
-                        PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
-                        if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
-                            resolved = true;
-                            assert lookupMatcher.multiSubstitutions.isEmpty();
-                            crntSubst = composeSubstitution(crntSubst, lookupMatcher.fSubstitution);
-                        }
-                    }
-                }
-
-                if (!resolved) {
-                    crntSubst = null;
-                    break;
-                }
-            }
-
-
-            /* evaluate side conditions */
-            if (crntSubst != null) {
-                Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
-                for (Term require : rule.requires()) {
-                    // TODO(YilongL): in the future, we may have to accumulate
-                    // the substitution obtained from evaluating the side
-                    // condition
-                    Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
-                    if (!evaluatedReq.equals(BoolToken.TRUE)) {
-                        crntSubst = null;
-                        break;
-                    }
-                }
-                Profiler.stopTimer(Profiler.EVALUATE_REQUIRES_TIMER);
-            }
-
-            if (crntSubst != null) {
-                results.add(crntSubst);
-            }
-        }
-        return results;
-    }
-
-    /**
-     * Private helper method to substitute and evaluate a
-     * {@link DataStructureLookupOrChoice} operation efficiently.
-     * <p>
-     * This method is more than 10x faster than simply calling
-     * {@code Term#substituteAndEvaluate(Map, TermContext)} on
-     * {@code lookupOrChoice}.
-     *
-     * @param lookupOrChoice
-     * @param subst
-     *            the substitution map
-     * @return the evaluated data structure lookup or choice operation
-     */
-    public static Term evaluateLookupOrChoice(Term lookupOrChoice, Map<Variable, Term> subst, TermContext context) {
-        Profiler.startTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
-
-        Term evalLookupOrChoice = null;
-        if (lookupOrChoice instanceof DataStructureLookup) {
-            DataStructureLookup lookup = (DataStructureLookup) lookupOrChoice;
-            Term base = null, key = null;
-            if (lookup.base() instanceof Variable) {
-                base = subst.get(lookup.base());
-            }
-            key = subst.get(lookup.key());
-            Kind kind = lookupOrChoice.kind();
-            base = base == null ? lookup.base().copyOnShareSubstAndEval(subst, context) : base;
-            key = key == null ? lookup.key().copyOnShareSubstAndEval(subst, context) : key;
-
-            evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(lookup.type(), base, key, kind).evaluateLookup();
-        } else {
-            DataStructureChoice choice = (DataStructureChoice) lookupOrChoice;
-            Term base = null;
-            if (choice.base() instanceof Variable) {
-                base = subst.get(choice.base());
-            }
-            base = base == null ? choice.base() : base;
-
-            evalLookupOrChoice = DataStructureLookupOrChoice.Util.of(choice.type(), base).evaluateChoice();
-        }
-
-        Profiler.stopTimer(Profiler.EVALUATE_LOOKUP_CHOICE_TIMER);
-        return evalLookupOrChoice;
-    }
-
-    /**
-     * Helper method which constructs all possible variable bindings of
-     * the pattern term to match the subject term.
-     *
-     * @return all possible substitutions of the pattern term to match the
-     *         subject term
-     */
-    public static List<Map<Variable, Term>> getMultiSubstitutions(
-            Map<Variable, Term> fSubstitution,
-            Collection<Collection<Map<Variable, Term>>> multiSubstitutions) {
-        if (!multiSubstitutions.isEmpty()) {
-            assert multiSubstitutions.size() <= 2;
-
-            List<Map<Variable, Term>> result = new ArrayList<Map<Variable, Term>>();
-            Iterator<Collection<Map<Variable, Term>>> iterator = multiSubstitutions.iterator();
-            if (multiSubstitutions.size() == 1) {
-                for (Map<Variable, Term> subst : iterator.next()) {
-                    Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst);
-                    if (composedSubst != null) {
-                        result.add(composedSubst);
-                    }
-                }
-            } else {
-                Collection<Map<Variable, Term>> substitutions = iterator.next();
-                Collection<Map<Variable, Term>> otherSubstitutions = iterator.next();
-                for (Map<Variable, Term> subst1 : substitutions) {
-                    for (Map<Variable, Term> subst2 : otherSubstitutions) {
-                        Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst1);
-                        if (composedSubst != null) {
-                            // TODO(YilongL): might be able to exploit the fact that composedSubst can be safely mutated
-                            composedSubst = composeSubstitution(composedSubst, subst2);
-                            if (composedSubst != null) {
-                                result.add(composedSubst);
-                            }
-                        }
-                    }
-                }
-            }
-            return result;
-        } else {
-            Map<Variable, Term> substitution = Maps.newHashMap(fSubstitution);
-            return Collections.singletonList(substitution);
-        }
-    }
-
-    /**
-     * Composes two specified substitutions.
-     *
-     * @param subst1
-     *            the first substitution
-     * @param subst2
-     *            the second substitution
-     * @return the composed substitution on success; otherwise, {@code null}
-     */
-    public static Map<Variable, Term> composeSubstitution(Map<Variable, Term> subst1, Map<Variable, Term> subst2) {
-        if (subst1.size() < subst2.size()) {
-            Map<Variable, Term> tmp = subst1;
-            subst1 = subst2;
-            subst2 = tmp;
-        }
-
-        Map<Variable, Term> result = new HashMap<>(subst1);
-        for (Map.Entry<Variable, Term> entry : subst2.entrySet()) {
-            Variable variable = entry.getKey();
-            Term term = entry.getValue();
-            Term otherTerm = result.get(variable);
-            if (otherTerm == null) {
-                result.put(variable, term);
-            } else if (!otherTerm.equals(term)) {
-                return null;
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Composes a list of substitutions.
-     *
-     * @param substs
-     *            a list of substitutions
-     * @return the composed substitution on success; otherwise, {@code null}
-     */
-    @SafeVarargs
-    public static Map<Variable, Term> composeSubstitution(Map<Variable, Term>... substs) {
-        switch (substs.length) {
-        case 0:
-            return null;
-
-        case 1:
-            return substs[0];
-
-        case 2:
-            return composeSubstitution(substs[0], substs[1]);
-
-        default:
-            Map<Variable, Term> subst = substs[0];
-            for (int idx = 1; idx < substs.length; idx++) {
-                subst = composeSubstitution(subst, substs[idx]);
-            }
-            return subst;
-        }
-    }
-
-    private PatternMatcher(boolean isLemma, TermContext context) {
+    public PatternMatcher(boolean isLemma, TermContext context) {
         this.matchOnFunctionSymbol = isLemma;
         this.termContext = context;
         multiSubstitutions = new ArrayList<>();
@@ -403,7 +161,7 @@ public class PatternMatcher extends AbstractMatcher {
      *            the pattern term
      * @return {@code true} if the matching succeeds; otherwise, {@code false}
      */
-    private boolean patternMatch(Term subject, Term pattern) {
+    public boolean patternMatch(Term subject, Term pattern) {
         try {
             isStarNested = false;
             match(subject, pattern);
@@ -475,23 +233,6 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     /**
-     * Private helper method that checks if a specified variable binding
-     * satisfies the ordered-sorted pattern matching condition; namely, the sort
-     * of the term must be subsorted to the sort of the variable.
-     *
-     * @param variable
-     *            the variable to be bound
-     * @param term
-     *            the term to be bound to
-     * @param termContext
-     * @return {@code true} if the variable can be bound to the term
-     *         successfully; otherwise, {@code false}
-     */
-    private static boolean checkOrderedSortedCondition(Variable variable, Term term, TermContext termContext) {
-        return termContext.definition().subsorts().isSubsortedEq(variable.sort(), term.sort());
-    }
-
-    /**
      * Binds a variable in the pattern to a subterm of the subject; calls
      * {@link PatternMatcher#fail(Term, Term)} when the binding fails.
      *
@@ -509,7 +250,7 @@ public class PatternMatcher extends AbstractMatcher {
             term = CellCollection.downKind(term);
         }
 
-        if (!checkOrderedSortedCondition(variable, term, termContext)) {
+        if (!termContext.definition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
             fail(variable, term);
         }
 
@@ -538,9 +279,12 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     @Override
-    public void match(BuiltinList builtinList, Term pattern) {
-        assert !(pattern instanceof Variable);
+    public void match(Bottom bottom, Term pattern) {
+        fail(bottom, pattern);
+    }
 
+    @Override
+    public void match(BuiltinList builtinList, Term pattern) {
         if (!(pattern instanceof BuiltinList)) {
             this.fail(builtinList, pattern);
         }
@@ -562,8 +306,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(BuiltinMap builtinMap, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof BuiltinMap)) {
             this.fail(builtinMap, pattern);
         }
@@ -714,8 +456,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(BuiltinSet builtinSet, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof BuiltinSet)) {
             this.fail(builtinSet, pattern);
         }
@@ -724,26 +464,12 @@ public class PatternMatcher extends AbstractMatcher {
                 "set matching is only supported when one of the sets is a variable.");
     }
 
-    @Override
-    public void match(BuiltinMgu builtinMgu, Term pattern) {
-        assert !(pattern instanceof Variable);
-
-        if (!(pattern instanceof BuiltinMgu)) {
-            this.fail(builtinMgu, pattern);
-        }
-
-        throw new UnsupportedOperationException(
-                "Mgu matching is only supported when one of the Mgu's is a variable.");
-    }
-
     /**
      * Two cells can be unified if and only if they have the same cell label and
      * their contents can be unified.
      */
     @Override
     public void match(Cell cell, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof Cell)) {
             this.fail(cell, pattern);
         }
@@ -763,8 +489,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(CellCollection cellCollection, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof CellCollection)) {
             fail(cellCollection, pattern);
         }
@@ -888,7 +612,7 @@ public class PatternMatcher extends AbstractMatcher {
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
-                        match(cells[generator.selection.get(i)], otherCells[i]);
+                        match(cells[generator.getSelection(i)], otherCells[i]);
                     }
                 } catch (PatternMatchingFailure e) {
                     continue;
@@ -896,7 +620,7 @@ public class PatternMatcher extends AbstractMatcher {
 
                 CellCollection.Builder builder = CellCollection.builder(termContext.definition().context());
                 for (int i = 0; i < cells.length; ++i) {
-                    if (!generator.selected.contains(i)) {
+                    if (!generator.isSelected(i)) {
                         builder.add(cells[i]);
                     }
                 }
@@ -945,90 +669,15 @@ public class PatternMatcher extends AbstractMatcher {
         return Multimaps.filterKeys(cellCollection.cellMap(), notRemoved);
     }
 
-    private class SelectionGenerator {
-
-        private final int size;
-        private final int coSize;
-        public List<Integer> selection;
-        public Set<Integer> selected;
-        private int index;
-
-        public SelectionGenerator(int size, int coSize) {
-            assert size <= coSize;
-
-            this.size = size;
-            this.coSize = coSize;
-            selection = new ArrayList<Integer>();
-            selected = new HashSet<Integer>();
-            for (int i = 0; i < size; ++i) {
-                selection.add(i);
-                selected.add(i);
-            }
-        }
-
-        private void pop() {
-            index = selection.remove(selection.size() - 1);
-            selected.remove(index);
-            ++index;
-        }
-
-        private void push() {
-            selection.add(index);
-            selected.add(index);
-            index = 0;
-        }
-
-        public boolean generate() {
-            if (selection.isEmpty()) return false;
-            pop();
-            while (selection.size() != size) {
-                if (index == coSize) {
-                    if (selection.isEmpty()) {
-                        break;
-                    } else {
-                        pop();
-                        continue;
-                    }
-                }
-
-                if (!selected.contains(index)) {
-                    push();
-                    continue;
-                }
-
-                ++index;
-            }
-
-            return !selection.isEmpty();
-        }
-
-    }
-
     @Override
     public void match(KLabelConstant kLabelConstant, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!kLabelConstant.equals(pattern)) {
             fail(kLabelConstant, pattern);
         }
     }
 
     @Override
-    public void match(KLabelFreezer kLabelFreezer, Term pattern) {
-        assert !(pattern instanceof Variable);
-
-        if(!(pattern instanceof KLabelFreezer)) {
-            fail(kLabelFreezer, pattern);
-        }
-
-        KLabelFreezer otherKLabelFreezer = (KLabelFreezer) pattern;
-        match(kLabelFreezer.term(), otherKLabelFreezer.term());
-    }
-
-    @Override
     public void match(KLabelInjection kLabelInjection, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if(!(pattern instanceof KLabelInjection)) {
             fail(kLabelInjection, pattern);
         }
@@ -1039,8 +688,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(Hole hole, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!hole.equals(pattern)) {
             fail(hole, pattern);
         }
@@ -1048,8 +695,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(KItem kItem, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof KItem)) {
             fail(kItem, pattern);
         }
@@ -1086,8 +731,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(Token token, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!token.equals(pattern)) {
             fail(token, pattern);
         }
@@ -1095,8 +738,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(KList kList, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if(!(pattern instanceof KList)) {
             fail(kList, pattern);
         }
@@ -1107,8 +748,6 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(KSequence kSequence, Term pattern) {
-        assert !(pattern instanceof Variable);
-
         if (!(pattern instanceof KSequence)) {
             this.fail(kSequence, pattern);
         }
@@ -1135,13 +774,6 @@ public class PatternMatcher extends AbstractMatcher {
         } else {
             fail(kCollection, pattern);
         }
-    }
-
-    @Override
-    public void match(Variable variable, Term pattern) {
-        assert !(pattern instanceof Variable);
-
-        fail(variable, pattern);
     }
 
     @Override

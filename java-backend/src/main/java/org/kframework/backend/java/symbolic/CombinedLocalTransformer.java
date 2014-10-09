@@ -217,9 +217,4 @@ public class CombinedLocalTransformer extends LocalTransformer {
     public ASTNode transform(Variable node) {
         return transformAll(node);
     }
-
-    @Override
-    public ASTNode transform(BuiltinMgu node) {
-        return transformAll(node);
-    }
 }

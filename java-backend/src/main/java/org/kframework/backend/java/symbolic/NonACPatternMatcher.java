@@ -2,15 +2,10 @@
 package org.kframework.backend.java.symbolic;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.TermEquality;
-import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
@@ -24,7 +19,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.Profiler;
+import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayDeque;
@@ -93,7 +88,7 @@ public class NonACPatternMatcher {
         taskBuffer.clear();
         tasks.addFirst(Pair.of(subject, pattern));
         failed = false;
-        return match() ? java.util.Collections.unmodifiableMap(substitution) : null;
+        return match() ? substitution : null;
     }
 
     private void check(boolean condition) {
@@ -173,7 +168,17 @@ public class NonACPatternMatcher {
                         return false;
                     }
                 } else if (subject instanceof Token) {
-                    check(subject.equals(pattern));
+                    if (subject.kind() == Kind.KITEM) {
+                        if (pattern instanceof KSequence) {
+                            match((Token) subject, (KSequence) pattern);
+                        } else if (pattern instanceof KList) {
+                            match((Token) subject, (KList) pattern);
+                        } else {
+                            check(subject.equals(pattern));
+                        }
+                    } else {
+                        check(subject.equals(pattern));
+                    }
                 } else if (subject instanceof KLabelInjection) {
                     if (pattern instanceof KLabelInjection) {
                         match((KLabelInjection) subject, (KLabelInjection) pattern);
@@ -235,7 +240,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(cell, pattern.cells().iterator().next());
-            addSubstitution(pattern.frame(), CellCollection.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), CellCollection.EMPTY);
+            }
         }
     }
 
@@ -325,7 +332,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(kItem, pattern.get(0));
-            addSubstitution(pattern.frame(), KSequence.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KSequence.EMPTY);
+            }
         }
     }
 
@@ -333,7 +342,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(kItem, pattern.get(0));
-            addSubstitution(pattern.frame(), KList.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KList.EMPTY);
+            }
         }
     }
 
@@ -341,7 +352,9 @@ public class NonACPatternMatcher {
         check(pattern.concreteSize() == 1);
         if (!failed) {
             addMatchingTask(kSequence, pattern.get(0));
-            addSubstitution(pattern.frame(), KList.EMPTY);
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KList.EMPTY);
+            }
         }
     }
 
@@ -380,6 +393,26 @@ public class NonACPatternMatcher {
         }
     }
 
+    private void match(Token token, KSequence pattern) {
+        check(pattern.concreteSize() == 1);
+        if (!failed) {
+            addMatchingTask(token, pattern.get(0));
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KSequence.EMPTY);
+            }
+        }
+    }
+
+    private void match(Token token, KList pattern) {
+        check(pattern.concreteSize() == 1);
+        if (!failed) {
+            addMatchingTask(token, pattern.get(0));
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), KList.EMPTY);
+            }
+        }
+    }
+
     private void match(KLabelInjection kLabelInjection, KLabelInjection pattern) {
         addMatchingTask(kLabelInjection.term(), pattern.term());
     }
@@ -400,100 +433,11 @@ public class NonACPatternMatcher {
      *            the term context
      * @return the instantiation of variables
      */
-    public static Map<Variable, Term> patternMatch(Term subject, Rule rule, TermContext context) {
+    public static Map<Variable, Term> match(Term subject, Rule rule, TermContext context) {
         NonACPatternMatcher matcher = new NonACPatternMatcher(rule.isFunction() || rule.isLemma(), context);
 
         Map<Variable, Term> result = matcher.patternMatch(subject, rule.leftHandSide());
-        return result != null ? evaluateConditions(rule, result, context) : null;
-    }
-
-    /**
-     * Evaluates the side-conditions of a rule against a list of possible
-     * instantiations.
-     *
-     * @param rule
-     * @param substitutions
-     * @param context
-     * @return a list of instantiations that satisfy the side-conditions; each
-     *         of which is updated with extra bindings introduced during the
-     *         evaluation
-     */
-    public static Map<Variable, Term> evaluateConditions(Rule rule, Map<Variable, Term> substitutions,
-            TermContext context) {
-        /* handle fresh variables, data structure lookups, and side conditions */
-
-        Map<Variable, Term> crntSubst = substitutions;
-        /* add bindings for fresh variables used in the rule */
-        for (Variable variable : rule.freshVariables()) {
-            crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
-        }
-
-        /* evaluate data structure lookups/choices and add bindings for them */
-        for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-            // TODO(YilongL): enforce the format of rule.lookups() in kompilation and simplify the following code
-            Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ?
-                    equality.leftHandSide() : equality.rightHandSide();
-                    Term nonLookupOrChoice = equality.leftHandSide() == lookupOrChoice ?
-                            equality.rightHandSide() : equality.leftHandSide();
-                    assert lookupOrChoice instanceof DataStructureLookupOrChoice :
-                        "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
-
-                    Term evalLookupOrChoice = PatternMatcher.evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
-
-                    boolean resolved = false;
-                    if (evalLookupOrChoice instanceof Bottom
-                            || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
-                        /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
-
-                        // when the operation is pending, it is not really a valid match
-                        // for example, matching ``<env>... X |-> V ...</env>''
-                        // against ``<env> Rho </env>'' will result in a pending
-                        // choice operation due to the unknown ``Rho''.
-                    } else {
-                        if (nonLookupOrChoice instanceof Variable) {
-                            Variable variable = (Variable) nonLookupOrChoice;
-                            if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
-                                Term term = crntSubst.put(variable, evalLookupOrChoice);
-                                resolved = term == null || BoolToken.TRUE.equals(
-                                        TermEquality.eq(term, evalLookupOrChoice, context));
-                            }
-                        } else {
-                            // the non-lookup term is not a variable and thus requires further pattern matching
-                            // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
-                            //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
-                            NonACPatternMatcher lookupMatcher = new NonACPatternMatcher(rule.isLemma(), context);
-                            Map<Variable, Term> lookupResult = lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice);
-                            if (lookupResult != null) {
-                                resolved = true;
-                                crntSubst = PatternMatcher.composeSubstitution(crntSubst, lookupResult);
-                            }
-                        }
-                    }
-
-                    if (!resolved) {
-                        crntSubst = null;
-                        break;
-                    }
-        }
-
-
-        /* evaluate side conditions */
-        if (crntSubst != null) {
-            Profiler.startTimer(Profiler.EVALUATE_REQUIRES_TIMER);
-            for (Term require : rule.requires()) {
-                // TODO(YilongL): in the future, we may have to accumulate
-                // the substitution obtained from evaluating the side
-                // condition
-                Term evaluatedReq = require.substituteAndEvaluate(crntSubst, context);
-                if (!evaluatedReq.equals(BoolToken.TRUE)) {
-                    crntSubst = null;
-                    break;
-                }
-            }
-            Profiler.stopTimer(Profiler.EVALUATE_REQUIRES_TIMER);
-        }
-
-        return crntSubst;
+        return result != null ? RewriteEngineUtils.evaluateConditions(rule, result, context) : null;
     }
 
 }

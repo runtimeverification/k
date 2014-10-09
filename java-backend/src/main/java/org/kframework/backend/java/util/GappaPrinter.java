@@ -5,6 +5,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
+import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class GappaPrinter extends BottomUpVisitor {
         String result = "";
         boolean first = true;
         Exception error = null;
-        for (SymbolicConstraint.Equality equality : constraint.equalities()) {
+        for (Equality equality : constraint.equalities()) {
             Term equalityLHS = equality.leftHandSide();
             Term equalityRHS = equality.rightHandSide();
             if (equalityLHS instanceof BoolToken) {

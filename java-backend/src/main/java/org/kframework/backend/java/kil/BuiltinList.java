@@ -38,6 +38,7 @@ public class BuiltinList extends Collection {
     private final ImmutableList<Term> elementsRight;
     private final ImmutableList<Term> baseTerms;
     private final ImmutableList<BaseTermType> baseTermTypes;
+    private final ImmutableList<Variable> listVariables;
 
     /**
      * Private efficient constructor used by {@link BuiltinList.Builder}.
@@ -46,13 +47,15 @@ public class BuiltinList extends Collection {
             ImmutableList<Term> elementsLeft,
             ImmutableList<Term> baseTerms,
             ImmutableList<Term> elementsRight,
-            ImmutableList<BaseTermType> baseTermTypes
+            ImmutableList<BaseTermType> baseTermTypes,
+            ImmutableList<Variable> listVariables
             ) {
         super(computeFrame(baseTerms), Kind.KITEM);
         this.elementsLeft = elementsLeft;
         this.elementsRight = elementsRight;
         this.baseTerms = baseTerms;
         this.baseTermTypes = baseTermTypes;
+        this.listVariables = listVariables;
     }
 
     private static Variable computeFrame(List<Term> baseTerms) {
@@ -64,7 +67,7 @@ public class BuiltinList extends Collection {
     }
 
     private BuiltinList(ImmutableList<Term> elementsLeft) {
-        this(elementsLeft, ImmutableList.<Term>of(), ImmutableList.<Term>of(), ImmutableList.<BaseTermType>of());
+        this(elementsLeft, ImmutableList.<Term>of(), ImmutableList.<Term>of(), ImmutableList.<BaseTermType>of(), ImmutableList.<Variable>of());
     }
 
     public static Term concatenate(Term... lists) {
@@ -98,6 +101,11 @@ public class BuiltinList extends Collection {
             index += baseTerms.size();
         }
         return BaseTerm.of(baseTerms.get(index), baseTermTypes.get(index));
+    }
+
+    @Override
+    public ImmutableList<Variable> collectionVariables() {
+        return listVariables;
     }
 
     /**
@@ -350,6 +358,7 @@ public class BuiltinList extends Collection {
         private final ImmutableList.Builder<Term> baseTermsBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<Term> elementsRightBuilder = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<BaseTermType> baseTermTypesBuilder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<Variable> listVariablesBuilder = new ImmutableList.Builder<>();
 
         /**
          * Appends the specified term as a list item, namely
@@ -389,6 +398,7 @@ public class BuiltinList extends Collection {
                 baseTermTypesBuilder.add(BaseTermType.FUNCTION);
             } else if (term instanceof Variable) {
                 baseTermTypesBuilder.add(BaseTermType.VARIABLE);
+                listVariablesBuilder.add((Variable) term);
             } else {
                 assert false : "unexpected concatenated term " + term;
             }
@@ -478,7 +488,8 @@ public class BuiltinList extends Collection {
                     elementsLeftBuilder.build(),
                     baseTermsBuilder.build(),
                     elementsRightBuilder.build(),
-                    baseTermTypesBuilder.build());
+                    baseTermTypesBuilder.build(),
+                    listVariablesBuilder.build());
             return builtinList.baseTerms().size() == 1 && builtinList.concreteSize() == 0 ?
                    builtinList.baseTerms().get(0) :
                    builtinList;

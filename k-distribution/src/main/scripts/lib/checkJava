@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-MIN_VERSION="1.7"
+MIN_VERSION="1.8"
 echoerr() { echo "$@" 1>&2; }
 
 if type -p java >/dev/null; then

@@ -38,7 +38,8 @@ public class UseSMTTest {
     Definition definition;
 
     @Mock
-    SymbolicConstraintOperations equalityOps;
+    SymbolicConstraintOperations constraintOps;
+
 
     @Before
     public void setUp() {
@@ -46,7 +47,7 @@ public class UseSMTTest {
         when(tc.definition().context()).thenReturn(context);
         when(definition.functionRules()).thenReturn(HashMultimap.<KLabelConstant, Rule>create());
         context.productions = new HashSet<>();
-        when(tc.global()).thenReturn(new GlobalContext(null, null, equalityOps, null));
+        when(tc.global()).thenReturn(new GlobalContext(null, null, null, constraintOps, null));
     }
 
     @Test

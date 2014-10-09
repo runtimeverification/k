@@ -1,8 +1,8 @@
 <T>
     <k>
-        "Input two numbers: " ~> HOLE ~> print ( HOLE ) ; ~> int x, y ;
-           ~> x = (read ( )) ; ~> y = (read ( )) ; ~> print ( "Their sum is: "
-          , (x + y), "\n" ) ;
+        "Input two numbers: " ~> HOLE, .AExps ~> print ( HOLE ) ; ~> int x
+          , y ; ~> x = read ( ) ; ~> y = read ( ) ; ~> print ( 
+          "Their sum is: ", x + y, "\n" ) ;
     </k>
     <env>
         .Map

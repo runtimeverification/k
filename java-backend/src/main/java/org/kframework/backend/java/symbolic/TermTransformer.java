@@ -50,11 +50,6 @@ public class TermTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(BuiltinMgu builtinMgu) {
-        return transformTerm((Term) super.transform(builtinMgu));
-    }
-
-    @Override
     public ASTNode transform(BuiltinSet builtinSet) {
         return transformTerm((Term) super.transform(builtinSet));
     }

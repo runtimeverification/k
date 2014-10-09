@@ -50,7 +50,7 @@ module MY-PATTERN-MATCHING
 
   syntax Bool ::= emptyKList(KList)  [function]
   rule emptyKList(.KList) => true
-  rule emptyKList(K,,Ks) => false
+  rule emptyKList(K:K,,KL) => false
 /***********
   HIDDEN
 ***********/

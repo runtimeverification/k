@@ -3,11 +3,8 @@ package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Sort;
-import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
@@ -131,16 +128,6 @@ public abstract class BitVector<T extends Number> extends Token {
         hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
         hashCode = hashCode * Utils.HASH_PRIME + bitwidth;
         return hashCode;
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
     }
 
     @Override

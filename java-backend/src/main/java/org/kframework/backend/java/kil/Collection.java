@@ -85,6 +85,8 @@ public abstract class Collection extends Term {
         return frame;
     }
 
+    public abstract java.util.Collection<Variable> collectionVariables();
+
     /**
      * Returns true if this {@code Collection} does not contain any content.
      */

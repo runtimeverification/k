@@ -338,7 +338,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         StringBuilder sb = new StringBuilder();
         sb.append("(and");
         boolean isEmptyAdd = true;
-        for (SymbolicConstraint.Equality equality : constraint.data.equalities) {
+        for (Equality equality : constraint.data.equalities) {
             try {
                 String left = ((SMTLibTerm) equality.leftHandSide().accept(this)).expression();
                 String right = ((SMTLibTerm) equality.rightHandSide().accept(this)).expression();

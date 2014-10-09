@@ -6,7 +6,7 @@ import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.NonACPatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -28,8 +28,7 @@ import org.kframework.utils.general.GlobalSettings;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,6 +63,7 @@ public final class KItem extends Term {
     private final Term kList;
     private final boolean isExactSort;
     private final Sort sort;
+    private final Set<Sort> possibleSorts;
     private Boolean evaluable = null;
     private Boolean anywhereApplicable = null;
 
@@ -83,11 +83,16 @@ public final class KItem extends Term {
     }
 
     KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
+        this(kLabel, kList, sort, isExactSort, Collections.singleton(sort));
+    }
+
+    private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort, Set<Sort> possibleSorts) {
         super(Kind.KITEM);
         this.kLabel = kLabel;
         this.kList = kList;
         this.sort = sort;
         this.isExactSort = isExactSort;
+        this.possibleSorts = possibleSorts;
     }
 
     private KItem(Term kLabel, Term kList, TermContext termContext) {
@@ -112,6 +117,7 @@ public final class KItem extends Term {
                 if (cacheTabVal != null) {
                     sort = cacheTabVal.sort;
                     isExactSort = cacheTabVal.isExactSort;
+                    possibleSorts = cacheTabVal.possibleSorts;
                     return;
                 }
             }
@@ -124,6 +130,7 @@ public final class KItem extends Term {
 
             sort = cacheTabVal.sort;
             isExactSort = cacheTabVal.isExactSort;
+            possibleSorts = cacheTabVal.possibleSorts;
         } else {
             /* not a KLabelConstant or the kList contains a frame variable */
             if (kLabel instanceof KLabelInjection) {
@@ -134,6 +141,7 @@ public final class KItem extends Term {
             }
 
             sort = kind.asSort();
+            possibleSorts = Collections.singleton(sort);
         }
     }
 
@@ -220,8 +228,9 @@ public final class KItem extends Term {
         }
         /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();
+        possibleSorts.add(sort);
 
-        return new CacheTableValue(sort, isExactSort);
+        return new CacheTableValue(sort, isExactSort, possibleSorts);
     }
 
     public boolean isEvaluable(TermContext context) {
@@ -354,20 +363,13 @@ public final class KItem extends Term {
             /* apply rules for user defined functions */
             if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
                 Term result = null;
+                Term owiseResult = null;
 
-                LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
                 for (Rule rule : definition.functionRules().get(kLabelConstant)) {
                     /* function rules should be applied by pattern match rather than unification */
-                    Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(kItem, rule, context);
-                    if (solutions.isEmpty()) {
+                    Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
+                    if (solution == null) {
                         continue;
-                    }
-
-                    Map<Variable, Term> solution = solutions.iterator().next();
-                    if (tool == Tool.KOMPILE || javaOptions.concreteExecution()) {
-                        assert solutions.size() <= 1 :
-                            "[non-deterministic function definition]: more than one way to apply the rule\n"
-                            + rule + "\nagainst the function\n" + kItem;
                     }
 
                     Term rightHandSide = rule.rightHandSide();
@@ -399,7 +401,8 @@ public final class KItem extends Term {
                          * wrong ``owise'' rule during execution.
                          */
                         if (kItem.isGround()) {
-                            owiseResults.add(rightHandSide);
+                            assert owiseResult == null : "There shall be at most one [owise] rule for each function";
+                            owiseResult = rightHandSide;
                         }
                     } else {
                         if (javaOptions.concreteExecution()) {
@@ -413,19 +416,15 @@ public final class KItem extends Term {
                      * If the function definitions do not need to be deterministic, try them in order
                      * and apply the first one that matches.
                      */
-                    if (!javaOptions.deterministicFunctions
-                            && result != null) {
+                    if (!javaOptions.deterministicFunctions && result != null) {
                         return result;
                     }
                 }
 
                 if (result != null) {
                     return result;
-                } else if (!owiseResults.isEmpty()) {
-                    assert owiseResults.size() == 1 :
-                        "[non-deterministic function definition]: more than one ``owise'' rule for the function\n"
-                        + kItem;
-                    return owiseResults.iterator().next();
+                } else if (owiseResult != null) {
+                    return owiseResult;
                 }
             }
 
@@ -470,11 +469,8 @@ public final class KItem extends Term {
          * anywhere rules in KLabelConstant */
         for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
             /* anywhere rules should be applied by pattern match rather than unification */
-            Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
-            if (solutions.isEmpty()) {
-                continue;
-            } else {
-                Map<Variable, Term> solution = solutions.iterator().next();
+            Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
+            if (solution != null) {
                 Term rightHandSide = rule.rightHandSide();
                 if (copyOnShareSubstAndEval) {
                     rightHandSide = rightHandSide.copyOnShareSubstAndEval(
@@ -521,14 +517,8 @@ public final class KItem extends Term {
         return sort;
     }
 
-    /**
-     * @return a unmodifiable view of the possible minimal sorts of this
-     *         {@code KItem} when its {@code KLabel} is a constructor;
-     *         otherwise, null;
-     */
-    public Set<Sort> possibleMinimalSorts() {
-        // TODO(YilongL): reconsider the use of this method when doing test generation
-        throw new UnsupportedOperationException();
+    public Set<Sort> possibleSorts() {
+        return Collections.unmodifiableSet(possibleSorts);
     }
 
     @Override
@@ -724,10 +714,12 @@ public final class KItem extends Term {
 
         final Sort sort;
         final boolean isExactSort;
+        final Set<Sort> possibleSorts;
 
-        CacheTableValue(Sort sort, boolean isExactSort) {
+        CacheTableValue(Sort sort, boolean isExactSort, Set<Sort> possibleSorts) {
             this.sort = sort;
             this.isExactSort = isExactSort;
+            this.possibleSorts = possibleSorts;
         }
     }
 

@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kil;
 
 import java.util.EnumMap;
+
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -12,7 +13,7 @@ import com.google.common.collect.Maps;
 
 /**
  * Refers to a computation which never completes successfully.
- * A {@link org.kframework.backend.java.symbolic.SymbolicConstraint.Equality} instance between
+ * A {@link org.kframework.backend.java.symbolic.Equality} instance between
  * bottom and anything else is false and makes the entire constraint false.
  *
  * @see org.kframework.backend.java.symbolic.SymbolicConstraint
@@ -41,6 +42,10 @@ public class Bottom extends Term implements MaximalSharing {
         return false;
     }
 
+    /**
+     * Returns {@code false} so that the unifier/matcher will continue to
+     * unify/match it against another term and fail as expected.
+     */
     @Override
     public boolean isSymbolic() {
         return false;
@@ -73,11 +78,13 @@ public class Bottom extends Term implements MaximalSharing {
 
     @Override
     public void accept(Matcher matcher, Term pattern) {
-        // TODO(YilongL): why not throw an exception here?
+        matcher.match(this, pattern);
     }
 
     @Override
-    public void accept(Unifier unifier, Term pattern) { }
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
 
     @Override
     public void accept(Visitor visitor) { }

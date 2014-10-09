@@ -105,8 +105,13 @@ public class KList extends KCollection {
     }
 
     @Override
+    public ImmutableList<Variable> collectionVariables() {
+        return kListVariables;
+    }
+
+    @Override
     public final boolean isConcreteCollection() {
-        return !hasFrame() && kListVariables.isEmpty();
+        return kListVariables.isEmpty();
     }
 
     @Override

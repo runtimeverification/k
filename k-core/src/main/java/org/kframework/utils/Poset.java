@@ -362,7 +362,8 @@ public class Poset<T> implements Serializable {
                             }
                             if (!visited.contains(nextNode)) {
                                 nodesStack.push(nextNode);
-                                iteratorStack.push(nodes.iterator());
+                                currentIterator = nodes.iterator();
+                                iteratorStack.push(currentIterator);
                                 visited.add(nextNode);
                                 break;
                             }

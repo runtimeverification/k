@@ -84,11 +84,6 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(BuiltinMgu builtinMgu) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public ASTNode transform(Cell cell) {
         return proceed(cell) ? super.transform(cell) : cell;
     }

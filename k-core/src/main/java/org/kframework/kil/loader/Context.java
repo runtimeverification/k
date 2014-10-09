@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +77,7 @@ public class Context implements Serializable {
     public SetMultimap<String, Production> tags = HashMultimap.create();
     public Map<String, Cell> cells = new HashMap<String, Cell>();
     public Map<String, Sort> cellSorts = new HashMap<>();
-    public Map<Sort, Production> listProductions = new HashMap<>();
+    public Map<Sort, Production> listProductions = new LinkedHashMap<>();
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
     public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
