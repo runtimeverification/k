@@ -30,10 +30,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
          * Represents key lookups of builtin data-structures as a symbolic
          * constraint.
          */
-        public final SymbolicConstraint.Data lookupsData;
-        public final SymbolicConstraint.Data constraintData;
-        public Data(Term term, SymbolicConstraint.Data lookups,
-                SymbolicConstraint.Data constraint) {
+        public final SymbolicConstraint lookupsData;
+        public final SymbolicConstraint constraintData;
+        public Data(Term term, SymbolicConstraint lookups,
+                SymbolicConstraint constraint) {
             super();
             this.term = term;
             this.lookupsData = lookups;
@@ -95,7 +95,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint,
             TermContext context) {
-        this(new Data(term, lookups.data, constraint.data), context);
+        this(new Data(term, lookups, constraint), context);
     }
 
     public ConstrainedTerm(Term term, SymbolicConstraint constraint, TermContext context) {
