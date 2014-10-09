@@ -133,6 +133,17 @@
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-windows-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeArtifactIds>cygwin1</includeArtifactIds>
+              <outputDirectory>${project.build.directory}/lib/native/windows</outputDirectory>
+              <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>

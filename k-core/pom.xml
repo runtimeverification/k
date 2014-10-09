@@ -178,6 +178,13 @@
 
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
+      <artifactId>cygwin1</artifactId>
+      <version>1.0</version>
+      <type>dll</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kframework.dependencies</groupId>
       <artifactId>strj</artifactId>
       <version>1.0</version>
       <scope>provided</scope>
@@ -349,12 +356,6 @@
         </os>
       </activation>
       <dependencies>
-        <dependency>
-          <groupId>org.kframework.dependencies</groupId>
-          <artifactId>cygwin1</artifactId>
-          <version>1.0</version>
-          <type>dll</type>
-        </dependency>
       </dependencies>
       <build>
         <plugins>
@@ -371,7 +372,7 @@
                 <configuration>
                   <includeArtifactIds>cygwin1</includeArtifactIds>
                   <outputDirectory>target/sdf/bin</outputDirectory>
-                    <stripVersion>true</stripVersion>
+                  <stripVersion>true</stripVersion>
                 </configuration>
               </execution>
             </executions>
