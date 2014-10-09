@@ -24,7 +24,7 @@ public class PrintTerm implements Transformation<ASTNode, String> {
 
     @Override
     public String run(ASTNode node, Attributes a) {
-        UnparserFilterNew printer = new UnparserFilterNew(true,colorOptions.color(),
+        UnparserFilter printer = new UnparserFilter(true,colorOptions.color(),
                 mode, false, a.typeSafeGet(Context.class));
         printer.visitNode(node);
         return printer.getResult();
