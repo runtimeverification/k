@@ -1,8 +1,23 @@
-; dummy prelude for floating-point because the set-logic command is not
-; supported when using the API parseSmtlib2String
-; see http://stackoverflow.com/a/7349729
+(set-logic QF_FPA)
 
-; YilongL: hack to avoid Z3 parser error when translating smtlib expression
-; the problem is that kernelc.k imports list_pattern but QF_FPA doesn't work
-; with Array yet
+; TODO: remove sort/fun declarations that are not actually used
+; set axioms
 (declare-sort IntSet)
+
+(declare-fun smt_set_cup (IntSet IntSet) IntSet)
+(declare-fun smt_set_ele (Int) IntSet)
+(declare-fun smt_set_emp () IntSet)
+(declare-fun smt_set_mem (Int) Bool)
+
+(declare-fun smt_set_lt ((IntSet) (IntSet)) Bool)
+(declare-fun smt_set_le ((IntSet) (IntSet)) Bool)
+
+; sequence axioms
+(declare-sort IntSeq)
+
+(declare-fun smt_seq_concat (IntSeq IntSeq) IntSeq)
+(declare-fun smt_seq_elem (Int) IntSeq)
+(declare-fun smt_seq_nil () IntSeq)
+
+(declare-fun smt_seq2set (IntSeq) IntSet)
+(declare-fun smt_seq_sorted (IntSeq) Bool)

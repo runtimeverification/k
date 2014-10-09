@@ -440,7 +440,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         sb.append(String.format(
                 "((_ asFloat %d %d) roundNearestTiesToEven %s 0)",
                 floatToken.exponent(), floatToken.bigFloatValue().precision(),
-                floatToken.bigFloatValue().toString("%Rf")));
+                floatToken.bigFloatValue().toString("%f")));
         return new SMTLibTerm(sb.toString());
     }
 

@@ -454,10 +454,10 @@ public class SymbolicRewriter {
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
             List<Rule> rules) {
-        List<ConstrainedTerm> proofResults = new ArrayList<ConstrainedTerm>();
-        Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
-        List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
-        List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
+        List<ConstrainedTerm> proofResults = new ArrayList<>();
+        Set<ConstrainedTerm> visited = new HashSet<>();
+        List<ConstrainedTerm> queue = new ArrayList<>();
+        List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
         initialTerm = new ConstrainedTerm(
                 initialTerm.term().expandPatterns(

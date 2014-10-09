@@ -114,6 +114,6 @@ module KERNELC-SYNTAX
               | "quicksort" | "merge_sort" | "bubble_sort" | "insertion_sort"
   syntax Id ::= "listNode" | "stackNode" | "val" | "next"
   syntax Id ::= "treeNode" | "node" | "value" | "left" | "right"
-  syntax Id ::= "sqs" | "sqv" | "dot" | "tau_vv" | "horizontal_los"
+  syntax Id ::= "sqs" | "sqv" | "dot" | "tau_vv" | "horizontal_los" | "omega_vv" | "cd2d"
   syntax Id ::= "a" | "b" | "c" | "x" | "y" | "z" | "t" | "u" | "v" | "p" | "n" | "s" | "l" | "ln" | "tn" | "sn" | "temp" | "min" | "iterx" | "itery" | "change"
 endmodule

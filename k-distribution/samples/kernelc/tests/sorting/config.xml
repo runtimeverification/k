@@ -25,13 +25,10 @@
       <krun-option name="--smt_prelude" value="../../include/z3/sorted_list.smt2" />
       <krun-option name="--z3-executable" />
     </program>
-<!-- TODO: uncomment this and remove exclude above when #1046 is fixed
     <program name="merge_sort.c">
-      <krun-option name="\-\-prove" value="tests/sorting/merge_sort_spec.k" />
-      <krun-option name="\-\-smt_prelude" value="../../include/z3/sorted_list.smt2" />
-      <krun-option name="\-\-z3-executable" />
+      <krun-option name="--prove" value="tests/sorting/merge_sort_spec.k" />
+      <krun-option name="--smt_prelude" value="../../include/z3/sorted_list.smt2" />
+      <krun-option name="--z3-executable" />
     </program>
--->
   </test>
 </tests>
-
