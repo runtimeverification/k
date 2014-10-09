@@ -22,7 +22,6 @@ int horizontal_los(double s_x, double s_y)
   double sqD;
   double E_hlos;
   sqS = sqs(s_x, s_y);
-  //sqS = 5.0*5.0;
   sqD = 5.0*5.0;
   E_hlos = 1.4551915228366851806640625E-11;
   return (sqS - sqD <= E_hlos);
@@ -33,11 +32,10 @@ double tau_vv(double s_x, double s_y, double v_x, double v_y){
 }
 
 double omega_vv(double s_x, double s_y, double v_x, double v_y){
-    double tau;
+  double tau;
 
-    tau = tau_vv(s_x, s_y, v_x, v_y);
-    return sqv(v_x, v_y)*sqv(s_x, s_y) + (2 * tau)* dot(s_x, s_y, v_x, v_y) + tau*tau - 5.0*5.0*sqv(v_x,v_y);
-
+  tau = tau_vv(s_x, s_y, v_x, v_y);
+  return sqv(v_x, v_y)*sqv(s_x, s_y) + (2.0 * tau)* dot(s_x, s_y, v_x, v_y) + tau*tau - 5.0*5.0*sqv(v_x,v_y);
 }
 
 int cd2d(double s_x, double s_y, double v_x, double v_y){
@@ -46,9 +44,3 @@ int cd2d(double s_x, double s_y, double v_x, double v_y){
   E_cd2d = 1.0;
   return  (horizontal_los(s_x, s_y)) ||  (omega_vv(s_x, s_y, v_x, v_y) <= E_cd2d);
 }
-
-/*int main()
-{
-  printf("%d ", cd2d(0.0, 0.0, 0.0, 0.0));
-  return 0;
-}*/

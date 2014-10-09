@@ -34,8 +34,16 @@ rule [sqs-spec]:
 requires minusInfinity(11,53) <Float X andBool X <Float plusInfinity(11,53) andBool minusInfinity(11,53) <Float Y andBool Y <Float plusInfinity(11,53)
 ensures Z ==Float X *Float X +Float Y *Float Y
 
-// TODO(YilongL): unable to prove the following because QF_FPA is too slow right now
-/*
+rule [sqv-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    sqv(tv(double, X:Float{exponent(11), significand(53)}), tv(double, Y:Float{exponent(11), significand(53)}))
+  =>
+    tv(double, Z:Float{exponent(11), significand(53)})
+  ...</k>
+requires minusInfinity(11,53) <Float X andBool X <Float plusInfinity(11,53) andBool minusInfinity(11,53) <Float Y andBool Y <Float plusInfinity(11,53)
+ensures Z ==Float X *Float X +Float Y *Float Y
+
 rule [dot-spec]:
   <fun>... FUN:Map ...</fun>
   <k>
@@ -43,8 +51,49 @@ rule [dot-spec]:
   =>
     tv(double, Z:Float{exponent(11), significand(53)})
   ...</k>
-requires isOrdinary(Ux) andBool isOrdinary(Uy) andBool isOrdinary(Vx) andBool isOrdinary(Vy)
+requires isValidDistance(Ux) andBool isValidDistance(Uy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
 ensures Z ==Float Ux *Float Vx +Float Uy *Float Vy
-*/
+
+rule [horizontal-los-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    horizontal_los(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}))
+  =>
+    tv(int, 1)
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool horizontalLosR(Sx, Sy, 5.0)
+
+rule [tau-vv-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    tau_vv(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}), tv(double, Vx:Float{exponent(11), significand(53)}), tv(double, Vy:Float{exponent(11), significand(53)}))
+  =>
+    tv(double, Z:Float{exponent(11), significand(53)})
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
+ensures Z ==Float tauR(Sx, Sy, Vx, Vy)
+
+rule [omega-vv-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    omega_vv(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}), tv(double, Vx:Float{exponent(11), significand(53)}), tv(double, Vy:Float{exponent(11), significand(53)}))
+  =>
+    tv(double, Z:Float{exponent(11), significand(53)})
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
+ensures Z ==Float omegaR(Sx, Sy, Vx, Vy)
+
+rule [cd2d-spec]:
+  <fun>... FUN:Map ...</fun>
+  <k>
+    cd2d(tv(double, Sx:Float{exponent(11), significand(53)}), tv(double, Sy:Float{exponent(11), significand(53)}), tv(double, Vx:Float{exponent(11), significand(53)}), tv(double, Vy:Float{exponent(11), significand(53)}))
+  =>
+    tv(int, 1)
+  ...</k>
+requires isValidDistance(Sx) andBool isValidDistance(Sy) andBool
+         isValidVelocity(Vx) andBool isValidVelocity(Vy)
 
 endmodule

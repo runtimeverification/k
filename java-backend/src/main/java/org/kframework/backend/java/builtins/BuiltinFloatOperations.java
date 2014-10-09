@@ -240,4 +240,8 @@ public class BuiltinFloatOperations {
         return FloatToken.of(term.bigFloatValue().rint(getMathContext(term)
                 .withRoundingMode(RoundingMode.FLOOR)), term.exponent());
     }
+
+    public static BoolToken isNaN(FloatToken term, TermContext context) {
+        return BoolToken.of(term.bigFloatValue().isNaN());
+    }
 }

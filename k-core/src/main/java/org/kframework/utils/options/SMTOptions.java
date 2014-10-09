@@ -38,6 +38,12 @@ public class SMTOptions implements Serializable {
         return smtPrelude;
     }
 
-    @Parameter(names="--z3-executable", description="Path to the SMT prelude file.")
+    @Parameter(names="--z3-executable", description="Invokes Z3 as an external process.")
     public boolean z3Executable = false;
+
+    @Parameter(names="--z3-cnstr-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking constraint satisfiability.")
+    public int z3CnstrTimeout = 50;
+
+    @Parameter(names="--z3-impl-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking implication.")
+    public int z3ImplTimeout = 5000;
 }
