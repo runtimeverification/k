@@ -86,6 +86,11 @@
               <goal>integration-test</goal>
               <goal>verify</goal>
             </goals>
+            <configuration>
+              <environmentVariables>
+                <PATH>${env.PATH}${path.separator}${project.build.directory}/release/k/lib/native/${native.os.classifier}</PATH>
+              </environmentVariables>
+            </configuration>
           </execution>
           <execution>
             <id>verify-ktest</id>
