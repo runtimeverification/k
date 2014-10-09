@@ -6,7 +6,7 @@ import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.NonACPatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -28,9 +28,7 @@ import org.kframework.utils.general.GlobalSettings;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -365,20 +363,13 @@ public final class KItem extends Term {
             /* apply rules for user defined functions */
             if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
                 Term result = null;
+                Term owiseResult = null;
 
-                LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
                 for (Rule rule : definition.functionRules().get(kLabelConstant)) {
                     /* function rules should be applied by pattern match rather than unification */
-                    Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(kItem, rule, context);
-                    if (solutions.isEmpty()) {
+                    Map<Variable, Term> solution = NonACPatternMatcher.match(kItem, rule, context);
+                    if (solution == null) {
                         continue;
-                    }
-
-                    Map<Variable, Term> solution = solutions.iterator().next();
-                    if (tool == Tool.KOMPILE || javaOptions.concreteExecution()) {
-                        assert solutions.size() <= 1 :
-                            "[non-deterministic function definition]: more than one way to apply the rule\n"
-                            + rule + "\nagainst the function\n" + kItem;
                     }
 
                     Term rightHandSide = rule.rightHandSide();
@@ -410,7 +401,8 @@ public final class KItem extends Term {
                          * wrong ``owise'' rule during execution.
                          */
                         if (kItem.isGround()) {
-                            owiseResults.add(rightHandSide);
+                            assert owiseResult == null : "There shall be at most one [owise] rule for each function";
+                            owiseResult = rightHandSide;
                         }
                     } else {
                         if (javaOptions.concreteExecution()) {
@@ -424,19 +416,15 @@ public final class KItem extends Term {
                      * If the function definitions do not need to be deterministic, try them in order
                      * and apply the first one that matches.
                      */
-                    if (!javaOptions.deterministicFunctions
-                            && result != null) {
+                    if (!javaOptions.deterministicFunctions && result != null) {
                         return result;
                     }
                 }
 
                 if (result != null) {
                     return result;
-                } else if (!owiseResults.isEmpty()) {
-                    assert owiseResults.size() == 1 :
-                        "[non-deterministic function definition]: more than one ``owise'' rule for the function\n"
-                        + kItem;
-                    return owiseResults.iterator().next();
+                } else if (owiseResult != null) {
+                    return owiseResult;
                 }
             }
 
@@ -481,11 +469,8 @@ public final class KItem extends Term {
          * anywhere rules in KLabelConstant */
         for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
             /* anywhere rules should be applied by pattern match rather than unification */
-            Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
-            if (solutions.isEmpty()) {
-                continue;
-            } else {
-                Map<Variable, Term> solution = solutions.iterator().next();
+            Map<Variable, Term> solution = NonACPatternMatcher.match(this, rule, context);
+            if (solution != null) {
                 Term rightHandSide = rule.rightHandSide();
                 if (copyOnShareSubstAndEval) {
                     rightHandSide = rightHandSide.copyOnShareSubstAndEval(

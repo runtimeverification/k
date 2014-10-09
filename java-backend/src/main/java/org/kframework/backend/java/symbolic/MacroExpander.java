@@ -126,7 +126,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
 
     private Term applyMacroRule(Term term) {
         for (Rule rule : definition.macros()) {
-            Map<Variable, Term> subst = NonACPatternMatcher.patternMatch(term, rule, context);
+            Map<Variable, Term> subst = NonACPatternMatcher.match(term, rule, context);
             if (subst != null) {
                 return rule.rightHandSide().substituteAndEvaluate(subst, context);
             }
