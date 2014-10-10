@@ -106,6 +106,10 @@ Common error messages:
      build path of your IDE. Generally this is solved by regenerating your project /
      re-syncing it with the pom.xml.
 
+- `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
+   (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
+   + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
+
 If something unexpected happens and the project fails to build, try `mvn clean` and
 rebuild the entire project. Generally speaking, however, the project should build incrementally
 without needing to be cleaned first.
