@@ -186,8 +186,13 @@ public class SymbolicRewriter {
 
         Term term = rule.rightHandSide();
 
+        /* get fresh substitutions of rule variables */
+        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
+
         /* rename rule variables in the constraints */
-        Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+//        constraint = (SymbolicConstraint) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
+        constraint.rename(freshSubstitution);
+
         /* rename rule variables in the rule RHS */
         term = term.substituteWithBinders(freshSubstitution, constraint.termContext());
         /* apply the constraints substitution on the rule RHS */
@@ -227,12 +232,15 @@ public class SymbolicRewriter {
             }
             constraint.addAllThenSimplify(rule.ensures());
 
-            /* rename rule variables in the constraints */
-            Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+            /* get fresh substitutions of rule variables */
+            Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
-            Term result = rule.rightHandSide();
+            /* rename rule variables in the constraints */
+//            constraint = (SymbolicConstraint) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
+            constraint.rename(freshSubstitution);
+
             /* rename rule variables in the rule RHS */
-            result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+            Term result = rule.rightHandSide().substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
             /* apply the constraints substitution on the rule RHS */
             result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */

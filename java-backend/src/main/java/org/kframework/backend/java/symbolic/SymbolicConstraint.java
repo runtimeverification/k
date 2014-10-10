@@ -1019,16 +1019,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * Renames the given set of variables and returns the new names. Updates
      * their occurrences in this symbolic constraint accordingly.
-     *
-     * @param variableSet
-     *            the set of variables to be renamed
-     * @return a mapping from the old names to the new ones
+     * <p>
+     * TODO(YilongL): remove this method and use
+     * JavaSymbolicObject#substituteWithBinders instead. Cannot do this now
+     * because the prover is so fragile...
      */
-    public Map<Variable, Variable> rename(Set<Variable> variableSet) {
-        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(variableSet);
-
+    @Deprecated
+    public void rename(Map<Variable, Variable> freshSubstitution) {
         /* rename substitution keys */
-        for (Variable variable : variableSet) {
+        for (Variable variable : freshSubstitution.keySet()) {
             if (substitution.get(variable) != null) {
                 substitution.put(freshSubstitution.get(variable), substitution.remove(variable));
             }
@@ -1043,19 +1042,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             equalities.set(i, equalities.get(i).substitute(freshSubstitution));
         }
 
-        return freshSubstitution;
-    }
-
-    /**
-     * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint
-     * by applying substitution.
-     */
-    public SymbolicConstraint substituteWithBinders(Map<Variable, ? extends Term> substitution, TermContext context) {
-        if (substitution.isEmpty()) {
-            return this;
-        }
-
-        return (SymbolicConstraint) accept(new BinderSubstitutionTransformer(substitution, context));
+        updateVariableSet();
     }
 
     /**
