@@ -1,7 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 
 module INT-LIST
-  imports LIST 
+  imports LIST
   imports INT-SET
 
   rule size(L1:List L2:List) => size(L1) +Int size(L2)    [lemma]
