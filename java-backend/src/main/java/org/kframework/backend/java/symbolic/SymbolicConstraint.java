@@ -27,8 +27,6 @@ import org.kframework.utils.options.SMTSolver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -40,6 +38,7 @@ import java.util.Set;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
+import com.google.common.collect.Sets;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -119,25 +118,25 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private final SymbolicUnifier unifier;
 
     public void orientSubstitution(Set<Variable> variables) {
-        Map<Variable, Term> newSubstitution = new HashMap<>();
+        Map<Variable, Term> newSubstitution = Maps.newLinkedHashMap();
         if (substitution.keySet().containsAll(variables)) {
             /* avoid setting isNormal to false */
             return;
         }
 
         /* compute the preimages of each variable in the codomain of the substitution */
-        Map<Variable, Set<Variable>> preimages = new HashMap<Variable, Set<Variable>>();
+        Map<Variable, Set<Variable>> preimages = Maps.newLinkedHashMap();
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
             if (entry.getValue() instanceof Variable) {
                 Variable rhs = (Variable) entry.getValue();
                 if (preimages.get(rhs) == null) {
-                    preimages.put(rhs, new HashSet<Variable>());
+                    preimages.put(rhs, Sets.newLinkedHashSet());
                 }
                 preimages.get(rhs).add(entry.getKey());
             }
         }
 
-        Set<Variable> substitutionToRemove = new HashSet<Variable>();
+        Set<Variable> substitutionToRemove = Sets.newLinkedHashSet();
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
             Variable lhs = entry.getKey();
             Term rhs = entry.getValue();
@@ -155,7 +154,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                      * that are constrained to be equal to the variable rhs
                      * because rhs cannot appear on the LHS of the substitution
                      */
-                    Set<Variable> preimagesOfRHS = new HashSet<Variable>(preimages.get(rhs));
+                    Set<Variable> preimagesOfRHS = Sets.newLinkedHashSet(preimages.get(rhs));
                     preimagesOfRHS.removeAll(variables);
                     if (preimagesOfRHS.isEmpty()) {
                         throw new RuntimeException("Orientation failed");
@@ -178,7 +177,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
 
-        Map<Variable, Term> result = new HashMap<>();
+        Map<Variable, Term> result = Maps.newLinkedHashMap();
         for (Variable var : substitutionToRemove)
             substitution.remove(var);
         for (Map.Entry<Variable, Term> entry : newSubstitution.entrySet()) {
@@ -641,7 +640,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         simplifiedConstraint.addAll(equalities);
         simplifiedConstraint.simplify();
 
-        Map<Term, Term> substitution = new HashMap<>();
+        Map<Term, Term> substitution = Maps.newLinkedHashMap();
         for (Equality e1:equalities()) {
             if (e1.rightHandSide().isGround()) {
                 substitution.put(e1.leftHandSide(), e1.rightHandSide());
@@ -944,7 +943,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         do {
             changed = false;
             // TODO(AndreiS): patterns should be expanded before are put in the substitution
-            Set<Variable> keys = new HashSet<>(substitution.keySet());
+            Set<Variable> keys = Sets.newLinkedHashSet(substitution.keySet());
             for (Variable variable : keys) {
                 Term term = substitution.get(variable);
                 Term expandedTerm = term.expandPatterns(this, narrowing, context);
@@ -1004,7 +1003,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         // on composing two substitution maps:
         // http://www.mathcs.duq.edu/simon/Fall04/notes-7-4/node4.html
-        Set<Variable> variables = new HashSet<Variable>(substitution.keySet());
+        Set<Variable> variables = Sets.newLinkedHashSet(substitution.keySet());
         variables.retainAll(substMap.keySet());
         assert variables.isEmpty() :
             "There shall be no common variables in the two substitution maps to be composed.";
