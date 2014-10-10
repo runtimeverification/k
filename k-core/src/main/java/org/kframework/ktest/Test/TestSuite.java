@@ -27,7 +27,6 @@ public class TestSuite {
 
     public boolean run() throws IOException, TransformerException, ParserConfigurationException {
         TaskQueue queue = new TaskQueue(options);
-        long start = System.currentTimeMillis();
         for (TestCase test : tests) {
             queue.addTask(test);
         }
@@ -43,7 +42,7 @@ public class TestSuite {
 
         boolean success = true;
         long cpuTimeSpent = 0;
-        long realTimeSpent = queue.getLastTestFinished() - start;
+        long realTimeSpent = queue.getLastTestFinished() - options.start;
         Iterable<Proc> allProcs = Iterables.concat(kompileProcs, pdfProcs, krunProcs);
         for (Proc p : allProcs) {
             success &= p.isSuccess();
