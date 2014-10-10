@@ -55,7 +55,7 @@ public class TestSuite {
         String msg = success ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
-        printTimeInfo(cpuTimeSpent, realTimeSpent,
+        printTimeInfo(cpuTimeSpent / 1000, realTimeSpent / 1000,
                 kompileProcs.size(), pdfProcs.size(), krunProcs.size());
 
         // generate reports
@@ -105,7 +105,7 @@ public class TestSuite {
                                int kompileSteps, int pdfSteps, int krunSteps) {
         String defInfo = String.format("Definitions kompiled: %s%n", kompileSteps);
         String pdfInfo = String.format("PDF posters kompiled: %s%n", pdfSteps);
-        String krunInfo = String.format("Programs krun: %s%n", krunSteps);
+        String krunInfo = String.format("Programs krun:        %s%n", krunSteps);
         String totalInfo = String.format(
                 "Total time: %s'%s'' elapsed, %s'%s'' CPU%n",
                 realTime / 60, realTime % 60,
