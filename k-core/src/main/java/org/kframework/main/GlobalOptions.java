@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.options.BaseEnumConverter;
+
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
 
@@ -44,6 +45,10 @@ public final class GlobalOptions {
     }
 
     public static class WarningsConverter extends BaseEnumConverter<Warnings> {
+
+        public WarningsConverter(String optionName) {
+            super(optionName);
+        }
 
         @Override
         public Class<Warnings> enumClass() {

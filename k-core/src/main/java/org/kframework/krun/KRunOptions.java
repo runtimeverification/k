@@ -162,6 +162,10 @@ public final class KRunOptions {
 
     public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
 
+        public OutputModeConverter(String optionName) {
+            super(optionName);
+        }
+
         @Override
         public Class<OutputModes> enumClass() {
             return OutputModes.class;
