@@ -175,7 +175,7 @@
                 <format>tar.gz</format>
                 <format>zip</format>
               </formats>
-              <finalName>k-nightly-${native.classifier}</finalName>
+              <finalName>k-nightly</finalName>
               <appendAssemblyId>false</appendAssemblyId>
             </configuration>
           </execution>
