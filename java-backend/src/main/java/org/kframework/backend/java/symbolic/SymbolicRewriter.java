@@ -12,7 +12,15 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
@@ -31,7 +39,7 @@ import com.google.inject.Inject;
  */
 public class SymbolicRewriter {
 
-    private final Definition definition;
+    private final Definition definition; // TODO(YilongL): use TermContext instead
     private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private int step;
@@ -147,16 +155,13 @@ public class SymbolicRewriter {
      * @return the pattern term
      */
     private ConstrainedTerm buildPattern(Rule rule, TermContext termContext) {
-        SymbolicConstraint constraint = new SymbolicConstraint(termContext);
-        constraint.addAll(rule.requires());
-        for (Variable variable : rule.freshVariables()) {
-            constraint.add(variable, FreshOperations.fresh(variable.sort(), termContext));
-        }
+        SymbolicConstraint precondition = new SymbolicConstraint(termContext);
+        precondition.addAll(rule.requires());
 
         ConstrainedTerm pattern = new ConstrainedTerm(
                 rule.leftHandSide(),
                 rule.lookups().getSymbolicConstraint(termContext),
-                constraint,
+                precondition,
                 termContext);
         return pattern;
     }
@@ -177,6 +182,9 @@ public class SymbolicRewriter {
             SymbolicConstraint constraint,
             Set<Variable> existingVariables) {
         constraint.orientSubstitution(rule.leftHandSide().variableSet());
+        for (Variable variable : rule.freshVariables()) {
+            constraint.add(variable, FreshOperations.fresh(variable.sort(), constraint.termContext()));
+        }
         constraint.addAll(rule.ensures());
 
         Term term = rule.rightHandSide();
@@ -192,7 +200,7 @@ public class SymbolicRewriter {
         /* eliminate anonymous variables */
         constraint.eliminateAnonymousVariables(existingVariables);
         // TODO(AndreiS): functions not being evaluated is becoming quite annoying
-        // TODO(YilongL): remove the following defensive code
+        // TODO(YilongL): figure out why and then remove the following defensive code
         term = term.evaluate(constraint.termContext());
 
         return new ConstrainedTerm(term, constraint, constraint.termContext());
