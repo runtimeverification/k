@@ -102,7 +102,7 @@ public abstract class JavaSymbolicObject extends ASTNode
             accept(visitor);
             variableSet = visitor.getVariableSet();
         }
-        return variableSet;
+        return Collections.unmodifiableSet(variableSet);
     }
 
     @Override
