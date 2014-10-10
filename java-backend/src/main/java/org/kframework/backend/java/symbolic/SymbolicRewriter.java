@@ -3,12 +3,11 @@ package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
@@ -17,7 +16,11 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
+
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 /**
@@ -33,8 +36,8 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private int step;
     private final Stopwatch ruleStopwatch = Stopwatch.createUnstarted();
-    private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
-    private final List<Rule> appliedRules = new ArrayList<Rule>();
+    private final List<ConstrainedTerm> results = Lists.newArrayList();
+    private final List<Rule> appliedRules = Lists.newArrayList();
     private boolean transition;
     private RuleIndex ruleIndex;
 
@@ -68,10 +71,6 @@ public class SymbolicRewriter {
         return constrainedTerm;
     }
 
-    public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm) {
-        return rewrite(constrainedTerm, -1);
-    }
-
     /**
      * Gets the rules that could be applied to a given term according to the
      * rule indexing mechanism.
@@ -89,7 +88,6 @@ public class SymbolicRewriter {
     }
 
     private void computeRewriteStep(ConstrainedTerm constrainedSubject, int successorBound) {
-        int rulesTried = 0;
         results.clear();
         appliedRules.clear();
 
@@ -100,7 +98,6 @@ public class SymbolicRewriter {
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
-        //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
         strategy.reset(getRules(constrainedSubject.term()));
 
         while (strategy.hasNext()) {
@@ -108,7 +105,6 @@ public class SymbolicRewriter {
             ArrayList<Rule> rules = new ArrayList<>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
-                rulesTried++;
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
 
@@ -285,9 +281,11 @@ public class SymbolicRewriter {
         return null;
     }
 
-    // Unifies the term with the pattern, and returns a map from variables in
-    // the pattern to the terms they unify with. Returns null if the term
-    // can't be unified with the pattern.
+    /**
+     * Unifies the term with the pattern, and returns a map from variables in
+     * the pattern to the terms they unify with. Returns {@code null} if the
+     * term can't be unified with the pattern.
+     */
     private Map<Variable, Term> getSubstitutionMap(ConstrainedTerm term, Rule pattern) {
         // Create the initial constraints based on the pattern
         SymbolicConstraint termConstraint = new SymbolicConstraint(term.termContext());
@@ -314,7 +312,7 @@ public class SymbolicRewriter {
 
         // Build a substitution map containing the variables in the pattern from
         // the substitution constraints given by unification.
-        Map<Variable, Term> map = new HashMap<Variable, Term>();
+        Map<Variable, Term> map = Maps.newHashMap();
         for (SymbolicConstraint constraint : constraints) {
             if (!constraint.isSubstitution()) {
                 return null;
@@ -325,7 +323,7 @@ public class SymbolicRewriter {
                 if (value == null) {
                     return null;
                 }
-                map.put(variable, new Cell<Term>(CellLabel.GENERATED_TOP, value));
+                map.put(variable, new Cell<>(CellLabel.GENERATED_TOP, value));
             }
         }
         return map;
@@ -353,8 +351,8 @@ public class SymbolicRewriter {
             SearchType searchType) {
         stopwatch.start();
 
-        List<Map<Variable,Term>> searchResults = new ArrayList<Map<Variable,Term>>();
-        Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
+        List<Map<Variable,Term>> searchResults = Lists.newArrayList();
+        Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         // If depth is 0 then we are just trying to match the pattern.
         // A more clean solution would require a bit of a rework to how patterns
@@ -370,8 +368,8 @@ public class SymbolicRewriter {
         }
 
         // The search queues will map terms to their depth in terms of transitions.
-        Map<ConstrainedTerm,Integer> queue = new LinkedHashMap<ConstrainedTerm,Integer>();
-        Map<ConstrainedTerm,Integer> nextQueue = new LinkedHashMap<ConstrainedTerm,Integer>();
+        Map<ConstrainedTerm,Integer> queue = Maps.newLinkedHashMap();
+        Map<ConstrainedTerm,Integer> nextQueue = Maps.newLinkedHashMap();
 
         visited.add(initialTerm);
         queue.put(initialTerm, 0);
@@ -434,7 +432,7 @@ public class SymbolicRewriter {
             }
 //                System.out.println("+++++++++++++++++++++++");
 
-                /* swap the queues */
+            /* swap the queues */
             Map<ConstrainedTerm, Integer> temp;
             temp = queue;
             queue = nextQueue;
@@ -510,8 +508,7 @@ public class SymbolicRewriter {
                     /* add helper rule */
                     HashSet<Variable> ruleVariables = new HashSet<Variable>(initialTerm.variableSet());
                     ruleVariables.addAll(targetTerm.variableSet());
-                    Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(
-                            ruleVariables);
+                    Variable.getFreshSubstitution(ruleVariables);
 
                     /*
                     rules.add(new Rule(
