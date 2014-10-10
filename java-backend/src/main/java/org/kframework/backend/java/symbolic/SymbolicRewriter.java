@@ -126,8 +126,7 @@ public class SymbolicRewriter {
                     /* compute all results */
                     ConstrainedTerm result = buildResult(
                             rule,
-                            unifConstraint,
-                            subject.variableSet());
+                            unifConstraint);
                     results.add(result);
                     appliedRules.add(rule);
                     if (results.size() == successorBound) {
@@ -174,13 +173,11 @@ public class SymbolicRewriter {
      *            the rewrite rule
      * @param constraint
      *            the resulting symbolic constraint of unification
-     * @param existingVariables
      * @return the new subject term
      */
     public static ConstrainedTerm buildResult(
             Rule rule,
-            SymbolicConstraint constraint,
-            Set<Variable> existingVariables) {
+            SymbolicConstraint constraint) {
         constraint.orientSubstitution(rule.leftHandSide().variableSet());
         for (Variable variable : rule.freshVariables()) {
             constraint.add(variable, FreshOperations.fresh(variable.sort(), constraint.termContext()));
@@ -197,8 +194,8 @@ public class SymbolicRewriter {
         term = term.substituteAndEvaluate(
                 constraint.substitution(),
                 constraint.termContext());
-        /* eliminate anonymous variables */
-        constraint.eliminateAnonymousVariables(existingVariables);
+        /* eliminate bindings of rule variables */
+        constraint.removeBindings(freshSubstitution.values());
         // TODO(AndreiS): functions not being evaluated is becoming quite annoying
         // TODO(YilongL): figure out why and then remove the following defensive code
         term = term.evaluate(constraint.termContext());
@@ -240,8 +237,8 @@ public class SymbolicRewriter {
             result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */
             result = result.evaluate(constrainedTerm.termContext());
-            /* eliminate anonymous variables */
-            constraint.eliminateAnonymousVariables(constrainedTerm.variableSet());
+            /* eliminate bindings of rule variables */
+            constraint.removeBindings(freshSubstitution.values());
 
             // TODO(AndreiS): move these some other place
             constraint.expandPatternsAndSimplify(true);

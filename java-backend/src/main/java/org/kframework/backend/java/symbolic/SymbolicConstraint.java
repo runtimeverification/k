@@ -524,17 +524,23 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     /**
-     * Garbage collect useless bindings. This method should be called after
-     * applying the substitution to the RHS of a rule. It then removes all
-     * bindings of anonymous variables.
+     * Removes specified variable bindings from this constraint.
+     * <p>
+     * Note: this method should only be used to garbage collect useless
+     * bindings. It is called to remove all bindings of the rewrite rule
+     * variables after building the rewrite result.
      */
-    public void eliminateAnonymousVariables(Set<Variable> nonAnonymousVariables) {
-        for (Iterator<Variable> iterator = substitution.keySet().iterator(); iterator.hasNext();) {
-            Variable variable = iterator.next();
-            if (!nonAnonymousVariables.contains(variable)) {
-                iterator.remove();
+    public void removeBindings(Collection<Variable> variablesToRemove) {
+        for (Variable variable : variablesToRemove) {
+            Term term = substitution.get(variable);
+            /* TODO(YilongL): remove the following check once we enforce that
+             * substitutions always satisfy order-sorted condition */
+            if (term != null && context.definition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
+                // safe to remove
+                substitution.remove(variable);
             }
         }
+//        substitution.keySet().removeAll(variablesToRemove);
 
         /* reset this symbolic constraint to be true when it becomes empty */
         if (equalities.isEmpty() && substitution.isEmpty()) {
