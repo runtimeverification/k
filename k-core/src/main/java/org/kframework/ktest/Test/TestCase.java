@@ -2,6 +2,7 @@
 package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.Config.InvalidConfigError;
@@ -11,6 +12,8 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class TestCase {
@@ -77,6 +80,11 @@ public class TestCase {
      */
     private String kompileDirFullPath;
 
+    /**
+     * KTest flags and options.
+     */
+    private final KTestOptions options;
+
     public TestCase(Annotated<String, LocationData> definition,
                     List<Annotated<String, LocationData>> programs,
                     String[] extensions,
@@ -85,7 +93,7 @@ public class TestCase {
                     List<PgmArg> kompileOpts,
                     ProgramProfile krunOpts,
                     Map<String, ProgramProfile> pgmSpecificKRunOpts,
-                    Set<KTestStep> skips) {
+                    Set<KTestStep> skips, KTestOptions options) {
         // programs and results should be ordered set because of how search algorithm works
         this.definition = definition;
         this.programs = programs;
@@ -96,6 +104,7 @@ public class TestCase {
         this.krunOpts = krunOpts;
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
         this.skips = skips;
+        this.options = options;
 
         setKompileDirArg();
         setKompileDirFullPath();
@@ -127,7 +136,7 @@ public class TestCase {
                 cmdArgs.getExtensions().toArray(new String[cmdArgs.getExtensions().size()]),
                 cmdArgs.getExcludes().toArray(new String[cmdArgs.getExcludes().size()]),
                 results, emptyOpts, emptyProfile, emptyOptsMap,
-                new HashSet<>());
+                new HashSet<>(), cmdArgs);
     }
 
     public boolean isDefinitionKompiled() {
@@ -135,24 +144,90 @@ public class TestCase {
     }
 
     /**
-     * Generate set of programs to run for this test case.
-     * @return set of programs to krun
+     * @return {@link org.kframework.ktest.Proc} that runs Posix-only command of the test case.
+     *         {@code null} if test case doesn't have a Posix-only command.
      */
-    public List<KRunProgram> getPrograms() {
-        List<KRunProgram> ret = new LinkedList<>();
-        for (Annotated<String, LocationData> pgmDir : programs)
-            ret.addAll(searchPrograms(pgmDir.getObj()));
-        // at this point ret may contain programs with same names, what we want is to search
-        // program directories right to left, and have at most one program with same name
-        Set<String> pgmNames = new HashSet<>();
-        for (int i = ret.size() - 1; i >= 0; i--) {
-            String pgmName = FilenameUtils.getName(ret.get(i).pgmName);
-            if (pgmNames.contains(pgmName))
-                ret.remove(i);
-            else
-                pgmNames.add(pgmName);
+    public Proc<TestCase> getPosixOnlyProc() {
+        if (posixInitScript == null) {
+            return null;
         }
-        return ret;
+        return new Proc<>(this, getPosixOnlyCmd(), getWorkingDir(), options);
+    }
+
+    /**
+     * @return {@link org.kframework.ktest.Proc} that runs kompile command of the test case.
+     */
+    public Proc<TestCase> getKompileProc() {
+        return new Proc<>(this, getKompileCmd(), getWorkingDir(), options);
+    }
+
+    /**
+     * @return {@link org.kframework.ktest.Proc} that runs PDF command of the test case.
+     */
+    public Proc<TestCase> getPDFProc() {
+        return new Proc<>(this, getPdfCmd(), getWorkingDir(), options);
+    }
+
+    /**
+     * @return List of {@link Proc}s that run KRun commands of the test case.
+     */
+    public List<Proc<KRunProgram>> getKRunProcs() {
+        List<Proc<KRunProgram>> procs = new ArrayList<>();
+
+        for (KRunProgram program : getPrograms()) {
+            String[] args = program.getKrunCmd();
+
+            // passing null to Proc is OK, it means `ignore'
+            String inputContents = null, outputContents = null, errorContents = null;
+            if (program.inputFile != null)
+                try {
+                    inputContents = IOUtils.toString(new FileInputStream(new File(program.inputFile)));
+                } catch (IOException e) {
+                    System.out.format("WARNING: cannot read input file %s -- skipping program %s%n",
+                            program.inputFile, program.args.get(1));
+                    // this case happens when an input file is found by TestCase,
+                    // but somehow file is not readable. in that case there's no point in running the
+                    // program because it'll wait for input forever.
+                    return null;
+                }
+            if (program.outputFile != null)
+                try {
+                    outputContents = IOUtils.toString(new FileInputStream(
+                            new File(program.outputFile)));
+                } catch (IOException e) {
+                    System.out.format("WARNING: cannot read output file %s -- program output " +
+                            "won't be matched against output file%n", program.outputFile);
+                }
+            if (program.errorFile != null)
+                try {
+                    errorContents = IOUtils.toString(new FileInputStream(
+                            new File(program.errorFile)));
+                } catch (IOException e) {
+                    System.out.format("WARNING: cannot read error file %s -- program error output "
+                            + "won't be matched against error file%n", program.errorFile);
+                }
+
+            // Annotate expected output and error messages with paths of files that these strings
+            // are defined in (to be used in error messages)
+            Annotated<String, String> outputContentsAnn = null;
+            if (outputContents != null)
+                outputContentsAnn = new Annotated<>(outputContents, program.outputFile);
+
+            Annotated<String, String> errorContentsAnn = null;
+            if (errorContents != null)
+                errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
+
+            StringMatcher matcher = options.getDefaultStringMatcher();
+            if (program.regex) {
+                matcher = new RegexStringMatcher();
+            }
+            Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
+                    outputContentsAnn, errorContentsAnn, matcher, new File(program.defPath), options,
+                    program.outputFile, program.newOutputFile);
+            procs.add(p);
+        }
+
+        return procs;
     }
 
     /**
@@ -167,63 +242,6 @@ public class TestCase {
         File f = new File(definition.getObj());
         assert f.isFile();
         return f.getParentFile();
-    }
-
-    /**
-     * @return command array to pass process builder
-     */
-    public String[] getKompileCmd() {
-        assert new File(getDefinition()).isFile();
-        List<String> stringArgs = new ArrayList<>();
-        stringArgs.add(ExecNames.getKompile());
-        stringArgs.add(getDefinition());
-        for (PgmArg kompileOpt : kompileOpts) {
-            stringArgs.addAll(kompileOpt.toStringList());
-        }
-        String[] argsArr = stringArgs.toArray(new String[stringArgs.size()]);
-        if (OS.current() == OS.WIN) {
-            for (int i = 0; i < argsArr.length; i++) {
-                argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
-            }
-        }
-        return argsArr;
-    }
-
-    /**
-     * @return true if posixInitScript attribute exists
-     */
-    public boolean hasPosixOnly() {
-        return posixInitScript != null;
-    }
-
-    /**
-     * @return posixInitScript attribute
-     */
-    public String getPosixInitScript() {
-        return posixInitScript;
-    }
-
-    /**
-     * @return command array to pass process builder
-     */
-    public String[] getPosixOnlyCmd() {
-        assert new File(posixInitScript).isFile();
-        return new String[] { posixInitScript };
-    }
-
-    /**
-     * @return command array to pass process builder
-     */
-    public String[] getPdfCmd() {
-        assert new File(getDefinition()).isFile();
-        String[] argsArr =
-                new String[] { ExecNames.getKompile(), "--backend", "pdf", getDefinition() };
-        if (OS.current() == OS.WIN) {
-            for (int i = 0; i < argsArr.length; i++) {
-                argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
-            }
-        }
-        return argsArr;
     }
 
     public void setKompileOpts(List<PgmArg> kompileOpts) {
@@ -260,6 +278,10 @@ public class TestCase {
         results.add(result);
     }
 
+    public String getPosixInitScript() {
+        return posixInitScript;
+    }
+
     /**
      * Do we need to skip a step for this test case?
      * @param step step to skip
@@ -287,17 +309,74 @@ public class TestCase {
     }
 
     /**
-     * @return Full path of -d argument. {@code null} if -d is not provided.
-     */
-    public String getKompileDirArg() {
-        return kompileDirArg;
-    }
-
-    /**
      * @return Full path of -kompiled directory that'll be generated by this test case.
      */
     public String getKompileDirFullPath() {
         return kompileDirFullPath;
+    }
+
+    /**
+     * @return command array to pass process builder
+     */
+    private String[] getPosixOnlyCmd() {
+        assert posixInitScript == null || new File(posixInitScript).isFile();
+        return new String[] { posixInitScript };
+    }
+
+    /**
+     * @return command array to pass process builder
+     */
+    private String[] getKompileCmd() {
+        assert new File(getDefinition()).isFile();
+        List<String> stringArgs = new ArrayList<>();
+        stringArgs.add(ExecNames.getKompile());
+        stringArgs.add(getDefinition());
+        for (PgmArg kompileOpt : kompileOpts) {
+            stringArgs.addAll(kompileOpt.toStringList());
+        }
+        String[] argsArr = stringArgs.toArray(new String[stringArgs.size()]);
+        if (OS.current() == OS.WIN) {
+            for (int i = 0; i < argsArr.length; i++) {
+                argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
+            }
+        }
+        return argsArr;
+    }
+
+    /**
+     * @return command array to pass process builder
+     */
+    private String[] getPdfCmd() {
+        assert new File(getDefinition()).isFile();
+        String[] argsArr =
+                new String[] { ExecNames.getKompile(), "--backend", "pdf", getDefinition() };
+        if (OS.current() == OS.WIN) {
+            for (int i = 0; i < argsArr.length; i++) {
+                argsArr[i] = StringUtil.escapeShell(argsArr[i], OS.current());
+            }
+        }
+        return argsArr;
+    }
+
+    /**
+     * Generate set of programs to run for this test case.
+     * @return set of programs to krun
+     */
+    private List<KRunProgram> getPrograms() {
+        List<KRunProgram> ret = new LinkedList<>();
+        for (Annotated<String, LocationData> pgmDir : programs)
+            ret.addAll(searchPrograms(pgmDir.getObj()));
+        // at this point ret may contain programs with same names, what we want is to search
+        // program directories right to left, and have at most one program with same name
+        Set<String> pgmNames = new HashSet<>();
+        for (int i = ret.size() - 1; i >= 0; i--) {
+            String pgmName = FilenameUtils.getName(ret.get(i).pgmName);
+            if (pgmNames.contains(pgmName))
+                ret.remove(i);
+            else
+                pgmNames.add(pgmName);
+        }
+        return ret;
     }
 
     /**

@@ -114,9 +114,8 @@ public class TestSuite {
         System.out.format("Running initial scripts...%n");
         startTpe();
         for (TestCase tc : tests) {
-            if (tc.hasPosixOnly()) {
-                Proc<TestCase> p =
-                        new Proc<>(tc, tc.getPosixOnlyCmd(), tc.getWorkingDir(), options);
+            Proc<TestCase> p = tc.getPosixOnlyProc();
+            if (p != null) {
                 ps.add(p);
                 tpe.execute(p);
             } else {
@@ -160,7 +159,7 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         startTpe();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.getWorkingDir(), options);
+            Proc<TestCase> p = tc.getKompileProc();
             ps.add(p);
             tpe.execute(p);
             kompileSteps++;
@@ -217,7 +216,7 @@ public class TestSuite {
         startTpe();
         long startTime = System.currentTimeMillis();
         for (TestCase tc : pdfTests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.getWorkingDir(), options);
+            Proc<TestCase> p = tc.getPDFProc();
             ps.add(p);
             tpe.execute(p);
             pdfSteps++;
@@ -276,31 +275,32 @@ public class TestSuite {
         int totalTests = 0;
         for (TestCase tc : kompileSuccesses) {
 
-            List<KRunProgram> programs = tc.getPrograms();
+            List<Proc<KRunProgram>> procs = tc.getKRunProcs();
             int inputs = 0, outputs = 0, errors = 0;
-            for (KRunProgram p : programs) {
+            for (Proc<KRunProgram> proc : procs) {
+                KRunProgram p = proc.getObj();
                 if (p.inputFile != null) inputs++;
                 if (p.outputFile != null) outputs++;
                 if (p.errorFile != null) errors++;
             }
+            totalTests += procs.size();
+            krunSteps += procs.size();
 
             System.out.format("Running %s programs... (%d in total, %d with input, " +
-                    "%d with output, %d with error)%n", tc.getDefinition(), programs.size(),
+                    "%d with output, %d with error)%n", tc.getDefinition(), procs.size(),
                     inputs, outputs, errors);
 
             // we can have more parallelism here, but just to keep things same as old ktest,
             // I'm testing tast cases sequentially
-            List<Proc<KRunProgram>> testCaseProcs = new ArrayList<>(programs.size());
             long startTime = System.currentTimeMillis();
             startTpe();
-            for (KRunProgram program : programs) {
-                testCaseProcs.add(runKRun(program));
-                totalTests++;
+            for (Proc<KRunProgram> proc : procs) {
+                tpe.execute(proc);
             }
             stopTpe();
             krunRealTime += System.currentTimeMillis() - startTime;
 
-            for (Proc<KRunProgram> p : testCaseProcs)
+            for (Proc<KRunProgram> p : procs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
                 {
@@ -329,66 +329,6 @@ public class TestSuite {
     private void stopTpe() throws InterruptedException {
         tpe.shutdown();
         while (!tpe.awaitTermination(1, TimeUnit.SECONDS));
-    }
-
-    /**
-     * Execute a krun step.
-     * @param program KRunProgram object that holds required information to run a krun process
-     * @return Proc object for krun process
-     */
-    private Proc<KRunProgram> runKRun(KRunProgram program) {
-        String[] args = program.getKrunCmd();
-
-        // passing null to Proc is OK, it means `ignore'
-        String inputContents = null, outputContents = null, errorContents = null;
-        if (program.inputFile != null)
-            try {
-                inputContents = IOUtils.toString(new FileInputStream(new File(program.inputFile)));
-            } catch (IOException e) {
-                System.out.format("WARNING: cannot read input file %s -- skipping program %s%n",
-                        program.inputFile, program.args.get(1));
-                // this case happens when an input file is found by TestCase,
-                // but somehow file is not readable. in that case there's no point in running the
-                // program because it'll wait for input forever.
-                return null;
-            }
-        if (program.outputFile != null)
-            try {
-                outputContents = IOUtils.toString(new FileInputStream(
-                        new File(program.outputFile)));
-            } catch (IOException e) {
-                System.out.format("WARNING: cannot read output file %s -- program output " +
-                        "won't be matched against output file%n", program.outputFile);
-            }
-        if (program.errorFile != null)
-            try {
-                errorContents = IOUtils.toString(new FileInputStream(
-                        new File(program.errorFile)));
-            } catch (IOException e) {
-                System.out.format("WARNING: cannot read error file %s -- program error output "
-                        + "won't be matched against error file%n", program.errorFile);
-            }
-
-        // Annotate expected output and error messages with paths of files that these strings
-        // are defined in (to be used in error messages)
-        Annotated<String, String> outputContentsAnn = null;
-        if (outputContents != null)
-            outputContentsAnn = new Annotated<>(outputContents, program.outputFile);
-
-        Annotated<String, String> errorContentsAnn = null;
-        if (errorContents != null)
-            errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
-
-        StringMatcher matcher = options.getDefaultStringMatcher();
-        if (program.regex) {
-            matcher = new RegexStringMatcher();
-        }
-        Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
-                outputContentsAnn, errorContentsAnn, matcher, new File(program.defPath), options,
-                program.outputFile, program.newOutputFile);
-        tpe.execute(p);
-        krunSteps++;
-        return p;
     }
 
     private void printResult(boolean condition) {

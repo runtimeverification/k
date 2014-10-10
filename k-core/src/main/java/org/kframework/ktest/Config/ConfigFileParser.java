@@ -289,7 +289,7 @@ public class ConfigFileParser {
         Map<String, ProgramProfile> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
         TestCase ret = new TestCase(definition, programs, extensions, excludes, results,
-                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips);
+                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips, cmdArgs);
         if (posixOnly != null) {
             ret.setPosixInitScript(posixOnly);
         }
