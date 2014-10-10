@@ -3,6 +3,7 @@ package org.kframework.ktest.Test;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.Proc;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Just a fancy wrapper around {@link java.util.concurrent.ThreadPoolExecutor}
@@ -68,12 +70,20 @@ public class TaskQueue {
     private final Map<String, Boolean> pdfDefs = new ConcurrentHashMap<>();
 
     /*
-     * We keep track of created Proc objects to be able to generate statistics/print useful info
+     * We keep track of Proc objects we run to be able to generate statistics/print useful info
      * after we're done.
+     *
+     * Note that these don't hold all the Proc objects, hold only the ones that we really run.
      */
     private final List<Proc<TestCase>> kompileProcs = new ArrayList<>();
     private final List<Proc<TestCase>> pdfProcs = new ArrayList<>();
     private final List<Proc<KRunProgram>> krunProcs = new ArrayList<>();
+
+    /**
+     * Time when lastly finished task finishes.
+     * Set using {@link java.lang.System#currentTimeMillis}.
+     */
+    private long lastTestFinished;
 
     public TaskQueue(KTestOptions options) {
         this.options = options;
@@ -92,8 +102,7 @@ public class TaskQueue {
      */
     public void addTask(TestCase tc) {
         if (!options.getSkips().contains(KTestStep.KOMPILE) && !tc.skip(KTestStep.KOMPILE)) {
-            Proc<TestCase> proc = new Proc<>(tc, tc.getKompileCmd(), tc.getWorkingDir(), options);
-            kompileProcs.add(proc);
+            Proc<TestCase> proc = tc.getKompileProc();
             tpe.execute(wrapKompileStep(proc));
         } else {
             // Normally, krun steps of a test case is added after kompile step of the test case is
@@ -103,13 +112,47 @@ public class TaskQueue {
                 addKRunSteps(tc);
             }
         }
-        if (!options.getSkips().contains(KTestStep.KRUN) && !tc.skip(KTestStep.PDF)
+        if (!options.getSkips().contains(KTestStep.PDF) && !tc.skip(KTestStep.PDF)
                 && !pdfDefs.containsKey(tc.getDefinition())) {
-            Proc<TestCase> proc = new Proc<>(tc, tc.getPdfCmd(), tc.getWorkingDir(), options);
-            pdfProcs.add(proc);
+            Proc<TestCase> proc = tc.getPDFProc();
             tpe.execute(wrapPDFStep(proc));
             pdfDefs.put(tc.getDefinition(), false);
         }
+    }
+
+    /**
+     * Block until all threads are done. Adding new tasks after this results in exception.
+     */
+    public void terminate() {
+        try {
+            while (!tpe.awaitTermination(1, TimeUnit.SECONDS)) {
+                if (tpe.getActiveCount() == 0) {
+                    tpe.shutdown();
+                    return;
+                }
+            }
+        } catch (InterruptedException e) {
+            // TODO: I have no idea when this is thrown, and in what condition tpe is left.
+            // For now, I'm assuming that we're done.
+            // Still register a warning to keep track of things.
+            GlobalSettings.kem.registerCompilerWarning(e.getMessage(), e);
+        }
+    }
+
+    public List<Proc<TestCase>> getKompileProcs() {
+        return kompileProcs;
+    }
+
+    public List<Proc<TestCase>> getPdfProcs() {
+        return pdfProcs;
+    }
+
+    public List<Proc<KRunProgram>> getKrunProcs() {
+        return krunProcs;
+    }
+
+    public long getLastTestFinished() {
+        return lastTestFinished;
     }
 
     /**
@@ -119,6 +162,7 @@ public class TaskQueue {
      * - Adds krun tasks that depend on this kompile step to the queue. (only if it's
      *   successfully done)
      * - Updates {@link #kompilePaths}.
+     * - Adds Proc to {@link #kompileProcs}.
      * @param kompileStep Kompile step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
      */
@@ -131,6 +175,8 @@ public class TaskQueue {
                 if (status == KompileStatus.NOT_STARTED) {
                     // We're running the kompile process
                     kompileStep.run();
+                    kompileProcs.add(kompileStep);
+                    lastTestFinished = System.currentTimeMillis();
                     boolean success = kompileStep.isSuccess();
                     synchronized (TaskQueue.this) {
                         kompilePaths.put(kompilePath,
@@ -171,14 +217,15 @@ public class TaskQueue {
     }
 
     /**
-     * Create a {@link java.lang.Runnable} from a kompile step that updates {@link #pdfDefs} after
-     * it's done.
-     * @param pdfStep PDF step to to wrap.
+     * Create a {@link java.lang.Runnable} from a kompile step that updates {@link #pdfDefs},
+     * {@link #pdfProcs} and {@link #lastTestFinished} after it's done.
+     * @param pdfStep PDF step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
      */
     private Runnable wrapPDFStep(Proc<TestCase> pdfStep) {
         return () -> {
             pdfStep.run();
+            lastTestFinished = System.currentTimeMillis();
             pdfDefs.put(pdfStep.getObj().getDefinition(), pdfStep.isSuccess());
         };
     }
@@ -187,7 +234,23 @@ public class TaskQueue {
      * Add KRun steps of the given test case to the {@link #tpe}.
      */
     private void addKRunSteps(TestCase tc) {
+        for (Proc<KRunProgram> proc : tc.getKRunProcs()) {
+            tpe.execute(wrapKRunStep(proc));
+        }
+    }
 
+    /**
+     * Create a {@link java.lang.Runnable} from a krun step that updates {@link #krunProcs} and
+     * {@link #lastTestFinished}.
+     * @param krunStep KRun step to wrap.
+     * @return New {@link java.lang.Runnable} that does things described above.
+     */
+    private Runnable wrapKRunStep(Proc<KRunProgram> krunStep) {
+        return () -> {
+            krunStep.run();
+            krunProcs.add(krunStep);
+            lastTestFinished = System.currentTimeMillis();
+        };
     }
 }
 
