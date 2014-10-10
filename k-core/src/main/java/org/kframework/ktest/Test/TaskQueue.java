@@ -174,8 +174,8 @@ public class TaskQueue {
                 KompileStatus status = tryAddKompileInProgress(kompilePath);
                 if (status == KompileStatus.NOT_STARTED) {
                     // We're running the kompile process
-                    kompileStep.run();
                     kompileProcs.add(kompileStep);
+                    kompileStep.run();
                     lastTestFinished = System.currentTimeMillis();
                     boolean success = kompileStep.isSuccess();
                     synchronized (TaskQueue.this) {
@@ -224,9 +224,9 @@ public class TaskQueue {
      */
     private Runnable wrapPDFStep(Proc<TestCase> pdfStep) {
         return () -> {
+            pdfDefs.put(pdfStep.getObj().getDefinition(), pdfStep.isSuccess());
             pdfStep.run();
             lastTestFinished = System.currentTimeMillis();
-            pdfDefs.put(pdfStep.getObj().getDefinition(), pdfStep.isSuccess());
         };
     }
 
@@ -247,8 +247,8 @@ public class TaskQueue {
      */
     private Runnable wrapKRunStep(Proc<KRunProgram> krunStep) {
         return () -> {
-            krunStep.run();
             krunProcs.add(krunStep);
+            krunStep.run();
             lastTestFinished = System.currentTimeMillis();
         };
     }
