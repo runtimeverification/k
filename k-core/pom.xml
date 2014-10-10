@@ -129,13 +129,6 @@
     </dependency>
     <dependency>
       <groupId>org.kframework.dependencies</groupId>
-      <artifactId>gappa</artifactId>
-      <version>1.0</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.os.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
       <artifactId>sdf2table</artifactId>
       <version>1.0</version>
       <type>${native.exe.type}</type>

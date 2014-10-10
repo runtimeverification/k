@@ -17,8 +17,6 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.GappaPrinter;
-import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
@@ -271,34 +269,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 SymbolicConstraint right, Set<Variable> rightOnlyVariables) {
             boolean result = false;
             assert left.termContext().definition().context() == right.termContext().definition().context();
-            if (smtOptions.smt == SMTSolver.GAPPA) {
-
-                GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(left);
-                String gterm1 = premises.result;
-                GappaPrinter.GappaPrintResult conclusion = GappaPrinter.toGappa(right);
-                if (conclusion.exception != null) {
-                    System.err.print(conclusion.exception.getMessage());
-                    System.err.println(" Cannot prove the full implication!");
-                    return false;
-                }
-                String gterm2 = conclusion.result;
-                String input = "";
-                Set<String> variables = new HashSet<>();
-                variables.addAll(premises.variables);
-                variables.addAll(conclusion.variables);
-                for (String variable : variables) {
-                    GappaServer.addVariable(variable);
-                }
-                if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
-                input += "(" + gterm2 + ")";
-                if (globalOptions.debug) {
-                    System.err.println("Verifying " + input);
-                }
-                if (GappaServer.proveTrue(input))
-                    result = true;
-
-//                System.out.println(constraint);
-            } else if (smtOptions.smt == SMTSolver.Z3) {
+            if (smtOptions.smt == SMTSolver.Z3) {
                 try {
                     result = z3.checkQuery(
                             KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
