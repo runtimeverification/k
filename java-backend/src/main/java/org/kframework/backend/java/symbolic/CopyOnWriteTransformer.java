@@ -82,7 +82,7 @@ public class CopyOnWriteTransformer implements Transformer {
         if (term != constrainedTerm.term()
                 || lookups != constrainedTerm.lookups()
                 || constraint != constrainedTerm.constraint()) {
-            constrainedTerm = new ConstrainedTerm(term, lookups, constraint, context);
+            constrainedTerm = new ConstrainedTerm(term, lookups, constraint);
         }
         return constrainedTerm;
     }

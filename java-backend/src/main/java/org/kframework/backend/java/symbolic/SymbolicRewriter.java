@@ -160,8 +160,7 @@ public class SymbolicRewriter {
         ConstrainedTerm pattern = new ConstrainedTerm(
                 rule.leftHandSide(),
                 rule.lookups().getSymbolicConstraint(termContext),
-                precondition,
-                termContext);
+                precondition);
         return pattern;
     }
 
@@ -205,7 +204,7 @@ public class SymbolicRewriter {
         // TODO(YilongL): figure out why and then remove the following defensive code
         term = term.evaluate(constraint.termContext());
 
-        return new ConstrainedTerm(term, constraint, constraint.termContext());
+        return new ConstrainedTerm(term, constraint);
     }
 
     /**
@@ -223,8 +222,7 @@ public class SymbolicRewriter {
             ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
                     rule.leftHandSide(),
                     rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
-                    leftHandSideConstraint,
-                    constrainedTerm.termContext());
+                    leftHandSideConstraint);
 
             SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm);
             if (constraint == null) {
@@ -254,7 +252,7 @@ public class SymbolicRewriter {
 
             /* return first solution */
 //            System.err.println(rule.getLocation() + " " + rule.getSource());
-            return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());
+            return new ConstrainedTerm(result, constraint);
         }
 
         return null;
@@ -277,8 +275,7 @@ public class SymbolicRewriter {
         ConstrainedTerm lhs = new ConstrainedTerm(
                 pattern.leftHandSide(),
                 pattern.lookups().getSymbolicConstraint(term.termContext()),
-                termConstraint,
-                term.termContext());
+                termConstraint);
 
         // Collect the variables we are interested in finding
         VariableCollector visitor = new VariableCollector();
@@ -441,8 +438,7 @@ public class SymbolicRewriter {
                         initialTerm.constraint(),
                         true,
                         initialTerm.termContext()),
-                initialTerm.constraint(),
-                initialTerm.termContext());
+                initialTerm.constraint());
 
         visited.add(initialTerm);
         queue.add(initialTerm);

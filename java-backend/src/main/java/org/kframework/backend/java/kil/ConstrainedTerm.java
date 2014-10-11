@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.TruthValue;
@@ -82,22 +81,18 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     private final TermContext context;
 
-    public ConstrainedTerm(Data data, TermContext context) {
+    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint) {
+        Data data = new Data(term, lookups, constraint);
         this.data = data;
-        this.context = context;
+        this.context = data.constraint.termContext();
     }
 
-    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint,
-            TermContext context) {
-        this(new Data(term, lookups, constraint), context);
-    }
-
-    public ConstrainedTerm(Term term, SymbolicConstraint constraint, TermContext context) {
-        this(term, new SymbolicConstraint(context), constraint, context);
+    public ConstrainedTerm(Term term, SymbolicConstraint constraint) {
+        this(term, new SymbolicConstraint(constraint.termContext()), constraint);
     }
 
     public ConstrainedTerm(Term term, TermContext context) {
-        this(term, new SymbolicConstraint(context), new SymbolicConstraint(context), context);
+        this(term, new SymbolicConstraint(context), new SymbolicConstraint(context));
     }
 
     public TermContext termContext() {
@@ -108,12 +103,12 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return data.constraint;
     }
 
-    public boolean implies(ConstrainedTerm constrainedTerm) {
-        return matchImplies(constrainedTerm) != null;
-    }
-
     public SymbolicConstraint lookups() {
         return data.lookups;
+    }
+
+    public boolean implies(ConstrainedTerm constrainedTerm) {
+        return matchImplies(constrainedTerm) != null;
     }
 
     /**
@@ -162,6 +157,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 return variables.contains(var);
             }
         };
+
         SymbolicConstraint rightHandSide = SymbolicConstraint
                 .simplifiedConstraintFrom(constrainedTerm.termContext(),
                         Maps.filterKeys(unificationConstraint.substitution(), notInVariables),
@@ -255,7 +251,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     @Override
     public ASTNode accept(Transformer transformer) {
-        throw new UnsupportedOperationException();
+        return transformer.transform(this);
     }
 
     @Override

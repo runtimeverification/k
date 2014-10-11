@@ -113,8 +113,7 @@ public class GroundRewriter extends AbstractRewriter {
         ConstrainedTerm lhs = new ConstrainedTerm(
                 pattern.leftHandSide(),
                 pattern.lookups().getSymbolicConstraint(termContext),
-                termConstraint,
-                termContext);
+                termConstraint);
 
         // Collect the variables we are interested in finding
         VariableCollector visitor = new VariableCollector();

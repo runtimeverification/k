@@ -112,16 +112,14 @@ public class JavaSymbolicProver implements Prover {
             initialConstraint.addAll(dummyRule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
                     transformer.transformTerm(kilLeftHandSide, definition),
-                    initialConstraint,
-                    termContext);
+                    initialConstraint);
 
             SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);
             targetConstraint.addAll(dummyRule.ensures());
             ConstrainedTerm targetTerm = new ConstrainedTerm(
                     dummyRule.leftHandSide().evaluate(termContext),
                     dummyRule.lookups().getSymbolicConstraint(termContext),
-                    targetConstraint,
-                    termContext);
+                    targetConstraint);
 
             proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
         }
