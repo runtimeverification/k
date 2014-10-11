@@ -320,7 +320,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             return unifyMap(map, otherMap, true);
         }
 
-        Set<BuiltinMap> foldedMaps = new HashSet<>();
+        Set<BuiltinMap> foldedMaps = Sets.newLinkedHashSet();
         foldedMaps.add(map);
         Queue<BuiltinMap> queue = new LinkedList<>();
         queue.add(map);
