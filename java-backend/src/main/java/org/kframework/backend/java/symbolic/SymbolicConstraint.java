@@ -71,7 +71,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @see SymbolicConstraint#substitution
      */
-    public LinkedList<Equality> equalities;
+    private LinkedList<Equality> equalities;
 
     /**
      * Specifies if this symbolic constraint is in normal form.
@@ -82,7 +82,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * <li>equalities between variables and terms are stored in
      * {@code substitution} rather than {@code equalities}.
      */
-    public boolean isNormal;
+    private boolean isNormal;
 
     /**
      * Stores special equalities whose left-hand sides are just variables.
@@ -95,15 +95,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @see SymbolicConstraint#equalities
      */
-    public LinkedHashMap<Variable, Term> substitution;
+    private LinkedHashMap<Variable, Term> substitution;
 
-    public TruthValue truthValue;
+    private TruthValue truthValue;
 
     /**
      * Stores the minimal equality causing this constraint to become false.
      * It is null is this constraint is not false.
      */
-    public Equality falsifyingEquality;
+    private Equality falsifyingEquality;
 
     private final ArrayList<Equality> equalityBuffer = Lists.newArrayList();
 
