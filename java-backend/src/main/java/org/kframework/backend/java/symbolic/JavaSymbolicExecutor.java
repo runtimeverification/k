@@ -77,9 +77,8 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
-        Term term = kilFactory.term(cfg);
+        Term term = kilFactory.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
-        term = term.evaluate(termContext);
 
         if (javaOptions.patternMatching) {
             FastDestructiveRewriter rewriter = new FastDestructiveRewriter(definition, termContext);
@@ -116,18 +115,18 @@ public class JavaSymbolicExecutor implements Executor {
         c.setLabel("generatedTop");
         c.setContents(new org.kframework.kil.Bag());
         pattern.setBody(new org.kframework.kil.Rewrite(pattern.getBody(), c, context));
-        Rule patternRule = transformer.transformRule(pattern);
+        Rule patternRule = transformer.transformAndEval(pattern);
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Map<Variable,Term>> hits;
         if (javaOptions.patternMatching) {
-            Term initialTerm = kilFactory.term(cfg);
+            Term initialTerm = kilFactory.transformAndEval(cfg);
             Term targetTerm = null;
             GroundRewriter rewriter = new GroundRewriter(definition, TermContext.of(globalContext));
             hits = rewriter.search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType);
         } else {
-            ConstrainedTerm initialTerm = new ConstrainedTerm(kilFactory.term(cfg), TermContext.of(globalContext));
+            ConstrainedTerm initialTerm = new ConstrainedTerm(kilFactory.transformAndEval(cfg), TermContext.of(globalContext));
             ConstrainedTerm targetTerm = null;
             hits = getSymbolicRewriter().search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType);

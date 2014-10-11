@@ -143,8 +143,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
             org.kframework.kil.Term kast = rp.runParser(
                     ccOptions.parser(context),
                     term1.stringValue(), true, Sort.of(term2.stringValue()), context);
-            Term term = kilFactory.term(kast);
-            term = term.evaluate(termContext);
+            Term term = kilFactory.transformAndEval(kast);
             return term;
         } catch (ParseFailedException e) {
             return processIOException("noparse", termContext);

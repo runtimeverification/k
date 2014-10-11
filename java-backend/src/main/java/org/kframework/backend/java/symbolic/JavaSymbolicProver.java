@@ -79,7 +79,7 @@ public class JavaSymbolicProver implements Prover {
                 continue;
             }
 
-            Rule rule = transformer.transformRule(
+            Rule rule = transformer.transformAndEval(
                     (org.kframework.kil.Rule) mapTransformer.visitNode(moduleItem));
             Rule freshRule = rule.getFreshRule(termContext);
             rules.add(freshRule);
@@ -105,13 +105,13 @@ public class JavaSymbolicProver implements Prover {
                     kilRequires,
                     kilEnsures,
                     context);
-            Rule dummyRule = transformer.transformRule(
+            Rule dummyRule = transformer.transformAndEval(
                     (org.kframework.kil.Rule) mapTransformer.visitNode(kilDummyRule));
 
             SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
             initialConstraint.addAll(dummyRule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
-                    transformer.transformTerm(kilLeftHandSide, definition),
+                    transformer.transformAndEval(kilLeftHandSide),
                     initialConstraint);
 
             SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);

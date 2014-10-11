@@ -403,21 +403,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value after including the side condition
      */
     public TruthValue addAll(Collection<Term> condition) {
-        boolean eval = context.definition().context().krunOptions != null
-                && context.definition().context().krunOptions.experimental.prove() != null;
-
         for (Term term : condition) {
             if (truthValue == TruthValue.FALSE) {
                 break;
             }
 
-            // TODO(AndreiS): remove this condition when function evaluation works properly
-            if (eval) {
-                add(term.evaluate(context), BoolToken.TRUE);
-            } else {
-                add(term, BoolToken.TRUE);
-
-            }
+            add(term, BoolToken.TRUE);
         }
 
         return truthValue;

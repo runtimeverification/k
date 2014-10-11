@@ -183,8 +183,6 @@ public class SymbolicRewriter {
         }
         constraint.addAll(rule.ensures());
 
-        Term term = rule.rightHandSide();
-
         /* get fresh substitutions of rule variables */
         Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
@@ -193,16 +191,13 @@ public class SymbolicRewriter {
         constraint.rename(freshSubstitution);
 
         /* rename rule variables in the rule RHS */
-        term = term.substituteWithBinders(freshSubstitution, constraint.termContext());
+        Term term = rule.rightHandSide().substituteWithBinders(freshSubstitution, constraint.termContext());
         /* apply the constraints substitution on the rule RHS */
         term = term.substituteAndEvaluate(
                 constraint.substitution(),
                 constraint.termContext());
         /* eliminate bindings of rule variables */
         constraint.removeBindings(freshSubstitution.values());
-        // TODO(AndreiS): functions not being evaluated is becoming quite annoying
-        // TODO(YilongL): figure out why and then remove the following defensive code
-        term = term.evaluate(constraint.termContext());
 
         return new ConstrainedTerm(term, constraint);
     }
@@ -239,10 +234,8 @@ public class SymbolicRewriter {
 
             /* rename rule variables in the rule RHS */
             Term result = rule.rightHandSide().substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
-            /* apply the constraints substitution on the rule RHS */
-            result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
-            /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(constrainedTerm.termContext());
+            /* apply the constraints substitution on the rule RHS and evaluate pending functions */
+            result = result.substituteAndEvaluate(constraint.substitution(), constrainedTerm.termContext());
             /* eliminate bindings of rule variables */
             constraint.removeBindings(freshSubstitution.values());
 
