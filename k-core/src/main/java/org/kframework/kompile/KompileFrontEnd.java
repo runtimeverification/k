@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,6 @@ import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
@@ -83,9 +83,16 @@ public class KompileFrontEnd extends FrontEnd {
             kem.registerCriticalError(msg);
         }
 
-        context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
-        if (!context.dotk.exists() && !context.dotk.mkdirs()) {
-            kem.registerCriticalError("Could not create directory " + context.dotk);
+        try {
+            context.dotk = Files.createTempDirectory(
+                    new File(System.getProperty("user.dir")).toPath().toAbsolutePath(), ".kompile")
+                    .toFile();
+            if (options.global.debug) {
+                kem.registerCompilerWarning("Won't delete temp dir: " +
+                        context.dotk.getAbsolutePath());
+            }
+        } catch (IOException e) {
+            kem.registerCriticalError("Could not create temporary directory.");
         }
 
         // default for documentation backends is to store intermediate outputs in temp directory
@@ -95,7 +102,7 @@ public class KompileFrontEnd extends FrontEnd {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     try {
-                        FileUtils.deleteDirectory(new File(options.directory, ".k"));
+                        FileUtils.deleteDirectory(context.dotk);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
