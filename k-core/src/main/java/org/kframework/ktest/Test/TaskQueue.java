@@ -152,13 +152,12 @@ public class TaskQueue {
     }
 
     /**
-     * Continue running the test case from kompile step.
+     * Continue running the test case from kompile step. Also runs PDF step.
      * @param tc TestCase to continue running.
      */
     private void continueFromKompileStep(TestCase tc) {
         if (!options.getSkips().contains(KTestStep.KOMPILE) && !tc.skip(KTestStep.KOMPILE)) {
-            Proc<TestCase> proc = tc.getKompileProc();
-            tpe.execute(wrapKompileStep(proc));
+            executeKompileStep(tc);
         } else {
             // Normally, krun steps of a test case is added after kompile step of the test case is
             // done. But since we're skipping kompile steps, we need to add krun steps here,
@@ -175,6 +174,22 @@ public class TaskQueue {
         }
     }
 
+    /**
+     * Execute a kompile step and continue with krun steps of the given test case.
+     * @param tc TestCase to execute kompile step and then krun steps.
+     */
+    private void executeKompileStep(TestCase tc) {
+        Proc<TestCase> proc = tc.getKompileProc();
+        tpe.execute(wrapKompileStep(proc));
+    }
+
+    /**
+     * Create a {@link java.lang.Runnable} from a script step that, after successfully running,
+     * adds kompile step that depends on the script. Also adds script
+     * {@link org.kframework.ktest.Proc} object to {@link #scriptProcs}.
+     * @param scriptStep Script step to wrap.
+     * @return New {@link java.lang.Runnable} that does things described above.
+     */
     private Runnable wrapScriptStep(Proc<TestCase> scriptStep) {
         return new Runnable() {
             @Override
@@ -286,9 +301,16 @@ public class TaskQueue {
         return new Runnable() {
             @Override
             public void run() {
-                krunProcs.add(krunStep);
-                krunStep.run();
-                lastTestFinished = System.currentTimeMillis();
+                // Don't check for `-kompiled` directory when in --dry mode. This is because
+                // in --dry we never create directories, so this check will always return false.
+                if (options.dry ||
+                        krunStep.getObj().testCase.isDefinitionKompiled()) {
+                    krunProcs.add(krunStep);
+                    krunStep.run();
+                    lastTestFinished = System.currentTimeMillis();
+                } else {
+                    executeKompileStep(krunStep.getObj().testCase);
+                }
             }
         };
     }

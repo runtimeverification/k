@@ -12,6 +12,7 @@ import java.util.List;
 
 public class KRunProgram {
 
+    public final TestCase testCase;
     public final String pgmName;
     public final String pgmPath;
     public final String defPath;
@@ -22,8 +23,10 @@ public class KRunProgram {
     public final String newOutputFile;
     public final boolean regex;
 
-    public KRunProgram(String pgmPath, String defPath, List<PgmArg> args, String inputFile, String outputFile,
-                       String errorFile, String newOutputFile, boolean regex) {
+    public KRunProgram(TestCase testCase, String pgmPath, String defPath, List<PgmArg> args,
+                       String inputFile, String outputFile, String errorFile, String newOutputFile,
+                       boolean regex) {
+        this.testCase = testCase;
         this.pgmName = FilenameUtils.getBaseName(pgmPath);
         this.pgmPath = pgmPath;
         this.defPath = defPath;

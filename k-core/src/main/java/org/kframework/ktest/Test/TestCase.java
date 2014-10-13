@@ -471,8 +471,8 @@ public class TestCase {
                         args.add(new PgmArg("--directory", kompileDir));
                     }
 
-                    ret.add(new KRunProgram(
-                            pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,
+                    ret.add(new KRunProgram(this, pgmFilePath, definitionFilePath, args,
+                            inputFilePath, outputFilePath, errorFilePath,
                             getNewOutputFilePath(outputFileName), profile.isRegex()));
                 }
             } else {
