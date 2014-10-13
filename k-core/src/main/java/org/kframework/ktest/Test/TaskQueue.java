@@ -153,6 +153,9 @@ public class TaskQueue {
 
     /**
      * Continue running the test case from kompile step. Also runs PDF step.
+     * krun steps are added to the queue by successfully terminated kompile steps. If we're skipping
+     * kompile steps(either because of `--skip kompile` or setting in config file) then this
+     * method adds krun steps to the queue.
      * @param tc TestCase to continue running.
      */
     private void continueFromKompileStep(TestCase tc) {
@@ -160,7 +163,7 @@ public class TaskQueue {
             executeKompileStep(tc);
         } else {
             // Normally, krun steps of a test case is added after kompile step of the test case is
-            // done. But since we're skipping kompile steps, we need to add krun steps here,
+            // done. But since we just skipped kompile step, we need to add krun steps here,
             // unless krun steps are skipped too.
             if (!options.getSkips().contains(KTestStep.KRUN) && !tc.skip(KTestStep.KRUN)) {
                 addKRunSteps(tc);
@@ -175,8 +178,9 @@ public class TaskQueue {
     }
 
     /**
-     * Execute a kompile step and continue with krun steps of the given test case.
-     * @param tc TestCase to execute kompile step and then krun steps.
+     * Execute a kompile step of the given test case. krun steps will be added if ktest step
+     * is successfully terminates.
+     * @param tc TestCase to execute kompile step.
      */
     private void executeKompileStep(TestCase tc) {
         Proc<TestCase> proc = tc.getKompileProc();
@@ -211,6 +215,7 @@ public class TaskQueue {
      *   successfully done)
      * - Updates {@link #kompilePaths}.
      * - Adds Proc to {@link #kompileProcs}.
+     * - Updates {@link #lastTestFinished}.
      * @param kompileStep Kompile step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
      */
@@ -265,7 +270,7 @@ public class TaskQueue {
     }
 
     /**
-     * Create a {@link java.lang.Runnable} from a kompile step that updates {@link #pdfDefs},
+     * Create a {@link java.lang.Runnable} from a PDF step that updates {@link #pdfDefs},
      * {@link #pdfProcs} and {@link #lastTestFinished} after it's done.
      * @param pdfStep PDF step to wrap.
      * @return New {@link java.lang.Runnable} that does things described above.
