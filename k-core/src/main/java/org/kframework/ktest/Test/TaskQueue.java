@@ -4,6 +4,7 @@ package org.kframework.ktest.Test;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.Proc;
+import org.kframework.utils.OS;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
@@ -76,6 +77,7 @@ public class TaskQueue {
      *
      * Note that these don't hold all the Proc objects, hold only the ones that we really run.
      */
+    private final List<Proc<TestCase>> scriptProcs = new ArrayList<>();
     private final List<Proc<TestCase>> kompileProcs = new ArrayList<>();
     private final List<Proc<TestCase>> pdfProcs = new ArrayList<>();
     private final List<Proc<KRunProgram>> krunProcs = new ArrayList<>();
@@ -102,22 +104,11 @@ public class TaskQueue {
      * @param tc TestCase to add to the task queue.
      */
     public void addTask(TestCase tc) {
-        if (!options.getSkips().contains(KTestStep.KOMPILE) && !tc.skip(KTestStep.KOMPILE)) {
-            Proc<TestCase> proc = tc.getKompileProc();
-            tpe.execute(wrapKompileStep(proc));
+        if (OS.current().isPosix && tc.getPosixInitScript() != null) {
+            Proc<TestCase> proc = tc.getPosixOnlyProc();
+            tpe.execute(wrapScriptStep(proc));
         } else {
-            // Normally, krun steps of a test case is added after kompile step of the test case is
-            // done. But since we're skipping kompile steps, we need to add krun steps here,
-            // unless krun steps are skipped too.
-            if (!options.getSkips().contains(KTestStep.KRUN) && !tc.skip(KTestStep.KRUN)) {
-                addKRunSteps(tc);
-            }
-        }
-        if (!options.getSkips().contains(KTestStep.PDF) && !tc.skip(KTestStep.PDF)
-                && !pdfDefs.containsKey(tc.getDefinition())) {
-            Proc<TestCase> proc = tc.getPDFProc();
-            tpe.execute(wrapPDFStep(proc));
-            pdfDefs.put(tc.getDefinition(), false);
+            continueFromKompileStep(tc);
         }
     }
 
@@ -140,6 +131,10 @@ public class TaskQueue {
         }
     }
 
+    public List<Proc<TestCase>> getScriptProcs() {
+        return scriptProcs;
+    }
+
     public List<Proc<TestCase>> getKompileProcs() {
         return kompileProcs;
     }
@@ -154,6 +149,43 @@ public class TaskQueue {
 
     public long getLastTestFinished() {
         return lastTestFinished;
+    }
+
+    /**
+     * Continue running the test case from kompile step.
+     * @param tc TestCase to continue running.
+     */
+    private void continueFromKompileStep(TestCase tc) {
+        if (!options.getSkips().contains(KTestStep.KOMPILE) && !tc.skip(KTestStep.KOMPILE)) {
+            Proc<TestCase> proc = tc.getKompileProc();
+            tpe.execute(wrapKompileStep(proc));
+        } else {
+            // Normally, krun steps of a test case is added after kompile step of the test case is
+            // done. But since we're skipping kompile steps, we need to add krun steps here,
+            // unless krun steps are skipped too.
+            if (!options.getSkips().contains(KTestStep.KRUN) && !tc.skip(KTestStep.KRUN)) {
+                addKRunSteps(tc);
+            }
+        }
+        if (!options.getSkips().contains(KTestStep.PDF) && !tc.skip(KTestStep.PDF)
+                && !pdfDefs.containsKey(tc.getDefinition())) {
+            Proc<TestCase> proc = tc.getPDFProc();
+            tpe.execute(wrapPDFStep(proc));
+            pdfDefs.put(tc.getDefinition(), false);
+        }
+    }
+
+    private Runnable wrapScriptStep(Proc<TestCase> scriptStep) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                scriptProcs.add(scriptStep);
+                scriptStep.run();
+                if (scriptStep.isSuccess()) {
+                    continueFromKompileStep(scriptStep.getObj());
+                }
+            }
+        };
     }
 
     /**

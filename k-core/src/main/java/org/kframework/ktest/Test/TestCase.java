@@ -64,7 +64,8 @@ public class TestCase {
     private Set<KTestStep> skips;
 
     /**
-     * Script to be executed before testing, only valid on Posix system
+     * Script to be executed before testing, only valid on Posix system.
+     * {@code null} if not available.
      */
     private String posixInitScript;
 
