@@ -42,7 +42,6 @@ public interface Unifier {
     public void unify(KLabelInjection kLabelInjection, Term term);
     public void unify(KList kList, Term term);
     public void unify(KSequence kSequence, Term term);
-    public void unify(Term term, Term otherTerm);
     public void unify(Token token, Term term);
 
 }

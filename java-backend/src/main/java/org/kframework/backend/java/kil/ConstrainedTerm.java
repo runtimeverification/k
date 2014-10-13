@@ -212,7 +212,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 // TODO(AndreiS): find a better place for pattern expansion
                 candidate.expandPatternsAndSimplify(true);
             } else {
-                SymbolicConstraint clonedConstraint = new SymbolicConstraint(data.constraint, context);
+                SymbolicConstraint clonedConstraint = new SymbolicConstraint(data.constraint);
                 clonedConstraint.addAll(candidate);
                 candidate = clonedConstraint;
             }

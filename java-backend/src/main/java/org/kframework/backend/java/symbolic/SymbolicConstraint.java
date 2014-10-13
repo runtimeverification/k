@@ -4,7 +4,6 @@ package org.kframework.backend.java.symbolic;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
@@ -17,6 +16,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
@@ -109,13 +109,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private boolean equalitiesWriteProtected = false;
 
-    private final TermContext context;
+    private List<List<SymbolicConstraint>> multiConstraints = Lists.newArrayList();
 
-    /**
-     * The symbolic unifier associated with this constraint. There is an
-     * one-to-one relationship between unifiers and constraints.
-     */
-    private final SymbolicUnifier unifier;
+    private final TermContext context;
 
     public void orientSubstitution(Set<Variable> variables) {
         Map<Variable, Term> newSubstitution = Maps.newLinkedHashMap();
@@ -267,8 +263,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return constraint;
     }
 
-    public SymbolicConstraint(SymbolicConstraint constraint, TermContext context) {
-        this(context);
+    public SymbolicConstraint(SymbolicConstraint constraint) {
+        this(constraint.context);
         substitution.putAll(constraint.substitution);
         addAll(constraint);
     }
@@ -278,7 +274,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         equalities = Lists.newLinkedList();
         truthValue = TruthValue.TRUE;
         isNormal = true;
-        unifier = new SymbolicUnifier(this, context);
         this.context = context;
     }
 
@@ -583,12 +578,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 if (context.definition().context().globalOptions.debug) {
                     System.err.println("Split on " + condition);
                 }
-                SymbolicConstraint left1 = new SymbolicConstraint(left, context);
+                SymbolicConstraint left1 = new SymbolicConstraint(left);
                 left1.add(condition, BoolToken.TRUE);
-                implications.add(Pair.of(left1, new SymbolicConstraint(right,context)));
-                SymbolicConstraint left2 = new SymbolicConstraint(left, context);
+                implications.add(Pair.of(left1, new SymbolicConstraint(right)));
+                SymbolicConstraint left2 = new SymbolicConstraint(left);
                 left2.add(condition, BoolToken.FALSE);
-                implications.add(Pair.of(left2, new SymbolicConstraint(right,context)));
+                implications.add(Pair.of(left2, new SymbolicConstraint(right)));
                 continue;
             }
 //            if (DEBUG) {
@@ -668,7 +663,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public boolean isSubstitution() {
         normalize();
-        return equalities.isEmpty() && unifier.data.multiConstraints.isEmpty();
+        return equalities.isEmpty() && multiConstraints.isEmpty();
     }
 
     public boolean isUnknown() {
@@ -687,36 +682,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         falsifyingEquality = equality;
     }
 
-    public Collection<SymbolicConstraint> getMultiConstraints() {
-        if (!unifier.data.multiConstraints.isEmpty()) {
-            assert unifier.data.multiConstraints.size() <= 2;
-
-            List<SymbolicConstraint> multiConstraints = new ArrayList<SymbolicConstraint>();
-            Iterator<Collection<SymbolicConstraint>> iterator = unifier.multiConstraints().iterator();
-            if (unifier.data.multiConstraints.size() == 1) {
-                for (SymbolicConstraint constraint : iterator.next()) {
-                    constraint.addAll(this);
-                    constraint.simplify();
-                    multiConstraints.add(constraint);
-                }
-            } else {
-                Collection<SymbolicConstraint> constraints = iterator.next();
-                Collection<SymbolicConstraint> otherConstraints = iterator.next();
-                for (SymbolicConstraint cnstr1 : constraints) {
-                    for (SymbolicConstraint cnstr2 : otherConstraints) {
-                        SymbolicConstraint constraint = new SymbolicConstraint(
-                                this, context);
-                        constraint.addAll(cnstr1);
-                        constraint.addAll(cnstr2);
-                        constraint.simplify();
-                        multiConstraints.add(constraint);
-                    }
-                }
-            }
-            return multiConstraints;
-        } else {
-            return Collections.singletonList(this);
-        }
+    public List<SymbolicConstraint> getMultiConstraints() {
+        return RewriteEngineUtils.getMultiConstraints(this, multiConstraints);
     }
 
     /**
@@ -737,11 +704,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Simplifies this symbolic constraint as much as possible. Decomposes large
      * equalities into small ones using unification.
      *
-     * @param fold set if non-deterministic pattern folding is enabled
+     * @param patternFold set if non-deterministic pattern folding is enabled
      *
      * @return the truth value of this symbolic constraint after simplification
      */
-    private TruthValue simplify(boolean fold) {
+    private TruthValue simplify(boolean patternFold) {
         if (truthValue != TruthValue.UNKNOWN) {
             return truthValue;
         }
@@ -759,51 +726,26 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             equalitiesWriteProtected = true;
             for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
                 Equality equality = iterator.next();
-                if (equality.isSimplifiableByCurrentAlgorithm()) {
-                    // if both sides of the equality could be further
-                    // decomposed, discharge the equality
-                    iterator.remove();
-                    if (!unifier.unify(equality)) {
-                        falsify(new Equality(
-                                unifier.unificationFailureLeftHandSide(), unifier.unificationFailureRightHandSide(), context));
-                        equalitiesWriteProtected = false;
-                        break label;
-                    }
 
-                    change = true;
-                } else if (BuiltinMap.isMapUnifiableByCurrentAlgorithm(equality.leftHandSide(), equality.rightHandSide())) {
-                    try {
-                        if (unifier.simplifyMapEquality(
-                                (BuiltinMap) equality.leftHandSide(),
-                                (BuiltinMap) equality.rightHandSide(),
-                                fold)) {
-                            iterator.remove();
-                            change = true;
-                        }
-                    } catch (UnificationFailure e) {
-                         falsify(new Equality(
-                                unifier.unificationFailureLeftHandSide(), unifier.unificationFailureRightHandSide(), context));
-                        equalitiesWriteProtected = false;
-                        break label;
-                    }
-                } else if (equality.leftHandSide() instanceof BuiltinList
-                        && ((BuiltinList) equality.leftHandSide()).isUnifiableByCurrentAlgorithm()
-                        && equality.rightHandSide() instanceof BuiltinList
-                        && ((BuiltinList) equality.rightHandSide()).isUnifiableByCurrentAlgorithm()) {
-                    try {
-                        if (unifier.unifyList(
-                                (BuiltinList) equality.leftHandSide(),
-                                (BuiltinList) equality.rightHandSide(), false)) {
-                            iterator.remove();
-                            change = true;
-                        }
-                    } catch (UnificationFailure e) {
-                         falsify(new Equality(
-                                unifier.unificationFailureLeftHandSide(), unifier.unificationFailureRightHandSide(), context));
-                        equalitiesWriteProtected = false;
-                        break label;
-                    }
+                SymbolicUnifier unifier = new SymbolicUnifier(patternFold, context);
+                if (!unifier.symbolicUnify(equality.leftHandSide(), equality.rightHandSide())) {
+                    falsify(new Equality(
+                            unifier.unificationFailureLeftHandSide(),
+                            unifier.unificationFailureRightHandSide(), context));
+                    equalitiesWriteProtected = false;
+                    break label;
                 }
+
+                if (unifier.multiConstraints().isEmpty()
+                        && unifier.constraint().equalities.size() == 1
+                        && unifier.constraint().equalities.get(0).equals(equality)) {
+                    continue;
+                }
+
+                iterator.remove();
+                change = true;
+                addAll(unifier.constraint());
+                multiConstraints.addAll(unifier.multiConstraints());
             }
 
             equalitiesWriteProtected = false;
@@ -971,7 +913,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             // TODO(AndreiS): move folding from here (this is way too fragile)
             /* simplify with pattern folding if not performing narrowing */
             if (!narrowing) {
-                simplify(true);
+                simplifyModuloPatternFolding();
             } else {
                 simplify();
             }

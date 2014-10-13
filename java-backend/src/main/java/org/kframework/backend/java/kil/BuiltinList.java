@@ -113,6 +113,13 @@ public class BuiltinList extends Collection {
         return true;
     }
 
+    public static boolean isListUnifiableByCurrentAlgorithm(Term term, Term otherTerm) {
+        return term instanceof BuiltinList
+                && ((BuiltinList) term).isUnifiableByCurrentAlgorithm()
+                && otherTerm instanceof BuiltinList
+                && ((BuiltinList) term).isUnifiableByCurrentAlgorithm();
+    }
+
     @Override
     public int concreteSize() {
         return elementsLeft.size() + elementsRight.size();
