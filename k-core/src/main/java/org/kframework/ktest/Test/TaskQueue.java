@@ -228,6 +228,7 @@ public class TaskQueue {
             @Override
             public void run() {
                 pdfDefs.put(pdfStep.getObj().getDefinition(), pdfStep.isSuccess());
+                pdfProcs.add(pdfStep);
                 pdfStep.run();
                 lastTestFinished = System.currentTimeMillis();
             }
