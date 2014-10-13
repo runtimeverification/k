@@ -9,7 +9,6 @@
             extension="c"
             >
         <kompile-option name="--backend" value="java" />
-        <kompile-option name="-d" value="simple" />
         <program name="average.c">
           <krun-option name="--prove" value="tests/simple/average_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />

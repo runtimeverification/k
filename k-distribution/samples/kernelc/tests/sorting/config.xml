@@ -9,7 +9,6 @@
         exclude="merge_sort.c"
         >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="-d" value="sorting" />
     <program name="bubble_sort.c">
       <krun-option name="--prove" value="tests/sorting/bubble_sort_spec.k" />
       <krun-option name="--smt_prelude" value="../../include/z3/sorted_list.smt2" />
