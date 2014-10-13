@@ -247,12 +247,9 @@ public class KParser {
                 context.getIOAgent().closeAllFiles();
             }
             if (result == null) {
-                System.out.println("Input: " + kDefinition);
-                System.err.println("rewriting failed, trace:");
-                context.printStackTrace();
                 context.setStandAlone(false);
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.INTERNAL, "Stratego rewriting failed"));
+                GlobalSettings.kem.registerInternalError("Input: " + kDefinition + "\nrewriting failed, trace:\n"
+                        + context.getTraceString() + "Stratego rewriting failed");
             } else {
                 context.setStandAlone(false);
             }
@@ -289,12 +286,9 @@ public class KParser {
                 context.getIOAgent().closeAllFiles();
             }
             if (result == null) {
-                System.out.println("Input: " + argument);
-                System.err.println("rewriting failed, trace:");
-                context.printStackTrace();
                 context.setStandAlone(false);
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.INTERNAL, "Stratego rewriting failed"));
+                GlobalSettings.kem.registerInternalError("Input: " + argument + "\nrewriting failed, trace:\n"
+                        + context.getTraceString() + "Stratego rewriting failed");
             } else {
                 context.setStandAlone(false);
             }

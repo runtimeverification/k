@@ -5,16 +5,18 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.kframework.main.FrontEnd;
+import org.kframework.utils.BaseTestCase;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 
-public class KompileModuleTest {
+public class KompileModuleTest extends BaseTestCase {
 
     @Test
     public void testCreateInjection() {
         String[] argv = new String[] { "test.k", "--backend", "latex" };
-        Injector injector = Guice.createInjector(KompileFrontEnd.getModules(argv));
+        Injector injector = Guice.createInjector(Modules.override(KompileFrontEnd.getModules(argv)).with(new TestModule()));
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KompileFrontEnd);
     }
 }

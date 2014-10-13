@@ -30,11 +30,10 @@ import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import java.io.File;
 
 
 /**
@@ -49,6 +48,7 @@ public class JavaSymbolicBackend extends BasicBackend {
     private final BinaryLoader loader;
     private final Provider<RuleIndex> index;
     private final Provider<KILtoBackendJavaKILTransformer> transformer;
+    private final FileUtil files;
 
     @Inject
     JavaSymbolicBackend(
@@ -56,11 +56,13 @@ public class JavaSymbolicBackend extends BasicBackend {
             Context context,
             BinaryLoader loader,
             Provider<RuleIndex> index,
-            Provider<KILtoBackendJavaKILTransformer> transformer) {
+            Provider<KILtoBackendJavaKILTransformer> transformer,
+            FileUtil files) {
         super(sw, context);
         this.loader = loader;
         this.index = index;
         this.transformer = transformer;
+        this.files = files;
     }
 
     @Override
@@ -69,8 +71,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         definition.setIndex(index.get());
 
-        loader.saveOrDie(new File(context.kompiled,
-                JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
+        loader.saveOrDie(files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME),
                 definition);
 
         return javaDef;

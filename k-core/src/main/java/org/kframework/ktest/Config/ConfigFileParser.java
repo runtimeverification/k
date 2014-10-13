@@ -36,10 +36,12 @@ public class ConfigFileParser {
 
     private final Document doc;
     private final KTestOptions cmdArgs;
+    private final Map<String, String> env;
 
-    public ConfigFileParser(File configFile, KTestOptions cmdArgs) throws IOException, SAXException,
+    public ConfigFileParser(File configFile, KTestOptions cmdArgs, Map<String, String> env) throws IOException, SAXException,
             ParserConfigurationException, TransformerException {
         this.cmdArgs = cmdArgs;
+        this.env = env;
 
         // validate xml file structure
         Source schemaFile = new StreamSource(getClass().getResourceAsStream("ktest.xsd"));
@@ -75,7 +77,7 @@ public class ConfigFileParser {
 
         // Create our filter to wrap the SAX parser, that captures the locations of elements
         // and annotates their nodes as they are inserted into the DOM.
-        ConfigPreProcessor locationAnnotator = new ConfigPreProcessor(xmlReader, doc);
+        ConfigPreProcessor locationAnnotator = new ConfigPreProcessor(xmlReader, doc, env);
 
         // Create the SAXSource to use the annotator.
         String systemId = configFile.getAbsolutePath();
@@ -168,7 +170,7 @@ public class ConfigFileParser {
 
         ConfigFileParser configFileParser;
         try {
-            configFileParser = new ConfigFileParser(new File(file), cmdArgs1);
+            configFileParser = new ConfigFileParser(new File(file), cmdArgs1, env);
         } catch (TransformerException | IOException | SAXException | ParserConfigurationException e) {
             // I'm not happy with that part ...
             throw new InvalidConfigError("error occured while parsing included file " + file +

@@ -7,11 +7,7 @@ import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.xml.XML;
-
-import org.w3c.dom.Element;
-
-import java.util.ArrayList;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +21,7 @@ import java.util.Map;
 public class Definition extends ASTNode implements Interfaces.MutableList<DefinitionItem, Enum<?>> {
 
     private List<DefinitionItem> items;
-    private String mainFile;
+    private File mainFile;
     private String mainModule;
     /** An index of all modules in {@link #items} by name */
     private Map<String, Module> modulesMap;
@@ -41,18 +37,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         this.mainModule = d.mainModule;
         this.mainSyntaxModule = d.mainSyntaxModule;
         this.items = d.items;
-    }
-
-    public Definition(Element element) {
-        super(element);
-
-        mainFile = element.getAttribute(Constants.MAINFILE);
-        mainModule = element.getAttribute(Constants.MAINMODULE);
-        items = new ArrayList<DefinitionItem>();
-
-        List<Element> elements = XML.getChildrenElements(element);
-        for (Element e : elements)
-            items.add((DefinitionItem) JavaClassesFactory.getTerm(e));
     }
 
     @Override
@@ -74,11 +58,11 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         return items;
     }
 
-    public void setMainFile(String mainFile) {
+    public void setMainFile(File mainFile) {
         this.mainFile = mainFile;
     }
 
-    public String getMainFile() {
+    public File getMainFile() {
         return mainFile;
     }
 

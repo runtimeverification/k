@@ -28,7 +28,7 @@ public class CommandSystem extends Command {
       //for (String c : cmd) { System.out.println(c); }
         RunProcess rp = new RunProcess();
         Map<String, String> environment = new HashMap<>();
-        rp.execute(environment, cmd);
+        rp.execute(context.files.resolveWorkingDirectory("."), environment, cmd);
 
         String stdout = rp.getStdout() != null ? rp.getStdout() : "";
         String stderr = rp.getErr()    != null ? rp.getErr()    : "";

@@ -7,31 +7,27 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.JarInfo;
-
 import com.google.inject.Inject;
-
-import java.io.File;
 
 public class HtmlBackend extends BasicBackend {
 
+    private final FileUtil files;
+
     @Inject
-    HtmlBackend(Stopwatch sw, Context context) {
+    HtmlBackend(Stopwatch sw, Context context, FileUtil files) {
         super(sw, context);
+        this.files = files;
     }
 
     @Override
     public void run(Definition definition) {
-        String fileSep = System.getProperty("file.separator");
-        String htmlIncludePath = JarInfo.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
-        HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath, context);
+        HTMLFilter htmlFilter = new HTMLFilter(context);
         htmlFilter.visitNode(definition);
 
         String html = htmlFilter.getHTML();
 
-        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".html", html);
-        FileUtil.save(options.directory.getPath() + File.separator + "k-definition.css",
-                FileUtil.getFileContent(htmlIncludePath + "k-definition.css"));
+        files.saveToDefinitionDirectory(FilenameUtils.removeExtension(definition.getMainFile().getName()) + ".html", html);
+        files.saveToDefinitionDirectory("k-definition.css", files.loadFromKBase("include/html/k-definition.css"));
 
         sw.printIntermediate("Generating HTML");
 

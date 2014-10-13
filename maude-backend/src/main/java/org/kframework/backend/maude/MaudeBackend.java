@@ -13,9 +13,11 @@ public class MaudeBackend {
 
     private final Stopwatch sw;
     private final Context context;
-    public MaudeBackend(Stopwatch sw, Context context) {
+    private final FileUtil files;
+    public MaudeBackend(Stopwatch sw, Context context, FileUtil files) {
         this.sw = sw;
         this.context = context;
+        this.files = files;
     }
 
     public void run(Definition definition) {
@@ -28,7 +30,7 @@ public class MaudeBackend {
         StringBuilder maudified = maudeFilter.getResult();
         StringBuilderUtil.replaceFirst(maudified, mainModule, mainModule + "-BASE");
 
-        FileUtil.save(context.kompiled.getAbsolutePath() + "/base.maude", maudified);
+        files.saveToKompiled("base.maude", maudified.toString());
         sw.printIntermediate("Generating Maude file");
     }
 }

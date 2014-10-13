@@ -3,12 +3,14 @@ package org.kframework.utils.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.main.GlobalOptions;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import java.io.*;
-import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -16,58 +18,39 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
 
-import static org.apache.commons.io.FileUtils.readFileToString;
-import static org.apache.commons.io.FileUtils.writeStringToFile;
-
+@Singleton
 public class FileUtil {
 
-    static final Field stringBuilderValue;
-    static final Field stringBuilderCount;
+    private final File tempDir;
+    private final Provider<File> kompiledDir;
+    private final File workingDir;
+    private final Provider<File> definitionDir;
+    private final KExceptionManager kem;
 
-    static {
-        try {
-            final Class<?> abstractStringBuilderClass
-                = Class.forName("java.lang.AbstractStringBuilder");
-            stringBuilderValue = abstractStringBuilderClass.getDeclaredField("value");
-            stringBuilderValue.setAccessible(true);
-            stringBuilderCount = abstractStringBuilderClass.getDeclaredField("count");
-            stringBuilderCount.setAccessible(true);
-        } catch (NoSuchFieldException | ClassNotFoundException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
-
-    public static void save(String fileName, String content) {
-        try {
-            writeStringToFile(new File(fileName), content);
-        } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("Cannot save file content: " + fileName, e);
-        }
-    }
-
-    /**
-     * A performance-optimized version of save() that uses reflection to access private fields of
-     * StringBuilder.
-     */
-    public static void save(String fileName, StringBuilder content) {
-        try {
-            Files.createDirectories(Paths.get(fileName).getParent());
-
-            try (Writer writer = new BufferedWriter(new FileWriter(fileName))){
-                toWriter(content, writer);
-            }
-        } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("Cannot save file content: " + fileName, e);
-        }
-    }
-
-    public static void toWriter(StringBuilder content, Writer writer) throws IOException {
-        try {
-            char[] sbValue = (char[]) stringBuilderValue.get(content);
-            int sbCount = (int) stringBuilderCount.get(content);
-            writer.write(sbValue, 0, sbCount);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
+    @Inject
+    FileUtil(
+            @TempDir File tempDir,
+            @DefinitionDir Provider<File> definitionDir,
+            @WorkingDir File workingDir,
+            @KompiledDir Provider<File> kompiledDir,
+            GlobalOptions options,
+            KExceptionManager kem) {
+        this.tempDir = tempDir;
+        this.definitionDir = definitionDir;
+        this.workingDir = workingDir;
+        this.kompiledDir = kompiledDir;
+        this.kem = kem;
+        if (!options.debug) {
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        FileUtils.deleteDirectory(tempDir);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 
@@ -76,32 +59,6 @@ public class FileUtil {
      */
     public static String getMainModule(String filename) {
         return FilenameUtils.getBaseName(filename).toUpperCase();
-    }
-
-    public static String getFileContent(String file) {
-        try {
-            return readFileToString(new File(file));
-        } catch (FileNotFoundException e) {
-            GlobalSettings.kem.registerCriticalError(
-                    "Cannot retrieve file content. Make sure that file: " + file + " exists.", e);
-        } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError(
-                    "Cannot retrieve file content. An IO error occured: " + file, e);
-        }
-        return "";
-    }
-
-    public static byte[] getFileContentAsBytes(String file) {
-        try {
-            return FileUtils.readFileToByteArray(new File(file));
-        } catch (FileNotFoundException e) {
-            GlobalSettings.kem.registerCriticalError(
-                    "Cannot retrieve file content. Make sure that file: " + file + " exists.", e);
-        } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError(
-                    "Cannot retrieve file content. An IO error occured: " + file, e);
-        }
-        throw new AssertionError("unreachable");
     }
 
     // generate an unique name for a folder with the name dirName
@@ -121,6 +78,109 @@ public class FileUtil {
                 throw new IOException("Could not find resource " + resourcePath);
             }
             properties.load(inStream);
+        }
+    }
+
+    public void saveToDefinitionDirectory(String file, String content) {
+        save(resolveDefinitionDirectory(file), content);
+    }
+
+    public String loadFromWorkingDirectory(String file) {
+        return load(resolveWorkingDirectory(file));
+    }
+
+    public void saveToWorkingDirectory(String file, String content) {
+        save(resolveWorkingDirectory(file), content);
+    }
+
+    public String loadFromKompiled(String file) {
+        return load(resolveKompiled(file));
+    }
+
+    public void saveToKompiled(String file, String content) {
+        save(resolveKompiled(file), content);
+    }
+
+    public String loadFromTemp(String file) {
+        return load(resolveTemp(file));
+    }
+
+    public void saveToTemp(String file, String content) {
+        save(resolveTemp(file), content);
+    }
+
+    public String loadFromKBase(String file) {
+        return load(resolveKBase(file));
+    }
+
+    public File resolveTemp(String file) {
+        return new File(tempDir, file);
+    }
+
+    public File resolveKompiled(String file) {
+        return new File(kompiledDir.get(), file);
+    }
+
+    public File resolveDefinitionDirectory(String file) {
+        return new File(definitionDir.get(), file);
+    }
+
+    public File resolveWorkingDirectory(String file) {
+        File f = new File(file);
+        if (f.isAbsolute()) return f;
+        return new File(workingDir, file);
+    }
+
+    public File resolveKBase(String file) {
+        return new File(JarInfo.getKBase(false), file);
+    }
+
+    public void copyTempFileToDefinitionDirectory(String fromPath) {
+        copyFileToDirectory(resolveTemp(fromPath), resolveDefinitionDirectory("."));
+    }
+
+    public void copyTempFileToKompiledDirectory(String fromPath) {
+        copyFileToDirectory(resolveTemp(fromPath), resolveKompiled("."));
+    }
+
+    public void copyTempFileToKompiledFile(String fromPath, String toPath) {
+        copyFile(resolveTemp(fromPath), resolveKompiled(toPath));
+    }
+
+    private void copyFile(File from, File to) {
+        try {
+            FileUtils.copyFile(from, to);
+        } catch (IOException e) {
+            kem.registerCriticalError("Could not copy " + from + " to " + to, e);
+        }
+    }
+
+    private void copyFileToDirectory(File from, File toDir) {
+        try {
+            FileUtils.copyFileToDirectory(from, toDir);
+        } catch (IOException e) {
+            kem.registerCriticalError("Could not copy " + from + " to directory " + toDir, e);
+        }
+    }
+
+    private void save(File file, String content) {
+        try {
+            File dir = file.getAbsoluteFile().getParentFile();
+            if (!dir.exists() && !dir.mkdirs()) {
+                kem.registerCriticalError("Could not create directory " + dir);
+            }
+            FileUtils.writeStringToFile(file, content);
+        } catch (IOException e) {
+            kem.registerCriticalError("Could not write to file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    private String load(File file) {
+        try {
+            return FileUtils.readFileToString(file);
+        } catch (IOException e) {
+            kem.registerCriticalError("Could not read from file " + file.getAbsolutePath(), e);
+            throw new AssertionError("unreachable");
         }
     }
 }

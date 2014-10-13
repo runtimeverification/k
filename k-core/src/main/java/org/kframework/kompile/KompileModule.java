@@ -1,8 +1,10 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
+import java.io.File;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.Backends;
 import org.kframework.backend.coq.CoqBackend;
@@ -17,6 +19,10 @@ import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.DefinitionDir;
+import org.kframework.utils.file.KompiledDir;
+import org.kframework.utils.file.TempDir;
+import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.SMTOptions;
 
@@ -60,6 +66,21 @@ public class KompileModule extends AbstractModule {
         mapBinder.addBinding(Backends.UNPARSE).to(UnparserBackend.class);
         mapBinder.addBinding(Backends.UNFLATTEN).to(UnflattenBackend.class);
         mapBinder.addBinding(Backends.COQ).to(CoqBackend.class);
+    }
+
+    @Provides @DefinitionDir
+    File definitionDir(@WorkingDir File workingDir, KompileOptions options) {
+        File f = new File(options.directory);
+        if (f.isAbsolute()) return f;
+        return new File(workingDir, options.directory);
+    }
+
+    @Provides @KompiledDir
+    File kompiledDir(@DefinitionDir File defDir, KompileOptions options, Backend backend, @TempDir File tempDir) {
+        if (!backend.generatesDefinition()) {
+            return tempDir;
+        }
+        return new File(defDir, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
     }
 
     @Provides @Backend.Autoinclude

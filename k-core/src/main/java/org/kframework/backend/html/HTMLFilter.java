@@ -8,12 +8,12 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,11 +44,9 @@ public class HTMLFilter extends BackendFilter {
 
     private Properties Latex2HTMLzero = new Properties();
     private Properties Latex2HTMLone = new Properties();
-    private String includePath = new String();
 
-    public HTMLFilter(String includePath, org.kframework.kil.loader.Context context) {
+    public HTMLFilter(org.kframework.kil.loader.Context context) {
         super(context);
-        this.includePath = includePath;
         createHTMLColors();
         loadProperties();
     }
@@ -146,7 +144,7 @@ public class HTMLFilter extends BackendFilter {
             String pattern = patternsVisitor.getPatterns().get(p);
             boolean isLatex = patternsVisitor.getPatternType(p) == HTMLPatternType.LATEX;
             int n = 1;
-            HTMLFilter termFilter = new HTMLFilter(includePath, context);
+            HTMLFilter termFilter = new HTMLFilter(context);
             for (ProductionItem pi : p.getItems()) {
                 if (!(pi instanceof Terminal)) {
                     termFilter.setResult("");
@@ -347,7 +345,7 @@ public class HTMLFilter extends BackendFilter {
             super.visit(trm, _);
         else {
             String pattern = getBracketPattern(trm);
-            HTMLFilter termFilter = new HTMLFilter(includePath, context);
+            HTMLFilter termFilter = new HTMLFilter(context);
             termFilter.visitNode(trm.getContent());
             pattern = pattern.replace("{#1}", "<span>" + termFilter.getResult() + "</span>");
             result.append(pattern);
@@ -376,7 +374,7 @@ public class HTMLFilter extends BackendFilter {
          * The information about the attribute is in HTMLPatternVisitor. */
             String pattern = patternsVisitor.getPatterns().get(trm.getProduction());
             int n = 1;
-            HTMLFilter termFilter = new HTMLFilter(includePath, context);
+            HTMLFilter termFilter = new HTMLFilter(context);
             for (Term t : trm.getContents()) {
                 termFilter.setResult("");
                 termFilter.visitNode(t);
@@ -660,15 +658,15 @@ public class HTMLFilter extends BackendFilter {
 
     private void loadProperties() {
         try {
-            FileUtil.loadProperties(Latex2HTMLzero, getClass(), includePath + "Latex2HTMLzero.properties");
+            FileUtil.loadProperties(Latex2HTMLzero, getClass(), "Latex2HTMLzero.properties");
         } catch (IOException e) {
-            System.out.println("error loading " + includePath + "Latex2HTMLzero.properties");
+            GlobalSettings.kem.registerCriticalError("error loading " + "Latex2HTMLzero.properties", e);
         }
 
         try {
-            FileUtil.loadProperties(Latex2HTMLone, getClass(), includePath + "Latex2HTMLone.properties");
+            FileUtil.loadProperties(Latex2HTMLone, getClass(), "Latex2HTMLone.properties");
         } catch (IOException e) {
-            System.out.println("error loading Latex2HTMLone.properties");
+            GlobalSettings.kem.registerCriticalError("error loading Latex2HTMLone.properties", e);
         }
     }
 

@@ -1,4 +1,7 @@
-.k
+.kompile*
+.krun*
+.kast*
+.ktest*
 *-kompiled
 *.kore
 *.pdf

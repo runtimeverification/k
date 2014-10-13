@@ -1,26 +1,23 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import static org.apache.commons.io.FileUtils.writeStringToFile;
-
-import java.io.IOException;
-
 import org.fusesource.jansi.AnsiString;
 import org.kframework.kil.Attributes;
 import org.kframework.transformation.Transformation;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.Main;
 
 import com.google.inject.Inject;
 
 public class WriteOutput implements Transformation<String, Void> {
 
     private final KRunOptions options;
-    private final KExceptionManager kem;
+    private final FileUtil files;
 
     @Inject
-    public WriteOutput(KRunOptions options, KExceptionManager kem) {
+    public WriteOutput(KRunOptions options, @Main FileUtil files) {
         this.options = options;
-        this.kem = kem;
+        this.files = files;
     }
 
     @Override
@@ -32,11 +29,7 @@ public class WriteOutput implements Transformation<String, Void> {
             System.out.println(output);
         } else {
             output = new AnsiString(output).getPlain().toString();
-            try {
-                writeStringToFile(options.experimental.outputFile, output);
-            } catch (IOException e) {
-                kem.registerInternalError("Could not write to " + options.experimental.outputFile, e);
-            }
+            files.saveToWorkingDirectory(options.experimental.outputFile, output);
         }
         return null;
     }
