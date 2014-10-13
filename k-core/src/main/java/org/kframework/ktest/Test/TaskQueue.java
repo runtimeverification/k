@@ -163,11 +163,8 @@ public class TaskQueue {
             executeKompileStep(tc);
         } else {
             // Normally, krun steps of a test case is added after kompile step of the test case is
-            // done. But since we just skipped kompile step, we need to add krun steps here,
-            // unless krun steps are skipped too.
-            if (!options.getSkips().contains(KTestStep.KRUN) && !tc.skip(KTestStep.KRUN)) {
-                addKRunSteps(tc);
-            }
+            // done. But since we just skipped kompile step, we need to add krun steps here
+            addKRunSteps(tc);
         }
         if (!options.getSkips().contains(KTestStep.PDF) && !tc.skip(KTestStep.PDF)
                 && !pdfDefs.containsKey(tc.getDefinition())) {
@@ -288,11 +285,14 @@ public class TaskQueue {
     }
 
     /**
-     * Add KRun steps of the given test case to the {@link #tpe}.
+     * Add KRun steps of the given test case to the {@link #tpe}, unless krun steps are skipped.
+     * (using `--skip krun` or setting in the config file)
      */
     private void addKRunSteps(TestCase tc) {
-        for (Proc<KRunProgram> proc : tc.getKRunProcs()) {
-            tpe.execute(wrapKRunStep(proc));
+        if (!options.getSkips().contains(KTestStep.KRUN) && !tc.skip(KTestStep.KRUN)) {
+            for (Proc<KRunProgram> proc : tc.getKRunProcs()) {
+                tpe.execute(wrapKRunStep(proc));
+            }
         }
     }
 
