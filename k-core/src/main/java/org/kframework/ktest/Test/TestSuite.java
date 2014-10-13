@@ -36,6 +36,7 @@ public class TestSuite {
             return true;
         }
 
+        List<Proc<TestCase>> scriptProcs = queue.getScriptProcs();
         List<Proc<TestCase>> kompileProcs = queue.getKompileProcs();
         List<Proc<TestCase>> pdfProcs = queue.getPdfProcs();
         List<Proc<KRunProgram>> krunProcs = queue.getKrunProcs();
@@ -43,7 +44,7 @@ public class TestSuite {
         boolean success = true;
         long cpuTimeSpent = 0;
         long realTimeSpent = queue.getLastTestFinished() - options.start;
-        Iterable<Proc> allProcs = Iterables.concat(kompileProcs, pdfProcs, krunProcs);
+        Iterable<Proc> allProcs = Iterables.concat(scriptProcs, kompileProcs, pdfProcs, krunProcs);
         for (Proc p : allProcs) {
             success &= p.isSuccess();
             cpuTimeSpent += p.getTimeDelta();
@@ -58,6 +59,11 @@ public class TestSuite {
                 kompileProcs.size(), pdfProcs.size(), krunProcs.size());
 
         // generate reports
+        for (Proc<TestCase> p : scriptProcs) {
+            TestCase tc = p.getObj();
+            makeReport(p, makeRelative(tc.getDefinition()),
+                    FilenameUtils.getName(tc.getPosixInitScript()));
+        }
         for (Proc<TestCase> p : kompileProcs) {
             TestCase tc = p.getObj();
             makeReport(p, makeRelative(tc.getDefinition()),
