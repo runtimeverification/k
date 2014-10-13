@@ -10,7 +10,6 @@ import java.util.Map;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
-import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -35,7 +34,7 @@ public class JavaSymbolicExecutor implements Executor {
 
     private final Definition definition;
     private final JavaExecutionOptions javaOptions;
-    private final KilFactory kilFactory;
+    private final KILtoBackendJavaKILTransformer kilTransformer;
     private final GlobalContext globalContext;
     private final Provider<SymbolicRewriter> symbolicRewriter;
     private final KILtoBackendJavaKILTransformer transformer;
@@ -45,14 +44,14 @@ public class JavaSymbolicExecutor implements Executor {
     JavaSymbolicExecutor(
             Context context,
             JavaExecutionOptions javaOptions,
-            KilFactory kilFactory,
+            KILtoBackendJavaKILTransformer kilTransformer,
             GlobalContext globalContext,
             Provider<SymbolicRewriter> symbolicRewriter,
             KILtoBackendJavaKILTransformer transformer,
             Definition definition) {
         this.context = context;
         this.javaOptions = javaOptions;
-        this.kilFactory = kilFactory;
+        this.kilTransformer = kilTransformer;
         this.globalContext = globalContext;
         this.symbolicRewriter = symbolicRewriter;
         this.transformer = transformer;
@@ -77,7 +76,7 @@ public class JavaSymbolicExecutor implements Executor {
     }
 
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
-        Term term = kilFactory.transformAndEval(cfg);
+        Term term = kilTransformer.transformAndEval(cfg);
         TermContext termContext = TermContext.of(globalContext);
 
         if (javaOptions.patternMatching) {
@@ -120,13 +119,13 @@ public class JavaSymbolicExecutor implements Executor {
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Map<Variable,Term>> hits;
         if (javaOptions.patternMatching) {
-            Term initialTerm = kilFactory.transformAndEval(cfg);
+            Term initialTerm = kilTransformer.transformAndEval(cfg);
             Term targetTerm = null;
             GroundRewriter rewriter = new GroundRewriter(definition, TermContext.of(globalContext));
             hits = rewriter.search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType);
         } else {
-            ConstrainedTerm initialTerm = new ConstrainedTerm(kilFactory.transformAndEval(cfg), TermContext.of(globalContext));
+            ConstrainedTerm initialTerm = new ConstrainedTerm(kilTransformer.transformAndEval(cfg), TermContext.of(globalContext));
             ConstrainedTerm targetTerm = null;
             hits = getSymbolicRewriter().search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType);

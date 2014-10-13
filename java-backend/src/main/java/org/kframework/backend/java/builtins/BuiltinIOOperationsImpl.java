@@ -7,9 +7,9 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.kil.Sort;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
@@ -34,7 +34,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
     private final FileSystem fs;
     private final Context context;
     private final ConfigurationCreationOptions ccOptions;
-    private final KilFactory kilFactory;
+    private final KILtoBackendJavaKILTransformer kilTransformer;
 
     @Inject
     public BuiltinIOOperationsImpl(
@@ -42,12 +42,12 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
             FileSystem fs,
             Context context,
             ConfigurationCreationOptions ccOptions,
-            KilFactory kilFactory) {
+            KILtoBackendJavaKILTransformer kilTransformer) {
         this.def = def;
         this.fs = fs;
         this.context = context;
         this.ccOptions = ccOptions;
-        this.kilFactory = kilFactory;
+        this.kilTransformer = kilTransformer;
     }
 
     @Override
@@ -143,7 +143,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
             org.kframework.kil.Term kast = rp.runParser(
                     ccOptions.parser(context),
                     term1.stringValue(), true, Sort.of(term2.stringValue()), context);
-            Term term = kilFactory.transformAndEval(kast);
+            Term term = kilTransformer.transformAndEval(kast);
             return term;
         } catch (ParseFailedException e) {
             return processIOException("noparse", termContext);

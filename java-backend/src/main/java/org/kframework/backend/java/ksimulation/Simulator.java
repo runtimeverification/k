@@ -2,7 +2,6 @@
 package org.kframework.backend.java.ksimulation;
 
 import org.kframework.backend.java.kil.GlobalContext;
-import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.symbolic.SymbolicRewriter;
 import org.kframework.kil.Attributes;
 import org.kframework.krun.api.KRunProofResult;
@@ -27,8 +26,6 @@ public class Simulator implements Transformation<Void, KRunResult<?>> {
             @Spec Provider<org.kframework.kil.Term> specTerm,
             @Main GlobalContext implGlobalContext,
             @Spec GlobalContext specGlobalContext,
-            @Main KilFactory implFactory,
-            @Spec KilFactory specFactory,
             KExceptionManager kem) {
         this.kem = kem;
     }
