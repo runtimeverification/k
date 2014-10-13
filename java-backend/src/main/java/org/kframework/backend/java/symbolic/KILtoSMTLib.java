@@ -341,14 +341,14 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
      */
     @Override
     public ASTNode transform(SymbolicConstraint constraint) {
-        if (constraint.data.equalities.isEmpty()) {
+        if (constraint.equalities().isEmpty()) {
             return new SMTLibTerm("true");
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("(and");
         boolean isEmptyAdd = true;
-        for (Equality equality : constraint.data.equalities) {
+        for (Equality equality : constraint.equalities()) {
             try {
                 String left = ((SMTLibTerm) equality.leftHandSide().accept(this)).expression();
                 String right = ((SMTLibTerm) equality.rightHandSide().accept(this)).expression();
