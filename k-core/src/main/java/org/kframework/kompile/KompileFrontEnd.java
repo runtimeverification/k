@@ -78,6 +78,11 @@ public class KompileFrontEnd extends FrontEnd {
 
     @Override
     public boolean run() {
+        if (!options.mainDefinitionFile().exists()) {
+            kem.registerCriticalError("Definition file doesn't exist: " +
+                    options.mainDefinitionFile().getAbsolutePath());
+        }
+
         if (options.directory.isFile()) { // isFile = exists && !isDirectory
             String msg = "Not a directory: " + options.directory;
             kem.registerCriticalError(msg);
@@ -111,12 +116,13 @@ public class KompileFrontEnd extends FrontEnd {
         }
 
         if (backend.generatesDefinition()) {
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
+            context.kompiled = new File(options.directory, FilenameUtils.removeExtension(
+                    options.mainDefinitionFile().getName()) + "-kompiled");
+            if (context.kompiled.exists()) {
                 checkAnotherKompiled(context.kompiled);
-                if (options.mainDefinitionFile().exists()
-                        && !context.kompiled.exists() && !context.kompiled.mkdirs()) {
-                    kem.registerCriticalError("Could not create directory " + context.kompiled);
-                }
+            } else if (!context.kompiled.mkdirs()) {
+                kem.registerCriticalError("Could not create directory " + context.kompiled);
+            }
         }
 
         genericCompile(options.experimental.step);
