@@ -224,10 +224,13 @@ public class TaskQueue {
      * @return New {@link java.lang.Runnable} that does things described above.
      */
     private Runnable wrapPDFStep(Proc<TestCase> pdfStep) {
-        return () -> {
-            pdfDefs.put(pdfStep.getObj().getDefinition(), pdfStep.isSuccess());
-            pdfStep.run();
-            lastTestFinished = System.currentTimeMillis();
+        return new Runnable() {
+            @Override
+            public void run() {
+                pdfDefs.put(pdfStep.getObj().getDefinition(), pdfStep.isSuccess());
+                pdfStep.run();
+                lastTestFinished = System.currentTimeMillis();
+            }
         };
     }
 
@@ -247,10 +250,13 @@ public class TaskQueue {
      * @return New {@link java.lang.Runnable} that does things described above.
      */
     private Runnable wrapKRunStep(Proc<KRunProgram> krunStep) {
-        return () -> {
-            krunProcs.add(krunStep);
-            krunStep.run();
-            lastTestFinished = System.currentTimeMillis();
+        return new Runnable() {
+            @Override
+            public void run() {
+                krunProcs.add(krunStep);
+                krunStep.run();
+                lastTestFinished = System.currentTimeMillis();
+            }
         };
     }
 }
