@@ -18,6 +18,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
+
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
@@ -43,13 +44,23 @@ public class KTestOptions {
     public KTestOptions(Void v) {}
 
     public static final class KTestStepSetConverter extends EnumSetConverter<KTestStep, KTestStepConverter> {
+
+        public KTestStepSetConverter(String optionName) {
+            super(optionName);
+        }
+
         @Override
         public KTestStepConverter enumConverter() {
-            return new KTestStepConverter();
+            return new KTestStepConverter(getOptionName());
         }
     }
 
     public static final class KTestStepConverter extends BaseEnumConverter<KTestStep> {
+
+        public KTestStepConverter(String optionName) {
+            super(optionName);
+        }
+
         @Override
         public Class<KTestStep> enumClass() {
             return KTestStep.class;

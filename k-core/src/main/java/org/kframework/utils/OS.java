@@ -1,12 +1,9 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import java.io.File;
-
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.general.GlobalSettings;
 
 public enum OS {
@@ -14,11 +11,9 @@ public enum OS {
 
     private OS(boolean isPosix) {
         this.isPosix = isPosix;
-        this.binDir = JarInfo.getKBase(false) + "/lib/native";
     }
 
     public final boolean isPosix;
-    private final String binDir;
 
     public static OS current() {
         String osString = System.getProperty("os.name").toLowerCase();
@@ -32,7 +27,7 @@ public enum OS {
             return OS.UNKNOWN;
     }
 
-    public File getNativeExecutable(String executable) {
+    public String getNativeExecutable(String executable) {
         if (this == UNKNOWN) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                     "Unknown OS type. " + System.getProperty("os.name") + " not recognized. " +
@@ -40,11 +35,9 @@ public enum OS {
         }
         if (this == WIN) {
             executable = executable + ".exe";
+        } else {
+            executable = executable + ".uexe";
         }
-        File f = new File(binDir, executable);
-        if (isPosix) {
-            f.setExecutable(true, false);
-        }
-        return f;
+        return executable;
     }
 }

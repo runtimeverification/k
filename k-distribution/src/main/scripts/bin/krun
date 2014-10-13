@@ -1,12 +1,2 @@
 #!/usr/bin/env sh
-export ${native.path.variable}=$${native.path.variable}:"$(dirname "$0")/../lib/native"
-export CYGWIN=nodosfilewarning # if running on windows
-ulimit -s `ulimit -H -s`
-if [ -z "$K_OPTS" ];
-  then export K_OPTS="-Xms64m -Xmx1024m -Xss32m -XX:+TieredCompilation"
-fi
-if "$(dirname "$0")/../lib/checkJava"; then
-  java -Djava.awt.headless=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -krun "$@"
-else
-  exit 1
-fi
+"$(dirname "$0")/../lib/k" -krun "$@"

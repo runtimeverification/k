@@ -8,7 +8,6 @@ import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
-import com.google.inject.ProvidedBy;
 
 public class ColorOptions {
 
@@ -29,6 +28,10 @@ public class ColorOptions {
     }
 
     public static class ColorModeConverter extends BaseEnumConverter<ColorSetting> {
+
+        public ColorModeConverter(String optionName) {
+            super(optionName);
+        }
 
         @Override
         public Class<ColorSetting> enumClass() {

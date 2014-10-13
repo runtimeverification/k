@@ -5,8 +5,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.converters.BaseConverter;
 
 /**
  * Helper class used to abstract functionality of converting enums in JCommander.
@@ -15,7 +15,11 @@ import com.beust.jcommander.ParameterException;
  * @author dwightguth
  *
  */
-public abstract class BaseEnumConverter<T extends Enum<T>> implements IStringConverter<T> {
+public abstract class BaseEnumConverter<T extends Enum<T>> extends BaseConverter<T> {
+
+    public BaseEnumConverter(String optionName) {
+        super(optionName);
+    }
 
     @Override
     public T convert(String arg) {
@@ -27,7 +31,7 @@ public abstract class BaseEnumConverter<T extends Enum<T>> implements IStringCon
             for (T value : values) {
                 validValues.add(friendlyName(value));
             }
-            throw new ParameterException("Invalid value for --backend parameter. Allowed values:" +
+            throw new ParameterException("Invalid value for " + getOptionName() + " parameter. Allowed values:" +
                     validValues);
         }
     }

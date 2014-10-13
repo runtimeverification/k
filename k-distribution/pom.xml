@@ -86,6 +86,11 @@
               <goal>integration-test</goal>
               <goal>verify</goal>
             </goals>
+            <configuration>
+              <environmentVariables>
+                <PATH>${env.PATH}${path.separator}${project.build.directory}/release/k/lib/native/${native.os.classifier}</PATH>
+              </environmentVariables>
+            </configuration>
           </execution>
           <execution>
             <id>verify-ktest</id>
@@ -129,16 +134,14 @@
             </configuration>
           </execution>
           <execution>
-            <id>copy-native-dependencies</id>
+            <id>copy-windows-dependencies</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
+              <includeArtifactIds>cygwin1</includeArtifactIds>
+              <outputDirectory>${project.build.directory}/lib/native/windows</outputDirectory>
               <stripVersion>true</stripVersion>
-              <stripClassifier>true</stripClassifier>
-              <includeTypes>${native.library.type}</includeTypes>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -172,7 +175,7 @@
                 <format>tar.gz</format>
                 <format>zip</format>
               </formats>
-              <finalName>k-nightly-${native.classifier}</finalName>
+              <finalName>k-nightly</finalName>
               <appendAssemblyId>false</appendAssemblyId>
             </configuration>
           </execution>

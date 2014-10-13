@@ -41,6 +41,10 @@ public final class JavaExecutionOptions {
 
     public static class RuleIndexConveter extends BaseEnumConverter<IndexingAlgorithm> {
 
+        public RuleIndexConveter(String optionName) {
+            super(optionName);
+        }
+
         @Override
         public Class<IndexingAlgorithm> enumClass() {
             return IndexingAlgorithm.class;

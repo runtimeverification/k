@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
+
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
@@ -78,6 +79,10 @@ public final class KastOptions {
     public ParserType parser = ParserType.PROGRAM;
 
     public static class ParserTypeConverter extends BaseEnumConverter<ParserType> {
+
+        public ParserTypeConverter(String optionName) {
+            super(optionName);
+        }
 
         @Override
         public Class<ParserType> enumClass() {

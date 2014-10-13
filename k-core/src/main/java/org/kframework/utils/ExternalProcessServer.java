@@ -3,7 +3,6 @@ package org.kframework.utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 
@@ -31,9 +30,9 @@ public class ExternalProcessServer {
     /** Start the server process */
     public void init() throws IOException {
         if (!firstTime) return;
-        File f = OS.current().getNativeExecutable(executable);
+        String f = OS.current().getNativeExecutable(executable);
 
-        ProcessBuilder pb = new ProcessBuilder(f.getAbsolutePath());
+        ProcessBuilder pb = new ProcessBuilder(f);
         pb.redirectError(Redirect.INHERIT);
         server = pb.start();
         output = new DataOutputStream(server.getOutputStream());

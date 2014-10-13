@@ -18,9 +18,4 @@ public enum SMTSolver {
      */
     Z3,
 
-    /**
-     * Uses {@link GappaServer}.
-     */
-    GAPPA;
-
 }
