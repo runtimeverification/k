@@ -392,6 +392,7 @@ public class TestCase {
             if (karg.arg.equals("--directory") || karg.arg.equals("-d")) {
                 kompileDirArg = FilenameUtils.concat(
                         FilenameUtils.getFullPath(definition.getObj()), karg.val);
+                return;
             }
         }
         kompileDirArg = null;
