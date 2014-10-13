@@ -65,6 +65,10 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         return collectionFunctions.isEmpty() && collectionVariables.size() <= 1;
     }
 
+    public boolean hasGroundKeys() {
+        return entries.keySet().stream().allMatch(Term::isGround);
+    }
+
     @Override
     public int concreteSize() {
         return entries.size();
