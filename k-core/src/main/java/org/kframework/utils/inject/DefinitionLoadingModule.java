@@ -33,14 +33,6 @@ public class DefinitionLoadingModule extends AbstractModule {
 
         sw.printIntermediate("Loading serialized context");
 
-        context.dotk = new File(
-                options.definition().getParent() + File.separator
-                        + ".k");
-        if (!context.dotk.exists()) {
-            if (!context.dotk.mkdirs()) {
-                kem.registerCriticalError("could not create directory " + context.dotk);
-            }
-        }
         context.kompiled = options.definition();
 
         sw.printIntermediate("Initializing definition paths");
