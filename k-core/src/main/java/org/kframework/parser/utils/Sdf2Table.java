@@ -14,10 +14,10 @@ public class Sdf2Table {
         ThreadedStreamCapturer errorStreamHandler;
 
         try {
-            File f = OS.current().getNativeExecutable("sdf2table");
+            String f = OS.current().getNativeExecutable("sdf2table");
 
             // create process
-            ProcessBuilder pb = new ProcessBuilder(f.getAbsolutePath(), "-c", "-m", mainFile, "-o", mainFile + ".tbl");
+            ProcessBuilder pb = new ProcessBuilder(f, "-c", "-m", mainFile, "-o", mainFile + ".tbl");
             pb.directory(startDir);
 
             // start sdf2table process

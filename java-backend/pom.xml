@@ -42,28 +42,161 @@
       <artifactId>com.microsoft.z3</artifactId>
       <version>4.3.2-SNAPSHOT</version>
     </dependency>
+
     <dependency>
       <groupId>com.microsoft.z3</groupId>
-      <artifactId>${native.library.prefix}z3java</artifactId>
+      <artifactId>libz3java</artifactId>
       <version>4.3.2-SNAPSHOT</version>
-      <type>${native.library.type}</type>
-      <classifier>${native.classifier}</classifier>
+      <type>so</type>
+      <classifier>linux64</classifier>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>libz3</artifactId>
       <version>4.3.2-SNAPSHOT</version>
-      <type>${native.library.type}</type>
-      <classifier>${native.classifier}</classifier>
+      <type>so</type>
+      <classifier>linux64</classifier>
     </dependency>
     <dependency>
       <groupId>com.microsoft.z3</groupId>
       <artifactId>z3</artifactId>
       <version>4.3.2-SNAPSHOT</version>
-      <type>${native.exe.type}</type>
-      <classifier>${native.classifier}</classifier>
+      <type>uexe</type>
+      <classifier>linux64</classifier>
     </dependency>
 
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3java</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>so</type>
+      <classifier>linux32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>so</type>
+      <classifier>linux32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>z3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>uexe</type>
+      <classifier>linux32</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3java</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>dylib</type>
+      <classifier>osx</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>dylib</type>
+      <classifier>osx</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>z3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>uexe</type>
+      <classifier>osx</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>z3java</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>dll</type>
+      <classifier>windows64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>dll</type>
+      <classifier>windows64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>z3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>exe</type>
+      <classifier>windows64</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>z3java</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>dll</type>
+      <classifier>windows32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>libz3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>dll</type>
+      <classifier>windows32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>z3</artifactId>
+      <version>4.3.2-SNAPSHOT</version>
+      <type>exe</type>
+      <classifier>windows32</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>vcomp100</artifactId>
+      <version>10.0</version>
+      <type>dll</type>
+      <classifier>64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>msvcp100</artifactId>
+      <version>10.0</version>
+      <type>dll</type>
+      <classifier>64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>msvcr100</artifactId>
+      <version>10.0</version>
+      <type>dll</type>
+      <classifier>64</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>vcomp100</artifactId>
+      <version>10.0</version>
+      <type>dll</type>
+      <classifier>32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>msvcp100</artifactId>
+      <version>10.0</version>
+      <type>dll</type>
+      <classifier>32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.z3</groupId>
+      <artifactId>msvcr100</artifactId>
+      <version>10.0</version>
+      <type>dll</type>
+      <classifier>32</classifier>
+    </dependency>
+ 
   </dependencies>
 
   <build>
@@ -80,7 +213,8 @@
             <configuration>
               <stripVersion>true</stripVersion>
               <stripClassifier>true</stripClassifier>
-              <includeTypes>${native.library.type}</includeTypes>
+              <includeTypes>so,dylib,dll</includeTypes>
+              <includeClassifiers>${native.arch.classifier},${native.classifier},${native.os.classifier}</includeClassifiers>
               <includeScope>runtime</includeScope>
               <outputDirectory>${project.build.directory}/lib/native</outputDirectory>
             </configuration>
@@ -100,38 +234,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>windows</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.microsoft.z3</groupId>
-          <artifactId>vcomp100</artifactId>
-          <version>10.0</version>
-          <type>dll</type>
-          <classifier>${native.arch.classifier}</classifier>
-        </dependency>
-        <dependency>
-          <groupId>com.microsoft.z3</groupId>
-          <artifactId>msvcp100</artifactId>
-          <version>10.0</version>
-          <type>dll</type>
-          <classifier>${native.arch.classifier}</classifier>
-        </dependency>
-        <dependency>
-          <groupId>com.microsoft.z3</groupId>
-          <artifactId>msvcr100</artifactId>
-          <version>10.0</version>
-          <type>dll</type>
-          <classifier>${native.arch.classifier}</classifier>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 </project>

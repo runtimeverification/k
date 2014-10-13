@@ -44,13 +44,7 @@ public class CoqBackend extends BasicBackend {
 
         FileUtil.save(options.directory.getPath() + File.separator + labelFile, unparsedText);
 
-        final File kcoqFile = OS.current().getNativeExecutable("kcoq");
-        final String kcoq = kcoqFile.getAbsolutePath();
-        if (!kcoqFile.canExecute()) {
-            kem.registerCriticalError("Could not find kcoq exectuable for your platform, check that it is installed at "
-              +kcoq+" and is executable.");
-            return;
-        }
+        final String kcoq = OS.current().getNativeExecutable("kcoq");
         File directory = new File(definition.getMainFile()).getParentFile();
 
         try {
