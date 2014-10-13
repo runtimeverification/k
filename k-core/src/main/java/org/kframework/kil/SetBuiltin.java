@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.backend.unparser.UnparserFilterNew;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.backend.unparser.UnparserLexicalComparator;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.loader.Context;
@@ -46,7 +46,7 @@ public class SetBuiltin extends CollectionBuiltin {
         for (Term element : elements()) {
             Term item = KApp.of(sort().elementLabel(), element);
             items.add(item);
-            UnparserFilterNew unparser = new UnparserFilterNew(context);
+            UnparserFilter unparser = new UnparserFilter(context);
             unparser.visitNode(item);
             String s = unparser.getResult();
             unparsed.put(item, s);
