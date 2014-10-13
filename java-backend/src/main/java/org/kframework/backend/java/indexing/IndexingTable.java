@@ -1,8 +1,9 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.indexing;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -24,19 +25,18 @@ import java.util.Set;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 
 /**
  * The indexing scheme currently used in the Java Backend
  */
-public class IndexingTable implements Serializable, RuleIndex{
+public class IndexingTable implements Serializable, RuleIndex {
 
-    private Map<Index, List<Rule>> ruleTable;
-    private Map<Index, List<Rule>> heatingRuleTable;
-    private Map<Index, List<Rule>> coolingRuleTable;
-    private Map<Index, List<Rule>> instreamRuleTable;
-    private Map<Index, List<Rule>> outstreamRuleTable;
-    private List<Rule> unindexedRules;
+    private Map<Index, Set<Rule>> ruleTable;
+    private Map<Index, Set<Rule>> heatingRuleTable;
+    private Map<Index, Set<Rule>> coolingRuleTable;
+    private Map<Index, Set<Rule>> instreamRuleTable;
+    private Map<Index, Set<Rule>> outstreamRuleTable;
+    private Set<Rule> unindexedRules;
     private final Definition definition;
 
     private final Data data;
@@ -84,59 +84,59 @@ public class IndexingTable implements Serializable, RuleIndex{
         /* Map each index to a list of rules unifiable with that index */
         /* Heating rules and regular rules have their first index checked */
         /* Cooling rules have their second index checked */
-        ImmutableMap.Builder<Index, List<Rule>> mapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> heatingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> coolingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> instreamMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> outstreamMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> heatingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> coolingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> instreamMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> outstreamMapBuilder = ImmutableMap.builder();
 
         for (Index index : indices) {
-            ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> heatingListBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> coolingListBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> instreamListBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> outstreamListBuilder = ImmutableList.builder();
+            ImmutableSet.Builder<Rule> rulesBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<Rule> heatingRulesBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<Rule> coolingRulesBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<Rule> instreamRulesBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<Rule> outstreamRulesBuilder = ImmutableSet.builder();
 
             for (Rule rule : definition.rules()) {
                 if (rule.containsAttribute("heat")) {
                     if (index.isUnifiable(rule.indexingPair().first)) {
-                        heatingListBuilder.add(rule);
+                        heatingRulesBuilder.add(rule);
                     }
                 } else if (rule.containsAttribute("cool")) {
                     if (index.isUnifiable(rule.indexingPair().second)) {
-                        coolingListBuilder.add(rule);
+                        coolingRulesBuilder.add(rule);
                     }
                 } else if (rule.containsAttribute(Constants.STDIN)) {
                     if (index.isUnifiable(rule.indexingPair().second)) {
-                        instreamListBuilder.add(rule);
+                        instreamRulesBuilder.add(rule);
                     }
                 } else if (rule.containsAttribute(Constants.STDOUT) || rule.containsAttribute(Constants.STDERR)) {
                     if (index.isUnifiable(rule.indexingPair().first)) {
-                        outstreamListBuilder.add(rule);
+                        outstreamRulesBuilder.add(rule);
                     }
                 } else {
                     if (index.isUnifiable(rule.indexingPair().first)) {
-                        listBuilder.add(rule);
+                        rulesBuilder.add(rule);
                     }
                 }
             }
-            ImmutableList<Rule> rules = listBuilder.build();
+            ImmutableSet<Rule> rules = rulesBuilder.build();
             if (!rules.isEmpty()) {
                 mapBuilder.put(index, rules);
             }
-            rules = heatingListBuilder.build();
+            rules = heatingRulesBuilder.build();
             if (!rules.isEmpty()) {
                 heatingMapBuilder.put(index, rules);
             }
-            rules = coolingListBuilder.build();
+            rules = coolingRulesBuilder.build();
             if (!rules.isEmpty()) {
                 coolingMapBuilder.put(index, rules);
             }
-            rules = instreamListBuilder.build();
+            rules = instreamRulesBuilder.build();
             if (!rules.isEmpty()) {
                 instreamMapBuilder.put(index, rules);
             }
-            rules = outstreamListBuilder.build();
+            rules = outstreamRulesBuilder.build();
             if (!rules.isEmpty()) {
                 outstreamMapBuilder.put(index, rules);
             }
@@ -147,15 +147,15 @@ public class IndexingTable implements Serializable, RuleIndex{
         outstreamRuleTable = outstreamMapBuilder.build();
         ruleTable = mapBuilder.build();
 
-        ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
+        ImmutableSet.Builder<Rule> unindexedRulesBuilder = ImmutableSet.builder();
         for (Rule rule : definition.rules()) {
             if (!rule.containsKCell() && !rule.containsAttribute(Constants.STDIN)
                         && !rule.containsAttribute(Constants.STDOUT)
                         && !rule.containsAttribute(Constants.STDERR)) {
-                    listBuilder.add(rule);
+                    unindexedRulesBuilder.add(rule);
             }
         }
-        unindexedRules = listBuilder.build();
+        unindexedRules = unindexedRulesBuilder.build();
     }
 
     /**
@@ -197,7 +197,7 @@ public class IndexingTable implements Serializable, RuleIndex{
     }
 
     private List<Rule> getRulesFromCfgTermIdx(ConfigurationTermIndex cfgTermIdx) {
-        Set<Rule> rules = new LinkedHashSet<>();
+        List<Rule> rules = Lists.newArrayList();
 
         /* give priority to IO rules */
         for (IndexingPair pair : cfgTermIdx.getInstreamIndexingPairs()) {
@@ -234,7 +234,7 @@ public class IndexingTable implements Serializable, RuleIndex{
 
         rules.addAll(unindexedRules);
 
-        return new ArrayList<>(rules);
+        return rules;
     }
 
     private ConfigurationTermIndex getConfigurationTermIndex(List<Cell<?>> indexingCells) {
