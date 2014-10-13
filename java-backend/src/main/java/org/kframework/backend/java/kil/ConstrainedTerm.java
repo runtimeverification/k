@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.TruthValue;
@@ -15,6 +14,7 @@ import org.kframework.kil.ASTNode;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -30,21 +30,21 @@ public class ConstrainedTerm extends JavaSymbolicObject {
          * Represents key lookups of builtin data-structures as a symbolic
          * constraint.
          */
-        public final SymbolicConstraint.Data lookupsData;
-        public final SymbolicConstraint.Data constraintData;
-        public Data(Term term, SymbolicConstraint.Data lookups,
-                SymbolicConstraint.Data constraint) {
+        public final SymbolicConstraint lookups;
+        public final SymbolicConstraint constraint;
+        public Data(Term term, SymbolicConstraint lookups,
+                SymbolicConstraint constraint) {
             super();
             this.term = term;
-            this.lookupsData = lookups;
-            this.constraintData = constraint;
+            this.lookups = lookups;
+            this.constraint = constraint;
         }
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((constraintData == null) ? 0 : constraintData.hashCode());
-            result = prime * result + ((lookupsData == null) ? 0 : lookupsData.hashCode());
+            result = prime * result + ((constraint == null) ? 0 : constraint.hashCode());
+            result = prime * result + ((lookups == null) ? 0 : lookups.hashCode());
             result = prime * result + ((term == null) ? 0 : term.hashCode());
             return result;
         }
@@ -57,15 +57,15 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             if (getClass() != obj.getClass())
                 return false;
             Data other = (Data) obj;
-            if (constraintData == null) {
-                if (other.constraintData != null)
+            if (constraint == null) {
+                if (other.constraint != null)
                     return false;
-            } else if (!constraintData.equals(other.constraintData))
+            } else if (!constraint.equals(other.constraint))
                 return false;
-            if (lookupsData == null) {
-                if (other.lookupsData != null)
+            if (lookups == null) {
+                if (other.lookups != null)
                     return false;
-            } else if (!lookupsData.equals(other.lookupsData))
+            } else if (!lookups.equals(other.lookups))
                 return false;
             if (term == null) {
                 if (other.term != null)
@@ -75,35 +75,24 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return true;
         }
 
-
     }
 
     private Data data;
 
     private final TermContext context;
 
-    private final SymbolicConstraint lookups;
-
-    private final SymbolicConstraint constraint;
-
-    public ConstrainedTerm(Data data, TermContext context) {
+    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint) {
+        Data data = new Data(term, lookups, constraint);
         this.data = data;
-        this.context = context;
-        this.lookups = new SymbolicConstraint(data.lookupsData, context);
-        this.constraint = new SymbolicConstraint(data.constraintData, context);
+        this.context = data.constraint.termContext();
     }
 
-    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint,
-            TermContext context) {
-        this(new Data(term, lookups.data, constraint.data), context);
-    }
-
-    public ConstrainedTerm(Term term, SymbolicConstraint constraint, TermContext context) {
-        this(term, new SymbolicConstraint(context), constraint, context);
+    public ConstrainedTerm(Term term, SymbolicConstraint constraint) {
+        this(term, new SymbolicConstraint(constraint.termContext()), constraint);
     }
 
     public ConstrainedTerm(Term term, TermContext context) {
-        this(term, new SymbolicConstraint(context), new SymbolicConstraint(context), context);
+        this(term, new SymbolicConstraint(context), new SymbolicConstraint(context));
     }
 
     public TermContext termContext() {
@@ -111,15 +100,15 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
 
     public SymbolicConstraint constraint() {
-        return constraint;
+        return data.constraint;
+    }
+
+    public SymbolicConstraint lookups() {
+        return data.lookups;
     }
 
     public boolean implies(ConstrainedTerm constrainedTerm) {
         return matchImplies(constrainedTerm) != null;
-    }
-
-    public SymbolicConstraint lookups() {
-        return lookups;
     }
 
     /**
@@ -129,7 +118,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      */
     public SymbolicConstraint matchImplies(ConstrainedTerm constrainedTerm) {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
-        unificationConstraint.addAll(constraint.substitution());
+        unificationConstraint.addAll(data.constraint.substitution());
         unificationConstraint.add(data.term, constrainedTerm.data.term);
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse()) {
@@ -138,8 +127,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         /* apply pattern folding */
         unificationConstraint.simplifyModuloPatternFolding();
-        unificationConstraint.addAll(constrainedTerm.lookups);
-        unificationConstraint.addAll(constrainedTerm.constraint);
+        unificationConstraint.addAll(constrainedTerm.data.lookups);
+        unificationConstraint.addAll(constrainedTerm.data.constraint);
         unificationConstraint.simplifyModuloPatternFolding();
         if (unificationConstraint.isFalse()) {
             return null;
@@ -151,7 +140,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         unificationConstraint.expandPatternsAndSimplify(false);
         unificationConstraint.expandPatternsAndSimplify(false);
 
-        final Set<Variable> variables = unificationConstraint.variableSet();
+        final Set<Variable> variables = Sets.newHashSet(unificationConstraint.variableSet());
         variables.removeAll(variableSet());
         unificationConstraint.orientSubstitution(variables);
         if (unificationConstraint.isFalse()
@@ -160,7 +149,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
 
         SymbolicConstraint leftHandSide = SymbolicConstraint
-                .simplifiedConstraintFrom(constrainedTerm.termContext(), constraint);
+                .simplifiedConstraintFrom(constrainedTerm.termContext(), data.constraint);
 
         Predicate<Variable> notInVariables = new Predicate<Variable>() {
             @Override
@@ -168,6 +157,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 return variables.contains(var);
             }
         };
+
         SymbolicConstraint rightHandSide = SymbolicConstraint
                 .simplifiedConstraintFrom(constrainedTerm.termContext(),
                         Maps.filterKeys(unificationConstraint.substitution(), notInVariables),
@@ -178,7 +168,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return null;
         }
 
-        unificationConstraint.addAllThenSimplify(lookups, constraint);
+        unificationConstraint.addAllThenSimplify(data.lookups, data.constraint);
 
         return unificationConstraint;
     }
@@ -206,12 +196,12 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
             if (TruthValue.FALSE ==
-                    candidate.addAllThenSimplify(constrainedTerm.lookups, constrainedTerm.constraint)) {
+                    candidate.addAllThenSimplify(constrainedTerm.data.lookups, constrainedTerm.data.constraint)) {
                 continue;
             }
 
             if (!candidate.isMatching(constrainedTerm.variableSet())) {
-                if (TruthValue.FALSE == candidate.addAllThenSimplify(constraint)) {
+                if (TruthValue.FALSE == candidate.addAllThenSimplify(data.constraint)) {
                     continue;
                 }
 
@@ -222,7 +212,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 // TODO(AndreiS): find a better place for pattern expansion
                 candidate.expandPatternsAndSimplify(true);
             } else {
-                SymbolicConstraint clonedConstraint = new SymbolicConstraint(constraint, context);
+                SymbolicConstraint clonedConstraint = new SymbolicConstraint(data.constraint, context);
                 clonedConstraint.addAll(candidate);
                 candidate = clonedConstraint;
             }
@@ -256,12 +246,12 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     @Override
     public String toString() {
-        return data.term + SymbolicConstraint.SEPARATOR + constraint + SymbolicConstraint.SEPARATOR + lookups;
+        return data.term + SymbolicConstraint.SEPARATOR + data.constraint + SymbolicConstraint.SEPARATOR + data.lookups;
     }
 
     @Override
     public ASTNode accept(Transformer transformer) {
-        throw new UnsupportedOperationException();
+        return transformer.transform(this);
     }
 
     @Override

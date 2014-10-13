@@ -54,16 +54,16 @@ public class SymbolicUnifier extends AbstractUnifier {
         /**
          * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
          */
-        public Collection<Collection<SymbolicConstraint.Data>> multiConstraints;
+        public Collection<Collection<SymbolicConstraint>> multiConstraints;
 
         //TODO: the fields should be final
 
-        public Data(Collection<Collection<SymbolicConstraint.Data>> multiConstraints) {
+        public Data(Collection<Collection<SymbolicConstraint>> multiConstraints) {
             this.multiConstraints = multiConstraints;
         }
 
         public Data() {
-            this(new ArrayList<java.util.Collection<SymbolicConstraint.Data>>());
+            this(new ArrayList<java.util.Collection<SymbolicConstraint>>());
         }
 
         @Override
@@ -121,9 +121,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     public Collection<Collection<SymbolicConstraint>> multiConstraints() {
         ArrayList<Collection<SymbolicConstraint>> multiConstraints = new ArrayList<>();
-        for(Collection<SymbolicConstraint.Data> mcd: data.multiConstraints) {
+        for(Collection<SymbolicConstraint> mcd: data.multiConstraints) {
             ArrayList<SymbolicConstraint> mc = new ArrayList<>();
-            for(SymbolicConstraint.Data scd: mcd)
+            for(SymbolicConstraint scd: mcd)
                 mc.add(new SymbolicConstraint(scd, termContext));
             multiConstraints.add(mc);
         }
@@ -320,7 +320,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             return unifyMap(map, otherMap, true);
         }
 
-        Set<BuiltinMap> foldedMaps = new HashSet<>();
+        Set<BuiltinMap> foldedMaps = Sets.newLinkedHashSet();
         foldedMaps.add(map);
         Queue<BuiltinMap> queue = new LinkedList<>();
         queue.add(map);
@@ -706,9 +706,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (constraints.size() == 1) {
                 fConstraint.addAll(constraints.iterator().next());
             } else {
-                List<SymbolicConstraint.Data> constraintsData = new ArrayList<>();
+                List<SymbolicConstraint> constraintsData = new ArrayList<>();
                 for(SymbolicConstraint c : constraints)
-                    constraintsData.add(c.data);
+                    constraintsData.add(c);
                 data.multiConstraints.add(constraintsData);
             }
         }

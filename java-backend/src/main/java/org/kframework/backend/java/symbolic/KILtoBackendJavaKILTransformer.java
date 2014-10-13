@@ -118,16 +118,18 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         return evaluatedDefinition;
     }
 
-    public Rule transformRule(org.kframework.kil.Rule node) {
+    public Rule transformAndEval(org.kframework.kil.Rule node) {
         Rule rule = null;
         rule = new MacroExpander(TermContext.of(globalContext)).processRule((Rule) this.visitNode(node));
+        rule = evaluateRule(rule, globalContext);
 
         return rule;
     }
 
-    public Term transformTerm(org.kframework.kil.Term node, Definition definition) {
+    public Term transformAndEval(org.kframework.kil.Term node) {
         Term term = null;
         term = new MacroExpander(TermContext.of(globalContext)).processTerm((Term) this.visitNode(node));
+        term = term.evaluate(TermContext.of(globalContext));
 
         return term;
     }

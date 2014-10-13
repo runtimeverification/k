@@ -6,7 +6,6 @@
         programs="."
         results="."
         extension="c"
-        exclude="merge_sort.c"
         >
     <kompile-option name="--backend" value="java" />
     <kompile-option name="-d" value="sorting" />

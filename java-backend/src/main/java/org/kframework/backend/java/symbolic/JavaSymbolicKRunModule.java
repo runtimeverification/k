@@ -8,7 +8,6 @@ import org.kframework.backend.java.builtins.BuiltinIOOperations;
 import org.kframework.backend.java.builtins.BuiltinIOOperationsImpl;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
-import org.kframework.backend.java.kil.KilFactory;
 import org.kframework.backend.java.ksimulation.Simulator;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -67,7 +66,6 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             bind(BuiltinIOOperations.class).to(BuiltinIOOperationsImpl.class);
 
             bind(SymbolicRewriter.class);
-            bind(KilFactory.class);
             bind(GlobalContext.class);
 
             MapBinder<String, Prover> proverBinder = MapBinder.newMapBinder(
@@ -105,14 +103,12 @@ public class JavaSymbolicKRunModule extends AbstractModule {
             bind(Term.class).annotatedWith(Spec.class).to(Term.class);
             bind(SymbolicRewriter.class).annotatedWith(Spec.class).to(SymbolicRewriter.class);
             bind(GlobalContext.class).annotatedWith(Spec.class).to(GlobalContext.class);
-            bind(KilFactory.class).annotatedWith(Spec.class).to(KilFactory.class);
             bind(Context.class).annotatedWith(Spec.class).to(Context.class);
 
             bind(Simulator.class).annotatedWith(Main.class).to(Simulator.class);
 
             expose(SymbolicRewriter.class).annotatedWith(Spec.class);
             expose(GlobalContext.class).annotatedWith(Spec.class);
-            expose(KilFactory.class).annotatedWith(Spec.class);
             expose(Term.class).annotatedWith(Spec.class);
             expose(Context.class).annotatedWith(Spec.class);
 
