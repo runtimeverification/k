@@ -32,6 +32,7 @@
         <program name="comm_assoc.c">
           <krun-option name="--prove" value="tests/simple/comm_assoc_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/basic.smt2" />
+          <krun-option name="--z3-cnstr-timeout" value="5000" />
         </program>
         <program name="multiplication_by_addition.c">
           <krun-option name="--prove" value="tests/simple/multiplication_by_addition_spec.k" />

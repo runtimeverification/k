@@ -17,6 +17,7 @@
     <program name="sum.simple">
       <krun-option name="--prove" value="verification/sum_spec.k" />
       <krun-option name="--directory" value="verification" />
+      <krun-option name="--z3-executable" />
     </program>
     <program name="comm_assoc.simple">
       <krun-option name="--prove" value="verification/comm_assoc_spec.k" />
