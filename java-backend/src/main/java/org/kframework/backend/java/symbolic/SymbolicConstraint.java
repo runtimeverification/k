@@ -587,7 +587,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Entry<Variable, ValueDifference<Term>> entry : mapDifference.entriesDiffering().entrySet()) {
             simplifiedConstraint.add(entry.getKey(), entry.getValue().leftValue());
         }
-        List<Equality> equalities = new LinkedList<>(constraint.equalities());
+        Set<Equality> equalities = Sets.newLinkedHashSet(constraint.equalities());
         equalities.removeAll(equalities());
         simplifiedConstraint.addAll(equalities);
         simplifiedConstraint.simplify();
@@ -612,8 +612,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean isFalse() {
-        normalize();
-        return truthValue == TruthValue.FALSE;
+        if (truthValue == TruthValue.FALSE) {
+            return true;
+        } else {
+            normalize();
+            return truthValue == TruthValue.FALSE;
+        }
     }
 
     public boolean isTrue() {
@@ -632,7 +636,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     private void falsify(Equality equality) {
         // TODO(AndreiS): this assertion should not fail
-        // assert truthValue == TruthValue.TRUE || truthValue == TruthValue.UNKNOWN;
+        assert truthValue == TruthValue.TRUE || truthValue == TruthValue.UNKNOWN;
         truthValue = TruthValue.FALSE;
         falsifyingEquality = equality;
     }
@@ -668,15 +672,22 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return truthValue;
         }
 
-        boolean change; // specifies if the equalities have been further
-                        // simplified in the last iteration
+        Map<Variable, Term> oldSubst = null;
+        Set<Equality> oldEqualities = null;
 
-        label: do {
-            change = false;
+        while (true) {
             normalize();
             if (truthValue != TruthValue.UNKNOWN) {
                 return truthValue;
             }
+
+            if (oldSubst != null && oldEqualities != null
+                    && substitution.equals(oldSubst)
+                    && equalities.equals(oldEqualities)) {
+                break;
+            }
+            oldSubst = Maps.newHashMap(substitution);
+            oldEqualities = Sets.newHashSet(equalities);
 
             equalitiesWriteProtected = true;
             for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
@@ -687,8 +698,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     falsify(new Equality(
                             unifier.unificationFailureLeftHandSide(),
                             unifier.unificationFailureRightHandSide(), context));
-                    equalitiesWriteProtected = false;
-                    break label;
+                    return TruthValue.FALSE;
                 }
 
                 if (unifier.multiConstraints().isEmpty()
@@ -698,13 +708,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 }
 
                 iterator.remove();
-                change = true;
                 addAll(unifier.constraint());
                 multiConstraints.addAll(unifier.multiConstraints());
             }
 
             equalitiesWriteProtected = false;
-        } while (change);
+        }
 
         return truthValue;
     }
@@ -720,9 +729,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Normalizes the symbolic constraint.
      */
     private void normalize() {
-        assert !equalitiesWriteProtected : "Do not modify equalities when they are write-protected!";
+        if (truthValue == TruthValue.FALSE) {
+            return;
+        }
 
-        if (isNormal) {
+//        assert !equalitiesWriteProtected : "Do not modify equalities when they are write-protected!";
+        if (isNormal || equalitiesWriteProtected) {
             return;
         }
 
