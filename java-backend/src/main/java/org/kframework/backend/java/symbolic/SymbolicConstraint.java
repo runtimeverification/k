@@ -20,7 +20,6 @@ import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
-import org.kframework.main.GlobalOptions;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
 
@@ -206,17 +205,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         private final SMTOptions smtOptions;
         private final Z3Wrapper z3;
-        private final GlobalOptions globalOptions;
 
         @Inject
         public SymbolicConstraintOperations(
                 Provider<Definition> definitionProvider,
                 SMTOptions smtOptions,
-                Z3Wrapper z3,
-                GlobalOptions globalOptions) {
+                Z3Wrapper z3) {
             this.smtOptions = smtOptions;
             this.z3 = z3;
-            this.globalOptions = globalOptions;
         }
 
         public boolean checkUnsat(SymbolicConstraint constraint) {
@@ -328,12 +324,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     public void add(Equality equality) {
         add(equality.leftHandSide(), equality.rightHandSide());
-    }
-
-    boolean checkKindMisMatch(Term leftHandSide, Term rightHandSide) {
-        return leftHandSide.kind() == rightHandSide.kind()
-                || (leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational())
-                || (leftHandSide.kind().isStructural() && rightHandSide.kind().isStructural());
     }
 
     /**
