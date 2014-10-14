@@ -932,8 +932,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             renamedEqualities.add(eq.substitute(freshSubstitution));
         }
         equalities = renamedEqualities;
-
-        updateVariableSet();
     }
 
     /**
@@ -987,6 +985,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
         return false;
+    }
+
+    @Override
+    public Set<Variable> variableSet() {
+        // TODO(YilongL): get rid of this once SymbolicConstraint becomes immutable
+        setVariableSet(null);
+        return super.variableSet();
     }
 
     @Override
