@@ -13,6 +13,7 @@
     <program name="reverse.simple">
       <krun-option name="--prove" value="verification/reverse_spec.k" />
       <krun-option name="--directory" value="verification" />
+      <krun-option name="--z3-executable" />
     </program>
     <program name="sum.simple">
       <krun-option name="--prove" value="verification/sum_spec.k" />
@@ -22,6 +23,7 @@
     <program name="comm_assoc.simple">
       <krun-option name="--prove" value="verification/comm_assoc_spec.k" />
       <krun-option name="--directory" value="verification" />
+      <krun-option name="--z3-executable" />
     </program>
 <!-- TODO(AndreiS): uncomment this test when we support AC unification
     <program name="head.simple">
