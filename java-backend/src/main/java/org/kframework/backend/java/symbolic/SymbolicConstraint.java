@@ -72,7 +72,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @see SymbolicConstraint#substitution
      */
-    private LinkedList<Equality> equalities;
+    private LinkedHashSet<Equality> equalities;
 
     /**
      * Specifies if this symbolic constraint is in normal form.
@@ -272,7 +272,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public SymbolicConstraint(TermContext context) {
         substitution = Maps.newLinkedHashMap();
-        equalities = Lists.newLinkedList();
+        equalities = Sets.newLinkedHashSet();
         truthValue = TruthValue.TRUE;
         isNormal = true;
         this.context = context;
@@ -392,7 +392,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
-    private void addAll(List<Equality> equalites) {
+    private void addAll(Set<Equality> equalites) {
         for (Equality equality : equalites) {
             add(equality);
         }
@@ -431,7 +431,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     if (element instanceof Term) {
                         addAll((Collection<Term>) arg);
                     } else {
-                        addAll((List<Equality>) arg);
+                        addAll((Set<Equality>) arg);
                     }
                 }
             } else if (arg instanceof Map) {
@@ -456,9 +456,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * @return an unmodifiable view of the field {@code equalities}
      */
-    public List<Equality> equalities() {
+    public Set<Equality> equalities() {
         normalize();
-        return Collections.unmodifiableList(equalities);
+        return Collections.unmodifiableSet(equalities);
     }
 
     /**
@@ -626,11 +626,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return equalities.isEmpty() && multiConstraints.isEmpty();
     }
 
-    public boolean isUnknown() {
-        normalize();
-        return truthValue == TruthValue.UNKNOWN;
-    }
-
     /**
      * Sets this constraint to be false, and record a minimal equality that makes it false.
      * @param equality
@@ -698,7 +693,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
                 if (unifier.multiConstraints().isEmpty()
                         && unifier.constraint().equalities.size() == 1
-                        && unifier.constraint().equalities.get(0).equals(equality)) {
+                        && unifier.constraint().equalities.iterator().next().equals(equality)) {
                     continue;
                 }
 
@@ -854,18 +849,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
             // TODO(YilongL): this is too ad-hoc; fix it once we allow sub-terms to carry constraint as well
-            int origSize = equalities.size();
-            for (int i = 0; i < equalities.size(); ++i) {
-                Equality equality = equalities.remove(i);
+            LinkedHashSet<Equality> expandedEqualities = Sets.newLinkedHashSet();
+            equalitiesWriteProtected = true;
+            for (Equality equality : equalities) {
                 Equality expandedEquality = equality.expandPatterns(this, narrowing);
-                equalities.addFirst(expandedEquality);
+                expandedEqualities.add(expandedEquality);
                 if (equality != expandedEquality) {
                     changed = true;
-                    if (equalities.size() != origSize) {
-                        break;
-                    }
                 }
             }
+            equalities = expandedEqualities;
+            equalitiesWriteProtected = false;
 
             /* force normalization to consider the changes made by this method */
             isNormal = false;
@@ -931,9 +925,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             entry.setValue(entry.getValue().substituteWithBinders(freshSubstitution, context));
         }
 
-        for (int i = 0; i < equalities.size(); ++i) {
-            equalities.set(i, equalities.get(i).substitute(freshSubstitution));
+        LinkedHashSet<Equality> renamedEqualities = Sets.newLinkedHashSet();
+        for (Equality eq : equalities) {
+            renamedEqualities.add(eq.substitute(freshSubstitution));
         }
+        equalities = renamedEqualities;
 
         updateVariableSet();
     }
