@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     private Equality falsifyingEquality;
 
-    private final ArrayList<Equality> equalityBuffer = Lists.newArrayList();
+    private final LinkedHashSet<Equality> equalityBuffer = Sets.newLinkedHashSet();
 
     private boolean equalitiesWriteProtected = false;
 
@@ -288,45 +289,35 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the left-hand side of the equality
      * @param rightHandSide
      *            the right-hand side of the equality
-     * @return the truth value of this symbolic constraint after including the
-     *         new equality
      */
-    public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert checkKindMisMatch(leftHandSide, rightHandSide):
-                "kind mismatch between "
-                + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
-                + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
-
+    public void add(Term leftHandSide, Term rightHandSide) {
         /* split andBool in multiple equalities */
+        // TODO(YilongL): maybe this should be handled somewhere else?
         if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel().toString().equals("'_andBool_") && rightHandSide.equals(BoolToken.TRUE)) {
             add(((KList) ((KItem) leftHandSide).kList()).get(0), BoolToken.TRUE);
             add(((KList) ((KItem) leftHandSide).kList()).get(1), BoolToken.TRUE);
-            return truthValue;
+            return;
         }
 
         /* split andBool in multiple equalities */
         if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel().toString().equals("'_andBool_") && leftHandSide.equals(BoolToken.TRUE)) {
             add(((KList) ((KItem) rightHandSide).kList()).get(0), BoolToken.TRUE);
             add(((KList) ((KItem) rightHandSide).kList()).get(1), BoolToken.TRUE);
-            return truthValue;
+            return;
         }
 
+        Equality equality = new Equality(leftHandSide, rightHandSide, context);
         if (equalitiesWriteProtected) {
-            Equality equality = new Equality(leftHandSide, rightHandSide, context);
-            if (equality.truthValue() == TruthValue.FALSE) {
-                falsify(equality);
-            } else if (equality.truthValue() == TruthValue.UNKNOWN) {
-                equalityBuffer.add(equality);
+            if (equalityBuffer.add(equality)) {
                 isNormal = false;
+                truthValue = TruthValue.UNKNOWN;
             }
         } else {
-            simplify(); // YilongL: normalize() is not enough
-            leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
-            rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
-
-            checkTruthValBeforePutIntoConstraint(leftHandSide, rightHandSide, false);
+            if (equalities.add(equality)) {
+                isNormal = false;
+                truthValue = TruthValue.UNKNOWN;
+            }
         }
-        return truthValue;
     }
 
     /**
@@ -334,11 +325,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @param equality
      *            the new equality
-     * @return the truth value of this symbolic constraint after including the
-     *         new equality
      */
-    public TruthValue add(Equality equality) {
-        return add(equality.leftHandSide(), equality.rightHandSide());
+    public void add(Equality equality) {
+        add(equality.leftHandSide(), equality.rightHandSide());
     }
 
     boolean checkKindMisMatch(Term leftHandSide, Term rightHandSide) {
@@ -397,27 +386,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the side condition
      * @return the truth value after including the side condition
      */
-    public TruthValue addAll(Collection<Term> condition) {
+    public void addAll(Collection<Term> condition) {
         for (Term term : condition) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(term, BoolToken.TRUE);
         }
-
-        return truthValue;
     }
 
-    private TruthValue addAll(List<Equality> equalites) {
+    private void addAll(List<Equality> equalites) {
         for (Equality equality : equalites) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(equality);
         }
-        return truthValue;
     }
 
     /**
@@ -425,43 +403,26 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @param constraint
      *            the given symbolic constraint
-     * @return the truth value after including the new equalities
      */
-    public TruthValue addAll(SymbolicConstraint constraint) {
+    public void addAll(SymbolicConstraint constraint) {
         addAll(constraint.substitution);
         for (Equality equality : constraint.equalities) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(equality.leftHandSide(), equality.rightHandSide());
         }
-
-        return truthValue;
     }
 
     /**
      * Adds all bindings in the given substitution map to this symbolic constraint.
      */
-    public TruthValue addAll(Map<Variable, Term> substitution) {
+    public void addAll(Map<Variable, Term> substitution) {
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(entry.getValue(), entry.getKey());
         }
-
-        return truthValue;
     }
 
     @SuppressWarnings("unchecked")
-    private TruthValue addAll(Object... args) {
+    private void addAll(Object... args) {
         for (Object arg : args) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             if (arg instanceof SymbolicConstraint) {
                 addAll((SymbolicConstraint) arg);
             } else if (arg instanceof Collection) {
@@ -481,7 +442,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 assert false : "invalid argument found: " + arg;
             }
         }
-        return truthValue;
     }
 
     public TruthValue addAllThenSimplify(Object... args) {
