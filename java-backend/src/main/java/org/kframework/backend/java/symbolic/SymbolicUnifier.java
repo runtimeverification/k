@@ -176,10 +176,10 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         size = Math.min(list.elementsRight().size(), otherList.elementsRight().size());
         for (int i = 1; i <= size; i++) {
-            unify(list.get(i), otherList.get(i));
+            unify(list.get(-i), otherList.get(-i));
         }
-        List<Term> remainingElementsRight = list.elementsRight().subList(0, size);
-        List<Term> otherRemainingElementsRight = otherList.elementsRight().subList(0, size);
+        List<Term> remainingElementsRight = list.elementsRight().subList(0, list.elementsRight().size() - size);
+        List<Term> otherRemainingElementsRight = otherList.elementsRight().subList(0, otherList.elementsRight().size() - size);
 
         List<Term> remainingBaseTerms = list.baseTerms();
         List<Term> otherRemainingBaseTerms = otherList.baseTerms();
