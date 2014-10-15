@@ -36,6 +36,14 @@ import com.google.common.collect.Maps;
  */
 public class RewriteEngineUtils {
 
+    public static boolean isSubsorted(Term big, Term small, TermContext context) {
+        return context.definition().subsorts().isSubsorted(big.sort(), small.sort());
+    }
+
+    public static boolean isSubsortedEq(Term big, Term small, TermContext context) {
+        return context.definition().subsorts().isSubsortedEq(big.sort(), small.sort());
+    }
+
     /**
      * Evaluates the side-conditions of a rule according to a given
      * substitution and updates the substitution accordingly.

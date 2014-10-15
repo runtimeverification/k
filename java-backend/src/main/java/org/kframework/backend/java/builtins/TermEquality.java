@@ -55,8 +55,7 @@ public class TermEquality {
             TermContext context) {
         SymbolicConstraint constraint = new SymbolicConstraint(context);
         constraint.add(term1, term2);
-        constraint.simplify();
-        return constraint.getTruthValue();
+        return constraint.simplify();
     }
 
     private static boolean hasKLabelVariables(Term term) {
