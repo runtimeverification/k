@@ -844,7 +844,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private void composeSubstitution(Map<Variable, Term> substMap) {
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
             Term variable = entry.getKey();
-            Term term = entry.getValue().substitute(substMap, context);
+            Term term = entry.getValue().substituteAndEvaluate(substMap, context);
             Equality equality = new Equality(variable, term, context);
             if (equality.truthValue() == TruthValue.UNKNOWN) {
                 entry.setValue(term);
