@@ -122,7 +122,8 @@ public class MaudeExecutor implements Executor {
         this.maudeOptions = maudeOptions;
 
 
-        krunTempDir = new File(context.dotk, FileUtil.generateUniqueFolderName("krun"));
+        krunTempDir = new File(System.getProperty("user.dir"),
+                FileUtil.generateUniqueFolderName(".krun"));
         inFile = new File(krunTempDir, "maude_in");
         outFile = new File(krunTempDir, "maude_out");
         errFile = new File(krunTempDir, "maude_err");
