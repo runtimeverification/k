@@ -62,8 +62,8 @@ public class KTestFrontEnd extends FrontEnd {
         try {
             options.validateArgs();
             return makeTestSuite(options.getTargetFile(), options).run();
-        } catch (SAXException | ParserConfigurationException | IOException | InterruptedException |
-                TransformerException | ParameterException e) {
+        } catch (SAXException | ParserConfigurationException | IOException | TransformerException
+                | ParameterException e) {
             kem.registerCriticalError(e.getMessage(), e);
             return false;
         } catch (InvalidConfigError e) {

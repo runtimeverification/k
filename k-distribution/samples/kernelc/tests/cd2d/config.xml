@@ -9,7 +9,6 @@
             extension="c"
             >
         <kompile-option name="--backend" value="java" />
-        <kompile-option name="-d" value="cd2d" />
         <program name="cdd.c">
           <krun-option name="--prove" value="tests/cd2d/cdd_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/floating_point.smt2" />

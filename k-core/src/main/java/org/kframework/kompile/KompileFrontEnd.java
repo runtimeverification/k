@@ -78,14 +78,21 @@ public class KompileFrontEnd extends FrontEnd {
 
     @Override
     public boolean run() {
+        if (!options.mainDefinitionFile().exists()) {
+            kem.registerCriticalError("Definition file doesn't exist: " +
+                    options.mainDefinitionFile().getAbsolutePath());
+        }
+
         if (options.directory.isFile()) { // isFile = exists && !isDirectory
             String msg = "Not a directory: " + options.directory;
             kem.registerCriticalError(msg);
         }
 
-        context.dotk = new File(options.directory, ".k/" + FileUtil.generateUniqueFolderName("kompile"));
-        if (!context.dotk.exists() && !context.dotk.mkdirs()) {
-            kem.registerCriticalError("Could not create directory " + context.dotk);
+        context.dotk = new File(System.getProperty("user.dir"),
+                FileUtil.generateUniqueFolderName(".kompile"));
+        if (!context.dotk.mkdirs() && !context.dotk.isDirectory()) {
+            kem.registerCriticalError("Could not create temporary directory " +
+                    context.dotk.getAbsolutePath());
         }
 
         // default for documentation backends is to store intermediate outputs in temp directory
@@ -95,7 +102,7 @@ public class KompileFrontEnd extends FrontEnd {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     try {
-                        FileUtils.deleteDirectory(new File(options.directory, ".k"));
+                        FileUtils.deleteDirectory(context.dotk);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -104,12 +111,13 @@ public class KompileFrontEnd extends FrontEnd {
         }
 
         if (backend.generatesDefinition()) {
-                context.kompiled = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
+            context.kompiled = new File(options.directory, FilenameUtils.removeExtension(
+                    options.mainDefinitionFile().getName()) + "-kompiled");
+            if (context.kompiled.isDirectory()) {
                 checkAnotherKompiled(context.kompiled);
-                if (options.mainDefinitionFile().exists()
-                        && !context.kompiled.exists() && !context.kompiled.mkdirs()) {
-                    kem.registerCriticalError("Could not create directory " + context.kompiled);
-                }
+            } else if (!context.kompiled.mkdirs()) {
+                kem.registerCriticalError("Could not create directory " + context.kompiled);
+            }
         }
 
         genericCompile(options.experimental.step);

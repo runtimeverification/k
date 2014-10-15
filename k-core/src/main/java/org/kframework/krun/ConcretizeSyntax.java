@@ -2,7 +2,7 @@
 package org.kframework.krun;
 
 import org.kframework.backend.kore.ToKAppTransformer;
-import org.kframework.backend.unparser.UnparserFilterNew;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -197,7 +197,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
         Map<Term, String> unparsedTerms = new HashMap<>();
         for (Term t : contents) {
-            UnparserFilterNew filter = new UnparserFilterNew(context);
+            UnparserFilter filter = new UnparserFilter(context);
             filter.visitNode(t);
             unparsedTerms.put(t, filter.getResult());
         }

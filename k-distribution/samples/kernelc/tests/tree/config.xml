@@ -9,7 +9,6 @@
             extension="c"
             >
         <kompile-option name="--backend" value="java" />
-        <kompile-option name="-d" value="tree" />
         <program name="height.c">
           <krun-option name="--prove" value="tests/tree/height_spec.k" />
           <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
