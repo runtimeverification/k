@@ -113,6 +113,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private final TermContext context;
 
+    @Deprecated
     public boolean orientSubstitution(Set<Variable> variables) {
         LinkedHashMap<Variable, Term> substitutionBackup = Maps.newLinkedHashMap(substitution);
 

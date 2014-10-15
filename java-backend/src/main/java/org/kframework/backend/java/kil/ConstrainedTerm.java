@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.TruthValue;
@@ -221,6 +222,13 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
 
         return solutions;
+    }
+
+    @Override
+    public Set<Variable> variableSet() {
+        // TODO(YilongL): get rid of this once SymbolicConstraint becomes immutable
+        setVariableSet(null);
+        return super.variableSet();
     }
 
     @Override
