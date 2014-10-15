@@ -21,7 +21,6 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Constants;
 
 import java.io.Serializable;
-import java.util.Set;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -31,12 +30,12 @@ import java.util.ArrayList;
  */
 public class IndexingTable implements Serializable, RuleIndex {
 
-    private Map<Index, Set<Rule>> ruleTable;
-    private Map<Index, Set<Rule>> heatingRuleTable;
-    private Map<Index, Set<Rule>> coolingRuleTable;
-    private Map<Index, Set<Rule>> instreamRuleTable;
-    private Map<Index, Set<Rule>> outstreamRuleTable;
-    private Set<Rule> unindexedRules;
+    private Map<Index, ImmutableSet<Rule>> ruleTable;
+    private Map<Index, ImmutableSet<Rule>> heatingRuleTable;
+    private Map<Index, ImmutableSet<Rule>> coolingRuleTable;
+    private Map<Index, ImmutableSet<Rule>> instreamRuleTable;
+    private Map<Index, ImmutableSet<Rule>> outstreamRuleTable;
+    private ImmutableSet<Rule> unindexedRules;
     private final Definition definition;
 
     private final Data data;
@@ -84,11 +83,11 @@ public class IndexingTable implements Serializable, RuleIndex {
         /* Map each index to a list of rules unifiable with that index */
         /* Heating rules and regular rules have their first index checked */
         /* Cooling rules have their second index checked */
-        ImmutableMap.Builder<Index, Set<Rule>> mapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, Set<Rule>> heatingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, Set<Rule>> coolingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, Set<Rule>> instreamMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, Set<Rule>> outstreamMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, ImmutableSet<Rule>> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, ImmutableSet<Rule>> heatingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, ImmutableSet<Rule>> coolingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, ImmutableSet<Rule>> instreamMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, ImmutableSet<Rule>> outstreamMapBuilder = ImmutableMap.builder();
 
         for (Index index : indices) {
             ImmutableSet.Builder<Rule> rulesBuilder = ImmutableSet.builder();
