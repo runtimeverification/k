@@ -84,6 +84,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         if (content instanceof Bag) {
             return Bag.flatten((Bag) content);
         } else if (content instanceof Cell
+                || content instanceof DataStructureBuiltin
                 || content instanceof Variable
                 || content instanceof KItemProjection) {
             return new Bag(Collections.singletonList(content));
@@ -182,6 +183,9 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
                 } else {
                     entries.put(key, KApp.of(new KInjectedLabel(value)));
                 }
+            } else if (term instanceof MapBuiltin) {
+                terms.addAll(((MapBuiltin) term).baseTerms());
+                entries.putAll(((MapBuiltin) term).elements());
             } else if (term instanceof Variable) {
                 terms.add(new Variable(((Variable) term).getName(), Sort.of(mapSort.name())));
             } else if (term instanceof KItemProjection) {
@@ -245,6 +249,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
             String keyCellLabel = keyConfigurationStructure.id;
 
+            context.cellSorts.put(MAP_CELL_CELL_LABEL_PREFIX + entryCellLabel, Sort.BAG);
             context.cellDataStructures.put(
                     mapCellLabel,
                     new CellMap(mapCellLabel, entryCellLabel, keyCellLabel));

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
+import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
 import org.kframework.kil.BoolBuiltin;
@@ -276,7 +277,9 @@ public class MetaK {
         new BasicVisitor(context) {
             @Override
             public Void visit(Cell node, Void _) {
-                cells.add(node);
+                if (!node.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
+                    cells.add(node);
+                }
                 return null;
             }
         }.visitNode(t);

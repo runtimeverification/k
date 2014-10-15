@@ -53,7 +53,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
             return node;
         }
 
-        Sort kind = node.getContents().getSort().getKSort().mainSort();
+        Sort kind = context.getCellSort(node).getKSort().mainSort();
         Collection col;
         if (node.getContents() instanceof Collection) {
             col = (Collection) node.getContents().shallowCopy();
