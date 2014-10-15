@@ -573,10 +573,11 @@ public final class KItem extends Term {
         return transformer.transform(this);
     }
 
-    public Term expandPattern(SymbolicConstraint constraint, boolean narrowing, TermContext context) {
+    public Term expandPattern(SymbolicConstraint constraint, boolean narrowing) {
         if (constraint == null) {
             return this;
         }
+        TermContext context = constraint.termContext();
 
         if (!(kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList)) {
             return this;
@@ -633,7 +634,7 @@ public final class KItem extends Term {
              * outside constraint while SymbolicConstraint#expandPatterns is
              * still traversing it */
             constraint.addAll(results.get(0).constraint());
-            return results.get(0).term().expandPatterns(constraint, narrowing, context);
+            return results.get(0).term().expandPatterns(constraint, narrowing);
         } else {
             return this;
         }

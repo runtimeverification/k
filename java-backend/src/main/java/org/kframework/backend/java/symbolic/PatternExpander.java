@@ -13,15 +13,15 @@ public class PatternExpander extends CopyOnWriteTransformer {
     private final SymbolicConstraint constraint;
     private final boolean narrowing;
 
-    public PatternExpander(SymbolicConstraint constraint, boolean narrowing, TermContext context) {
-        super(context);
+    public PatternExpander(SymbolicConstraint constraint, boolean narrowing) {
+        super(constraint.termContext());
         this.constraint = constraint;
         this.narrowing = narrowing;
     }
 
     @Override
     public ASTNode transform(KItem kItem) {
-        return ((KItem) super.transform(kItem)).expandPattern(constraint, narrowing, context);
+        return ((KItem) super.transform(kItem)).expandPattern(constraint, narrowing);
     }
 
 }

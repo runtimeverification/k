@@ -241,7 +241,7 @@ public class SymbolicRewriter {
 
             // TODO(AndreiS): move these some other place
             constraint.expandPatternsAndSimplify(true);
-            result = result.expandPatterns(constraint, true, constrainedTerm.termContext());
+            result = result.expandPatterns(constraint, true);
 
             /* return first solution */
 //            System.err.println(rule.getLocation() + " " + rule.getSource());
@@ -429,8 +429,7 @@ public class SymbolicRewriter {
         initialTerm = new ConstrainedTerm(
                 initialTerm.term().expandPatterns(
                         initialTerm.constraint(),
-                        true,
-                        initialTerm.termContext()),
+                        true),
                 initialTerm.constraint());
 
         visited.add(initialTerm);

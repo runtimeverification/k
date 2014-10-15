@@ -156,8 +156,8 @@ public class Equality {
     }
 
     public Equality expandPatterns(SymbolicConstraint constraint, boolean narrowing) {
-        Term returnLeftHandSide = leftHandSide.expandPatterns(constraint, narrowing, context);
-        Term returnRightHandSide = rightHandSide.expandPatterns(constraint, narrowing, context);
+        Term returnLeftHandSide = leftHandSide.expandPatterns(constraint, narrowing);
+        Term returnRightHandSide = rightHandSide.expandPatterns(constraint, narrowing);
         if (returnLeftHandSide != leftHandSide || returnRightHandSide != rightHandSide) {
             return new Equality(returnLeftHandSide, returnRightHandSide, context);
         } else {

@@ -801,7 +801,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             Set<Variable> keys = Sets.newLinkedHashSet(substitution.keySet());
             for (Variable variable : keys) {
                 Term term = substitution.get(variable);
-                Term expandedTerm = term.expandPatterns(this, narrowing, context);
+                Term expandedTerm = term.expandPatterns(this, narrowing);
                 if (term != expandedTerm) {
                     substitution.put(variable, expandedTerm);
                     changed = true;
