@@ -719,7 +719,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     return;
                 }
 
-                Map<Variable, Term> substToAdd = Maps.newHashMap();
+                Map<Variable, Term> substToAdd = Maps.newLinkedHashMap();
                 Term lhs = evalEquality.leftHandSide();
                 Term rhs = evalEquality.rightHandSide();
                 if (lhs instanceof Variable
