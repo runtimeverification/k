@@ -193,6 +193,8 @@ public class KTestOptions {
      */
     private boolean debug = false;
 
+    public final long start = System.currentTimeMillis();
+
     /**
      * Copy constructor.
      * @param obj KTestOptions object to copy

@@ -186,9 +186,7 @@ public class Proc<T> implements Runnable {
             pb.environment().put("kast", ExecNames.getKast());
 
             try {
-                if (options.isVerbose()) {
-                    printVerboseRunningMsg(toLogString(args));
-                }
+                printRunningMsg(toLogString(args));
                 long startTime = System.currentTimeMillis();
                 Process proc = pb.start();
 
@@ -290,7 +288,6 @@ public class Proc<T> implements Runnable {
     private void handlePgmResult(ProcOutput normalOutput, ProcOutput debugOutput) {
         String red = ColorUtil.RgbToAnsi(
                 Color.RED, options.getColorSetting(), options.getTerminalColor());
-        boolean verbose = options.isVerbose();
         String logStr = toLogString(args);
         if (normalOutput.returnCode == 0) {
 
@@ -300,8 +297,7 @@ public class Proc<T> implements Runnable {
             if (expectedOut == null) {
                 // we're not comparing outputs
                 success = true;
-                if (verbose)
-                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
+                System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
                 doGenerateOut = true;
             } else {
                 try {
@@ -309,8 +305,7 @@ public class Proc<T> implements Runnable {
 
                     // outputs match
                     success = true;
-                    if (verbose)
-                        System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
                 } catch (MatchFailure e) {
                     // outputs don't match
                     System.out.format(
@@ -318,8 +313,7 @@ public class Proc<T> implements Runnable {
                         "%s (time: %d ms)%s%n",
                         red, logStr, expectedOut.getAnn(), timeDelta, ColorUtil.ANSI_NORMAL);
                     reportOutMatch(e.getMessage());
-                    if (verbose)
-                        System.out.println(getReason());
+                    System.out.println(getReason());
                     doGenerateOut = true;
                 }
             }
@@ -359,7 +353,7 @@ public class Proc<T> implements Runnable {
                         red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
                 if (debugOutput != null) {
                     System.out.format("error was: %s%n", debugOutput.stderr);
-                } else if (verbose) {
+                } else {
                     System.out.format("error was: %s%n", normalOutput.stderr);
                 }
                 reportErr(normalOutput.stderr);
@@ -368,8 +362,7 @@ public class Proc<T> implements Runnable {
                     strComparator.matches(expectedErr.getObj(), normalOutput.stderr);
                     // error outputs match
                     success = true;
-                    if (verbose)
-                        System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
                 } catch (MatchFailure e) {
                     // error outputs don't match
                     System.out.format(
@@ -379,7 +372,7 @@ public class Proc<T> implements Runnable {
                     if (debugOutput != null) {
                         System.out.format("error output was (except the stack trace): %s%n",
                                 debugOutput.stderr);
-                    } else if (verbose) {
+                    } else {
                         System.out.format("error output was: %s%n", normalOutput.stderr);
                     }
                     reportErrMatch(e.getMessage());
@@ -408,7 +401,7 @@ public class Proc<T> implements Runnable {
         reason = "Timeout";
     }
 
-    private void printVerboseRunningMsg(String logStr) {
+    private void printRunningMsg(String logStr) {
         StringBuilder b = new StringBuilder();
         b.append("Running [");
         b.append(logStr);
