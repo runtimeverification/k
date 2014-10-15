@@ -5,14 +5,11 @@ package org.kframework.backend.java.symbolic;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
@@ -156,7 +153,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     Set<Variable> preimagesOfRHS = Sets.newLinkedHashSet(preimages.get(rhs));
                     preimagesOfRHS.removeAll(variables);
                     if (preimagesOfRHS.isEmpty()) {
-                        throw new RuntimeException("Orientation failed");
+                        substitution = substitutionBackup;
+                        return false;
                     }
                     Variable newRHS = preimagesOfRHS.iterator().next();
                     newSubstitution.put(lhs, newRHS);
@@ -188,6 +186,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, context));
         }
 
+        if (!result.keySet().containsAll(variables)) {
+            return false;
+        }
         for (Map.Entry<Variable, Term> subst : result.entrySet()) {
             Equality equality = new Equality(subst.getKey(), subst.getValue(), context);
             if (!isSubsortedEq(subst.getKey(), subst.getValue())
@@ -891,46 +892,21 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     /**
-     * Checks if this symbolic constraint is a matching substitution of the variables in the
-     * argument set.
+     * Checks if this symbolic constraint contains only substitutions of the
+     * given variables.
+     * <p>
+     * This method is useful for checking if narrowing happens.
      */
     public boolean isMatching(Set<Variable> variables) {
-        orientSubstitution(variables);
-        /*
-         * YilongL: data structure lookups will change the variables on the LHS
-         * of a rule, e.g.: "rule foo(M:Map X |-> Y, X) => 0" will be kompiled
-         * into "rule foo(_,_)(_0:Map,, X) => 0 requires [] /\ _0:Map[X] = Y
-         * ensures []". Therefore, we cannot write pattern.term().variableSet()
-         * in the following check.
-         */
-        if (!isSubstitution() || !substitution.keySet().equals(variables)) {
+        if (!isSubstitution()) {
             return false;
         }
 
-        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            Sort sortOfPatVar = entry.getKey().sort();
-            Term subst = entry.getValue();
-            if (subst instanceof DataStructureLookupOrChoice) {
-                return false;
-            }
-            Sort sortOfSubst = subst.sort();
-            /* YilongL: There are three different cases:
-             * 1) sortOfParVar >= sortOfSubst
-             * 2) sortOfParVar < sortOfSubst
-             * 3) there is no order between sortOfParVar & sortOfSubst
-             * Only case 1) represents a pattern matching
-             */
-            if (!context.definition().subsorts().isSubsortedEq(sortOfPatVar, sortOfSubst)) {
-                return false;
-            }
-
-            if (entry.getKey() instanceof ConcreteCollectionVariable
-                    && !(entry.getValue() instanceof ConcreteCollectionVariable && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((ConcreteCollectionVariable) entry.getValue()).concreteCollectionSize())
-                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).concreteSize())) {
-                return false;
-            }
+        if (orientSubstitution(variables)) {
+            return substitution.size() == variables.size();
+        } else {
+            return false;
         }
-        return true;
     }
 
     public boolean hasMapEqualities() {

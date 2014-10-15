@@ -201,7 +201,14 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 continue;
             }
 
-            if (!candidate.isMatching(constrainedTerm.variableSet())) {
+            if (candidate.isMatching(constrainedTerm.variableSet())) {
+                /* OPTIMIZATION: since no narrowing happens, the symbolic
+                 * constraint remains unchanged; thus, there is no need to check
+                 * satisfiability or expand patterns */
+                if (TruthValue.FALSE == candidate.addAllThenSimplify(data.constraint)) {
+                    continue;
+                }
+            } else {
                 if (TruthValue.FALSE == candidate.addAllThenSimplify(data.constraint)) {
                     continue;
                 }
@@ -212,10 +219,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
                 // TODO(AndreiS): find a better place for pattern expansion
                 candidate.expandPatternsAndSimplify(true);
-            } else {
-                SymbolicConstraint clonedConstraint = new SymbolicConstraint(data.constraint);
-                clonedConstraint.addAll(candidate);
-                candidate = clonedConstraint;
             }
 
             solutions.add(candidate);
