@@ -107,6 +107,10 @@ public class Variable extends Term implements Immutable {
         return true;
     }
 
+    public boolean unifyCollection(Collection collection) {
+        return !(collection.concreteSize() != 0 && collection.collectionVariables().contains(this));
+    }
+
     @Override
     public final boolean equals(Object object) {
         if (this == object) {

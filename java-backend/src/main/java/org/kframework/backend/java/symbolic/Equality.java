@@ -10,6 +10,7 @@ import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
@@ -21,6 +22,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Utils;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -240,13 +242,11 @@ public class Equality {
             // TODO(YilongL): I think occurs check should be handled in SymbolicUnifier instead
             if (leftHandSide instanceof Variable
                     && rightHandSide instanceof org.kframework.backend.java.kil.Collection
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).collectionVariables().contains(leftHandSide)
-                    && ((org.kframework.backend.java.kil.Collection) rightHandSide).concreteSize() != 0) {
+                    && !((Variable) leftHandSide).unifyCollection((Collection) rightHandSide)) {
                 return true;
             } else if (rightHandSide instanceof Variable
                     && leftHandSide instanceof org.kframework.backend.java.kil.Collection
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).collectionVariables().contains(rightHandSide)
-                    && ((org.kframework.backend.java.kil.Collection) leftHandSide).concreteSize() != 0) {
+                    && !((Variable) rightHandSide).unifyCollection((Collection) leftHandSide)) {
                 return true;
             }
 
