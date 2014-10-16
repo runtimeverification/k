@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.unparser.OutputModes;
 import org.kframework.backend.unparser.UnparserFilter;
+import org.kframework.compile.transformers.DataStructure2Cell;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.ColorSetting;
@@ -68,6 +69,7 @@ public class JavaSymbolicExecutor implements Executor {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTransformer(context));
+        kilTerm = (org.kframework.kil.Term) (new DataStructure2Cell(context)).visitNode(kilTerm);
         KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm));
         UnparserFilter unparser = new UnparserFilter(true, ColorSetting.OFF, OutputModes.PRETTY, context);
         unparser.visitNode(kilTerm);
@@ -139,6 +141,7 @@ public class JavaSymbolicExecutor implements Executor {
                 org.kframework.kil.Term kilTerm =
                         (org.kframework.kil.Term) map.get(var).accept(
                                 new BackendJavaKILtoKILTransformer(context));
+                kilTerm = (org.kframework.kil.Term) (new DataStructure2Cell(context)).visitNode(kilTerm);
                 substitutionMap.put(var.name(), kilTerm);
             }
 

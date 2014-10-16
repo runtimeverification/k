@@ -31,6 +31,7 @@ import java.util.Map;
 /**
  * Translates a builtin data structure (list, map, set) from a {@link Cell} representation
  * to a {@link DataStructureBuiltin} representation.
+ * Inverse transformation of {@link DataStructure2Cell}.
  *
  * Does not support functions on cells.
  *
@@ -58,9 +59,11 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
      // TODO(AndreiS): should only be applied once
         makeCellDataStructures();
 
+        cell = (Cell) super.visit(cell, _);
+
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
-            return super.visit(cell, _);
+            return cell;
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());
