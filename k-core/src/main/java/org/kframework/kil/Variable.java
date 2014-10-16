@@ -82,6 +82,10 @@ public class Variable extends Term {
         return new Variable(GENERATED_ANON_VAR + nextVariableIndex++, sort);
     }
 
+    public static Variable getAnonVar(Sort sort, boolean freshVariable, boolean freshConstant) {
+        return new Variable(GENERATED_ANON_VAR + nextVariableIndex++, sort, freshVariable, freshConstant);
+    }
+
     public void setName(String name) {
         this.name = name;
     }
