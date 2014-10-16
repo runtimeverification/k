@@ -180,6 +180,8 @@
             <configuration>
               <sourceDirectory>src</sourceDirectory>
               <includes>**/*.java</includes>
+              <!-- TODO(dwightguth): remove with checkstyle 5.9 -->
+              <excludes>**/ConfigurationSubstitutionVisitor.java,**/DataStructure2Cell.java,**/BuiltinList.java,**/BuiltinSet.java,**/BuiltinMap.java</excludes>
               <configLocation>src/main/config/checkstyle-java.xml</configLocation>
               <suppressionsLocation>src/main/config/checkstyle-suppress.xml</suppressionsLocation>
               <failsOnError>true</failsOnError>
