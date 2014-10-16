@@ -63,12 +63,9 @@ public class DataStructure2Cell extends CopyOnWriteTransformer {
 
     private static Bag getListCells(ListBuiltin listBuiltin) {
         List<Term> cells = Lists.newArrayList();
-        Consumer<Term> action = element ->
-                cells.add(((KInjectedLabel) ((KApp) element).getLabel()).getTerm());
-
-        listBuiltin.elementsLeft().stream().forEach(action);
+        cells.addAll(listBuiltin.elementsLeft());
         cells.addAll(listBuiltin.baseTerms());
-        listBuiltin.elementsRight().stream().forEach(action);
+        cells.addAll(listBuiltin.elementsRight());
 
         return new Bag(cells);
     }
