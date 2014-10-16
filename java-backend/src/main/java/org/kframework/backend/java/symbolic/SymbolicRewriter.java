@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
@@ -25,6 +26,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.SearchType;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -176,14 +178,13 @@ public class SymbolicRewriter {
     public static ConstrainedTerm buildResult(
             Rule rule,
             SymbolicConstraint constraint) {
-        constraint.orientSubstitution(rule.leftHandSide().variableSet());
         for (Variable variable : rule.freshConstants()) {
             constraint.add(variable, FreshOperations.fresh(variable.sort(), constraint.termContext()));
         }
         constraint.addAll(rule.ensures());
 
         /* get fresh substitutions of rule variables */
-        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
+        BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
         /* rename rule variables in the constraints */
         constraint = (SymbolicConstraint) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
@@ -191,6 +192,9 @@ public class SymbolicRewriter {
         /* rename rule variables in the rule RHS */
         Term term = rule.rightHandSide().substituteWithBinders(freshSubstitution, constraint.termContext());
         /* apply the constraints substitution on the rule RHS */
+        constraint.orientSubstitution(rule.boundVariables().stream()
+                .map(p -> freshSubstitution.get(p))
+                .collect(Collectors.toSet()));
         term = term.substituteAndEvaluate(
                 constraint.substitution(),
                 constraint.termContext());
@@ -224,7 +228,7 @@ public class SymbolicRewriter {
             constraint.addAllThenSimplify(rule.ensures());
 
             /* get fresh substitutions of rule variables */
-            Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
+            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
             /* rename rule variables in the constraints */
             constraint = (SymbolicConstraint) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
@@ -232,7 +236,12 @@ public class SymbolicRewriter {
             /* rename rule variables in the rule RHS */
             Term result = rule.rightHandSide().substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
             /* apply the constraints substitution on the rule RHS and evaluate pending functions */
-            result = result.substituteAndEvaluate(constraint.substitution(), constrainedTerm.termContext());
+            constraint.orientSubstitution(rule.boundVariables().stream()
+                    .map(p -> freshSubstitution.get(p))
+                    .collect(Collectors.toSet()));
+            result = result.substituteAndEvaluate(
+                    constraint.substitution(),
+                    constraint.termContext());
             /* eliminate bindings of rule variables */
             constraint.removeBindings(freshSubstitution.values());
 

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
@@ -22,6 +23,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
+
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -287,6 +289,12 @@ public class Rule extends JavaSymbolicObject {
 
     public ImmutableSet<Variable> freshVariables() {
         return freshVariables;
+    }
+
+    public Set<Variable> boundVariables() {
+        return variableSet().stream()
+                .filter(v -> !freshConstants.contains(v) && !freshVariables.contains(v))
+                .collect(Collectors.toSet());
     }
 
     /**

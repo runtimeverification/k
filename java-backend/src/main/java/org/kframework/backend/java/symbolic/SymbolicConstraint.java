@@ -432,7 +432,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * bindings. It is called to remove all bindings of the rewrite rule
      * variables after building the rewrite result.
      */
-    public void removeBindings(Collection<Variable> variablesToRemove) {
+    public void removeBindings(Set<Variable> variablesToRemove) {
         substitution.keySet().removeAll(variablesToRemove);
 
         /* reset this symbolic constraint to be true when it becomes empty */
