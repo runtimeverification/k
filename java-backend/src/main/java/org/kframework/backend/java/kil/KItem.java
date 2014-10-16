@@ -373,13 +373,13 @@ public final class KItem extends Term {
                     }
 
                     Term rightHandSide = rule.rightHandSide();
-                    if (rule.hasUnboundVariables()) {
+                    if (!rule.freshVariables().isEmpty()) {
                         // this opt. only makes sense when using pattern matching
                         // because after unification variables can end up in the
                         // constraint rather than in the form of substitution
 
                         /* rename unbound variables */
-                        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.unboundVariables());
+                        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.freshVariables());
                         /* rename rule variables in the rule RHS */
                         rightHandSide = rightHandSide.substituteWithBinders(freshSubstitution, context);
                     }

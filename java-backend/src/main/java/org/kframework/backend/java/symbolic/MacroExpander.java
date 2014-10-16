@@ -1,9 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.java.kil.CellLabel;
@@ -14,6 +13,8 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+
+import com.google.common.collect.Lists;
 
 
 /**
@@ -55,11 +56,11 @@ public class MacroExpander extends CopyOnWriteTransformer {
     public Rule processRule(Rule rule) {
         Term processedLeftHandSide = processTerm(rule.leftHandSide());
         Term processedRightHandSide = processTerm(rule.rightHandSide());
-        Collection<Term> processedRequires = new ArrayList<Term>(rule.requires().size());
+        List<Term> processedRequires = Lists.newArrayListWithCapacity(rule.requires().size());
         for (Term conditionItem : rule.requires()) {
             processedRequires.add(processTerm(conditionItem));
         }
-        Collection<Term> processedEnsures = new ArrayList<Term>(rule.ensures().size());
+        List<Term> processedEnsures = Lists.newArrayListWithCapacity(rule.ensures().size());
         for (Term conditionItem : rule.ensures()) {
             processedEnsures.add(processTerm(conditionItem));
         }
@@ -85,6 +86,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 processedRightHandSide,
                 processedRequires,
                 processedEnsures,
+                rule.freshConstants(),
                 rule.freshVariables(),
                 processedLookups,
                 rule.isCompiledForFastRewriting(),

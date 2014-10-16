@@ -204,7 +204,7 @@ public class BottomUpVisitor implements Visitor {
         for (Term term : rule.ensures()) {
             term.accept(this);
         }
-        for (Variable variable : rule.freshVariables()) {
+        for (Variable variable : rule.freshConstants()) {
             variable.accept(this);
         }
     }

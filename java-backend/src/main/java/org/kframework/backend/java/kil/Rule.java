@@ -3,7 +3,6 @@
 package org.kframework.backend.java.kil;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +19,6 @@ import org.kframework.backend.java.symbolic.UninterpretedConstraint.Equality;
 import org.kframework.backend.java.symbolic.VariableOccurrencesCounter;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
@@ -44,11 +42,11 @@ public class Rule extends JavaSymbolicObject {
     private final Term rightHandSide;
     private final ImmutableList<Term> requires;
     private final ImmutableList<Term> ensures;
+    private final ImmutableSet<Variable> freshConstants;
     private final ImmutableSet<Variable> freshVariables;
     private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
-    private final boolean hasUnboundVars;
 
     /**
      * Specifies whether this rule has been compiled to generate instructions
@@ -82,14 +80,6 @@ public class Rule extends JavaSymbolicObject {
 
     private final boolean modifyCellStructure;
 
-    /**
-     * Unbound variables in the rule before kompilation; that is, all variables
-     * on the rhs which do not appear in either lhs or fresh condition(s).
-     * Therefore, variables that could be bound by side-condition(s) are also
-     * counted. This definition of unbound variable is consistent with the
-     * checking algorithm used in the {@link CheckVariables} pass.
-     */
-    private final ImmutableSet<Variable> unboundVars;
     // TODO(YilongL): make it final
     private boolean isSortPredicate;
     private final Sort predSort;
@@ -99,9 +89,10 @@ public class Rule extends JavaSymbolicObject {
             String label,
             Term leftHandSide,
             Term rightHandSide,
-            Collection<Term> requires,
-            Collection<Term> ensures,
-            Collection<Variable> freshVariables,
+            List<Term> requires,
+            List<Term> ensures,
+            Set<Variable> freshConstants,
+            Set<Variable> freshVariables,
             UninterpretedConstraint lookups,
             boolean compiledForFastRewriting,
             Map<CellLabel, Term> lhsOfReadCells,
@@ -115,6 +106,7 @@ public class Rule extends JavaSymbolicObject {
         this.rightHandSide = rightHandSide;
         this.requires = ImmutableList.copyOf(requires);
         this.ensures = ImmutableList.copyOf(ensures);
+        this.freshConstants = ImmutableSet.copyOf(freshConstants);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
 
@@ -163,19 +155,6 @@ public class Rule extends JavaSymbolicObject {
             }
         });
         containsKCell = tempContainsKCell;
-
-        hasUnboundVars = super.containsAttribute(CheckVariables.UNBOUND_VARS);
-        if (hasUnboundVars) {
-            // TODO(YilongL): maybe compute unbound variables in the generic KIL instead
-            Set<Variable> ubVars = new HashSet<>(rightHandSide.variableSet());
-            ubVars.removeAll(leftHandSide.variableSet());
-            for (UninterpretedConstraint.Equality eq : lookups.equalities()) {
-                ubVars.remove(eq.leftHandSide());
-            }
-            unboundVars = ImmutableSet.copyOf(ubVars);
-        } else {
-            unboundVars = null;
-        }
 
         isSortPredicate = isFunction() && definedKLabel().isSortPredicate();
         if (isSortPredicate) {
@@ -302,16 +281,12 @@ public class Rule extends JavaSymbolicObject {
         return ensures;
     }
 
+    public ImmutableSet<Variable> freshConstants() {
+        return freshConstants;
+    }
+
     public ImmutableSet<Variable> freshVariables() {
         return freshVariables;
-    }
-
-    public boolean hasUnboundVariables() {
-        return hasUnboundVars;
-    }
-
-    public ImmutableSet<Variable> unboundVariables() {
-        return unboundVars == null ? ImmutableSet.<Variable>of() : unboundVars;
     }
 
     /**
@@ -461,7 +436,7 @@ public class Rule extends JavaSymbolicObject {
                 && requires.equals(rule.requires)
                 && ensures.equals(rule.ensures)
                 && lookups.equals(rule.lookups)
-                && freshVariables.equals(rule.freshVariables);
+                && freshConstants.equals(rule.freshConstants);
     }
 
     @Override
@@ -474,7 +449,7 @@ public class Rule extends JavaSymbolicObject {
             hashCode = hashCode * Utils.HASH_PRIME + requires.hashCode();
             hashCode = hashCode * Utils.HASH_PRIME + ensures.hashCode();
             hashCode = hashCode * Utils.HASH_PRIME + lookups.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + freshVariables.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + freshConstants.hashCode();
         }
         return hashCode;
     }

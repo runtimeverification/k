@@ -467,12 +467,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
         Term rightHandSide = (Term) this.visitNode(rewrite.getRight());
 
-        Collection<Term> requires = new ArrayList<>();
+        List<Term> requires = new ArrayList<>();
         if (node.getRequires() != null) {
             transformConjunction(requires, (Term) this.visitNode(node.getRequires()));
         }
 
-        Collection<Term> ensures = new ArrayList<>();
+        List<Term> ensures = new ArrayList<>();
         if (node.getEnsures() != null) {
             transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
         }
@@ -519,10 +519,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         }
 
-        Collection<Variable> freshVariables = new ArrayList<>();
+        Set<Variable> freshConstants = Sets.newHashSet();
         // TODO(AndreiS): check !Variable only appears in the RHS
         for (org.kframework.kil.Variable variable : node.getBody().variables()) {
             if (variable.isFreshConstant()) {
+                freshConstants.add((Variable) this.visitNode(variable));
+            }
+        }
+
+        Set<Variable> freshVariables = Sets.newHashSet();
+        for (org.kframework.kil.Variable variable : node.getBody().variables()) {
+            if (variable.isFreshVariable()) {
                 freshVariables.add((Variable) this.visitNode(variable));
             }
         }
@@ -559,6 +566,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rightHandSide,
                 requires,
                 ensures,
+                freshConstants,
                 freshVariables,
                 lookupsBuilder.build(),
                 ruleData.isCompiledForFastRewriting(),
@@ -715,6 +723,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rightHandSide,
                 requires,
                 ensures,
+                rule.freshConstants(),
                 rule.freshVariables(),
                 lookupsBuilder.build(),
                 rule.isCompiledForFastRewriting(),

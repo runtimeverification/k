@@ -499,8 +499,11 @@ public class CopyOnWriteTransformer implements Transformer {
         for (Term conditionItem : rule.ensures()) {
             processedEnsures.add((Term) conditionItem.accept(this));
         }
-        Set<Variable> processedFreshVariables = new HashSet<Variable>(
-                rule.freshVariables().size());
+        Set<Variable> processedFreshConstants = new HashSet<>(rule.freshConstants().size());
+        for (Variable variable : rule.freshConstants()) {
+            processedFreshConstants.add((Variable) variable.accept(this));
+        }
+        Set<Variable> processedFreshVariables = new HashSet<>(rule.freshVariables().size());
         for (Variable variable : rule.freshVariables()) {
             processedFreshVariables.add((Variable) variable.accept(this));
         }
@@ -524,7 +527,7 @@ public class CopyOnWriteTransformer implements Transformer {
                 || processedRightHandSide != rule.rightHandSide()
                 || processedRequires.equals(rule.requires())
                 || processedEnsures.equals(rule.ensures())
-                || processedFreshVariables.equals(rule.freshVariables())
+                || processedFreshConstants.equals(rule.freshConstants())
                 || processedLookups != rule.lookups()) {
             return new Rule(
                     rule.label(),
@@ -532,6 +535,7 @@ public class CopyOnWriteTransformer implements Transformer {
                     processedRightHandSide,
                     processedRequires,
                     processedEnsures,
+                    processedFreshConstants,
                     processedFreshVariables,
                     processedLookups,
                     rule.isCompiledForFastRewriting(),

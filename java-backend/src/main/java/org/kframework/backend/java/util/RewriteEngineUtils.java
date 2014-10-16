@@ -60,7 +60,7 @@ public class RewriteEngineUtils {
 
         Map<Variable, Term> crntSubst = substitution;
         /* add bindings for fresh variables used in the rule */
-        for (Variable variable : rule.freshVariables()) {
+        for (Variable variable : rule.freshConstants()) {
             crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
         }
 
@@ -149,7 +149,7 @@ public class RewriteEngineUtils {
         List<Map<Variable, Term>> results = Lists.newArrayList();
         for (Map<Variable, Term> crntSubst : substitutions) {
             /* add bindings for fresh variables used in the rule */
-            for (Variable variable : rule.freshVariables()) {
+            for (Variable variable : rule.freshConstants()) {
                 crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
             }
 
