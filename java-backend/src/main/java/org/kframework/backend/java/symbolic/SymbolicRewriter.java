@@ -178,15 +178,22 @@ public class SymbolicRewriter {
     public static ConstrainedTerm buildResult(
             Rule rule,
             SymbolicConstraint constraint) {
+        return buildResult(rule, constraint, false);
+    }
+
+    private static ConstrainedTerm buildResult(Rule rule,
+            SymbolicConstraint constraint, boolean expandPattern) {
         for (Variable variable : rule.freshConstants()) {
             constraint.add(variable, FreshOperations.fresh(variable.sort(), constraint.termContext()));
         }
-        constraint.addAll(rule.ensures());
+        constraint.addAllThenSimplify(rule.ensures());
 
         /* get fresh substitutions of rule variables */
         BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
         /* rename rule variables in the constraints */
+        /* TODO(YilongL): implement a faster rename method in
+         * SymbolicConstraint which do not require calling simplify after */
         constraint = (SymbolicConstraint) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
         constraint.simplify();
 
@@ -201,6 +208,13 @@ public class SymbolicRewriter {
                 constraint.termContext());
         /* eliminate bindings of rule variables */
         constraint.removeBindings(freshSubstitution.values());
+
+        if (expandPattern) {
+            // TODO(AndreiS): move these some other place
+            constraint.expandPatternsAndSimplify(true);
+            term = term.expandPatterns(constraint, true);
+//            System.err.println(rule.getLocation() + " " + rule.getSource());
+        }
 
         return new ConstrainedTerm(term, constraint);
     }
@@ -226,34 +240,8 @@ public class SymbolicRewriter {
             if (constraint == null) {
                 continue;
             }
-            constraint.addAllThenSimplify(rule.ensures());
 
-            /* get fresh substitutions of rule variables */
-            BiMap<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
-
-            /* rename rule variables in the constraints */
-            constraint = (SymbolicConstraint) constraint.substituteWithBinders(freshSubstitution, constraint.termContext());
-            constraint.simplify();
-
-            /* rename rule variables in the rule RHS */
-            Term result = rule.rightHandSide().substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
-            /* apply the constraints substitution on the rule RHS and evaluate pending functions */
-            constraint.orientSubstitution(rule.boundVariables().stream()
-                    .map(p -> freshSubstitution.get(p))
-                    .collect(Collectors.toSet()));
-            result = result.substituteAndEvaluate(
-                    constraint.substitution(),
-                    constraint.termContext());
-            /* eliminate bindings of rule variables */
-            constraint.removeBindings(freshSubstitution.values());
-
-            // TODO(AndreiS): move these some other place
-            constraint.expandPatternsAndSimplify(true);
-            result = result.expandPatterns(constraint, true);
-
-            /* return first solution */
-//            System.err.println(rule.getLocation() + " " + rule.getSource());
-            return new ConstrainedTerm(result, constraint);
+            return buildResult(rule, constraint, true);
         }
 
         return null;
