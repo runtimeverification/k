@@ -191,6 +191,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         if (!result.keySet().containsAll(variables)) {
+            substitution = substitutionBackup;
             return false;
         }
         for (Map.Entry<Variable, Term> subst : result.entrySet()) {
