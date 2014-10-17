@@ -139,9 +139,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         final Set<Variable> variables = Sets.newHashSet(unificationConstraint.variableSet());
         variables.removeAll(variableSet());
-        unificationConstraint.orientSubstitution(variables);
-        if (unificationConstraint.isFalse()
-                || !unificationConstraint.substitution().keySet().containsAll(variables)) {
+        if (!unificationConstraint.orientSubstitution(variables)) {
             return null;
         }
 

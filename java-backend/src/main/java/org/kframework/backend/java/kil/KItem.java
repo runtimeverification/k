@@ -608,14 +608,16 @@ public final class KItem extends Term {
                     continue;
                 }
             } else {
-                if (!unificationConstraint.isMatching(ruleInputKList.variableSet())) {
+                Set<Variable> existVariables = ruleInputKList.variableSet();
+                if (!unificationConstraint.isMatching(existVariables)) {
                     continue;
                 }
 
                 SymbolicConstraint requires = SymbolicConstraint
                         .simplifiedConstraintFrom(context, rule.requires(), unificationConstraint);
-                requires.orientSubstitution(ruleInputKList.variableSet());
-                if (requires.isFalse() || !constraint.implies(requires, ruleInputKList.variableSet())) {
+                // this should be guaranteed by the above unificationConstraint.isMatching
+                assert requires.substitution().keySet().containsAll(existVariables);
+                if (requires.isFalse() || !constraint.implies(requires, existVariables)) {
                     continue;
                 }
             }

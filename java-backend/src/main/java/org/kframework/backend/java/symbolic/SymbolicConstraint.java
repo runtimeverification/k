@@ -868,11 +868,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return false;
         }
 
-        if (orientSubstitution(variables)) {
-            return substitution.size() == variables.size();
-        } else {
-            return false;
-        }
+        return orientSubstitution(variables)
+                && substitution.size() == variables.size();
     }
 
     public boolean hasMapEqualities() {
