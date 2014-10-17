@@ -1,14 +1,44 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.builtins.BitVector;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KItemProjection;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.ListUpdate;
+import org.kframework.backend.java.kil.MapKeyChoice;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.SetElementChoice;
+import org.kframework.backend.java.kil.SetLookup;
+import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
+import com.google.common.collect.Sets;
+
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -16,63 +46,179 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class SubstitutionTransformer extends PrePostTransformer {
+public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
-    private final Map<Variable, ? extends Term> substitution;
+    protected final Map<Variable, ? extends Term> substitution;
 
     public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
         super(context);
         this.substitution = substitution;
-        preTransformer.addTransformer(new LocalVariableChecker());
-        postTransformer.addTransformer(new LocalSubstitutionTransformer());
-        postTransformer.addTransformer(new VariableUpdaterTransformer());
     }
 
-    /**
-     * Stops further traversing the term when it contains no variable that needs
-     * to be substituted.
-     *
-     */
-    private class LocalVariableChecker extends LocalTransformer {
-        @Override
-        public ASTNode transform(JavaSymbolicObject object) {
-            // TODO(AndreiS) this stops the traversal for ground terms (even if the functions are not fully evaluated)
-            Set<Variable> variables = object.variableSet();
-            for (Variable variable : substitution.keySet()) {
-                if (variables.contains(variable)) {
-                    return object;
-                }
-            }
-            return new DoneTransforming(object);
-        }
+    protected boolean proceed(JavaSymbolicObject object) {
+        return !Sets.intersection(object.variableSet(), substitution.keySet()).isEmpty();
     }
 
-    /**
-     * Local transformer that performs the actual substitution of variables.
-     */
-    private class LocalSubstitutionTransformer extends LocalTransformer {
-
-        @Override
-        public Term transform(Variable variable) {
-            Term term = substitution.get(variable);
-            if (term != null) {
-                return term;
-            } else {
-                return variable;
-            }
-        }
+    @Override
+    public ASTNode transform(BitVector bitVector) {
+        return bitVector;
     }
 
-    /**
-     * Recomputes the set of variables contained in each node of the AST.
-     *
-     * @author TraianSF
-     */
-    private class VariableUpdaterTransformer extends LocalTransformer {
-        @Override
-        protected ASTNode transform(JavaSymbolicObject object) {
-            object.updateVariableSet();
-            return object;
-        }
+    @Override
+    public ASTNode transform(BoolToken boolToken) {
+        return boolToken;
+    }
+
+    @Override
+    public ASTNode transform(BuiltinList builtinList) {
+        /* YilongL: cannot extract the following code to a common helper method
+         * without involving dynamic dispatch */
+        return proceed(builtinList) ? super.transform(builtinList) : builtinList;
+    }
+
+    @Override
+    public ASTNode transform(BuiltinMap builtinMap) {
+        return proceed(builtinMap) ? super.transform(builtinMap) : builtinMap;
+    }
+
+    @Override
+    public ASTNode transform(BuiltinSet builtinSet) {
+        return proceed(builtinSet) ? super.transform(builtinSet) : builtinSet;
+    }
+
+    @Override
+    public ASTNode transform(Cell cell) {
+        return proceed(cell) ? super.transform(cell) : cell;
+    }
+
+    @Override
+    public ASTNode transform(CellCollection cellCollection) {
+        return proceed(cellCollection) ? super.transform(cellCollection) : cellCollection;
+    }
+
+    @Override
+    public ASTNode transform(ConstrainedTerm constrainedTerm) {
+        return proceed(constrainedTerm) ? super.transform(constrainedTerm) : constrainedTerm;
+    }
+
+    @Override
+    public ASTNode transform(Hole hole) {
+        return hole;
+    }
+
+    @Override
+    public ASTNode transform(IntToken intToken) {
+        return intToken;
+    }
+
+    @Override
+    public ASTNode transform(KLabelConstant kLabelConstant) {
+        return kLabelConstant;
+    }
+
+    @Override
+    public ASTNode transform(KLabelFreezer kLabelFreezer) {
+        return proceed(kLabelFreezer) ? super.transform(kLabelFreezer) : kLabelFreezer;
+    }
+
+    @Override
+    public ASTNode transform(KLabelInjection kLabelInjection) {
+        return proceed(kLabelInjection) ? super.transform(kLabelInjection) : kLabelInjection;
+    }
+
+    @Override
+    public ASTNode transform(KItemProjection kItemProjection) {
+        return proceed(kItemProjection) ? super.transform(kItemProjection) : kItemProjection;
+    }
+
+    @Override
+    public ASTNode transform(KItem kItem) {
+        return proceed(kItem) ? super.transform(kItem) : kItem;
+    }
+
+    @Override
+    public ASTNode transform(KList kList) {
+        return proceed(kList) ? super.transform(kList) : kList;
+    }
+
+    @Override
+    public ASTNode transform(KSequence kSequence) {
+        return proceed(kSequence) ? super.transform(kSequence) : kSequence;
+    }
+
+    @Override
+    public ASTNode transform(ListLookup listLookup) {
+        return proceed(listLookup) ? super.transform(listLookup) : listLookup;
+    }
+
+    @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return proceed(listUpdate) ? super.transform(listUpdate) : listUpdate;
+    }
+
+    @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        return proceed(mapKeyChoice) ? super.transform(mapKeyChoice) : mapKeyChoice;
+    }
+
+    @Override
+    public ASTNode transform(MapLookup mapLookup) {
+        return proceed(mapLookup) ? super.transform(mapLookup) : mapLookup;
+    }
+
+    @Override
+    public ASTNode transform(MapUpdate mapUpdate) {
+        return proceed(mapUpdate) ? super.transform(mapUpdate) : mapUpdate;
+    }
+
+    @Override
+    public ASTNode transform(MetaVariable metaVariable) {
+        return metaVariable;
+    }
+
+    @Override
+    public ASTNode transform(Rule rule) {
+        return proceed(rule) ? super.transform(rule) : rule;
+    }
+
+    @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        return proceed(setElementChoice) ? super.transform(setElementChoice) : setElementChoice;
+    }
+
+    @Override
+    public ASTNode transform(SetLookup setLookup) {
+        return proceed(setLookup) ? super.transform(setLookup) : setLookup;
+    }
+
+    @Override
+    public ASTNode transform(SetUpdate setUpdate) {
+        return proceed(setUpdate) ? super.transform(setUpdate) : setUpdate;
+    }
+
+    @Override
+    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
+        return proceed(symbolicConstraint) ? super.transform(symbolicConstraint) : symbolicConstraint;
+    }
+
+    @Override
+    public ASTNode transform(StringToken stringToken) {
+        return stringToken;
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        return proceed(uninterpretedConstraint) ? super.transform(uninterpretedConstraint) : uninterpretedConstraint;
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedToken uninterpretedToken) {
+        return uninterpretedToken;
+    }
+
+    @Override
+    public ASTNode transform(Variable variable) {
+        Term term = substitution.get(variable);
+        return term == null ? variable : term;
     }
 }

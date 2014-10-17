@@ -540,14 +540,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 substitution.put(e1.rightHandSide(), e1.leftHandSide());
             }
         }
-        simplifiedConstraint = (SymbolicConstraint) substituteTerms(simplifiedConstraint, substitution);
+        simplifiedConstraint = (SymbolicConstraint) TermSubstitutionTransformer
+                .substitute(simplifiedConstraint, substitution, context);
         simplifiedConstraint.renormalize();
         simplifiedConstraint.simplify();
         return simplifiedConstraint;
-    }
-
-    private JavaSymbolicObject substituteTerms(JavaSymbolicObject constraint, Map<Term, Term> substitution) {
-        return (JavaSymbolicObject) constraint.accept(new TermSubstitutionTransformer(substitution,context));
     }
 
     public boolean isFalse() {

@@ -1,12 +1,17 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
-import org.kframework.backend.java.kil.*;
-import org.kframework.kil.ASTNode;
-
 import java.util.Map;
 import java.util.Set;
+
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.ASTNode;
 
 
 /**
@@ -18,24 +23,11 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 
     public BinderSubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
         super(substitution, context);
-        preTransformer.addTransformer(new BinderSubstitution(context));
     }
 
-    /**
-     * Checks
-     *
-     */
-    private class BinderSubstitution extends LocalTransformer {
-        public BinderSubstitution(TermContext context) {
-            super(context);
-        }
-
-        @Override
-        public ASTNode transform(KItem kItem) {
-            kItem = binderSensitiveSubstitute(kItem, context);
-            return super.transform(kItem);
-        }
-
+    @Override
+    public ASTNode transform(KItem kItem) {
+        return proceed(kItem) ? super.transform(binderSensitiveSubstitute(kItem, context)) : kItem;
     }
 
     public static KItem binderSensitiveSubstitute(KItem kItem, TermContext context) {
