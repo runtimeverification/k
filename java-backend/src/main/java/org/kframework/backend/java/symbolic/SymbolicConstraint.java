@@ -108,7 +108,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     private final LinkedHashSet<Equality> equalityBuffer = Sets.newLinkedHashSet();
 
-    private boolean equalitiesWriteProtected = false;
+    private boolean writeProtected = false;
 
     private List<List<SymbolicConstraint>> multiConstraints = Lists.newArrayList();
 
@@ -336,7 +336,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         Equality equality = new Equality(leftHandSide, rightHandSide, context);
-        if (equalitiesWriteProtected) {
+        if (writeProtected) {
             if (equalityBuffer.add(equality)) {
                 isNormal = false;
                 truthValue = TruthValue.UNKNOWN;
@@ -639,7 +639,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             oldSubst = Maps.newHashMap(substitution);
             oldEqualities = Sets.newHashSet(equalities);
 
-            equalitiesWriteProtected = true;
+            writeProtected = true;
             for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
                 Equality equality = iterator.next();
 
@@ -662,7 +662,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 multiConstraints.addAll(unifier.multiConstraints());
             }
 
-            equalitiesWriteProtected = false;
+            writeProtected = false;
         }
 
         return truthValue;
@@ -684,7 +684,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
 //        assert !equalitiesWriteProtected : "Do not modify equalities when they are write-protected!";
-        if (isNormal || equalitiesWriteProtected) {
+        if (isNormal || writeProtected) {
             return;
         }
 
@@ -784,35 +784,38 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public void expandPatternsAndSimplify(boolean narrowing) {
-        normalize();
+        Map<Variable, Term> oldSubst = null;
+        Set<Equality> oldEqualities = null;
 
-        boolean changed;
-        do {
-            changed = false;
+        normalize();
+        while (true) {
+            assert isNormal;
+            if (oldSubst != null && oldEqualities != null
+                    && substitution.equals(oldSubst)
+                    && equalities.equals(oldEqualities)) {
+                break;
+            }
+            oldSubst = Maps.newHashMap(substitution);
+            oldEqualities = Sets.newHashSet(equalities);
+
             // TODO(AndreiS): patterns should be expanded before are put in the substitution
             Set<Variable> keys = Sets.newLinkedHashSet(substitution.keySet());
+            writeProtected = true;
             for (Variable variable : keys) {
                 Term term = substitution.get(variable);
                 Term expandedTerm = term.expandPatterns(this, narrowing);
                 if (term != expandedTerm) {
                     substitution.put(variable, expandedTerm);
-                    changed = true;
                 }
             }
 
-            // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
-            // TODO(YilongL): this is too ad-hoc; fix it once we allow sub-terms to carry constraint as well
             LinkedHashSet<Equality> expandedEqualities = Sets.newLinkedHashSet();
-            equalitiesWriteProtected = true;
             for (Equality equality : equalities) {
                 Equality expandedEquality = equality.expandPatterns(this, narrowing);
                 expandedEqualities.add(expandedEquality);
-                if (equality != expandedEquality) {
-                    changed = true;
-                }
             }
             equalities = expandedEqualities;
-            equalitiesWriteProtected = false;
+            writeProtected = false;
 
             /* force normalization to consider the changes made by this method */
             isNormal = false;
@@ -824,7 +827,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             } else {
                 simplify();
             }
-        } while (changed);
+        }
     }
 
     /**

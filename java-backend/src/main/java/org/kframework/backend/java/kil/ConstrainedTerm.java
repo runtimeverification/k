@@ -136,10 +136,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
 
         unificationConstraint.expandPatternsAndSimplify(false);
-        // TODO(AndreiS): figure out when a map unification provided more data
-        unificationConstraint.expandPatternsAndSimplify(false);
-        unificationConstraint.expandPatternsAndSimplify(false);
-        unificationConstraint.expandPatternsAndSimplify(false);
 
         final Set<Variable> variables = Sets.newHashSet(unificationConstraint.variableSet());
         variables.removeAll(variableSet());
