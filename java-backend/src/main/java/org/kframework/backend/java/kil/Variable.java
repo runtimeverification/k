@@ -41,13 +41,13 @@ public class Variable extends Term implements Immutable {
     }
 
     /**
-     * Returns a fresh {@code Variable} of a given sort.
+     * Returns a fresh anonymous {@code Variable} of a given sort.
      *
      * @param sort
      *            the given sort
      * @return the fresh variable
      */
-    public static Variable getFreshVariable(Sort sort) {
+    public static Variable getAnonVariable(Sort sort) {
         return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
     }
 
@@ -76,7 +76,7 @@ public class Variable extends Term implements Immutable {
     }
 
     public Variable getFreshCopy() {
-        Variable var = Variable.getFreshVariable(sort);
+        Variable var = Variable.getAnonVariable(sort);
         var.copyAttributesFrom(this);
         return var;
     }
