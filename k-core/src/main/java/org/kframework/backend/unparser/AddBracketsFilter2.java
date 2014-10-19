@@ -126,7 +126,7 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
     }
 
     private Variable replaceWithVar(Term ast) {
-        Variable var = Variable.getFreshVar(((Term)ast).getSort());
+        Variable var = Variable.getAnonVar(((Term)ast).getSort());
         substitution.put(var.getName(), (Term) ast);
         return var;
     }

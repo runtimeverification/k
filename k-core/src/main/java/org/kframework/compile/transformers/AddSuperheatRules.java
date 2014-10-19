@@ -83,8 +83,8 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
         Rule superHeat = node.shallowCopy();
         Term left = body.getLeft(); // C[e]
         Term right = body.getRight(); // e ~> C
-        Variable restHeat = Variable.getFreshVar(Sort.K);
-        Variable lHeat = Variable.getFreshVar(Sort.KLIST);
+        Variable restHeat = Variable.getAnonVar(Sort.K);
+        Variable lHeat = Variable.getAnonVar(Sort.KLIST);
         KSequence red1Seq = new KSequence();
         red1Seq.add(left); red1Seq.add(restHeat); //C[e] ~> RestHeat:K,
         KList red1List = new KList();

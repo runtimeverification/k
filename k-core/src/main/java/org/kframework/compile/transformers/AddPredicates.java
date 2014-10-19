@@ -187,7 +187,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.addConstant(Sort.KLABEL, symPred);
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
-                    Variable var = Variable.getFreshVar(Sort.K);
+                    Variable var = Variable.getAnonVar(Sort.K);
                     Term lhs = KApp.of(KLabelConstant.of(symPred, context), var);
                     Term rhs = KApp.of(
                             KLabelConstant.BOOL_ANDTHENBOOL_KLABEL,
@@ -198,7 +198,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.appendModuleItem(rule);
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
-                    var = Variable.getFreshVar(Sort.KLIST);
+                    var = Variable.getAnonVar(Sort.KLIST);
                     Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
 
                     // define isSort for symbolic sort constructor symSort
@@ -219,7 +219,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                 } else if (sort.isBuiltinSort()) {
-                    Variable var = Variable.getFreshVar(sort);
+                    Variable var = Variable.getAnonVar(sort);
                     Term lhs = KApp.of(BuiltinPredicate, var);
                     Rule rule = new Rule(lhs, BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
