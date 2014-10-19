@@ -62,26 +62,35 @@ public class DataStructure2Cell extends CopyOnWriteTransformer {
         return returnCell;
     }
 
-    private static Bag getListCells(ListBuiltin listBuiltin) {
+    private Bag getListCells(ListBuiltin listBuiltin) {
         List<Term> cells = Lists.newArrayList();
-        cells.addAll(listBuiltin.elementsLeft());
+        Consumer<Term> action = element -> cells.add(getNonLegacyTerm(element));
+        listBuiltin.elementsLeft().stream().forEach(action);
         cells.addAll(listBuiltin.baseTerms());
-        cells.addAll(listBuiltin.elementsRight());
+        listBuiltin.elementsRight().stream().forEach(action);
 
         return new Bag(cells);
     }
 
-    private static Bag getMapCells(MapBuiltin mapBuiltin, CellMap cellMap) {
+    private Bag getMapCells(MapBuiltin mapBuiltin, CellMap cellMap) {
         List<Term> cells = Lists.newArrayList();
         mapBuiltin.elements().entrySet().stream().forEach(entry ->
                 cells.add(new Cell(
                         cellMap.entryCellLabel(),
                         new Bag(Lists.<Term>newArrayList(
                                 new Cell(cellMap.keyCellLabel(), entry.getKey()),
-                                ((Cell) entry.getValue()).getContents())))));
+                                ((Cell) getNonLegacyTerm(entry.getValue())).getContents())))));
         cells.addAll(mapBuiltin.baseTerms());
 
         return new Bag(cells);
+    }
+
+    private Term getNonLegacyTerm(Term term) {
+        if (context.kompileOptions.experimental.legacyKast) {
+            return ((KInjectedLabel) ((KApp) term).getLabel()).getTerm();
+        } else {
+            return term;
+        }
     }
 
     @Override
