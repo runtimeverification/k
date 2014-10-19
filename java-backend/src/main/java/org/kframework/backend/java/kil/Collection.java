@@ -44,6 +44,11 @@ public abstract class Collection extends Term {
         this.frame = frame;
     }
 
+    /**
+     * Returns a KORE (KLabel/KList) representation of this collection. The returned representation
+     * is not unique (due to associativity/commutativity).
+     * {@link org.kframework.backend.java.kil.Term#evaluate} is the inverse operation.
+     */
     public Term toLabelRepresentation(TermContext context) {
         DataStructureSort sort = context.definition().context().dataStructureSortOf(
                 sort().toFrontEnd());
@@ -66,6 +71,11 @@ public abstract class Collection extends Term {
         return result;
     }
 
+    /**
+     * Returns a list aggregating the base terms and the elements/entries of this collection.
+     * Each collection is responsible for representing its elements/entries in KLabel and KList
+     * format.
+     */
     abstract protected List<Term> getLabelRepresentationComponents(TermContext context);
 
     /**
