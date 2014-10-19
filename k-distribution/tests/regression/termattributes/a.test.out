@@ -1,4 +1,4 @@
 <k>
-    V:Int{foo} ~> foo ::A{bar} ~> V ~> V ~> GeneratedFreshVar0:K ::K{baz}
+    V:Int{foo} ~> foo ::A{bar} ~> V ~> V ~> GeneratedAnonVar0:K ::K{baz}
 </k>
-GeneratedFreshVar1:Bag
+GeneratedAnonVar1:Bag
