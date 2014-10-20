@@ -232,7 +232,9 @@ public class TaskQueue {
                         kompilePaths.put(kompilePath,
                                 success ? KompileStatus.SUCCEEDED : KompileStatus.FAILED);
                     }
-                    addKRunSteps(kompileStep.getObj());
+                    if (success) {
+                        addKRunSteps(kompileStep.getObj());
+                    }
                 } else if (status == KompileStatus.IN_PROGRESS) {
                     // Just wait until it's finished
                     tpe.execute(this);
