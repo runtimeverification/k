@@ -2,18 +2,14 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellLabel;
-import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -98,49 +94,14 @@ public class GroundRewriter extends AbstractRewriter {
         return rule.rightHandSide().substituteAndEvaluate(substitution, termContext);
     }
 
-    // Unifies the term with the pattern, and returns a map from variables in
-    // the pattern to the terms they unify with. Returns null if the term
-    // can't be unified with the pattern.
     private Map<Variable, Term> getSubstitutionMap(Term term, Rule pattern) {
-        // Create the initial constraints based on the pattern
-        SymbolicConstraint termConstraint = new SymbolicConstraint(termContext);
-        termConstraint.addAll(pattern.requires());
-        for (Variable var : pattern.freshVariables()) {
-            termConstraint.add(var, FreshOperations.fresh(var.sort(), termContext));
-        }
-
-        // Create a constrained term from the left hand side of the pattern.
-        ConstrainedTerm lhs = new ConstrainedTerm(
-                pattern.leftHandSide(),
-                pattern.lookups().getSymbolicConstraint(termContext),
-                termConstraint);
-
-        // Collect the variables we are interested in finding
-        VariableCollector visitor = new VariableCollector();
-        lhs.accept(visitor);
-
-        ConstrainedTerm cnstrTerm = new ConstrainedTerm(term, termContext);
-        Collection<SymbolicConstraint> constraints = cnstrTerm.unify(lhs);
-        if (constraints.isEmpty()) {
+        List<Map<Variable, Term>> maps = PatternMatcher.match(term, pattern, termContext);
+        if (maps.size() != 1) {
             return null;
         }
 
-        // Build a substitution map containing the variables in the pattern from
-        // the substitution constraints given by unification.
-        Map<Variable, Term> map = new HashMap<Variable, Term>();
-        for (SymbolicConstraint constraint : constraints) {
-            if (!constraint.isSubstitution()) {
-                return null;
-            }
-            constraint.orientSubstitution(visitor.getVariableSet());
-            for (Variable variable : visitor.getVariableSet()) {
-                Term value = constraint.substitution().get(variable);
-                if (value == null) {
-                    return null;
-                }
-                map.put(variable, new Cell<Term>(CellLabel.GENERATED_TOP, value));
-            }
-        }
+        Map<Variable, Term> map = maps.get(0);
+        map.entrySet().forEach(e -> e.setValue(new Cell<>(CellLabel.GENERATED_TOP, e.getValue())));
         return map;
     }
 
