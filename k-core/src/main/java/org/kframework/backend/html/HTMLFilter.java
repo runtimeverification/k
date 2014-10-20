@@ -660,7 +660,7 @@ public class HTMLFilter extends BackendFilter {
         try {
             FileUtil.loadProperties(Latex2HTMLzero, getClass(), "Latex2HTMLzero.properties");
         } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("error loading " + "Latex2HTMLzero.properties", e);
+            GlobalSettings.kem.registerCriticalError("error loading Latex2HTMLzero.properties", e);
         }
 
         try {
