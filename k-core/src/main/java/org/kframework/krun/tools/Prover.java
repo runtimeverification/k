@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.tools;
 
-import java.io.File;
 import java.util.Set;
 
 import org.kframework.kil.Attributes;
@@ -45,6 +44,7 @@ public interface Prover {
         private final Term initialConfiguration;
         private final KExceptionManager kem;
         private final Prover prover;
+        private final FileUtil files;
 
         @Inject
         protected Tool(
@@ -53,22 +53,23 @@ public interface Prover {
                 Stopwatch sw,
                 @Main Term initialConfiguration,
                 KExceptionManager kem,
-                @Main Prover prover) {
+                @Main Prover prover,
+                @Main FileUtil files) {
             this.options = options;
             this.context = context;
             this.sw = sw;
             this.initialConfiguration = initialConfiguration;
             this.kem = kem;
             this.prover = prover;
+            this.files = files;
         }
 
         @Override
         public KRunProofResult<Set<Term>> run(Void v, Attributes a) {
             a.add(Context.class, context);
             try {
-                File proofFile = options.experimental.prove();
-                String content = FileUtil.getFileContent(
-                        proofFile.getAbsoluteFile().toString());
+                String proofFile = options.experimental.prove;
+                String content = files.loadFromWorkingDirectory(proofFile);
                 Definition parsed = DefinitionLoader.parseString(content,
                         Sources.fromFile(proofFile), context);
                 Module mod = parsed.getSingletonModule();

@@ -1,14 +1,10 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
@@ -27,6 +23,7 @@ import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.CommonModule;
+
 import com.google.inject.Inject;
 import com.google.inject.Module;
 
@@ -53,6 +50,7 @@ public class KompileFrontEnd extends FrontEnd {
     private final KExceptionManager kem;
     private final BinaryLoader loader;
     private final DefinitionLoader defLoader;
+    private final FileUtil files;
 
     @Inject
     KompileFrontEnd(
@@ -65,7 +63,8 @@ public class KompileFrontEnd extends FrontEnd {
             KExceptionManager kem,
             BinaryLoader loader,
             DefinitionLoader defLoader,
-            JarInfo jarInfo) {
+            JarInfo jarInfo,
+            FileUtil files) {
         super(kem, options.global, usage, experimentalUsage, jarInfo);
         this.context = context;
         this.options = options;
@@ -74,6 +73,7 @@ public class KompileFrontEnd extends FrontEnd {
         this.kem = kem;
         this.loader = loader;
         this.defLoader = defLoader;
+        this.files = files;
     }
 
     @Override
@@ -83,46 +83,11 @@ public class KompileFrontEnd extends FrontEnd {
                     options.mainDefinitionFile().getAbsolutePath());
         }
 
-        if (options.directory.isFile()) { // isFile = exists && !isDirectory
-            String msg = "Not a directory: " + options.directory;
-            kem.registerCriticalError(msg);
-        }
-
-        context.dotk = new File(System.getProperty("user.dir"),
-                FileUtil.generateUniqueFolderName(".kompile"));
-        if (!context.dotk.mkdirs() && !context.dotk.isDirectory()) {
-            kem.registerCriticalError("Could not create temporary directory " +
-                    context.dotk.getAbsolutePath());
-        }
-
-        // default for documentation backends is to store intermediate outputs in temp directory
-        context.kompiled = context.dotk;
-
-        if (!options.global.debug) {
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    try {
-                        FileUtils.deleteDirectory(context.dotk);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-
-        if (backend.generatesDefinition()) {
-            context.kompiled = new File(options.directory, FilenameUtils.removeExtension(
-                    options.mainDefinitionFile().getName()) + "-kompiled");
-            if (context.kompiled.isDirectory()) {
-                checkAnotherKompiled(context.kompiled);
-            } else if (!context.kompiled.mkdirs()) {
-                kem.registerCriticalError("Could not create directory " + context.kompiled);
-            }
-        }
+        context.files = files;
 
         genericCompile(options.experimental.step);
 
-        loader.saveOrDie(new File(context.kompiled, "context.bin").getAbsolutePath(), context);
+        loader.saveOrDie(files.resolveKompiled("context.bin"), context);
 
         verbose();
         return true;
@@ -155,28 +120,11 @@ public class KompileFrontEnd extends FrontEnd {
             javaDef = (Definition) e.getResult();
         }
 
-        loader.saveOrDie(context.kompiled.getAbsolutePath() + "/configuration.bin",
+        loader.saveOrDie(files.resolveKompiled("configuration.bin"),
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
 
-    }
-
-    private void checkAnotherKompiled(File kompiled) {
-        File[] kompiledList = kompiled.getParentFile().listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File current, String name) {
-                File f = new File(current, name);
-                return f.getAbsolutePath().endsWith("-kompiled") && f.isDirectory();
-            }
-        });
-        for (File aKompiledList : kompiledList) {
-            if (!aKompiledList.getName().equals(kompiled.getName())) {
-                String msg = "Creating multiple kompiled definition in the same directory " +
-                        "is not allowed. Found " + aKompiledList.getName() + " and " + kompiled.getName() + ".";
-                kem.registerCriticalError(msg);
-            }
-        }
     }
 }
 

@@ -5,7 +5,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.JarInfo;
-
 import com.beust.jcommander.ParameterException;
 
 public abstract class FrontEnd {

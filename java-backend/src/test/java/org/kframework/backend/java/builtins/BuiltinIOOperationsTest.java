@@ -1,6 +1,8 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
+import java.io.File;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +31,7 @@ public class BuiltinIOOperationsTest {
 
         Mockito.when(fs.open("foo", "r")).thenReturn(3L);
 
-        Term res = new BuiltinIOOperationsImpl(null, fs, null, null, null).open(path, mode, context);
+        Term res = new BuiltinIOOperationsImpl(null, fs, null, null, null, new File(".")).open(path, mode, context);
         Assert.assertTrue(res instanceof IntToken);
         Assert.assertEquals(3, ((IntToken)res).intValue());
     }

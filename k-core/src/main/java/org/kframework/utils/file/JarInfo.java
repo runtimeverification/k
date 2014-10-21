@@ -1,10 +1,8 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
+
 import com.google.inject.Inject;
 
 import java.io.File;
@@ -73,8 +71,7 @@ public class JarInfo {
             System.out.println("Git branch: " + branch);
             System.out.println("Build date: " + date.toString());
         } catch (IOException e) {
-            kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                    "Could not load version info. Check your build system?"));
+            kem.registerInternalError("Could not load version info. Check your build system?");
         }
     }
 }

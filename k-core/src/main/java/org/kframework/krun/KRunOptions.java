@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -246,7 +245,7 @@ public final class KRunOptions {
             return s;
         }
         org.kframework.parser.concrete.KParser
-        .ImportTblRule(configurationCreation.definitionLoading.definition());
+        .ImportTblRule(context.files.resolveKompiled("."));
         return DefinitionLoader.parsePattern(
                 patternToParse,
                 null,
@@ -290,7 +289,7 @@ public final class KRunOptions {
         private String ltlmc;
 
         @Parameter(names="--ltlmc-file", description="Specify the formula for model checking through a file.")
-        private File ltlmcFile;
+        private String ltlmcFile;
 
         public String ltlmc() {
             if (ltlmc != null && ltlmcFile != null) {
@@ -302,27 +301,23 @@ public final class KRunOptions {
             if (ltlmcFile == null) {
                 return null;
             }
-            if (!ltlmcFile.exists() || ltlmcFile.isDirectory()) {
-                throw new ParameterException("Cannot read from file " + ltlmcFile.getAbsolutePath());
-            }
-            return FileUtil.getFileContent(ltlmcFile.getAbsolutePath());
+            return files.loadFromWorkingDirectory(ltlmcFile);
+        }
+
+        private FileUtil files;
+
+        @Inject
+        public void setFiles(FileUtil files) {
+            this.files = files;
         }
 
         @Parameter(names="--prove", description="Prove a set of reachability rules.")
-        private File prove;
-
-        public File prove() {
-            if (prove == null) return null;
-            if (!prove.exists() || prove.isDirectory()) {
-                throw new ParameterException("File to prove does not exist.");
-            }
-            return prove;
-        }
+        public String prove;
 
         @ParametersDelegate
         public SMTOptions smt = new SMTOptions();
 
         @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
-        public File outputFile;
+        public String outputFile;
     }
 }

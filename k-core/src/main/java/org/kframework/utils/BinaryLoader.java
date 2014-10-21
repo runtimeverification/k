@@ -4,6 +4,7 @@ package org.kframework.utils;
 import java.io.*;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -33,15 +34,23 @@ public class BinaryLoader {
         this.injector = injector;
     }
 
-    public void save(String fileName, Object o) throws IOException {
+    public void save(File fileName, Object o) throws IOException {
+        File dir = fileName.getAbsoluteFile().getParentFile();
+        if (!dir.exists() && !dir.mkdirs()) {
+            kem.registerCriticalError("Could not create directory " + dir);
+        }
         try (OutputStream out = new FileOutputStream(fileName)) {
             save(out, o);
         }
     }
 
-    public void saveOrDie(String fileName, Object o) {
+    public void saveOrDie(File fileName, Object o) {
+        File dir = fileName.getAbsoluteFile().getParentFile();
+        if (!dir.exists() && !dir.mkdirs()) {
+            kem.registerCriticalError("Could not create directory " + dir);
+        }
         try (OutputStream out = new FileOutputStream(fileName)) {
-            saveOrDie(out, o, fileName);
+            saveOrDie(out, o, fileName.getAbsolutePath());
         } catch (IOException e) {
             kem.registerCriticalError("Could not write to " + fileName, e);
         }
@@ -66,7 +75,7 @@ public class BinaryLoader {
         }
     }
 
-    public <T> T load(Class<T> cls, String fileName) throws IOException, ClassNotFoundException {
+    public <T> T load(Class<T> cls, File fileName) throws IOException, ClassNotFoundException {
         return cls.cast(load(fileName));
     }
 
@@ -74,9 +83,9 @@ public class BinaryLoader {
         return cls.cast(load(in));
     }
 
-    public <T> T loadOrDie(Class<T> cls, String fileName) {
+    public <T> T loadOrDie(Class<T> cls, File fileName) {
         try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
-            return loadOrDie(cls, in, fileName);
+            return loadOrDie(cls, in, fileName.getAbsolutePath());
         } catch (IOException e) {
             kem.registerCriticalError("Could not read from " + fileName, e);
         }
@@ -92,7 +101,7 @@ public class BinaryLoader {
         }
     }
 
-    public Object load(String fileName) throws IOException, ClassNotFoundException {
+    public Object load(File fileName) throws IOException, ClassNotFoundException {
         try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
             return load(in);
         }
@@ -102,7 +111,7 @@ public class BinaryLoader {
         return loadOrDie(cls, in, "input stream");
     }
 
-    public <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
+    private <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
 
         try {
             return load(cls, in);

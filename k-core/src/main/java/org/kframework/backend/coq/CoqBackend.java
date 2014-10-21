@@ -24,11 +24,13 @@ import com.google.inject.Inject;
 
 public class CoqBackend extends BasicBackend {
     private final KExceptionManager kem;
+    private final FileUtil files;
 
     @Inject
-    public CoqBackend(Stopwatch sw, Context context, KExceptionManager kem) {
+    public CoqBackend(Stopwatch sw, Context context, KExceptionManager kem, FileUtil files) {
         super(sw, context);
         this.kem = kem;
+        this.files = files;
     }
 
     @Override
@@ -42,14 +44,14 @@ public class CoqBackend extends BasicBackend {
         unparser.visitNode(definition);
         String unparsedText = unparser.getResult();
 
-        FileUtil.save(options.directory.getPath() + File.separator + labelFile, unparsedText);
+        files.saveToDefinitionDirectory(labelFile, unparsedText);
 
         final String kcoq = OS.current().getNativeExecutable("kcoq");
-        File directory = new File(definition.getMainFile()).getParentFile();
+        File directory = definition.getMainFile().getParentFile();
 
         try {
             Process p = new ProcessBuilder(kcoq,"syntax","--recursive",
-                    definition.getMainFile(),domainFile)
+                    definition.getMainFile().getAbsolutePath(),domainFile)
               .inheritIO().directory(directory).start();
             int result;
             try {
@@ -68,7 +70,7 @@ public class CoqBackend extends BasicBackend {
         }
         try {
             Process p = new ProcessBuilder(kcoq,"rules","--lang-name",langName,"--recursive",
-                    definition.getMainFile(),"--rules-from",labelFile,ruleFile)
+                    definition.getMainFile().getAbsolutePath(),"--rules-from",labelFile,ruleFile)
               .inheritIO().directory(directory).start();
             int result;
             try {

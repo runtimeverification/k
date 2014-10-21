@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.compile.checks.CheckListDecl;
@@ -81,6 +80,7 @@ public class DefinitionLoader {
     private final OuterParser outer;
     private final boolean documentation;
     private final boolean autoinclude;
+    private final FileUtil files;
 
     @Inject
     public DefinitionLoader(
@@ -89,13 +89,15 @@ public class DefinitionLoader {
             KExceptionManager kem,
             OuterParser outer,
             @Backend.Documentation boolean documentation,
-            @Backend.Autoinclude boolean autoinclude) {
+            @Backend.Autoinclude boolean autoinclude,
+            FileUtil files) {
         this.sw = sw;
         this.loader = loader;
         this.kem = kem;
         this.outer = outer;
         this.documentation = documentation;
         this.autoinclude = autoinclude;
+        this.files = files;
     }
 
     public Definition loadDefinition(File mainFile, String lang, Context context) {
@@ -104,7 +106,7 @@ public class DefinitionLoader {
 
         String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
         if ("bin".equals(extension)) {
-            javaDef = loader.loadOrDie(Definition.class, canoFile.toString());
+            javaDef = loader.loadOrDie(Definition.class, canoFile);
 
             sw.printIntermediate("Load definition from binary");
 
@@ -135,10 +137,10 @@ public class DefinitionLoader {
             // transfer information from the OuterParser object, to the Definition object
             org.kframework.kil.Definition def = new org.kframework.kil.Definition();
             try {
-                def.setMainFile(mainFile.getCanonicalPath());
+                def.setMainFile(mainFile.getCanonicalFile());
             } catch (IOException e) {
                 // this isn't worth crashing the application over, so just use the absolute path
-                def.setMainFile(mainFile.getAbsolutePath());
+                def.setMainFile(mainFile.getAbsoluteFile());
             }
             def.setMainModule(mainModule);
             def.setModulesMap(outer.getModulesMap());
@@ -177,35 +179,28 @@ public class DefinitionLoader {
             sw.printIntermediate("Checks");
 
             // ------------------------------------- generate files
-            ResourceExtractor.ExtractDefSDF(new File(context.dotk, "def"));
-            ResourceExtractor.ExtractGroundSDF(new File(context.dotk, "ground"));
+            ResourceExtractor.ExtractDefSDF(files.resolveTemp("def"));
+            ResourceExtractor.ExtractGroundSDF(files.resolveTemp("ground"));
 
-            ResourceExtractor.ExtractProgramSDF(new File(context.dotk, "pgm"));
+            ResourceExtractor.ExtractProgramSDF(files.resolveTemp("pgm"));
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
             if (!documentation) {
                 String oldSdfPgm = "";
-                if (new File(context.kompiled, "Program.sdf").exists())
-                    oldSdfPgm = FileUtil.getFileContent(context.kompiled.getAbsolutePath() + "/Program.sdf");
+                if (files.resolveKompiled("Program.sdf").exists())
+                    oldSdfPgm = files.loadFromKompiled("Program.sdf");
 
                 StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
 
-                FileUtil.save(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgmBuilder);
-                String newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+                String newSdfPgm = newSdfPgmBuilder.toString();
+                files.saveToTemp("pgm/Program.sdf", newSdfPgm);
 
                 sw.printIntermediate("File Gen Pgm");
 
-                if (!oldSdfPgm.equals(newSdfPgm) || !new File(context.kompiled, "Program.tbl").exists()) {
-                    Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/pgm"), "Program");
-                    try {
-                        FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.sdf"), context.kompiled);
-                        FileUtils.copyFileToDirectory(new File(context.dotk, "pgm/Program.tbl"), context.kompiled);
-                    } catch (IOException e) {
-                        kem.registerInternalError(
-                                "IO error detected writing program parser to file", e);
-                        throw new AssertionError("unreachable");
-                    }
-
+                if (!oldSdfPgm.equals(newSdfPgm) || !files.resolveKompiled("Program.tbl").exists()) {
+                    Sdf2Table.run_sdf2table(files.resolveTemp("pgm"), "Program");
+                    files.copyTempFileToKompiledDirectory("pgm/Program.sdf");
+                    files.copyTempFileToKompiledDirectory("pgm/Program.tbl");
                     sw.printIntermediate("Generate TBLPgm");
                 }
             }
@@ -218,45 +213,32 @@ public class DefinitionLoader {
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
             String oldSdf = "";
-            if (new File(context.kompiled, "Integration.sdf").exists())
-                oldSdf = FileUtil.getFileContent(context.kompiled.getAbsolutePath() + "/Integration.sdf");
-            FileUtil.save(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, context));
-            FileUtil.save(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
-            String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
+            if (files.resolveKompiled("Integration.sdf").exists())
+                oldSdf = files.loadFromKompiled("Integration.sdf");
+            String newSdf = DefinitionSDF.getSdfForDefinition(def, context).toString();
+            files.saveToTemp("def/Integration.sdf", newSdf);;
+            files.saveToTemp("ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context).toString());
 
             sw.printIntermediate("File Gen Def");
 
-            String cacheFile = context.kompiled.getAbsolutePath() + "/defx-cache.bin";
-            if (!oldSdf.equals(newSdf) || !new File(context.kompiled, "Rule.tbl").exists()
-                    || !new File(context.kompiled, "Ground.tbl").exists()) {
+            File cache = files.resolveKompiled("defx-cache.bin");
+            if (!oldSdf.equals(newSdf) || !files.resolveKompiled("Rule.tbl").exists()
+                    || !files.resolveKompiled("Ground.tbl").exists()) {
                 try {
                     // delete the file with the cached/partially parsed rules
-                    File cache = new File(cacheFile);
                     if (cache.exists() && !cache.delete()) {
-                        kem.registerCriticalError("Could not delete file " + cacheFile);
+                        kem.registerCriticalError("Could not delete file " + cache);
                     }
                     // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                    Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
+                    Thread t1 = Sdf2Table.run_sdf2table_parallel(files.resolveTemp("def"), "Concrete");
                     if (!documentation) {
-                        Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
+                        Thread t2 = Sdf2Table.run_sdf2table_parallel(files.resolveTemp("ground"), "Concrete");
                         t2.join();
-                        try {
-                            FileUtils.copyFile(new File(context.dotk, "ground/Concrete.tbl"), new File(context.kompiled, "Ground.tbl"));
-                        } catch (IOException e) {
-                            kem.registerInternalError(
-                                    "IO error detected writing ground parser to file", e);
-                            throw new AssertionError("unreachable");
-                        }
+                        files.copyTempFileToKompiledFile("ground/Concrete.tbl", "Ground.tbl");
                     }
                     t1.join();
-                    try {
-                        FileUtils.copyFileToDirectory(new File(context.dotk, "def/Integration.sdf"), context.kompiled);
-                        FileUtils.copyFile(new File(context.dotk, "def/Concrete.tbl"), new File(context.kompiled, "Rule.tbl"));
-                    } catch (IOException e) {
-                        kem.registerInternalError(
-                                "IO error detected writing rule parser to file", e);
-                        throw new AssertionError("unreachable");
-                    }
+                    files.copyTempFileToKompiledDirectory("def/Integration.sdf");
+                    files.copyTempFileToKompiledFile("def/Concrete.tbl", "Rule.tbl");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     kem.registerCriticalError(
@@ -267,7 +249,7 @@ public class DefinitionLoader {
                 sw.printIntermediate("Generate TBLDef");
             }
 
-            org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
+            org.kframework.parser.concrete.KParser.ImportTblRule(files.resolveKompiled("."));
 
             sw.printIntermediate("Importing Files");
             // ------------------------------------- parse configs
@@ -287,7 +269,7 @@ public class DefinitionLoader {
             // load definition if possible
             try {
                 @SuppressWarnings("unchecked")
-                Map<String, CachedSentence> cachedDefTemp = loader.load(Map.class, cacheFile);
+                Map<String, CachedSentence> cachedDefTemp = loader.load(Map.class, cache);
                 cachedDef = cachedDefTemp;
             } catch (IOException | ClassNotFoundException e) {
                 // it means the cache is not valid, or it doesn't exist
@@ -306,7 +288,7 @@ public class DefinitionLoader {
                 te.printStackTrace();
             } finally {
                 // save definition
-                loader.saveOrDie(cacheFile, clf.getKept());
+                loader.saveOrDie(cache, clf.getKept());
             }
             JavaClassesFactory.endConstruction();
 
@@ -346,7 +328,7 @@ public class DefinitionLoader {
         def.setItems(di);
 
         // ------------------------------------- import files in Stratego
-        org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
+        org.kframework.parser.concrete.KParser.ImportTblRule(context.files.resolveKompiled("."));
 
         // ------------------------------------- parse configs
         JavaClassesFactory.startConstruction(context);

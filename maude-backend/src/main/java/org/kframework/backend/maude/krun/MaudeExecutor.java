@@ -3,7 +3,6 @@ package org.kframework.backend.maude.krun;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,7 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections15.Transformer;
-import org.apache.commons.io.FileUtils;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.maude.MaudeKRunOptions;
 import org.kframework.compile.utils.RuleCompilerSteps;
@@ -89,12 +87,11 @@ import edu.uci.ics.jung.io.graphml.NodeMetadata;
 
 public class MaudeExecutor implements Executor {
 
-    final File krunTempDir;
-    final File inFile;
-    final File outFile;
-    final File errFile;
-    final File xmlOutFile;
-    final File processedXmlOutFile;
+    public static final String inFile = "maude_in";
+    public static final String outFile = "maude_out";
+    public static final String errFile = "maude_err";
+    public static final String xmlOutFile = "maudeoutput.xml";
+    public static final String processedXmlOutFile = "maudeoutput_simplified.xml";
 
     private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
@@ -102,6 +99,7 @@ public class MaudeExecutor implements Executor {
     private final MaudeKRunOptions maudeOptions;
     private final Stopwatch sw;
     private final Context context;
+    private final FileUtil files;
 
     private boolean ioServer;
     private int counter = 0;
@@ -113,50 +111,30 @@ public class MaudeExecutor implements Executor {
             Stopwatch sw,
             Context context,
             KExceptionManager kem,
-            MaudeKRunOptions maudeOptions) {
+            MaudeKRunOptions maudeOptions,
+            FileUtil files) {
         this.options = options;
         this.sw = sw;
         this.context = context;
         this.kompileOptions = kompileOptions;
         this.kem = kem;
         this.maudeOptions = maudeOptions;
-
-
-        krunTempDir = new File(System.getProperty("user.dir"),
-                FileUtil.generateUniqueFolderName(".krun"));
-        inFile = new File(krunTempDir, "maude_in");
-        outFile = new File(krunTempDir, "maude_out");
-        errFile = new File(krunTempDir, "maude_err");
-        xmlOutFile = new File(krunTempDir, "maudeoutput.xml");
-        processedXmlOutFile = new File(krunTempDir, "maudeoutput_simplified.xml");
-
-        if (!options.global.debug) {
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        FileUtils.deleteDirectory(krunTempDir);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
+        this.files = files;
 
         ioServer = options.io();
     }
 
     void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
-        FileUtil.save(inFile.getAbsolutePath(), maudeCmd);
+        files.saveToTemp(inFile, maudeCmd.toString());
 
         int returnValue;
-        KRunner runner = new KRunner(new File(context.kompiled, "main.maude"),
-                    outFile, errFile, inFile, xmlOutFile,
+        KRunner runner = new KRunner(files.resolveKompiled("main.maude"),
+                    files.resolveTemp(outFile), files.resolveTemp(errFile), files.resolveTemp(inFile), files.resolveTemp(xmlOutFile),
                     kompileOptions.mainModule(),
                     maudeOptions.logIO, !ioServer, context);
         returnValue = runner.run();
-        if (errFile.exists()) {
-            String content = FileUtil.getFileContent(errFile.getAbsolutePath());
+        if (files.resolveTemp(errFile).exists()) {
+            String content = files.loadFromTemp(errFile);
             if (content.length() > 0) {
                 throw new KRunExecutionException(content);
             }
@@ -243,7 +221,7 @@ public class MaudeExecutor implements Executor {
     }
 
     private KRunResult<KRunState> parseRunResult(String maude_cmd) throws IOException {
-        Document doc = XmlUtil.readXMLFromFile(xmlOutFile.getAbsolutePath());
+        Document doc = XmlUtil.readXMLFromFile(files.resolveTemp(xmlOutFile).getAbsolutePath());
         NodeList list;
         Node nod;
         list = doc.getElementsByTagName("result");
@@ -258,7 +236,7 @@ public class MaudeExecutor implements Executor {
         KRunResult<KRunState> ret = new KRunResult<KRunState>(state);
         String statistics = printStatistics(elem, maude_cmd);
         ret.setStatistics(statistics);
-        ret.setRawOutput(FileUtil.getFileContent(outFile.getAbsolutePath()));
+        ret.setRawOutput(files.loadFromTemp(outFile));
         parseCounter(list.item(2));
         return ret;
     }
@@ -280,7 +258,7 @@ public class MaudeExecutor implements Executor {
 
     void assertXML(boolean assertion) {
         if (!assertion) {
-            kem.registerCriticalError("Cannot parse result xml from maude. If you believe this to be in error, please file a bug and attach " + xmlOutFile.getAbsolutePath().replaceAll("/krun[0-9]*/", "/krun/"));
+            assert false;
         }
     }
 
@@ -541,13 +519,13 @@ public class MaudeExecutor implements Executor {
         DirectedGraph<KRunState, Transition> graph = (showGraph) ? parseSearchGraph() : null;
         results = new SearchResults(solutions, graph, matches);
         KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
-        result.setRawOutput(FileUtil.getFileContent(outFile.getAbsolutePath()));
+        result.setRawOutput(files.loadFromTemp(outFile));
         return result;
     }
 
     private DirectedGraph<KRunState, Transition> parseSearchGraph() {
         try (
-            Scanner scanner = new Scanner(new File(xmlOutFile.getAbsolutePath()));
+            Scanner scanner = new Scanner(files.resolveTemp(xmlOutFile));
             Writer writer = new OutputStreamWriter(new BufferedOutputStream(
                 new FileOutputStream(processedXmlOutFile)))) {
 
@@ -563,14 +541,14 @@ public class MaudeExecutor implements Executor {
                     + " and write to " + processedXmlOutFile, e);
         }
 
-        Document doc = XmlUtil.readXMLFromFile(processedXmlOutFile.getAbsolutePath());
+        Document doc = XmlUtil.readXMLFromFile(files.resolveTemp(processedXmlOutFile).getAbsolutePath());
         NodeList list;
         Node nod;
         list = doc.getElementsByTagName("graphml");
         assertXML(list.getLength() == 1);
         nod = list.item(0);
         assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
-        XmlUtil.serializeXML(nod, processedXmlOutFile.getAbsolutePath());
+        XmlUtil.serializeXML(nod, files.resolveTemp(processedXmlOutFile).getAbsolutePath());
 
         Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() {
             @Override
@@ -645,7 +623,7 @@ public class MaudeExecutor implements Executor {
 
     private List<SearchResult> parseSearchResults(Rule pattern, RuleCompilerSteps compilationInfo) {
         List<SearchResult> results = new ArrayList<SearchResult>();
-        Document doc = XmlUtil.readXMLFromFile(xmlOutFile.getAbsolutePath());
+        Document doc = XmlUtil.readXMLFromFile(files.resolveTemp(xmlOutFile).getAbsolutePath());
         NodeList list;
         Node nod;
         list = doc.getElementsByTagName("search-result");

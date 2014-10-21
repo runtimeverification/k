@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import java.io.File;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
@@ -85,14 +84,14 @@ public final class KRunDebuggerOptions {
     public static final class CommandSave {
 
         @Parameter(names="-f", description="File to save to", required=true)
-        public File file;
+        public String file;
     }
 
     @Parameters(commandNames="load", commandDescription="Load the debug session from a file")
     public static final class CommandLoad {
 
         @Parameter(names="-f", description="File to load from", required=true)
-        public File file;
+        public String file;
     }
 
     @Parameters(commandNames="read", commandDescription="Emulate reading a string from stdin")
