@@ -404,26 +404,10 @@ public class Context implements Serializable {
         modules.transitiveClosure();
     }
 
-    public boolean isModuleIncluded(String localModule, String importedModule) {
-        return modules.isInRelation(localModule, importedModule);
-    }
-
     public boolean isModuleIncludedEq(String localModule, String importedModule) {
         if (localModule.equals(importedModule))
             return true;
         return modules.isInRelation(localModule, importedModule);
-    }
-
-    public boolean isRequiredEq(File required, File local) {
-        try {
-            required = required.getCanonicalFile();
-            local = local.getCanonicalFile();
-        } catch (IOException e) {
-            GlobalSettings.kem.registerInternalError("Cannot create canonical files from " + required + " and " + local, e);
-        }
-        if (required.equals(local))
-            return true;
-        return fileRequirements.isInRelation(required, local);
     }
 
     public void addSubsort(Sort bigSort, Sort smallSort) {
@@ -539,12 +523,6 @@ public class Context implements Serializable {
      */
     public Set<Production> productionsOf(String label) {
         return klabels.get(label);
-    }
-
-    public Term kWrapper(Term t) {
-        if (isSubsortedEq(Sort.K, t.getSort()))
-            return t;
-        return KApp.of(new KInjectedLabel(t));
     }
 
     public Map<Sort, DataStructureSort> getDataStructureSorts() {
