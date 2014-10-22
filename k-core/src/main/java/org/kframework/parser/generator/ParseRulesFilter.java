@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Formatter;
@@ -24,6 +25,7 @@ import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -100,7 +102,11 @@ public class ParseRulesFilter extends ParseForestTransformer {
             cachedDef.put(key, new CachedSentence(sentence, startLine, startColumn));
 
             if (globalOptions.debug) {
-                try (Formatter f = new Formatter(new FileWriter(context.files.resolveTemp("timing.log"), true))) {
+                File file = context.files.resolveTemp("timing.log");
+                if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+                    GlobalSettings.kem.registerCriticalError("Could not create directory " + file.getParentFile());
+                }
+                try (Formatter f = new Formatter(new FileWriter(file, true))) {
                     f.format("Parsing rule: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime), ss.getSource(), ss.getLocation());
                 } catch (IOException e) {
                     e.printStackTrace();
