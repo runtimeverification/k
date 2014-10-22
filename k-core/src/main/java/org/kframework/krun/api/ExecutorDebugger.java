@@ -16,7 +16,6 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.Transition.TransitionType;
@@ -64,8 +63,6 @@ public class ExecutorDebugger implements Debugger {
             defaultPattern = (Rule) pattern;
         } catch (CompilerStepDone e) {
             e.printStackTrace();
-        } catch (ParseFailedException e) {
-            e.report();
         }
 
         KRunState initialState = new KRunState(initialConfiguration);

@@ -6,7 +6,7 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;

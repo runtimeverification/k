@@ -20,7 +20,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
 public class TypeInferenceSupremumFilter extends ParseForestTransformer {
 

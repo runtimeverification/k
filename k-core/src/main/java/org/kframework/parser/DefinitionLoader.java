@@ -26,7 +26,7 @@ import org.kframework.kil.loader.CollectModuleImportsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.RemoveUnusedModules;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.outer.Outer;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -81,6 +81,7 @@ public class DefinitionLoader {
     private final boolean documentation;
     private final boolean autoinclude;
     private final FileUtil files;
+    private final ProgramSDF programSDF;
 
     @Inject
     public DefinitionLoader(
@@ -90,7 +91,8 @@ public class DefinitionLoader {
             OuterParser outer,
             @Backend.Documentation boolean documentation,
             @Backend.Autoinclude boolean autoinclude,
-            FileUtil files) {
+            FileUtil files,
+            ProgramSDF programSDF) {
         this.sw = sw;
         this.loader = loader;
         this.kem = kem;
@@ -98,6 +100,7 @@ public class DefinitionLoader {
         this.documentation = documentation;
         this.autoinclude = autoinclude;
         this.files = files;
+        this.programSDF = programSDF;
     }
 
     public Definition loadDefinition(File mainFile, String lang, Context context) {
@@ -190,7 +193,7 @@ public class DefinitionLoader {
                 if (files.resolveKompiled("Program.sdf").exists())
                     oldSdfPgm = files.loadFromKompiled("Program.sdf");
 
-                StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
+                StringBuilder newSdfPgmBuilder = programSDF.getSdfForPrograms(def, context);
 
                 String newSdfPgm = newSdfPgmBuilder.toString();
                 files.saveToTemp("pgm/Program.sdf", newSdfPgm);
@@ -373,12 +376,8 @@ public class DefinitionLoader {
         config = new PriorityFilter(context).visitNode(config);
         config = new PreferDotsFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
-        try {
-            config = new TypeSystemFilter(context).visitNode(config);
-            config = new TypeInferenceSupremumFilter(context).visitNode(config);
-        } catch (ParseFailedException e) {
-            e.report();
-        }
+        config = new TypeSystemFilter(context).visitNode(config);
+        config = new TypeInferenceSupremumFilter(context).visitNode(config);
         // config = new AmbDuplicateFilter(context).visitNode(config);
         // config = new TypeSystemFilter(context).visitNode(config);
         // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
@@ -423,12 +422,8 @@ public class DefinitionLoader {
         config = new PriorityFilter(context).visitNode(config);
         config = new PreferDotsFilter(context).visitNode(config);
         config = new VariableTypeInferenceFilter(context).visitNode(config);
-        try {
-            config = new TypeSystemFilter(context).visitNode(config);
-            config = new TypeInferenceSupremumFilter(context).visitNode(config);
-        } catch (ParseFailedException e) {
-            e.report();
-        }
+        config = new TypeSystemFilter(context).visitNode(config);
+        config = new TypeInferenceSupremumFilter(context).visitNode(config);
         // config = new AmbDuplicateFilter(context).visitNode(config);
         // config = new TypeSystemFilter(context).visitNode(config);
         // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);

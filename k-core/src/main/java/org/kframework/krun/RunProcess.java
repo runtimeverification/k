@@ -7,13 +7,19 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.parser.ParserType;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.Environment;
+import org.kframework.utils.file.WorkingDir;
+
+import com.google.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,22 +32,49 @@ import java.util.Map;
 // instantiate processes
 public class RunProcess {
 
-    private String stdout = null;
-    private String err = null;
-    private int exitCode;
+    public static class ProcessOutput {
+        public final String stdout;
+        public final String stderr;
+        public final int exitCode;
 
-    public void execute(File workingDir, Map<String, String> environment,String... commands) {
+        public ProcessOutput(String stdout, String stderr, int exitCode) {
+            this.stdout = stdout;
+            this.stderr = stderr;
+            this.exitCode = exitCode;
+        }
+    }
+
+    private final KExceptionManager kem;
+    private final ProgramLoader loader;
+    private final Map<String, String> env;
+    private final File workingDir;
+
+    @Inject
+    public RunProcess(KExceptionManager kem, ProgramLoader loader, @Environment Map<String, String> env, @WorkingDir File workingDir) {
+        this.kem = kem;
+        this.loader = loader;
+        this.env = env;
+        this.workingDir = workingDir;
+    }
+
+    public KExceptionManager getKem() {
+        return kem;
+    }
+
+    public ProcessOutput execute(Map<String, String> environment, String... commands) {
 
         ThreadedStreamCapturer inputStreamHandler, errorStreamHandler;
 
         try {
             if (commands.length <= 0) {
-                org.kframework.utils.Error.report("Need command options to run");
+                kem.registerCriticalError("Need command options to run");
             }
 
             // create process
             ProcessBuilder pb = new ProcessBuilder(commands);
             Map<String, String> realEnvironment = pb.environment();
+            realEnvironment.clear();
+            realEnvironment.putAll(env);
             realEnvironment.putAll(environment);
 
             // set execution directory to current user dir
@@ -61,7 +94,6 @@ public class RunProcess {
 
             // wait for process to finish
             process.waitFor();
-            setExitCode(process.exitValue());
 
             synchronized (inputStreamHandler) {
                 while (inputStreamHandler.isAlive())
@@ -73,33 +105,16 @@ public class RunProcess {
             }
 
             String s1 = inputStreamHandler.getContent().toString();
-            if (!s1.equals("")) {
-                this.setStdout(s1);
-            }
 
             String s2 = errorStreamHandler.getContent().toString();
-            // if some errors occurred (if something was written on the stderr stream)
-            if (!s2.equals("")) {
-                this.setErr(s2);
-            }
 
-        } catch (IOException e) {
-            // e.printStackTrace();
-            org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
-        } catch (InterruptedException e) {
-            // e.printStackTrace();
-            org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
+            return new ProcessOutput(s1, s2, process.exitValue());
+
+        } catch (IOException | InterruptedException e) {
+            kem.registerCriticalError("Error while running process:" + e.getMessage(), e);
+            throw new AssertionError("unreachable");
         }
 
-    }
-
-    public Term runParserOrDie(String parser, String pgm, boolean isPgm, Sort startSymbol, Context context) {
-        try {
-            return runParser(parser, pgm, isPgm, startSymbol, context);
-        } catch (ParseFailedException e) {
-            e.report();
-            return null;
-        }
     }
 
     /*
@@ -120,34 +135,34 @@ public class RunProcess {
                     content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
-                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
+                term = loader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast -e":
-                term = ProgramLoader.processPgm(value, source, startSymbol, context, ParserType.PROGRAM);
+                term = loader.processPgm(value, source, startSymbol, context, ParserType.PROGRAM);
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
                     content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
-                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
+                term = loader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser ground -e":
-                term = ProgramLoader.processPgm(value, source, startSymbol, context, ParserType.GROUND);
+                term = loader.processPgm(value, source, startSymbol, context, ParserType.GROUND);
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
                     content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
-                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.RULES);
+                term = loader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
                     content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
-                term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
+                term = loader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
                 break;
             default: //external parser
                 List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
@@ -158,13 +173,14 @@ public class RunProcess {
                 if (isNotFile) {
                     environment.put("KRUN_IS_NOT_FILE", "true");
                 }
-                this.execute(context.files.resolveWorkingDirectory("."), environment, tokens.toArray(new String[tokens.size()]));
+                ProcessOutput output = this.execute(environment, tokens.toArray(new String[tokens.size()]));
 
-                if (this.getExitCode() != 0) {
-                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
+                if (output.exitCode != 0) {
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: "
+                            + output.exitCode + "\nStdout:\n" + output.stdout + "\nStderr:\n" + output.stderr));
                 }
 
-                String kast = this.getStdout() != null ? this.getStdout() : "";
+                String kast = output.stdout != null ? output.stdout : "";
 
                 //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
                 //TODO(dwightguth): parse the output of the external parser into real kil classes
@@ -172,30 +188,6 @@ public class RunProcess {
         }
 
         return term;
-    }
-
-    public String getStdout() {
-        return stdout;
-    }
-
-    public void setStdout(String stdout) {
-        this.stdout = stdout;
-    }
-
-    public String getErr() {
-        return err;
-    }
-
-    public void setErr(String err) {
-        this.err = err;
-    }
-
-    public void setExitCode(int exitCode) {
-        this.exitCode = exitCode;
-    }
-
-    public int getExitCode() {
-        return exitCode;
     }
 
 }

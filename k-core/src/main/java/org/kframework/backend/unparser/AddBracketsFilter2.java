@@ -5,7 +5,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.ColorSetting;
 import org.kframework.parser.DefinitionLoader;
 

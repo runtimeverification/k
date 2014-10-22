@@ -13,17 +13,10 @@ import java.util.Formatter;
  */
 @Singleton
 public class Stopwatch {
-    @Inject
-    private static Stopwatch sw;
     private long start;
     private long lastIntermediate;
     Formatter f = new Formatter(System.out);
     private final GlobalOptions options;
-
-    @Deprecated
-    public static Stopwatch instance() {
-        return sw;
-    }
 
     @Inject
     Stopwatch(GlobalOptions options) {

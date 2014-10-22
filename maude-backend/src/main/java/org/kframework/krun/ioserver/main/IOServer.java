@@ -3,9 +3,9 @@ package org.kframework.krun.ioserver.main;
 
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
+import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.commands.*;
-import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.inject.Inject;
@@ -31,15 +31,15 @@ public class IOServer implements Runnable {
     private final Context context;
     private final FileSystem fs;
     private final ConfigurationCreationOptions options;
-    private final FileUtil files;
+    private final RunProcess rp;
     private int port;
 
     @Inject
-    public IOServer(Context context, FileSystem fs, ConfigurationCreationOptions options, FileUtil files) {
+    public IOServer(Context context, FileSystem fs, ConfigurationCreationOptions options, RunProcess rp) {
         this.context = context;
         this.fs = fs;
         this.options = options;
-        this.files = files;
+        this.rp = rp;
     }
 
     public int getPort() {
@@ -177,10 +177,10 @@ public class IOServer implements Runnable {
             return c;
         }
         if (command.equals("parse")) {
-            return new CommandParse(args, socket, context, fs, options);
+            return new CommandParse(args, socket, context, fs, options, rp);
         }
         if (command.equals("system")) {
-            return new CommandSystem(args, socket, fs, files);
+            return new CommandSystem(args, socket, fs, rp);
         }
 
         return new CommandUnknown(args, socket, fs); //, (long) 0);

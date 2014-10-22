@@ -10,7 +10,7 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.utils.CachedSentence;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;

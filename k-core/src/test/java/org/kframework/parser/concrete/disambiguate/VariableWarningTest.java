@@ -10,7 +10,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BaseTestCase;
 import org.kframework.utils.errorsystem.KException;

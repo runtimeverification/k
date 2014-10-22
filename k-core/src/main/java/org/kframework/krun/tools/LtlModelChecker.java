@@ -5,7 +5,6 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
@@ -42,6 +41,7 @@ public interface LtlModelChecker {
         private final Stopwatch sw;
         private final LtlModelChecker modelChecker;
         private final KExceptionManager kem;
+        private final RunProcess rp;
 
         @Inject
         protected Tool(
@@ -50,29 +50,28 @@ public interface LtlModelChecker {
                 @Main Context context,
                 Stopwatch sw,
                 @Main LtlModelChecker modelChecker,
-                KExceptionManager kem) {
+                KExceptionManager kem,
+                RunProcess rp) {
             this.options = options;
             this.initialConfiguration = initialConfiguration;
             this.context = context;
             this.sw = sw;
             this.modelChecker = modelChecker;
             this.kem = kem;
+            this.rp = rp;
         }
 
         @Override
         public KRunProofResult<KRunGraph> run(Void v, Attributes a) {
             a.add(Context.class, context);
             try {
-                Term formula = new RunProcess().runParser("kast -e",
+                Term formula = rp.runParser("kast -e",
                         options.experimental.ltlmc(), false, Sort.of("LtlFormula"), context);
                 KRunProofResult<KRunGraph> result = modelChecker.modelCheck(
                                 formula,
                                 initialConfiguration);
                 sw.printIntermediate("Model checking total");
                 return result;
-            } catch (ParseFailedException e) {
-                e.report();
-                throw new AssertionError("unreachable");
             } catch (KRunExecutionException e) {
                 kem.registerCriticalError(e.getMessage(), e);
                 throw new AssertionError("unreachable");

@@ -5,8 +5,6 @@ import java.io.File;
 import java.util.Map;
 
 import org.kframework.main.Tool;
-import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TempDir;
@@ -22,9 +20,7 @@ public class CommonModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        requestStaticInjection(Stopwatch.class);
         requestStaticInjection(GlobalSettings.class);
-        requestStaticInjection(BinaryLoader.class);
         requestStaticInjection(Tool.class);
 
         bind(File.class).annotatedWith(WorkingDir.class).toInstance(new File("."));

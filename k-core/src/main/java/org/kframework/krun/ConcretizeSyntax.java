@@ -10,7 +10,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 
 import com.davekoelle.AlphanumComparator;

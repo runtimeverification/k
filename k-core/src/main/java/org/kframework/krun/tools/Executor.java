@@ -9,7 +9,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunResult;
@@ -104,9 +104,6 @@ public interface Executor {
                 }
             } catch (KRunExecutionException e) {
                 kem.registerCriticalError(e.getMessage(), e);
-                throw new AssertionError("unreachable");
-            } catch (ParseFailedException e) {
-                e.report();
                 throw new AssertionError("unreachable");
             }
         }

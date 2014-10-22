@@ -3,8 +3,8 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.ParseForestTransformer;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
-import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
+import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.VariableTypeClashException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;

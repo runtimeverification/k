@@ -22,12 +22,21 @@ import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
 
+import com.google.inject.Inject;
+
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
  */
 public class ProgramSDF {
 
-    public static StringBuilder getSdfForPrograms(Definition def, Context context) {
+    private final BinaryLoader loader;
+
+    @Inject
+    public ProgramSDF(BinaryLoader loader) {
+        this.loader = loader;
+    }
+
+    public StringBuilder getSdfForPrograms(Definition def, Context context) {
         // collect all the syntax modules
         CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context);
         csmv.visitNode(def);
@@ -63,7 +72,7 @@ public class ProgramSDF {
         }
 
         // save the new parser info
-        BinaryLoader.instance().saveOrDie(context.files.resolveKompiled("newParser.bin"), ks2gsf.getGrammar());
+        loader.saveOrDie(context.files.resolveKompiled("newParser.bin"), ks2gsf.getGrammar());
 
         StringBuilder sdf = new StringBuilder();
         sdf.append("module Program\n\n");
