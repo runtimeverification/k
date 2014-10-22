@@ -9,11 +9,8 @@ import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
-import org.kframework.kil.Term;
 import org.kframework.kil.UserList;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.ColorOptions;
@@ -273,44 +270,8 @@ public class Context implements Serializable {
      * @return the sort which is the LUB of the given set of sorts on success;
      *         otherwise {@code null}
      */
-    public Sort getLUBSort(Set<Sort> sorts) {
-        return subsorts.getLUB(sorts);
-    }
-
-    /**
-     * Finds the LUB (Least Upper Bound) of a given set of sorts.
-     *
-     * @param sorts
-     *            the given set of sorts
-     * @return the sort which is the LUB of the given set of sorts on success;
-     *         otherwise {@code null}
-     */
     public Sort getLUBSort(Sort... sorts) {
         return subsorts.getLUB(Sets.newHashSet(sorts));
-    }
-
-    /**
-     * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
-     *
-     * @param sorts
-     *            the given set of sorts
-     * @return the sort which is the GLB of the given set of sorts on success;
-     *         otherwise {@code null}
-     */
-    public Sort getGLBSort(Set<Sort> sorts) {
-        return subsorts.getGLB(sorts);
-    }
-
-    /**
-     * Finds the GLB (Greatest Lower Bound) of a given set of sorts.
-     *
-     * @param sorts
-     *            the given set of sorts
-     * @return the sort which is the GLB of the given set of sorts on success;
-     *         otherwise {@code null}
-     */
-    public Sort getGLBSort(Sort... sorts) {
-        return subsorts.getGLB(Sets.newHashSet(sorts));
     }
 
     /**
