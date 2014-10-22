@@ -10,6 +10,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,12 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         return builder.build();
     }
 
+    public static Term concatenate(Collection<Term> maps) {
+        Builder builder = new Builder();
+        builder.concatenate(maps);
+        return builder.build();
+    }
+
     public static boolean isMapUnifiableByCurrentAlgorithm(Term term, Term otherTerm) {
         return term instanceof BuiltinMap && ((BuiltinMap) term).isUnifiableByCurrentAlgorithm()
                 && otherTerm instanceof BuiltinMap && ((BuiltinMap) otherTerm).isUnifiableByCurrentAlgorithm();
@@ -65,7 +72,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
         return collectionFunctions.isEmpty() && collectionVariables.size() <= 1;
     }
 
-    public boolean hasGroundKeys() {
+    public boolean hasOnlyGroundKeys() {
         return entries.keySet().stream().allMatch(Term::isGround);
     }
 
@@ -163,7 +170,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
     }
 
     @Override
-    protected List<Term> getLabelRepresentationComponents(TermContext context) {
+    protected List<Term> getKComponents(TermContext context) {
         DataStructureSort sort = context.definition().context().dataStructureSortOf(
                 sort().toFrontEnd());
 
@@ -176,7 +183,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinMap) {
-                components.addAll(((BuiltinMap) term).getLabelRepresentationComponents(context));
+                components.addAll(((BuiltinMap) term).getKComponents(context));
             } else {
                 components.add(term);
             }

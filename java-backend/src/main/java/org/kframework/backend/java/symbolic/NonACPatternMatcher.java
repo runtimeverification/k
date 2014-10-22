@@ -90,7 +90,8 @@ public class NonACPatternMatcher {
         tasks.addFirst(Pair.of(subject, pattern));
         failed = false;
         if (match()) {
-            // TODO(AndreiS): this is an ad-hoc evaluation
+            // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
+            // (used during associative matching) back to builtin representation
             if (termContext.definition().context().krunOptions != null
                     && termContext.definition().context().krunOptions.experimental.prove() != null) {
                 PatternMatcher.evaluateSubstitution(substitution, termContext);
@@ -435,8 +436,8 @@ public class NonACPatternMatcher {
 
     private void match(BuiltinList builtinList, BuiltinList pattern) {
         addMatchingTask(
-                builtinList.toLabelRepresentation(termContext),
-                pattern.toLabelRepresentation(termContext));
+                builtinList.toK(termContext),
+                pattern.toK(termContext));
     }
 
     /**

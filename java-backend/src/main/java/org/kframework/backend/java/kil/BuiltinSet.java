@@ -147,7 +147,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
     }
 
     @Override
-    protected List<Term> getLabelRepresentationComponents(TermContext context) {
+    protected List<Term> getKComponents(TermContext context) {
         DataStructureSort sort = context.definition().context().dataStructureSortOf(
                 sort().toFrontEnd());
 
@@ -160,7 +160,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
 
         for (Term term : baseTerms()) {
             if (term instanceof BuiltinSet) {
-                components.addAll(((BuiltinSet) term).getLabelRepresentationComponents(context));
+                components.addAll(((BuiltinSet) term).getKComponents(context));
             } else {
                 components.add(term);
             }

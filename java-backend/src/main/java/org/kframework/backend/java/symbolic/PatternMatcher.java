@@ -290,10 +290,9 @@ public class PatternMatcher extends AbstractMatcher {
         }
 
         if (matchOnFunctionSymbol) {
-            builtinList.toLabelRepresentation(termContext).accept(
-                    this,
-                    ((BuiltinList) pattern).toLabelRepresentation(termContext));
-            // TODO(AndreiS): this is an ad-hoc evaluation
+            builtinList.toK(termContext).accept(this, ((BuiltinList) pattern).toK(termContext));
+            // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
+            // (used during associative matching) back to builtin representation
             evaluateSubstitution(fSubstitution, termContext);
             return;
         }

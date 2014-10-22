@@ -238,7 +238,7 @@ public class BuiltinList extends Collection {
     }
 
     @Override
-    protected List<Term> getLabelRepresentationComponents(TermContext context) {
+    protected List<Term> getKComponents(TermContext context) {
         DataStructureSort sort = context.definition().context().dataStructureSortOf(
                 sort().toFrontEnd());
 
@@ -252,7 +252,7 @@ public class BuiltinList extends Collection {
         elementsLeft.stream().forEach(addElementToComponents);
         for (Term term : baseTerms) {
             if (term instanceof BuiltinList) {
-                components.addAll(((BuiltinList) term).getLabelRepresentationComponents(context));
+                components.addAll(((BuiltinList) term).getKComponents(context));
             } else {
                 components.add(term);
             }

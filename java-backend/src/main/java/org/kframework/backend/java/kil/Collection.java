@@ -49,10 +49,10 @@ public abstract class Collection extends Term {
      * is not unique (due to associativity/commutativity).
      * {@link org.kframework.backend.java.kil.Term#evaluate} is the inverse operation.
      */
-    public Term toLabelRepresentation(TermContext context) {
+    public Term toK(TermContext context) {
         DataStructureSort sort = context.definition().context().dataStructureSortOf(
                 sort().toFrontEnd());
-        List<Term> components = getLabelRepresentationComponents(context);
+        List<Term> components = getKComponents(context);
 
         if (components.isEmpty()) {
             return KItem.of(
@@ -76,7 +76,7 @@ public abstract class Collection extends Term {
      * Each collection is responsible for representing its elements/entries in KLabel and KList
      * format.
      */
-    abstract protected List<Term> getLabelRepresentationComponents(TermContext context);
+    abstract protected List<Term> getKComponents(TermContext context);
 
     /**
      * Checks if this {@code Collection} contains a frame variable.

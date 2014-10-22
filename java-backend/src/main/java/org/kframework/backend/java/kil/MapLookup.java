@@ -32,7 +32,9 @@ public class MapLookup extends Term implements DataStructureLookup {
         Term value = builtinMap.get(key);
         if (value != null) {
             return value;
-        } else if (key.isGround() && builtinMap.isConcreteCollection() && builtinMap.hasGroundKeys()) {
+        } else if (key.isGround()
+                && builtinMap.isConcreteCollection()
+                && builtinMap.hasOnlyGroundKeys()) {
             return Bottom.of(kind);
         } else if (builtinMap.isEmpty()) {
             return Bottom.of(kind);
