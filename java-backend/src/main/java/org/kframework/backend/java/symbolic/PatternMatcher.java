@@ -289,6 +289,14 @@ public class PatternMatcher extends AbstractMatcher {
             this.fail(builtinList, pattern);
         }
 
+        if (matchOnFunctionSymbol) {
+            builtinList.toK(termContext).accept(this, ((BuiltinList) pattern).toK(termContext));
+            // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
+            // (used during associative matching) back to builtin representation
+            evaluateSubstitution(fSubstitution, termContext);
+            return;
+        }
+
         throw new UnsupportedOperationException(
                 "list matching is only supported when one of the lists is a variable.");
     }
@@ -768,6 +776,12 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public String getName() {
         return this.getClass().toString();
+    }
+
+    public static void evaluateSubstitution(Map<Variable, Term> substitution, TermContext context) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            entry.setValue(entry.getValue().evaluate(context));
+        }
     }
 
 }

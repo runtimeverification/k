@@ -13,6 +13,7 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.compile.transformers.DataStructure2Cell;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.ConfigurationSubstitutionVisitor;
 import org.kframework.compile.utils.MetaK;
@@ -54,6 +55,7 @@ public class JavaSymbolicProver implements Prover {
         Map<org.kframework.kil.Term, org.kframework.kil.Term> substitution = null;
         if (cfg != null) {
             cfg = executor.run(cfg).getResult().getRawResult();
+            cfg = (org.kframework.kil.Term) (new DataStructure2Cell(context)).visitNode(cfg);
             ConfigurationSubstitutionVisitor configurationSubstitutionVisitor =
                     new ConfigurationSubstitutionVisitor(context);
             configurationSubstitutionVisitor.visitNode(cfg);

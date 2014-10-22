@@ -28,12 +28,15 @@ public class MapLookup extends Term implements DataStructureLookup {
             return this;
         }
 
-        Term value = ((BuiltinMap) map).get(key);
+        BuiltinMap builtinMap = (BuiltinMap) map;
+        Term value = builtinMap.get(key);
         if (value != null) {
             return value;
-        } else if (map.isGround() && key.isGround()) {
+        } else if (key.isGround()
+                && builtinMap.isConcreteCollection()
+                && builtinMap.hasOnlyGroundKeys()) {
             return Bottom.of(kind);
-        } else if (((BuiltinMap) map).isEmpty()) {
+        } else if (builtinMap.isEmpty()) {
             return Bottom.of(kind);
         } else {
             return this;

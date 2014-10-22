@@ -38,17 +38,17 @@ module LIST
 
   /*@ Construct a new List as the concatenation of two Lists. This is similar to
    the append "@" operation in many functional programming languages. */
-  syntax List ::= List List     [left, function, hook(List:__), klabel('_List_)]
+  syntax List ::= List List     [left, function, hook(List:__), klabel('_List_), smtlib(smt_seq_concat)]
   /*@ Construct an empty List: */
-  syntax List ::= ".List"       [function, hook(List:.List)]
+  syntax List ::= ".List"       [function, hook(List:.List), smtlib(smt_seq_nil)]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)   [function, hook(List:ListItem)]
+  syntax List ::= ListItem(K)   [function, hook(List:ListItem), smtlib(smt_seq_elem)]
 
   /*@ Check element membership in the given list */
   syntax Bool ::= K "in" List   [function, hook(List:.List), klabel('_inList_)]
 
   /*@ Get the list length */
-  syntax Int ::= size(List)     [function, hook(Collection:size), klabel ('sizeList)]
+  syntax Int ::= size(List)     [function, hook(Collection:size), klabel ('sizeList), smtlib(smt_seq_len)]
 endmodule
 

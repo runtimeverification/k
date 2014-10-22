@@ -2,10 +2,20 @@
     0
 </k>
 <map>
-    0 |-> <value>
-        0
-    </value>
-    1 |-> <value>
-        0
-    </value>
+    <entry>
+        <key>
+            0
+        </key>
+        <value>
+            0
+        </value>
+    </entry>
+    <entry>
+        <key>
+            1
+        </key>
+        <value>
+            0
+        </value>
+    </entry>
 </map>

@@ -44,13 +44,13 @@ rule [insertion-sort-loop-inv1]:
   <heap>...
     object(LX) |-> tv (struct listNode *, X:Pointer => null)
     object(LY) |-> tv (struct listNode *, Y1:Pointer => ?Y2:Pointer)
-    (lseg(Y1, null)(A1:IntSeq)
-     lseg(X, null)(B:IntSeq)
+    (lseg(Y1, null)(A1:List)
+     lseg(X, null)(B:List)
      =>
-     lseg(?Y2, null)(?A2:IntSeq))
+     lseg(?Y2, null)(?A2:List))
  ...</heap>
 requires sorted(A1)
-ensures sorted(?A2) andBool intseq2intset(A1) U intseq2intset(B) ==K intseq2intset(?A2)
+ensures sorted(?A2) andBool list2set(A1) U list2set(B) ==K list2set(?A2)
 
 rule [insertion-sort-loop-inv2]:
   <struct>... STRUCT:Map ...</struct>
@@ -80,14 +80,14 @@ rule [insertion-sort-loop-inv2]:
      object(N) |-> (
         val  |-> tv(int, NV:Int)
         next |-> tv(struct listNode *, null))
-     lseg(Y, object(Z))(A1:IntSeq)
-     lseg(P, null)(B:IntSeq)
+     lseg(Y, object(Z))(A1:List)
+     lseg(P, null)(B:List)
      =>
-     lseg(Y, null)(?A2:IntSeq))
+     lseg(Y, null)(?A2:List))
  ...</heap>
-requires sorted(A1 @ [V] @ B) andBool V <Int NV
+requires sorted(A1 ListItem(V) B) andBool V <Int NV
 ensures sorted(?A2)
-  andBool intseq2intset(A1) U intseq2intset(B) U { V } U { NV } ==K intseq2intset(?A2)
+  andBool list2set(A1) U list2set(B) U { V } U { NV } ==K list2set(?A2)
 
 rule [insertion-sort-func-spec]:
   <struct>... STRUCT:Map ...</struct>
@@ -98,8 +98,8 @@ rule [insertion-sort-func-spec]:
     tv(struct listNode *, ?X2:Pointer)
   ...</k>
   <heap>...
-    lseg(X1, null)(A1:IntSeq) => lseg(?X2, null)(?A2:IntSeq)
+    lseg(X1, null)(A1:List) => lseg(?X2, null)(?A2:List)
   ...</heap>
-ensures sorted(?A2) andBool intseq2intset(A1) ==K intseq2intset(?A2)
+ensures sorted(?A2) andBool list2set(A1) ==K list2set(?A2)
 endmodule
 

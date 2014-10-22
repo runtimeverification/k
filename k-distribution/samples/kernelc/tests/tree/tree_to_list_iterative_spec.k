@@ -53,11 +53,11 @@ rule [loop-inv]:
   <heap>...
     object(P1) |-> tv(struct listNode *, LP:Pointer => ?LP:Pointer)
     object(P2) |-> tv(struct stackNode *, SP:Pointer => null)
-    (treeList(SP)(TS:TreeSeq) list(LP)(A:IntSeq)
+    (treeList(SP)(TS:TreeSeq) list(LP)(A:List)
       =>
-    list(?LP)(treeseq2intseq(TS) @ A))
+    list(?LP)(treeseq2intseq(TS) A))
   ...</heap>
-  <out>... .List => intseq2list(rev(treeseq2intseq(TS))) </out>
+  <out>... .List => rev(treeseq2intseq(TS)) </out>
 
 rule [func-spec]:
   <struct>... STRUCT:Map ...</struct>
@@ -72,6 +72,6 @@ rule [func-spec]:
   =>
     list(?LP:Pointer)(tree2inorder(T))
   ...</heap>
-  <out>... .List => intseq2list(rev(tree2inorder(T))) </out>
+  <out>... .List => rev(tree2inorder(T)) </out>
 
 endmodule

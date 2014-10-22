@@ -4,6 +4,9 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+
+import java.util.List;
 
 
 /**
@@ -40,6 +43,40 @@ public abstract class Collection extends Term {
 
         this.frame = frame;
     }
+
+    /**
+     * Returns a KORE (KLabel/KList) representation of this collection. The returned representation
+     * is not unique (due to associativity/commutativity).
+     * {@link org.kframework.backend.java.kil.Term#evaluate} is the inverse operation.
+     */
+    public Term toK(TermContext context) {
+        DataStructureSort sort = context.definition().context().dataStructureSortOf(
+                sort().toFrontEnd());
+        List<Term> components = getKComponents(context);
+
+        if (components.isEmpty()) {
+            return KItem.of(
+                    KLabelConstant.of(sort.unitLabel(), context.definition().context()),
+                    KList.EMPTY,
+                    context);
+        }
+
+        Term result = components.get(components.size() - 1);
+        for (int i = components.size() - 2; i >= 0; --i) {
+            result = KItem.of(
+                    KLabelConstant.of(sort.constructorLabel(), context.definition().context()),
+                    KList.concatenate(components.get(i), result),
+                    context);
+        }
+        return result;
+    }
+
+    /**
+     * Returns a list aggregating the base terms and the elements/entries of this collection.
+     * Each collection is responsible for representing its elements/entries in KLabel and KList
+     * format.
+     */
+    abstract protected List<Term> getKComponents(TermContext context);
 
     /**
      * Checks if this {@code Collection} contains a frame variable.

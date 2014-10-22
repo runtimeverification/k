@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
@@ -15,7 +16,10 @@ import com.google.common.collect.Sets;
  */
 public class BuiltinSetOperations {
 
-    public static Term constructor(BuiltinSet set1, BuiltinSet set2, TermContext context) {
+    public static Term constructor(Term set1, Term set2, TermContext context) {
+        if (set1.sort() != Sort.SET || set2.sort() != Sort.SET) {
+            throw new IllegalArgumentException();
+        }
         return BuiltinSet.concatenate(set1, set2);
     }
 

@@ -17,7 +17,7 @@ rule
       val  |-> tv(int, _:Int)
       next |-> tv(struct listNode *, Tail)
     )
-    list(Tail)(L:IntSeq)
+    list(Tail)(L:List)
   ...</heap>
 
 endmodule

@@ -10,10 +10,10 @@ rule
   <k>
     length_recursive(tv(struct listNode *, LP:Pointer))
   =>
-    tv(int, len(A))
+    tv(int, size(A))
   ...</k>
   <heap>...
-    list(LP)(A:IntSeq)
+    list(LP)(A:List)
   ...</heap>
 
 endmodule

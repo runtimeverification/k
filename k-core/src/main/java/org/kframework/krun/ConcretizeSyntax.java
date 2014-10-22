@@ -168,8 +168,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Cell cell, Void _)  {
         // TODO(AndreiS): fix the printing of the cells which are representing maps
-        if (cell.getLabel().matches(".*-fragment")
-                || cell.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
+        if (cell.getLabel().matches(".*-fragment")) {
             return this.visitNode(cell.getContents());
         }
         return super.visit(cell, _);

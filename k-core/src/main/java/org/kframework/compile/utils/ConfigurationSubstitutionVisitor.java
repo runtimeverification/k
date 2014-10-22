@@ -1,12 +1,19 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
-import org.kframework.kil.*;
+import org.kframework.kil.Bag;
+import org.kframework.kil.Cell;
+import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,24 +24,27 @@ import java.util.Map;
  */
 public class ConfigurationSubstitutionVisitor extends BasicVisitor {
 
-    private final Map<Term, Term> substitution;
+    private final Multimap<Term, Term> substitutionMultimap;
     public ConfigurationSubstitutionVisitor(Context context) {
         super(context);
-        substitution = new HashMap<>();
+        substitutionMultimap = HashMultimap.create();
     }
 
     public Map<Term, Term> getSubstitution() {
-        return substitution;
+        Map<Term, Term> substitutionMap = Maps.newHashMap();
+        substitutionMultimap.asMap().entrySet().stream().forEach(entry -> {
+                if (entry.getValue().size() == 1) {
+                    substitutionMap.put(entry.getKey(), entry.getValue().iterator().next());
+                }});
+        return substitutionMap;
     }
 
     @Override
     public Void visit(Cell cell, Void _) {
-        if (cell.getContents() instanceof Bag || cell.getContents() instanceof Cell) {
-            super.visit(cell, _);
-        } else {
-            substitution.put(new Variable(cell.getLabel().toUpperCase(), cell.getContents().getSort()),
-                    cell.getContents());
-        }
+        super.visit(cell, _);
+        substitutionMultimap.put(
+                new Variable(cell.getLabel().toUpperCase(), context.getCellSort(cell)),
+                cell.getContents());
         return null;
     }
 }
