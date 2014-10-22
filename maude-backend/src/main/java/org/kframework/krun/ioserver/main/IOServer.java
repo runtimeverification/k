@@ -2,8 +2,10 @@
 package org.kframework.krun.ioserver.main;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.commands.*;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.inject.Inject;
@@ -28,12 +30,16 @@ public class IOServer implements Runnable {
     private static final int POOL_THREADS_SIZE = 10;
     private final Context context;
     private final FileSystem fs;
+    private final ConfigurationCreationOptions options;
+    private final FileUtil files;
     private int port;
 
     @Inject
-    public IOServer(Context context, FileSystem fs) {
+    public IOServer(Context context, FileSystem fs, ConfigurationCreationOptions options, FileUtil files) {
         this.context = context;
         this.fs = fs;
+        this.options = options;
+        this.files = files;
     }
 
     public int getPort() {
@@ -171,10 +177,10 @@ public class IOServer implements Runnable {
             return c;
         }
         if (command.equals("parse")) {
-            return new CommandParse(args, socket, context, fs);
+            return new CommandParse(args, socket, context, fs, options);
         }
         if (command.equals("system")) {
-            return new CommandSystem(args, socket, context, fs);
+            return new CommandSystem(args, socket, fs, files);
         }
 
         return new CommandUnknown(args, socket, fs); //, (long) 0);

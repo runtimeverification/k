@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.runner;
 
-import org.kframework.kil.loader.Context;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
@@ -22,7 +21,6 @@ public class KRunner {
     private final FileUtil files;
     private final KompileOptions kompileOptions;
     private final KRunOptions krunOptions;
-    private final Context context;
     private final IOServer server;
 
     @Inject
@@ -30,12 +28,10 @@ public class KRunner {
             FileUtil files,
             KompileOptions kompileOptions,
             KRunOptions krunOptions,
-            Context context,
             IOServer server) {
         this.files = files;
         this.kompileOptions = kompileOptions;
         this.krunOptions = krunOptions;
-        this.context = context;
         this.server = server;
     }
 
