@@ -141,12 +141,12 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     private void kLabelStrictness(Production prod, boolean isSeq) {
         List<Term> contents = new ArrayList<>(3);
         //first argument is a variable of sort KList
-        Variable variable = Variable.getFreshVar(Sort.KLIST);
+        Variable variable = Variable.getAnonVar(Sort.KLIST);
         contents.add(variable);
         //second is a HOLE
         contents.add(Hole.KITEM_HOLE);
         //third argument is a variable of sort KList
-        contents.add(Variable.getFreshVar(Sort.KLIST));
+        contents.add(Variable.getAnonVar(Sort.KLIST));
         KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
         //make a context from the TermCons
         org.kframework.kil.Context ctx = new org.kframework.kil.Context();

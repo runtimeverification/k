@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.sharing;
 
+import static org.kframework.kil.Variable.GENERATED_ANON_VAR;
+
 import org.kframework.kil.Rule;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -64,12 +66,12 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                 return null;
             }
 
-            if (variable.getName().startsWith("GeneratedFreshVar")) {
+            if (variable.getName().startsWith(GENERATED_ANON_VAR)) {
                 try {
-                    Integer.parseInt(variable.getName().substring("GeneratedFreshVar".length()));
+                    Integer.parseInt(variable.getName().substring(GENERATED_ANON_VAR.length()));
                     substitution.put(
                             variable,
-                            new Variable("GeneratedFreshVar" + counter++, variable.getSort()));
+                            new Variable(GENERATED_ANON_VAR + counter++, variable.getSort()));
                 } catch (NumberFormatException e) { }
             }
 

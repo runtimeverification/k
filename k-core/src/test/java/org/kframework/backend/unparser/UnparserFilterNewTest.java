@@ -31,7 +31,7 @@ public class UnparserFilterNewTest {
     @Test
     public void testTrailingUnderscores() {
         UnparserFilter v = new UnparserFilter(context);
-        KApp t = KApp.of(KLabelConstant.of("'__", context), Variable.getFreshVar(Sort.K), Variable.getFreshVar(Sort.K));
+        KApp t = KApp.of(KLabelConstant.of("'__", context), Variable.getAnonVar(Sort.K), Variable.getAnonVar(Sort.K));
         v.visit(t, null);
         v.getResult();
     }
