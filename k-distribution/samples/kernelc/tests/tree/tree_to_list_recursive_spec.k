@@ -13,10 +13,10 @@ rule
     tv(struct listNode *, ?LP)
   ...</k>
   <heap>...
-    tree(TP)(T:Tree) list(LP)(A:IntSeq)
+    tree(TP)(T:Tree) list(LP)(A:List)
   =>
-    list(?LP:Pointer)(tree2inorder(T) @ A)
+    list(?LP:Pointer)(tree2inorder(T) A)
   ...</heap>
-  <out>... .List => intseq2list(rev(tree2inorder(T))) </out>
+  <out>... .List => rev(tree2inorder(T)) </out>
 
 endmodule

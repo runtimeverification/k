@@ -131,7 +131,7 @@ public class Rule extends JavaSymbolicObject {
                 streamListBuilder.addItem(eq.rightHandSide());
             }
             if (!(listVar instanceof ConcreteCollectionVariable)) {
-                streamListBuilder.concatenate(Variable.getFreshVariable(Sort.LIST));
+                streamListBuilder.concatenate(Variable.getAnonVariable(Sort.LIST));
             }
 
             Term streamList = streamListBuilder.build();

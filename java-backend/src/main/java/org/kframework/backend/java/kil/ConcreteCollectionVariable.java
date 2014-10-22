@@ -28,7 +28,7 @@ public class ConcreteCollectionVariable extends Variable {
             return concreteCollectionSize() == ((ConcreteCollectionVariable) term).concreteCollectionSize();
         } else if (term instanceof Collection) {
             Collection collection = (Collection) term;
-            return collection.isConcreteCollection() ? collection.concreteSize() == concreteSize : false;
+            return collection.isConcreteCollection() && collection.concreteSize() == concreteSize;
         } else {
             return false;
         }
@@ -42,6 +42,8 @@ public class ConcreteCollectionVariable extends Variable {
             return collection.isConcreteCollection() ?
                 collection.concreteSize() == concreteSize :
                 collection.concreteSize() <= concreteSize;
+        } else if (term instanceof Variable) {
+            return true;
         } else {
             return false;
         }
@@ -50,7 +52,7 @@ public class ConcreteCollectionVariable extends Variable {
     @Override
     public ConcreteCollectionVariable getFreshCopy() {
         ConcreteCollectionVariable var = new ConcreteCollectionVariable(
-                Variable.getFreshVariable(sort()).name(),
+                Variable.getAnonVariable(sort()).name(),
                 sort(),
                 true,
                 concreteSize);

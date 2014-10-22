@@ -16,9 +16,11 @@ import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.utils.file.WorkingDir;
 
 import com.google.inject.Inject;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.util.Map;
@@ -35,6 +37,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
     private final Context context;
     private final ConfigurationCreationOptions ccOptions;
     private final KILtoBackendJavaKILTransformer kilTransformer;
+    private final File workingDir;
 
     @Inject
     public BuiltinIOOperationsImpl(
@@ -42,12 +45,14 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
             FileSystem fs,
             Context context,
             ConfigurationCreationOptions ccOptions,
-            KILtoBackendJavaKILTransformer kilTransformer) {
+            KILtoBackendJavaKILTransformer kilTransformer,
+            @WorkingDir File workingDir) {
         this.def = def;
         this.fs = fs;
         this.context = context;
         this.ccOptions = ccOptions;
         this.kilTransformer = kilTransformer;
+        this.workingDir = workingDir;
     }
 
     @Override
@@ -156,7 +161,7 @@ public class BuiltinIOOperationsImpl implements BuiltinIOOperations {
         Map<String, String> environment = new HashMap<>();
         String[] args = term.stringValue().split("\001", -1);
         //for (String c : args) { System.out.println(c); }
-        rp.execute(environment, args);
+        rp.execute(workingDir, environment, args);
 
         KLabelConstant klabel = KLabelConstant.of("'#systemResult(_,_,_)", context);
         /*

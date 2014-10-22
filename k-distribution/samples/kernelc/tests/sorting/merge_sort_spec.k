@@ -34,14 +34,14 @@ rule [mergesort-loop-inv1]:
     object(LX) |-> tv (struct listNode *, X:Pointer => null)
     object(LY) |-> tv (struct listNode *, object(Y1:Int) => object(?Y2:Int))
     object(LZ) |-> tv (struct listNode *, object(Z1:Int) => object(?Z2:Int))
-    (lseg(X, null)(A:IntSeq)
-     lseg(object(Y1), null)(B1:IntSeq)
-     lseg(object(Z1), null)(C1:IntSeq)
+    (lseg(X, null)(A:List)
+     lseg(object(Y1), null)(B1:List)
+     lseg(object(Z1), null)(C1:List)
      =>
-     lseg(object(?Y2), null)(?B2:IntSeq)
-     lseg(object(?Z2), null)(?C2:IntSeq))
+     lseg(object(?Y2), null)(?B2:List)
+     lseg(object(?Z2), null)(?C2:List))
  ...</heap>
-ensures intseq2intset(A) U intseq2intset(B1) U intseq2intset(C1) ==K intseq2intset(?B2) U intseq2intset(?C2)
+ensures list2set(A) U list2set(B1) U list2set(C1) ==K list2set(?B2) U list2set(?C2)
 
 rule [mergesort-loop-inv2]:
   <struct>... STRUCT:Map ...</struct>
@@ -81,16 +81,16 @@ rule [mergesort-loop-inv2]:
     (object(P) |-> (
         val  |-> tv(int, V:Int)
         next |-> tv(struct listNode *, _:Pointer))
-     lseg(X, object(P))(A1:IntSeq)
-     lseg(Y, null)(B:IntSeq)
-     lseg(Z, null)(C:IntSeq)
+     lseg(X, object(P))(A1:List)
+     lseg(Y, null)(B:List)
+     lseg(Z, null)(C:List)
      =>
-     lseg(X, null)(?A2:IntSeq))
+     lseg(X, null)(?A2:List))
  ...</heap>
-requires sorted(A1 @ [V]) andBool sorted(B) andBool sorted(C)
-  andBool intseq2intset(A1) U {V} <=IntSet intseq2intset(B) U intseq2intset(C)
+requires sorted(A1 ListItem(V)) andBool sorted(B) andBool sorted(C)
+  andBool list2set(A1) U {V} <=IntSet list2set(B) U list2set(C)
 ensures sorted(?A2)
-  andBool intseq2intset(A1) U intseq2intset(B) U intseq2intset(C) U { V } ==K intseq2intset(?A2)
+  andBool list2set(A1) U list2set(B) U list2set(C) U { V } ==K list2set(?A2)
 
 rule [mergesort-func-spec]:
   <struct>... STRUCT:Map ...</struct>
@@ -101,8 +101,8 @@ rule [mergesort-func-spec]:
     tv(struct listNode *, ?X2:Pointer)
   ...</k>
   <heap>...
-    lseg(X1, null)(A1:IntSeq) => lseg(?X2, null)(?A2:IntSeq)
+    lseg(X1, null)(A1:List) => lseg(?X2, null)(?A2:List)
   ...</heap>
-ensures sorted(?A2) andBool intseq2intset(A1) ==K intseq2intset(?A2)
+ensures sorted(?A2) andBool list2set(A1) ==K list2set(?A2)
 endmodule
 

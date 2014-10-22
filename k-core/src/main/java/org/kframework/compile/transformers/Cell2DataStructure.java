@@ -31,6 +31,7 @@ import java.util.Map;
 /**
  * Translates a builtin data structure (list, map, set) from a {@link Cell} representation
  * to a {@link DataStructureBuiltin} representation.
+ * Inverse transformation of {@link DataStructure2Cell}.
  *
  * Does not support functions on cells.
  *
@@ -58,9 +59,11 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
      // TODO(AndreiS): should only be applied once
         makeCellDataStructures();
 
+        cell = (Cell) super.visit(cell, _);
+
         CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
         if (cellDataStructure == null) {
-            return super.visit(cell, _);
+            return cell;
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());
@@ -84,6 +87,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
         if (content instanceof Bag) {
             return Bag.flatten((Bag) content);
         } else if (content instanceof Cell
+                || content instanceof DataStructureBuiltin
                 || content instanceof Variable
                 || content instanceof KItemProjection) {
             return new Bag(Collections.singletonList(content));
@@ -182,6 +186,9 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
                 } else {
                     entries.put(key, KApp.of(new KInjectedLabel(value)));
                 }
+            } else if (term instanceof MapBuiltin) {
+                terms.addAll(((MapBuiltin) term).baseTerms());
+                entries.putAll(((MapBuiltin) term).elements());
             } else if (term instanceof Variable) {
                 terms.add(new Variable(((Variable) term).getName(), Sort.of(mapSort.name())));
             } else if (term instanceof KItemProjection) {
@@ -245,6 +252,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
 
             String keyCellLabel = keyConfigurationStructure.id;
 
+            context.cellSorts.put(MAP_CELL_CELL_LABEL_PREFIX + entryCellLabel, Sort.BAG);
             context.cellDataStructures.put(
                     mapCellLabel,
                     new CellMap(mapCellLabel, entryCellLabel, keyCellLabel));

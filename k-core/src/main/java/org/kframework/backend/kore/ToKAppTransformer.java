@@ -2,11 +2,8 @@
 package org.kframework.backend.kore;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 
-import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
@@ -25,8 +22,6 @@ import org.kframework.kil.SetUpdate;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-
-import com.davekoelle.AlphanumComparator;
 
 /*
  *

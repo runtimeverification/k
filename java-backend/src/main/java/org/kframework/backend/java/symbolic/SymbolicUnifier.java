@@ -504,7 +504,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             Variable otherFrame = otherCellCollection.hasFrame()? otherCellCollection.frame() : null;
 
             if (frame != null && otherFrame != null && (numOfDiffCellLabels > 0) && (numOfOtherDiffCellLabels > 0)) {
-                Variable variable = Variable.getFreshVariable(Sort.BAG);
+                Variable variable = Variable.getAnonVariable(Sort.BAG);
                 fConstraint.add(frame, CellCollection.of(getRemainingCellMap(otherCellCollection, unifiableCellLabels), variable, context));
                 fConstraint.add(CellCollection.of(getRemainingCellMap(cellCollection, unifiableCellLabels), variable, context), otherFrame);
             } else if (frame == null && (numOfOtherDiffCellLabels > 0)

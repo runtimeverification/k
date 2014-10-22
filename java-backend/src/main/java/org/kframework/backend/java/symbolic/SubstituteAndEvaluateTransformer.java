@@ -136,11 +136,11 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
             // TODO(YilongL): visitor/imp.k would fail the following assertion
             if (context.definition().context().globalOptions.debug) {
                 if (result instanceof KItem && ((KItem) result).isEvaluable(context) && result.isGround()) {
-                    System.err.println("Unable to resolve function symbol:\n\t" + result);
+                    System.err.println("Unable to resolve function symbol:\n\t\t" + result);
                     if (!definition.functionRules().isEmpty()) {
-                        System.err.print("\n\tDefined function rules:");
+                        System.err.println("\tDefined function rules:");
                         for (Rule rule : definition.functionRules().get((KLabelConstant) ((KItem) result).kLabel())) {
-                            System.err.print("\n\t" + rule);
+                            System.err.println("\t\t" + rule);
                         }
                     }
                 }

@@ -2,6 +2,7 @@
 package org.kframework.kil.loader;
 
 import java.util.HashMap;
+
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Attribute;
@@ -12,7 +13,6 @@ import org.kframework.kil.Bracket;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Definition;
 import org.kframework.kil.FreezerHole;
 import org.kframework.kil.Hole;
 import org.kframework.kil.KApp;
@@ -28,6 +28,7 @@ import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
 /**
@@ -98,8 +99,6 @@ public class JavaClassesFactory {
             return new Hole(element);
         if (Constants.FREEZERHOLE.equals(element.getNodeName()))
             return new FreezerHole(element);
-        if (Constants.DEFINITION.equals(element.getNodeName()))
-            return new Definition(element);
         if (Constants.AMB.equals(element.getNodeName()))
             return new Ambiguity(element);
         if (Constants.TAG.equals(element.getNodeName()))
@@ -108,7 +107,7 @@ public class JavaClassesFactory {
         if (Constants.ATTRIBUTES.equals(element.getNodeName()))
             return new Attributes(element);
 
-        System.out.println(">>> " + element.getNodeName() + " <<< - unimplemented yet: org.kframework.kil.loader.JavaClassesFactory");
+        GlobalSettings.kem.registerCriticalError(">>> " + element.getNodeName() + " <<< - unimplemented yet: org.kframework.kil.loader.JavaClassesFactory");
         return null;
     }
 

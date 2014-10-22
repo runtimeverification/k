@@ -1,11 +1,10 @@
-// Copyright (c) 2012-2014 K Team. All Rights Reserved.
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.unparser;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.NonCachingVisitor;
 import org.kframework.krun.ColorSetting;
 import org.kframework.utils.ColorUtil;
-import org.kframework.utils.StringUtil;
 
 import java.awt.Color;
 import java.util.Iterator;
@@ -16,21 +15,13 @@ public class UnparserFilter extends NonCachingVisitor {
     private boolean firstPriorityBlock = false;
     private boolean firstProduction = false;
     private boolean inConfiguration = false;
-    private boolean addParentheses;
-    private final OutputModes outputMode;
     private int inTerm = 0;
     private ColorSetting color = ColorSetting.OFF;
     private Color terminalColor = Color.black;
     private boolean annotateLocation;
     public static int TAB = 4;
-    private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
     private java.util.List<String> variableList = new java.util.LinkedList<String>();
-    private java.util.Map<Production, Integer> priorities = null;
     private java.util.Stack<ASTNode> stack = new java.util.Stack<ASTNode>();
-
-    public void setForEquivalence() {
-        forEquivalence = true;
-    }
 
     public void setIndenter(Indenter indenter) {
         this.indenter = indenter;
@@ -57,10 +48,10 @@ public class UnparserFilter extends NonCachingVisitor {
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
-        this.addParentheses = outputMode != OutputModes.SMART;
         this.annotateLocation = annotateLocation;
-        this.outputMode = outputMode;
-        //TODO(dwightguth): clean up pretty printing so we don't need this ugly hack
+        if (outputMode == OutputModes.NO_WRAP) {
+            indenter.setWidth(-1);
+        }
         if (context.colorOptions != null) {
             terminalColor = context.colorOptions.terminalColor();
         }
@@ -80,10 +71,8 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Import imp, Void _) {
         prepare(imp);
-        if (!forEquivalence) {
-            indenter.write("imports " + imp.getName());
-            indenter.endLine();
-        }
+        indenter.write("imports " + imp.getName());
+        indenter.endLine();
         return postpare();
     }
 
@@ -91,19 +80,15 @@ public class UnparserFilter extends NonCachingVisitor {
     public Void visit(Module mod, Void _) {
         prepare(mod);
         if (!mod.isPredefined()) {
-            if (!forEquivalence) {
-                indenter.write("module " + mod.getName());
-                indenter.endLine();
-                indenter.endLine();
-                indenter.indent(TAB);
-            }
+            indenter.write("module " + mod.getName());
+            indenter.endLine();
+            indenter.endLine();
+            indenter.indent(TAB);
             super.visit(mod, _);
-            if (!forEquivalence) {
-                indenter.unindent();
-                indenter.write("endmodule");
-                indenter.endLine();
-                indenter.endLine();
-            }
+            indenter.unindent();
+            indenter.write("endmodule");
+            indenter.endLine();
+            indenter.endLine();
         }
         return postpare();
     }
@@ -227,18 +212,15 @@ public class UnparserFilter extends NonCachingVisitor {
 
     @Override
     public Void visit(Configuration configuration, Void _) {
-        prepare(configuration);
-        if (!forEquivalence) {
-            indenter.write("configuration");
-            indenter.endLine();
-            indenter.indent(TAB);
-            inConfiguration = true;
-            this.visitNode(configuration.getBody());
-            inConfiguration = false;
-            indenter.unindent();
-            indenter.endLine();
-            indenter.endLine();
-        }
+        indenter.write("configuration");
+        indenter.endLine();
+        indenter.indent(TAB);
+        inConfiguration = true;
+        this.visitNode(configuration.getBody());
+        inConfiguration = false;
+        indenter.unindent();
+        indenter.endLine();
+        indenter.endLine();
         return postpare();
     }
 
@@ -275,7 +257,11 @@ public class UnparserFilter extends NonCachingVisitor {
         if (!colorCode.equals("")) {
             indenter.write(ColorUtil.ANSI_NORMAL);
         }
-        this.visitNode(cell.getContents());
+
+        /* if the contents of this cell is a bag, sort them properly */
+        Term contents = cell.getContents();
+        this.visitNode(contents);
+
         indenter.write(colorCode);
         if (inConfiguration && inTerm == 0) {
             indenter.endLine();
@@ -332,7 +318,7 @@ public class UnparserFilter extends NonCachingVisitor {
         variableList.clear();
         this.visitNode(rule.getBody());
         if (rule.getRequires() != null) {
-            indenter.write(" when ");
+            indenter.write(" requires ");
             this.visitNode(rule.getRequires());
         }
         if (rule.getEnsures() != null) {
@@ -353,51 +339,10 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(KApp kapp, Void _) {
         prepare(kapp);
-        Term child = kapp.getChild();
-        Term label = kapp.getLabel();
-        if (label instanceof Token) {
-            assert child instanceof KList : "child of KApp with Token is not KList";
-            assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
-            indenter.write(((Token) label).value());
-        } else if ((outputMode == OutputModes.PRETTY || outputMode == OutputModes.NO_WRAP)
-                && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
-
-            String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";
-
-            if (child instanceof KList) {
-                java.util.List<Term> termList = ((KList)child).getContents();
-
-                if(termList.size()==0){
-                    indenter.write(rawLabel);
-                } else{
-                    int i = 0;
-                    String [] rawLabelList = rawLabel.split("_");
-                    for (i = 0; i < termList.size(); ++i) {
-                        indenter.write(rawLabelList[i]);
-                        if (i > 0) {
-                            indenter.write(" ");
-                        }
-                        this.visitNode(termList.get(i));
-                        if (i < termList.size() - 1) {
-                            indenter.write(" ");
-                        }
-                    }
-                    indenter.write(rawLabelList[i]);
-                }
-            }
-            else {
-                // child is a KList variable
-                indenter.write("(");
-                this.visitNode(child);
-                indenter.write(")");
-            }
-        }
-        else {
-            this.visitNode(label);
-            indenter.write("(");
-            this.visitNode(child);
-            indenter.write(")");
-        }
+        this.visitNode(kapp.getLabel());
+        indenter.write("(");
+        this.visitNode(kapp.getChild());
+        indenter.write(")");
         return postpare();
     }
 
@@ -418,13 +363,13 @@ public class UnparserFilter extends NonCachingVisitor {
         return postpare();
     }
 
-    @Override
-    public Void visit(Constant t, Void _) {
-        prepare(t);
-        indenter.write(t.getValue());
-        return postpare();
-    }
-
+    /*
+     * TermCons actually controls most input terms, ie. most input terms will
+     * have classes TermCons.
+     * The way to deal with TermCons is that if the syntax of the given definition allowed,
+     * we will put parentheses surrounding a TermCons term.
+     * We will also delete the final ListTerminator if the input mode is pretty printing.
+     */
     @Override
     public Void visit(TermCons termCons, Void _) {
         prepare(termCons);
@@ -434,32 +379,64 @@ public class UnparserFilter extends NonCachingVisitor {
             UserList userList = (UserList) production.getItems().get(0);
             String separator = userList.getSeparator();
             java.util.List<Term> contents = termCons.getContents();
-            if (contents.size() == 0) {
-                indenter.write("." + production.getSort());
-            } else {
-                this.visitNode(contents.get(0));
-                if (!(contents.get(1) instanceof ListTerminator)) {
-                    indenter.write(separator + " ");
-                    this.visitNode(contents.get(1));
-                }
-            }
+            this.visitNode(contents.get(0));
+            indenter.write(separator + " ");
+            this.visitNode(contents.get(1));
         } else {
             int where = 0;
             for (int i = 0; i < production.getItems().size(); ++i) {
                 ProductionItem productionItem = production.getItems().get(i);
                 if (!(productionItem instanceof Terminal)) {
-                    this.visitNode(termCons.getContents().get(where++));
+                    Term subterm = termCons.getContents().get(where);
+                    if (!isDataStructure(termCons) && isDataStructure(subterm)) {
+                        indenter.endLine();
+                        indenter.indent(TAB);
+                        this.visitNode(subterm);
+                        indenter.unindent();
+                    } else {
+                        this.visitNode(subterm);
+                    }
+                    where++;
                 } else {
                     indenter.write(((Terminal) productionItem).getTerminal());
                 }
                 // TODO(YilongL): not sure I can simply remove the following code
                 if (i != production.getItems().size() - 1) {
-                    indenter.write(" ");
+                    if (isDataStructure(termCons)) {
+                        indenter.endLine();
+                    } else {
+                        indenter.write(" ");
+                    }
                 }
             }
         }
         inTerm--;
         return postpare();
+    }
+
+    @Override
+    public Void visit(Constant constant, Void _) {
+        prepare(constant);
+        indenter.write(constant.getValue());
+        return postpare();
+    }
+
+    private boolean isDataStructure(Term t) {
+        if (t instanceof TermCons) {
+            Production production = ((TermCons) t).getProduction();
+
+            DataStructureSort dsSort = context.dataStructureSortOf(production.getSort());
+            if (dsSort != null && dsSort.constructorLabel().equals(production.getKLabel())) {
+                //is a constructor of a data structure
+                //special case a new line between each item and indentation
+                return true;
+            }
+            return false;
+        } else if (t instanceof Bracket) {
+            return isDataStructure(((Bracket) t).getContent());
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -474,7 +451,7 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(KLabelConstant kLabelConstant, Void _) {
         prepare(kLabelConstant);
-        indenter.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
+        indenter.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll(",", "`,"));
         return postpare();
     }
 
@@ -550,16 +527,6 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     @Override
-    public Void visit(KLabel kLabel, Void _) {
-        prepare(kLabel);
-//        indenter.endLine();
-//        indenter.write("Don't know how to pretty print KLabel");
-//        indenter.endLine();
-        super.visit(kLabel, _);
-        return postpare();
-    }
-
-    @Override
     public Void visit(TermComment termComment, Void _) {
         prepare(termComment);
         indenter.write("<br/>");
@@ -601,7 +568,7 @@ public class UnparserFilter extends NonCachingVisitor {
         variableList.clear();
         this.visitNode(context.getBody());
         if (context.getRequires() != null) {
-            indenter.write(" when ");
+            indenter.write(" requires ");
             this.visitNode(context.getRequires());
         }
         if (context.getEnsures() != null) {
@@ -630,10 +597,8 @@ public class UnparserFilter extends NonCachingVisitor {
     @Override
     public Void visit(Require require, Void _) {
         prepare(require);
-        if (!forEquivalence) {
-            indenter.write("require \"" + require.getValue() + "\"");
-            indenter.endLine();
-        }
+        indenter.write("require \"" + require.getValue() + "\"");
+        indenter.endLine();
         return postpare();
     }
 
@@ -678,11 +643,6 @@ public class UnparserFilter extends NonCachingVisitor {
     }
 
     protected void prepare(ASTNode astNode) {
-        if (!stack.empty()) {
-            if (needsParenthesis(stack.peek(), astNode)) {
-                indenter.write("(");
-            }
-        }
         stack.push(astNode);
         if (annotateLocation) {
             if (astNode.getLocation() == null) {
@@ -696,46 +656,11 @@ public class UnparserFilter extends NonCachingVisitor {
 
     protected Void postpare() {
         ASTNode astNode = stack.pop();
-        if (!stack.empty()) {
-            if (needsParenthesis(stack.peek(), astNode)) {
-                indenter.write(")");
-            }
-        }
         if (annotateLocation) {
             astNode.getLocation().lineEnd = indenter.getLineNo();
             astNode.getLocation().columnEnd = indenter.getColNo();
         }
         return null;
-    }
-
-    private boolean needsParenthesis(ASTNode upper, ASTNode astNode) {
-        if (!addParentheses)
-            return false;
-        if (astNode instanceof Rewrite) {
-            if ((upper instanceof Cell) || (upper instanceof Rule)) {
-                return false;
-            }
-            return true;
-        } else if ((astNode instanceof TermCons) && (upper instanceof TermCons)) {
-            TermCons termConsNext = (TermCons) astNode;
-            TermCons termCons = (TermCons) upper;
-            Production productionNext = termConsNext.getProduction();
-            Production production = termCons.getProduction();
-            if (context.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {
-                return true;
-            }
-            return termConsNext.getContents().size() != 0;
-        } else {
-            return false;
-        }
-    }
-
-    public java.util.Map<Production, Integer> getPriorities() {
-        return priorities;
-    }
-
-    public void setPriorities(java.util.Map<Production, Integer> priorities) {
-        this.priorities = priorities;
     }
 
     public void setInConfiguration(boolean inConfiguration) {

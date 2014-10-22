@@ -7,15 +7,19 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -142,6 +146,29 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
         return stringBuilder.toString();
     }
 
+    @Override
+    protected List<Term> getKComponents(TermContext context) {
+        DataStructureSort sort = context.definition().context().dataStructureSortOf(
+                sort().toFrontEnd());
+
+        ArrayList<Term> components = Lists.newArrayList();
+        elements.stream().forEach(element ->
+                components.add(KItem.of(
+                        KLabelConstant.of(sort.elementLabel(), context.definition().context()),
+                        KList.singleton(element),
+                        context)));
+
+        for (Term term : baseTerms()) {
+            if (term instanceof BuiltinSet) {
+                components.addAll(((BuiltinSet) term).getKComponents(context));
+            } else {
+                components.add(term);
+            }
+        }
+
+        return components;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -201,7 +228,9 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build());
-            return builtinSet.hasFrame() && builtinSet.elements.isEmpty() ? builtinSet.frame : builtinSet;
+            return builtinSet.baseTerms().size() == 1 && builtinSet.concreteSize() == 0 ?
+                    builtinSet.baseTerms().iterator().next() :
+                    builtinSet;
         }
     }
 

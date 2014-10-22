@@ -100,7 +100,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
             cachedDef.put(key, new CachedSentence(sentence, startLine, startColumn));
 
             if (globalOptions.debug) {
-                try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
+                try (Formatter f = new Formatter(new FileWriter(context.files.resolveTemp("timing.log"), true))) {
                     f.format("Parsing rule: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime), ss.getSource(), ss.getLocation());
                 } catch (IOException e) {
                     e.printStackTrace();

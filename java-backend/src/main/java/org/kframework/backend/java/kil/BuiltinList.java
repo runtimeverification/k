@@ -1,16 +1,19 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
-
 package org.kframework.backend.java.kil;
 
-import java.util.List;
-
-import org.apache.commons.collections4.ListUtils;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.apache.commons.collections4.ListUtils;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -241,6 +244,31 @@ public class BuiltinList extends Collection {
         }
     }
 
+    @Override
+    protected List<Term> getKComponents(TermContext context) {
+        DataStructureSort sort = context.definition().context().dataStructureSortOf(
+                sort().toFrontEnd());
+
+        ArrayList<Term> components = Lists.newArrayList();
+        Consumer<Term> addElementToComponents = element ->
+                components.add(KItem.of(
+                        KLabelConstant.of(sort.elementLabel(), context.definition().context()),
+                        KList.singleton(element),
+                        context));
+
+        elementsLeft.stream().forEach(addElementToComponents);
+        for (Term term : baseTerms) {
+            if (term instanceof BuiltinList) {
+                components.addAll(((BuiltinList) term).getKComponents(context));
+            } else {
+                components.add(term);
+            }
+        }
+        elementsRight.stream().forEach(addElementToComponents);
+
+        return components;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -276,6 +304,26 @@ public class BuiltinList extends Collection {
 
         public boolean isList() {
             return type == BaseTermType.LIST;
+        }
+
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            if (!(object instanceof BaseTerm)) {
+                return false;
+            }
+
+            BaseTerm baseTerm = (BaseTerm) object;
+            return term.equals(baseTerm.term) && type.equals(baseTerm.type);
+        }
+
+        public int hashCode() {
+            int hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + type.hashCode();
+            return hashCode;
         }
     }
 
@@ -446,7 +494,9 @@ public class BuiltinList extends Collection {
                     elementsRightBuilder.build(),
                     baseTermTypesBuilder.build(),
                     listVariablesBuilder.build());
-            return builtinList.hasFrame() && builtinList.concreteSize() == 0 ? builtinList.frame : builtinList;
+            return builtinList.baseTerms().size() == 1 && builtinList.concreteSize() == 0 ?
+                   builtinList.baseTerms().get(0) :
+                   builtinList;
         }
     }
 

@@ -81,5 +81,4 @@ public abstract class AssociativeCommutativeCollection extends Collection {
     public final boolean isGround() {
         return isConcreteCollection() && super.isGround();
     }
-
 }

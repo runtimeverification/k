@@ -20,8 +20,8 @@ rule [loop-inv]:
   ...</env>
   <heap>...
     object(LX) |-> tv (struct listNode *, LP:Pointer => null)
-    object(LY) |-> tv (int, L:Int => L +Int len(A))
-    list(LP)(A:IntSeq)
+    object(LY) |-> tv (int, L:Int => L +Int size(A))
+    list(LP)(A:List)
   ...</heap>
 
 rule [func-spec]:
@@ -30,10 +30,10 @@ rule [func-spec]:
   <k>
     length_iterative(tv(struct listNode *, LP:Pointer))
   =>
-    tv(int, len(A))
+    tv(int, size(A))
   ...</k>
   <heap>...
-    list(LP)(A:IntSeq)
+    list(LP)(A:List)
   ...</heap>
 
 endmodule

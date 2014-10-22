@@ -6,14 +6,7 @@ import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multisets;
 
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +21,10 @@ import java.util.Map.Entry;
  */
 public class BuiltinMapOperations {
 
-    public static Term constructor(BuiltinMap map1, BuiltinMap map2, TermContext context) {
+    public static Term constructor(Term map1, Term map2, TermContext context) {
+        if (map1.sort() != Sort.MAP || map2.sort() != Sort.MAP) {
+            throw new IllegalArgumentException();
+        }
         return BuiltinMap.concatenate(map1, map2);
     }
 
@@ -93,12 +89,17 @@ public class BuiltinMapOperations {
     }
 
     public static BuiltinSet keys(BuiltinMap map, TermContext context) {
-        if (!map.isConcreteCollection()) {
+        if (map.getEntries().isEmpty() && !map.isEmpty()) {
             return null;
         }
-
         BuiltinSet.Builder builder = BuiltinSet.builder();
         builder.addAll(map.getEntries().keySet());
+        if (!map.isConcreteCollection()) {
+            builder.add(KItem.of(
+                    KLabelConstant.of("'keys", context.definition().context()),
+                    KList.concatenate(BuiltinMap.concatenate(map.baseTerms())),
+                    context));
+        }
         return (BuiltinSet) builder.build();
     }
 

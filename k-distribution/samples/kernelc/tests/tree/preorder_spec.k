@@ -15,6 +15,6 @@ rule
   <heap>...
     tree(TP)(T:Tree)
   ...</heap>
-  <out>... .List => intseq2list(tree2preorder(T)) </out>
+  <out>... .List => tree2preorder(T) </out>
 
 endmodule

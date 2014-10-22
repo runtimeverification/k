@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.kframework.backend.unparser.UnparserFilterNew;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.backend.unparser.UnparserLexicalComparator;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
@@ -82,7 +82,7 @@ public class MapBuiltin extends DataStructureBuiltin {
             Term item = KApp.of(sort().elementLabel(),
                     entry.getKey(), entry.getValue());
             items.add(item);
-            UnparserFilterNew unparser = new UnparserFilterNew(context);
+            UnparserFilter unparser = new UnparserFilter(context);
             unparser.visitNode(item);
             String s = unparser.getResult();
             unparsed.put(item, s);

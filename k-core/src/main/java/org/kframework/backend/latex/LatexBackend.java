@@ -1,39 +1,37 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.latex;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.JarInfo;
-import org.kframework.utils.general.GlobalSettings;
 
 import com.google.inject.Inject;
 
 import java.io.File;
-import java.io.IOException;
 
 public class LatexBackend extends BasicBackend {
 
-    private File latexFile;
-    private File latexStyleFile;
+    private String latexFilePath;
     private boolean makeDocument = false;
 
+    private final FileUtil files;
+
     @Inject
-    LatexBackend(Stopwatch sw, Context context) {
+    LatexBackend(Stopwatch sw, Context context, FileUtil files) {
         super(sw, context);
+        this.files = files;
     }
 
-    public LatexBackend(Stopwatch sw, Context context, boolean doc) {
+    public LatexBackend(Stopwatch sw, Context context, boolean doc, FileUtil files) {
         super(sw, context);
         makeDocument = doc;
+        this.files = files;
     }
 
     public void compile(Definition javaDef) {
-        String fileSep = System.getProperty("file.separator");
         String endl = System.getProperty("line.separator");
 
         LatexFilter lf;
@@ -41,13 +39,7 @@ public class LatexBackend extends BasicBackend {
         else lf = new LatexFilter(context);
         lf.visitNode(javaDef);
 
-        String kLatexStyle = JarInfo.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-        latexStyleFile = new File(context.dotk.getAbsolutePath() + fileSep + "k.sty");
-        try {
-            FileUtils.writeStringToFile(latexStyleFile, FileUtil.getFileContent(kLatexStyle));
-        } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("Could not write to " + latexStyleFile.getAbsolutePath(), e);
-        }
+        files.saveToTemp("k.sty", files.loadFromKBase("include/latex/k.sty"));
 
         String latexified = "\\nonstopmode" + endl +
                 "\\PassOptionsToPackage{pdftex,usenames,dvipsnames,svgnames,x11names}{xcolor}"+ endl +
@@ -57,36 +49,22 @@ public class LatexBackend extends BasicBackend {
         latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
         File canonicalFile = options.mainDefinitionFile();
-        String latexFilePath;
-        if(makeDocument) latexFilePath= context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + "-doc.tex";
-        else latexFilePath = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
-        latexFile = new File(latexFilePath);
-        try {
-            FileUtils.writeStringToFile(latexFile, latexified);
-        } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("Could not write to " + latexFile.getAbsolutePath(), e);
-        }
+        if(makeDocument) latexFilePath = FilenameUtils.removeExtension(canonicalFile.getName()) + "-doc.tex";
+        else latexFilePath = FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
+        files.saveToTemp(latexFilePath, latexified);
 
         sw.printIntermediate("Latex Generation");
     }
 
-    public void copyFiles() throws IOException {
-        FileUtils.copyFile(latexFile, new File(options.directory, latexFile.getName()));
-        FileUtils.copyFile(latexStyleFile, new File(options.directory, latexStyleFile.getName()));
+    public String getLatexFile() {
+        return latexFilePath;
     }
 
     @Override
     public void run(Definition javaDef) {
-        try {
             compile(javaDef);
-            copyFiles();
-        } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError(e.getMessage(), e);
-        }
-    }
-
-    public File getLatexFile() {
-        return latexFile;
+            files.copyTempFileToDefinitionDirectory("k.sty");
+            files.copyTempFileToDefinitionDirectory(latexFilePath);
     }
 
     @Override

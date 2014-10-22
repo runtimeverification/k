@@ -2,7 +2,7 @@
 package org.kframework.krun;
 
 import org.kframework.backend.kore.ToKAppTransformer;
-import org.kframework.backend.unparser.UnparserFilterNew;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -168,8 +168,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
     @Override
     public ASTNode visit(Cell cell, Void _)  {
         // TODO(AndreiS): fix the printing of the cells which are representing maps
-        if (cell.getLabel().matches(".*-fragment")
-                || cell.getLabel().startsWith(Cell2DataStructure.MAP_CELL_CELL_LABEL_PREFIX)) {
+        if (cell.getLabel().matches(".*-fragment")) {
             return this.visitNode(cell.getContents());
         }
         return super.visit(cell, _);
@@ -197,7 +196,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
         }
         Map<Term, String> unparsedTerms = new HashMap<>();
         for (Term t : contents) {
-            UnparserFilterNew filter = new UnparserFilterNew(context);
+            UnparserFilter filter = new UnparserFilter(context);
             filter.visitNode(t);
             unparsedTerms.put(t, filter.getResult());
         }

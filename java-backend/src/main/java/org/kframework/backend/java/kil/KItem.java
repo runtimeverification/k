@@ -269,15 +269,18 @@ public final class KItem extends Term {
         private final Tool tool;
         private final JavaExecutionOptions javaOptions;
         private final GlobalOptions globalOptions;
+        private final KExceptionManager kem;
 
         @Inject
         public KItemOperations(
                 Tool tool,
                 JavaExecutionOptions javaOptions,
-                GlobalOptions globalOptions) {
+                GlobalOptions globalOptions,
+                KExceptionManager kem) {
             this.tool = tool;
             this.javaOptions = javaOptions;
             this.globalOptions = globalOptions;
+            this.kem = kem;
         }
 
         /**
@@ -339,10 +342,7 @@ public final class KItem extends Term {
                         throw (RuntimeException)t;
                     }
                     if (t instanceof RuntimeException) {
-                        if (globalOptions.verbose) {
-                            System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
-                            e.printStackTrace();
-                        }
+                        kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, e);
                     } else {
                         throw new AssertionError("Builtin functions should not throw checked exceptions", e);
                     }

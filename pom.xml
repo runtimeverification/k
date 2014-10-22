@@ -180,6 +180,8 @@
             <configuration>
               <sourceDirectory>src</sourceDirectory>
               <includes>**/*.java</includes>
+              <!-- TODO(dwightguth): remove with checkstyle 5.9 -->
+              <excludes>**/ConfigurationSubstitutionVisitor.java,**/DataStructure2Cell.java,**/BuiltinList.java,**/BuiltinSet.java,**/BuiltinMap.java,**/SymbolicRewriter.java,**/GroundRewriter.java,**/Rule.java</excludes>
               <configLocation>src/main/config/checkstyle-java.xml</configLocation>
               <suppressionsLocation>src/main/config/checkstyle-suppress.xml</suppressionsLocation>
               <failsOnError>true</failsOnError>
@@ -199,122 +201,26 @@
     </plugins>
   </build>
   <profiles>
-    <!-- Maven 3.2.2 introduces a breaking change in the behavior of profiles
-         with multiple activation clauses. In order to support all versions
-         including the latest, we need to keep only one clause per profile.
-         Hence this very ugly code duplication hack. Please make sure if
-         you need to make any changes that you change BOTH the -explicit and
-         -implicit profiles. -->
-
     <profile>
-      <id>linux32-explicit</id>
+      <id>linux64</id>
       <activation>
-        <property>
-          <name>platform</name>
-          <value>linux32</value>
-        </property>
-      </activation>
-      <properties>
-        <native.arch.classifier>32</native.arch.classifier>
-        <native.library.type>so</native.library.type>
-        <native.library.prefix>lib</native.library.prefix>
-        <native.os.classifier>linux</native.os.classifier>
-        <native.classifier>linux32</native.classifier>
-        <native.script.type>sh</native.script.type>
-        <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
-        <native.path.variable>LD_LIBRARY_PATH</native.path.variable>
-      </properties>
-    </profile>
-    <profile>
-      <id>linux64-explicit</id>
-      <activation>
-        <property>
-          <name>platform</name>
-          <value>linux64</value>
-        </property>
+        <os>
+          <family>Unix</family>
+          <name>!mac os x</name>
+          <arch>amd64</arch>
+        </os>
       </activation>
       <properties>
         <native.arch.classifier>64</native.arch.classifier>
-        <native.library.type>so</native.library.type>
-        <native.library.prefix>lib</native.library.prefix>
-        <native.os.classifier>linux</native.os.classifier>
         <native.classifier>linux64</native.classifier>
-        <native.script.type>sh</native.script.type>
+        <native.os.classifier>linux</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension></native.exe.extension>
         <native.script.extension></native.script.extension>
-        <native.path.variable>LD_LIBRARY_PATH</native.path.variable>
       </properties>
     </profile>
     <profile>
-      <id>osx-explicit</id>
-      <activation>
-        <property>
-          <name>platform</name>
-          <value>osx</value>
-        </property>
-      </activation>
-      <properties>
-        <native.library.type>dylib</native.library.type>
-        <native.library.prefix>lib</native.library.prefix>
-        <native.os.classifier>osx</native.os.classifier>
-        <native.classifier>osx</native.classifier>
-        <native.script.type>sh</native.script.type>
-        <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
-        <native.path.variable>DYLD_LIBRARY_PATH</native.path.variable>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows32-explicit</id>
-      <activation>
-        <property>
-          <name>platform</name>
-          <value>windows32</value>
-        </property>
-      </activation>
-      <properties>
-        <native.arch.classifier>32</native.arch.classifier>
-        <native.library.type>dll</native.library.type>
-        <native.library.prefix></native.library.prefix>
-        <native.os.classifier>windows</native.os.classifier>
-        <native.classifier>windows32</native.classifier>
-        <native.script.type>bat</native.script.type>
-        <native.exe.type>exe</native.exe.type>
-        <native.exe.extension>.exe</native.exe.extension>
-        <native.script.extension>.bat</native.script.extension>
-        <native.path.variable>PATH</native.path.variable>
-        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows64-explicit</id>
-      <activation>
-        <property>
-          <name>platform</name>
-          <value>windows64</value>
-        </property>
-      </activation>
-      <properties>
-        <native.arch.classifier>64</native.arch.classifier>
-        <native.library.type>dll</native.library.type>
-        <native.library.prefix></native.library.prefix>
-        <native.os.classifier>windows</native.os.classifier>
-        <native.classifier>windows64</native.classifier>
-        <native.script.type>bat</native.script.type>
-        <native.exe.type>exe</native.exe.type>
-        <native.exe.extension>.exe</native.exe.extension>
-        <native.script.extension>.bat</native.script.extension>
-        <native.path.variable>PATH</native.path.variable>
-        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>linux32-implicit</id>
+      <id>linux32</id>
       <activation>
         <os>
           <family>Unix</family>
@@ -324,60 +230,49 @@
       </activation>
       <properties>
         <native.arch.classifier>32</native.arch.classifier>
-        <native.library.type>so</native.library.type>
-        <native.library.prefix>lib</native.library.prefix>
-        <native.os.classifier>linux</native.os.classifier>
         <native.classifier>linux32</native.classifier>
-        <native.script.type>sh</native.script.type>
-        <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension></native.exe.extension>
-        <native.script.extension></native.script.extension>
-        <native.path.variable>LD_LIBRARY_PATH</native.path.variable>
-      </properties>
-    </profile>
-    <profile>
-      <id>linux64-implicit</id>
-      <activation>
-        <os>
-          <family>Unix</family>
-          <name>!mac os x</name>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>64</native.arch.classifier>
-        <native.library.type>so</native.library.type>
-        <native.library.prefix>lib</native.library.prefix>
         <native.os.classifier>linux</native.os.classifier>
-        <native.classifier>linux64</native.classifier>
-        <native.script.type>sh</native.script.type>
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension></native.exe.extension>
         <native.script.extension></native.script.extension>
-        <native.path.variable>LD_LIBRARY_PATH</native.path.variable>
       </properties>
     </profile>
     <profile>
-      <id>osx-implicit</id>
+      <id>osx</id>
       <activation>
         <os>
           <family>mac</family>
         </os>
       </activation>
       <properties>
-        <native.library.type>dylib</native.library.type>
-        <native.library.prefix>lib</native.library.prefix>
-        <native.os.classifier>osx</native.os.classifier>
+        <native.arch.classifier>64</native.arch.classifier>
         <native.classifier>osx</native.classifier>
-        <native.script.type>sh</native.script.type>
+        <native.os.classifier>osx</native.os.classifier>
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension></native.exe.extension>
         <native.script.extension></native.script.extension>
-        <native.path.variable>DYLD_LIBRARY_PATH</native.path.variable>
       </properties>
     </profile>
     <profile>
-      <id>windows32-implicit</id>
+      <id>windows64</id>
+      <activation>
+        <os>
+          <family>windows</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <native.arch.classifier>64</native.arch.classifier>
+        <native.classifier>windows64</native.classifier>
+        <native.os.classifier>windows</native.os.classifier>
+        <native.exe.type>exe</native.exe.type>
+        <native.exe.extension>.exe</native.exe.extension>
+        <native.script.extension>.bat</native.script.extension>
+        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows32</id>
       <activation>
         <os>
           <family>windows</family>
@@ -386,37 +281,11 @@
       </activation>
       <properties>
         <native.arch.classifier>32</native.arch.classifier>
-        <native.library.type>dll</native.library.type>
-        <native.library.prefix></native.library.prefix>
-        <native.os.classifier>windows</native.os.classifier>
         <native.classifier>windows32</native.classifier>
-        <native.script.type>bat</native.script.type>
-        <native.exe.type>exe</native.exe.type>
-        <native.exe.extension>.exe</native.exe.extension>
-        <native.script.extension>.bat</native.script.extension>
-        <native.path.variable>PATH</native.path.variable>
-        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows64-implicit</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>64</native.arch.classifier>
-        <native.library.type>dll</native.library.type>
-        <native.library.prefix></native.library.prefix>
         <native.os.classifier>windows</native.os.classifier>
-        <native.classifier>windows64</native.classifier>
-        <native.script.type>bat</native.script.type>
         <native.exe.type>exe</native.exe.type>
         <native.exe.extension>.exe</native.exe.extension>
         <native.script.extension>.bat</native.script.extension>
-        <native.path.variable>PATH</native.path.variable>
         <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
       </properties>
     </profile>

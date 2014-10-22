@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.kast;
 
-import java.io.File;
 import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
@@ -9,7 +8,6 @@ import com.beust.jcommander.IStringConverter;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
-import org.kframework.kil.loader.Context;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
 import org.kframework.utils.file.FileUtil;
@@ -45,11 +43,14 @@ public final class KastOptions {
         if (parameters == null || parameters.size() != 1) {
             GlobalSettings.kem.registerCriticalError("You have to provide a file in order to kast a program.");
         }
-        File f = new File(parameters.get(0));
-        if (!f.exists() || f.isDirectory()) {
-            GlobalSettings.kem.registerCriticalError("Could not find file: " + f.getAbsolutePath());
-        }
-        return FileUtil.getFileContent(parameters.get(0));
+        return files.loadFromWorkingDirectory(parameters.get(0));
+    }
+
+    private FileUtil files;
+
+    @Inject
+    public void setFiles(FileUtil files) {
+        this.files = files;
     }
 
     /**
@@ -94,24 +95,14 @@ public final class KastOptions {
             "The default is the sort of $PGM from the configuration. A sort may also be specified " +
             "with the 'KRUN_SORT' environment variable, in which case it is used if the option is " +
             "not specified on the command line.")
-    private Sort sort;
+    public Sort sort;
+
     public static class SortTypeConverter implements IStringConverter<Sort> {
         // converts the command line argument into a Sort
         @Override
         public Sort convert(String arg) {
             return Sort.of(arg);
         }
-    }
-
-    public Sort sort(Context context) {
-        if (sort == null) {
-            if (System.getenv("KRUN_SORT") != null) {
-                sort = Sort.of(System.getenv("KRUN_SORT"));
-            } else {
-                sort = context.startSymbolPgm;
-            }
-        }
-        return sort;
     }
 
     @ParametersDelegate

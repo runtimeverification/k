@@ -13,6 +13,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.LocatorImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
 
+import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,9 +33,11 @@ public class ConfigPreProcessor extends XMLFilterImpl {
     private final Stack<Locator> locatorStack = new Stack<>();
     private final Stack<Element> elementStack = new Stack<>();
     private final UserDataHandler dataHandler = new LocationDataHandler();
+    private final Map<String, String> env;
 
-    ConfigPreProcessor(XMLReader xmlReader, Document dom) {
+    ConfigPreProcessor(XMLReader xmlReader, Document dom, Map<String, String> env) {
         super(xmlReader);
+        this.env = env;
 
         // Add listener to DOM, so we know which node was added.
         EventListener modListener = new EventListener() {
@@ -117,7 +120,7 @@ public class ConfigPreProcessor extends XMLFilterImpl {
         Matcher m = Pattern.compile("\\$\\{(.*?)\\}").matcher(str);
         if (m.find()) {
             String var = m.group(1);
-            String val = System.getenv(var);
+            String val = env.get(var);
             if (val != null) {
                 return resolveEnvVars(m.replaceFirst(val));
             } else {

@@ -74,6 +74,9 @@ public class Z3Wrapper {
         } catch (Z3Exception e) {
             kem.registerCriticalWarning(
                     "failed to translate smtlib expression:\n" + SMT_PRELUDE + query);
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println(System.getProperty("java.library.path"));
+            throw e;
         }
         return result;
     }
@@ -83,7 +86,7 @@ public class Z3Wrapper {
         try {
             for (int i = 0; i < Z3_RESTART_LIMIT; i++) {
                 ProcessBuilder pb = new ProcessBuilder(
-                        OS.current().getNativeExecutable("z3").getAbsolutePath(),
+                        OS.current().getNativeExecutable("z3"),
                         "-in",
                         "-smt2",
                         "-t:" + timeout);

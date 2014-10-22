@@ -59,6 +59,10 @@ module INT-HOOKS
   rule I1:Int =/=Int I2:Int => notBool(I1 ==Int I2)
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
+  syntax Int ::= bool2Int(Bool)   [function, smtlib(smt_bool2int)]
+  rule bool2Int(true) => 1
+  rule bool2Int(false) => 0
+
   //sort Nat ::= {I:Int | I >=Int 0}
   syntax Nat
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]

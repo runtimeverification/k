@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.kframework.backend.Backend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
@@ -15,13 +16,10 @@ import org.kframework.kil.Module;
 import org.kframework.kil.Require;
 import org.kframework.kil.Sources;
 import org.kframework.kil.loader.Context;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.JarInfo;
-import org.kframework.utils.general.GlobalSettings;
-
 import com.google.inject.Inject;
 
 public class OuterParser {
@@ -33,19 +31,23 @@ public class OuterParser {
     private final boolean autoinclude;
     private static final String missingFileMsg = "Could not find 'required' file: ";
 
-    private final KompileOptions kompileOptions;
     private final GlobalOptions globalOptions;
     private final String autoincludedFile;
+    private final FileUtil files;
+    private final KExceptionManager kem;
 
     @Inject
     public OuterParser(
-            KompileOptions kompileOptions,
+            GlobalOptions globalOptions,
             @Backend.Autoinclude boolean autoinclude,
-            @Backend.AutoincludedFile String autoincludedFile) {
+            @Backend.AutoincludedFile String autoincludedFile,
+            FileUtil files,
+            KExceptionManager kem) {
         this.autoinclude = autoinclude;
-        this.kompileOptions = kompileOptions;
-        this.globalOptions = kompileOptions.global;
+        this.globalOptions = globalOptions;
         this.autoincludedFile = autoincludedFile;
+        this.files = files;
+        this.kem = kem;
     }
 
     /**
@@ -58,22 +60,22 @@ public class OuterParser {
 
         try {
             // parse first the file given at console for fast failure in case of error
-            File file = new File(fileName);
+            File file = files.resolveWorkingDirectory(fileName);
             if (!file.exists())
-                GlobalSettings.kem.registerCriticalError(missingFileMsg + fileName + " given at console.");
+                kem.registerCriticalError(missingFileMsg + fileName + " given at console.");
 
-            slurp2(file, context);
+            slurp2(file, context, false);
 
             if (autoinclude) {
                 // parse the autoinclude.k file but remember what I parsed to give the correct order at the end
                 List<DefinitionItem> tempmi = moduleItems;
                 moduleItems = new ArrayList<DefinitionItem>();
 
-                file = buildCanonicalPath(autoincludedFile, new File(fileName));
-                if (file == null)
-                    GlobalSettings.kem.registerCriticalError(missingFileMsg + fileName + " autoimported for every definition ");
+                File autoinclude = files.resolveKBase("include/" + autoincludedFile);
+                if (!autoinclude.exists())
+                    kem.registerCriticalError(missingFileMsg + autoinclude + " autoimported for every definition ");
 
-                slurp2(file, context);
+                slurp2(autoinclude, context, true);
                 moduleItems.addAll(tempmi);
             }
 
@@ -84,44 +86,37 @@ public class OuterParser {
         }
     }
 
-    private File buildCanonicalPath(String fileName, File parentFile) throws IOException {
-        File file = new File(parentFile.getCanonicalFile().getParent() + "/" + fileName);
-        if (file.exists())
-            return file;
-        file = new File(JarInfo.getKBase(false) + "/include/" + fileName);
-        if (file.exists())
-            return file;
-
-        return null;
-    }
-
-    private void slurp2(File file, Context context) throws IOException {
+    private void slurp2(File file, Context context, boolean predefined) throws IOException {
         String canonicalPath = file.getCanonicalPath();
         if (!filePaths.contains(canonicalPath)) {
             filePaths.add(canonicalPath);
 
             if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
-            List<DefinitionItem> defItemList = Outer.parse(Sources.fromFile(file), FileUtil.getFileContent(file.getAbsolutePath()), context);
+            List<DefinitionItem> defItemList = Outer.parse(Sources.fromFile(file), FileUtils.readFileToString(file), context);
 
             // go through every required file
             for (ASTNode di : defItemList) {
                 if (di instanceof Require) {
                     Require req = (Require) di;
 
-                    File newFile = buildCanonicalPath(req.getValue(), file);
+                    File newFile = new File(file.getCanonicalFile().getParentFile(), req.getValue());
+                    boolean predefinedRequirement = predefined;
+                    if (!newFile.exists()) {
+                        predefinedRequirement = true;
+                        newFile = files.resolveKBase("include/" + req.getValue());
+                    }
 
-                    if (newFile == null)
-                        GlobalSettings.kem.registerCriticalError(missingFileMsg + req.getValue(), req);
+                    if (!newFile.exists())
+                        kem.registerCriticalError(missingFileMsg + req.getValue(), req);
 
-                    slurp2(newFile, context);
-                    context.addFileRequirement(newFile.getCanonicalPath(), file.getCanonicalPath());
+                    slurp2(newFile, context, predefinedRequirement);
+                    context.addFileRequirement(newFile, file);
                 }
             }
 
-            boolean predefined = file.getCanonicalPath().startsWith(JarInfo.getKBase(false) + File.separator + "include");
             if (!predefined)
-                context.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
+                context.addFileRequirement(files.resolveKBase(autoincludedFile), file);
 
             // add the modules to the modules list and to the map for easy access
             for (DefinitionItem di : defItemList) {
@@ -134,7 +129,7 @@ public class OuterParser {
                     Module previous = this.modulesMap.put(m.getName(), m);
                     if (previous != null) {
                         String msg = "Found two modules with the same name: " + m.getName();
-                        GlobalSettings.kem.registerCriticalError(msg, m);
+                        kem.registerCriticalError(msg, m);
                     }
                 }
             }

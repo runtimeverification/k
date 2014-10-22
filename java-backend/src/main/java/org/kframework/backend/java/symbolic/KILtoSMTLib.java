@@ -6,6 +6,7 @@ import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -14,6 +15,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SMTLibTerm;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -134,10 +136,10 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
     private final HashSet<Variable> variables;
 
     public static String translateConstraint(SymbolicConstraint constraint) {
-        KILtoSMTLib transformer = new KILtoSMTLib(true);
+        KILtoSMTLib transformer = new KILtoSMTLib(true, constraint.termContext());
         String expression = ((SMTLibTerm) constraint.accept(transformer)).expression();
         return getSortAndFunctionDeclarations(constraint.termContext().definition(), transformer.variables())
-             + getAxioms(constraint.termContext().definition())
+             + getAxioms(constraint.termContext())
              + getConstantDeclarations(transformer.variables())
              + "(assert " + expression + ")";
     }
@@ -146,15 +148,15 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             SymbolicConstraint leftHandSide,
             SymbolicConstraint rightHandSide,
             Set<Variable> rightHandSideOnlyVariables) {
-        KILtoSMTLib leftTransformer = new KILtoSMTLib(true);
-        KILtoSMTLib rightTransformer = new KILtoSMTLib(false);
+        KILtoSMTLib leftTransformer = new KILtoSMTLib(true, leftHandSide.termContext());
+        KILtoSMTLib rightTransformer = new KILtoSMTLib(false, rightHandSide.termContext());
         String leftExpression = ((SMTLibTerm) leftHandSide.accept(leftTransformer)).expression();
         String rightExpression = ((SMTLibTerm) rightHandSide.accept(rightTransformer)).expression();
         StringBuilder sb = new StringBuilder();
         sb.append(getSortAndFunctionDeclarations(
                 leftHandSide.termContext().definition(),
                 Sets.union(leftTransformer.variables(), rightTransformer.variables())));
-        sb.append(getAxioms(leftHandSide.termContext().definition()));
+        sb.append(getAxioms(leftHandSide.termContext()));
         sb.append(getConstantDeclarations(Sets.difference(
                 Sets.union(leftTransformer.variables(), rightTransformer.variables()),
                 rightHandSideOnlyVariables)));
@@ -184,14 +186,14 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             String smtlib = production.getAttribute(Attribute.SMTLIB_KEY);
             if (smtlib != null && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
                 functions.add(production);
-                sorts.add(Sort.of(production.getSort()));
+                sorts.add(renameSort(Sort.of(production.getSort())));
                 for (int i = 0; i < production.getArity(); ++i) {
-                    sorts.add(Sort.of(production.getChildSort(i)));
+                    sorts.add(renameSort(Sort.of(production.getChildSort(i))));
                 }
             }
         }
         for (Variable variable : variables) {
-            sorts.add(variable.sort());
+            sorts.add(renameSort(variable.sort()));
         }
 
         if (!Sets.intersection(sorts, RESERVED_Z3_SORTS).isEmpty()) {
@@ -223,12 +225,12 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         return sb.toString();
     }
 
-    private static String getAxioms(Definition definition) {
+    private static String getAxioms(TermContext context) {
         StringBuilder sb = new StringBuilder();
-        for (Rule rule : definition.functionRules().values()) {
+        for (Rule rule : context.definition().functionRules().values()) {
             if (rule.containsAttribute(Attribute.SMT_LEMMA_KEY)) {
                 try {
-                    KILtoSMTLib transformer = new KILtoSMTLib(false);
+                    KILtoSMTLib transformer = new KILtoSMTLib(false, context);
                     String leftExpression = ((SMTLibTerm) rule.leftHandSide().accept(transformer)).expression();
                     String rightExpression = ((SMTLibTerm) rule.rightHandSide().accept(transformer)).expression();
                     sb.append("(assert ");
@@ -300,6 +302,8 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             assert false : "getSortName should be called with a sorted node";
             return null;
         }
+
+        s = renameSort(s);
         if (s == Sort.BIT_VECTOR) {
             return "(_ BitVec " + BitVector.getBitwidthOrDie(node) + ")";
         } else if (s == Sort.FLOAT) {
@@ -310,7 +314,16 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
         }
     }
 
-    public KILtoSMTLib(boolean skipEqualities) {
+    private static Sort renameSort(Sort sort) {
+        if (sort == Sort.LIST) {
+            return Sort.of("IntSeq");
+        } else {
+            return sort;
+        }
+    }
+
+    public KILtoSMTLib(boolean skipEqualities, TermContext context) {
+        super(context);
         this.skipEqualities = skipEqualities;
         variables = new HashSet<>();
     }
@@ -453,6 +466,11 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
             sb.append(value.testBit(i) ? "1" : "0");
         }
         return new SMTLibTerm(sb.toString());
+    }
+
+    @Override
+    public ASTNode transform(BuiltinList builtinList) {
+        return builtinList.toK(context).accept(this);
     }
 
     @Override

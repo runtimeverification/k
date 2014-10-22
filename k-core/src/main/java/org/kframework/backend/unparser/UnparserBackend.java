@@ -11,20 +11,22 @@ import org.kframework.utils.file.FileUtil;
 
 import com.google.inject.Inject;
 
-import java.io.File;
-
 public class UnparserBackend extends BasicBackend {
     private boolean unflattenFirst; // unflatten syntax before unparsing
 
+    private final FileUtil files;
+
     @Inject
-    UnparserBackend(Stopwatch sw, Context context) {
+    UnparserBackend(Stopwatch sw, Context context, FileUtil files) {
         super(sw, context);
         this.unflattenFirst = false;
+        this.files = files;
     }
 
-    public UnparserBackend(Stopwatch sw, Context context, boolean unflattenFirst) {
+    public UnparserBackend(Stopwatch sw, Context context, boolean unflattenFirst, FileUtil files) {
         super(sw, context);
         this.unflattenFirst = unflattenFirst;
+        this.files = files;
     }
 
     @Override
@@ -38,9 +40,7 @@ public class UnparserBackend extends BasicBackend {
 
         String unparsedText = unparserFilter.getResult();
 
-        FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
-
-        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + ".unparsed.k", unparsedText);
+        files.saveToDefinitionDirectory(FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + ".unparsed.k", unparsedText);
     }
 
     @Override

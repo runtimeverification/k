@@ -118,17 +118,16 @@ public class JavaSymbolicExecutor implements Executor {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Map<Variable,Term>> hits;
+        Term initialTerm = kilTransformer.transformAndEval(cfg);
+        Term targetTerm = null;
+        TermContext termContext = TermContext.of(globalContext);
         if (javaOptions.patternMatching) {
-            Term initialTerm = kilTransformer.transformAndEval(cfg);
-            Term targetTerm = null;
-            GroundRewriter rewriter = new GroundRewriter(definition, TermContext.of(globalContext));
+            GroundRewriter rewriter = new GroundRewriter(definition, termContext);
             hits = rewriter.search(initialTerm, targetTerm, claims,
                     patternRule, bound, depth, searchType);
         } else {
-            ConstrainedTerm initialTerm = new ConstrainedTerm(kilTransformer.transformAndEval(cfg), TermContext.of(globalContext));
-            ConstrainedTerm targetTerm = null;
             hits = getSymbolicRewriter().search(initialTerm, targetTerm, claims,
-                    patternRule, bound, depth, searchType);
+                    patternRule, bound, depth, searchType, termContext);
         }
 
         for (Map<Variable,Term> map : hits) {

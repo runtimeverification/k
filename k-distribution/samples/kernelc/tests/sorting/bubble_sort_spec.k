@@ -34,12 +34,12 @@ rule [bubble-sort-loop-inv1]:
   <heap>...
     object(LX) |-> tv (struct listNode *, X:Pointer)
     object(LC) |-> tv (int, 1 => ?_:Int)
-    (lseg(X, null)(A1:IntSeq)
+    (lseg(X, null)(A1:List)
      =>
-     lseg(X, null)(?A2:IntSeq))
+     lseg(X, null)(?A2:List))
  ...</heap>
 requires X =/=K null
-ensures sorted(?A2) andBool intseq2intset(A1) ==K intseq2intset(?A2)
+ensures sorted(?A2) andBool list2set(A1) ==K list2set(?A2)
 
 rule [bubble-sort-loop-inv2]:
   <struct>... STRUCT:Map ...</struct>
@@ -70,14 +70,14 @@ rule [bubble-sort-loop-inv2]:
     (object(Y1) |-> (
         val  |-> tv(int, V:Int)
         next |-> tv(struct listNode *, P:Pointer))
-     lseg(X, object(Y1))(A1:IntSeq)
-     lseg(P, null)(B:IntSeq)
+     lseg(X, object(Y1))(A1:List)
+     lseg(P, null)(B:List)
      =>
-     lseg(X, null)(?A2:IntSeq))
+     lseg(X, null)(?A2:List))
  ...</heap>
-requires sorted(A1 @ [V]) orBool C1 =/=K 0
+requires sorted(A1 ListItem(V)) orBool C1 =/=K 0
 ensures (sorted(?A2) orBool ?C2 =/=K 0)
-  andBool intseq2intset(A1) U intseq2intset(B) U { V } ==K intseq2intset(?A2)
+  andBool list2set(A1) U list2set(B) U { V } ==K list2set(?A2)
 
 rule [bubble-sort-func-spec]:
   <struct>... STRUCT:Map ...</struct>
@@ -88,8 +88,8 @@ rule [bubble-sort-func-spec]:
     tv(struct listNode *, ?X2:Pointer)
   ...</k>
   <heap>...
-    lseg(X1, null)(A1:IntSeq) => lseg(?X2, null)(?A2:IntSeq)
+    lseg(X1, null)(A1:List) => lseg(?X2, null)(?A2:List)
   ...</heap>
-ensures sorted(?A2) andBool intseq2intset(A1) ==K intseq2intset(?A2)
+ensures sorted(?A2) andBool list2set(A1) ==K list2set(?A2)
 endmodule
 

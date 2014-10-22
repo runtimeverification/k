@@ -4,6 +4,7 @@ package org.kframework.krun.api;
 import org.kframework.backend.unparser.AddBracketsFilter;
 import org.kframework.backend.unparser.AddBracketsFilter2;
 import org.kframework.backend.unparser.OutputModes;
+import org.kframework.compile.transformers.DataStructure2Cell;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -56,6 +57,7 @@ public class KRunState implements Serializable, Comparable<KRunState> {
 
     public static Term concretize(Term result, Context context) {
         try {
+            result = (Term) new DataStructure2Cell(context).visitNode(result);
             result = (Term) new ConcretizeSyntax(context).visitNode(result);
             result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
             result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);

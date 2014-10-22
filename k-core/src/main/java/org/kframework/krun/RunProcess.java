@@ -14,7 +14,6 @@ import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.file.FileUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +30,7 @@ public class RunProcess {
     private String err = null;
     private int exitCode;
 
-    public void execute(Map<String, String> environment,String... commands) {
+    public void execute(File workingDir, Map<String, String> environment,String... commands) {
 
         ThreadedStreamCapturer inputStreamHandler, errorStreamHandler;
 
@@ -46,7 +45,7 @@ public class RunProcess {
             realEnvironment.putAll(environment);
 
             // set execution directory to current user dir
-            pb.directory(new File("."));
+            pb.directory(workingDir);
 
             // start process
             Process process = pb.start();
@@ -118,7 +117,7 @@ public class RunProcess {
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.PROGRAM);
@@ -128,7 +127,7 @@ public class RunProcess {
                 break;
             case "kast --parser ground":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.GROUND);
@@ -138,14 +137,14 @@ public class RunProcess {
                 break;
             case "kast --parser rules":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.RULES);
                 break;
             case "kast --parser binary":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = context.files.loadFromWorkingDirectory(value);
                     source = Sources.fromFile(value);
                 }
                 term = ProgramLoader.processPgm(content, source, startSymbol, context, ParserType.BINARY);
@@ -155,11 +154,11 @@ public class RunProcess {
                 tokens.add(value);
                 Map<String, String> environment = new HashMap<>();
                 environment.put("KRUN_SORT", startSymbol.toString());
-                environment.put("KRUN_COMPILED_DEF", context.kompiled.getParentFile().getAbsolutePath());
+                environment.put("KRUN_COMPILED_DEF", context.files.resolveDefinitionDirectory(".").getAbsolutePath());
                 if (isNotFile) {
                     environment.put("KRUN_IS_NOT_FILE", "true");
                 }
-                this.execute(environment, tokens.toArray(new String[tokens.size()]));
+                this.execute(context.files.resolveWorkingDirectory("."), environment, tokens.toArray(new String[tokens.size()]));
 
                 if (this.getExitCode() != 0) {
                     throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));

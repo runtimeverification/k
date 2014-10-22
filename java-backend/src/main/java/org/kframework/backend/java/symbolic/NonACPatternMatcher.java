@@ -1,7 +1,7 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CellLabel;
@@ -33,6 +33,7 @@ import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.tuple.Pair;
 
 
 /**
@@ -88,7 +89,17 @@ public class NonACPatternMatcher {
         taskBuffer.clear();
         tasks.addFirst(Pair.of(subject, pattern));
         failed = false;
-        return match() ? substitution : null;
+        if (match()) {
+            // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
+            // (used during associative matching) back to builtin representation
+            if (termContext.definition().context().krunOptions != null
+                    && termContext.definition().context().krunOptions.experimental.prove != null) {
+                PatternMatcher.evaluateSubstitution(substitution, termContext);
+            }
+            return substitution;
+        } else {
+            return null;
+        }
     }
 
     private void check(boolean condition) {
@@ -187,6 +198,12 @@ public class NonACPatternMatcher {
                     }
                 } else if (subject instanceof Hole) {
                     check(subject.equals(pattern));
+                } else if (subject instanceof BuiltinList && matchOnFunctionSymbol) {
+                    if (pattern instanceof BuiltinList) {
+                        match((BuiltinList) subject, (BuiltinList) pattern);
+                    } else {
+                        return false;
+                    }
                 } else {
                     assert false : "unreachable";
                 }
@@ -417,6 +434,11 @@ public class NonACPatternMatcher {
         addMatchingTask(kLabelInjection.term(), pattern.term());
     }
 
+    private void match(BuiltinList builtinList, BuiltinList pattern) {
+        addMatchingTask(
+                builtinList.toK(termContext),
+                pattern.toK(termContext));
+    }
 
     /**
      * Matches a subject term against a rule. Returns the instantiation when the

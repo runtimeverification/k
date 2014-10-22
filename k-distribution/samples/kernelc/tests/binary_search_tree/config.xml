@@ -8,7 +8,6 @@
         extension="c"
         >
     <kompile-option name="--backend" value="java" />
-    <kompile-option name="-d" value="binary_search_tree" />
     <program name="find.c">
       <krun-option name="--prove" value="tests/binary_search_tree/find_spec.k" />
       <krun-option name="--smt_prelude" value="../../include/z3/search_tree.smt2" />
