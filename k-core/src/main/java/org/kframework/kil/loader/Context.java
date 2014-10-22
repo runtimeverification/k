@@ -79,7 +79,6 @@ public class Context implements Serializable {
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
 
-    public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
     private Poset<Sort> syntacticSubsorts = Poset.create();
     public java.util.Set<Sort> definedSorts = Sort.getBaseSorts();
@@ -93,7 +92,6 @@ public class Context implements Serializable {
     @Deprecated
     public transient FileUtil files;
     public boolean initialized = false;
-    protected java.util.List<String> komputationCells = null;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
     public Set<Sort> variableTokenSorts = new HashSet<>();
     public HashMap<Sort, String> freshFunctionNames = new HashMap<>();

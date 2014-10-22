@@ -2,8 +2,6 @@
 
 package org.kframework.backend.unparser;
 
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.kil.KApp;
@@ -21,7 +19,6 @@ public class UnparserFilterNewTest {
     @Before
     public void setup() {
         context = Mockito.mock(Context.class);
-        context.canonicalBracketForSort = Mockito.mock(Map.class);
         context.krunOptions = new KRunOptions();
     }
 
