@@ -60,9 +60,9 @@ public class KRunner {
         try {
             if (krunOptions.io()) {
                 ioServer = startServer();
-            }
-            synchronized(server) {
-                server.wait();
+                synchronized(server) {
+                    server.wait();
+                }
             }
             String commandTemplate = "load {0}\nmod KRUNNER is including {1} .\neq #TCPPORT = {2,number,#} .\nendm\nload {3}\n";
 
