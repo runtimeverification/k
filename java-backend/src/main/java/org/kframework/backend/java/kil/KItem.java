@@ -79,7 +79,8 @@ public final class KItem extends Term {
             }
         }
 
-        return new KItem(kLabel, kList, termContext);
+        // TODO(yilongli): break the dependency on the Tool object
+        return new KItem(kLabel, kList, termContext, termContext.global().kItemOps.tool);
     }
 
     KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
@@ -95,7 +96,7 @@ public final class KItem extends Term {
         this.possibleSorts = possibleSorts;
     }
 
-    private KItem(Term kLabel, Term kList, TermContext termContext) {
+    private KItem(Term kLabel, Term kList, TermContext termContext, Tool tool) {
         super(Kind.KITEM);
         this.kLabel = kLabel;
         this.kList = kList;
@@ -109,7 +110,7 @@ public final class KItem extends Term {
             /* at runtime, checks if the result has been cached */
             CacheTableColKey cacheTabColKey = null;
             CacheTableValue cacheTabVal = null;
-            boolean enableCache = (Tool.instance() != Tool.KOMPILE)
+            boolean enableCache = (tool != Tool.KOMPILE)
                     && definition.sortPredicateRulesOn(kLabelConstant).isEmpty();
             if (enableCache) {
                 cacheTabColKey = new CacheTableColKey(kLabelConstant, (KList) kList);
@@ -123,7 +124,7 @@ public final class KItem extends Term {
             }
 
             /* cache miss, compute sort information and cache it */
-            cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext);
+            cacheTabVal = computeSort(kLabelConstant, (KList) kList, termContext, tool);
             if (enableCache) {
                 SORT_CACHE_TABLE.put(definition, cacheTabColKey, cacheTabVal);
             }
@@ -146,14 +147,14 @@ public final class KItem extends Term {
     }
 
     private CacheTableValue computeSort(KLabelConstant kLabelConstant,
-            KList kList, TermContext termContext) {
+            KList kList, TermContext termContext, Tool tool) {
         Definition definition = termContext.definition();
         Subsorts subsorts = definition.subsorts();
 
         Set<Sort> sorts = Sets.newHashSet();
         Set<Sort> possibleSorts = Sets.newHashSet();
 
-        if (Tool.instance() != Tool.KOMPILE) {
+        if (tool != Tool.KOMPILE) {
             /**
              * Sort checks in the Java engine are not implemented as
              * rewrite rules, so we need to precompute the sort of
@@ -405,7 +406,7 @@ public final class KItem extends Term {
                             owiseResult = rightHandSide;
                         }
                     } else {
-                        if (javaOptions.concreteExecution()) {
+                        if (tool == Tool.KRUN) {
                             assert result == null || result.equals(rightHandSide):
                                 "[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem;
                         }
