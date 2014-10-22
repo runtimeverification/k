@@ -48,10 +48,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class Context implements Serializable {
 
-    public static final Set<String> generatedTags = ImmutableSet.of(
-            "kgeneratedlabel",
-            "prefixlabel");
-
     public static final Set<Key<String>> parsingTags = ImmutableSet.of(
         Attribute.keyOf("left"),
         Attribute.keyOf("right"),
@@ -81,7 +77,6 @@ public class Context implements Serializable {
     public Map<String, Sort> cellSorts = new HashMap<>();
     public Map<Sort, Production> listProductions = new LinkedHashMap<>();
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
-    public Map<String, String> listLabelSeparator = new HashMap<>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
 
     public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
@@ -525,10 +520,6 @@ public class Context implements Serializable {
         if (bigSort.equals(smallSort))
             return true;
         return syntacticSubsorts.isInRelation(bigSort, smallSort);
-    }
-
-    public boolean isTagGenerated(String key) {
-        return generatedTags.contains(key);
     }
 
     public boolean isSpecialTerminal(String terminal) {
