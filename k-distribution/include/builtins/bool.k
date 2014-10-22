@@ -12,14 +12,14 @@ module BOOL-HOOKS
 
   syntax Bool ::= "notBool" Bool          [function, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(#BOOL:notBool_)]
                 > Bool "andBool" Bool     [function, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(#BOOL:_andBool_)]
-                | Bool "andThenBool" Bool [function, left, smtlib(and), boolOperation, hook(#BOOL:_andBool_)]
-                > Bool "xorBool" Bool      [function, left, smtlib(xor), boolOperation, hook(#BOOL:_xorBool_)]
+                | K "andThenBool" K       [function, left, smtlib(and), boolOperation, hook(#BOOL:_andThenBool_)]
+                > Bool "xorBool" Bool     [function, left, smtlib(xor), boolOperation, hook(#BOOL:_xorBool_)]
                 > Bool "orBool" Bool      [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(#BOOL:_orBool_)]
-                | Bool "orElseBool" Bool  [function, left, smtlib(or), boolOperation, hook(#BOOL:_orBool_)]
+                | K "orElseBool" K        [function, left, smtlib(or), boolOperation, hook(#BOOL:_orElseBool_)]
                 > Bool "impliesBool" Bool [function, left, smtlib(=>), boolOperation, hook(#BOOL:_impliesBool_)]
                 > left:
                   Bool "==Bool" Bool      [function, left, smtlib(=), hook(#BOOL:_==Bool_)]
-                | Bool "=/=Bool" Bool      [function, left, smtlib(distinct), hook(#BOOL:_=/=Bool_)]
+                | Bool "=/=Bool" Bool     [function, left, smtlib(distinct), hook(#BOOL:_=/=Bool_)]
 
   rule notBool true => false
   rule notBool false => true
