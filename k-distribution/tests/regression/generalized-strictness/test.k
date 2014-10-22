@@ -6,9 +6,9 @@ module TEST
 
     context rvalue ( HOLE ) [strict, context(result(RVal)), klabel('rvalue), cell(k)]
 
-    context (HOLE => 'rvalue(HOLE)) + GeneratedFreshVar2:K [left, result(RVal), cell(k)]
+    context (HOLE => 'rvalue(HOLE)) + GeneratedAnonVar2:K [left, result(RVal), cell(k)]
 
-    context GeneratedFreshVar3:K + (HOLE => 'rvalue(HOLE)) [left, result(RVal), cell(k)]
+    context GeneratedAnonVar3:K + (HOLE => 'rvalue(HOLE)) [left, result(RVal), cell(k)]
 
 
 

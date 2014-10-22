@@ -55,7 +55,7 @@ public class ProgramLoader {
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
-        org.kframework.parser.concrete.KParser.ImportTblPgm(context.kompiled);
+        org.kframework.parser.concrete.KParser.ImportTblPgm(context.files.resolveKompiled("."));
         String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol.toString());
         Document doc = XmlLoader.getXMLDoc(parsed);
 
@@ -96,14 +96,14 @@ public class ProgramLoader {
 
         ASTNode out;
         if (whatParser == ParserType.GROUND) {
-            org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled);
+            org.kframework.parser.concrete.KParser.ImportTblGround(context.files.resolveKompiled("."));
             out = DefinitionLoader.parseCmdString(new String(content), source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context).visitNode(out);
             out = new RemoveSyntacticCasts(context).visitNode(out);
             out = new FlattenTerms(context).visitNode(out);
         } else if (whatParser == ParserType.RULES) {
-            org.kframework.parser.concrete.KParser.ImportTblRule(context.kompiled);
+            org.kframework.parser.concrete.KParser.ImportTblRule(context.files.resolveKompiled("."));
             out = DefinitionLoader.parsePattern(new String(content), source, startSymbol, context);
             out = new RemoveBrackets(context).visitNode(out);
             out = new AddEmptyLists(context).visitNode(out);
@@ -127,7 +127,7 @@ public class ProgramLoader {
             // load the new parser
             // TODO(Radu): after the parser is in a good enough shape, replace the program parser
             // TODO(Radu): (the default one) with this branch of the 'if'
-            Grammar grammar = BinaryLoader.instance().loadOrDie(Grammar.class, context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
+            Grammar grammar = BinaryLoader.instance().loadOrDie(Grammar.class, context.files.resolveKompiled("newParser.bin"));
 
             String contentString = new String(content);
             Parser parser = new Parser(contentString);

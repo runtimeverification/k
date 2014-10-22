@@ -130,6 +130,7 @@ public interface Debugger {
         @InjectGeneric private Transformation<Transition, String> transitionPrinter;
         private final Debugger debugger;
         private final Context context;
+        private final FileUtil files;
 
         @Inject
         Tool(
@@ -138,13 +139,15 @@ public interface Debugger {
                 @Main KompileOptions kompileOptions,
                 BinaryLoader loader,
                 @Main Debugger debugger,
-                @Main Context context) {
+                @Main Context context,
+                @Main FileUtil files) {
             this.kem = kem;
             this.initialConfiguration = initialConfiguration;
             this.kompileOptions = kompileOptions;
             this.loader = loader;
             this.debugger = debugger;
             this.context = context;
+            this.files = files;
         }
 
         Tool(
@@ -157,8 +160,9 @@ public interface Debugger {
                 Transformation<KRunGraph, String> graphPrinter,
                 Transformation<Transition, String> transitionPrinter,
                 @Main Debugger debugger,
-                @Main Context context) {
-            this(kem, initialConfiguration, kompileOptions, loader, debugger, context);
+                @Main Context context,
+                @Main FileUtil files) {
+            this(kem, initialConfiguration, kompileOptions, loader, debugger, context, files);
             this.statePrinter = statePrinter;
             this.searchPrinter = searchPrinter;
             this.graphPrinter = graphPrinter;
@@ -285,7 +289,7 @@ public interface Debugger {
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandSave) {
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                             loader.saveOrDie(out, debugger.getGraph());
-                            FileUtil.save(options.save.file.getAbsolutePath(), Base64.encode(out.toByteArray()));
+                            files.saveToWorkingDirectory(options.save.file, Base64.encode(out.toByteArray()));
                         } catch (IOException e) {
                             kem.registerInternalError("Error writing to binary file", e);
                             throw new AssertionError("unreachable");
@@ -294,7 +298,7 @@ public interface Debugger {
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
                         KRunGraph savedGraph;
                         try (ByteArrayInputStream in = new ByteArrayInputStream(
-                                Base64.decode(FileUtil.getFileContent(options.load.file.getAbsolutePath())))) {
+                                Base64.decode(files.loadFromWorkingDirectory(options.load.file)))) {
                             savedGraph = loader.loadOrDie(KRunGraph.class, in);
                             debugger.setGraph(savedGraph);
                             debugger.setCurrentState(0);

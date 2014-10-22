@@ -101,9 +101,9 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         if (context.getDataStructureSorts().containsKey(node.getSort())
                 || node.getSort().equals(Sort.K)
                 || node.getSort().equals(Sort.KITEM)) {
-            var = Variable.getFreshVar(node.getSort());
+            var = Variable.getAnonVar(node.getSort());
         } else {
-            var = Variable.getFreshVar(Sort.of("#" + node.getName()));
+            var = Variable.getAnonVar(Sort.of("#" + node.getName()));
         }
 
         MaudeFilter filter = new MaudeFilter(context);

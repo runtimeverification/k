@@ -52,7 +52,7 @@ public class ConcreteCollectionVariable extends Variable {
     @Override
     public ConcreteCollectionVariable getFreshCopy() {
         ConcreteCollectionVariable var = new ConcreteCollectionVariable(
-                Variable.getFreshVariable(sort()).name(),
+                Variable.getAnonVariable(sort()).name(),
                 sort(),
                 true,
                 concreteSize);

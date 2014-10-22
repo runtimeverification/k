@@ -30,7 +30,7 @@ public class MaudeModelChecker implements LtlModelChecker {
     private final KompileOptions kompileOptions;
     private final MaudeExecutor executor;
     private final KExceptionManager kem;
-
+    private final FileUtil files;
     private final Context context;
 
     @Inject
@@ -38,11 +38,13 @@ public class MaudeModelChecker implements LtlModelChecker {
             Context context,
             KompileOptions kompileOptions,
             MaudeExecutor executor,
-            KExceptionManager kem) {
+            KExceptionManager kem,
+            FileUtil files) {
         this.context = context;
         this.kompileOptions = kompileOptions;
         this.executor = executor;
         this.kem = kem;
+        this.files = files;
     }
 
     @Override
@@ -66,12 +68,12 @@ public class MaudeModelChecker implements LtlModelChecker {
             .append(") .");
         executor.executeKRun(cmd);
         KRunProofResult<KRunGraph> result = parseModelCheckResult();
-        result.setRawOutput(FileUtil.getFileContent(executor.outFile.getAbsolutePath()));
+        result.setRawOutput(files.loadFromTemp(MaudeExecutor.outFile));
         return result;
     }
 
     private KRunProofResult<KRunGraph> parseModelCheckResult() {
-        Document doc = XmlUtil.readXMLFromFile(executor.xmlOutFile.getAbsolutePath());
+        Document doc = XmlUtil.readXMLFromFile(files.resolveTemp(MaudeExecutor.xmlOutFile).getAbsolutePath());
         NodeList list;
         Node nod;
         list = doc.getElementsByTagName("result");

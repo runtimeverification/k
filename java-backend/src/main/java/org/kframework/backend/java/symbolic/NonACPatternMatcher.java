@@ -93,7 +93,7 @@ public class NonACPatternMatcher {
             // TODO(AndreiS): this ad-hoc evaluation is converting from the KLabel/KList format
             // (used during associative matching) back to builtin representation
             if (termContext.definition().context().krunOptions != null
-                    && termContext.definition().context().krunOptions.experimental.prove() != null) {
+                    && termContext.definition().context().krunOptions.experimental.prove != null) {
                 PatternMatcher.evaluateSubstitution(substitution, termContext);
             }
             return substitution;

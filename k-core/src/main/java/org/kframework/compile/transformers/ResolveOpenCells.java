@@ -39,14 +39,14 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
             if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
                 content = KApp.of(
                         KLabelConstant.of(dataStructureSort.constructorLabel()),
-                        Variable.getFreshVar(dataStructureSort.sort()),
+                        Variable.getAnonVar(dataStructureSort.sort()),
                         content);
             }
             if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
                 content = KApp.of(
                         KLabelConstant.of(dataStructureSort.constructorLabel()),
                         content,
-                        Variable.getFreshVar(dataStructureSort.sort()));
+                        Variable.getAnonVar(dataStructureSort.sort()));
             }
 
             node.setContents(content);
@@ -73,10 +73,10 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
             ellipses = Ellipses.RIGHT;
         }
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
-            col.getContents().add(0, Variable.getFreshVar(Sort.of(kind.toString())));
+            col.getContents().add(0, Variable.getAnonVar(Sort.of(kind.toString())));
         }
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
-            col.getContents().add(Variable.getFreshVar(Sort.of(kind.toString())));
+            col.getContents().add(Variable.getAnonVar(Sort.of(kind.toString())));
         }
 
         return node;

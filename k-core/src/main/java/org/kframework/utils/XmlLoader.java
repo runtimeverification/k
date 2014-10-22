@@ -15,11 +15,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -157,24 +153,5 @@ public class XmlLoader {
 
         String[] str = loc.split("[\\(,\\)]");
         return Integer.parseInt(str[place + 1]);
-    }
-
-    public static void writeXmlFile(Document doc, String filename) {
-        try {
-            // Prepare the DOM document for writing
-            javax.xml.transform.Source source = new DOMSource(doc);
-
-            // Prepare the output file
-            File file = new File(filename);
-            Result result = new StreamResult(file);
-
-            // Write the DOM document to the file
-            Transformer xformer = TransformerFactory.newInstance().newTransformer();
-            xformer.transform(source, result);
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
-        } catch (javax.xml.transform.TransformerException e) {
-            e.printStackTrace();
-        }
     }
 }

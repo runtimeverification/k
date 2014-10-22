@@ -233,7 +233,7 @@ public class MetaK {
 
     public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
         if (prod.isSubsort()) {
-            return Variable.getFreshVar(prod.getSubsort());
+            return Variable.getAnonVar(prod.getSubsort());
         }
         if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
@@ -252,17 +252,17 @@ public class MetaK {
         if (prod.isLexical()) {
             return KApp.of(KLabelConstant.of("#token", context),
                            StringBuiltin.kAppOf(prod.getSort().getName()),
-                           Variable.getFreshVar(Sort.STRING));
+                           Variable.getAnonVar(Sort.STRING));
         }
         TermCons t = new TermCons(prod.getSort(), prod);
         if (prod.isListDecl()) {
-            t.getContents().add(Variable.getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
-            t.getContents().add(Variable.getFreshVar(prod.getSort()));
+            t.getContents().add(Variable.getAnonVar(((UserList) prod.getItems().get(0)).getSort()));
+            t.getContents().add(Variable.getAnonVar(prod.getSort()));
             return t;
         }
         for (ProductionItem item : prod.getItems()) {
             if (item instanceof NonTerminal) {
-                t.getContents().add(Variable.getFreshVar(((NonTerminal) item).getSort()));
+                t.getContents().add(Variable.getAnonVar(((NonTerminal) item).getSort()));
             }
         }
         return t;

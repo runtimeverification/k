@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import java.io.File;
 import java.util.List;
 
 import org.kframework.backend.java.builtins.BuiltinIOOperations;
@@ -9,7 +8,6 @@ import org.kframework.backend.java.builtins.BuiltinIOOperationsImpl;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.ksimulation.Simulator;
-import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
@@ -19,12 +17,15 @@ import org.kframework.krun.tools.Prover;
 import org.kframework.transformation.ToolActivation;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.Spec;
 
 import com.beust.jcommander.JCommander;
 import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
+import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
@@ -32,6 +33,9 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.spi.DefaultElementVisitor;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
 
 public class JavaSymbolicKRunModule extends AbstractModule {
 
@@ -78,9 +82,9 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         }
 
         @Provides @Singleton
-        Definition javaDefinition(BinaryLoader loader, Context context) {
+        Definition javaDefinition(BinaryLoader loader, Context context, FileUtil files) {
             Definition def = loader.loadOrDie(Definition.class,
-                    new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString());
+                    files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME));
             def.setContext(context);
             return def;
         }
@@ -96,22 +100,24 @@ public class JavaSymbolicKRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
+            for (Element element : Elements.getElements(definitionSpecificModules)) {
+                element.acceptVisitor(new DefaultElementVisitor<Void>() {
+                    @Override
+                    public <T> Void visit(Binding<T> binding) {
+                        Key<T> key = binding.getKey();
+                        if (key.getAnnotation() == null && key.getAnnotationType() == null) {
+                            bind(key.getTypeLiteral()).annotatedWith(Spec.class).to(key.getTypeLiteral());
+                            expose(key.getTypeLiteral()).annotatedWith(Spec.class);
+                        }
+                        return null;
+                    }
+                });
+            }
             for (Module m : definitionSpecificModules) {
                 install(m);
             }
 
-            bind(Term.class).annotatedWith(Spec.class).to(Term.class);
-            bind(SymbolicRewriter.class).annotatedWith(Spec.class).to(SymbolicRewriter.class);
-            bind(GlobalContext.class).annotatedWith(Spec.class).to(GlobalContext.class);
-            bind(Context.class).annotatedWith(Spec.class).to(Context.class);
-
             bind(Simulator.class).annotatedWith(Main.class).to(Simulator.class);
-
-            expose(SymbolicRewriter.class).annotatedWith(Spec.class);
-            expose(GlobalContext.class).annotatedWith(Spec.class);
-            expose(Term.class).annotatedWith(Spec.class);
-            expose(Context.class).annotatedWith(Spec.class);
-
             expose(Simulator.class).annotatedWith(Main.class);
         }
 

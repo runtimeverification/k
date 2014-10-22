@@ -192,7 +192,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
             StringBuiltin.kAppOf(inputCells.get(node.getLabel())));
 
         Term ioBuffer = KApp.of(bufferLabel,
-           new Variable(Variable.getFreshVar(Sort.K)));
+           new Variable(Variable.getAnonVar(Sort.K)));
 
 //        ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]
         Term list;

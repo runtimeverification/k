@@ -1,7 +1,6 @@
 // Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +21,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
@@ -65,11 +63,7 @@ public class ProgramSDF {
         }
 
         // save the new parser info
-        File pgm = new File(context.kompiled, "pgm");
-        if (!pgm.exists() && !pgm.mkdirs()) {
-            GlobalSettings.kem.registerInternalError("Could not create directory " + pgm);
-        }
-        BinaryLoader.instance().saveOrDie(context.kompiled.getPath()+ "/pgm/newParser.bin", ks2gsf.getGrammar());
+        BinaryLoader.instance().saveOrDie(context.files.resolveKompiled("newParser.bin"), ks2gsf.getGrammar());
 
         StringBuilder sdf = new StringBuilder();
         sdf.append("module Program\n\n");

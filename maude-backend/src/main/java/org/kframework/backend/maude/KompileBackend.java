@@ -11,15 +11,17 @@ import org.kframework.utils.file.JarInfo;
 
 import com.google.inject.Inject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
 public class KompileBackend extends BasicBackend {
 
+    private final FileUtil files;
+
     @Inject
-    KompileBackend(Stopwatch sw, Context context) {
+    KompileBackend(Stopwatch sw, Context context, FileUtil files) {
         super(sw, context);
+        this.files = files;
     }
 
     @Override
@@ -39,7 +41,8 @@ public class KompileBackend extends BasicBackend {
             .append("mod ").append(mainModule).append("-BUILTINS is\n").append(" including ")
             .append(mainModule).append("-BASE .\n")
             .append(builtinsFilter.getResult()).append("endm\n");
-        FileUtil.save(context.kompiled.getAbsolutePath() + "/builtins.maude", builtins);
+
+        files.saveToKompiled("builtins.maude", builtins.toString());
         sw.printIntermediate("Generating equations for hooks");
         javaDef = (Definition) new DeleteFunctionRules(maudeHooks.stringPropertyNames(), context)
             .visitNode(javaDef);
@@ -48,14 +51,10 @@ public class KompileBackend extends BasicBackend {
 
     @Override
     public void run(Definition javaDef) {
-        MaudeBackend maude = new MaudeBackend(sw, context);
+        MaudeBackend maude = new MaudeBackend(sw, context, files);
         maude.run(javaDef);
 
         String load = "load \"" + JarInfo.getKBase(true) + JarInfo.MAUDE_LIB_DIR + "/k-prelude\"\n";
-
-        // load libraries if any
-        String maudeLib = "".equals(options.experimental.lib) ? "" : "load " + JarInfo.windowfyPath(new File(options.experimental.lib).getAbsolutePath()) + "\n";
-        load += maudeLib;
 
         final String mainModule = javaDef.getMainModule();
         //String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
@@ -65,7 +64,7 @@ public class KompileBackend extends BasicBackend {
             .append("  including ").append(mainModule).append("-BASE .\n")
             .append("  including ").append(mainModule).append("-BUILTINS .\n")
             .append("eq mainModule = '").append(mainModule).append(" .\nendm\n");
-        FileUtil.save(context.kompiled.getAbsolutePath() + "/" + "main.maude", main);
+        files.saveToKompiled("main.maude", main.toString());
     }
 
     @Override

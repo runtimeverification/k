@@ -111,7 +111,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 config = new AmbFilter(context).visitNode(config);
 
                 if (globalOptions.debug) {
-                    try (Formatter f = new Formatter(new FileWriter(context.dotk.getAbsolutePath() + "/timing.log", true))) {
+                    try (Formatter f = new Formatter(new FileWriter(context.files.resolveTemp("timing.log"), true))) {
                         f.format("Parsing config: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime2), ss.getSource(), ss.getLocation());
                     } catch (IOException e) {
                         e.printStackTrace();
