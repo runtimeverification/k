@@ -5,7 +5,6 @@ import org.kframework.krun.api.io.FileSystem;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 public class CommandSeek extends Command {
 
@@ -13,8 +12,8 @@ public class CommandSeek extends Command {
     private long ID;
     private int position;
 
-    public CommandSeek(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
-        super(args, socket, logger, fs); //, maudeId);
+    public CommandSeek(String[] args, Socket socket, FileSystem fs) { //, Long maudeId) {
+        super(args, socket, fs); //, maudeId);
 
         try {
             ID = Long.parseLong(args[1]);

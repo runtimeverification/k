@@ -6,7 +6,6 @@ import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
 
 import java.net.Socket;
-import java.util.logging.Logger;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -15,8 +14,8 @@ public class CommandSystem extends Command {
     private String[] cmd;
     protected Context context;
 
-    public CommandSystem(String[] args, Socket socket, Logger logger, Context context, FileSystem fs) {
-        super(args, socket, logger, fs);
+    public CommandSystem(String[] args, Socket socket, Context context, FileSystem fs) {
+        super(args, socket, fs);
         this.context = context;
 
         int length = args.length - 1 - 3 /* garbage */;

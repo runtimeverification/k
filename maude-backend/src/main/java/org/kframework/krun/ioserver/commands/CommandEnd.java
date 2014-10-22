@@ -5,13 +5,12 @@ import org.kframework.krun.api.io.FileSystem;
 
 import java.net.Socket;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.logging.Logger;
 
 public class CommandEnd extends Command {
     private ThreadPoolExecutor pool;
 
-    public CommandEnd(String[] args, Socket socket, Logger logger, FileSystem fs) {
-        super(args, socket, logger, fs);
+    public CommandEnd(String[] args, Socket socket, FileSystem fs) {
+        super(args, socket, fs);
     }
 
      public void setPool(ThreadPoolExecutor pool) {

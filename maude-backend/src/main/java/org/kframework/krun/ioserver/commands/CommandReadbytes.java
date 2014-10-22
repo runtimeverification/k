@@ -5,15 +5,14 @@ import org.kframework.krun.api.io.FileSystem;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 public class CommandReadbytes extends Command {
 
     private long ID;
     private int numBytes;
 
-    public CommandReadbytes(String[] args, Socket socket, Logger logger, FileSystem fs) {
-        super(args, socket, logger, fs);
+    public CommandReadbytes(String[] args, Socket socket, FileSystem fs) {
+        super(args, socket, fs);
 
         try {
             ID = Long.parseLong(args[1]);

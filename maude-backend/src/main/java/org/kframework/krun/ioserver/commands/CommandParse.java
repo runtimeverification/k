@@ -10,7 +10,6 @@ import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
 
 import java.net.Socket;
-import java.util.logging.Logger;
 
 public class CommandParse extends Command {
 
@@ -18,8 +17,8 @@ public class CommandParse extends Command {
     private Sort sort;
     protected Context context;
 
-    public CommandParse(String[] args, Socket socket, Logger logger, Context context, FileSystem fs) {
-        super(args, socket, logger, fs);
+    public CommandParse(String[] args, Socket socket, Context context, FileSystem fs) {
+        super(args, socket, fs);
         this.context = context;
 
         sort = Sort.of(args[1]);

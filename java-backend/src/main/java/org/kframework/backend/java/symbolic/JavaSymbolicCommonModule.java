@@ -17,8 +17,6 @@ import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.builtins.TermEquality;
-import org.kframework.krun.api.io.FileSystem;
-import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.utils.inject.Builtins;
 
 import com.google.common.collect.ImmutableSet;
@@ -52,7 +50,6 @@ public class JavaSymbolicCommonModule extends AbstractModule {
             FreshOperations.class);
     @Override
     protected void configure() {
-        bind(FileSystem.class).to(PortableFileSystem.class);
 
         MapBinder<Class<?>, Object> builtinFunctionBinder = MapBinder.newMapBinder(binder(),
                 new TypeLiteral<Class<?>>() {}, TypeLiteral.get(Object.class), Builtins.class);

@@ -14,14 +14,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class CommandOpendir extends Command {
 
     private String path;
 
-    public CommandOpendir(String[] args, Socket socket, Logger logger, FileSystem fs) {
-        super(args, socket, logger, fs);
+    public CommandOpendir(String[] args, Socket socket, FileSystem fs) {
+        super(args, socket, fs);
 
         path = args[1];
     }
