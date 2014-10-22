@@ -470,7 +470,7 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
-        return builtinList.toLabelRepresentation(context).accept(this);
+        return builtinList.toK(context).accept(this);
     }
 
     @Override
