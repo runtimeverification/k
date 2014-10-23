@@ -27,6 +27,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.RemoveUnusedModules;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.outer.Outer;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -189,6 +190,10 @@ public class DefinitionLoader {
                 String oldSdfPgm = "";
                 if (files.resolveKompiled("Program.sdf").exists())
                     oldSdfPgm = files.loadFromKompiled("Program.sdf");
+
+                // save the new parser info
+                Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context);
+                BinaryLoader.instance().saveOrDie(context.files.resolveKompiled("newParser.bin"), newParserGrammar);
 
                 StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
 
