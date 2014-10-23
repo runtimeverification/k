@@ -64,18 +64,21 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     private final boolean patternFold;
 
+    private final boolean partialSimpl;
+
     private boolean isStarNested;
 
     private final TermContext termContext;
 
     public SymbolicUnifier(TermContext context) {
-        this(false, context);
+        this(false, false, context);
     }
 
-    public SymbolicUnifier(boolean patternFold, TermContext context) {
+    public SymbolicUnifier(boolean patternFold, boolean partialSimpl, TermContext context) {
         this.fConstraint = new SymbolicConstraint(context);
         this.multiConstraints = Lists.newArrayList();
         this.patternFold = patternFold;
+        this.partialSimpl = partialSimpl;
         this.termContext = context;
     }
 
@@ -240,7 +243,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         Term otherRemainingList = otherBuilder.build();
 
         if (!remainingList.equals(BuiltinList.EMPTY_LIST) || !otherRemainingList.equals(BuiltinList.EMPTY_LIST)) {
-            if (remainingList instanceof Variable || otherRemainingList instanceof Variable) {
+            if (remainingList instanceof Variable || otherRemainingList instanceof Variable || partialSimpl) {
                 fConstraint.add(remainingList, otherRemainingList);
             } else {
                 fConstraint.add(list, otherList);
@@ -392,8 +395,8 @@ public class SymbolicUnifier extends AbstractUnifier {
         Term otherRemainingMap = otherBuilder.build();
 
         if (!remainingMap.equals(BuiltinMap.EMPTY_MAP) || !otherRemainingMap.equals(BuiltinMap.EMPTY_MAP)) {
-            if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable) {
-                // map equality resolved
+            if (remainingMap instanceof Variable || otherRemainingMap instanceof Variable || partialSimpl) {
+                // map equality resolved or partial simplification enabled
                 fConstraint.add(remainingMap, otherRemainingMap);
             } else {
                 /* unable to dissolve the entire map equality; thus, we need to

@@ -121,7 +121,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.addAll(data.constraint.substitution());
         unificationConstraint.add(data.term, constrainedTerm.data.term);
-        unificationConstraint.simplify();
+        unificationConstraint.simplify2();
         if (unificationConstraint.isFalse()) {
             return null;
         }

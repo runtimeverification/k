@@ -602,22 +602,36 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value of this symbolic constraint after simplification
      */
     public TruthValue simplify() {
-        return simplify(false);
+        return simplify(false, true);
+    }
+
+    /**
+     * Similar to {@link SymbolicConstraint#simplify()} except that equalities
+     * between builtin data structures will remain intact if they cannot be
+     * resolved completely.
+     */
+    public TruthValue simplify2() {
+        return simplify(false, false);
     }
 
     public TruthValue simplifyModuloPatternFolding() {
-        return simplify(true);
+        return simplify(true, true);
     }
 
     /**
      * Simplifies this symbolic constraint as much as possible. Decomposes large
      * equalities into small ones using unification.
      *
-     * @param patternFold set if non-deterministic pattern folding is enabled
+     * @param patternFold
+     *            set if non-deterministic pattern folding is enabled
+     *
+     * @param partialSimpl
+     *            set if equalities between builtin data structures can be
+     *            partially simplified
      *
      * @return the truth value of this symbolic constraint after simplification
      */
-    private TruthValue simplify(boolean patternFold) {
+    private TruthValue simplify(boolean patternFold, boolean partialSimpl) {
         if (truthValue != TruthValue.UNKNOWN) {
             return truthValue;
         }
@@ -643,7 +657,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
                 Equality equality = iterator.next();
 
-                SymbolicUnifier unifier = new SymbolicUnifier(patternFold, context);
+                SymbolicUnifier unifier = new SymbolicUnifier(patternFold, partialSimpl, context);
                 if (!unifier.symbolicUnify(equality.leftHandSide(), equality.rightHandSide())) {
                     falsify(new Equality(
                             unifier.unificationFailureLeftHandSide(),
