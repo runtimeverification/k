@@ -65,6 +65,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -519,20 +520,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         }
 
-        Set<Variable> freshConstants = Sets.newHashSet();
         // TODO(AndreiS): check !Variable only appears in the RHS
-        for (org.kframework.kil.Variable variable : node.getBody().variables()) {
-            if (variable.isFreshConstant()) {
-                freshConstants.add((Variable) this.visitNode(variable));
-            }
-        }
+        Set<Variable> freshConstants = node.getBody().variables().stream()
+                .filter(v -> v.isFreshConstant())
+                .map(v -> (Variable) this.visitNode(v))
+                .collect(Collectors.toSet());
 
-        Set<Variable> freshVariables = Sets.newHashSet();
-        for (org.kframework.kil.Variable variable : node.getBody().variables()) {
-            if (variable.isFreshVariable()) {
-                freshVariables.add((Variable) this.visitNode(variable));
-            }
-        }
+        Set<Variable> freshVariables = node.getBody().variables().stream()
+                .filter(v -> v.isFreshVariable())
+                .map(v -> (Variable) this.visitNode(v))
+                .collect(Collectors.toSet());
 
         assert leftHandSide.kind() == rightHandSide.kind()
                 || leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational();
