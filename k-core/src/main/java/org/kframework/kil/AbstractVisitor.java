@@ -57,8 +57,8 @@ import java.util.Map;
  */
 public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visitor<P, R, E> {
     protected final Context context;
-    protected final Module currentModule;
-    protected final Definition currentDefinition;
+    private Module currentModule;
+    private Definition currentDefinition;
     final String name;
 
     protected IdentityHashMap<ASTNode, R> cache = new IdentityHashMap<>();
@@ -81,6 +81,14 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         this.currentDefinition = currentDefinition;
         this.currentModule = currentModule;
         this.name = name == null ? this.getClass().toString() : name;
+    }
+
+    protected final Definition getCurrentDefinition() {
+        return currentDefinition;
+    }
+
+    protected final Module getCurrentModule() {
+        return currentModule;
     }
 
     @Override
