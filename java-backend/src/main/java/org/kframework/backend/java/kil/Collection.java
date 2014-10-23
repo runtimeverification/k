@@ -116,7 +116,7 @@ public abstract class Collection extends Term {
     public abstract boolean isConcreteCollection();
 
     @Override
-    public boolean isSymbolic() {
+    public final boolean isSymbolic() {
         return false;
     }
 

@@ -4,23 +4,19 @@ package org.kframework.backend.java.symbolic;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
-import org.kframework.main.GlobalOptions;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
 
@@ -29,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +68,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @see SymbolicConstraint#substitution
      */
-    private LinkedList<Equality> equalities;
+    private LinkedHashSet<Equality> equalities;
 
     /**
      * Specifies if this symbolic constraint is in normal form.
@@ -105,23 +102,22 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     private Equality falsifyingEquality;
 
-    private final ArrayList<Equality> equalityBuffer = Lists.newArrayList();
+    private final LinkedHashSet<Equality> equalityBuffer = Sets.newLinkedHashSet();
 
     private boolean equalitiesWriteProtected = false;
 
+    private List<List<SymbolicConstraint>> multiConstraints = Lists.newArrayList();
+
     private final TermContext context;
 
-    /**
-     * The symbolic unifier associated with this constraint. There is an
-     * one-to-one relationship between unifiers and constraints.
-     */
-    private final SymbolicUnifier unifier;
+    @Deprecated
+    public boolean orientSubstitution(Set<Variable> variables) {
+        LinkedHashMap<Variable, Term> substitutionBackup = Maps.newLinkedHashMap(substitution);
 
-    public void orientSubstitution(Set<Variable> variables) {
         Map<Variable, Term> newSubstitution = Maps.newLinkedHashMap();
         if (substitution.keySet().containsAll(variables)) {
             /* avoid setting isNormal to false */
-            return;
+            return true;
         }
 
         /* compute the preimages of each variable in the codomain of the substitution */
@@ -157,7 +153,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     Set<Variable> preimagesOfRHS = Sets.newLinkedHashSet(preimages.get(rhs));
                     preimagesOfRHS.removeAll(variables);
                     if (preimagesOfRHS.isEmpty()) {
-                        throw new RuntimeException("Orientation failed");
+                        substitution = substitutionBackup;
+                        return false;
                     }
                     Variable newRHS = preimagesOfRHS.iterator().next();
                     newSubstitution.put(lhs, newRHS);
@@ -177,7 +174,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
 
-        Map<Variable, Term> result = Maps.newLinkedHashMap();
+        LinkedHashMap<Variable, Term> result = Maps.newLinkedHashMap();
         for (Variable var : substitutionToRemove)
             substitution.remove(var);
         for (Map.Entry<Variable, Term> entry : newSubstitution.entrySet()) {
@@ -189,16 +186,25 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, context));
         }
 
-        substitution.clear();
-        for (Map.Entry<Variable, Term> subst : result.entrySet()) {
-            checkTruthValBeforePutIntoConstraint(subst.getKey(), subst.getValue(), true);
+        if (!result.keySet().containsAll(variables)) {
+            return false;
         }
+        for (Map.Entry<Variable, Term> subst : result.entrySet()) {
+            Equality equality = new Equality(subst.getKey(), subst.getValue(), context);
+            if (!isSubsortedEq(subst.getKey(), subst.getValue())
+                    || equality.truthValue() == TruthValue.FALSE) {
+                substitution = substitutionBackup;
+                return false;
+            }
+        }
+        substitution = result;
 
         /*
          * after re-orientation, the {@code equalities} may contain variables on
          * the LHS's of the {@code substitution}
          */
         isNormal = false;
+        return true;
     }
 
     public Equality falsifyingEquality() {
@@ -209,17 +215,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         private final SMTOptions smtOptions;
         private final Z3Wrapper z3;
-        private final GlobalOptions globalOptions;
 
         @Inject
         public SymbolicConstraintOperations(
                 Provider<Definition> definitionProvider,
                 SMTOptions smtOptions,
-                Z3Wrapper z3,
-                GlobalOptions globalOptions) {
+                Z3Wrapper z3) {
             this.smtOptions = smtOptions;
             this.z3 = z3;
-            this.globalOptions = globalOptions;
         }
 
         public boolean checkUnsat(SymbolicConstraint constraint) {
@@ -267,18 +270,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return constraint;
     }
 
-    public SymbolicConstraint(SymbolicConstraint constraint, TermContext context) {
-        this(context);
+    public SymbolicConstraint(SymbolicConstraint constraint) {
+        this(constraint.context);
         substitution.putAll(constraint.substitution);
         addAll(constraint);
     }
 
     public SymbolicConstraint(TermContext context) {
         substitution = Maps.newLinkedHashMap();
-        equalities = Lists.newLinkedList();
+        equalities = Sets.newLinkedHashSet();
         truthValue = TruthValue.TRUE;
         isNormal = true;
-        unifier = new SymbolicUnifier(this, context);
         this.context = context;
     }
 
@@ -293,45 +295,35 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the left-hand side of the equality
      * @param rightHandSide
      *            the right-hand side of the equality
-     * @return the truth value of this symbolic constraint after including the
-     *         new equality
      */
-    public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert checkKindMisMatch(leftHandSide, rightHandSide):
-                "kind mismatch between "
-                + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
-                + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
-
+    public void add(Term leftHandSide, Term rightHandSide) {
         /* split andBool in multiple equalities */
+        // TODO(YilongL): maybe this should be handled somewhere else?
         if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel().toString().equals("'_andBool_") && rightHandSide.equals(BoolToken.TRUE)) {
             add(((KList) ((KItem) leftHandSide).kList()).get(0), BoolToken.TRUE);
             add(((KList) ((KItem) leftHandSide).kList()).get(1), BoolToken.TRUE);
-            return truthValue;
+            return;
         }
 
         /* split andBool in multiple equalities */
         if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel().toString().equals("'_andBool_") && leftHandSide.equals(BoolToken.TRUE)) {
             add(((KList) ((KItem) rightHandSide).kList()).get(0), BoolToken.TRUE);
             add(((KList) ((KItem) rightHandSide).kList()).get(1), BoolToken.TRUE);
-            return truthValue;
+            return;
         }
 
+        Equality equality = new Equality(leftHandSide, rightHandSide, context);
         if (equalitiesWriteProtected) {
-            Equality equality = new Equality(leftHandSide, rightHandSide, context);
-            if (equality.truthValue() == TruthValue.FALSE) {
-                falsify(equality);
-            } else if (equality.truthValue() == TruthValue.UNKNOWN) {
-                equalityBuffer.add(equality);
+            if (equalityBuffer.add(equality)) {
                 isNormal = false;
+                truthValue = TruthValue.UNKNOWN;
             }
         } else {
-            simplify(); // YilongL: normalize() is not enough
-            leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
-            rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
-
-            checkTruthValBeforePutIntoConstraint(leftHandSide, rightHandSide, false);
+            if (equalities.add(equality)) {
+                isNormal = false;
+                truthValue = TruthValue.UNKNOWN;
+            }
         }
-        return truthValue;
     }
 
     /**
@@ -339,58 +331,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @param equality
      *            the new equality
-     * @return the truth value of this symbolic constraint after including the
-     *         new equality
      */
-    public TruthValue add(Equality equality) {
-        return add(equality.leftHandSide(), equality.rightHandSide());
-    }
-
-    boolean checkKindMisMatch(Term leftHandSide, Term rightHandSide) {
-        return leftHandSide.kind() == rightHandSide.kind()
-                || (leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational())
-                || (leftHandSide.kind().isStructural() && rightHandSide.kind().isStructural());
-    }
-
-    /**
-     * Private helper method that checks the truth value of a specified equality
-     * and put it into the equality list or substitution map maintained by this
-     * symbolic constraint properly.
-     *
-     * @param leftHandSide
-     *            the left-hand side of the specified equality
-     * @param rightHandSide
-     *            the right-hand side of the specified equality
-     * @param putInSubst
-     *            specifies whether the equality can be safely added to the
-     *            substitution map of this symbolic constraint
-     */
-    private void checkTruthValBeforePutIntoConstraint(Term leftHandSide, Term rightHandSide, boolean putInSubst) {
-        if (truthValue == TruthValue.FALSE) {
-            return;
-        }
-
-        // assume the truthValue to be TRUE or UNKNOWN from now on
-        Equality equality = new Equality(leftHandSide, rightHandSide, context);
-        if (equality.truthValue() == TruthValue.UNKNOWN){
-            if (putInSubst) {
-                Term origVal = substitution.put((Variable) leftHandSide, rightHandSide);
-                if (origVal == null) {
-                    isNormal = false;
-                }
-            } else {
-                equalities.add(equality);
-                isNormal = false;
-            }
-            truthValue = TruthValue.UNKNOWN;
-        } else if (equality.truthValue() == TruthValue.FALSE) {
-            if (putInSubst) {
-                substitution.put((Variable) leftHandSide, rightHandSide);
-            } else {
-                equalities.add(equality);
-            }
-            falsify(equality);
-        }
+    public void add(Equality equality) {
+        add(equality.leftHandSide(), equality.rightHandSide());
     }
 
     /**
@@ -402,27 +345,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the side condition
      * @return the truth value after including the side condition
      */
-    public TruthValue addAll(Collection<Term> condition) {
+    public void addAll(Collection<Term> condition) {
         for (Term term : condition) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(term, BoolToken.TRUE);
         }
-
-        return truthValue;
     }
 
-    private TruthValue addAll(List<Equality> equalites) {
+    private void addAll(Set<Equality> equalites) {
         for (Equality equality : equalites) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(equality);
         }
-        return truthValue;
     }
 
     /**
@@ -430,43 +362,26 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @param constraint
      *            the given symbolic constraint
-     * @return the truth value after including the new equalities
      */
-    public TruthValue addAll(SymbolicConstraint constraint) {
+    public void addAll(SymbolicConstraint constraint) {
         addAll(constraint.substitution);
         for (Equality equality : constraint.equalities) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(equality.leftHandSide(), equality.rightHandSide());
         }
-
-        return truthValue;
     }
 
     /**
      * Adds all bindings in the given substitution map to this symbolic constraint.
      */
-    public TruthValue addAll(Map<Variable, Term> substitution) {
+    public void addAll(Map<Variable, Term> substitution) {
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             add(entry.getValue(), entry.getKey());
         }
-
-        return truthValue;
     }
 
     @SuppressWarnings("unchecked")
-    private TruthValue addAll(Object... args) {
+    private void addAll(Object... args) {
         for (Object arg : args) {
-            if (truthValue == TruthValue.FALSE) {
-                break;
-            }
-
             if (arg instanceof SymbolicConstraint) {
                 addAll((SymbolicConstraint) arg);
             } else if (arg instanceof Collection) {
@@ -475,7 +390,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     if (element instanceof Term) {
                         addAll((Collection<Term>) arg);
                     } else {
-                        addAll((List<Equality>) arg);
+                        addAll((Set<Equality>) arg);
                     }
                 }
             } else if (arg instanceof Map) {
@@ -486,7 +401,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 assert false : "invalid argument found: " + arg;
             }
         }
-        return truthValue;
     }
 
     public TruthValue addAllThenSimplify(Object... args) {
@@ -501,9 +415,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * @return an unmodifiable view of the field {@code equalities}
      */
-    public List<Equality> equalities() {
+    public Set<Equality> equalities() {
         normalize();
-        return Collections.unmodifiableList(equalities);
+        return Collections.unmodifiableSet(equalities);
     }
 
     /**
@@ -522,16 +436,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * variables after building the rewrite result.
      */
     public void removeBindings(Collection<Variable> variablesToRemove) {
-        for (Variable variable : variablesToRemove) {
-            Term term = substitution.get(variable);
-            /* TODO(YilongL): remove the following check once we enforce that
-             * substitutions always satisfy order-sorted condition */
-            if (term != null && context.definition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
-                // safe to remove
-                substitution.remove(variable);
-            }
-        }
-//        substitution.keySet().removeAll(variablesToRemove);
+        substitution.keySet().removeAll(variablesToRemove);
 
         /* reset this symbolic constraint to be true when it becomes empty */
         if (equalities.isEmpty() && substitution.isEmpty()) {
@@ -583,12 +488,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 if (context.definition().context().globalOptions.debug) {
                     System.err.println("Split on " + condition);
                 }
-                SymbolicConstraint left1 = new SymbolicConstraint(left, context);
+                SymbolicConstraint left1 = new SymbolicConstraint(left);
                 left1.add(condition, BoolToken.TRUE);
-                implications.add(Pair.of(left1, new SymbolicConstraint(right,context)));
-                SymbolicConstraint left2 = new SymbolicConstraint(left, context);
+                implications.add(Pair.of(left1, new SymbolicConstraint(right)));
+                SymbolicConstraint left2 = new SymbolicConstraint(left);
                 left2.add(condition, BoolToken.FALSE);
-                implications.add(Pair.of(left2, new SymbolicConstraint(right,context)));
+                implications.add(Pair.of(left2, new SymbolicConstraint(right)));
                 continue;
             }
 //            if (DEBUG) {
@@ -632,7 +537,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Entry<Variable, ValueDifference<Term>> entry : mapDifference.entriesDiffering().entrySet()) {
             simplifiedConstraint.add(entry.getKey(), entry.getValue().leftValue());
         }
-        List<Equality> equalities = new LinkedList<>(constraint.equalities());
+        Set<Equality> equalities = Sets.newLinkedHashSet(constraint.equalities());
         equalities.removeAll(equalities());
         simplifiedConstraint.addAll(equalities);
         simplifiedConstraint.simplify();
@@ -657,8 +562,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean isFalse() {
-        normalize();
-        return truthValue == TruthValue.FALSE;
+        if (truthValue == TruthValue.FALSE) {
+            return true;
+        } else {
+            normalize();
+            return truthValue == TruthValue.FALSE;
+        }
     }
 
     public boolean isTrue() {
@@ -668,12 +577,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public boolean isSubstitution() {
         normalize();
-        return equalities.isEmpty() && unifier.data.multiConstraints.isEmpty();
-    }
-
-    public boolean isUnknown() {
-        normalize();
-        return truthValue == TruthValue.UNKNOWN;
+        return equalities.isEmpty() && multiConstraints.isEmpty();
     }
 
     /**
@@ -682,41 +586,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     private void falsify(Equality equality) {
         // TODO(AndreiS): this assertion should not fail
-        // assert truthValue == TruthValue.TRUE || truthValue == TruthValue.UNKNOWN;
+        assert truthValue == TruthValue.TRUE || truthValue == TruthValue.UNKNOWN;
         truthValue = TruthValue.FALSE;
         falsifyingEquality = equality;
     }
 
-    public Collection<SymbolicConstraint> getMultiConstraints() {
-        if (!unifier.data.multiConstraints.isEmpty()) {
-            assert unifier.data.multiConstraints.size() <= 2;
-
-            List<SymbolicConstraint> multiConstraints = new ArrayList<SymbolicConstraint>();
-            Iterator<Collection<SymbolicConstraint>> iterator = unifier.multiConstraints().iterator();
-            if (unifier.data.multiConstraints.size() == 1) {
-                for (SymbolicConstraint constraint : iterator.next()) {
-                    constraint.addAll(this);
-                    constraint.simplify();
-                    multiConstraints.add(constraint);
-                }
-            } else {
-                Collection<SymbolicConstraint> constraints = iterator.next();
-                Collection<SymbolicConstraint> otherConstraints = iterator.next();
-                for (SymbolicConstraint cnstr1 : constraints) {
-                    for (SymbolicConstraint cnstr2 : otherConstraints) {
-                        SymbolicConstraint constraint = new SymbolicConstraint(
-                                this, context);
-                        constraint.addAll(cnstr1);
-                        constraint.addAll(cnstr2);
-                        constraint.simplify();
-                        multiConstraints.add(constraint);
-                    }
-                }
-            }
-            return multiConstraints;
-        } else {
-            return Collections.singletonList(this);
-        }
+    public List<SymbolicConstraint> getMultiConstraints() {
+        return RewriteEngineUtils.getMultiConstraints(this, multiConstraints);
     }
 
     /**
@@ -726,88 +602,82 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value of this symbolic constraint after simplification
      */
     public TruthValue simplify() {
-        return simplify(false);
+        return simplify(false, true);
+    }
+
+    /**
+     * Similar to {@link SymbolicConstraint#simplify()} except that equalities
+     * between builtin data structures will remain intact if they cannot be
+     * resolved completely.
+     */
+    public TruthValue simplifyBeforePatternFolding() {
+        return simplify(false, false);
     }
 
     public TruthValue simplifyModuloPatternFolding() {
-        return simplify(true);
+        return simplify(true, true);
     }
 
     /**
      * Simplifies this symbolic constraint as much as possible. Decomposes large
      * equalities into small ones using unification.
      *
-     * @param fold set if non-deterministic pattern folding is enabled
+     * @param patternFold
+     *            set if non-deterministic pattern folding is enabled
+     *
+     * @param partialSimpl
+     *            set if equalities between builtin data structures can be
+     *            partially simplified
      *
      * @return the truth value of this symbolic constraint after simplification
      */
-    private TruthValue simplify(boolean fold) {
+    private TruthValue simplify(boolean patternFold, boolean partialSimpl) {
         if (truthValue != TruthValue.UNKNOWN) {
             return truthValue;
         }
 
-        boolean change; // specifies if the equalities have been further
-                        // simplified in the last iteration
+        Map<Variable, Term> oldSubst = null;
+        Set<Equality> oldEqualities = null;
 
-        label: do {
-            change = false;
+        while (true) {
             normalize();
             if (truthValue != TruthValue.UNKNOWN) {
                 return truthValue;
             }
 
+            if (oldSubst != null && oldEqualities != null
+                    && substitution.equals(oldSubst)
+                    && equalities.equals(oldEqualities)) {
+                break;
+            }
+            oldSubst = Maps.newHashMap(substitution);
+            oldEqualities = Sets.newHashSet(equalities);
+
             equalitiesWriteProtected = true;
             for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
                 Equality equality = iterator.next();
-                if (equality.isSimplifiableByCurrentAlgorithm()) {
-                    // if both sides of the equality could be further
-                    // decomposed, discharge the equality
-                    iterator.remove();
-                    if (!unifier.unify(equality)) {
-                        falsify(new Equality(
-                                unifier.unificationFailureLeftHandSide(), unifier.unificationFailureRightHandSide(), context));
-                        equalitiesWriteProtected = false;
-                        break label;
-                    }
 
-                    change = true;
-                } else if (BuiltinMap.isMapUnifiableByCurrentAlgorithm(equality.leftHandSide(), equality.rightHandSide())) {
-                    try {
-                        if (unifier.simplifyMapEquality(
-                                (BuiltinMap) equality.leftHandSide(),
-                                (BuiltinMap) equality.rightHandSide(),
-                                fold)) {
-                            iterator.remove();
-                            change = true;
-                        }
-                    } catch (UnificationFailure e) {
-                         falsify(new Equality(
-                                unifier.unificationFailureLeftHandSide(), unifier.unificationFailureRightHandSide(), context));
-                        equalitiesWriteProtected = false;
-                        break label;
-                    }
-                } else if (equality.leftHandSide() instanceof BuiltinList
-                        && ((BuiltinList) equality.leftHandSide()).isUnifiableByCurrentAlgorithm()
-                        && equality.rightHandSide() instanceof BuiltinList
-                        && ((BuiltinList) equality.rightHandSide()).isUnifiableByCurrentAlgorithm()) {
-                    try {
-                        if (unifier.unifyList(
-                                (BuiltinList) equality.leftHandSide(),
-                                (BuiltinList) equality.rightHandSide(), false)) {
-                            iterator.remove();
-                            change = true;
-                        }
-                    } catch (UnificationFailure e) {
-                         falsify(new Equality(
-                                unifier.unificationFailureLeftHandSide(), unifier.unificationFailureRightHandSide(), context));
-                        equalitiesWriteProtected = false;
-                        break label;
-                    }
+                SymbolicUnifier unifier = new SymbolicUnifier(patternFold, partialSimpl, context);
+                if (!unifier.symbolicUnify(equality.leftHandSide(), equality.rightHandSide())) {
+                    falsify(new Equality(
+                            unifier.unificationFailureLeftHandSide(),
+                            unifier.unificationFailureRightHandSide(), context));
+                    return TruthValue.FALSE;
                 }
+
+                if (unifier.multiConstraints().isEmpty()
+                        && unifier.constraint().equalities.size() == 1
+                        && unifier.constraint().equalities.iterator().next().equals(equality)) {
+                    continue;
+                }
+
+                iterator.remove();
+                addAll(unifier.constraint());
+                multiConstraints.addAll(unifier.multiConstraints());
             }
 
             equalitiesWriteProtected = false;
-        } while (change);
+        }
 
         return truthValue;
     }
@@ -823,9 +693,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Normalizes the symbolic constraint.
      */
     private void normalize() {
-        assert !equalitiesWriteProtected : "Do not modify equalities when they are write-protected!";
+        if (truthValue == TruthValue.FALSE) {
+            return;
+        }
 
-        if (isNormal) {
+//        assert !equalitiesWriteProtected : "Do not modify equalities when they are write-protected!";
+        if (isNormal || equalitiesWriteProtected) {
             return;
         }
 
@@ -862,41 +735,32 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     return;
                 }
 
-                Map<Variable, Term> substToAdd = Maps.newHashMap();
-                Term leftHandSide = evalEquality.leftHandSide();
-                Term rightHandSide = evalEquality.rightHandSide();
-                if (leftHandSide instanceof Variable
-                        && rightHandSide instanceof Variable) {
-                    if (((Variable) rightHandSide).isAnonymous()) {
-                        substToAdd.put((Variable) rightHandSide, leftHandSide);
+                Map<Variable, Term> substToAdd = Maps.newLinkedHashMap();
+                Term lhs = evalEquality.leftHandSide();
+                Term rhs = evalEquality.rightHandSide();
+                if (lhs instanceof Variable
+                        && rhs instanceof Variable) {
+                    if (isSubsorted(lhs, rhs)) {
+                        substToAdd.put((Variable) lhs, rhs);
+                    } else if (isSubsorted(rhs, lhs)) {
+                        substToAdd.put((Variable) rhs, lhs);
+                    } else if (lhs.sort().equals(rhs.sort())) {
+                        if (((Variable) rhs).isAnonymous()) {
+                            substToAdd.put((Variable) rhs, lhs);
+                        } else {
+                            substToAdd.put((Variable) lhs, rhs);
+                        }
                     } else {
-                        substToAdd.put((Variable) leftHandSide, rightHandSide);
+                        if (equalityChanged) {
+                            iter.remove();
+                            equalityBuffer.add(evalEquality);
+                        }
+                        continue;
                     }
-                    /* TODO(YilongL): investigate why the following code will break the prover */
-//                    if (leftHandSide.sort().equals(rightHandSide.sort())) {
-//                        if (((Variable) rightHandSide).isAnonymous()) {
-//                            substToAdd.put((Variable) rightHandSide, leftHandSide);
-//                        } else {
-//                            substToAdd.put((Variable) leftHandSide, rightHandSide);
-//                        }
-//                    } else {
-//                        Sort glb = context.definition().subsorts().getGLBSort(leftHandSide.sort(), rightHandSide.sort());
-//                        if (glb != null) {
-//                            Variable variable = Variable.getFreshVariable(glb);
-//                            substToAdd.put((Variable) leftHandSide, variable);
-//                            substToAdd.put((Variable) rightHandSide, variable);
-//                        } else {
-//                            if (equalityChanged) {
-//                                iter.remove();
-//                                equalityBuffer.add(evalEquality);
-//                            }
-//                            continue;
-//                        }
-//                    }
-                } else if (leftHandSide instanceof Variable) {
-                    substToAdd.put((Variable) leftHandSide, rightHandSide);
-                } else if (rightHandSide instanceof Variable) {
-                    substToAdd.put((Variable) rightHandSide, leftHandSide);
+                } else if (lhs instanceof Variable && isSubsortedEq(lhs, rhs)) {
+                    substToAdd.put((Variable) lhs, rhs);
+                } else if (rhs instanceof Variable && isSubsortedEq(rhs, lhs)) {
+                    substToAdd.put((Variable) rhs, lhs);
                 } else {
                     if (equalityChanged) {
                         iter.remove();
@@ -913,7 +777,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 if (!occursCheck) {
                     iter.remove();
                     // TODO(YilongL): composeSubstitution seems ad-hoc... FIXME!
-                    composeSubstitution(substToAdd, context);
+                    composeSubstitution(substToAdd);
                     if (truthValue == TruthValue.FALSE) {
                         return;
                     }
@@ -933,6 +797,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         } while (substChanged);
     }
 
+    private boolean isSubsorted(Term big, Term small) {
+        return context.definition().subsorts().isSubsorted(big.sort(), small.sort());
+    }
+
+    private boolean isSubsortedEq(Term big, Term small) {
+        return context.definition().subsorts().isSubsortedEq(big.sort(), small.sort());
+    }
+
     public void expandPatternsAndSimplify(boolean narrowing) {
         normalize();
 
@@ -943,7 +815,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             Set<Variable> keys = Sets.newLinkedHashSet(substitution.keySet());
             for (Variable variable : keys) {
                 Term term = substitution.get(variable);
-                Term expandedTerm = term.expandPatterns(this, narrowing, context);
+                Term expandedTerm = term.expandPatterns(this, narrowing);
                 if (term != expandedTerm) {
                     substitution.put(variable, expandedTerm);
                     changed = true;
@@ -952,18 +824,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             // TODO(YilongL): what if this SymbolicConstraint is modified inside the loop?
             // TODO(YilongL): this is too ad-hoc; fix it once we allow sub-terms to carry constraint as well
-            int origSize = equalities.size();
-            for (int i = 0; i < equalities.size(); ++i) {
-                Equality equality = equalities.remove(i);
+            LinkedHashSet<Equality> expandedEqualities = Sets.newLinkedHashSet();
+            equalitiesWriteProtected = true;
+            for (Equality equality : equalities) {
                 Equality expandedEquality = equality.expandPatterns(this, narrowing);
-                equalities.addFirst(expandedEquality);
+                expandedEqualities.add(expandedEquality);
                 if (equality != expandedEquality) {
                     changed = true;
-                    if (equalities.size() != origSize) {
-                        break;
-                    }
                 }
             }
+            equalities = expandedEqualities;
+            equalitiesWriteProtected = false;
 
             /* force normalization to consider the changes made by this method */
             isNormal = false;
@@ -971,7 +842,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             // TODO(AndreiS): move folding from here (this is way too fragile)
             /* simplify with pattern folding if not performing narrowing */
             if (!narrowing) {
-                simplify(true);
+                simplifyModuloPatternFolding();
             } else {
                 simplify();
             }
@@ -984,25 +855,23 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *
      * @param substMap
      *            the specified substitution map
-     * @param context
-     *            the term context
      */
-    private void composeSubstitution(Map<Variable, Term> substMap,
-            TermContext context) {
-        @SuppressWarnings("unchecked")
-        Map.Entry<Variable, Term>[] entries = substitution.entrySet().toArray(new Map.Entry[substitution.size()]);
-        for (Map.Entry<Variable, Term> subst : entries) {
-            Term term = subst.getValue().substituteAndEvaluate(substMap, context);
-            if (term != subst.getValue()) {
-                checkTruthValBeforePutIntoConstraint(subst.getKey(), term, true);
+    private void composeSubstitution(Map<Variable, Term> substMap) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            Term variable = entry.getKey();
+            Term term = entry.getValue().substituteAndEvaluate(substMap, context);
+            Equality equality = new Equality(variable, term, context);
+            if (equality.truthValue() == TruthValue.UNKNOWN) {
+                entry.setValue(term);
+            } else if (equality.truthValue() == TruthValue.FALSE) {
+                falsify(equality);
+                return;
             }
         }
 
         // on composing two substitution maps:
         // http://www.mathcs.duq.edu/simon/Fall04/notes-7-4/node4.html
-        Set<Variable> variables = Sets.newLinkedHashSet(substitution.keySet());
-        variables.retainAll(substMap.keySet());
-        assert variables.isEmpty() :
+        assert Sets.intersection(substitution.keySet(), substMap.keySet()).isEmpty() :
             "There shall be no common variables in the two substitution maps to be composed.";
         substitution.putAll(substMap);
     }
@@ -1029,54 +898,29 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             entry.setValue(entry.getValue().substituteWithBinders(freshSubstitution, context));
         }
 
-        for (int i = 0; i < equalities.size(); ++i) {
-            equalities.set(i, equalities.get(i).substitute(freshSubstitution));
+        LinkedHashSet<Equality> renamedEqualities = Sets.newLinkedHashSet();
+        for (Equality eq : equalities) {
+            renamedEqualities.add(eq.substitute(freshSubstitution));
         }
-
-        updateVariableSet();
+        equalities = renamedEqualities;
     }
 
     /**
-     * Checks if this symbolic constraint is a matching substitution of the variables in the
-     * argument set.
+     * Checks if this symbolic constraint contains only substitutions of the
+     * given variables.
+     * <p>
+     * This method is useful for checking if narrowing happens.
      */
     public boolean isMatching(Set<Variable> variables) {
-        orientSubstitution(variables);
-        /*
-         * YilongL: data structure lookups will change the variables on the LHS
-         * of a rule, e.g.: "rule foo(M:Map X |-> Y, X) => 0" will be kompiled
-         * into "rule foo(_,_)(_0:Map,, X) => 0 requires [] /\ _0:Map[X] = Y
-         * ensures []". Therefore, we cannot write pattern.term().variableSet()
-         * in the following check.
-         */
-        if (!isSubstitution() || !substitution.keySet().equals(variables)) {
+        if (!isSubstitution()) {
             return false;
         }
 
-        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            Sort sortOfPatVar = entry.getKey().sort();
-            Term subst = entry.getValue();
-            if (subst instanceof DataStructureLookupOrChoice) {
-                return false;
-            }
-            Sort sortOfSubst = subst.sort();
-            /* YilongL: There are three different cases:
-             * 1) sortOfParVar >= sortOfSubst
-             * 2) sortOfParVar < sortOfSubst
-             * 3) there is no order between sortOfParVar & sortOfSubst
-             * Only case 1) represents a pattern matching
-             */
-            if (!context.definition().subsorts().isSubsortedEq(sortOfPatVar, sortOfSubst)) {
-                return false;
-            }
-
-            if (entry.getKey() instanceof ConcreteCollectionVariable
-                    && !(entry.getValue() instanceof ConcreteCollectionVariable && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((ConcreteCollectionVariable) entry.getValue()).concreteCollectionSize())
-                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).concreteSize())) {
-                return false;
-            }
+        if (orientSubstitution(variables)) {
+            return substitution.size() == variables.size();
+        } else {
+            return false;
         }
-        return true;
     }
 
     public boolean hasMapEqualities() {
@@ -1087,6 +931,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
         return false;
+    }
+
+    @Override
+    public Set<Variable> variableSet() {
+        // TODO(YilongL): get rid of this once SymbolicConstraint becomes immutable
+        setVariableSet(null);
+        return super.variableSet();
     }
 
     @Override
@@ -1142,16 +993,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(org.kframework.kil.visitors.Visitor<P, R, E> visitor, P p) throws E {
-        throw new UnsupportedOperationException();
     }
 
     /**

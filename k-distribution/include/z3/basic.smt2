@@ -15,7 +15,7 @@
 (declare-fun smt_set_cup (IntSet IntSet) IntSet)
 (declare-fun smt_set_ele (Int) IntSet)
 (declare-fun smt_set_emp () IntSet)
-(declare-fun smt_set_mem (Int) Bool)
+(declare-fun smt_set_mem (Int IntSet) Bool)
 
 (declare-fun smt_set_lt ((IntSet) (IntSet)) Bool)
 (declare-fun smt_set_le ((IntSet) (IntSet)) Bool)
@@ -31,4 +31,3 @@
 (declare-fun smt_seq_sorted (IntSeq) Bool)
 
 (declare-fun smt_seq_filter (Int IntSeq) IntSeq)
-

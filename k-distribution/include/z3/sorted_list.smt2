@@ -15,7 +15,7 @@
 (declare-fun smt_set_cup (IntSet IntSet) IntSet)
 (declare-fun smt_set_ele (Int) IntSet)
 (declare-fun smt_set_emp () IntSet)
-(declare-fun smt_set_mem (Int) Bool)
+(declare-fun smt_set_mem (Int IntSet) Bool)
 
 (assert (forall ((s1 IntSet) (s2 IntSet) (s3 IntSet)) (= (smt_set_cup (smt_set_cup s1 s2) s3) (smt_set_cup s1 (smt_set_cup s2 s3)))))
 (assert (forall ((s1 IntSet) (s2 IntSet)) (= (smt_set_cup s1 s2) (smt_set_cup s2 s1))))
@@ -60,4 +60,3 @@
 	:pattern ((smt_seq_sorted (smt_seq_concat s1 s2)))
 	:pattern ((smt_seq_sorted s1) (smt_seq_sorted s2))
 )))
-
