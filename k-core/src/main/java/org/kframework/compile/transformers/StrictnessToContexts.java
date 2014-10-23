@@ -6,8 +6,7 @@ import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.*;
 
 
@@ -44,25 +43,22 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             Boolean isSeq = prod.containsAttribute("seqstrict");
 
             if (!(prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL))) {
-                GlobalSettings.kem.registerCompilerError(
+                throw KExceptionManager.compilerError(
                         "only productions of sort K, sort KLabel or of syntactic sorts can have "
                                 + "strictness attributes",
                         this, prod);
-                continue;
             }
 
             if (prod.isSubsort()) {
-                GlobalSettings.kem.registerCompilerError(
+                throw KExceptionManager.compilerError(
                         "Production is a subsort and cannot be strict.",
                         this, prod);
-                continue;
             }
 
             if (prod.isConstant() && !prod.getSort().equals(Sort.KLABEL)) {
-                GlobalSettings.kem.registerCompilerError(
+                throw KExceptionManager.compilerError(
                         "Production is a constant and cannot be strict.",
                         this, prod);
-                continue;
             }
 
             final String strictType;
@@ -94,7 +90,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                     try {
                         strictnessPositions.add(Integer.parseInt(strictAttr.trim()));
                     } catch (NumberFormatException e) {
-                        GlobalSettings.kem.registerCompilerError(
+                        throw KExceptionManager.compilerError(
                                 "Expecting a number between 1 and " + prod.getArity() + ", but found " + strictAttr + " as a" +
                                         " strict position in " + Arrays.toString(strictAttrs),
                                 this, prod);

@@ -5,8 +5,7 @@ import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.Proc;
 import org.kframework.utils.OS;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -124,10 +123,8 @@ public class TaskQueue {
                 }
             }
         } catch (InterruptedException e) {
-            // TODO: I have no idea when this is thrown, and in what condition tpe is left.
-            // For now, I'm assuming that we're done.
-            // Still register a warning to keep track of things.
-            GlobalSettings.kem.registerCompilerWarning(e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            throw KExceptionManager.criticalError("KTest was interrupted", e);
         }
     }
 

@@ -6,7 +6,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class ConfigurationCleaner extends CopyOnWriteTransformer {
 
@@ -30,7 +30,7 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
             node = node.shallowCopy();
         } else {
             if (!(result instanceof Cell)) {
-                GlobalSettings.kem.registerInternalError(
+                throw KExceptionManager.internalError(
                         "Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.",
                         this, node);
             } else    node = (Cell) result;

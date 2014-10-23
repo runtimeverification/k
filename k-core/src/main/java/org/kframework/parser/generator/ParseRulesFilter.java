@@ -25,7 +25,7 @@ import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -104,7 +104,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
             if (globalOptions.debug) {
                 File file = context.files.resolveTemp("timing.log");
                 if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-                    GlobalSettings.kem.registerCriticalError("Could not create directory " + file.getParentFile());
+                    throw KExceptionManager.criticalError("Could not create directory " + file.getParentFile());
                 }
                 try (Formatter f = new Formatter(new FileWriter(file, true))) {
                     f.format("Parsing rule: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime), ss.getSource(), ss.getLocation());

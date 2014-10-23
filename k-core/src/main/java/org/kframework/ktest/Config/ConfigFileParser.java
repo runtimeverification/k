@@ -9,7 +9,7 @@ import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -28,6 +28,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -37,11 +38,13 @@ public class ConfigFileParser {
     private final Document doc;
     private final KTestOptions cmdArgs;
     private final Map<String, String> env;
+    private final KExceptionManager kem;
 
-    public ConfigFileParser(File configFile, KTestOptions cmdArgs, Map<String, String> env) throws IOException, SAXException,
+    public ConfigFileParser(File configFile, KTestOptions cmdArgs, Map<String, String> env, KExceptionManager kem) throws IOException, SAXException,
             ParserConfigurationException, TransformerException {
         this.cmdArgs = cmdArgs;
         this.env = env;
+        this.kem = kem;
 
         // validate xml file structure
         Source schemaFile = new StreamSource(getClass().getResourceAsStream("ktest.xsd"));
@@ -53,9 +56,9 @@ public class ConfigFileParser {
             validator.validate(xmlFile);
         } catch (SAXException e) {
             // unfortunately validator doesn't provide error locations so all we can say is this
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                     "Invalid config file formatting. Refer to the K manual for details. "
-                            + e.getMessage());
+                            + e.getMessage(), e);
         }
 
         // parse xml file
@@ -170,7 +173,7 @@ public class ConfigFileParser {
 
         ConfigFileParser configFileParser;
         try {
-            configFileParser = new ConfigFileParser(new File(file), cmdArgs1, env);
+            configFileParser = new ConfigFileParser(new File(file), cmdArgs1, env, kem);
         } catch (TransformerException | IOException | SAXException | ParserConfigurationException e) {
             // I'm not happy with that part ...
             throw new InvalidConfigError("error occured while parsing included file " + file +
@@ -291,7 +294,7 @@ public class ConfigFileParser {
         Map<String, ProgramProfile> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
         TestCase ret = new TestCase(definition, programs, extensions, excludes, results,
-                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips, cmdArgs);
+                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips, cmdArgs, kem);
         if (posixOnly != null) {
             ret.setPosixInitScript(posixOnly);
         }

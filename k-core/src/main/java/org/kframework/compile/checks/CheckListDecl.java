@@ -8,7 +8,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class CheckListDecl extends BasicVisitor {
 
@@ -20,14 +20,14 @@ public class CheckListDecl extends BasicVisitor {
     public Void visit(Production node, Void _) {
         if (node.isListDecl() && node.getSort().isBaseSort()) {
             String msg = node.getSort() + " can not be extended to be a list sort.";
-            GlobalSettings.kem.registerCompilerError(msg, this, node);
+            throw KExceptionManager.compilerError(msg, this, node);
         }
 
         if (node.isListDecl()) {
             UserList ul = (UserList) node.getItems().get(0);
             if (ul.getSort().equals(node.getSort())) {
                 String msg = "Circular lists are not allowed.";
-                GlobalSettings.kem.registerCompilerError(msg, this, node);
+                throw KExceptionManager.compilerError(msg, this, node);
             }
         }
 
@@ -35,11 +35,11 @@ public class CheckListDecl extends BasicVisitor {
             ProductionItem pi = node.getItems().get(i);
             if (pi instanceof UserList && node.getItems().size() > 1) {
                 String msg = "Inline list declarations are not allowed.";
-                GlobalSettings.kem.registerCompilerError(msg, this, pi);
+                throw KExceptionManager.compilerError(msg, this, pi);
             }
             if (pi instanceof Lexical && node.getItems().size() > 1) {
                 String msg = "Inline lexical/token declarations are not allowed.";
-                GlobalSettings.kem.registerCompilerError(msg, this, pi);
+                throw KExceptionManager.compilerError(msg, this, pi);
             }
         }
         return null;

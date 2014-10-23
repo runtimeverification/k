@@ -1,11 +1,11 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.krun.runner;
 
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.ioserver.main.IOServer;
-import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.maude.MaudeRun;
 
 import com.google.inject.Inject;
@@ -81,8 +81,7 @@ public class KRunner {
             }
             return _maudeProcess.exitValue();
         } catch (IOException e1) {
-            GlobalSettings.kem.registerInternalError("Error running maude: " + e1.getMessage(), e1);
-            throw new AssertionError("unreachable");
+            throw KExceptionManager.internalError("Error running maude: " + e1.getMessage(), e1);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return 1;

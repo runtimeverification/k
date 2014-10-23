@@ -10,8 +10,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -81,7 +80,7 @@ public class TokenSortCollector extends BasicVisitor {
             if (nonTokenSorts.contains(sort)) {
                 String msg = "Cannot subsort a lexical production to a non-token sort:\nsyntax "
                         + sort + " ::= " + production;
-                GlobalSettings.kem.registerCompilerError(msg,
+                throw KExceptionManager.compilerError(msg,
                         this, production);
             }
 
@@ -98,7 +97,7 @@ public class TokenSortCollector extends BasicVisitor {
             if (tokenSorts.contains(sort)) {
                 String msg = "Cannot subsort a non-lexical production to a token sort:\nsyntax "
                         + sort + " ::= " + production;
-                GlobalSettings.kem.registerCompilerError(msg, this, production);
+                throw KExceptionManager.compilerError(msg, this, production);
             }
 
             nonTokenSorts.add(sort);

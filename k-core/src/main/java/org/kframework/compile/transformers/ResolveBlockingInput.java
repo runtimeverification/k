@@ -9,8 +9,7 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,8 +48,11 @@ public class ResolveBlockingInput extends GetLhsPattern {
      */
     Term resultCondition;
 
-    public ResolveBlockingInput(Context context) {
+    private final KExceptionManager kem;
+
+    public ResolveBlockingInput(Context context, KExceptionManager kem) {
         super("Resolve Blocking Input", context);
+        this.kem = kem;
     }
 
     @Override
@@ -78,7 +80,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
     public ASTNode visit(Module node, Void _)  {
         ASTNode result = super.visit(node, _);
         if (result != node) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Should have obtained the same module.",
                     this, node);
         }
@@ -127,7 +129,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
             return super.visit(node, _);
         }
         if (!(node.getEllipses() == Ellipses.RIGHT)) {
-            GlobalSettings.kem.registerCompilerWarning(
+            kem.registerCompilerWarning(
                     "cell should have right ellipses but it doesn't." +
                             System.getProperty("line.separator") + "Won't transform.",
                             this, node);
@@ -135,7 +137,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
         }
         Term contents = node.getContents();
         if (!(contents instanceof Rewrite)) {
-            GlobalSettings.kem.registerCompilerWarning(
+            kem.registerCompilerWarning(
                     "Expecting a rewrite of a basic type variable into the empty list but got " + contents.getClass() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
                             this, contents);
@@ -146,7 +148,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
             (!(rewrite.getLeft() instanceof KApp &&
             ((KApp)rewrite.getLeft()).getLabel().equals(
                 KLabelConstant.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, context)))))) {
-            GlobalSettings.kem.registerCompilerWarning(
+            kem.registerCompilerWarning(
                     "Expecting a list item but got " + rewrite.getLeft().getClass() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
                             this, rewrite.getLeft());
@@ -157,7 +159,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
         KApp kappItem = (KApp)item;
         Term child = kappItem.getChild();
         if (!(child instanceof KList) || ((KList)child).getContents().size() != 1) {
-            GlobalSettings.kem.registerCompilerWarning(
+            kem.registerCompilerWarning(
                 "Expecting an input type variable but got a KList instead. Won't transform.",
                         this, ((KApp)item).getChild());
             return node;
@@ -166,7 +168,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 
         if (!(variable instanceof Variable))//&&    MetaK.isBuiltinSort(item.getItem().getSort())
                  {
-            GlobalSettings.kem.registerCompilerWarning(
+            kem.registerCompilerWarning(
                     "Expecting an input type variable but got " + variable.getClass() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
                             this, variable);
@@ -175,7 +177,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
         if ((!(rewrite.getRight() instanceof KApp &&
             ((KApp)rewrite.getRight()).getLabel().equals(
                 KLabelConstant.of(DataStructureSort.DEFAULT_LIST_UNIT_LABEL, context))))) {
-            GlobalSettings.kem.registerCompilerWarning(
+            kem.registerCompilerWarning(
                     "Expecting an empty list but got " + rewrite.getRight().getClass() + " of sort " +
                             rewrite.getRight().getSort() + "." +
                             System.getProperty("line.separator") + "Won't transform.",

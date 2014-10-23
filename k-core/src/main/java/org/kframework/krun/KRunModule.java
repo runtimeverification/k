@@ -117,7 +117,7 @@ public class KRunModule extends AbstractModule {
                       TypeToken<?> fieldType = TypeToken.of(typeLiteral.getFieldType(field).getType());
                       TypeToken<? extends TransformationProvider<?>> genericProviderTypeToken = providerOf(fieldType);
                       TypeLiteral<? extends TransformationProvider<?>> genericProviderTypeLiteral = (TypeLiteral<? extends TransformationProvider<?>>) TypeLiteral.get(genericProviderTypeToken.getType());
-                      typeEncounter.register(new TransformationMembersInjector<I>(field, typeEncounter.getProvider(Key.get(genericProviderTypeLiteral)), typeEncounter.getProvider(KExceptionManager.class)));
+                      typeEncounter.register(new TransformationMembersInjector<I>(field, typeEncounter.getProvider(Key.get(genericProviderTypeLiteral))));
                     }
                 }
             }
@@ -216,7 +216,7 @@ public class KRunModule extends AbstractModule {
         Executor getExecutor(KompileOptions options, Map<String, Provider<Executor>> map, KExceptionManager kem) {
             Provider<Executor> provider = map.get(options.backend);
             if (provider == null) {
-                kem.registerCriticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
+                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();
@@ -226,7 +226,7 @@ public class KRunModule extends AbstractModule {
         LtlModelChecker getModelChecker(KompileOptions options, Map<String, Provider<LtlModelChecker>> map, KExceptionManager kem) {
             Provider<LtlModelChecker> provider = map.get(options.backend);
             if (provider == null) {
-                kem.registerCriticalError("Backend " + options.backend + " does not support ltl model checking. Supported backends are: "
+                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support ltl model checking. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();
@@ -236,7 +236,7 @@ public class KRunModule extends AbstractModule {
         Prover getProver(KompileOptions options, Map<String, Provider<Prover>> map, KExceptionManager kem) {
             Provider<Prover> provider = map.get(options.backend);
             if (provider == null) {
-                kem.registerCriticalError("Backend " + options.backend + " does not support program verification. Supported backends are: "
+                throw KExceptionManager.criticalError("Backend " + options.backend + " does not support program verification. Supported backends are: "
                         + map.keySet());
             }
             return provider.get();

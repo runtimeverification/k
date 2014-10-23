@@ -14,8 +14,8 @@ import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
-import org.kframework.utils.general.GlobalSettings;
 
 
 /**
@@ -39,8 +39,7 @@ public class Evaluator extends CopyOnWriteTransformer {
         try {
             return ((KItem) super.transform(kItem)).resolveFunctionAndAnywhere(false, context);
         } catch (StackOverflowError e) {
-            GlobalSettings.kem.registerCriticalError(TRACE_MSG, e);
-            throw e; //unreachable
+            throw KExceptionManager.criticalError(TRACE_MSG, e);
         } catch (KEMException e) {
             e.exception.addTraceFrame(kItem.kLabel().toString());
             throw e;

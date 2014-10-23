@@ -6,8 +6,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -77,7 +76,7 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     private void addRules(Rule rule, String stream) {
         DataStructureSort sort = context.dataStructureSortOf(rule.getBody().getSort());
         if (!(rule.getBody().getSort().equals(Sort.LIST) || rule.getBody().getSort().equals(Sort.LIST_ITEM) || context.dataStructureListSortOf(rule.getBody().getSort()) != null)) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Found a rule tagged '" + stream + "' whose body wasn't a list.",
                         this, rule);
         }

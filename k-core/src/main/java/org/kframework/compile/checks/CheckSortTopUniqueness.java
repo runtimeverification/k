@@ -6,7 +6,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Check for various errors in syntax declarations. 1. You are not allowed to use empty terminals ("") in definitions. You need to have at least two sorts, or a non empty terminal.
@@ -33,7 +33,7 @@ public class CheckSortTopUniqueness extends BasicVisitor {
         }
         if (count > 1) {
             msg = msg.substring(0, msg.length() - 2);
-            GlobalSettings.kem.registerCompilerError(msg, this, node);
+            throw KExceptionManager.compilerError(msg, this, node);
         }
         return null;
     }

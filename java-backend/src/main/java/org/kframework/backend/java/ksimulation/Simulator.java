@@ -32,8 +32,7 @@ public class Simulator implements Transformation<Void, KRunResult<?>> {
 
     @Override
     public KRunProofResult<?> run(Void v, Attributes a) {
-        kem.registerCriticalError("--simulation is not currently supported");
-        throw new AssertionError("unreachable");
+        throw KExceptionManager.criticalError("--simulation is not currently supported");
     }
 
     @Override

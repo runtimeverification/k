@@ -62,11 +62,10 @@ public class CoqBackend extends BasicBackend {
                 return;
             }
             if (result != 0) {
-                kem.registerCriticalError("Error generating Coq syntax definition");
-                return;
+                throw KExceptionManager.criticalError("Error generating Coq syntax definition");
             }
         } catch (IOException e) {
-            kem.registerCriticalError("Error generating Coq syntax definition", e);
+            throw KExceptionManager.criticalError("Error generating Coq syntax definition", e);
         }
         try {
             Process p = new ProcessBuilder(kcoq,"rules","--lang-name",langName,"--recursive",
@@ -81,11 +80,10 @@ public class CoqBackend extends BasicBackend {
                 return;
             }
             if (result != 0) {
-                kem.registerCriticalError("Error generating Coq rules definition");
-                return;
+                throw KExceptionManager.criticalError("Error generating Coq rules definition");
             }
         } catch (IOException e) {
-            kem.registerCriticalError("Error generating Coq rules definition", e);
+            throw KExceptionManager.criticalError("Error generating Coq rules definition", e);
         }
     }
 

@@ -16,10 +16,10 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 
 import java.util.*;
 
@@ -29,8 +29,11 @@ public class MaudeFilter extends BackendFilter {
     private Set<String> unusedTransitions;
     private Set<String> separators = new HashSet<String>();
 
-    public MaudeFilter(Context context) {
+    private final KExceptionManager kem;
+
+    public MaudeFilter(Context context, KExceptionManager kem) {
         super(context);
+        this.kem = kem;
         unusedTransitions = new HashSet<>(options.transition.size());
         this.cfgStr = context.getConfigurationStructureMap();
     }
@@ -48,7 +51,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(" \n");
         }
         if (!(unusedTransitions.isEmpty())) {
-            GlobalSettings.kem.registerCompilerWarning(
+            kem.registerCompilerWarning(
                             "These specified transition tags were not used (mispelled?):\n\t\t" + unusedTransitions);
         }
         return null;
@@ -147,7 +150,7 @@ public class MaudeFilter extends BackendFilter {
                     if (operation.equals("") && !p.containsAttribute("onlyLabel")) {
                         String msg = "Cannot declare empty terminals in the definition.\n";
                         msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
-                        GlobalSettings.kem.registerCriticalError(msg, this, p);
+                        throw KExceptionManager.criticalError(msg, this, p);
                     }
                     if (!MaudeHelper.isConstantSort(syn.getDeclaredSort().getSort()) || !syn.getDeclaredSort().getSort().equals(Sort.KLABEL) || !syn.getDeclaredSort().getSort().equals(Sort.CELL_LABEL)) {
                         result.append("op ");
@@ -180,7 +183,7 @@ public class MaudeFilter extends BackendFilter {
                     String maudelabel = p.getLabel();
                     if (maudelabel.equals("")) {
                         String msg = "Empty production. Please use `prefixlabel` attribute.";
-                        GlobalSettings.kem.registerCompilerWarning(msg, this, p);
+                        kem.registerCompilerWarning(msg, this, p);
                         continue;
                     }
 
@@ -490,7 +493,7 @@ public class MaudeFilter extends BackendFilter {
             isTransition = true;
         }
         if (!(rule.getBody() instanceof Rewrite)) {
-            GlobalSettings.kem.registerInternalError("This rule should have a rewrite at top by now.",
+            throw KExceptionManager.internalError("This rule should have a rewrite at top by now.",
                     this, rule);
         }
         Rewrite body = (Rewrite) rule.getBody();
@@ -677,15 +680,15 @@ public class MaudeFilter extends BackendFilter {
     public Void visit(FloatBuiltin token, Void _) {
         result.append("#_(");
         if (token.bigFloatValue().isNegativeZero() || token.bigFloatValue().isNaN()) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+            throw KExceptionManager.criticalError(
                     "Attempting to compile a definition containing -0.0 or NaN with the Maude backend. "
                             + "Maude does not support these features, and floating point arithmetic is "
-                            + "unsupported in the Maude backend. Please recompile with --backend java."));
+                            + "unsupported in the Maude backend. Please recompile with --backend java.", token);
         }
         result.append(FloatBuiltin.printKFloat(token.bigFloatValue()));
         result.append(")");
         if (!floatWarning) {
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL,
+            kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INTERNAL,
                     "The Maude backend does not officially support floating point numbers. The results of "
                     + "this semantics may be undefined or, in some cases, "
                     + "incorrect."));
@@ -725,7 +728,7 @@ public class MaudeFilter extends BackendFilter {
                     first = false;
                 }
                 if (term == null) {
-                    GlobalSettings.kem.registerInternalError("NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
+                    throw KExceptionManager.internalError("NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
                             + ".", this, collection);
                 }
                 this.visitNode(term);

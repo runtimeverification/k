@@ -64,7 +64,7 @@ public class DefinitionLoadingModule extends AbstractModule {
         for (int i = 0; i < dirs.length; i++) {
             if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
                 if (directory != null) {
-                    kem.registerCriticalError("Multiple compiled definitions found in the "
+                    throw KExceptionManager.criticalError("Multiple compiled definitions found in the "
                             + "current working directory: " + directory.getAbsolutePath() + " and " +
                             dirs[i].getAbsolutePath());
                 } else {
@@ -74,11 +74,11 @@ public class DefinitionLoadingModule extends AbstractModule {
         }
 
         if (directory == null) {
-            kem.registerCriticalError("Could not find a compiled definition. " +
+            throw KExceptionManager.criticalError("Could not find a compiled definition. " +
                     "Use --directory to specify one.");
         }
         if (!directory.isDirectory()) {
-            kem.registerCriticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
+            throw KExceptionManager.criticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
         }
         return directory;
     }
@@ -106,7 +106,7 @@ public class DefinitionLoadingModule extends AbstractModule {
             }
         }
         if (!directory.isDirectory()) {
-            kem.registerCriticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
+            throw KExceptionManager.criticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
         }
         return directory;
     }

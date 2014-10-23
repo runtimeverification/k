@@ -8,8 +8,7 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,11 +70,9 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
             cell.setEllipses(Ellipses.NONE);
             ConfigurationStructure cellStr = config.get(cell.getId());
             if (cellStr.sons.isEmpty()) {
-                GlobalSettings.kem.registerCompilerError(
+                throw KExceptionManager.compilerError(
                         "Cell " + node + " is a leaf in the configuration and it's not closed in the RHS.",
                         this, node);
-
-                return cell;
             }
             List<Cell> sons = MetaK.getTopCells(cell.getContents(), context);
             Map<String, ConfigurationStructure> potentialSons = new HashMap<String, ConfigurationStructure>(cellStr.sons);

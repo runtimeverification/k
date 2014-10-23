@@ -11,6 +11,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.Properties;
 
@@ -23,11 +24,13 @@ public class MaudeBuiltinsFilter extends BackendFilter {
     private boolean first;
     private final Properties maudeHooksMap;
     private final Properties specialMaudeHooks;
+    private final KExceptionManager kem;
 
-    public MaudeBuiltinsFilter(Properties maudeHooksMap, Properties specialMaudeHooks, Context context) {
+    public MaudeBuiltinsFilter(Properties maudeHooksMap, Properties specialMaudeHooks, Context context, KExceptionManager kem) {
         super(context);
         this.maudeHooksMap = maudeHooksMap;
         this.specialMaudeHooks = specialMaudeHooks;
+        this.kem = kem;
     }
 
     @Override
@@ -106,7 +109,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
             var = Variable.getAnonVar(Sort.of("#" + node.getName()));
         }
 
-        MaudeFilter filter = new MaudeFilter(context);
+        MaudeFilter filter = new MaudeFilter(context, kem);
         filter.visit(var, null);
         left += filter.getResult();
 

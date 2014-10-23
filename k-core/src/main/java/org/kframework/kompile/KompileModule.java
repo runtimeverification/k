@@ -102,7 +102,7 @@ public class KompileModule extends AbstractModule {
     Backend getBackend(KompileOptions options, Map<String, Backend> map, KExceptionManager kem) {
         Backend backend = map.get(options.backend);
         if (backend == null) {
-            kem.registerCriticalError("Invalid backend: " + options.backend
+            throw KExceptionManager.criticalError("Invalid backend: " + options.backend
                     + ". It should be one of " + map.keySet());
         }
         return backend;

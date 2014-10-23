@@ -4,7 +4,7 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Initially created by: Traian Florin Serbanuta
@@ -36,7 +36,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
             return node;
         Term kresultCnd = null;
         if (!(node.getBody() instanceof  Rewrite)) {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                             "Heating/Cooling rules should have rewrite at the top.",
                             this, node);
         }
@@ -44,27 +44,27 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
         Rewrite rewrite = (Rewrite) node.getBody();
         if (heating) {
             if (!(rewrite.getRight() instanceof KSequence)) {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                                 "Heating rules should have a K sequence in the rhs.",
                                 this, node);
             }
             kSequence = (KSequence) rewrite.getRight();
         } else {
             if (!(rewrite.getLeft() instanceof KSequence)) {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                                 "Cooling rules should have a K sequence in the lhs.",
                                 this, node);
             }
             kSequence = (KSequence) rewrite.getLeft();
         }
         if (kSequence.getContents().size() != 2 ) {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                             "Heating/Cooling rules should have exactly 2 items in their K Sequence.",
                                 this, node);
         }
         java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
         if (vars.size() != 1) {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                             "Heating/Cooling rules should heat/cool at most one variable.",
                             this, node);
         }

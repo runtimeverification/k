@@ -69,12 +69,10 @@ public class KTestFrontEnd extends FrontEnd {
             return makeTestSuite(options.getTargetFile(), options).run();
         } catch (SAXException | ParserConfigurationException | IOException | TransformerException
                 | ParameterException e) {
-            kem.registerCriticalError(e.getMessage(), e);
-            return false;
+            throw KExceptionManager.criticalError(e.getMessage(), e);
         } catch (InvalidConfigError e) {
             LocationData location = e.getLocation();
-            kem.registerCriticalError(e.getMessage(), e, location.getLocation(), location.getSource());
-            return false;
+            throw KExceptionManager.criticalError(e.getMessage(), e, location.getLocation(), location.getSource());
         }
     }
 
@@ -84,10 +82,10 @@ public class KTestFrontEnd extends FrontEnd {
         switch (FilenameUtils.getExtension(targetFile)) {
         case "xml":
             ret = new TestSuite(new ConfigFileParser(
-                    new File(cmdArgs.getTargetFile()), cmdArgs, env).parse(), cmdArgs);
+                    new File(cmdArgs.getTargetFile()), cmdArgs, env, kem).parse(), cmdArgs);
             break;
         case "k":
-            TestCase tc = TestCase.makeTestCaseFromK(cmdArgs);
+            TestCase tc = TestCase.makeTestCaseFromK(cmdArgs, kem);
             tc.validate();
             List<TestCase> tcs = new LinkedList<>();
             tcs.add(tc);

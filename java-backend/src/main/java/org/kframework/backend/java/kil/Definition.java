@@ -9,8 +9,7 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +51,7 @@ public class Definition extends JavaSymbolicObject {
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
     private transient Context context;
+    private transient KExceptionManager kem;
     private final Subsorts subsorts;
     private final Set<Sort> tokenSorts;
     private final Set<Sort> builtinSorts;
@@ -59,9 +59,10 @@ public class Definition extends JavaSymbolicObject {
     public final IndexingTable.Data indexingData;
 
     @Inject
-    public Definition(Context context, IndexingTable.Data indexingData) {
+    public Definition(Context context, KExceptionManager kem, IndexingTable.Data indexingData) {
         this.context = context;
         this.indexingData = indexingData;
+        this.kem = kem;
         rules = new ArrayList<>();
         macros = new ArrayList<>();
         kLabels = new HashSet<>();
@@ -111,7 +112,7 @@ public class Definition extends JavaSymbolicObject {
             macros.add(rule);
         } else if (rule.containsAttribute(Attribute.ANYWHERE_KEY)) {
             if (!(rule.leftHandSide() instanceof KItem)) {
-                GlobalSettings.kem.registerCriticalWarning(
+                kem.registerCriticalWarning(
                         "The Java backend only supports [anywhere] rule that rewrites KItem; but found:\n\t"
                                 + rule, rule);
                 return;
@@ -160,6 +161,10 @@ public class Definition extends JavaSymbolicObject {
 
     public void setContext(Context context) {
         this.context = context;
+    }
+
+    public void setKem(KExceptionManager kem) {
+        this.kem = kem;
     }
 
     public Multimap<KLabelConstant, Rule> functionRules() {

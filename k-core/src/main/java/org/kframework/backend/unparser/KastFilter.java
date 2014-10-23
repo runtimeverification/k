@@ -2,13 +2,9 @@
 package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MaudeHelper;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class KastFilter extends BasicVisitor {
     protected Indenter result;
@@ -97,7 +93,7 @@ public class KastFilter extends BasicVisitor {
                     first = false;
                 }
                 if (term == null) {
-                    GlobalSettings.kem.registerInternalError(
+                    throw KExceptionManager.internalError(
                             "NULL Term encountered when KastFilter ran on collection " + listOfK.getContents() + ".",
                             this, listOfK);
                 }

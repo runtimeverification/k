@@ -10,7 +10,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableSet;
@@ -182,7 +182,7 @@ public class KLabelConstant extends KLabel {
                         || production.containsAttribute(Attribute.PREDICATE_KEY)) {
                     functionProduction = production;
                 } else if (functionProduction != null) {  // this label can either be function or not.
-                    GlobalSettings.kem.registerCriticalError(
+                    throw KExceptionManager.criticalError(
                             "Ambiguity: Top symbol " + label + " corresponds to both a functional declaration (" +
                                     functionProduction + ") and to a non-functional one (" +
                                     production + ")",

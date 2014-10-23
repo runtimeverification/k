@@ -5,8 +5,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -61,7 +60,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
         } else {
             col = MetaK.createCollection(node.getContents(), kind);
             if (col == null) {
-                GlobalSettings.kem.registerCompilerError(
+                throw KExceptionManager.compilerError(
                         "Expecting a collection item here but got " + node.getContents() + " which is of sort " + kind,
                         this, node);
 

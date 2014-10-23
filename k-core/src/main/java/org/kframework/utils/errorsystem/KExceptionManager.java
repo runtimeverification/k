@@ -35,7 +35,9 @@ public class KExceptionManager {
 
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                printStackTrace(e);
+                if (options.debug) {
+                    e.printStackTrace();
+                }
                 exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                         "Uncaught exception thrown of type " + e.getClass().getSimpleName()
                         + ".\nPlease file a bug report at https://github.com/kframework/k/issues", e));
@@ -44,69 +46,81 @@ public class KExceptionManager {
         });
     }
 
-    private void printStackTrace(Throwable e) {
-        if (e != null) {
+    private void printStackTrace(KException e) {
+        if (e.getException() != null) {
             if (options.debug) {
-                e.printStackTrace();
+                e.getException().printStackTrace();
             }
         }
     }
 
-    public void registerCriticalError(String message) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, null, null);
+    public static KEMException criticalError(String message) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, null, null);
     }
 
-    public void registerCriticalError(String message, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getSource());
+    public static KEMException criticalError(String message, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, null, node.getLocation(), node.getSource());
     }
 
-    public void registerCriticalError(String message, Throwable e) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, null, null);
+    public static KEMException criticalError(String message, Throwable e) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, null, null);
     }
 
-    public void registerCriticalError(String message, Throwable e, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getSource());
+    public static KEMException criticalError(String message, Throwable e, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getSource());
     }
 
-    public void registerCriticalError(String message, Throwable e, Location loc, Source source) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, loc, source);
+    public static KEMException criticalError(String message, Throwable e, Location loc, Source source) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, e, loc, source);
     }
 
 
-    public void registerCriticalError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, phase, null, node.getLocation(), node.getSource());
+    public static KEMException criticalError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, phase, null, node.getLocation(), node.getSource());
     }
 
-    public void registerInternalError(String message) {
-        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, null, null, null);
+    public static KEMException internalError(String message) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, null, null, null);
     }
 
-    public void registerInternalError(String message, Throwable e) {
-        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, e, null, null);
+    public static KEMException internalError(String message, Throwable e) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
-    public void registerInternalError(String message, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, null, node.getLocation(), node.getSource());
+    public static KEMException internalError(String message, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, null, node.getLocation(), node.getSource());
     }
 
-    public void registerInternalError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, phase, null, node.getLocation(), node.getSource());
+    public static KEMException internalError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, phase, null, node.getLocation(), node.getSource());
     }
 
-    public void registerCompilerError(String message) {
-        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, null, null);
+    public static KEMException compilerError(String message) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, null, null);
     }
 
-    public void registerCompilerError(String message, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, node.getLocation(), node.getSource());
+    public static KEMException compilerError(String message, Throwable e, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, e, node.getLocation(), node.getSource());
     }
 
-    public void registerCompilerError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, phase, null, node.getLocation(), node.getSource());
+    public static KEMException compilerError(String message, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, node.getLocation(), node.getSource());
     }
 
-    public void registerCompilerError(String message, AbstractVisitor<?, ?, ?> phase, Throwable e, ASTNode node) {
-        register(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, phase, e, node.getLocation(), node.getSource());
+    public static KEMException compilerError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, phase, null, node.getLocation(), node.getSource());
+    }
+
+    public static KEMException compilerError(String message, AbstractVisitor<?, ?, ?> phase, Throwable e, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, phase, e, node.getLocation(), node.getSource());
+    }
+
+    public static KEMException innerParserError(String message, AbstractVisitor<?, ?, ?> phase, ASTNode node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, phase, null, node.getLocation(), node.getSource());
+    }
+
+    public static KEMException outerParserError(String message, Throwable e, Source source, Location location) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, e, location, source);
     }
 
     public void registerCompilerWarning(String message) {
@@ -145,13 +159,21 @@ public class KExceptionManager {
         register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, e, node.getLocation(), node.getSource());
     }
 
+    public void registerInternalWarning(String message) {
+        register(ExceptionType.WARNING, KExceptionGroup.INTERNAL, message, null, null, null, null);
+    }
+
     public void registerInternalWarning(String message, Throwable e) {
         register(ExceptionType.WARNING, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
+    private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
+            AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
+        return new KEMException(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));
+    }
+
     private void register(ExceptionType type, KExceptionGroup group, String message,
             AbstractVisitor<?, ?, ?> phase, Throwable e, Location location, Source source) {
-        printStackTrace(e);
         registerInternal(new KException(type, group, message, phase == null ? null : phase.getName(), source, location, e));
     }
 
@@ -185,6 +207,7 @@ public class KExceptionManager {
                 if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
                     continue;
                 }
+                printStackTrace(e);
                 System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
                 last = e;
             }
@@ -205,6 +228,12 @@ public class KExceptionManager {
         @Override
         public String getMessage() {
             return exception.toString();
+        }
+
+        public void register(KExceptionManager kem) {
+            synchronized(kem.getExceptions()) {
+                kem.getExceptions().add(exception);
+            }
         }
     }
 

@@ -21,7 +21,6 @@ import com.beust.jcommander.ParameterException;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 
 public class JCommanderModule extends AbstractModule  {
 
@@ -48,8 +47,7 @@ public class JCommanderModule extends AbstractModule  {
             sw.printIntermediate("Parse command line options");
             return jc;
         } catch (ParameterException e) {
-            kem.registerCriticalError(e.getMessage(), e);
-            throw new AssertionError("unreachable");
+            throw KExceptionManager.criticalError(e.getMessage(), e);
         }
     }
 

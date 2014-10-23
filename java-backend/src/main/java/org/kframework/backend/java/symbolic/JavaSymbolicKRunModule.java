@@ -17,6 +17,7 @@ import org.kframework.krun.tools.Prover;
 import org.kframework.transformation.ToolActivation;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
@@ -82,10 +83,11 @@ public class JavaSymbolicKRunModule extends AbstractModule {
         }
 
         @Provides @Singleton
-        Definition javaDefinition(BinaryLoader loader, Context context, FileUtil files) {
+        Definition javaDefinition(BinaryLoader loader, Context context, FileUtil files, KExceptionManager kem) {
             Definition def = loader.loadOrDie(Definition.class,
                     files.resolveKompiled(JavaSymbolicBackend.DEFINITION_FILENAME));
             def.setContext(context);
+            def.setKem(kem);
             return def;
         }
     }

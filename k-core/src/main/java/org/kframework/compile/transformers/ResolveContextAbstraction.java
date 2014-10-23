@@ -12,21 +12,21 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.*;
-import java.util.List;
-import java.util.Map;
 
 public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 
     private int maxLevel;
     private ConfigurationStructureMap config;
 
-    public ResolveContextAbstraction(org.kframework.kil.loader.Context context) {
+    private final KExceptionManager kem;
+
+    public ResolveContextAbstraction(org.kframework.kil.loader.Context context, KExceptionManager kem) {
         super("Resolve Context Abstraction", context);
         config = context.getConfigurationStructureMap();
         maxLevel = context.getMaxConfigurationLevel();
+        this.kem = kem;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
             parentCell = createParentCell(parent, cells);
             if (!cells.isEmpty()) {
                 if (min <= 1) {
-                    GlobalSettings.kem.registerCompilerError(
+                    throw KExceptionManager.compilerError(
                             "Got to the top cell while trying to fill up context for cell " + cells.peek() + ".  Perhaps missing a multiplicity declaration in configuration? ",
                             this, node);
                 }
@@ -121,7 +121,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         ConfigurationStructure confCell = config.get(cell);
         if (confCell == null)
         {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                     "Cell " + cell.getLabel() + " is not part of the configuration ",
                     this, node);
         }
@@ -182,7 +182,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
                 for (Cell cell : inCells) {
                     ConfigurationStructure cellCfg = potentialSons.get(cell.getId());
                     if (cellCfg == null) {
-                        GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING,
+                        kem.register(new KException(ExceptionType.HIDDENWARNING,
                                 KExceptionGroup.INTERNAL,
                                 "Cell " + cell + " appears more than its multiplicity in " + t + ". \n\tTransformation: " + getName(),
                                 getName(),
@@ -206,14 +206,14 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
              return config.get(((Cell)t)).parent;
         }
         if (!(t instanceof Rewrite)) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Expecting Rewrite, but got " + t.getClass() + " while " + getName(),
                     this, t);
 
         }
         List<Cell> cells = MetaK.getTopCells(t, context);
         if (cells.isEmpty()) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Expecting some cells in here, but got none while " + getName(),
                     this, t);
         }
@@ -221,7 +221,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         ConfigurationStructure parent = config.get(i.next()).parent;
         while (i.hasNext()) {
             if (parent != config.get(i.next()).parent) {
-                GlobalSettings.kem.registerInternalError(
+                throw KExceptionManager.internalError(
                         "Not all cells " + cells + "have parent " + parent + " while " + getName(),
                         this, t);
 
@@ -247,7 +247,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
         public Void visit(Cell node, Void _) {
             int level = config.get(node).level - this.level;
             if (level < 0) {
-                GlobalSettings.kem.registerInternalError(
+                throw KExceptionManager.internalError(
                         "Cell " + node + " Has a higher level than its parent.",
                         this, node);
 
@@ -289,14 +289,14 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
                 Iterator<Cell> i = cells.iterator();
                 level = config.get(i.next()).level - this.level;
                 if (!(level >= 0)) {
-                    GlobalSettings.kem.registerInternalError(
+                    throw KExceptionManager.internalError(
                             "Rewrite not at the right level in configuration",
                             this, node);
                 }
                 if (max < level) max = level;
                 while(i.hasNext()) //Sanity check -- see that all cells in a rewrite are at the same level
                     if (level != config.get(i.next()).level - this.level) {
-                        GlobalSettings.kem.registerInternalError(
+                        throw KExceptionManager.internalError(
                                 "Expecting all cells in " + node + " to be at the same level when " + getName(),
                                 this, node);
                     }

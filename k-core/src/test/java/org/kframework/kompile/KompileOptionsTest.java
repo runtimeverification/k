@@ -11,9 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kframework.backend.Backends;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KExceptionManager.KEMException;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -37,8 +35,6 @@ public class KompileOptionsTest {
     public void setUp() {
         options = new KompileOptions();
         options.setFiles(files);
-        GlobalSettings.kem = kem;
-        doThrow(KEMException.class).when(kem).registerCriticalError(Matchers.anyString());
         when(files.resolveWorkingDirectory(Matchers.anyString())).thenAnswer(new Answer<File>() {
             @Override
             public File answer(InvocationOnMock invocation) throws Throwable {

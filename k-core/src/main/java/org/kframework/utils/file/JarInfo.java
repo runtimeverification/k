@@ -71,7 +71,7 @@ public class JarInfo {
             System.out.println("Git branch: " + branch);
             System.out.println("Build date: " + date.toString());
         } catch (IOException e) {
-            kem.registerInternalError("Could not load version info. Check your build system?");
+            throw KExceptionManager.internalError("Could not load version info. Check your build system?");
         }
     }
 }

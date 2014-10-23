@@ -14,7 +14,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.FloatBuiltin;
 import org.kframework.mpfr.BigFloat;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class FloatToken extends Token implements MaximalSharing {
 
@@ -118,7 +118,7 @@ public class FloatToken extends Token implements MaximalSharing {
     public static Pair<Integer, Integer> getExponentAndSignificandOrDie(ASTNode t) {
         Pair<Integer, Integer> pair = getExponentAndSignificand(t);
         if (pair == null) {
-            GlobalSettings.kem.registerCriticalError("Expected floating point number variable to declare an exponent and a significand." +
+            throw KExceptionManager.criticalError("Expected floating point number variable to declare an exponent and a significand." +
                     " For example, F:Float{exponent(11), significand(53)} for a double-precision floating point number.");
         }
         return pair;
@@ -133,9 +133,8 @@ public class FloatToken extends Token implements MaximalSharing {
         try {
             return Pair.of(Integer.parseInt(exponent), Integer.parseInt(significand));
         } catch (NumberFormatException e) {
-            GlobalSettings.kem.registerCriticalError("Expected variable attributes 'exponent' and 'significand' to " +
+            throw KExceptionManager.criticalError("Expected variable attributes 'exponent' and 'significand' to " +
                     "be integers, found: " + t.getAttribute(Attribute.EXPONENT_KEY) + " " + t.getAttribute(Attribute.SIGNIFICAND_KEY), e);
-            throw new AssertionError("unreachable");
         }
     }
 

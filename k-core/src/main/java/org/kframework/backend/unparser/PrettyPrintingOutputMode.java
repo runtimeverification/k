@@ -11,15 +11,24 @@ import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.transformation.Transformation;
 
+import com.google.inject.Inject;
+
 public class PrettyPrintingOutputMode  {
 
     private PrettyPrintingOutputMode() {}
 
     public static class PrintKRunState implements Transformation<KRunState, ASTNode> {
 
+        private final ConcretizeTerm concretizer;
+
+        @Inject
+        public PrintKRunState(ConcretizeTerm concretizer) {
+            this.concretizer = concretizer;
+        }
+
         @Override
         public Term run(KRunState state, Attributes a) {
-            return state.getResult(a.typeSafeGet(Context.class));
+            return concretizer.concretize(a.typeSafeGet(Context.class), state.getRawResult());
         }
 
         @Override
@@ -30,9 +39,16 @@ public class PrettyPrintingOutputMode  {
 
     public static class PrintSearchResult implements Transformation<SearchResult, Map<String, Term>> {
 
+        private final ConcretizeTerm concretizer;
+
+        @Inject
+        public PrintSearchResult(ConcretizeTerm concretizer) {
+            this.concretizer = concretizer;
+        }
+
         @Override
         public Map<String, Term> run(SearchResult solution, Attributes a) {
-            return solution.getSubstitution();
+            return concretizer.concretizeSubstitution(a.typeSafeGet(Context.class), solution);
         }
 
         @Override

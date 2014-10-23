@@ -11,8 +11,7 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,9 +21,12 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
     public Set<String> modNames = new HashSet<String>();
     private String startModuleName;
 
-    public CollectIncludedModulesVisitor(String startModuleName, Context context) {
+    private final KExceptionManager kem;
+
+    public CollectIncludedModulesVisitor(String startModuleName, Context context, KExceptionManager kem) {
         super(context);
         this.startModuleName = startModuleName;
+        this.kem = kem;
     }
 
     public Void visit(Definition def, Void _) {
@@ -48,7 +50,7 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
                                 synQue.add(mm.getName());
                             else if (!MetaK.isKModule(mname2)) {
                                 String msg = "Could not find module: " + mname2 + " imported from: " + m.getName();
-                                GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, imp.getSource(), imp.getLocation()));
+                                kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, imp.getSource(), imp.getLocation()));
                             }
                         }
                     }

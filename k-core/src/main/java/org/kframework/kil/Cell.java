@@ -15,7 +15,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -182,7 +182,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
                 return Multiplicity.SOME;
             if ("1".equals(attr))
                 return Multiplicity.ONE;
-            GlobalSettings.kem.registerCompilerWarning("Unknown multiplicity in configuration for cell " + this.getLabel() + ".",
+            throw KExceptionManager.compilerError("Unknown multiplicity in configuration for cell " + this.getLabel() + ".",
                     this);
         }
         return Multiplicity.ONE;
@@ -196,7 +196,7 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
             }
         } catch (IllegalArgumentException e) {
             String msg = "Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.";
-            GlobalSettings.kem.registerCompilerWarning(msg, e, this);
+            throw KExceptionManager.compilerError(msg, e, this);
         }
         return Ellipses.NONE;
     }

@@ -149,8 +149,7 @@ public class JavaSymbolicExecutor implements Executor {
             searchResults.add(new SearchResult(
                     new KRunState(rawResult),
                     substitutionMap,
-                    compilationInfo,
-                    context));
+                    compilationInfo));
         }
 
         // TODO(ericmikida): Make the isDefaultPattern option set in some reasonable way

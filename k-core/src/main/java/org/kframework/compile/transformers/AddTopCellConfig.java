@@ -6,8 +6,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +22,14 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
         ASTNode result = super.visit(node, _);
         if (result == node) return node;
         if (result == null) {
-            GlobalSettings.kem.registerCompilerError(
+            throw KExceptionManager.compilerError(
                     "Expecting Module, but got null. Returning the untransformed module.",
                     this, node);
-            return node;
         }
         if (!(result instanceof Module)) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Expecting Module, but got " + result.getClass() + " while transforming.",
                     this, node);
-            return node;
         }
         node = (Module) result;
         List<PriorityBlock> topCellBlocks = new ArrayList<PriorityBlock>();

@@ -79,7 +79,7 @@ public class KompileFrontEnd extends FrontEnd {
     @Override
     public boolean run() {
         if (!options.mainDefinitionFile().exists()) {
-            kem.registerCriticalError("Definition file doesn't exist: " +
+            throw KExceptionManager.criticalError("Definition file doesn't exist: " +
                     options.mainDefinitionFile().getAbsolutePath());
         }
 

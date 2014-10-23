@@ -21,7 +21,9 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
-import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.TermLoader;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
 import com.google.inject.Inject;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -39,25 +41,31 @@ public class ExecutorDebugger implements Debugger {
 
     private final Context context;
     private final Executor executor;
+    private final TermLoader loader;
+    private final KExceptionManager kem;
 
     @Inject
     public ExecutorDebugger(
             Executor executor,
-            Context context) throws KRunExecutionException {
+            Context context,
+            TermLoader loader,
+            KExceptionManager kem) throws KRunExecutionException {
         this.context = context;
         this.executor = executor;
+        this.loader = loader;
+        this.kem = kem;
     }
 
     @Override
     public void start(Term initialConfiguration) throws KRunExecutionException {
         try {
             org.kframework.parser.concrete.KParser.ImportTblRule(context.files.resolveKompiled("."));
-            ASTNode pattern = DefinitionLoader.parsePattern(
+            ASTNode pattern = loader.parsePattern(
                     KRunOptions.DEFAULT_PATTERN,
                     null,
                     Sort.BAG,
                     context);
-            defaultPatternInfo = new RuleCompilerSteps(context);
+            defaultPatternInfo = new RuleCompilerSteps(context, kem);
             pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
             defaultPattern = (Rule) pattern;

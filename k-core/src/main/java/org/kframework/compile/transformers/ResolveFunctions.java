@@ -5,7 +5,7 @@ package org.kframework.compile.transformers;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Add the function attribute to rules which rewrite either a TermCons of
@@ -48,7 +48,7 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
         node = node.shallowCopy();
         node.setAttributes(node.getAttributes().shallowCopy());
         if (node.containsAttribute("heat")) {
-            GlobalSettings.kem.registerCompilerError(
+            throw KExceptionManager.compilerError(
                     "Top symbol tagged as function but evaluation strategies are not supported for functions.",
                     this, node);
         }

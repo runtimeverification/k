@@ -7,22 +7,25 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.ColorSetting;
-import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.TermLoader;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AddBracketsFilter2 extends ParseForestTransformer {
 
-    public AddBracketsFilter2(Context context) throws IOException {
+    private final TermLoader loader;
+
+    public AddBracketsFilter2(Context context, TermLoader loader) {
         super("Add more brackets", context);
+        this.loader = loader;
         org.kframework.parser.concrete.KParser.ImportTblRule(context.files.resolveKompiled("."));
     }
 
     private Term reparsed = null;
-    public AddBracketsFilter2(Term reparsed, Context context) {
+    private AddBracketsFilter2(Term reparsed, Context context, TermLoader loader) {
         super("Add brackets to term based on parse forest", context);
+        this.loader = loader;
         this.reparsed = reparsed;
     }
 
@@ -114,12 +117,12 @@ public class AddBracketsFilter2 extends ParseForestTransformer {
         unparser.visitNode(ast);
         String unparsed = unparser.getResult();
         try {
-            ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, context);
+            ASTNode rule = loader.parsePatternAmbiguous(unparsed, context);
             Term reparsed = ((Sentence)rule).getBody();
             if (!reparsed.contains(ast)) {
                 return replaceWithVar(ast);
             }
-            return new AddBracketsFilter2(reparsed, context).visitNode(ast);
+            return new AddBracketsFilter2(reparsed, context, loader).visitNode(ast);
         } catch (ParseFailedException e) {
             return replaceWithVar(ast);
         }

@@ -9,18 +9,21 @@ import org.kframework.kil.ModuleItem;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 public class CollectSynModulesVisitor extends BasicVisitor {
-    public CollectSynModulesVisitor(Context context) {
+
+    private final KExceptionManager kem;
+
+    public CollectSynModulesVisitor(Context context, KExceptionManager kem) {
         super(context);
+        this.kem = kem;
     }
 
     public Set<String> synModNames = new HashSet<String>();
@@ -33,14 +36,14 @@ public class CollectSynModulesVisitor extends BasicVisitor {
             String msg = "Module " + def.getMainSyntaxModule() + " is not imported by the main module " +
                     def.getMainModule() + ".  The parser generator will use " + def.getMainModule() +
                     " as the main syntax module.";
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg));
+            kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg));
             synQue.add(def.getMainModule());
         }
 
         Module bshm = def.getModulesMap().get("AUTO-INCLUDED-MODULE-SYNTAX");
         if (bshm == null) {
             String msg = "Could not find module AUTO-INCLUDED-MODULE-SYNTAX (automatically included in the main syntax module)!";
-            GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
+            kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg));
         } else
             synQue.add("AUTO-INCLUDED-MODULE-SYNTAX");
 
@@ -61,7 +64,7 @@ public class CollectSynModulesVisitor extends BasicVisitor {
                                 synQue.add(mm.getName());
                             else if (!MetaK.isKModule(mname2)) {
                                 String msg = "Could not find module: " + mname2 + " imported from: " + m.getName();
-                                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, getName(), imp.getSource(), imp.getLocation()));
+                                kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, getName(), imp.getSource(), imp.getLocation()));
                             }
                     }
             }

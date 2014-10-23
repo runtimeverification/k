@@ -73,7 +73,7 @@ public class BuiltinFunction {
         try {
             FileUtil.loadProperties(properties, getClass(), hookPropertiesFileName);
         } catch (IOException e) {
-            kem.registerInternalError("Could not read from resource " + hookPropertiesFileName, e);
+            throw KExceptionManager.internalError("Could not read from resource " + hookPropertiesFileName, e);
         }
 
         for (String label : context.klabels.keySet()) {

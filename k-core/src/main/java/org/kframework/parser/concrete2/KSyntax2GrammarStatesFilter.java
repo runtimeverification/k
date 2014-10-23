@@ -28,7 +28,7 @@ import org.kframework.parser.concrete2.Rule.AddLocationRule;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.parser.concrete2.Rule.WrapLabelRule;
 import org.kframework.parser.generator.CollectTerminalsVisitor;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * A simple visitor that goes through every accessible production and creates the NFA states for the
@@ -36,9 +36,10 @@ import org.kframework.utils.general.GlobalSettings;
  * will be referenced each time a NonTerminalState is created.
  */
 public class KSyntax2GrammarStatesFilter extends BasicVisitor {
-    public KSyntax2GrammarStatesFilter(Context context, CollectTerminalsVisitor ctv) {
+    public KSyntax2GrammarStatesFilter(Context context, CollectTerminalsVisitor ctv, KExceptionManager kem) {
         super(KSyntax2GrammarStatesFilter.class.getName(), context);
         this.ctv = ctv;
+        this.kem = kem;
 
         // create a NonTerminal for every declared sort
         for (Sort sort : context.definedSorts) {
@@ -48,6 +49,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
 
     private Grammar grammar = new Grammar();
     private CollectTerminalsVisitor ctv;
+    private final KExceptionManager kem;
 
     @Override
     public Void visit(Production prd, Void _) {
@@ -195,7 +197,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 } catch (PatternSyntaxException ex) {
                     p = Pattern.compile("NoMatch");
                     String msg = "Lexical pattern not compatible with the new parser.";
-                    GlobalSettings.kem.registerCompilerWarning(msg, ex, lx);
+                    kem.registerCompilerWarning(msg, ex, lx);
                 }
             } else {
                 p = Pattern.compile(prd.getAttribute(Constants.REGEX));

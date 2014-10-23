@@ -9,7 +9,6 @@ import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TempDir;
 import org.kframework.utils.file.WorkingDir;
-import org.kframework.utils.general.GlobalSettings;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -20,7 +19,6 @@ public class CommonModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        requestStaticInjection(GlobalSettings.class);
         requestStaticInjection(Tool.class);
 
         bind(File.class).annotatedWith(WorkingDir.class).toInstance(new File("."));

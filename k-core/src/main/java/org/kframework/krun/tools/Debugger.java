@@ -180,8 +180,7 @@ public interface Debugger {
             try {
                 reader = new ConsoleReader();
             } catch (IOException e) {
-                kem.registerInternalError("IO error detected interacting with console", e);
-                throw new AssertionError("unreachable");
+                throw KExceptionManager.internalError("IO error detected interacting with console", e);
             }
             // adding autocompletion and history feature to the stepper internal
             // commandline by using the JLine library
@@ -201,12 +200,11 @@ public interface Debugger {
                 System.out.println("After running one step of execution the result is:\n");
                 System.out.println(statePrinter.run(debugger.getState(debugger.getCurrentState()), a));
             } catch (UnsupportedBackendOptionException e) {
-                kem.registerCriticalError("Backend \""
+                throw KExceptionManager.criticalError("Backend \""
                         + kompileOptions.backend
                         + "\" does not support option " + e.getMessage(), e);
-                throw new AssertionError("unreachable");
             } catch (KRunExecutionException e) {
-                kem.registerCriticalError(e.getMessage(), e);
+                throw KExceptionManager.criticalError(e.getMessage(), e);
             }
             while (true) {
                 System.out.println();
@@ -214,8 +212,7 @@ public interface Debugger {
                 try {
                     input = reader.readLine("Command > ");
                 } catch (IOException e) {
-                    kem.registerInternalError("IO error detected interacting with console", e);
-                    throw new AssertionError("unreachable");
+                    throw KExceptionManager.internalError("IO error detected interacting with console", e);
                 }
                 if (input == null) {
                     // probably pressed ^D
@@ -291,8 +288,7 @@ public interface Debugger {
                             loader.saveOrDie(out, debugger.getGraph());
                             files.saveToWorkingDirectory(options.save.file, Base64.encode(out.toByteArray()));
                         } catch (IOException e) {
-                            kem.registerInternalError("Error writing to binary file", e);
-                            throw new AssertionError("unreachable");
+                            throw KExceptionManager.internalError("Error writing to binary file", e);
                         }
                         System.out.println("File successfully saved.");
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandLoad) {
@@ -304,8 +300,7 @@ public interface Debugger {
                             debugger.setCurrentState(0);
                             System.out.println("File successfully loaded.");
                         } catch (IOException e) {
-                            kem.registerInternalError("Error reading from binary file", e);
-                            throw new AssertionError("unreachable");
+                            throw KExceptionManager.internalError("Error reading from binary file", e);
                         }
                     } else if (command(jc) instanceof KRunDebuggerOptions.CommandRead) {
                         debugger.readFromStdin(StringBuiltin.valueOf(options.read.string).stringValue());
