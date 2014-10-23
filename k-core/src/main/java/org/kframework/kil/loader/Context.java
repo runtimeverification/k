@@ -76,6 +76,7 @@ public class Context implements Serializable {
     public SetMultimap<String, Production> listKLabels = HashMultimap.create();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
 
+    public Map<Sort, Production> canonicalBracketForSort = new HashMap<>();
     private Poset<Sort> subsorts = Poset.create();
     private Poset<Sort> syntacticSubsorts = Poset.create();
     public java.util.Set<Sort> definedSorts = Sort.getBaseSorts();

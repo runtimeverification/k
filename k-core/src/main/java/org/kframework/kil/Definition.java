@@ -89,6 +89,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         new UpdateAssocVisitor(context).visitNode(this);
         new CollectProductionsVisitor(context).visitNode(this);
         context.computeConses();
+        new CollectBracketsVisitor(context).visitNode(this);
         new CollectSubsortsVisitor(context).visitNode(this);
         new CollectPrioritiesVisitor(context).visitNode(this);
         new CollectStartSymbolPgmVisitor(context).visitNode(this);
