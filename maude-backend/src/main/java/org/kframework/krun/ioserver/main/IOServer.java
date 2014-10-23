@@ -2,12 +2,13 @@
 package org.kframework.krun.ioserver.main;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.commands.*;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
+
+import com.google.inject.Inject;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -21,43 +22,45 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.logging.Logger;
 
 
-public class IOServer {
-    int port;
-    ServerSocketChannel serverSocket;
-    ThreadPoolExecutor pool;
-    private int POOL_THREADS_SIZE = 10;
-    private Logger _logger;
-    protected Context context;
-    protected FileSystem fs;
+public class IOServer implements Runnable {
+    private ServerSocketChannel serverSocket;
+    private ThreadPoolExecutor pool;
+    private static final int POOL_THREADS_SIZE = 10;
+    private final Context context;
+    private final FileSystem fs;
+    private final ConfigurationCreationOptions options;
+    private final FileUtil files;
+    private int port;
 
-    public IOServer(int port, Logger logger, Context context, FileSystem fs) {
+    @Inject
+    public IOServer(Context context, FileSystem fs, ConfigurationCreationOptions options, FileUtil files) {
         this.context = context;
         this.fs = fs;
-        this.port = port;
-        _logger = logger;
-        pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(POOL_THREADS_SIZE);
-        createServer();
+        this.options = options;
+        this.files = files;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     public void createServer() {
+        pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(POOL_THREADS_SIZE);
         try {
             serverSocket = ServerSocketChannel.open();
             serverSocket.socket().bind(new InetSocketAddress(port));
             this.port = serverSocket.socket().getLocalPort();
         } catch (IOException e) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "IO Server could not listen on port " + port));
+            GlobalSettings.kem.registerCriticalError("IO Server could not listen on port " + port, e);
         }
     }
 
     public void acceptConnections() throws IOException {
-        _logger.info("Server started at " + serverSocket.socket().getInetAddress() + ": " + port);
         try {
             while (true) {
                 Socket clientSocket = serverSocket.socket().accept();
-                _logger.info(clientSocket.toString());
                 String msg = getMessage(clientSocket);
                 Command command = parseCommand(msg, clientSocket);
 
@@ -106,8 +109,6 @@ public class IOServer {
     private Command parseCommand(String msg, Socket clientSocket) {
         String inputLine = msg;
 
-        _logger.info("received request: " + inputLine);
-
         // parse
         // TODO: here XML should be used...
         // maudeId#command#args#
@@ -116,7 +117,7 @@ public class IOServer {
 
         System.arraycopy(args, 2, args1, 0, args.length-2);
 
-        Command command = createCommand(args1, clientSocket, _logger);
+        Command command = createCommand(args1, clientSocket);
 
         command.maudeId = Integer.parseInt(args[0]);
         return command;
@@ -129,7 +130,7 @@ public class IOServer {
      * @param socket
      * @return the corresponding Command(thread or task) for the given command
      */
-    public Command createCommand(String[] args, Socket socket, Logger logger) {
+    public Command createCommand(String[] args, Socket socket) {
 
         // fail if wrong arguments are given
         String command = null;
@@ -141,48 +142,48 @@ public class IOServer {
 
         // switch on command and create appropriate objects
         if (command.equals("open")) {
-            return new CommandOpen(args, socket, logger, fs); //, maudeId);
+            return new CommandOpen(args, socket, fs); //, maudeId);
         }
         if (command.equals("close")) {
-            return new CommandClose(args, socket, logger, fs); //, maudeId);
+            return new CommandClose(args, socket, fs); //, maudeId);
         }
         if (command.equals("seek")) {
-            return new CommandSeek(args, socket, logger, fs); //, maudeId);
+            return new CommandSeek(args, socket, fs); //, maudeId);
         }
         if (command.equals("position")) {
-            return new CommandPosition(args, socket, logger, fs); //, maudeId);
+            return new CommandPosition(args, socket, fs); //, maudeId);
         }
         if (command.equals("readbyte")) {
-            return new CommandReadbyte(args, socket, logger, fs); //, maudeId);
+            return new CommandReadbyte(args, socket, fs); //, maudeId);
         }
         if (command.equals("readbytes")) {
-            return new CommandReadbytes(args, socket, logger, fs); //, maudeId);
+            return new CommandReadbytes(args, socket, fs); //, maudeId);
         }
         if (command.equals("writebyte")) {
-            return new CommandWritebyte(args, socket, logger, fs); //, maudeId);
+            return new CommandWritebyte(args, socket, fs); //, maudeId);
         }
         if (command.equals("writebytes")) {
-            return new CommandWritebytes(args, socket, logger, fs); //, maudeId);
+            return new CommandWritebytes(args, socket, fs); //, maudeId);
         }
         if (command.equals("stat")) {
-            return new CommandStat(args, socket, logger, fs);
+            return new CommandStat(args, socket, fs);
         }
         if (command.equals("opendir")) {
-            return new CommandOpendir(args, socket, logger, fs);
+            return new CommandOpendir(args, socket, fs);
         }
         if (command.equals("end")) {
-            CommandEnd c = new CommandEnd(args, socket, logger, fs);
+            CommandEnd c = new CommandEnd(args, socket, fs);
             c.setPool(pool);
             return c;
         }
         if (command.equals("parse")) {
-            return new CommandParse(args, socket, logger, context, fs);
+            return new CommandParse(args, socket, context, fs, options);
         }
         if (command.equals("system")) {
-            return new CommandSystem(args, socket, logger, context, fs);
+            return new CommandSystem(args, socket, fs, files);
         }
 
-        return new CommandUnknown(args, socket, logger, fs); //, (long) 0);
+        return new CommandUnknown(args, socket, fs); //, (long) 0);
     }
 
     /***
@@ -191,7 +192,7 @@ public class IOServer {
      * @param socket
      */
     public static void fail(String msgId, String reason, Socket socket) {
-
+        System.err.println(reason);
         reason = msgId + "\001fail\001" + reason + "\001\001\001\n";
         //System.out.println(reason);
         BufferedWriter output;
@@ -207,41 +208,25 @@ public class IOServer {
             output.close();
             socket.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            GlobalSettings.kem.registerCriticalError("Error writing output to client", e);
         }
     }
 
     public static void fail(String reason, Socket socket) {
         fail("-1", reason, socket);
     }
-}
 
-/*
- * 1. server fisiere - accepta command -> execute
- *
- * accept(Command c) { c.execute(lookup(c.ID));
- *
- * /*
- *
- * mesaj === comanda
- *
- * 1. open(uri, attr) success: ID fail: string: ""
- *
- * 2. resopen(ID, uri, attr) success fail: string
- *
- * 3. close(ID) success fail
- *
- * 4. seek(ID, pos) success fail
- *
- * 4'. position(ID) success fail ?
- *
- *
- * 5. readbyte(ID) return ASCII fail: EOF
- *
- * 6. writechar(ID) success fail
- *
- * 7. flush(ID) success fail
- *
- * 8. peek(ID) success: ASCII fail
- */
+    @Override
+    public void run() {
+        createServer();
+        synchronized(this) {
+            this.notify();
+        }
+        try {
+            acceptConnections();
+        } catch (IOException e) {
+            GlobalSettings.kem.registerInternalError("Failed to start IO server: " + e.getMessage(), e);
+        }
+
+    }
+}

@@ -5,7 +5,6 @@ import org.kframework.krun.api.io.FileSystem;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 
 
@@ -13,10 +12,10 @@ public class CommandClose extends Command {
 
     private Long ID;
 
-    public CommandClose(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+    public CommandClose(String[] args, Socket socket, FileSystem fs) { //, Long maudeId) {
 
         // the form of the request should be: close#ID
-        super(args, socket, logger, fs); //, maudeId);
+        super(args, socket, fs); //, maudeId);
 
         try {
             ID = Long.parseLong(args[1]);

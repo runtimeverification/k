@@ -5,7 +5,6 @@ import org.kframework.krun.api.io.FileSystem;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 public class CommandWritebytes extends Command {
 
@@ -14,8 +13,8 @@ public class CommandWritebytes extends Command {
     private String string;
     private byte[] bytes;
 
-    public CommandWritebytes(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
-        super(args, socket, logger, fs); //, maudeId);
+    public CommandWritebytes(String[] args, Socket socket, FileSystem fs) { //, Long maudeId) {
+        super(args, socket, fs); //, maudeId);
 
         try {
             ID = Long.parseLong(args[1]);

@@ -52,7 +52,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
 import org.kframework.kil.loader.Context;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.SubstitutionFilter;
@@ -93,45 +92,38 @@ public class MaudeExecutor implements Executor {
     public static final String xmlOutFile = "maudeoutput.xml";
     public static final String processedXmlOutFile = "maudeoutput_simplified.xml";
 
-    private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
     private final KRunOptions options;
     private final MaudeKRunOptions maudeOptions;
     private final Stopwatch sw;
     private final Context context;
     private final FileUtil files;
+    private final KRunner runner;
 
-    private boolean ioServer;
     private int counter = 0;
 
     @Inject
     MaudeExecutor(
             KRunOptions options,
-            KompileOptions kompileOptions,
             Stopwatch sw,
             Context context,
             KExceptionManager kem,
             MaudeKRunOptions maudeOptions,
-            FileUtil files) {
+            FileUtil files,
+            KRunner runner) {
         this.options = options;
         this.sw = sw;
         this.context = context;
-        this.kompileOptions = kompileOptions;
         this.kem = kem;
         this.maudeOptions = maudeOptions;
         this.files = files;
-
-        ioServer = options.io();
+        this.runner = runner;
     }
 
     void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
         files.saveToTemp(inFile, maudeCmd.toString());
 
         int returnValue;
-        KRunner runner = new KRunner(files.resolveKompiled("main.maude"),
-                    files.resolveTemp(outFile), files.resolveTemp(errFile), files.resolveTemp(inFile), files.resolveTemp(xmlOutFile),
-                    kompileOptions.mainModule(),
-                    maudeOptions.logIO, !ioServer, context);
         returnValue = runner.run();
         if (files.resolveTemp(errFile).exists()) {
             String content = files.loadFromTemp(errFile);

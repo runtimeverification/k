@@ -8,23 +8,19 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 
 public abstract class Command implements Runnable {
     Socket socket;
     public int maudeId;
     protected FileSystem fs;
-    private Logger _logger;
 
-    public Command(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+    public Command(String[] args, Socket socket, FileSystem fs) { //, Long maudeId) {
         this.socket = socket;
         this.fs = fs;
-        _logger = logger;
     }
 
     public void fail(String reason) {
-        _logger.info(maudeId + " is failing because of " + reason);
         IOServer.fail(Integer.toString(maudeId), reason, socket);
     }
 
@@ -36,7 +32,6 @@ public abstract class Command implements Runnable {
         for (String s : messages) {
             success += s + "\001";
         }
-        _logger.info("sending '" + success + "\001\001' to "+ maudeId);
         success += "\001\001\n";
 
         BufferedWriter output = null;
@@ -48,18 +43,13 @@ public abstract class Command implements Runnable {
             output.flush();
             output.close();
         } catch (IOException e) {
-            _logger.info("failed to respond to client " + maudeId);
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         try {
-            _logger.info("Closing client socket for " + maudeId);
-//            socket.shutdownOutput();
-//            if (output != null) {output.close();}
             Thread.sleep(100);   // There should exist a better solution for this problem
             socket.close();
         } catch (IOException e) {
-            _logger.info("failed to close socket for " + maudeId);
             e.printStackTrace();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

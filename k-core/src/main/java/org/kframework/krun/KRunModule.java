@@ -31,6 +31,8 @@ import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.Transition;
+import org.kframework.krun.api.io.FileSystem;
+import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.krun.tools.Debugger;
 import org.kframework.krun.tools.Executor;
 import org.kframework.krun.tools.LtlModelChecker;
@@ -92,6 +94,8 @@ public class KRunModule extends AbstractModule {
         bind(SMTOptions.class).toInstance(options.experimental.smt);
         bind(GlobalOptions.class).toInstance(options.global);
         bind(ColorOptions.class).toInstance(options.color);
+
+        bind(FileSystem.class).to(PortableFileSystem.class);
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().toInstance(options);

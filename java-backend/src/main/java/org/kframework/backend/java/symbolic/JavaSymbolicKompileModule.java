@@ -10,6 +10,9 @@ import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.krun.api.io.FileSystem;
+import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
@@ -22,6 +25,7 @@ public class JavaSymbolicKompileModule extends AbstractModule {
         bind(JavaExecutionOptions.class).toInstance(new JavaExecutionOptions());
         bind(BuiltinIOOperations.class).to(DummyBuiltinIOOperations.class);
         bind(Boolean.class).annotatedWith(FreshRules.class).toInstance(true);
+        bind(FileSystem.class).to(PortableFileSystem.class);
 
         MapBinder<IndexingAlgorithm, RuleIndex> indexBinder = MapBinder.newMapBinder(
                 binder(), IndexingAlgorithm.class, RuleIndex.class);

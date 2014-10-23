@@ -5,7 +5,6 @@ import org.kframework.krun.api.io.FileSystem;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 
 public class CommandOpen extends Command {
@@ -13,8 +12,8 @@ public class CommandOpen extends Command {
     private String path;
     private String mode;
 
-    public CommandOpen(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
-        super(args, socket, logger, fs); //, maudeId);
+    public CommandOpen(String[] args, Socket socket, FileSystem fs) { //, Long maudeId) {
+        super(args, socket, fs); //, maudeId);
 
         // uri#attribute1=v1#a2=v2...
         path = args[1];

@@ -14,15 +14,14 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public class CommandStat extends Command {
 
     private String path;
     private boolean follow;
 
-    public CommandStat(String[] args, Socket socket, Logger logger, FileSystem fs) {
-        super(args, socket, logger, fs);
+    public CommandStat(String[] args, Socket socket, FileSystem fs) {
+        super(args, socket, fs);
 
         path = args[1];
         follow = Boolean.parseBoolean(args[2]);
