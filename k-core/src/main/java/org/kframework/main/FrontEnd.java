@@ -52,6 +52,7 @@ public abstract class FrontEnd {
             if (globalOptions.debug) {
                 e.printStackTrace();
             }
+            e.register(kem);
             kem.print();
         }
         return succeeded;
