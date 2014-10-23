@@ -610,7 +610,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * between builtin data structures will remain intact if they cannot be
      * resolved completely.
      */
-    public TruthValue simplify2() {
+    public TruthValue simplifyBeforePatternFolding() {
         return simplify(false, false);
     }
 
