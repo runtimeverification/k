@@ -10,6 +10,7 @@
 .recommenders
 .cache
 .idea
+*.iml
 .project
 .classpath
 .settings/
