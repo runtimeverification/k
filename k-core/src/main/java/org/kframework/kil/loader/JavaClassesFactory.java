@@ -110,10 +110,4 @@ public class JavaClassesFactory {
         GlobalSettings.kem.registerCriticalError(">>> " + element.getNodeName() + " <<< - unimplemented yet: org.kframework.kil.loader.JavaClassesFactory");
         return null;
     }
-
-    private static java.util.Map<Integer, ASTNode> cache = new HashMap<Integer, ASTNode>();
-
-    public static void clearCache() {
-        cache.clear();
-    }
 }
