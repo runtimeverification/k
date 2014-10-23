@@ -67,7 +67,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 if (ss.containsAttribute("kore")) {
                     long startTime = System.currentTimeMillis();
                     parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                    if (globalOptions.verbose)
+                    if (context.globalOptions.verbose)
                         System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
                 } else
                     parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
@@ -112,7 +112,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 // last resort disambiguation
                 config = new AmbFilter(context).visitNode(config);
 
-                if (globalOptions.debug) {
+                if (context.globalOptions.debug) {
                     File file = context.files.resolveTemp("timing.log");
                     if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                         GlobalSettings.kem.registerCriticalError("Could not create directory " + file.getParentFile());

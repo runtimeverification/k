@@ -59,8 +59,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
     protected final Context context;
     protected final Module currentModule;
     protected final Definition currentDefinition;
-    protected final KompileOptions kompileOptions;
-    protected final GlobalOptions globalOptions;
     final String name;
 
     protected IdentityHashMap<ASTNode, R> cache = new IdentityHashMap<>();
@@ -82,8 +80,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         this.context = context;
         this.currentDefinition = currentDefinition;
         this.currentModule = currentModule;
-        this.kompileOptions = context == null ? null : context.kompileOptions;
-        this.globalOptions = context == null ? null : context.globalOptions;
         this.name = name == null ? this.getClass().toString() : name;
     }
 
