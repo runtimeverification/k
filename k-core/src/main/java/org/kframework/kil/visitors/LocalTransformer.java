@@ -2,6 +2,8 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.ParseFailedException;
 
@@ -15,6 +17,15 @@ public class LocalTransformer extends AbstractTransformer<ParseFailedException> 
 
     public LocalTransformer(String name, Context context) {
         super(name, context);
+    }
+
+    public LocalTransformer(String name, Context context, Definition currentDefinition) {
+        super(name, context, currentDefinition);
+    }
+
+    public LocalTransformer(String name, Context context,
+                            Definition currentDefinition, Module currentModule) {
+        super(name, context, currentDefinition, currentModule);
     }
 
     @Override

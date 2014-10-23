@@ -8,6 +8,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
+import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,24 +56,49 @@ import java.util.Map;
  * return {@code null}.
  */
 public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visitor<P, R, E> {
-    protected org.kframework.kil.loader.Context context;
-    protected KompileOptions kompileOptions;
-    protected GlobalOptions globalOptions;
-    String name;
+    protected final Context context;
+    protected final Module currentModule;
+    protected final Definition currentDefinition;
+    protected final KompileOptions kompileOptions;
+    protected final GlobalOptions globalOptions;
+    final String name;
 
     protected IdentityHashMap<ASTNode, R> cache = new IdentityHashMap<>();
 
-    public AbstractVisitor(org.kframework.kil.loader.Context context) {
+    public AbstractVisitor(Context context) {
         this.context = context;
-        if (context != null) {
-            this.kompileOptions = context.kompileOptions;
-            this.globalOptions = context.globalOptions;
-        }
+        this.currentDefinition = null;
+        this.currentModule = null;
+        this.kompileOptions = context == null ? null : context.kompileOptions;
+        this.globalOptions = context == null ? null : context.globalOptions;
         this.name = this.getClass().toString();
     }
 
-    public AbstractVisitor(String name, org.kframework.kil.loader.Context context) {
-        this(context);
+    public AbstractVisitor(String name, Context context) {
+        this.context = context;
+        this.currentDefinition = null;
+        this.currentModule = null;
+        this.kompileOptions = context == null ? null : context.kompileOptions;
+        this.globalOptions = context == null ? null : context.globalOptions;
+        this.name = name;
+    }
+
+    public AbstractVisitor(String name, Context context, Definition currentDefinition) {
+        this.context = context;
+        this.currentDefinition = currentDefinition;
+        this.currentModule = null;
+        this.kompileOptions = context == null ? null : context.kompileOptions;
+        this.globalOptions = context == null ? null : context.globalOptions;
+        this.name = name;
+    }
+
+    public AbstractVisitor(String name, Context context,
+                           Definition currentDefinition, Module currentModule) {
+        this.context = context;
+        this.currentDefinition = currentDefinition;
+        this.currentModule = currentModule;
+        this.kompileOptions = context == null ? null : context.kompileOptions;
+        this.globalOptions = context == null ? null : context.globalOptions;
         this.name = name;
     }
 

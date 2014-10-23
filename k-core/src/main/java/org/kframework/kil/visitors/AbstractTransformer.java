@@ -3,6 +3,8 @@ package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 
 /**
@@ -22,6 +24,15 @@ public abstract class AbstractTransformer<E extends Throwable> extends AbstractV
 
     public AbstractTransformer(Context context) {
         super(context);
+    }
+
+    public AbstractTransformer(String name, Context context, Definition currentDefinition) {
+        super(name, context, currentDefinition);
+    }
+
+    public AbstractTransformer(String name, Context context,
+                               Definition currentDefinition, Module currentModule) {
+        super(name, context, currentDefinition, currentModule);
     }
 
     @Override

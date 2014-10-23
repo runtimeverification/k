@@ -3,6 +3,8 @@ package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.AbstractVisitor;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 
 /**
@@ -18,6 +20,15 @@ public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> 
 
     public BasicVisitor(String name, Context context) {
         super(name, context);
+    }
+
+    public BasicVisitor(String name, Context context, Definition currentDefinition) {
+        super(name, context, currentDefinition);
+    }
+
+    public BasicVisitor(String name, Context context,
+                        Definition currentDefinition, Module currentModule) {
+        super(name, context, currentDefinition, currentModule);
     }
 
     @Override
