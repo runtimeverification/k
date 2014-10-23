@@ -36,6 +36,14 @@ import com.google.common.collect.Maps;
  */
 public class RewriteEngineUtils {
 
+    public static boolean isSubsorted(Term big, Term small, TermContext context) {
+        return context.definition().subsorts().isSubsorted(big.sort(), small.sort());
+    }
+
+    public static boolean isSubsortedEq(Term big, Term small, TermContext context) {
+        return context.definition().subsorts().isSubsortedEq(big.sort(), small.sort());
+    }
+
     /**
      * Evaluates the side-conditions of a rule according to a given
      * substitution and updates the substitution accordingly.
@@ -52,7 +60,7 @@ public class RewriteEngineUtils {
 
         Map<Variable, Term> crntSubst = substitution;
         /* add bindings for fresh variables used in the rule */
-        for (Variable variable : rule.freshVariables()) {
+        for (Variable variable : rule.freshConstants()) {
             crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
         }
 
@@ -141,7 +149,7 @@ public class RewriteEngineUtils {
         List<Map<Variable, Term>> results = Lists.newArrayList();
         for (Map<Variable, Term> crntSubst : substitutions) {
             /* add bindings for fresh variables used in the rule */
-            for (Variable variable : rule.freshVariables()) {
+            for (Variable variable : rule.freshConstants()) {
                 crntSubst.put(variable, FreshOperations.fresh(variable.sort(), context));
             }
 

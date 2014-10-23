@@ -35,8 +35,6 @@ import java.util.Map;
  */
 public class CheckVariables extends BasicVisitor {
 
-    public static final String UNBOUND_VARS = "hasUnboundVars";
-
     KompileOptions options;
 
     public CheckVariables(Context context) {
@@ -125,7 +123,6 @@ public class CheckVariables extends BasicVisitor {
                         this, v);
             }
             if (!left.containsKey(v)) {
-                node.addAttribute(UNBOUND_VARS, "");
                 GlobalSettings.kem.registerCompilerError(
                         "Unbounded variable " + v.toString() + "should start with ? or !.",
                         this, v);

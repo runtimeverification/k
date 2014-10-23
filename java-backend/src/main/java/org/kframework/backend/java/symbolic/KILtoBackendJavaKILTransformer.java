@@ -65,6 +65,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -467,12 +468,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Term leftHandSide = (Term) this.visitNode(rewrite.getLeft());
         Term rightHandSide = (Term) this.visitNode(rewrite.getRight());
 
-        Collection<Term> requires = new ArrayList<>();
+        List<Term> requires = new ArrayList<>();
         if (node.getRequires() != null) {
             transformConjunction(requires, (Term) this.visitNode(node.getRequires()));
         }
 
-        Collection<Term> ensures = new ArrayList<>();
+        List<Term> ensures = new ArrayList<>();
         if (node.getEnsures() != null) {
             transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
         }
@@ -519,13 +520,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         }
 
-        Collection<Variable> freshVariables = new ArrayList<>();
         // TODO(AndreiS): check !Variable only appears in the RHS
-        for (org.kframework.kil.Variable variable : node.getBody().variables()) {
-            if (variable.isFreshConstant()) {
-                freshVariables.add((Variable) this.visitNode(variable));
-            }
-        }
+        Set<Variable> freshConstants = node.getBody().variables().stream()
+                .filter(v -> v.isFreshConstant())
+                .map(v -> (Variable) this.visitNode(v))
+                .collect(Collectors.toSet());
+
+        Set<Variable> freshVariables = node.getBody().variables().stream()
+                .filter(v -> v.isFreshVariable())
+                .map(v -> (Variable) this.visitNode(v))
+                .collect(Collectors.toSet());
 
         assert leftHandSide.kind() == rightHandSide.kind()
                 || leftHandSide.kind().isComputational() && rightHandSide.kind().isComputational();
@@ -559,6 +563,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rightHandSide,
                 requires,
                 ensures,
+                freshConstants,
                 freshVariables,
                 lookupsBuilder.build(),
                 ruleData.isCompiledForFastRewriting(),
@@ -715,6 +720,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 rightHandSide,
                 requires,
                 ensures,
+                rule.freshConstants(),
                 rule.freshVariables(),
                 lookupsBuilder.build(),
                 rule.isCompiledForFastRewriting(),

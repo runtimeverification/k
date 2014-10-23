@@ -8,6 +8,9 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -32,8 +35,8 @@ public class Variable extends Term implements Immutable {
      *            the set of {@code Variable}s
      * @return the substitution
      */
-    public static Map<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
-        Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
+    public static BiMap<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
+        BiMap<Variable, Variable> substitution = HashBiMap.create(variableSet.size());
         for (Variable variable : variableSet) {
             substitution.put(variable, variable.getFreshCopy());
         }

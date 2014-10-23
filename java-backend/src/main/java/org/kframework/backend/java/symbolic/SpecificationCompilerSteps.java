@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddInjections;
 import org.kframework.compile.transformers.AddKCell;
@@ -14,6 +15,7 @@ import org.kframework.compile.transformers.ResolveContextAbstraction;
 import org.kframework.compile.transformers.ResolveListOfK;
 import org.kframework.compile.transformers.ResolveOpenCells;
 import org.kframework.compile.transformers.ResolveRewrite;
+import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompileDataStructures;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.kil.Module;
@@ -32,7 +34,7 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new RemoveBrackets(context));
         add(new AddEmptyLists(context));
         add(new RemoveSyntacticCasts(context));
-        //add(new CheckVisitorStep<Definition>(new CheckVariables(context), context));
+        add(new CheckVisitorStep<Module>(new CheckVariables(context), context));
         //add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
 
         add(new AddKCell(context));

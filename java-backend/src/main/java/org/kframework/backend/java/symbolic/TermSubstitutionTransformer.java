@@ -8,7 +8,7 @@ import java.util.Map;
 
 
 /**
- * Substitutes variables with terms according to a given substitution map.
+ * Substitutes terms with terms according to a given substitution map.
  *
  * @author AndreiS
  */
@@ -16,22 +16,29 @@ public class TermSubstitutionTransformer extends PrePostTransformer {
 
     private final Map<? extends Term, ? extends Term> substitution;
 
-    public TermSubstitutionTransformer(Map<? extends Term, ? extends Term> substitution, TermContext context) {
+    public static JavaSymbolicObject substitute(JavaSymbolicObject object,
+            Map<? extends Term, ? extends Term> substitution,
+            TermContext context) {
+        TermSubstitutionTransformer transformer = new TermSubstitutionTransformer(
+                substitution, context);
+        return (JavaSymbolicObject) object.accept(transformer);
+    }
+
+    private TermSubstitutionTransformer(Map<? extends Term, ? extends Term> substitution, TermContext context) {
         super(context);
         this.substitution = substitution;
-//        preTransformer.addTransformer(new LocalVariableChecker());
         preTransformer.addTransformer(new LocalSubstitutionTransformer());
     }
 
     private class LocalSubstitutionTransformer extends LocalTransformer {
 
         @Override
-        public ASTNode transform(Term variable) {
-            Term term = substitution.get(variable);
-            if (term != null) {
-                return new DoneTransforming(term);
+        public ASTNode transform(Term term) {
+            Term subst = substitution.get(term);
+            if (subst != null) {
+                return new DoneTransforming(subst);
             } else {
-                return variable;
+                return term;
             }
         }
     }
