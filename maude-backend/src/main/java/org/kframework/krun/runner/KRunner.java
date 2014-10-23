@@ -59,8 +59,8 @@ public class KRunner {
         Thread ioServer = null;
         try {
             if (krunOptions.io()) {
-                ioServer = startServer();
                 synchronized(server) {
+                    ioServer = startServer();
                     server.wait();
                 }
             }
