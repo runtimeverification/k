@@ -69,9 +69,6 @@ public class TermLoader {
         org.kframework.kil.Definition def = new org.kframework.kil.Definition();
         def.setItems(di);
 
-        // ------------------------------------- import files in Stratego
-        org.kframework.parser.concrete.KParser.ImportTblRule(context.files.resolveKompiled("."));
-
         // ------------------------------------- parse configs
         JavaClassesFactory.startConstruction(context);
         def = (Definition) new ParseConfigsFilter(context, false, kem).visitNode(def);
@@ -92,7 +89,7 @@ public class TermLoader {
         if (!context.initialized) {
             assert false : "You need to load the definition before you call parsePattern!";
         }
-        String parsed = org.kframework.parser.concrete.KParser.ParseKCmdString(content);
+        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKCmdString(content, context.files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
         XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
@@ -137,7 +134,7 @@ public class TermLoader {
             assert false : "You need to load the definition before you call parsePattern!";
         }
 
-        String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);
+        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, context.files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         XmlLoader.addSource(doc.getFirstChild(), source);
@@ -183,7 +180,7 @@ public class TermLoader {
             assert false : "You need to load the definition before you call parsePattern!";
         }
 
-        String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);
+        String parsed = org.kframework.parser.concrete.DefinitionLocalKParser.ParseKRuleString(pattern, context.files.resolveKompiled("."));
         Document doc = XmlLoader.getXMLDoc(parsed);
 
         // XmlLoader.addFilename(doc.getFirstChild(), filename);

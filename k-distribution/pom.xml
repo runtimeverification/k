@@ -36,6 +36,12 @@
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>org.kframework.k</groupId>
+      <artifactId>sdf-parser</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -118,10 +124,25 @@
             <configuration>
               <includeTypes>jar</includeTypes>
               <includeScope>runtime</includeScope>
+              <excludeArtifactIds>strategoxt,sdf-parser</excludeArtifactIds>
               <useBaseVersion>false</useBaseVersion>
               <outputDirectory>${project.build.directory}/lib/java</outputDirectory>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-dynamic-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeTypes>jar</includeTypes>
+              <includeScope>runtime</includeScope>
+              <includeArtifactIds>strategoxt,sdf-parser</includeArtifactIds>
+              <stripVersion>true</stripVersion>
+              <outputDirectory>${project.build.directory}/lib/java/dynamic</outputDirectory>
+            </configuration>
+          </execution> 
           <execution>
             <id>unpack-zip-dependencies</id>
             <goals>
