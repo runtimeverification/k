@@ -279,10 +279,8 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
                     patternsBuilder.build(),
                     functionsBuilder.build(),
                     variablesBuilder.build());
-            //return builtinMap.baseTerms().size() == 1 && builtinMap.concreteSize() == 0 ?
-            //        builtinMap.baseTerms().iterator().next() :
-            //        builtinMap;
-            return builtinMap.hasFrame() && builtinMap.entries.isEmpty() ? builtinMap.frame : builtinMap;
+            return builtinMap.baseTerms().size() == 1 && builtinMap.concreteSize() == 0 ?
+                    builtinMap.baseTerms().iterator().next() : builtinMap;
         }
     }
 }
