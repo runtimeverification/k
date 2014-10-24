@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.compile.utils;
 
-import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -43,7 +42,7 @@ public class ConfigurationSubstitutionVisitor extends BasicVisitor {
     public Void visit(Cell cell, Void _) {
         super.visit(cell, _);
         substitutionMultimap.put(
-                new Variable(cell.getLabel().toUpperCase(), context.getCellSort(cell)),
+                new Variable(cell.getLabel().toUpperCase().replace("-", ""), context.getCellSort(cell)),
                 cell.getContents());
         return null;
     }
