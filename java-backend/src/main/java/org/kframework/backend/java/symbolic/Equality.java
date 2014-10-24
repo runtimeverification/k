@@ -230,15 +230,6 @@ public class Equality {
                 return true;
             }
 
-            /* both leftHandSide & rightHandSide must have been evaluated before
-             * this method is invoked */
-            // TODO(YilongL): this doesn't look right; first, we should not rely
-            // on the fact that functions have been evaluated; second, why not
-            // let the SymbolicUnifier do its job but use equals?
-            if (leftHandSide.isGround() && rightHandSide.isGround()) {
-                return !leftHandSide.equals(rightHandSide);
-            }
-
             // TODO(YilongL): I think occurs check should be handled in SymbolicUnifier instead
             if (leftHandSide instanceof Variable
                     && rightHandSide instanceof org.kframework.backend.java.kil.Collection

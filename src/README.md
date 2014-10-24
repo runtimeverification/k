@@ -4,8 +4,7 @@ This is a readme file for the developers.
 # Prerequisites
 
 ## Java Development Kit (required JDK8 or higher)
-You can follow the instructions here: 
-http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html depending on
+You can follow the instructions [http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html](here) depending on
 the type of your machine.
 
 To make sure that everything works you should be able to call `java -version` and
@@ -46,6 +45,33 @@ which will significantly speed up the incremental build process.
 
 You should run K from the k-distribution project, because it is the only project to have the complete
 classpath and therefore all backends.
+
+## Environment
+
+In order for K to run correctly in an IDE, it is necessary that the correct environment variables be set.
+
+### Mac OS X
+
+`PATH=$PATH:<release>/lib/native/osx
+DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:<release>/lib/native/osx`
+
+### Windows x86
+
+`PATH=$PATH;<release>\lib\native\windows;<release>\lib\native\windows32;<release>\lib\native\32`
+
+### Windows x64
+
+`PATH=$PATH;<release>\lib\native\windows;<release>\lib\native\windows64;<release>\lib\native\64`
+
+### Linux i386
+
+`PATH=$PATH:<release>/lib/native/linux:<release>/lib/native/linux32
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<release>/lib/native/linux32`
+
+### Linux amd64
+
+`PATH=$PATH:<release>/lib/native/linux:<release>/lib/native/linux64
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<release>/lib/native/linux64`
 
 ## Eclipse
 To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the

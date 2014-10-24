@@ -27,6 +27,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.loader.RemoveUnusedModules;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.outer.Outer;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -81,7 +82,6 @@ public class DefinitionLoader {
     private final boolean documentation;
     private final boolean autoinclude;
     private final FileUtil files;
-    private final ProgramSDF programSDF;
 
     @Inject
     public DefinitionLoader(
@@ -91,8 +91,7 @@ public class DefinitionLoader {
             OuterParser outer,
             @Backend.Documentation boolean documentation,
             @Backend.Autoinclude boolean autoinclude,
-            FileUtil files,
-            ProgramSDF programSDF) {
+            FileUtil files) {
         this.sw = sw;
         this.loader = loader;
         this.kem = kem;
@@ -100,7 +99,6 @@ public class DefinitionLoader {
         this.documentation = documentation;
         this.autoinclude = autoinclude;
         this.files = files;
-        this.programSDF = programSDF;
     }
 
     public Definition loadDefinition(File mainFile, String lang, Context context) {
@@ -193,7 +191,11 @@ public class DefinitionLoader {
                 if (files.resolveKompiled("Program.sdf").exists())
                     oldSdfPgm = files.loadFromKompiled("Program.sdf");
 
-                StringBuilder newSdfPgmBuilder = programSDF.getSdfForPrograms(def, context);
+                // save the new parser info
+                Grammar newParserGrammar = ProgramSDF.getNewParserForPrograms(def, context);
+                loader.saveOrDie(files.resolveKompiled("newParser.bin"), newParserGrammar);
+
+                StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
 
                 String newSdfPgm = newSdfPgmBuilder.toString();
                 files.saveToTemp("pgm/Program.sdf", newSdfPgm);

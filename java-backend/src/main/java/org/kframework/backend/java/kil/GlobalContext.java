@@ -16,8 +16,11 @@ public class GlobalContext {
     private Definition def;
     public final FileSystem fs;
     public final BuiltinFunction builtins;
+    @Deprecated
     public final EqualityOperations equalityOps;
+    @Deprecated
     public final SymbolicConstraintOperations constraintOps;
+    @Deprecated
     public final KItemOperations kItemOps;
 
     @Inject
