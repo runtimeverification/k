@@ -22,7 +22,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -159,11 +159,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                         var.setSyntactic(false);
                         varDeclMap.put(key, var);
                     }
-                    try {
-                        r = (Sentence) new VariableTypeFilter(varDeclMap, true, context).visitNode(r);
-                    } catch (ParseFailedException e) {
-                        e.report();
-                    }
+                    r = (Sentence) new VariableTypeFilter(varDeclMap, true, context).visitNode(r);
                     // correct the sorts for each variable after type inference
                     CollectRemainingVarsVisitor vars3 = new CollectRemainingVarsVisitor(context);
                     vars3.visitNode(r);
@@ -215,11 +211,7 @@ public class VariableTypeInferenceFilter extends ParseForestTransformer {
                     }
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!varDeclMap.isEmpty()) {
-                        try {
-                            r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
-                        } catch (ParseFailedException e) {
-                            e.report();
-                        }
+                        r = (Sentence) new VariableTypeFilter(varDeclMap, false, context).visitNode(r);
                     }
                 } else {
                     Multimap<String, String> collect = HashMultimap.create();

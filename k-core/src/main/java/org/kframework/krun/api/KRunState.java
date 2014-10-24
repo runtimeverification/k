@@ -10,7 +10,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.SubstitutionFilter;
@@ -56,51 +55,47 @@ public class KRunState implements Serializable, Comparable<KRunState> {
     }
 
     public static Term concretize(Term result, Context context) {
-        try {
-            result = (Term) new DataStructure2Cell(context).visitNode(result);
-            result = (Term) new ConcretizeSyntax(context).visitNode(result);
-            result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
-            result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
-            result = (Term) new ConcretizeSyntax.RemoveEmptyLists(context).visitNode(result);
-            result = (Term) new AddBracketsFilter(context).visitNode(result);
-            if (context.krunOptions.output == OutputModes.SMART) {
-                try {
-                    /* collect existing free variables in the result */
-                    final Set<Variable> existingFreeVariables = new HashSet<Variable>();
-                    BasicVisitor variableCollector = new BasicVisitor(context) {
-                        @Override
-                        public Void visit(Variable var, Void _) {
-                            existingFreeVariables.add(var);
-                            return null;
-                        }
-                    };
-                    variableCollector.visitNode(result);
-
-                    /* add brackets */
-                    AddBracketsFilter2 filter = new AddBracketsFilter2(context);
-                    result = (Term) filter.visitNode(result);
-
-                    /* initialize the substitution map of the filter using existing free variables */
-                    Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
-                    for (Variable var : existingFreeVariables) {
-                        subst.put(var.getName(), var);
+        result = (Term) new DataStructure2Cell(context).visitNode(result);
+        result = (Term) new ConcretizeSyntax(context).visitNode(result);
+        result = (Term) new TypeInferenceSupremumFilter(context).visitNode(result);
+        result = (Term) new FlattenDisambiguationFilter(context).visitNode(result);
+        result = (Term) new ConcretizeSyntax.RemoveEmptyLists(context).visitNode(result);
+        result = (Term) new AddBracketsFilter(context).visitNode(result);
+        if (context.krunOptions.output == OutputModes.SMART) {
+            try {
+                /* collect existing free variables in the result */
+                final Set<Variable> existingFreeVariables = new HashSet<Variable>();
+                BasicVisitor variableCollector = new BasicVisitor(context) {
+                    @Override
+                    public Void visit(Variable var, Void _) {
+                        existingFreeVariables.add(var);
+                        return null;
                     }
-                    while (true) {
-                        Term newResult = (Term) new SubstitutionFilter(subst, context).visitNode(result);
-                        if (newResult.equals(result)) {
-                            break;
-                        }
-                        result = newResult;
-                    }
-                } catch (IOException e) {
-                    GlobalSettings.kem.register(new KException(
-                        ExceptionType.WARNING,
-                        KExceptionGroup.INTERNAL,
-                        "Could not load parser: brackets may be unsound"));
+                };
+                variableCollector.visitNode(result);
+
+                /* add brackets */
+                AddBracketsFilter2 filter = new AddBracketsFilter2(context);
+                result = (Term) filter.visitNode(result);
+
+                /* initialize the substitution map of the filter using existing free variables */
+                Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
+                for (Variable var : existingFreeVariables) {
+                    subst.put(var.getName(), var);
                 }
+                while (true) {
+                    Term newResult = (Term) new SubstitutionFilter(subst, context).visitNode(result);
+                    if (newResult.equals(result)) {
+                        break;
+                    }
+                    result = newResult;
+                }
+            } catch (IOException e) {
+                GlobalSettings.kem.register(new KException(
+                    ExceptionType.WARNING,
+                    KExceptionGroup.INTERNAL,
+                    "Could not load parser: brackets may be unsound"));
             }
-        } catch (ParseFailedException e) {
-            e.report();
         }
         if (result.getClass() == Cell.class) {
             Cell generatedTop = (Cell) result;

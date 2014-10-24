@@ -12,7 +12,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Source;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.Stopwatch;
@@ -45,6 +44,7 @@ public class KastFrontEnd extends FrontEnd {
     private final Provider<Context> contextProvider;
     private final Stopwatch sw;
     private final Map<String, String> env;
+    private final ProgramLoader loader;
 
     @Inject
     KastFrontEnd(
@@ -55,12 +55,14 @@ public class KastFrontEnd extends FrontEnd {
             Stopwatch sw,
             KExceptionManager kem,
             JarInfo jarInfo,
-            @Environment Map<String, String> env) {
+            @Environment Map<String, String> env,
+            ProgramLoader loader) {
         super(kem, options.global, usage, experimentalUsage, jarInfo);
         this.options = options;
         this.contextProvider = contextProvider;
         this.sw = sw;
         this.env = env;
+        this.loader = loader;
     }
 
     /**
@@ -75,31 +77,26 @@ public class KastFrontEnd extends FrontEnd {
         Context context = contextProvider.get();
         Sort sort = sort(options.sort, context);
 
-        try {
-            ASTNode out = ProgramLoader.processPgm(stringToParse, source, sort, context, options.parser);
-            StringBuilder kast;
-            if (options.experimental.pretty) {
-                IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),
-                        options.experimental.auxTabSize, options.experimental.tabSize);
-                KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
-                kastFilter.visitNode(out);
-                kast = kastFilter.getResult();
-            } else {
-                MaudeFilter maudeFilter = new MaudeFilter(context);
-                maudeFilter.visitNode(out);
-                kast = maudeFilter.getResult();
-                kast.append("\n");
-            }
-
-            System.out.print(kast.toString());
-
-            sw.printIntermediate("Maudify Program");
-            sw.printTotal("Total");
-            return true;
-        } catch (ParseFailedException e) {
-            e.report();
-            return false;
+        ASTNode out = loader.processPgm(stringToParse, source, sort, context, options.parser);
+        StringBuilder kast;
+        if (options.experimental.pretty) {
+            IndentationOptions indentationOptions = new IndentationOptions(options.experimental.maxWidth(),
+                    options.experimental.auxTabSize, options.experimental.tabSize);
+            KastFilter kastFilter = new KastFilter(indentationOptions, options.experimental.nextLine, context);
+            kastFilter.visitNode(out);
+            kast = kastFilter.getResult();
+        } else {
+            MaudeFilter maudeFilter = new MaudeFilter(context);
+            maudeFilter.visitNode(out);
+            kast = maudeFilter.getResult();
+            kast.append("\n");
         }
+
+        System.out.print(kast.toString());
+
+        sw.printIntermediate("Maudify Program");
+        sw.printTotal("Total");
+        return true;
     }
 
 

@@ -14,7 +14,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.krun.api.SearchType;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;

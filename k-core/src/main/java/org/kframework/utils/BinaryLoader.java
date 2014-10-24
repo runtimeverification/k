@@ -19,13 +19,6 @@ public class BinaryLoader {
     // be replaced by serialized objects containing data only.
     private final Injector injector;
 
-    @Inject private static BinaryLoader loader;
-
-    @Deprecated
-    public static BinaryLoader instance() {
-        return loader;
-    }
-
     @Inject
     public BinaryLoader(
             KExceptionManager kem,

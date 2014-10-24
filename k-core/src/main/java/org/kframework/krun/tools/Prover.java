@@ -9,7 +9,6 @@ import org.kframework.kil.Module;
 import org.kframework.kil.Sources;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunProofResult;
@@ -78,9 +77,6 @@ public interface Prover {
                 return result;
             } catch (KRunExecutionException e) {
                 kem.registerCriticalError(e.getMessage(), e);
-                throw new AssertionError("unreachable");
-            } catch (ParseFailedException e) {
-                e.report();
                 throw new AssertionError("unreachable");
             }
         }

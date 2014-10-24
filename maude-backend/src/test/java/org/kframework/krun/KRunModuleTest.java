@@ -39,7 +39,7 @@ public class KRunModuleTest extends BaseTestCase {
     @Before
     public void setUp() {
         context.configVarSorts = new HashMap<>();
-        when(rp.runParserOrDie("kast", "foo.c", false, null, context)).thenReturn(KSequence.EMPTY);
+        when(rp.runParser("kast", "foo.c", false, null, context)).thenReturn(KSequence.EMPTY);
     }
 
     @Test
@@ -88,10 +88,10 @@ public class KRunModuleTest extends BaseTestCase {
     private Injector buildInjector(String[] argv) {
         List<Module> definitionSpecificModules = Lists.newArrayList(KRunFrontEnd.getDefinitionSpecificModules(argv));
         definitionSpecificModules.addAll(new MaudeBackendKModule().getDefinitionSpecificKRunModules());
-        Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new TestModule());
+        Module definitionSpecificModuleOverride = Modules.override(definitionSpecificModules).with(new DefinitionSpecificTestModule());
         List<Module> modules = Lists.newArrayList(KRunFrontEnd.getModules(argv, ImmutableList.of(definitionSpecificModuleOverride)));
         modules.addAll(new MaudeBackendKModule().getKRunModules(ImmutableList.of(definitionSpecificModuleOverride)));
-        Injector injector = Guice.createInjector(modules);
+        Injector injector = Guice.createInjector(Modules.override(modules).with(new TestModule()));
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KRunFrontEnd);
         injector.getInstance(Key.get(new TypeLiteral<TransformationProvider<Transformation<Void, Void>>>() {}));
         return injector;

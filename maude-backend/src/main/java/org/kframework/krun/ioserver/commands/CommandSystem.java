@@ -2,9 +2,8 @@
 package org.kframework.krun.ioserver.commands;
 
 import org.kframework.krun.RunProcess;
+import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
-import org.kframework.utils.file.FileUtil;
-
 import java.net.Socket;
 import java.util.Map;
 import java.util.HashMap;
@@ -12,11 +11,11 @@ import java.util.HashMap;
 public class CommandSystem extends Command {
 
     private String[] cmd;
-    private final FileUtil files;
+    private final RunProcess rp;
 
-    public CommandSystem(String[] args, Socket socket, FileSystem fs, FileUtil files) {
+    public CommandSystem(String[] args, Socket socket, FileSystem fs, RunProcess rp) {
         super(args, socket, fs);
-        this.files = files;
+        this.rp = rp;
 
         int length = args.length - 1 - 3 /* garbage */;
         cmd = new String[length];
@@ -24,13 +23,11 @@ public class CommandSystem extends Command {
     }
 
     public void run() {
-      //for (String c : cmd) { System.out.println(c); }
-        RunProcess rp = new RunProcess();
         Map<String, String> environment = new HashMap<>();
-        rp.execute(files.resolveWorkingDirectory("."), environment, cmd);
+        ProcessOutput output = rp.execute(environment, cmd);
 
-        String stdout = rp.getStdout() != null ? rp.getStdout() : "";
-        String stderr = rp.getErr()    != null ? rp.getErr()    : "";
-        succeed(Integer.toString(rp.getExitCode()), stdout.trim(), stderr.trim(), "#EOL");
+        String stdout = output.stdout != null ? output.stdout : "";
+        String stderr = output.stderr != null ? output.stderr : "";
+        succeed(Integer.toString(output.exitCode), stdout.trim(), stderr.trim(), "#EOL");
     }
 }

@@ -10,8 +10,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.DefinitionDir;
-import org.kframework.utils.file.KompiledDir;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -52,15 +50,21 @@ public abstract class BaseTestCase {
         context.kompileOptions = new KompileOptions();
     }
 
-    public class TestModule extends AbstractModule {
+    public class DefinitionSpecificTestModule extends AbstractModule {
 
         @Override
         protected void configure() {
             bind(Context.class).toInstance(context);
             bind(Configuration.class).toInstance(configuration);
+        }
+
+    }
+
+    public class TestModule extends AbstractModule {
+
+        @Override
+        protected void configure() {
             bind(RunProcess.class).toInstance(rp);
-            bind(File.class).annotatedWith(KompiledDir.class).toInstance(kompiledDir);
-            bind(File.class).annotatedWith(DefinitionDir.class).toInstance(definitionDir);
         }
 
     }

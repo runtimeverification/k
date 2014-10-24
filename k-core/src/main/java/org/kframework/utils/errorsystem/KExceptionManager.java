@@ -197,7 +197,7 @@ public class KExceptionManager {
      */
     public static class KEMException extends RuntimeException {
         public final KException exception;
-        private KEMException(KException e) {
+        KEMException(KException e) {
             super(e.getException());
             this.exception = e;
         }

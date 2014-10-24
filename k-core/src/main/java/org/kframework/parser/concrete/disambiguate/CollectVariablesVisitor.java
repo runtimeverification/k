@@ -20,7 +20,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.LocalTransformer;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
 /**
  * Do not use outside the parser!

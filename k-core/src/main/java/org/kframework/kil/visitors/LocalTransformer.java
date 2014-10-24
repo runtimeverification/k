@@ -3,7 +3,7 @@ package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.ParseFailedException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
 /**
  * A {@link AbstractTransformer} which doesn't visit its children. See also

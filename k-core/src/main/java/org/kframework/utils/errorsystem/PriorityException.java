@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
-package org.kframework.kil.visitors.exceptions;
+package org.kframework.utils.errorsystem;
 
-import org.kframework.utils.errorsystem.KException;
 
 @SuppressWarnings("serial")
 public class PriorityException extends ParseFailedException {
