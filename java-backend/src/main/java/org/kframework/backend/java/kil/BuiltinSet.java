@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -186,7 +187,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
 
         public <T extends Term> boolean addAll(Collection<T> elements) {
             // elements refers to the one in the outer class
-            return this.elements.<T>addAll(elements);
+            return this.elements.addAll(elements);
         }
 
         public boolean remove(Term element) {
@@ -198,9 +199,11 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
          */
         public void concatenate(Term... terms) {
             for (Term term : terms) {
-                assert term.sort().equals(Sort.SET)
-                        : "unexpected sort " + term.sort() + " of concatenated term " + term
-                        + "; expected " + Sort.SET;
+                if (!term.sort().equals(Sort.SET)) {
+                    GlobalSettings.kem.registerCriticalError("unexpected sort "
+                            + term.sort() + " of concatenated term " + term
+                            + "; expected " + Sort.SET);
+                }
 
                 if (term instanceof BuiltinSet) {
                     BuiltinSet set = (BuiltinSet) term;
@@ -217,7 +220,7 @@ public class BuiltinSet extends AssociativeCommutativeCollection {
                 } else if (term instanceof Variable) {
                     variablesBuilder.add((Variable) term);
                 } else {
-                    assert false : "unexpected concatenated term" + term;
+                    GlobalSettings.kem.registerCriticalError("unexpected concatenated term" + term);
                 }
             }
         }
