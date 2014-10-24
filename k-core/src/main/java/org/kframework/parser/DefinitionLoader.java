@@ -301,7 +301,7 @@ public class DefinitionLoader {
             // the objects in the sentences are mutable, and we risk altering them and miss
             // warning and error messages when kompiling next time around
             try {
-                def = (Definition) new DisambiguateRulesFilter(context, true).visitNode(def);
+                def = (Definition) new DisambiguateRulesFilter(context, def, true).visitNode(def);
             } catch (ParseFailedException te) {
                 te.printStackTrace();
             }

@@ -83,7 +83,6 @@ public class Context implements Serializable {
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
-    private Poset<String> modules = Poset.create();
     private Poset<File> fileRequirements = Poset.create();
     public Sort startSymbolPgm = Sort.K;
     public Map<String, Sort> configVarSorts = new HashMap<>();
@@ -352,24 +351,6 @@ public class Context implements Serializable {
 
     public void finalizeRequirements() {
         fileRequirements.transitiveClosure();
-    }
-
-    public void addModuleImport(String mainModule, String importedModule) {
-        // add the new subsorting
-        if (mainModule.equals(importedModule))
-            return;
-
-        modules.addRelation(mainModule, importedModule);
-    }
-
-    public void finalizeModules() {
-        modules.transitiveClosure();
-    }
-
-    public boolean isModuleIncludedEq(String localModule, String importedModule) {
-        if (localModule.equals(importedModule))
-            return true;
-        return modules.isInRelation(localModule, importedModule);
     }
 
     public void addSubsort(Sort bigSort, Sort smallSort) {

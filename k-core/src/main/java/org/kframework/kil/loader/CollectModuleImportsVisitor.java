@@ -12,21 +12,38 @@ public class CollectModuleImportsVisitor extends NonCachingVisitor {
         super(context);
     }
 
-    private String parentModule = null;
-
-    public Void visit(Definition def, Void _) {
-        super.visit(def, _);
-        context.finalizeModules();
-        return null;
+    public CollectModuleImportsVisitor(Context context, Definition currentDefinition) {
+        super(context, currentDefinition);
     }
 
+    public CollectModuleImportsVisitor(Context context,
+                                       Definition currentDefinition, Module currentModule) {
+        super(context, currentDefinition, currentModule);
+    }
+
+    @Override
+    public Void visit(Definition d, Void _) {
+        if (getCurrentDefinition() == null) {
+            return new CollectModuleImportsVisitor(context, d).visit(d, _);
+        } else {
+            super.visit(d, _);
+            getCurrentDefinition().finalizeModules();
+            return null;
+        }
+    }
+
+    @Override
     public Void visit(Module m, Void _) {
-        parentModule = m.getName();
-        return super.visit(m, _);
+        if (getCurrentModule() == null) {
+            return new CollectModuleImportsVisitor(context, getCurrentDefinition(), m).visit(m, _);
+        } else {
+            return super.visit(m, _);
+        }
     }
 
+    @Override
     public Void visit(Import i, Void _) {
-        context.addModuleImport(parentModule, i.getName());
+        getCurrentDefinition().addModuleImport(getCurrentModule().getName(), i.getName());
         return null;
     }
 }

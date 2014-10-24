@@ -2,6 +2,7 @@
 package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.loader.Context;
@@ -32,12 +33,26 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         this.checkInclusion = checkInclusion;
     }
 
-    String localModule = null;
+    public DisambiguateRulesFilter(Context context, Definition currentDefinition,
+                                   boolean checkInclusion) {
+        super(DisambiguateRulesFilter.class.getName(), context, currentDefinition);
+        this.checkInclusion = checkInclusion;
+    }
+
+    public DisambiguateRulesFilter(Context context, Definition currentDefinition,
+                                   Module currentModule, boolean checkInclusion) {
+        super(DisambiguateRulesFilter.class.getName(), context, currentDefinition, currentModule);
+        this.checkInclusion = checkInclusion;
+    }
 
     @Override
     public ASTNode visit(Module m, Void _) throws ParseFailedException {
-        localModule = m.getName();
-        return super.visit(m, _);
+        if (getCurrentModule() == null) {
+            return new DisambiguateRulesFilter(context, getCurrentDefinition(), m, checkInclusion)
+                    .visit(m, _);
+        } else {
+            return super.visit(m, _);
+        }
     }
 
     public ASTNode visit(Sentence ss, Void _) throws ParseFailedException {
@@ -45,7 +60,8 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         config = new SentenceVariablesFilter(context).visitNode(config);
         config = new CellEndLabelFilter(context).visitNode(config);
         if (checkInclusion)
-            config = new InclusionFilter(localModule, context).visitNode(config);
+            config = new InclusionFilter(context, getCurrentDefinition(), getCurrentModule())
+                    .visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
