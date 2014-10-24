@@ -11,7 +11,6 @@ import org.kframework.backend.java.compile.DataStructureToLookupUpdate;
 import org.kframework.backend.java.compile.GenerateKRewriteMachineInstructions;
 import org.kframework.backend.java.compile.JavaBackendCell2DataStructure;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;

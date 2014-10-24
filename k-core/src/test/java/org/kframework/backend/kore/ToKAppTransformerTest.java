@@ -14,7 +14,6 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.MapBuiltin;
-import org.kframework.kil.Production;
 import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
@@ -45,7 +44,6 @@ public class ToKAppTransformerTest {
         when(context.dataStructureSortOf(Sort.MAP)).thenReturn(mapSort);
         when(context.dataStructureSortOf(Sort.LIST)).thenReturn(listSort);
         when(context.dataStructureSortOf(Sort.SET)).thenReturn(setSort);
-        context.canonicalBracketForSort = Maps.newHashMap();
     }
 
     @Test

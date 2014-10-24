@@ -139,28 +139,6 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         return new Definition(this);
     }
 
-    public Configuration getSingletonConfiguration() throws ConfigurationNotUnique, ConfigurationNotFound {
-        Configuration result = null;
-        for (DefinitionItem i : this.getItems()) {
-            if (i instanceof Module) {
-                if (i.isPredefined())
-                    continue;
-                for (ModuleItem j : ((Module) i).getItems()) {
-                    if (j instanceof Configuration) {
-                        if (result != null) {
-                            throw new ConfigurationNotUnique();
-                        } else {
-                            result = (Configuration)j;
-                        }
-                    }
-                }
-            }
-        }
-        if (result == null)
-            throw new ConfigurationNotFound();
-        return result;
-    }
-
     @Override
     protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.complete(this, visitor.visit(this, p));
