@@ -8,6 +8,6 @@
 <suppressions>
   <suppress checks="IllegalThrows" files="src[\\/]test[\\/]"/>
   <suppress checks="IllegalThrows" files="[\\/]src[\\/]main[\\/]sdf[\\/]editor[\\/]java"/>
-  <suppress checks="IllegalThrows" files="/src/main/java/org/kframework/parser/generator/ParseRulesFilter.java"/>
-  <suppress checks="IllegalThrows" files="/src/main/java/org/kframework/parser/generator/ParseConfigsFilter.java"/>
+  <suppress checks="IllegalThrows" files="ParseRulesFilter.java"/>
+  <suppress checks="IllegalThrows" files="ParseConfigsFilter.java"/>
 </suppressions>
