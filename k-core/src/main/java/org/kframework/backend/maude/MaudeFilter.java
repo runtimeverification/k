@@ -19,8 +19,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
-
 import java.util.*;
 
 public class MaudeFilter extends BackendFilter {
@@ -683,7 +681,7 @@ public class MaudeFilter extends BackendFilter {
             throw KExceptionManager.criticalError(
                     "Attempting to compile a definition containing -0.0 or NaN with the Maude backend. "
                             + "Maude does not support these features, and floating point arithmetic is "
-                            + "unsupported in the Maude backend. Please recompile with --backend java.", token);
+                            + "unsupported in the Maude backend. Please recompile with --backend java.");
         }
         result.append(FloatBuiltin.printKFloat(token.bigFloatValue()));
         result.append(")");
