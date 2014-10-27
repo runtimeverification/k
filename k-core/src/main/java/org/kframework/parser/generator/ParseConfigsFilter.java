@@ -3,6 +3,7 @@ package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
@@ -48,11 +49,9 @@ public class ParseConfigsFilter extends ParseForestTransformer {
     }
 
     boolean checkInclusion = true;
-    String localModule = null;
 
     @Override
     public ASTNode visit(Module m, Void _) throws ParseFailedException {
-        localModule = m.getName();
         ASTNode rez = super.visit(m, _);
         new CollectStartSymbolPgmVisitor(context).visitNode(rez);
         return rez;
@@ -67,7 +66,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 if (ss.containsAttribute("kore")) {
                     long startTime = System.currentTimeMillis();
                     parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                    if (globalOptions.verbose)
+                    if (context.globalOptions.verbose)
                         System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
                 } else
                     parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
@@ -92,7 +91,8 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 config = new SentenceVariablesFilter(context).visitNode(config);
                 config = new CellEndLabelFilter(context).visitNode(config);
                 if (checkInclusion)
-                    config = new InclusionFilter(localModule, context).visitNode(config);
+                    config = new InclusionFilter(context, getCurrentDefinition(),
+                            getCurrentModule()).visitNode(config);
                 // config = new CellTypesFilter().visitNode(config); not the case on configs
                 // config = new CorrectRewritePriorityFilter().visitNode(config);
                 config = new CorrectKSeqFilter(context).visitNode(config);
@@ -112,7 +112,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 // last resort disambiguation
                 config = new AmbFilter(context).visitNode(config);
 
-                if (globalOptions.debug) {
+                if (context.globalOptions.debug) {
                     File file = context.files.resolveTemp("timing.log");
                     if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                         GlobalSettings.kem.registerCriticalError("Could not create directory " + file.getParentFile());

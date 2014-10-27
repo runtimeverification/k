@@ -9,10 +9,6 @@ public class NonCachingVisitor extends BasicVisitor {
         super(context);
     }
 
-    public NonCachingVisitor(String name, Context context) {
-        super(name, context);
-    }
-
     @Override
     public boolean cache() {
         return false;

@@ -13,8 +13,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * AST representation of a KLabel constant.
  */
@@ -44,25 +42,6 @@ public class KLabelConstant extends KLabel {
     public static final KLabelConstant STREAM_PREDICATE = of(AddPredicates.predicate(Sort.of("Stream")));
     public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
     public static final KLabelConstant FRESH_KLABEL = of("fresh");
-
-    /**
-     * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant objects; subsequent calls with the same label return
-     * the same object.
-     *
-     * @param label
-     *            string representation of the KLabel; must not be '`' escaped;
-     * @return AST term representation the KLabel;
-     */
-    public static KLabelConstant of(String label, Context context) {
-        assert label != null;
-
-        KLabelConstant kLabelConstant = cache.get(label);
-        if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, context);
-            cache.put(label, kLabelConstant);
-        }
-        return kLabelConstant;
-    }
 
     /**
      * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant objects; subsequent calls with the same label return
@@ -97,42 +76,18 @@ public class KLabelConstant extends KLabel {
 
     /* un-escaped label */
     private final String label;
-    /* unmodifiable view of the production list */
-    private final ImmutableSet<Production> productions;
 
     public KLabelConstant(String label) {
         this.label = label;
-        productions = ImmutableSet.of();
-    }
-
-    private KLabelConstant(String label, Context context) {
-        this.label = label;
-        // context.productionsOf returns a view into a multimap, which is not serializable. So we copy it
-        productions = ImmutableSet.copyOf(context.productionsOf(label));
     }
 
     /**
      * Constructs a {@link KLabelConstant} from an XML {@link Element} representing a constant. The KLabel string representation in the element is escaped according to Maude
      * conventions.
      */
-    public KLabelConstant(Element element, Context context) {
-        super(element);
-        label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        // context.productionsOf returns a view into a multimap, which is not serializable. So we copy it
-        productions = ImmutableSet.copyOf(context.productionsOf(label));
-    }
-
     public KLabelConstant(Element element) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-        productions = ImmutableSet.of();
-    }
-
-    /**
-     * @return unmodifiable list of productions generating this KLabel
-     */
-    public Set<Production> productions() {
-        return productions;
     }
 
     @Override

@@ -28,7 +28,7 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         for (String klbl : node.getModuleKLabels()) {
-            Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl, context)));
+            Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl)));
             Term lhs = KApp.of(KLabel2String, kapp);
             Term rhs = StringBuiltin.kAppOf(StringUtil.escapeMaude(klbl));
             Rule rule = new Rule(lhs, rhs, context);
@@ -38,7 +38,7 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
             java.util.List<Term> termList = new ArrayList<Term>();
             termList.add(rhs);
             TermCons termCons = new TermCons(Sort.KLABEL, termList, String2KLabelProd);
-            rule = new Rule(termCons, KLabelConstant.of(klbl, context), context);
+            rule = new Rule(termCons, KLabelConstant.of(klbl), context);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);
         }

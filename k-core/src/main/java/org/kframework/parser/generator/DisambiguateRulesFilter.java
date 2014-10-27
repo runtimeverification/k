@@ -2,6 +2,7 @@
 package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.loader.Context;
@@ -32,20 +33,14 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         this.checkInclusion = checkInclusion;
     }
 
-    String localModule = null;
-
-    @Override
-    public ASTNode visit(Module m, Void _) throws ParseFailedException {
-        localModule = m.getName();
-        return super.visit(m, _);
-    }
-
     public ASTNode visit(Sentence ss, Void _) throws ParseFailedException {
+        assert (getCurrentModule() != null);
         ASTNode config = ss;
         config = new SentenceVariablesFilter(context).visitNode(config);
         config = new CellEndLabelFilter(context).visitNode(config);
         if (checkInclusion)
-            config = new InclusionFilter(localModule, context).visitNode(config);
+            config = new InclusionFilter(context, getCurrentDefinition(), getCurrentModule())
+                    .visitNode(config);
         config = new CellTypesFilter(context).visitNode(config);
         config = new CorrectRewritePriorityFilter(context).visitNode(config);
         config = new CorrectKSeqFilter(context).visitNode(config);
@@ -65,13 +60,5 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         // last resort disambiguation
         config = new AmbFilter(context).visitNode(config);
         return config;
-    }
-
-    public boolean isCheckInclusion() {
-        return checkInclusion;
-    }
-
-    public void setCheckInclusion(boolean checkInclusion) {
-        this.checkInclusion = checkInclusion;
     }
 }

@@ -64,7 +64,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
 
                 long koreStartTime = System.currentTimeMillis();
                 parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                if (globalOptions.verbose)
+                if (context.globalOptions.verbose)
                     System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
             } else
                 parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
@@ -101,7 +101,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
             }
             cachedDef.put(key, new CachedSentence(sentence, startLine, startColumn));
 
-            if (globalOptions.debug) {
+            if (context.globalOptions.debug) {
                 File file = context.files.resolveTemp("timing.log");
                 if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                     GlobalSettings.kem.registerCriticalError("Could not create directory " + file.getParentFile());

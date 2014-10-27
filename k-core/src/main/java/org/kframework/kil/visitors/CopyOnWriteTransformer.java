@@ -2,6 +2,8 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 
 /**
@@ -14,10 +16,6 @@ public class CopyOnWriteTransformer extends AbstractTransformer<RuntimeException
 
     public CopyOnWriteTransformer(String name, Context context) {
         super(name, context);
-    }
-
-    public CopyOnWriteTransformer(Context context) {
-        super(context);
     }
 
     @Override

@@ -94,7 +94,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
             output.put("$stdin", StringBuiltin.EMPTY);
         } else {
             String stdin = getStdinBuffer();
-            KApp noIO = KApp.of(KLabelConstant.of("'#noIO", context));
+            KApp noIO = KApp.of(KLabelConstant.of("'#noIO"));
             DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
             if (myList != null) {
                 output.put("$noIO", DataStructureBuiltin.element(myList, noIO));

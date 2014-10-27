@@ -3,7 +3,6 @@ package org.kframework.kil.loader;
 
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
-import org.kframework.kil.Module;
 import org.kframework.kil.visitors.NonCachingVisitor;
 
 public class CollectModuleImportsVisitor extends NonCachingVisitor {
@@ -12,21 +11,16 @@ public class CollectModuleImportsVisitor extends NonCachingVisitor {
         super(context);
     }
 
-    private String parentModule = null;
-
-    public Void visit(Definition def, Void _) {
-        super.visit(def, _);
-        context.finalizeModules();
+    @Override
+    public Void visit(Definition d, Void _) {
+        super.visit(d, _);
+        getCurrentDefinition().finalizeModules();
         return null;
     }
 
-    public Void visit(Module m, Void _) {
-        parentModule = m.getName();
-        return super.visit(m, _);
-    }
-
+    @Override
     public Void visit(Import i, Void _) {
-        context.addModuleImport(parentModule, i.getName());
+        getCurrentDefinition().addModuleImport(getCurrentModule().getName(), i.getName());
         return null;
     }
 }

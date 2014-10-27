@@ -124,7 +124,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
                 label = tc.getProduction().getTerminatorKLabel();
             else
                 label = ppp.getKLabel();
-            return new KApp(l, s, KLabelConstant.of(label, context), lok);
+            return new KApp(l, s, KLabelConstant.of(label), lok);
         }
 
         @Override
@@ -146,7 +146,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             // if this is a list sort
             if (!MaudeHelper.isBasicSort(emp.getSort())) {
                 Production listProd = context.listProductions.get(emp.getSort());
-                return new KApp(l, f, KLabelConstant.of(listProd.getTerminatorKLabel(), context), KList.EMPTY);
+                return new KApp(l, f, KLabelConstant.of(listProd.getTerminatorKLabel()), KList.EMPTY);
             }
             return emp;
         }

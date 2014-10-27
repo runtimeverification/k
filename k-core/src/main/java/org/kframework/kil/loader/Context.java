@@ -21,8 +21,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Formatter;
@@ -83,8 +81,6 @@ public class Context implements Serializable {
     private Poset<String> priorities = Poset.create();
     private Poset<String> assocLeft = Poset.create();
     private Poset<String> assocRight = Poset.create();
-    private Poset<String> modules = Poset.create();
-    private Poset<File> fileRequirements = Poset.create();
     public Sort startSymbolPgm = Sort.K;
     public Map<String, Sort> configVarSorts = new HashMap<>();
     @Deprecated
@@ -336,40 +332,6 @@ public class Context implements Serializable {
      */
     public boolean isPriorityWrong(String klabelParent, String klabelChild) {
         return priorities.isInRelation(klabelParent, klabelChild);
-    }
-
-    public void addFileRequirement(File required, File local) {
-        // add the new subsorting
-        if (required.equals(local))
-            return;
-
-        try {
-            fileRequirements.addRelation(required.getCanonicalFile(), local.getCanonicalFile());
-        } catch (IOException e) {
-           GlobalSettings.kem.registerInternalError("Cannot create canonical files from " + required + " and " + local, e);
-        }
-    }
-
-    public void finalizeRequirements() {
-        fileRequirements.transitiveClosure();
-    }
-
-    public void addModuleImport(String mainModule, String importedModule) {
-        // add the new subsorting
-        if (mainModule.equals(importedModule))
-            return;
-
-        modules.addRelation(mainModule, importedModule);
-    }
-
-    public void finalizeModules() {
-        modules.transitiveClosure();
-    }
-
-    public boolean isModuleIncludedEq(String localModule, String importedModule) {
-        if (localModule.equals(importedModule))
-            return true;
-        return modules.isInRelation(localModule, importedModule);
     }
 
     public void addSubsort(Sort bigSort, Sort smallSort) {

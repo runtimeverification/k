@@ -60,16 +60,16 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 String symCtor = AddSymbolicK.symbolicConstructor(sort);
 
                 Variable var = Variable.getAnonVar(Sort.INT);
-                Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
+                Term symTerm = KApp.of(KLabelConstant.of(symCtor), var);
                 Term lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                KApp strTerm = KApp.of(KLabelConstant.of("Int2String", context), var);
+                KApp strTerm = KApp.of(KLabelConstant.of("Int2String"), var);
                 Term rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm, context);
                 Rule rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = Variable.getAnonVar(Sort.BUILTIN_STRING);
-                symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
+                symTerm = KApp.of(KLabelConstant.of(symCtor), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
                 rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), var, context);
                 rule = new Rule(lhs, rhs, context);
@@ -78,18 +78,18 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
                 /* TODO: replace Id2String with some generic function of #token(..., ...) */
                 var = Variable.getAnonVar(Sort.ID);
-                symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
+                symTerm = KApp.of(KLabelConstant.of(symCtor), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                strTerm = KApp.of(KLabelConstant.of("#tokenToString", context), var);
+                strTerm = KApp.of(KLabelConstant.of("#tokenToString"), var);
                 rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm, context);
                 rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = Variable.getAnonVar(Sort.BUILTIN_ID);
-                symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
+                symTerm = KApp.of(KLabelConstant.of(symCtor), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                strTerm = KApp.of(KLabelConstant.of("#tokenToString", context), var);
+                strTerm = KApp.of(KLabelConstant.of("#tokenToString"), var);
                 rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm, context);
                 rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);

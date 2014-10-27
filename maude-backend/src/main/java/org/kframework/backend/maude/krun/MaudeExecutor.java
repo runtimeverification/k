@@ -402,7 +402,7 @@ public class MaudeExecutor implements Executor {
                 }
                 return new KApp(label,child);
             } else if (sort.equals(Sort.KLABEL.toString()) && list.size() == 0) {
-                return KLabelConstant.of(StringUtil.unescapeMaude(op), context);
+                return KLabelConstant.of(StringUtil.unescapeMaude(op));
             } else if (sort.equals(Sort.KLABEL.toString()) && op.equals("#freezer_")) {
                 assertXMLTerm(list.size() == 1);
                 return new FreezerLabel(parseXML(list.get(0), context));
