@@ -75,7 +75,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 } else {
                     try {
                         parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-                    } catch (Exception e) {
+                    } catch (RuntimeException e) {
                         String msg = "SDF failed to parse a configuration by throwing: " + e.getCause().getLocalizedMessage();
                         throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
                     }
