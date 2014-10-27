@@ -45,7 +45,7 @@ public class JavaBackendCell2DataStructure extends CopyOnWriteTransformer {
     private boolean madeCellDataStructures = false;
 
     public JavaBackendCell2DataStructure(Context context) {
-        super(context);
+        super("Transform cells with key attribute to maps", context);
     }
 
     @Override

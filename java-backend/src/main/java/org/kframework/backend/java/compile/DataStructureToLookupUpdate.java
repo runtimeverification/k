@@ -115,7 +115,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private ASTNode location;
 
     public DataStructureToLookupUpdate(Context context) {
-        super("Compile maps into load and store operations", context);
+        super("Compile data-structure patterns into load and store operations", context);
     }
 
     @Override
