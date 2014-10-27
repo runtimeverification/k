@@ -40,18 +40,18 @@ public class FileUtil {
         this.workingDir = workingDir;
         this.kompiledDir = kompiledDir;
         this.kem = kem;
-        if (!options.debug) {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
-                    try {
-                        FileUtils.deleteDirectory(tempDir);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (!options.debug) {
+                        try {
+                            FileUtils.deleteDirectory(tempDir);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });
-        }
     }
 
     /**
