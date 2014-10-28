@@ -1,0 +1,28 @@
+<k>
+    1
+</k>
+<map1>
+    <entry1>
+        <key1>
+            0
+        </key1>
+        <map2>
+            <entry2>
+                <key2>
+                    0
+                </key2>
+                <value>
+                    0
+                </value>
+            </entry2>
+            <entry2>
+                <key2>
+                    1
+                </key2>
+                <value>
+                    1
+                </value>
+            </entry2>
+        </map2>
+    </entry1>
+</map1>

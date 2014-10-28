@@ -233,6 +233,10 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
             if (term instanceof BuiltinMap) {
                 BuiltinMap map = (BuiltinMap) term;
+
+                assert !entries.keySet().stream().anyMatch(key -> map.entries.containsKey(key)) :
+                    "failed to concatenate maps with common keys!";
+
                 entries.putAll(map.entries);
                 patternsBuilder.addAll(map.collectionPatterns);
                 functionsBuilder.addAll(map.collectionFunctions);

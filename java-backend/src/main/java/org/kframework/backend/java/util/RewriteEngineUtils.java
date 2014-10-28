@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.TermEquality;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.DataStructureChoice;
 import org.kframework.backend.java.kil.DataStructureLookup;
@@ -21,7 +20,6 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.symbolic.NonACPatternMatcher;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
@@ -74,7 +72,7 @@ public class RewriteEngineUtils {
                     assert lookupOrChoice instanceof DataStructureLookupOrChoice :
                         "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
-                    Term evalLookupOrChoice = RewriteEngineUtils.evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
+                    Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
 
                     boolean resolved = false;
                     if (evalLookupOrChoice instanceof Bottom
@@ -90,18 +88,23 @@ public class RewriteEngineUtils {
                             Variable variable = (Variable) nonLookupOrChoice;
                             if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
                                 Term term = crntSubst.put(variable, evalLookupOrChoice);
-                                resolved = term == null || BoolToken.TRUE.equals(
-                                        TermEquality.eq(term, evalLookupOrChoice, context));
+                                resolved = term == null || term.equals(evalLookupOrChoice);
                             }
                         } else {
                             // the non-lookup term is not a variable and thus requires further pattern matching
                             // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
                             //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
-                            NonACPatternMatcher lookupMatcher = new NonACPatternMatcher(rule.isLemma(), context);
-                            Map<Variable, Term> lookupResult = lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice);
-                            if (lookupResult != null) {
-                                resolved = true;
-                                crntSubst = RewriteEngineUtils.composeSubstitution(crntSubst, lookupResult);
+
+                            Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
+
+                            PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
+                            if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
+                                assert lookupMatcher.multiSubstitutions().isEmpty();
+
+                                if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
+                                    resolved = true;
+                                    crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+                                }
                             }
                         }
                     }
@@ -179,18 +182,25 @@ public class RewriteEngineUtils {
                         Variable variable = (Variable) nonLookupOrChoice;
                         if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
                             Term term = crntSubst.put(variable, evalLookupOrChoice);
-                            resolved = term == null || BoolToken.TRUE.equals(
-                                    TermEquality.eq(term, evalLookupOrChoice, context));
+                            resolved = term == null || term.equals(evalLookupOrChoice);
                         }
                     } else {
                         // the non-lookup term is not a variable and thus requires further pattern matching
                         // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
                         //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
+
+                        Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
+
                         PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
-                        if (lookupMatcher.patternMatch(evalLookupOrChoice, nonLookupOrChoice)) {
-                            resolved = true;
+                        if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
+                            // TODO(YilongL): the following assertion will fail
+                            // when there is AC matching involved in lookups; FIXME
                             assert lookupMatcher.multiSubstitutions().isEmpty();
-                            crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+
+                            if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet()) ) {
+                                resolved = true;
+                                crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+                            }
                         }
                     }
                 }
@@ -286,7 +296,7 @@ public class RewriteEngineUtils {
             Iterator<Collection<Map<Variable, Term>>> iterator = multiSubstitutions.iterator();
             if (multiSubstitutions.size() == 1) {
                 for (Map<Variable, Term> subst : iterator.next()) {
-                    Map<Variable, Term> composedSubst = RewriteEngineUtils.composeSubstitution(fSubstitution, subst);
+                    Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst);
                     if (composedSubst != null) {
                         result.add(composedSubst);
                     }
@@ -296,10 +306,10 @@ public class RewriteEngineUtils {
                 Collection<Map<Variable, Term>> otherSubstitutions = iterator.next();
                 for (Map<Variable, Term> subst1 : substitutions) {
                     for (Map<Variable, Term> subst2 : otherSubstitutions) {
-                        Map<Variable, Term> composedSubst = RewriteEngineUtils.composeSubstitution(fSubstitution, subst1);
+                        Map<Variable, Term> composedSubst = composeSubstitution(fSubstitution, subst1);
                         if (composedSubst != null) {
                             // TODO(YilongL): might be able to exploit the fact that composedSubst can be safely mutated
-                            composedSubst = RewriteEngineUtils.composeSubstitution(composedSubst, subst2);
+                            composedSubst = composeSubstitution(composedSubst, subst2);
                             if (composedSubst != null) {
                                 result.add(composedSubst);
                             }

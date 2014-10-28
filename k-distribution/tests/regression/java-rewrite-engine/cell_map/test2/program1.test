@@ -1,0 +1,2 @@
+create(0) ; store(0, 0, 0) ; store(0, 1, 1) ; load(0, 1)
+// TODO(YilongL): add another test case with the last operation replaced by load(0, 0) to test AC-matching in side-condition

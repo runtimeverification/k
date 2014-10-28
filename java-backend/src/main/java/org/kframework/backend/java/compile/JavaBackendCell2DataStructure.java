@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.compile;
 
+import static org.kframework.compile.transformers.Cell2DataStructure.*;
+
 import org.kframework.backend.java.kil.JavaBackendRuleData;
 import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.CellMap;
@@ -10,6 +12,7 @@ import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.CellList;
+import org.kframework.kil.Configuration;
 import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.Rewrite;
@@ -17,6 +20,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -32,20 +36,30 @@ import java.util.Set;
  *
  * @see Cell2DataStructure
  */
-public class JavaBackendCell2DataStructure extends Cell2DataStructure {
+public class JavaBackendCell2DataStructure extends CopyOnWriteTransformer {
 
     private Set<String> cellMapLabels = Sets.newHashSet();
 
     private String patternLabel;
 
+    private boolean madeCellDataStructures = false;
+
     public JavaBackendCell2DataStructure(Context context) {
-        super(context);
+        super("Transform cells with key attribute to maps", context);
+    }
+
+    @Override
+    public ASTNode visit(Configuration configuration, Void _) {
+        return configuration;
     }
 
     @Override
     public ASTNode visit(Rule rule, Void _) {
-        // TODO(AndreiS): should only be applied once
-        makeCellDataStructures();
+        if (!madeCellDataStructures) {
+            makeCellDataStructures(context);
+            madeCellDataStructures = true;
+        }
+
         if ((rule.getBody().getSort().equals(Sort.BAG) || rule.getBody().getSort().equals(Sort.BAG_ITEM))
                 && rule.containsAttribute(Attribute.PATTERN_KEY)) {
             patternLabel = ((Cell) ((Rewrite) rule.getBody()).getLeft()).getLabel();
@@ -53,14 +67,14 @@ public class JavaBackendCell2DataStructure extends Cell2DataStructure {
             patternLabel = null;
         }
 
+        cellMapLabels.clear();
+        rule = (Rule) super.visit(rule, _);
+
         JavaBackendRuleData ruleData = rule.getAttribute(JavaBackendRuleData.class);
         if (ruleData == null || !ruleData.isCompiledForFastRewriting()) {
-            return super.visit(rule, _);
+            return rule;
         }
 
-        cellMapLabels.clear();
-
-        rule = (Rule) super.visit(rule, _);
         /* compiling cell to cell map changes the cells of interest used for fast rewriting */
         if (!cellMapLabels.isEmpty()) {
             Set<String> cellsOfInterest = Sets.newHashSet(rule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest());
@@ -108,15 +122,20 @@ public class JavaBackendCell2DataStructure extends Cell2DataStructure {
 
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-        CellDataStructure cellDataStructure = context.cellDataStructures.get(cell.getLabel());
+        cell = (Cell) super.visit(cell, _);
+
+        String cellLabel = cell.getLabel();
+        CellDataStructure cellDataStructure = context.cellDataStructures.get(cellLabel);
         if (cellDataStructure == null) {
-            return super.visit(cell, _);
+            return cell;
         } else if (cellDataStructure instanceof CellMap) {
-            cellMapLabels.add(cellDataStructure.dataStructureCellLabel());
+            cellMapLabels.removeIf(cellMapLbl -> context.getConfigurationStructureMap().get(
+                    cellMapLbl).ancestorIds.contains(cellLabel));
+            cellMapLabels.add(cellLabel);
         }
 
         Bag cellContent = normalizeCellContent(cell.getContents());
-        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
+        if (patternLabel != null && cellLabel.equals(patternLabel)) {
             cellContent = new Bag(cellContent.getContents().subList(
                     0,
                     cellContent.getContents().size() - 1));
@@ -124,15 +143,15 @@ public class JavaBackendCell2DataStructure extends Cell2DataStructure {
 
         DataStructureBuiltin dataStructureBuiltin;
         if (cellDataStructure instanceof CellList) {
-            dataStructureBuiltin = getListBuiltin(cellContent, (CellList) cellDataStructure);
+            dataStructureBuiltin = getListBuiltin(cellContent, (CellList) cellDataStructure, context);
         } else if (cellDataStructure instanceof CellMap) {
-            dataStructureBuiltin = getMapBuiltin(cellContent, (CellMap) cellDataStructure);
+            dataStructureBuiltin = getMapBuiltin(cellContent, (CellMap) cellDataStructure, context);
         } else {
             assert false;
             return null;
         }
 
-        if (patternLabel != null && cell.getLabel().equals(patternLabel)) {
+        if (patternLabel != null && cellLabel.equals(patternLabel)) {
             MapBuiltin mapBuiltin = (MapBuiltin) dataStructureBuiltin;
             if (!(mapBuiltin.baseTerms().size() == 1 && mapBuiltin.elements().isEmpty())) {
                 return mapBuiltin;

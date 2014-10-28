@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +13,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -188,13 +188,17 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return Collections.emptyList();
         }
 
-        List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
+        List<SymbolicConstraint> candidates = Lists.newArrayList();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
             if (TruthValue.FALSE ==
                     candidate.addAllThenSimplify(constrainedTerm.data.lookups, constrainedTerm.data.constraint)) {
                 continue;
             }
+            candidates.addAll(candidate.getMultiConstraints());
+        }
 
+        List<SymbolicConstraint> solutions = Lists.newArrayList();
+        for (SymbolicConstraint candidate : candidates) {
             if (candidate.isMatching(constrainedTerm.variableSet())) {
                 /* OPTIMIZATION: since no narrowing happens, the symbolic
                  * constraint remains unchanged; thus, there is no need to check
@@ -215,6 +219,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 candidate.expandPatternsAndSimplify(true);
             }
 
+            assert candidate.getMultiConstraints().size() == 1;
             solutions.add(candidate);
         }
 
