@@ -270,44 +270,25 @@ public class NonACPatternMatcher {
     private void match(CellCollection cellCollection, CellCollection otherCellCollection) {
         Context context = termContext.definition().context();
 
-        if (cellCollection.hasFrame()) {
-            check(otherCellCollection.hasFrame());
-            if (failed) {
-                return;
-            }
-        }
-
         Set<CellLabel> unifiableCellLabels = Sets.intersection(cellCollection.labelSet(), otherCellCollection.labelSet());
-        int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
-        int numOfOtherDiffCellLabels = otherCellCollection.labelSet().size() - unifiableCellLabels.size();
-
-        /* there will be no AC-matching involved if at least one of the cell
-         * collections doesn't contain any multiplicity cell */
-        assert (!cellCollection.hasMultiplicityCell() || !otherCellCollection.hasMultiplicityCell()) :
-            "AC-matching not supported; consider using the AC pattern matcher instead";
-
-        for (CellLabel label : unifiableCellLabels) {
-            /* these are non-multiplicity cells for sure */
-            match(cellCollection.get(label).iterator().next(),
-                    otherCellCollection.get(label).iterator().next());
+        check(otherCellCollection.labelSet().size() == unifiableCellLabels.size());
+        if (failed) {
+            return;
         }
+
+        int numOfDiffCellLabels = cellCollection.labelSet().size() - unifiableCellLabels.size();
 
         Variable frame = cellCollection.hasFrame() ? cellCollection.frame() : null;
         Variable otherFrame = otherCellCollection.hasFrame()? otherCellCollection.frame() : null;
 
         if (frame != null) {
-            check(otherFrame != null && numOfOtherDiffCellLabels == 0);
+            check(otherFrame != null);
             if (failed) {
                 return;
             }
 
             addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
         } else {
-            check(numOfOtherDiffCellLabels == 0);
-            if (failed) {
-                return;
-            }
-
             if (otherFrame != null) {
                 addSubstitution(otherFrame, cellCollection.removeAll(unifiableCellLabels, context));
             } else {
@@ -317,6 +298,18 @@ public class NonACPatternMatcher {
                 }
             }
         }
+
+        for (CellLabel label : unifiableCellLabels) {
+            assert cellCollection.get(label).size() == 1 && otherCellCollection.get(label).size() == 1 :
+                "AC-matching not supported; consider using the AC pattern matcher instead";
+
+            /* YilongL: it's okay for two multiplicity cells to pass the above
+             * AC-matching check because there is really only one possible way
+             * for the matching to succeed */
+            match(cellCollection.get(label).iterator().next(),
+                    otherCellCollection.get(label).iterator().next());
+        }
+
     }
 
     private void match(KItem kItem, KItem pattern) {
