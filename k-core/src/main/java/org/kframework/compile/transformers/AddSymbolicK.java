@@ -32,16 +32,6 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
             return SymbolicConstructorPrefix + sort;
     }
 
-    public static final boolean isSymbolicConstructor(Sort sort) {
-        return sort.getName().startsWith(SymbolicConstructorPrefix);
-    }
-
-    public final Production getSymbolicProduction(Sort sort) {
-        assert allowSymbolic(sort);
-
-        return Production.makeFunction(sort, symbolicConstructor(sort), Sort.K, context);
-    }
-
     public Term freshSymSortN(Sort sort, int n) {
         return KApp.of(
                 KLabelConstant.of("'#freshSymSortN"),
@@ -72,10 +62,6 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
             return retNode;
         else
             return node;
-    }
-
-    public static String getSymbolicConstructorPrefix() {
-        return SymbolicConstructorPrefix;
     }
 }
 

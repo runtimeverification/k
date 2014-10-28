@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 
 import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
