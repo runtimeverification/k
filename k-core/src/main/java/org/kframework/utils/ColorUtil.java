@@ -377,7 +377,7 @@ public class ColorUtil {
         return "\u001b[38;5;" + code + "m";
     }
 
-    public static String RgbToAnsi(Color rgb, ColorSetting colorSetting, Color terminalColor) {
+    public synchronized static String RgbToAnsi(Color rgb, ColorSetting colorSetting, Color terminalColor) {
         initColors(terminalColor); //init static maps if needed
         switch(colorSetting) {
             case OFF:
