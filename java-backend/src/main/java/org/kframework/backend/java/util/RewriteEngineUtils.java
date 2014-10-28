@@ -193,6 +193,8 @@ public class RewriteEngineUtils {
 
                         PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
                         if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
+                            // TODO(YilongL): the following assertion will fail
+                            // when there is AC matching involved in lookups; FIXME
                             assert lookupMatcher.multiSubstitutions().isEmpty();
 
                             if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet()) ) {

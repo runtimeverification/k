@@ -47,7 +47,7 @@ import com.google.common.collect.Sets;
  */
 public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
 
-    private enum Status { LHS, RHS }
+    private enum Status { LHS, RHS, LOOKUP }
 
     private Rule crntRule;
     private boolean hasAssocCommMatching;
@@ -108,6 +108,12 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
         crntRule = rule;
         status = Status.LHS;
         this.visitNode(((Rewrite) rule.getBody()).getLeft());
+
+        status = Status.LOOKUP;
+        for (Term lookup : rule.getAttribute(JavaBackendRuleData.class).getLookups()) {
+            this.visitNode(lookup);
+        }
+
         if (hasAssocCommMatching) {
             rule = rule.shallowCopy();
             rule.addAttribute(JavaBackendRuleData.class, rule.getAttribute(JavaBackendRuleData.class).setCompiledForFastRewriting(false));
@@ -117,6 +123,7 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
 
         status = Status.RHS;
         this.visitNode(((Rewrite) rule.getBody()).getRight());
+
         status = null;
         crntRule = null;
 
@@ -132,13 +139,11 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Cell cell, Void _)  {
-        if (crntRule == null) {
-            return super.visit(cell, _);
-        }
-        if (!crntRule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest().contains(cell.getLabel())
-                && outerWriteCell == null) {
-            return super.visit(cell, _);
-        }
+//        // TODO(YilongL): rewrite this!!!!
+//        if (!crntRule.getAttribute(JavaBackendRuleData.class).getCellsOfInterest().contains(cell.getLabel())
+//                && outerWriteCell == null) {
+//            return super.visit(cell, _);
+//        }
 
         if (status == Status.LHS) {
             if (crntRule.getAttribute(JavaBackendRuleData.class).getReadCells().contains(cell.getLabel())) {
@@ -146,26 +151,40 @@ public class AddLocalRewritesUnderCells extends CopyOnWriteTransformer {
                     hasAssocCommMatching = true;
                 }
                 lhsOfReadCell.put(cell.getLabel(), cell.getContents());
+                return cell;
+            } else {
+                return super.visit(cell, _);
             }
-        } else {
+        } else if (status == Status.RHS) {
             if (outerWriteCell != null) {
                 if (isGroundCell(cell)) {
                     cellsToCopy.add(outerWriteCell);
+                    return cell;
                 } else {
-                    super.visit(cell, _);
+                    return super.visit(cell, _);
                 }
             } else {
                 if (crntRule.getAttribute(JavaBackendRuleData.class).getWriteCells().contains(cell.getLabel())) {
                     rhsOfWriteCell.put(cell.getLabel(), cell.getContents());
 
                     outerWriteCell = cell.getLabel();
-                    super.visit(cell, _);
+                    cell = (Cell) super.visit(cell, _);
                     outerWriteCell = null;
+
+                    return cell;
+                } else {
+                    return super.visit(cell, _);
                 }
             }
+        } else if (status == Status.LOOKUP) {
+            if (hasAssocCommMatching(cell)) {
+                hasAssocCommMatching = true;
+            }
+            return super.visit(cell, _);
+        } else {
+            assert false;
+            return null;
         }
-
-        return cell;
     }
 
     private boolean hasAssocCommMatching(Cell cell) {
