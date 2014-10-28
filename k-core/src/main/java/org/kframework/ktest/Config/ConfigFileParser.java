@@ -10,6 +10,7 @@ import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -39,12 +40,14 @@ public class ConfigFileParser {
     private final KTestOptions cmdArgs;
     private final Map<String, String> env;
     private final KExceptionManager kem;
+    private final FileUtil files;
 
-    public ConfigFileParser(File configFile, KTestOptions cmdArgs, Map<String, String> env, KExceptionManager kem) throws IOException, SAXException,
+    public ConfigFileParser(File configFile, KTestOptions cmdArgs, Map<String, String> env, KExceptionManager kem, FileUtil files) throws IOException, SAXException,
             ParserConfigurationException, TransformerException {
         this.cmdArgs = cmdArgs;
         this.env = env;
         this.kem = kem;
+        this.files = files;
 
         // validate xml file structure
         Source schemaFile = new StreamSource(getClass().getResourceAsStream("ktest.xsd"));
@@ -80,7 +83,7 @@ public class ConfigFileParser {
 
         // Create our filter to wrap the SAX parser, that captures the locations of elements
         // and annotates their nodes as they are inserted into the DOM.
-        ConfigPreProcessor locationAnnotator = new ConfigPreProcessor(xmlReader, doc, env);
+        ConfigPreProcessor locationAnnotator = new ConfigPreProcessor(xmlReader, doc, env, files);
 
         // Create the SAXSource to use the annotator.
         String systemId = configFile.getAbsolutePath();
@@ -150,7 +153,7 @@ public class ConfigFileParser {
                 (LocationData) includeNode.getUserData(LocationData.LOCATION_DATA_KEY);
 
         String fileValue = includeAttrs.getNamedItem("file").getNodeValue();
-        String file = concat(FilenameUtils.getFullPath(cmdArgs.getTargetFile()),fileValue);
+        String file = concat(files.resolveWorkingDirectory(cmdArgs.getTargetFile()).getParentFile().getAbsolutePath(),fileValue);
 
         if (!new File(file).isFile())
             throw new InvalidConfigError(
@@ -173,7 +176,7 @@ public class ConfigFileParser {
 
         ConfigFileParser configFileParser;
         try {
-            configFileParser = new ConfigFileParser(new File(file), cmdArgs1, env, kem);
+            configFileParser = new ConfigFileParser(new File(file), cmdArgs1, env, kem, files);
         } catch (TransformerException | IOException | SAXException | ParserConfigurationException e) {
             // I'm not happy with that part ...
             throw new InvalidConfigError("error occured while parsing included file " + file +
@@ -294,7 +297,7 @@ public class ConfigFileParser {
         Map<String, ProgramProfile> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
         TestCase ret = new TestCase(definition, programs, extensions, excludes, results,
-                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips, cmdArgs, kem);
+                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips, cmdArgs, kem, files, env);
         if (posixOnly != null) {
             ret.setPosixInitScript(posixOnly);
         }

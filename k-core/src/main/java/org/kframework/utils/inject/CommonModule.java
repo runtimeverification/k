@@ -13,24 +13,23 @@ import org.kframework.utils.file.WorkingDir;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
 
 public class CommonModule extends AbstractModule {
 
     @Override
-    protected void configure() {
-        requestStaticInjection(Tool.class);
-
-        bind(File.class).annotatedWith(WorkingDir.class).toInstance(new File("."));
-        bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(Environment.class).toInstance(System.getenv());
-
-        //TODO(dwightguth): when we upgrade to Guice 4.0, add
-        //binder().requireAtInjectOnConstructors()
-    }
+    protected void configure() {}
 
     @Provides @TempDir @Singleton
     File tempDir(@WorkingDir File workingDir, Tool tool) {
         return new File(workingDir, FileUtil.generateUniqueFolderName("." + tool.name().toLowerCase()));
+    }
+
+    @Provides
+    ProcessBuilder pb(@WorkingDir File workingDir, @Environment Map<String, String> env) {
+        ProcessBuilder pb = new ProcessBuilder().directory(workingDir);
+        pb.environment().clear();
+        pb.environment().putAll(env);
+        return pb;
     }
 
 }

@@ -7,6 +7,7 @@ import org.kframework.ktest.PgmArg;
 import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +16,16 @@ public class KRunProgram {
     public final TestCase testCase;
     public final String pgmName;
     public final String pgmPath;
-    public final String defPath;
+    public final File defPath;
     public final List<PgmArg> args;
-    public final String inputFile;
-    public final String outputFile;
-    public final String errorFile;
-    public final String newOutputFile;
+    public final File inputFile;
+    public final File outputFile;
+    public final File errorFile;
+    public final File newOutputFile;
     public final boolean regex;
 
-    public KRunProgram(TestCase testCase, String pgmPath, String defPath, List<PgmArg> args,
-                       String inputFile, String outputFile, String errorFile, String newOutputFile,
+    public KRunProgram(TestCase testCase, String pgmPath, File defPath, List<PgmArg> args,
+                       File inputFile, File outputFile, File errorFile, File newOutputFile,
                        boolean regex) {
         this.testCase = testCase;
         this.pgmName = FilenameUtils.getBaseName(pgmPath);

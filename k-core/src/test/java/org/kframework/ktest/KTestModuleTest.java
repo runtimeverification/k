@@ -10,6 +10,7 @@ import org.kframework.utils.BaseTestCase;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class KTestModuleTest extends BaseTestCase {
     public void testCreateInjection() {
         String[] argv = new String[] { "foo.c" };
         List<Module> modules = KTestFrontEnd.getModules(argv);
-        Injector injector = Guice.createInjector(modules);
+        Injector injector = Guice.createInjector(Modules.override(modules).with(new TestModule()));
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KTestFrontEnd);
     }
 

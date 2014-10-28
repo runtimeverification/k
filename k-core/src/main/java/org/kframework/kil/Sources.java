@@ -15,10 +15,6 @@ public class Sources {
         return new FileSource(filename);
     }
 
-    public static Source fromFile(String filename) {
-        return new FileSource(new File(filename));
-    }
-
     public static Source fromCommandLine(String optionName) {
         return new CommandLineSource(optionName);
     }

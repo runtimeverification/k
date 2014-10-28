@@ -2,13 +2,16 @@
 package org.kframework.ktest.Test;
 
 import com.google.common.collect.Iterables;
+
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.KTestOptions;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.file.FileUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+
 import java.awt.*;
 import java.io.*;
 import java.util.List;
@@ -19,10 +22,10 @@ public class TestSuite {
     private final KTestOptions options;
     private final ReportGen reportGen;
 
-    public TestSuite(List<TestCase> tests, KTestOptions options) {
+    public TestSuite(List<TestCase> tests, KTestOptions options, FileUtil files) {
         this.tests = tests;
         this.options = options;
-        reportGen = options.getGenerateReport() ? new ReportGen() : null;
+        reportGen = options.getGenerateReport() ? new ReportGen(files.resolveWorkingDirectory("junit-reports")) : null;
     }
 
     public boolean run() throws IOException, TransformerException, ParserConfigurationException {
@@ -61,22 +64,22 @@ public class TestSuite {
         // generate reports
         for (Proc<TestCase> p : scriptProcs) {
             TestCase tc = p.getObj();
-            makeReport(p, makeRelative(tc.getDefinition()),
+            makeReport(p, tc.getDefinition(),
                     FilenameUtils.getName(tc.getPosixInitScript()));
         }
         for (Proc<TestCase> p : kompileProcs) {
             TestCase tc = p.getObj();
-            makeReport(p, makeRelative(tc.getDefinition()),
+            makeReport(p, tc.getDefinition(),
                     FilenameUtils.getName(tc.getDefinition()));
         }
         for (Proc<TestCase> p : pdfProcs) {
             TestCase tc = p.getObj();
-            makeReport(p, makeRelative(tc.getDefinition()),
+            makeReport(p, tc.getDefinition(),
                     FilenameUtils.getBaseName(tc.getDefinition()) + ".pdf");
         }
         for (Proc<KRunProgram> p : krunProcs) {
             KRunProgram pgm = p.getObj();
-            makeReport(p, makeRelative(pgm.defPath), FilenameUtils.getName(pgm.pgmName));
+            makeReport(p, pgm.defPath.getAbsolutePath(), FilenameUtils.getName(pgm.pgmName));
         }
 
         if (reportGen != null) {
@@ -84,15 +87,6 @@ public class TestSuite {
         }
 
         return success;
-    }
-
-    private String makeRelative(String absolutePath) {
-        // I'm not sure if this works as expected, but I'm simply removing prefix of absolutePath
-        String pathRegex = System.getProperty("user.dir")
-                // on Windows, `\` characters in file paths are causing problem, so we need to
-                // escape one more level:
-                .replaceAll("\\\\", "\\\\\\\\");
-        return absolutePath.replaceFirst(pathRegex, "");
     }
 
     private void makeReport(Proc<?> p, String definition, String testName) {

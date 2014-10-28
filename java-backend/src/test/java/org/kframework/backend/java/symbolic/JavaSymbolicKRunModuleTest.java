@@ -68,7 +68,7 @@ public class JavaSymbolicKRunModuleTest extends BaseTestCase {
         String[] argv = new String[] { "foo.k", "--backend", "java" };
         List<Module> modules = Lists.newArrayList(KompileFrontEnd.getModules(argv));
         modules.addAll(new JavaBackendKModule().getKompileModules());
-        Injector injector = Guice.createInjector(Modules.override(modules).with(new TestModule()));
+        Injector injector = Guice.createInjector(Modules.override(modules).with(new TestModule(), new BaseTestCase.TestModule()));
         assertTrue(injector.getInstance(FrontEnd.class) instanceof KompileFrontEnd);
     }
 

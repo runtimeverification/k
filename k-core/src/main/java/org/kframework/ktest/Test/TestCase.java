@@ -10,6 +10,7 @@ import org.kframework.ktest.Config.LocationData;
 import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -86,6 +87,8 @@ public class TestCase {
     private final KTestOptions options;
 
     private final KExceptionManager kem;
+    private final FileUtil files;
+    private final Map<String, String> env;
 
     public TestCase(Annotated<String, LocationData> definition,
                     List<Annotated<String, LocationData>> programs,
@@ -96,7 +99,9 @@ public class TestCase {
                     ProgramProfile krunOpts,
                     Map<String, ProgramProfile> pgmSpecificKRunOpts,
                     Set<KTestStep> skips, KTestOptions options,
-                    KExceptionManager kem) {
+                    KExceptionManager kem,
+                    FileUtil files,
+                    Map<String, String> env) {
         // programs and results should be ordered set because of how search algorithm works
         this.definition = definition;
         this.programs = programs;
@@ -109,12 +114,14 @@ public class TestCase {
         this.skips = skips;
         this.options = options;
         this.kem = kem;
+        this.files = files;
+        this.env = env;
 
         setKompileDirArg();
         setKompileDirFullPath();
     }
 
-    public static TestCase makeTestCaseFromK(KTestOptions cmdArgs, KExceptionManager kem) {
+    public static TestCase makeTestCaseFromK(KTestOptions cmdArgs, KExceptionManager kem, FileUtil files, Map<String, String> env) {
         // give a warning if 'programs' is specified using the command line argument,
         // but 'extension' is not.
         if (cmdArgs.programsSpecified() && cmdArgs.getExtensions().isEmpty()) {
@@ -140,11 +147,11 @@ public class TestCase {
                 cmdArgs.getExtensions().toArray(new String[cmdArgs.getExtensions().size()]),
                 cmdArgs.getExcludes().toArray(new String[cmdArgs.getExcludes().size()]),
                 results, emptyOpts, emptyProfile, emptyOptsMap,
-                new HashSet<>(), cmdArgs, kem);
+                new HashSet<>(), cmdArgs, kem, files, env);
     }
 
     public boolean isDefinitionKompiled() {
-        return new File(kompileDirFullPath).isDirectory();
+        return files.resolveWorkingDirectory(kompileDirFullPath).isDirectory();
     }
 
     /**
@@ -155,21 +162,21 @@ public class TestCase {
         if (posixInitScript == null) {
             return null;
         }
-        return new Proc<>(this, getPosixOnlyCmd(), getWorkingDir(), options, kem);
+        return new Proc<>(this, getPosixOnlyCmd(), getWorkingDir(), options, kem, env);
     }
 
     /**
      * @return {@link org.kframework.ktest.Proc} that runs kompile command of the test case.
      */
     public Proc<TestCase> getKompileProc() {
-        return new Proc<>(this, getKompileCmd(), getWorkingDir(), options, kem);
+        return new Proc<>(this, getKompileCmd(), getWorkingDir(), options, kem, env);
     }
 
     /**
      * @return {@link org.kframework.ktest.Proc} that runs PDF command of the test case.
      */
     public Proc<TestCase> getPDFProc() {
-        return new Proc<>(this, getPdfCmd(), getWorkingDir(), options, kem);
+        return new Proc<>(this, getPdfCmd(), getWorkingDir(), options, kem, env);
     }
 
     /**
@@ -185,7 +192,7 @@ public class TestCase {
             String inputContents = null, outputContents = null, errorContents = null;
             if (program.inputFile != null)
                 try {
-                    inputContents = IOUtils.toString(new FileInputStream(new File(program.inputFile)));
+                    inputContents = IOUtils.toString(new FileInputStream(program.inputFile));
                 } catch (IOException e) {
                     System.out.format("WARNING: cannot read input file %s -- skipping program %s%n",
                             program.inputFile, program.args.get(1));
@@ -197,7 +204,7 @@ public class TestCase {
             if (program.outputFile != null)
                 try {
                     outputContents = IOUtils.toString(new FileInputStream(
-                            new File(program.outputFile)));
+                            program.outputFile));
                 } catch (IOException e) {
                     System.out.format("WARNING: cannot read output file %s -- program output " +
                             "won't be matched against output file%n", program.outputFile);
@@ -205,7 +212,7 @@ public class TestCase {
             if (program.errorFile != null)
                 try {
                     errorContents = IOUtils.toString(new FileInputStream(
-                            new File(program.errorFile)));
+                            program.errorFile));
                 } catch (IOException e) {
                     System.out.format("WARNING: cannot read error file %s -- program error output "
                             + "won't be matched against error file%n", program.errorFile);
@@ -213,11 +220,11 @@ public class TestCase {
 
             // Annotate expected output and error messages with paths of files that these strings
             // are defined in (to be used in error messages)
-            Annotated<String, String> outputContentsAnn = null;
+            Annotated<String, File> outputContentsAnn = null;
             if (outputContents != null)
                 outputContentsAnn = new Annotated<>(outputContents, program.outputFile);
 
-            Annotated<String, String> errorContentsAnn = null;
+            Annotated<String, File> errorContentsAnn = null;
             if (errorContents != null)
                 errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
 
@@ -226,8 +233,8 @@ public class TestCase {
                 matcher = new RegexStringMatcher();
             }
             Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
-                    outputContentsAnn, errorContentsAnn, matcher, new File(program.defPath), options,
-                    program.outputFile, program.newOutputFile, kem);
+                    outputContentsAnn, errorContentsAnn, matcher, program.defPath, options,
+                    program.outputFile, program.newOutputFile, kem, env);
             procs.add(p);
         }
 
@@ -238,12 +245,12 @@ public class TestCase {
      * @return absolute path of definition file
      */
     public String getDefinition() {
-        assert new File(definition.getObj()).isFile();
+        assert files.resolveWorkingDirectory(definition.getObj()).isFile();
         return definition.getObj();
     }
 
     public File getWorkingDir() {
-        File f = new File(definition.getObj());
+        File f = files.resolveWorkingDirectory(definition.getObj());
         assert f.isFile();
         return f.getParentFile();
     }
@@ -296,17 +303,17 @@ public class TestCase {
     }
 
     public void validate() throws InvalidConfigError {
-        if (!new File(definition.getObj()).isFile())
+        if (!files.resolveWorkingDirectory(definition.getObj()).isFile())
             throw new InvalidConfigError(
                     "definition file " + definition.getObj() + " is not a file.",
                     definition.getAnn());
         for (Annotated<String, LocationData> p : programs)
-            if (!new File(p.getObj()).isDirectory())
+            if (!files.resolveWorkingDirectory(p.getObj()).isDirectory())
                 throw new InvalidConfigError(
                         "program directory " + p.getObj() + " is not a directory.",
                         p.getAnn());
         for (Annotated<String, LocationData> r : results)
-            if (!new File(r.getObj()).isDirectory())
+            if (!files.resolveWorkingDirectory(r.getObj()).isDirectory())
                 throw new InvalidConfigError(
                         "result directory " + r.getObj() + " is not a directory.",
                         r.getAnn());
@@ -323,7 +330,7 @@ public class TestCase {
      * @return command array to pass process builder
      */
     private String[] getPosixOnlyCmd() {
-        assert posixInitScript == null || new File(posixInitScript).isFile();
+        assert posixInitScript == null || files.resolveWorkingDirectory(posixInitScript).isFile();
         return new String[] { posixInitScript };
     }
 
@@ -331,7 +338,7 @@ public class TestCase {
      * @return command array to pass process builder
      */
     private String[] getKompileCmd() {
-        assert new File(getDefinition()).isFile();
+        assert files.resolveWorkingDirectory(getDefinition()).isFile();
         List<String> stringArgs = new ArrayList<>();
         stringArgs.add(ExecNames.getKompile());
         stringArgs.add(getDefinition());
@@ -351,7 +358,7 @@ public class TestCase {
      * @return command array to pass process builder
      */
     private String[] getPdfCmd() {
-        assert new File(getDefinition()).isFile();
+        assert files.resolveWorkingDirectory(getDefinition()).isFile();
         String[] argsArr =
                 new String[] { ExecNames.getKompile(), "--backend", "pdf", getDefinition() };
         if (OS.current() == OS.WIN) {
@@ -429,7 +436,7 @@ public class TestCase {
      */
     private List<KRunProgram> searchPrograms(String pgmDir) {
         List<KRunProgram> ret = new LinkedList<>();
-        File[] files = new File(pgmDir).listFiles();
+        File[] files = this.files.resolveWorkingDirectory(pgmDir).listFiles();
         assert files != null : "searchPrograms returned null -- this is a bug, please report.";
         for (File pgmFile : files) {
             if (pgmFile.isFile()) {
@@ -474,8 +481,11 @@ public class TestCase {
                         args.add(new PgmArg("--directory", kompileDir));
                     }
 
-                    ret.add(new KRunProgram(this, pgmFilePath, definitionFilePath, args,
-                            inputFilePath, outputFilePath, errorFilePath,
+                    ret.add(new KRunProgram(this, pgmFilePath,
+                            this.files.resolveWorkingDirectory(definitionFilePath), args,
+                            inputFilePath == null ? null : this.files.resolveWorkingDirectory(inputFilePath),
+                            outputFilePath == null ? null : this.files.resolveWorkingDirectory(outputFilePath),
+                            errorFilePath == null ? null : this.files.resolveWorkingDirectory(errorFilePath),
                             getNewOutputFilePath(outputFileName), profile.isRegex()));
                 }
             } else {
@@ -485,8 +495,8 @@ public class TestCase {
         return ret;
     }
 
-    private String getNewOutputFilePath(String outputFileName) {
-        return FilenameUtils.concat(results.get(results.size() -1).getObj(), outputFileName);
+    private File getNewOutputFilePath(String outputFileName) {
+        return files.resolveWorkingDirectory(FilenameUtils.concat(results.get(results.size() -1).getObj(), outputFileName));
     }
 
     /**
@@ -514,7 +524,7 @@ public class TestCase {
      * @return absolute path if found, null if not
      */
     private String searchFile(String fname, String dir) {
-        File[] files = new File(dir).listFiles();
+        File[] files = this.files.resolveWorkingDirectory(dir).listFiles();
         assert files != null : "listFiles returned null -- this is a bug, please report";
         for (File f : files) {
             if (f.isFile() && f.getName().equals(fname))

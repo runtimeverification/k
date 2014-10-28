@@ -9,7 +9,9 @@ import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import java.io.*;
 
@@ -17,7 +19,7 @@ public class PdfBackend extends BasicBackend {
 
     private final LatexBackend latexBackend;
     private final FileUtil files;
-    private final KExceptionManager kem;
+    private final Provider<ProcessBuilder> pb;
 
     @Inject
     PdfBackend(
@@ -25,11 +27,11 @@ public class PdfBackend extends BasicBackend {
             Context context,
             LatexBackend latexBackend,
             FileUtil files,
-            KExceptionManager kem) {
+            Provider<ProcessBuilder> pb) {
         super(sw, context);
         this.latexBackend = latexBackend;
         this.files = files;
-        this.kem = kem;
+        this.pb = pb;
     }
 
     private String generatePdf(File latexFile) {
@@ -38,8 +40,8 @@ public class PdfBackend extends BasicBackend {
             String pdfLatex = "pdflatex";
             String argument = latexFile.getCanonicalPath();
 
-            ProcessBuilder pb =
-                    new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+            ProcessBuilder pb = this.pb.get().command(
+                    pdfLatex, argument, "-interaction", "nonstopmode");
             pb.redirectErrorStream(true);
             pb.directory(latexFile.getParentFile());
 

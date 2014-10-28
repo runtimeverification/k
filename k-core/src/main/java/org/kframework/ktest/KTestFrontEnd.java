@@ -12,6 +12,7 @@ import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
@@ -46,6 +47,7 @@ public class KTestFrontEnd extends FrontEnd {
     private final KTestOptions options;
     private final KExceptionManager kem;
     private final Map<String, String> env;
+    private final FileUtil files;
 
     @Inject
     KTestFrontEnd(
@@ -55,17 +57,19 @@ public class KTestFrontEnd extends FrontEnd {
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
-            @Environment Map<String, String> env) {
+            @Environment Map<String, String> env,
+            FileUtil files) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo);
         this.options = options;
         this.options.setDebug(globalOptions.debug);
         this.kem = kem;
         this.env = env;
+        this.files = files;
     }
 
     public boolean run() {
         try {
-            options.validateArgs();
+            options.validateArgs(files);
             return makeTestSuite(options.getTargetFile(), options).run();
         } catch (SAXException | ParserConfigurationException | IOException | TransformerException
                 | ParameterException e) {
@@ -82,14 +86,14 @@ public class KTestFrontEnd extends FrontEnd {
         switch (FilenameUtils.getExtension(targetFile)) {
         case "xml":
             ret = new TestSuite(new ConfigFileParser(
-                    new File(cmdArgs.getTargetFile()), cmdArgs, env, kem).parse(), cmdArgs);
+                    new File(cmdArgs.getTargetFile()), cmdArgs, env, kem, files).parse(), cmdArgs, files);
             break;
         case "k":
-            TestCase tc = TestCase.makeTestCaseFromK(cmdArgs, kem);
+            TestCase tc = TestCase.makeTestCaseFromK(cmdArgs, kem, files, env);
             tc.validate();
             List<TestCase> tcs = new LinkedList<>();
             tcs.add(tc);
-            ret = new TestSuite(tcs, cmdArgs);
+            ret = new TestSuite(tcs, cmdArgs, files);
             break;
         default:
             // this code should be unreacable, because `validateArgs' should ensure that

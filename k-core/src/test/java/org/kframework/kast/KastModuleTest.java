@@ -2,6 +2,7 @@
 package org.kframework.kast;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 import org.kframework.main.FrontEnd;
 import org.kframework.utils.BaseTestCase;
