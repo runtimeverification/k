@@ -2,7 +2,6 @@
 package org.kframework.krun;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -27,6 +26,8 @@ import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.TTYInfo;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -39,6 +40,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
     private final boolean io;
     private final KExceptionManager kem;
     private final RunProcess rp;
+    private final TTYInfo tty;
 
     //public final String kdir;
 
@@ -52,7 +54,8 @@ public class InitialConfigurationProvider implements Provider<Term> {
             Context context,
             Configuration cfg,
             KExceptionManager kem,
-            RunProcess rp) {
+            RunProcess rp,
+            TTYInfo tty) {
         this.context = context;
         this.sw = sw;
         this.options = ccOptions;
@@ -60,6 +63,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
         this.io = krunOptions.io();
         this.kem = kem;
         this.rp = rp;
+        this.tty = tty;
     }
 
     public Term get() {
@@ -115,8 +119,7 @@ public class InitialConfigurationProvider implements Provider<Term> {
                     new InputStreamReader(System.in));
             // detect if the input comes from console or redirected
             // from a pipeline
-            Console c = System.console();
-            if (c == null && br.ready()) {
+            if (!tty.stdin) {
                 buffer = br.readLine();
             }
         } catch (IOException e) {

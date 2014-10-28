@@ -6,13 +6,13 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.kframework.krun.api.io.File;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.io.EOFException;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
@@ -25,13 +25,19 @@ public class PortableFileSystem implements FileSystem {
 
     private Map<FileDescriptor, File> files = new HashMap<FileDescriptor, File>();
 
-    public PortableFileSystem() {
+    private final FileUtil fileUtil;
+    private final KExceptionManager kem;
+
+    @Inject
+    public PortableFileSystem(KExceptionManager kem, FileUtil fileUtil) {
+        this.fileUtil = fileUtil;
+        this.kem = kem;
         descriptors.put(0L, FileDescriptor.in);
         descriptors.put(1L, FileDescriptor.out);
         descriptors.put(2L, FileDescriptor.err);
-        files.put(FileDescriptor.in, new InputStreamFile(new FileInputStream(FileDescriptor.in)));
-        files.put(FileDescriptor.out, new OutputStreamFile(new FileOutputStream(FileDescriptor.out)));
-        files.put(FileDescriptor.err, new OutputStreamFile(new FileOutputStream(FileDescriptor.err)));
+        files.put(FileDescriptor.in, new InputStreamFile(System.in, kem));
+        files.put(FileDescriptor.out, new OutputStreamFile(System.out, kem));
+        files.put(FileDescriptor.err, new OutputStreamFile(System.err, kem));
     }
 
     public File get(long fd) throws IOException {
@@ -53,15 +59,9 @@ public class PortableFileSystem implements FileSystem {
         try {
             FileDescriptor fileFD;
             File file;
-            if (mode.equals("w")) {
-                FileOutputStream f = new FileOutputStream(path);
-                fileFD = f.getFD();
-                file = new OutputStreamFile(f);
-            } else {
-                RandomAccessFile f = new RandomAccessFile(path, mode);
-                fileFD = f.getFD();
-                file = new RandomAccessFileFile(f);
-            }
+            RandomAccessFile f = new RandomAccessFile(fileUtil.resolveWorkingDirectory(path), mode);
+            fileFD = f.getFD();
+            file = new RandomAccessFileFile(f);
             long fd = fdCounter++;
             descriptors.put(fd, fileFD);
             files.put(fileFD, file);
@@ -74,6 +74,8 @@ public class PortableFileSystem implements FileSystem {
                     //man 2 open says you can open a directory in readonly mode with open, but
                     //java has no support for it. So we throw an UnsupportedOperationException
                     //instead of failing with EISDIR
+                    kem.registerInternalWarning("Unsupported file system behavior: tried to open a directory."
+                            + " If you are interested in this behavior, please file an issue on github.");
                     throw new UnsupportedOperationException();
                 }
                 throw ioe;
