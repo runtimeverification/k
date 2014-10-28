@@ -21,7 +21,6 @@ import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.parser.TermLoader;
-import org.kframework.parser.concrete.ThreadLocalKParser;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;

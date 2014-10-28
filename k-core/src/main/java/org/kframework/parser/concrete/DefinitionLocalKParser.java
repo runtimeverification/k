@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete;
 
 import java.io.File;
@@ -16,6 +17,25 @@ import java.util.stream.Collectors;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.JarInfo;
 
+/**
+ * Abstracts the JSGLR dependency out from the classpath of the K core.
+ * By doing this, we are able to instantiate a new classloader with access
+ * to the third-party code, and create a new version of the static state intrinsic
+ * to JSGLR for every definition we execute. This means that multiple definitions
+ * can be parsed in different threads within the same process.
+ *
+ * Note that a consequence of this is that if you use many definitions in
+ * the same process, you will use up a lot of memory dedicated to the JVM code cache.
+ * Currently the implementation of this class does not expire classloaders
+ * when too many of them have been instantiated. It also does not behave correctly
+ * if a single definition is modified and then parsed again. These are future optimizations
+ * that can potentially be made to this class, however, what it does currently
+ * is sufficient to allow a single process to be used for an entire KTest test suite,
+ * which is the primary goal of this class.
+ *
+ * @author dwightguth
+ *
+ */
 public class DefinitionLocalKParser {
 
     private static final Map<File, Class<?>> impl = new HashMap<>();
