@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
-import org.kframework.backend.java.builtins.TermEquality;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.DataStructureChoice;
 import org.kframework.backend.java.kil.DataStructureLookup;
@@ -73,12 +72,11 @@ public class RewriteEngineUtils {
                     assert lookupOrChoice instanceof DataStructureLookupOrChoice :
                         "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
-                    lookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
-                    nonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
+                    Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
 
                     boolean resolved = false;
-                    if (lookupOrChoice instanceof Bottom
-                            || lookupOrChoice instanceof DataStructureLookupOrChoice) {
+                    if (evalLookupOrChoice instanceof Bottom
+                            || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
                         /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
 
                         // when the operation is pending, it is not really a valid match
@@ -88,20 +86,25 @@ public class RewriteEngineUtils {
                     } else {
                         if (nonLookupOrChoice instanceof Variable) {
                             Variable variable = (Variable) nonLookupOrChoice;
-                            if (context.definition().subsorts().isSubsortedEq(variable.sort(), lookupOrChoice.sort())) {
-                                Term term = crntSubst.put(variable, lookupOrChoice);
-                                resolved = term == null || BoolToken.TRUE.equals(
-                                        TermEquality.eq(term, lookupOrChoice, context));
+                            if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
+                                Term term = crntSubst.put(variable, evalLookupOrChoice);
+                                resolved = term == null || term.equals(evalLookupOrChoice);
                             }
                         } else {
                             // the non-lookup term is not a variable and thus requires further pattern matching
                             // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
                             //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
+
+                            Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
+
                             PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
-                            if (lookupMatcher.patternMatch(lookupOrChoice, nonLookupOrChoice)) {
-                                resolved = true;
+                            if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
                                 assert lookupMatcher.multiSubstitutions().isEmpty();
-                                crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+
+                                if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet())) {
+                                    resolved = true;
+                                    crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+                                }
                             }
                         }
                     }
@@ -163,12 +166,11 @@ public class RewriteEngineUtils {
                 assert lookupOrChoice instanceof DataStructureLookupOrChoice :
                     "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
 
-                lookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
-                nonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
+                Term evalLookupOrChoice = evaluateLookupOrChoice(lookupOrChoice, crntSubst, context);
 
                 boolean resolved = false;
-                if (lookupOrChoice instanceof Bottom
-                        || lookupOrChoice instanceof DataStructureLookupOrChoice) {
+                if (evalLookupOrChoice instanceof Bottom
+                        || evalLookupOrChoice instanceof DataStructureLookupOrChoice) {
                     /* the data-structure lookup or choice operation is either undefined or pending due to symbolic argument(s) */
 
                     // when the operation is pending, it is not really a valid match
@@ -178,20 +180,25 @@ public class RewriteEngineUtils {
                 } else {
                     if (nonLookupOrChoice instanceof Variable) {
                         Variable variable = (Variable) nonLookupOrChoice;
-                        if (context.definition().subsorts().isSubsortedEq(variable.sort(), lookupOrChoice.sort())) {
-                            Term term = crntSubst.put(variable, lookupOrChoice);
-                            resolved = term == null || BoolToken.TRUE.equals(
-                                    TermEquality.eq(term, lookupOrChoice, context));
+                        if (context.definition().subsorts().isSubsortedEq(variable.sort(), evalLookupOrChoice.sort())) {
+                            Term term = crntSubst.put(variable, evalLookupOrChoice);
+                            resolved = term == null || term.equals(evalLookupOrChoice);
                         }
                     } else {
                         // the non-lookup term is not a variable and thus requires further pattern matching
                         // for example: L:List[Int(#"0")] = '#ostream(_)(I:Int), where L is the output buffer
                         //           => '#ostream(_)(Int(#"1")) =? '#ostream(_)(I:Int)
+
+                        Term evalNonLookupOrChoice = nonLookupOrChoice.substituteAndEvaluate(crntSubst, context);
+
                         PatternMatcher lookupMatcher = new PatternMatcher(rule.isLemma(), context);
-                        if (lookupMatcher.patternMatch(lookupOrChoice, nonLookupOrChoice)) {
-                            resolved = true;
+                        if (lookupMatcher.patternMatch(evalLookupOrChoice, evalNonLookupOrChoice)) {
                             assert lookupMatcher.multiSubstitutions().isEmpty();
-                            crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+
+                            if (nonLookupOrChoice.variableSet().containsAll(lookupMatcher.substitution().keySet()) ) {
+                                resolved = true;
+                                crntSubst = composeSubstitution(crntSubst, lookupMatcher.substitution());
+                            }
                         }
                     }
                 }
