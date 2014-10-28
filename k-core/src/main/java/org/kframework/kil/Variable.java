@@ -32,7 +32,7 @@ public class Variable extends Term {
         this.expectedSort = expectedSort;
     }
 
-    public Variable(Element element) {
+    public Variable(Element element, JavaClassesFactory factory) {
         super(element);
         this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
         this.name = element.getAttribute(Constants.NAME_name_ATTR);
@@ -40,7 +40,7 @@ public class Variable extends Term {
 
         java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
         if (its.size() > 0) {
-            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+            getAttributes().putAll((Attributes) factory.getTerm(its.get(0)));
         }
 
         if (this.name.startsWith("?")) {

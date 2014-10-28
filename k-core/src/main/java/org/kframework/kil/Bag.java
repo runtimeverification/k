@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -20,8 +21,8 @@ public class Bag extends Collection {
         super(location, source, Sort.BAG);
     }
 
-    public Bag(Element element) {
-        super(element);
+    public Bag(Element element, JavaClassesFactory factory) {
+        super(element, factory);
     }
 
     public Bag(Bag node) {

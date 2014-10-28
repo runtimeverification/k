@@ -37,26 +37,26 @@ public class Sentence extends ModuleItem implements MutableParent<Term, Sentence
         super();
     }
 
-    public Sentence(Element element) {
+    public Sentence(Element element, JavaClassesFactory factory) {
         super(element);
 
         label = element.getAttribute(Constants.LABEL);
         Element elm = XML.getChildrenElementsByTagName(element, Constants.BODY).get(0);
         Element elmBody = XML.getChildrenElements(elm).get(0);
-        this.body = (Term) JavaClassesFactory.getTerm(elmBody);
+        this.body = (Term) factory.getTerm(elmBody);
 
         java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.COND);
         if (its.size() > 0)
-            this.requires = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
+            this.requires = (Term) factory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
 
         its = XML.getChildrenElementsByTagName(element, "ensures");
         if (its.size() > 0)
-            this.ensures = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
+            this.ensures = (Term) factory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
 
         its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
         // assumption: <cellAttributes> appears only once
         if (its.size() > 0) {
-            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+            getAttributes().putAll((Attributes) factory.getTerm(its.get(0)));
         } else {
             getAttributes().addAttribute("generated", "generated");
         }

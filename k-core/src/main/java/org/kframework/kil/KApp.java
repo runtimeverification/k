@@ -78,12 +78,12 @@ public class KApp extends Term implements Interfaces.MutableParent<Term, KApp.Ch
     /**
      * Constructs a {@link KApp} object from an XML {@link Element}.
      */
-    public KApp(Element element, org.kframework.kil.loader.Context context) {
+    public KApp(Element element, JavaClassesFactory factory) {
         super(element);
         List<Element> childrenElements = XML.getChildrenElements(element);
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
-        setLabel((Term) JavaClassesFactory.getTerm(body));
-        Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
+        setLabel((Term) factory.getTerm(body));
+        Term term = (Term) factory.getTerm(childrenElements.get(1));
         if (!(term.getSort().equals(Sort.KLIST) || term instanceof Ambiguity)) {
             setChild(new KList(Collections.<Term> singletonList(term)));
         } else {

@@ -45,9 +45,9 @@ public class Bracket extends Term implements Interfaces.MutableParent<Term, Enum
         this.content = t;
     }
 
-    public Bracket(Element element) {
+    public Bracket(Element element, JavaClassesFactory factory) {
         super(element);
-        this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+        this.content = (Term) factory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
     public Bracket(Sort sort) {

@@ -15,15 +15,15 @@ public class Rewrite extends Term {
     private Term left;
     private Term right;
 
-    public Rewrite(Element element, Context context) {
+    public Rewrite(Element element, JavaClassesFactory factory, Context context) {
         super(element);
 
         Element temp = XML.getChildrenElementsByTagName(element, Constants.LEFT).get(0);
         temp = XML.getChildrenElements(temp).get(0);
-        left = (Term) JavaClassesFactory.getTerm(temp);
+        left = (Term) factory.getTerm(temp);
         temp = XML.getChildrenElementsByTagName(element, Constants.RIGHT).get(0);
         temp = XML.getChildrenElements(temp).get(0);
-        right = (Term) JavaClassesFactory.getTerm(temp);
+        right = (Term) factory.getTerm(temp);
         recomputeSort(context);
     }
 

@@ -2,6 +2,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -14,8 +15,8 @@ import org.w3c.dom.Element;
  */
 public class Rule extends Sentence {
 
-    public Rule(Element element) {
-        super(element);
+    public Rule(Element element, JavaClassesFactory factory) {
+        super(element, factory);
     }
 
     public Rule(Rule node) {
