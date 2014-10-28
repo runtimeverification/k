@@ -21,6 +21,7 @@ import com.beust.jcommander.ParameterException;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 
 public class JCommanderModule extends AbstractModule  {
 
@@ -38,7 +39,7 @@ public class JCommanderModule extends AbstractModule  {
     @Override
     protected void configure() {}
 
-    @Provides
+    @Provides @Singleton
     JCommander jcommander(Tool tool, @Options Set<Object> options, @Options Set<Class<?>> experimentalOptions, KExceptionManager kem, Stopwatch sw) {
         try {
             JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
