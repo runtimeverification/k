@@ -292,7 +292,7 @@ public class ExecutorDebugger implements Debugger {
 
         @Override
         public ASTNode visit(KApp kapp, Void _)  {
-            if (kapp.getLabel().equals(KLabelConstant.of("'#buffer", context))) {
+            if (kapp.getLabel().equals(KLabelConstant.of("'#buffer"))) {
                 inBuffer = true;
                 ASTNode result = super.visit(kapp, _);
                 inBuffer = false;

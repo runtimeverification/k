@@ -44,7 +44,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 
     public Term freshSymSortN(Sort sort, int n) {
         return KApp.of(
-                KLabelConstant.of("'#freshSymSortN", context),
+                KLabelConstant.of("'#freshSymSortN"),
                 StringBuiltin.kAppOf(sort.getName()),
                 IntBuiltin.kAppOf(n));
     }

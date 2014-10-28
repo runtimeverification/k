@@ -39,7 +39,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
                     }
                 }
                 return new KApp(
-                        KLabelConstant.of(t1.getProduction().getKLabel(), context),
+                        KLabelConstant.of(t1.getProduction().getKLabel()),
                         (Term) this.visitNode(new KList(t1.getContents())));
             }
         } else if (amb.getContents().get(0) instanceof ListTerminator) {
