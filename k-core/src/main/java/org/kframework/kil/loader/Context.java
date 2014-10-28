@@ -512,7 +512,32 @@ public class Context implements Serializable {
         return conses;
     }
 
-    private int[] number = {0};
+    private int number = 0;
+
+
+    /**
+     * Generate incremental numbers that doesn't contain the number 1
+     *
+     * @return an integer that doesn't contain the number 1
+     */
+    private int getUniqueId() {
+        boolean valid = false;
+        while (!valid) {
+            int nr = number;
+            while (nr > 0) {
+                if (nr % 10 == 1) {
+                    number++;
+                    break;
+                } else {
+                    nr /= 10;
+                }
+            }
+            if (nr == 0) {
+                valid = true;
+            }
+        }
+        return number++;
+    }
 
     public void computeConses() {
         assert conses == null : "can only compute conses once";
@@ -530,7 +555,7 @@ public class Context implements Serializable {
                 if (p.isListDecl())
                     cons = StringUtil.escapeSort(p.getSort()) + "1" + "ListSyn";
                 else
-                    cons = StringUtil.escapeSort(p.getSort()) + "1" + StringUtil.getUniqueId(number) + "Syn";
+                    cons = StringUtil.escapeSort(p.getSort()) + "1" + getUniqueId() + "Syn";
                 conses.put(cons, p);
             }
         }

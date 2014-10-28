@@ -419,30 +419,6 @@ public class StringUtil {
     }
 
     /**
-     * Generate incremental numbers that doesn't contain the number 1
-     *
-     * @return an integer that doesn't contain the number 1
-     */
-    public static int getUniqueId(int[] number) {
-        boolean valid = false;
-        while (!valid) {
-            int nr = number[0];
-            while (nr > 0) {
-                if (nr % 10 == 1) {
-                    number[0]++;
-                    break;
-                } else {
-                    nr /= 10;
-                }
-            }
-            if (nr == 0) {
-                valid = true;
-            }
-        }
-        return number[0]++;
-    }
-
-    /**
      * Takes a string as input and creates a continuous token for the maude lexer.
      * Adds a backquote character to the following characters: ( ) [ ] { } , `
      * @param tag Input string.
