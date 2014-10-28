@@ -22,6 +22,12 @@ import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 
 import com.google.inject.Inject;
 
+/**
+ * Centralizes logic responsible for converting a raw KAST term in executable format into
+ * concrete syntax which can be pretty-printed using the UnparserFilter.
+ * @author dwightguth
+ *
+ */
 public class ConcretizeTerm {
 
     private final TermLoader loader;

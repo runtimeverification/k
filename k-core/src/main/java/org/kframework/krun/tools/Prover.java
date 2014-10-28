@@ -41,10 +41,9 @@ public interface Prover {
         private final Context context;
         private final Stopwatch sw;
         private final Term initialConfiguration;
-        private final KExceptionManager kem;
         private final Prover prover;
         private final FileUtil files;
-        private final TermLoader loader;
+        private final TermLoader termLoader;
 
         @Inject
         protected Tool(
@@ -52,18 +51,16 @@ public interface Prover {
                 @Main Context context,
                 Stopwatch sw,
                 @Main Term initialConfiguration,
-                KExceptionManager kem,
                 @Main Prover prover,
                 @Main FileUtil files,
-                TermLoader loader) {
+                TermLoader termLoader) {
             this.options = options;
             this.context = context;
             this.sw = sw;
             this.initialConfiguration = initialConfiguration;
-            this.kem = kem;
             this.prover = prover;
             this.files = files;
-            this.loader = loader;
+            this.termLoader = termLoader;
         }
 
         @Override
@@ -72,7 +69,7 @@ public interface Prover {
             try {
                 String proofFile = options.experimental.prove;
                 String content = files.loadFromWorkingDirectory(proofFile);
-                Definition parsed = loader.parseString(content,
+                Definition parsed = termLoader.parseString(content,
                         Sources.fromFile(proofFile), context);
                 Module mod = parsed.getSingletonModule();
                 KRunProofResult<Set<Term>> result = prover.prove(mod, initialConfiguration);
