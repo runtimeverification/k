@@ -200,7 +200,7 @@ public class KRunModule extends AbstractModule {
 
             bind(Debugger.class).to(ExecutorDebugger.class);
 
-            bind(Term.class).toProvider(InitialConfigurationProvider.class);
+            bind(Term.class).toProvider(InitialConfigurationProvider.class).in(Singleton.class);
 
             bind(FileUtil.class);
 
