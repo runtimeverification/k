@@ -48,39 +48,13 @@ public class ParseConfigsFilter extends ParseForestTransformer {
         this.checkInclusion = checkInclusion;
     }
 
-    public ParseConfigsFilter(Context context, Definition currentDefinition,
-                              boolean checkInclusion) {
-        super("Parse Configurations", context, currentDefinition);
-        this.checkInclusion = checkInclusion;
-    }
-
-    public ParseConfigsFilter(Context context, Definition currentDefinition, Module currentModule,
-                              boolean checkInclusion) {
-        super("Parse Configurations", context, currentDefinition, currentModule);
-        this.checkInclusion = checkInclusion;
-    }
-
     boolean checkInclusion = true;
 
     @Override
-    public ASTNode visit(Definition d, Void _) throws ParseFailedException {
-        if (getCurrentDefinition() == null) {
-            return new ParseConfigsFilter(context, d, checkInclusion).visit(d, _);
-        } else {
-            return super.visit(d, _);
-        }
-    }
-
-    @Override
     public ASTNode visit(Module m, Void _) throws ParseFailedException {
-        if (getCurrentModule() == null) {
-            return new ParseConfigsFilter(context, getCurrentDefinition(), m, checkInclusion)
-                    .visit(m, _);
-        } else {
-            ASTNode rez = super.visit(m, _);
-            new CollectStartSymbolPgmVisitor(context).visitNode(rez);
-            return rez;
-        }
+        ASTNode rez = super.visit(m, _);
+        new CollectStartSymbolPgmVisitor(context).visitNode(rez);
+        return rez;
     }
 
     public ASTNode visit(StringSentence ss, Void _) throws ParseFailedException {

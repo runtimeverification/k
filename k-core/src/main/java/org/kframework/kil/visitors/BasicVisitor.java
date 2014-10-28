@@ -22,15 +22,6 @@ public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> 
         super(name, context);
     }
 
-    public BasicVisitor(String name, Context context, Definition currentDefinition) {
-        super(name, context, currentDefinition);
-    }
-
-    public BasicVisitor(String name, Context context,
-                        Definition currentDefinition, Module currentModule) {
-        super(name, context, currentDefinition, currentModule);
-    }
-
     @Override
     public Void defaultReturnValue(ASTNode node, Void _) {
         return null;

@@ -19,15 +19,6 @@ public class LocalTransformer extends AbstractTransformer<ParseFailedException> 
         super(name, context);
     }
 
-    public LocalTransformer(String name, Context context, Definition currentDefinition) {
-        super(name, context, currentDefinition);
-    }
-
-    public LocalTransformer(String name, Context context,
-                            Definition currentDefinition, Module currentModule) {
-        super(name, context, currentDefinition, currentModule);
-    }
-
     @Override
     public boolean visitChildren() {
         return false;

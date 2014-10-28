@@ -18,19 +18,6 @@ public class CopyOnWriteTransformer extends AbstractTransformer<RuntimeException
         super(name, context);
     }
 
-    public CopyOnWriteTransformer(Context context) {
-        super(context);
-    }
-
-    public CopyOnWriteTransformer(String name, Context context, Definition currentDefinition) {
-        super(name, context, currentDefinition);
-    }
-
-    public CopyOnWriteTransformer(String name, Context context,
-                                  Definition currentDefinition, Module currentModule) {
-        super(name, context, currentDefinition, currentModule);
-    }
-
     @Override
     public boolean visitChildren() {
         return true;

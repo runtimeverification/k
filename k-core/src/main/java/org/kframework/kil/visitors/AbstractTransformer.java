@@ -22,10 +22,6 @@ public abstract class AbstractTransformer<E extends Throwable> extends AbstractV
         super(name, context);
     }
 
-    public AbstractTransformer(Context context) {
-        super(context);
-    }
-
     public AbstractTransformer(String name, Context context, Definition currentDefinition) {
         super(name, context, currentDefinition);
     }

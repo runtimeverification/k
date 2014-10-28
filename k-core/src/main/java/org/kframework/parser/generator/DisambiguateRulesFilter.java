@@ -33,29 +33,8 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         this.checkInclusion = checkInclusion;
     }
 
-    public DisambiguateRulesFilter(Context context, Definition currentDefinition,
-                                   boolean checkInclusion) {
-        super(DisambiguateRulesFilter.class.getName(), context, currentDefinition);
-        this.checkInclusion = checkInclusion;
-    }
-
-    public DisambiguateRulesFilter(Context context, Definition currentDefinition,
-                                   Module currentModule, boolean checkInclusion) {
-        super(DisambiguateRulesFilter.class.getName(), context, currentDefinition, currentModule);
-        this.checkInclusion = checkInclusion;
-    }
-
-    @Override
-    public ASTNode visit(Module m, Void _) throws ParseFailedException {
-        if (getCurrentModule() == null) {
-            return new DisambiguateRulesFilter(context, getCurrentDefinition(), m, checkInclusion)
-                    .visit(m, _);
-        } else {
-            return super.visit(m, _);
-        }
-    }
-
     public ASTNode visit(Sentence ss, Void _) throws ParseFailedException {
+        assert (getCurrentModule() != null);
         ASTNode config = ss;
         config = new SentenceVariablesFilter(context).visitNode(config);
         config = new CellEndLabelFilter(context).visitNode(config);
@@ -81,13 +60,5 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         // last resort disambiguation
         config = new AmbFilter(context).visitNode(config);
         return config;
-    }
-
-    public boolean isCheckInclusion() {
-        return checkInclusion;
-    }
-
-    public void setCheckInclusion(boolean checkInclusion) {
-        this.checkInclusion = checkInclusion;
     }
 }

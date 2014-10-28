@@ -296,6 +296,9 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
 
     @Override
     public R visit(Definition node, P p) throws E {
+        if (currentDefinition == null) {
+            currentDefinition = node;
+        }
         node = genericVisitList(node, p, mutableList(Definition.class), null);
         return visit((ASTNode) node, p);
     }
@@ -312,6 +315,9 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
 
     @Override
     public R visit(Module node, P p) throws E {
+        if (currentModule == null) {
+            currentModule = node;
+        }
         node = genericVisitList(node, p, mutableList(Module.class), null);
         return visit((DefinitionItem) node, p);
     }

@@ -27,10 +27,6 @@ public class ParseForestTransformer extends AbstractTransformer<ParseFailedExcep
         super(name, context);
     }
 
-    public ParseForestTransformer(String name, Context context, Definition currentDefinition) {
-        super(name, context, currentDefinition);
-    }
-
     public ParseForestTransformer(String name, Context context,
                                   Definition currentDefinition, Module currentModule) {
         super(name, context, currentDefinition, currentModule);

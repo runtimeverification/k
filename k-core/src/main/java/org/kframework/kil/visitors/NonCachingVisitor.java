@@ -11,18 +11,6 @@ public class NonCachingVisitor extends BasicVisitor {
         super(context);
     }
 
-    public NonCachingVisitor(String name, Context context) {
-        super(name, context);
-    }
-
-    public NonCachingVisitor(Context context, Definition currentDefinition) {
-        super(null, context, currentDefinition);
-    }
-
-    public NonCachingVisitor(Context context, Definition currentDefinition, Module currentModule) {
-        super(null, context, currentDefinition, currentModule);
-    }
-
     @Override
     public boolean cache() {
         return false;
