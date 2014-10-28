@@ -8,4 +8,6 @@
 <suppressions>
   <suppress checks="IllegalThrows" files="src[\\/]test[\\/]"/>
   <suppress checks="IllegalThrows" files="[\\/]src[\\/]main[\\/]sdf[\\/]editor[\\/]java"/>
+  <suppress checks="IllegalCatch" files="ParseRulesFilter.java"/>
+  <suppress checks="IllegalCatch" files="ParseConfigsFilter.java"/>
 </suppressions>

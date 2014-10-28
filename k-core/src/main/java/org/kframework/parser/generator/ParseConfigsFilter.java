@@ -12,6 +12,9 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -68,8 +71,14 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                     parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
                     if (context.globalOptions.verbose)
                         System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
-                } else
-                    parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                } else {
+                    try {
+                        parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                    } catch (RuntimeException e) {
+                        String msg = "SDF failed to parse a configuration by throwing: " + e.getCause().getLocalizedMessage();
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
+                    }
+                }
                 Document doc = XmlLoader.getXMLDoc(parsed);
 
                 // replace the old xml node with the newly parsed sentence
