@@ -73,17 +73,12 @@ public class TermLoader {
         org.kframework.parser.concrete.KParser.ImportTblRule(context.files.resolveKompiled("."));
 
         // ------------------------------------- parse configs
-        JavaClassesFactory.startConstruction(context);
         def = (Definition) new ParseConfigsFilter(context, false, kem).visitNode(def);
-        JavaClassesFactory.endConstruction();
 
         // ----------------------------------- parse rules
-        JavaClassesFactory.startConstruction(context);
         def = (Definition) new ParseRulesFilter(context).visitNode(def);
         def = (Definition) new DisambiguateRulesFilter(context, false, kem).visitNode(def);
         def = (Definition) new NormalizeASTTransformer(context, kem).visitNode(def);
-
-        JavaClassesFactory.endConstruction();
 
         return def;
     }
@@ -97,9 +92,7 @@ public class TermLoader {
         XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
 
-        JavaClassesFactory.startConstruction(context);
-        org.kframework.kil.ASTNode config = JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
-        JavaClassesFactory.endConstruction();
+        org.kframework.kil.ASTNode config = new JavaClassesFactory(context).getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
 
         // TODO: reject rewrites
         config = new SentenceVariablesFilter(context).visitNode(config);
@@ -143,9 +136,7 @@ public class TermLoader {
         XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
 
-        JavaClassesFactory.startConstruction(context);
-        ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
-        JavaClassesFactory.endConstruction();
+        ASTNode config = new JavaClassesFactory(context).getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
         // TODO: reject rewrites
         config = new SentenceVariablesFilter(context).visitNode(config);
@@ -189,9 +180,7 @@ public class TermLoader {
         // XmlLoader.addFilename(doc.getFirstChild(), filename);
         XmlLoader.reportErrors(doc);
 
-        JavaClassesFactory.startConstruction(context);
-        ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
-        JavaClassesFactory.endConstruction();
+        ASTNode config = new JavaClassesFactory(context).getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
         // TODO: don't allow rewrites
         config = new SentenceVariablesFilter(context).visitNode(config);

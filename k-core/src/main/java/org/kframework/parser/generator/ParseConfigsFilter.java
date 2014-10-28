@@ -91,7 +91,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 XmlLoader.addSource(xmlTerm, ss.getSource());
                 XmlLoader.reportErrors(doc, ss.getType());
 
-                Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
+                Sentence st = (Sentence) new JavaClassesFactory(context).getTerm((Element) xmlTerm);
                 config = new Configuration(st);
                 assert st.getLabel().equals(""); // labels should have been parsed in Outer Parsing
                 st.setLabel(ss.getLabel());

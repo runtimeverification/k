@@ -28,13 +28,13 @@ public abstract class Collection extends Term implements Interfaces.MutableList<
         contents = new ArrayList<Term>();
     }
 
-    public Collection(Element element) {
+    public Collection(Element element, JavaClassesFactory factory) {
         super(element);
 
         contents = new ArrayList<Term>();
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
-            contents.add((Term) JavaClassesFactory.getTerm(e));
+            contents.add((Term) factory.getTerm(e));
     }
 
     public Collection(Sort sort, List<Term> col) {

@@ -29,7 +29,7 @@ public class TermCons extends ProductionReference implements Interfaces.MutableL
     private int cachedHashCode = 0;
     private boolean upToDateHash = false;
 
-    public TermCons(Element element, Map<String, Production> conses){
+    public TermCons(Element element, JavaClassesFactory factory, Map<String, Production> conses){
         super(element, conses);
         this.sort = Sort.of(element.getAttribute(Constants.SORT_sort_ATTR));
         assert this.production != null;
@@ -37,7 +37,7 @@ public class TermCons extends ProductionReference implements Interfaces.MutableL
         contents = new ArrayList<Term>();
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
-            contents.add((Term) JavaClassesFactory.getTerm(e));
+            contents.add((Term) factory.getTerm(e));
     }
 
     public TermCons(Sort sort, Production p) {

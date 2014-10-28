@@ -82,9 +82,7 @@ public class ProgramLoader {
 
         XmlLoader.addSource(doc.getFirstChild(), source);
         XmlLoader.reportErrors(doc);
-        JavaClassesFactory.startConstruction(context);
-        out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
-        JavaClassesFactory.endConstruction();
+        out = new  JavaClassesFactory(context).getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
         out = new PriorityFilter(context).visitNode(out);
         out = new PreferAvoidFilter(context).visitNode(out);

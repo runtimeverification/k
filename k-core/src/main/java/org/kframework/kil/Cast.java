@@ -63,7 +63,7 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
         this.type = type;
     }
 
-    public Cast(Element element) {
+    public Cast(Element element, JavaClassesFactory factory) {
         super(element);
         if (element.getAttribute("type").equals("semantic"))
             this.type = CastType.SEMANTIC;
@@ -73,11 +73,11 @@ public class Cast extends Term implements Interfaces.MutableParent<Term, Enum<?>
             this.type = CastType.INNER;
         else if (element.getAttribute("type").equals("outer"))
             this.type = CastType.OUTER;
-        this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+        this.content = (Term) factory.getTerm(XML.getChildrenElements(element).get(0));
 
         java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
         if (its.size() > 0) {
-            getAttributes().putAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+            getAttributes().putAll((Attributes) factory.getTerm(its.get(0)));
         }
     }
 

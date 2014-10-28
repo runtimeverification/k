@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -21,8 +22,8 @@ public class KList extends Collection {
         super(location, source, Sort.KLIST);
     }
 
-    public KList(Element element) {
-        super(element);
+    public KList(Element element, JavaClassesFactory factory) {
+        super(element, factory);
     }
 
     public KList(KList node) {

@@ -4,6 +4,7 @@ package org.kframework.kil;
 import java.util.Collections;
 import java.util.List;
 
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -12,8 +13,8 @@ public class KSequence extends Collection {
 
     public static final KSequence EMPTY = new KSequence(Collections.<Term> emptyList());
 
-    public KSequence(Element element) {
-        super(element);
+    public KSequence(Element element, JavaClassesFactory factory) {
+        super(element, factory);
     }
 
     public KSequence(KSequence node) {

@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +11,6 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
@@ -81,12 +77,12 @@ public class Cell extends Term implements Interfaces.MutableParent<Term, Enum<?>
         cellAttributes = new HashMap<String, String>();
     }
 
-    public Cell(Element element) {
+    public Cell(Element element, JavaClassesFactory factory) {
         super(element);
         this.sort = Sort.BAG_ITEM;
         this.label = element.getAttribute(Constants.LABEL_label_ATTR);
         this.endLabel = element.getAttribute(Constants.ENDLABEL_label_ATTR);
-        this.contents = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+        this.contents = (Term) factory.getTerm(XML.getChildrenElements(element).get(0));
 
         NamedNodeMap its = element.getAttributes();
         cellAttributes = new HashMap<String, String>();

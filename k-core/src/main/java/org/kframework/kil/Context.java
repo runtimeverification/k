@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -12,8 +13,8 @@ import org.w3c.dom.Element;
  */
 public class Context extends Sentence {
 
-    public Context(Element element) {
-        super(element);
+    public Context(Element element, JavaClassesFactory factory) {
+        super(element, factory);
     }
 
     public Context(Context node) {

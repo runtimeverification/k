@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
@@ -13,8 +14,8 @@ import java.util.ArrayList;
  */
 public class Ambiguity extends Collection {
 
-    public Ambiguity(Element element) {
-        super(element);
+    public Ambiguity(Element element, JavaClassesFactory factory) {
+        super(element, factory);
     }
 
     public Ambiguity(Ambiguity node) {

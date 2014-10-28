@@ -56,13 +56,13 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
 
     private static C comparator = new C();
 
-    public Attributes(Element element) {
+    public Attributes(Element element, JavaClassesFactory factory) {
         super(element);
 
         contents = new TreeMap<>(comparator);
         List<Element> children = XML.getChildrenElements(element);
         for (Element e : children)
-            add((Attribute<?>) JavaClassesFactory.getTerm(e));
+            add((Attribute<?>) factory.getTerm(e));
     }
 
     public Attributes() {

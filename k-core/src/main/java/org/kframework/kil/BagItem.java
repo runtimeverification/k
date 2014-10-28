@@ -11,9 +11,9 @@ public class BagItem extends CollectionItem {
         super(location, source, Sort.BAG_ITEM);
     }
 
-    public BagItem(Element element) {
+    public BagItem(Element element, JavaClassesFactory factory) {
         super(element);
-        this.value = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+        this.value = (Term) factory.getTerm(XML.getChildrenElements(element).get(0));
     }
 
     public BagItem(BagItem node) {
