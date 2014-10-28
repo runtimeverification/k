@@ -256,6 +256,10 @@ public class NonACPatternMatcher {
     private void match(Cell cell, CellCollection pattern) {
         check(pattern.concreteSize() == 1);
         if (!failed) {
+            /* YilongL: there is no need to assert AC-matching here, because
+             * even if both cells are multiplicity cells, there is still only
+             * one possible way to match */
+
             addMatchingTask(cell, pattern.cells().iterator().next());
             if (pattern.hasFrame()) {
                 addSubstitution(pattern.frame(), CellCollection.EMPTY);
