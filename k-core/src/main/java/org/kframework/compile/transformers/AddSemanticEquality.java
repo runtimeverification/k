@@ -16,8 +16,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,15 +54,15 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                         if (!equalities.containsKey(prod.getChildSort(0)))
                             equalities.put(prod.getChildSort(0), prod.getKLabel());
                         else
-                            GlobalSettings.kem.registerCriticalError(
+                            throw KExceptionManager.criticalError(
                                     "redeclaration of equality for sort " + prod.getChildSort(0),
                                     this, prod);
                     else
-                        GlobalSettings.kem.registerCriticalError(
+                        throw KExceptionManager.criticalError(
                                 "arguments for equality expected to be of the same sort",
                                 this, prod);
                 else
-                    GlobalSettings.kem.registerCriticalError(
+                    throw KExceptionManager.criticalError(
                             "unexpected number of arguments for equality, expected 2",
                             this, prod);
             /* TOOD(AndreiS): cink fails this check; either fix cink or remove the check

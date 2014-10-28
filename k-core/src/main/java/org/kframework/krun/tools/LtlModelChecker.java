@@ -73,8 +73,7 @@ public interface LtlModelChecker {
                 sw.printIntermediate("Model checking total");
                 return result;
             } catch (KRunExecutionException e) {
-                kem.registerCriticalError(e.getMessage(), e);
-                throw new AssertionError("unreachable");
+                throw KExceptionManager.criticalError(e.getMessage(), e);
             }
         }
 

@@ -7,9 +7,8 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
-
 import java.awt.*;
 import java.io.IOException;
 import java.util.*;
@@ -660,13 +659,13 @@ public class HTMLFilter extends BackendFilter {
         try {
             FileUtil.loadProperties(Latex2HTMLzero, getClass(), "Latex2HTMLzero.properties");
         } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("error loading Latex2HTMLzero.properties", e);
+            throw KExceptionManager.criticalError("error loading Latex2HTMLzero.properties", e);
         }
 
         try {
             FileUtil.loadProperties(Latex2HTMLone, getClass(), "Latex2HTMLone.properties");
         } catch (IOException e) {
-            GlobalSettings.kem.registerCriticalError("error loading Latex2HTMLone.properties", e);
+            throw KExceptionManager.criticalError("error loading Latex2HTMLone.properties", e);
         }
     }
 

@@ -3,8 +3,7 @@ package org.kframework.compile.checks;
 
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public class CheckConfigurationCells extends BasicVisitor {
     public Void visit(Cell node, Void _) {
         Cell cell = cells.get(node.getId());
         if (cell != null) {
-            GlobalSettings.kem.registerCompilerError(
+            throw KExceptionManager.compilerError(
                     "Cell " + node.getId() + " found twice in configuration (once at " + cell.getLocation() + ").",
                     this, node);
         }

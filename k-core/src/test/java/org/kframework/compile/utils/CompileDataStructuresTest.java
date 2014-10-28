@@ -20,13 +20,14 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.BaseTestCase;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CompileDataStructuresTest {
+public class CompileDataStructuresTest extends BaseTestCase {
 
     @Mock
     private Context context;
@@ -42,7 +43,7 @@ public class CompileDataStructuresTest {
 
     @Before
     public void setUp() {
-        compileDataStructures = new CompileDataStructures(context);
+        compileDataStructures = new CompileDataStructures(context, kem);
         mapSort = new DataStructureSort("Map", Sort.MAP, "'_Map_", "'_|->_", "'.Map", Collections.singletonMap("update", "'_[_<-_]"));
     }
 

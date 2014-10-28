@@ -13,7 +13,7 @@ import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
-import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.TermLoader;
 import org.kframework.transformation.Transformation;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -41,9 +41,9 @@ public interface Prover {
         private final Context context;
         private final Stopwatch sw;
         private final Term initialConfiguration;
-        private final KExceptionManager kem;
         private final Prover prover;
         private final FileUtil files;
+        private final TermLoader termLoader;
 
         @Inject
         protected Tool(
@@ -51,16 +51,16 @@ public interface Prover {
                 @Main Context context,
                 Stopwatch sw,
                 @Main Term initialConfiguration,
-                KExceptionManager kem,
                 @Main Prover prover,
-                @Main FileUtil files) {
+                @Main FileUtil files,
+                TermLoader termLoader) {
             this.options = options;
             this.context = context;
             this.sw = sw;
             this.initialConfiguration = initialConfiguration;
-            this.kem = kem;
             this.prover = prover;
             this.files = files;
+            this.termLoader = termLoader;
         }
 
         @Override
@@ -69,15 +69,14 @@ public interface Prover {
             try {
                 String proofFile = options.experimental.prove;
                 String content = files.loadFromWorkingDirectory(proofFile);
-                Definition parsed = DefinitionLoader.parseString(content,
+                Definition parsed = termLoader.parseString(content,
                         Sources.fromFile(proofFile), context);
                 Module mod = parsed.getSingletonModule();
                 KRunProofResult<Set<Term>> result = prover.prove(mod, initialConfiguration);
                 sw.printIntermediate("Proof total");
                 return result;
             } catch (KRunExecutionException e) {
-                kem.registerCriticalError(e.getMessage(), e);
-                throw new AssertionError("unreachable");
+                throw KExceptionManager.criticalError(e.getMessage(), e);
             }
         }
 

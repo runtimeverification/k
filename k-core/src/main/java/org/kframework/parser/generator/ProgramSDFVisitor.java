@@ -22,7 +22,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Collect all the syntax declarations into containers according to their function.
@@ -70,7 +70,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
                 Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
                 if (prods2.isEmpty()) {
                     String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                    GlobalSettings.kem.registerCriticalError(msg, this, tag);
+                    throw KExceptionManager.criticalError(msg, this, tag);
                 }
                 pb1.getProductions().addAll(prods2);
             }
@@ -91,7 +91,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
             Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
             if (prods2.isEmpty()) {
                 String msg = "Could not find any production represented by tag: " + tag.getLabel();
-                GlobalSettings.kem.registerCriticalError(msg, this, tag);
+                throw KExceptionManager.criticalError(msg, this, tag);
             }
             pb1.getProductions().addAll(prods2);
         }

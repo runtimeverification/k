@@ -6,16 +6,17 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.*;
-import java.util.Set;
 
 
 public class FlattenModules  extends BasicCompilerStep<Definition> {
 
-    public FlattenModules(Context context) {
+    private final KExceptionManager kem;
+
+    public FlattenModules(Context context, KExceptionManager kem) {
         super(context);
+        this.kem = kem;
     }
 
     @Override
@@ -65,7 +66,7 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
                                 mods.add(modules.get(name));
                                 included.add(name);
                             } else {
-                                GlobalSettings.kem.registerCompilerWarning(
+                                kem.registerCompilerWarning(
                                         "Module " + name + " undefined.",
                                         this, i);
                             }

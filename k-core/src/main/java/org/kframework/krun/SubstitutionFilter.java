@@ -3,8 +3,7 @@ package org.kframework.krun;
 
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.*;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.Map;
 
 public class SubstitutionFilter extends CopyOnWriteTransformer {
@@ -23,7 +22,7 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
             t = args.get(var.getName() + ":" + var.getSort());
         }
         if (t == null) {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                 "Configuration variable missing: " + var.getName(),
                 this, var);
         }

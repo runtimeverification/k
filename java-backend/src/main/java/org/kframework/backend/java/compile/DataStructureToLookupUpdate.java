@@ -22,8 +22,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -233,9 +232,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         ((BuiltinLookup) queue.get(i)).variables(),
                         ((BuiltinLookup) queue.get(j)).variables());
                 if (!commonVariables.isEmpty()) {
-                    GlobalSettings.kem.registerCriticalError("Unsupported map pattern in the rule left-hand side", node);
-                    /* dead code */
-                    return null;
+                    throw KExceptionManager.criticalError("Unsupported map pattern in the rule left-hand side", node);
                 }
             }
         }
@@ -255,18 +252,14 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                             mapLookup.kind(),
                             true));
                 } else {
-                    GlobalSettings.kem.registerCriticalError("Unsupported map pattern in the rule left-hand side", node);
-                    /* dead code */
-                    return null;
+                    throw KExceptionManager.criticalError("Unsupported map pattern in the rule left-hand side", node);
                 }
             } else if (lookup instanceof SetLookup) {
                 SetLookup setLookup = (SetLookup) lookup;
                 if (setLookup.key() instanceof Variable && !variables.contains(setLookup.key())) {
                     lookups.add(new SetLookup(setLookup.base(), setLookup.key(), true));
                 } else {
-                    GlobalSettings.kem.registerCriticalError("Unsupported map pattern in the rule left-hand side", node);
-                    /* dead code */
-                    return null;
+                    throw KExceptionManager.criticalError("Unsupported map pattern in the rule left-hand side", node);
                 }
             } else {
                 assert false: "unexpected builtin data structure type";
@@ -295,13 +288,12 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         node = (ListBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                         "unexpected left-hand side data structure format; "
                         + "expected elements and at most one variable\n"
                         + node,
                         this,
                         location);
-                return null;
             }
 
             if (node.elementsLeft().isEmpty() && node.elementsRight().isEmpty()
@@ -396,12 +388,11 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         node = (MapBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                         "unexpected left-hand side data structure format; "
                         + "expected elements and at most one variable\n"
                         + node,
                         this, location);
-                return null;
             }
 
             if (node.elements().isEmpty() && node.hasViewBase()) {
@@ -476,12 +467,11 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         node = (SetBuiltin) super.visit(node, _);
         if (status == Status.LHS) {
             if (!node.isLHSView()) {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                         "unexpected left-hand side data structure format; "
                         + "expected elements and at most one variable\n"
                         + node,
                         this, location);
-                return null;
             }
 
             if (node.elements().isEmpty() && node.hasViewBase()) {

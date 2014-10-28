@@ -42,7 +42,7 @@ public abstract class FrontEnd {
                 try {
                     succeeded = run();
                 } catch (ParameterException e) {
-                    kem.registerCriticalError(e.getMessage(), e);
+                    throw KExceptionManager.criticalError(e.getMessage(), e);
                 }
                 kem.print();
             }
@@ -52,6 +52,7 @@ public abstract class FrontEnd {
             if (globalOptions.debug) {
                 e.printStackTrace();
             }
+            e.register(kem);
             kem.print();
         }
         return succeeded;

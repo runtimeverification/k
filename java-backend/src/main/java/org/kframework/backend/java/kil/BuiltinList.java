@@ -8,8 +8,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -394,7 +393,7 @@ public class BuiltinList extends Collection {
                 baseTermTypesBuilder.add(BaseTermType.VARIABLE);
                 listVariablesBuilder.add((Variable) term);
             } else {
-                GlobalSettings.kem.registerCriticalError("unexpected concatenated term" + term);
+                throw KExceptionManager.criticalError("unexpected concatenated term" + term);
             }
         }
 
@@ -409,7 +408,7 @@ public class BuiltinList extends Collection {
          */
         public void concatenate(Term term) {
             if (!term.sort().equals(Sort.LIST)) {
-                GlobalSettings.kem.registerCriticalError("unexpected sort "
+                throw KExceptionManager.criticalError("unexpected sort "
                         + term.sort() + " of concatenated term " + term
                         + "; expected " + Sort.LIST);
             }
@@ -451,7 +450,7 @@ public class BuiltinList extends Collection {
                     }
                 }
             } else {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                         "the builder is not allowed to concatencate list terms in "
                         + BuilderStatus.ELEMENTS_RIGHT);
             }

@@ -12,12 +12,10 @@ public class TransformationMembersInjector<T> implements MembersInjector<T> {
 
     private final Field field;
     private final Provider<? extends TransformationProvider<?>> provider;
-    private final Provider<KExceptionManager> kem;
 
-    public TransformationMembersInjector(Field field, Provider<? extends TransformationProvider<?>> provider, Provider<KExceptionManager> kem) {
+    public TransformationMembersInjector(Field field, Provider<? extends TransformationProvider<?>> provider) {
         this.field = field;
         this.provider = provider;
-        this.kem = kem;
     }
 
     @Override
@@ -28,7 +26,7 @@ public class TransformationMembersInjector<T> implements MembersInjector<T> {
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new RuntimeException("could not inject " + t, e);
         } catch (AmbiguousTransformationException | TransformationNotSatisfiedException e) {
-            kem.get().registerCriticalError(e.getMessage(), e);
+            throw KExceptionManager.criticalError(e.getMessage(), e);
         }
     }
 

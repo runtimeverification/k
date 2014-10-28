@@ -5,6 +5,8 @@ import org.kframework.compile.transformers.*;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.errorsystem.KExceptionManager;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,7 +41,7 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
         return null;
     }
 
-    public RuleCompilerSteps(Context context) {
+    public RuleCompilerSteps(Context context, KExceptionManager kem) {
         super(context);
         this.add(new AddKCell(context));
         this.add(new AddTopCellRules(context));
@@ -48,11 +50,11 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
         this.add(new ResolveListOfK(context));
         this.add(new FlattenTerms(context));
         final ResolveContextAbstraction resolveContextAbstraction =
-                new ResolveContextAbstraction(context);
+                new ResolveContextAbstraction(context, kem);
         this.add(resolveContextAbstraction);
         this.add(new ResolveOpenCells(context));
         this.add(new Cell2DataStructure(context));
-        this.add(new CompileDataStructures(context));
+        this.add(new CompileDataStructures(context, kem));
     }
 
     @Override

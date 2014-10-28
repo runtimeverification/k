@@ -71,8 +71,7 @@ public class KRunFrontEnd extends FrontEnd {
             return true;
         } catch (TransformationNotSatisfiedException
                 | AmbiguousTransformationException e) {
-            kem.registerCriticalError(e.getMessage(), e);
-            throw new AssertionError("unreachable");
+            throw KExceptionManager.criticalError(e.getMessage(), e);
         }
     }
 }

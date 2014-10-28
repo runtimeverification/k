@@ -15,7 +15,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BaseTestCase;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.general.GlobalSettings;
 import org.mockito.ArgumentMatcher;
 
 public class VariableWarningTest extends BaseTestCase {
@@ -24,7 +23,6 @@ public class VariableWarningTest extends BaseTestCase {
     public void setUp() {
         context = new Context();
         context.globalOptions = new GlobalOptions();
-        GlobalSettings.kem = kem;
 
     }
 
@@ -46,7 +44,7 @@ public class VariableWarningTest extends BaseTestCase {
         ks.getContents().add(v4);
         r.setBody(ks);
 
-        new VariableTypeInferenceFilter(context).visitNode(r);
+        new VariableTypeInferenceFilter(context, kem).visitNode(r);
         verify(kem).register(argThat(new ArgumentMatcher<KException>() {
             @Override
             public boolean matches(Object argument) {

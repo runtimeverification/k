@@ -7,8 +7,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +16,11 @@ import java.util.List;
  */
 public class AddEmptyLists extends CopyOnWriteTransformer {
 
-    public AddEmptyLists(Context context) {
+    private final KExceptionManager kem;
+
+    public AddEmptyLists(Context context, KExceptionManager kem) {
         super("Add empty lists", context);
+        this.kem = kem;
     }
 
     /**
@@ -34,10 +36,10 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
      * @return wrapped t, or null if no change should be made
      */
     private Term wrapTerm(Term t, Sort expectedSort) {
-        if (isAddEmptyList(expectedSort, t.getSort())) {
+        if (isAddEmptyList(context, expectedSort, t.getSort())) {
             if (!isUserListElement(expectedSort, t, context)) {
                 String msg = "Found sort '" + t.getSort() + "' where list sort '" + expectedSort + "' was expected. Moving on.";
-                GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
+                kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getSource(), t.getLocation()));
             } else
                 return addEmpty(t, expectedSort);
         }
@@ -131,7 +133,7 @@ public class AddEmptyLists extends CopyOnWriteTransformer {
                && context.isSubsortedEq(context.getListElementSort(listSort), elementSort);
     }
 
-    public boolean isAddEmptyList(Sort expectedSort, Sort termSort) {
+    public static boolean isAddEmptyList(Context context, Sort expectedSort, Sort termSort) {
         if (!context.isListSort(expectedSort))
             return false;
         if (context.isSubsortedEq(expectedSort, termSort)

@@ -151,7 +151,7 @@ public class FileUtil {
         try {
             FileUtils.copyFile(from, to);
         } catch (IOException e) {
-            kem.registerCriticalError("Could not copy " + from + " to " + to, e);
+            throw KExceptionManager.criticalError("Could not copy " + from + " to " + to, e);
         }
     }
 
@@ -159,7 +159,7 @@ public class FileUtil {
         try {
             FileUtils.copyFileToDirectory(from, toDir);
         } catch (IOException e) {
-            kem.registerCriticalError("Could not copy " + from + " to directory " + toDir, e);
+            throw KExceptionManager.criticalError("Could not copy " + from + " to directory " + toDir, e);
         }
     }
 
@@ -167,11 +167,11 @@ public class FileUtil {
         try {
             File dir = file.getAbsoluteFile().getParentFile();
             if (!dir.exists() && !dir.mkdirs()) {
-                kem.registerCriticalError("Could not create directory " + dir);
+                throw KExceptionManager.criticalError("Could not create directory " + dir);
             }
             FileUtils.writeStringToFile(file, content);
         } catch (IOException e) {
-            kem.registerCriticalError("Could not write to file " + file.getAbsolutePath(), e);
+            throw KExceptionManager.criticalError("Could not write to file " + file.getAbsolutePath(), e);
         }
     }
 
@@ -179,8 +179,7 @@ public class FileUtil {
         try {
             return FileUtils.readFileToString(file);
         } catch (IOException e) {
-            kem.registerCriticalError("Could not read from file " + file.getAbsolutePath(), e);
-            throw new AssertionError("unreachable");
+            throw KExceptionManager.criticalError("Could not read from file " + file.getAbsolutePath(), e);
         }
     }
 }

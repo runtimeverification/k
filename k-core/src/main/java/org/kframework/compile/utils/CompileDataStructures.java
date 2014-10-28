@@ -16,8 +16,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.Collections;
 import java.util.Set;
 
@@ -38,12 +37,15 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
     private ASTNode location;
 
+    private final KExceptionManager kem;
+
     /**
      * Simplified constructor for the common case
      * @param context The context of the rules being compiled
      */
-    public CompileDataStructures(Context context) {
+    public CompileDataStructures(Context context, KExceptionManager kem) {
         super("Compile collections to internal K representation", context);
+        this.kem = kem;
     }
 
     @Override
@@ -143,7 +145,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                 || sort.sort().equals(Sort.MAP)) {
             // TODO(AndreiS): the lines below should work once KLabelConstant are properly created
             if (productions.size() > 1) {
-                GlobalSettings.kem.registerCompilerWarning(
+                kem.registerCompilerWarning(
                         "unable to transform the KApp: " + node
                         + "\nbecause of multiple productions associated:\n"
                         + productions,
@@ -161,11 +163,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
             if (kList.isEmpty()) {
                 return DataStructureBuiltin.empty(sort);
             } else {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                         "unexpected non-empty KList applied to constant KLabel " + kLabelConstant,
                         this,
                         location);
-                return node;
             }
         } else if (sort.sort().equals(Sort.MAP)) {
             /* TODO(AndreiS): replace this with a more generic mechanism */

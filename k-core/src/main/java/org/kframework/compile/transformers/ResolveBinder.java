@@ -3,6 +3,7 @@ package org.kframework.compile.transformers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -22,10 +23,9 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -73,15 +73,16 @@ public class ResolveBinder extends CopyOnWriteTransformer {
 
             while (m.regionStart() < m.regionEnd()) {
                 if (!m.lookingAt()) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "could not parse binder attribute \"" + bindInfo.substring(m.regionStart(), m.regionEnd()) + "\""));
+                    throw KExceptionManager.criticalError(
+                            "could not parse binder attribute \"" + bindInfo.substring(m.regionStart(), m.regionEnd()) + "\"");
                 }
                 if (m.end() < m.regionEnd()) {
                     if (!m.group(4).equals(",")) {
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "expecting ',' at the end \"" + m.group() + "\""));
+                        throw KExceptionManager.criticalError("expecting ',' at the end \"" + m.group() + "\"");
                     }
                 } else {
                     if (!m.group(4).equals("")) {
-                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "unexpected ',' at the end \"" + m.group() + "\""));
+                        throw KExceptionManager.criticalError("unexpected ',' at the end \"" + m.group() + "\"");
                     }
                 }
 

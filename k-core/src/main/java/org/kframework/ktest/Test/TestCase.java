@@ -9,8 +9,7 @@ import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
 import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -86,6 +85,8 @@ public class TestCase {
      */
     private final KTestOptions options;
 
+    private final KExceptionManager kem;
+
     public TestCase(Annotated<String, LocationData> definition,
                     List<Annotated<String, LocationData>> programs,
                     String[] extensions,
@@ -94,7 +95,8 @@ public class TestCase {
                     List<PgmArg> kompileOpts,
                     ProgramProfile krunOpts,
                     Map<String, ProgramProfile> pgmSpecificKRunOpts,
-                    Set<KTestStep> skips, KTestOptions options) {
+                    Set<KTestStep> skips, KTestOptions options,
+                    KExceptionManager kem) {
         // programs and results should be ordered set because of how search algorithm works
         this.definition = definition;
         this.programs = programs;
@@ -106,16 +108,17 @@ public class TestCase {
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
         this.skips = skips;
         this.options = options;
+        this.kem = kem;
 
         setKompileDirArg();
         setKompileDirFullPath();
     }
 
-    public static TestCase makeTestCaseFromK(KTestOptions cmdArgs) {
+    public static TestCase makeTestCaseFromK(KTestOptions cmdArgs, KExceptionManager kem) {
         // give a warning if 'programs' is specified using the command line argument,
         // but 'extension' is not.
         if (cmdArgs.programsSpecified() && cmdArgs.getExtensions().isEmpty()) {
-            GlobalSettings.kem.registerCompilerWarning("'programs' attribute is given, " +
+            kem.registerCompilerWarning("'programs' attribute is given, " +
                     "but 'extension' is not. ktest won't run any programs.");
         }
 
@@ -137,7 +140,7 @@ public class TestCase {
                 cmdArgs.getExtensions().toArray(new String[cmdArgs.getExtensions().size()]),
                 cmdArgs.getExcludes().toArray(new String[cmdArgs.getExcludes().size()]),
                 results, emptyOpts, emptyProfile, emptyOptsMap,
-                new HashSet<>(), cmdArgs);
+                new HashSet<>(), cmdArgs, kem);
     }
 
     public boolean isDefinitionKompiled() {
@@ -152,21 +155,21 @@ public class TestCase {
         if (posixInitScript == null) {
             return null;
         }
-        return new Proc<>(this, getPosixOnlyCmd(), getWorkingDir(), options);
+        return new Proc<>(this, getPosixOnlyCmd(), getWorkingDir(), options, kem);
     }
 
     /**
      * @return {@link org.kframework.ktest.Proc} that runs kompile command of the test case.
      */
     public Proc<TestCase> getKompileProc() {
-        return new Proc<>(this, getKompileCmd(), getWorkingDir(), options);
+        return new Proc<>(this, getKompileCmd(), getWorkingDir(), options, kem);
     }
 
     /**
      * @return {@link org.kframework.ktest.Proc} that runs PDF command of the test case.
      */
     public Proc<TestCase> getPDFProc() {
-        return new Proc<>(this, getPdfCmd(), getWorkingDir(), options);
+        return new Proc<>(this, getPdfCmd(), getWorkingDir(), options, kem);
     }
 
     /**
@@ -224,7 +227,7 @@ public class TestCase {
             }
             Proc<KRunProgram> p = new Proc<>(program, args, program.inputFile, inputContents,
                     outputContentsAnn, errorContentsAnn, matcher, new File(program.defPath), options,
-                    program.outputFile, program.newOutputFile);
+                    program.outputFile, program.newOutputFile, kem);
             procs.add(p);
         }
 

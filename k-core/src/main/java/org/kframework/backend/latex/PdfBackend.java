@@ -57,7 +57,7 @@ public class PdfBackend extends BasicBackend {
             if (process.exitValue() != 0) {
                 String latexLogFile = FilenameUtils.removeExtension(latexFile.getName()) + ".log";
                 files.copyTempFileToDefinitionDirectory(latexLogFile);
-                kem.registerCriticalError("pdflatex returned a non-zero exit code. " +
+                throw KExceptionManager.criticalError("pdflatex returned a non-zero exit code. " +
                                 "The pdf might be generated, but with bugs. " +
                                 "Please inspect the latex logs.");
             }
@@ -65,13 +65,12 @@ public class PdfBackend extends BasicBackend {
 
             return FilenameUtils.removeExtension(latexFile.getName()) + ".pdf";
         } catch (IOException | InterruptedException e) {
-            kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                             "Cannot generate the pdf version of the definition. " +
                             "It seems that `pdflatex` is not installed or is not in your path. " +
                             "To generate the pdf version you can run `pdflatex` having as " +
                             "argument the latex version of the definition.", e);
         }
-        return null; // unreachable code
     }
 
     @Override

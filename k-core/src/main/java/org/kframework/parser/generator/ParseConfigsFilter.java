@@ -31,7 +31,7 @@ import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.utils.XmlLoader;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,12 +42,16 @@ import java.io.IOException;
 import java.util.Formatter;
 
 public class ParseConfigsFilter extends ParseForestTransformer {
-    public ParseConfigsFilter(Context context) {
+
+    private final KExceptionManager kem;
+
+    public ParseConfigsFilter(Context context, KExceptionManager kem) {
         super("Parse Configurations", context);
+        this.kem = kem;
     }
 
-    public ParseConfigsFilter(Context context, boolean checkInclusion) {
-        super("Parse Configurations", context);
+    public ParseConfigsFilter(Context context, boolean checkInclusion, KExceptionManager kem) {
+        this(context, kem);
         this.checkInclusion = checkInclusion;
     }
 
@@ -109,7 +113,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 // config = new CheckBinaryPrecedenceFilter().visitNode(config);
                 config = new PriorityFilter(context).visitNode(config);
                 config = new PreferDotsFilter(context).visitNode(config);
-                config = new VariableTypeInferenceFilter(context).visitNode(config);
+                config = new VariableTypeInferenceFilter(context, kem).visitNode(config);
                 // config = new AmbDuplicateFilter(context).visitNode(config);
                 // config = new TypeSystemFilter(context).visitNode(config);
                 // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
@@ -119,12 +123,12 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 config = new FlattenListsFilter(context).visitNode(config);
                 config = new AmbDuplicateFilter(context).visitNode(config);
                 // last resort disambiguation
-                config = new AmbFilter(context).visitNode(config);
+                config = new AmbFilter(context, kem).visitNode(config);
 
                 if (context.globalOptions.debug) {
                     File file = context.files.resolveTemp("timing.log");
                     if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-                        GlobalSettings.kem.registerCriticalError("Could not create directory " + file.getParentFile());
+                        throw KExceptionManager.criticalError("Could not create directory " + file.getParentFile());
                     }
                     try (Formatter f = new Formatter(new FileWriter(file, true))) {
                         f.format("Parsing config: Time: %6d Location: %s:%s%n", (System.currentTimeMillis() - startTime2), ss.getSource(), ss.getLocation());

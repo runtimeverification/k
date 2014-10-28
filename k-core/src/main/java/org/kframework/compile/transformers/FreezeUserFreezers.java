@@ -5,10 +5,8 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.*;
-import java.util.List;
 
 /**
  * Initially created by: Traian Florin Serbanuta
@@ -39,7 +37,7 @@ public class FreezeUserFreezers extends CopyOnWriteTransformer {
         if (!(heating || cooling))
             return node;
         if (!(node.getBody() instanceof  Rewrite)) {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                             "Heating/Cooling rules should have rewrite at the top.",
                             this, node);
         }
@@ -47,14 +45,14 @@ public class FreezeUserFreezers extends CopyOnWriteTransformer {
         Rewrite rewrite = (Rewrite) node.getBody();
         if (heating) {
             if (!(rewrite.getRight() instanceof KSequence)) {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                                 "Heating rules should have a K sequence in the rhs.",
                                 this, node);
             }
             kSequence = (KSequence) rewrite.getRight();
         } else {
             if (!(rewrite.getLeft() instanceof KSequence)) {
-                GlobalSettings.kem.registerCriticalError(
+                throw KExceptionManager.criticalError(
                                 "Cooling rules should have a K sequence in the lhs.",
                                 this, node);
             }
@@ -62,7 +60,7 @@ public class FreezeUserFreezers extends CopyOnWriteTransformer {
         }
         List<Term> kSequenceContents = kSequence.getContents();
         if (kSequenceContents.size() != 2 ) {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                             "Heating/Cooling rules should have exactly 2 items in their K Sequence.",
                                 this, node);
         }

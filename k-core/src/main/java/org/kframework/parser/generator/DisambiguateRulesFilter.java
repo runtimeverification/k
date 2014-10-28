@@ -7,6 +7,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -28,9 +29,12 @@ import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 public class DisambiguateRulesFilter extends ParseForestTransformer {
     boolean checkInclusion = true;
 
-    public DisambiguateRulesFilter(Context context, boolean checkInclusion) {
+    private final KExceptionManager kem;
+
+    public DisambiguateRulesFilter(Context context, boolean checkInclusion, KExceptionManager kem) {
         super(DisambiguateRulesFilter.class.getName(), context);
         this.checkInclusion = checkInclusion;
+        this.kem = kem;
     }
 
     public ASTNode visit(Sentence ss, Void _) throws ParseFailedException {
@@ -48,7 +52,7 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         // config = new CheckBinaryPrecedenceFilter().visitNode(config);
         config = new PriorityFilter(context).visitNode(config);
         config = new PreferDotsFilter(context).visitNode(config);
-        config = new VariableTypeInferenceFilter(context).visitNode(config);
+        config = new VariableTypeInferenceFilter(context, kem).visitNode(config);
         // config = new AmbDuplicateFilter(context).visitNode(config);
         // config = new TypeSystemFilter(context).visitNode(config);
         // config = new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context).visitNode(config);
@@ -58,7 +62,7 @@ public class DisambiguateRulesFilter extends ParseForestTransformer {
         config = new FlattenListsFilter(context).visitNode(config);
         config = new AmbDuplicateFilter(context).visitNode(config);
         // last resort disambiguation
-        config = new AmbFilter(context).visitNode(config);
+        config = new AmbFilter(context, kem).visitNode(config);
         return config;
     }
 }

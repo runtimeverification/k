@@ -5,11 +5,7 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.kframework.krun.api.io.File;
 import org.kframework.krun.api.io.FileSystem;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import com.google.inject.Singleton;
 
 import java.io.EOFException;
@@ -124,11 +120,9 @@ public class PortableFileSystem implements FileSystem {
         } else if (realMessage.equals("Illegal seek")) {
             throw new IOException("ESPIPE");
         }
-        e.printStackTrace();
-        GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-            KExceptionGroup.CRITICAL,
+        throw KExceptionManager.criticalError(
             "Unrecognized OS errno. Please file an issue on the K framework issue tracker\n" +
-            "explaining precisely what you were trying to do and include the above stack trace"));
+            "explaining precisely what you were trying to do");
     }
 
     static void processIOException(IOException e) throws IOException {

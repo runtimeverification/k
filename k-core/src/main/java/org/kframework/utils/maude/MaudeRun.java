@@ -1,9 +1,8 @@
 // Copyright (c) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.utils.maude;
 
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.JarInfo;
-import org.kframework.utils.general.GlobalSettings;
-
 import java.io.*;
 
 public class MaudeRun {
@@ -50,9 +49,8 @@ public class MaudeRun {
 
         final File maude = new File(maudeExe);
         if (!maude.exists()) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Cannot execute Maude from " + maudeExe + ".");
-            throw new AssertionError("unreachable");
         } else {
             if (!maude.canExecute()) {
                 maude.setExecutable(true);

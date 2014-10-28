@@ -45,6 +45,7 @@ public class KastFrontEnd extends FrontEnd {
     private final Stopwatch sw;
     private final Map<String, String> env;
     private final ProgramLoader loader;
+    private final KExceptionManager kem;
 
     @Inject
     KastFrontEnd(
@@ -63,6 +64,7 @@ public class KastFrontEnd extends FrontEnd {
         this.sw = sw;
         this.env = env;
         this.loader = loader;
+        this.kem = kem;
     }
 
     /**
@@ -86,7 +88,7 @@ public class KastFrontEnd extends FrontEnd {
             kastFilter.visitNode(out);
             kast = kastFilter.getResult();
         } else {
-            MaudeFilter maudeFilter = new MaudeFilter(context);
+            MaudeFilter maudeFilter = new MaudeFilter(context, kem);
             maudeFilter.visitNode(out);
             kast = maudeFilter.getResult();
             kast.append("\n");

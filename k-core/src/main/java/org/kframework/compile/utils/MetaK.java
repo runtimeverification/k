@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
+
 import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Bag;
@@ -40,7 +41,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class MetaK {
 
@@ -133,19 +134,10 @@ public class MetaK {
             }
         }.visitNode(node);
         if (result.size() == 0) {
-            GlobalSettings.kem.registerInternalError("Internal compiler error --- Cannot find configuration.",
+            throw KExceptionManager.internalError("Internal compiler error --- Cannot find configuration.",
                     node);
         }
         return result.get(0);
-    }
-
-    public static Term defaultTerm(Term v, org.kframework.kil.loader.Context context) {
-        Sort sort = v.getSort();
-        Sort ksort = sort.getKSort().mainSort();
-        if (ksort.isDefaultable())
-            return new ListTerminator(Sort.of(ksort.toString()), null);
-        GlobalSettings.kem.registerCompilerWarning("Don't know the default value for term " + v.toString() + ". Assuming .K", v);
-        return KSequence.EMPTY;
     }
 
     public static boolean isAnywhere(Rule r) {

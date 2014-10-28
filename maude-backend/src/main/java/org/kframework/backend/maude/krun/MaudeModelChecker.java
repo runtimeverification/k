@@ -49,9 +49,9 @@ public class MaudeModelChecker implements LtlModelChecker {
 
     @Override
     public KRunProofResult<KRunGraph> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
-        MaudeFilter formulaFilter = new MaudeFilter(context);
+        MaudeFilter formulaFilter = new MaudeFilter(context, kem);
         formulaFilter.visitNode(formula);
-        MaudeFilter cfgFilter = new MaudeFilter(context);
+        MaudeFilter cfgFilter = new MaudeFilter(context, kem);
         cfgFilter.visitNode(cfg);
 
         StringBuilder cmd = new StringBuilder()
@@ -176,8 +176,7 @@ public class MaudeModelChecker implements LtlModelChecker {
         } else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {
             executor.assertXML(child.size() == 0);
         } else {
-            kem.registerCriticalError("Cannot parse result xml from maude due to production " + op + " of sort " + sort + ". Please file an error on the issue tracker which includes this error message.");
-            executor.assertXML(false);
+            throw KExceptionManager.criticalError("Cannot parse result xml from maude due to production " + op + " of sort " + sort + ". Please file an error on the issue tracker which includes this error message.");
         }
     }
 

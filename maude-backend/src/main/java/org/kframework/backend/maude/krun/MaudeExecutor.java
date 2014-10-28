@@ -132,7 +132,7 @@ public class MaudeExecutor implements Executor {
             }
         }
         if (returnValue != 0) {
-            kem.registerCriticalError("Maude returned non-zero value: " + returnValue);
+            throw KExceptionManager.criticalError("Maude returned non-zero value: " + returnValue);
         }
     }
 
@@ -142,7 +142,7 @@ public class MaudeExecutor implements Executor {
     }
 
     private KRunResult<KRunState> run(String maude_cmd, Term cfg) throws KRunExecutionException {
-        MaudeFilter maudeFilter = new MaudeFilter(context);
+        MaudeFilter maudeFilter = new MaudeFilter(context, kem);
         maudeFilter.visitNode(cfg);
         StringBuilder cmd = new StringBuilder();
 
@@ -484,15 +484,15 @@ public class MaudeExecutor implements Executor {
         } else if (depth != null) {
             cmd.append("[,").append(depth).append("] ");
         }
-        MaudeFilter maudeFilter = new MaudeFilter(context);
+        MaudeFilter maudeFilter = new MaudeFilter(context, kem);
         maudeFilter.visitNode(cfg);
         cmd.append(maudeFilter.getResult()).append(" ");
-        MaudeFilter patternBody = new MaudeFilter(context);
+        MaudeFilter patternBody = new MaudeFilter(context, kem);
         patternBody.visitNode(pattern.getBody());
         String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
         //TODO: consider replacing Requires with Ensures here.
         if (pattern.getRequires() != null) {
-            MaudeFilter patternCondition = new MaudeFilter(context);
+            MaudeFilter patternCondition = new MaudeFilter(context, kem);
             patternCondition.visitNode(pattern.getRequires());
             patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
         }
@@ -529,7 +529,7 @@ public class MaudeExecutor implements Executor {
                 writer.write(text, 0, text.length());
             }
         } catch (IOException e) {
-            kem.registerInternalError("Could not read from " + xmlOutFile
+            throw KExceptionManager.internalError("Could not read from " + xmlOutFile
                     + " and write to " + processedXmlOutFile, e);
         }
 
@@ -605,11 +605,9 @@ public class MaudeExecutor implements Executor {
                 edgeTransformer, hyperEdgeTransformer);
             return graphmlParser.readGraph();
         } catch (GraphIOException e) {
-            kem.registerInternalError("Failed to parse graphml from maude", e);
-            throw new AssertionError("unreachable");
+            throw KExceptionManager.internalError("Failed to parse graphml from maude", e);
         } catch (IOException e) {
-            kem.registerInternalError("Failed to read from " + processedXmlOutFile, e);
-            throw new AssertionError("unreachable");
+            throw KExceptionManager.internalError("Failed to read from " + processedXmlOutFile, e);
         }
     }
 
@@ -643,8 +641,7 @@ public class MaudeExecutor implements Executor {
             Term rawResult = (Term) new SubstitutionFilter(rawSubstitution, context)
                     .visitNode(pattern.getBody());
             KRunState state = new KRunState(rawResult);
-            SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo,
-                    context);
+            SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo);
             results.add(result);
         }
         list = doc.getElementsByTagName("result");

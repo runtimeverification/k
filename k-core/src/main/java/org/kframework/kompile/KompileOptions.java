@@ -8,8 +8,8 @@ import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
@@ -30,7 +30,7 @@ public final class KompileOptions implements Serializable {
 
     public File mainDefinitionFile() {
         if (parameters == null || parameters.size() == 0) {
-            GlobalSettings.kem.registerCriticalError("You have to provide exactly one main file in order to compile.");
+            throw KExceptionManager.criticalError("You have to provide exactly one main file in order to compile.");
         }
         return files.resolveWorkingDirectory(parameters.get(0));
     }

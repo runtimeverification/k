@@ -19,12 +19,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -223,9 +218,8 @@ public final class KItem extends Term {
          */
         Sort sort = sorts.isEmpty() ? kind.asSort() : subsorts.getGLBSort(sorts);
         if (sort == null) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                    KExceptionGroup.CRITICAL, "Cannot compute least sort of term: " +
-                            this.toString() + "\nPossible least sorts are: " + sorts));
+            throw KExceptionManager.criticalError("Cannot compute least sort of term: " +
+                            this.toString() + "\nPossible least sorts are: " + sorts);
         }
         /* the sort is exact iff the klabel is a constructor and there is no other possible sort */
         boolean isExactSort = kLabelConstant.isConstructor() && possibleSorts.isEmpty();

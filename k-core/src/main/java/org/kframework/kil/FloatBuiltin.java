@@ -11,7 +11,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.mpfr.BigFloat;
 import org.kframework.mpfr.BinaryMathContext;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.w3c.dom.Element;
 
 public class FloatBuiltin extends Token {
@@ -125,7 +125,7 @@ public class FloatBuiltin extends Token {
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
         Pair<BigFloat, Integer> pair = parseKFloat(s);
         if (pair == null) {
-            GlobalSettings.kem.registerCriticalError(
+            throw KExceptionManager.criticalError(
                     s + " is not parseable as a valid Float.", this);
         }
         this.value = pair.getLeft();

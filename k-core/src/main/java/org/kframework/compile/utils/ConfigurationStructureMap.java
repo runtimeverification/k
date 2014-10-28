@@ -2,8 +2,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.Cell;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -55,7 +54,7 @@ public class ConfigurationStructureMap implements
         ConfigurationStructure cfgStr;
         cfgStr = config.get(o.getId());
         if (cfgStr == null) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Cell " + o + " not found in configuration", o);
         }
         return cfgStr;
@@ -84,7 +83,7 @@ public class ConfigurationStructureMap implements
     public ConfigurationStructure put(String s, ConfigurationStructure configurationStructure) {
         if (config.containsKey(s)) {
             Cell c = config.get(s).cell;
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").",
                     configurationStructure.cell);
         }

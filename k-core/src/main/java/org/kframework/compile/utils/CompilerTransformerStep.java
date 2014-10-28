@@ -4,7 +4,7 @@ package org.kframework.compile.utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.AbstractTransformer;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 
 public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerStep<T> {
@@ -21,7 +21,7 @@ public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerSte
         ASTNode result = null;
         result = t.visitNode(def);
         if (!def.getClass().isInstance(result)) {
-            GlobalSettings.kem.registerInternalError(
+            throw KExceptionManager.internalError(
                     "Expecting " + def.getClass().getName() + ", but got " + result.getClass().getName()
                     + " while applying" + getName() + ".",
                     def);

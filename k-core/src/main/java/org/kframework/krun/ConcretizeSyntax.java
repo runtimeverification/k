@@ -4,7 +4,6 @@ package org.kframework.krun;
 import org.kframework.backend.kore.ToKAppTransformer;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.*;
 import org.kframework.kil.Cast.CastType;
@@ -73,7 +72,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
             if (child instanceof TermCons) {
                 TermCons termCons = (TermCons) child;
                 if (termCons.getProduction().isListDecl()) {
-                    if (new AddEmptyLists(context).isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof ListTerminator) {
+                    if (AddEmptyLists.isAddEmptyList(context, tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof ListTerminator) {
 
                         tcParent.getContents().set(i, termCons.getContents().get(0));
                     }

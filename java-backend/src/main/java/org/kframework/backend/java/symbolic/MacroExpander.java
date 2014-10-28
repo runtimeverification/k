@@ -13,6 +13,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import com.google.common.collect.Lists;
 
@@ -26,12 +27,15 @@ import com.google.common.collect.Lists;
  */
 public class MacroExpander extends CopyOnWriteTransformer {
 
-    public MacroExpander(TermContext context) {
+    private final KExceptionManager kem;
+
+    public MacroExpander(TermContext context, KExceptionManager kem) {
         super(context);
+        this.kem = kem;
     }
 
     public Definition processDefinition() {
-        Definition processedDefinition = new Definition(definition.context(), definition.indexingData);
+        Definition processedDefinition = new Definition(definition.context(), kem, definition.indexingData);
         processedDefinition.addKLabelCollection(definition.kLabels());
         processedDefinition.addFrozenKLabelCollection(definition.frozenKLabels());
         for (Rule rule : definition.rules()) {

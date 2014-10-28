@@ -8,7 +8,7 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 public class CheckRewrite extends BasicVisitor {
 
@@ -41,7 +41,7 @@ public class CheckRewrite extends BasicVisitor {
         this.visitNode(node.getBody());
         if (rewritesNo == 0) {
             String msg = "Rules must have at least one rewrite.";
-            GlobalSettings.kem.registerCompilerError(msg, this, node);
+            throw KExceptionManager.compilerError(msg, this, node);
         }
 
         if (node.getRequires() != null) {
@@ -88,19 +88,19 @@ public class CheckRewrite extends BasicVisitor {
     public Void visit(Rewrite node, Void _) {
         if (inConfig) {
             String msg = "Rewrites are not allowed in configurations.";
-            GlobalSettings.kem.registerCompilerError(msg, this, node);
+            throw KExceptionManager.compilerError(msg, this, node);
         }
         if (inRewrite) {
             String msg = "Rewrites are not allowed to be nested.";
-            GlobalSettings.kem.registerCompilerError(msg, this, node);
+            throw KExceptionManager.compilerError(msg, this, node);
         }
         if (inSideCondition) {
             String msg = "Rewrites are not allowed in side conditions.";
-            GlobalSettings.kem.registerCompilerError(msg, this, node);
+            throw KExceptionManager.compilerError(msg, this, node);
         }
         if (inFunction) {
             String msg = "Rewrites are not allowed under functions.";
-            GlobalSettings.kem.registerCompilerError(msg, this, node);
+            throw KExceptionManager.compilerError(msg, this, node);
         }
         rewritesNo++;
         inRewrite = true;

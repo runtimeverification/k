@@ -10,8 +10,8 @@ import org.kframework.kil.Source;
 import org.kframework.kil.Sources;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserType;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
@@ -32,16 +32,16 @@ public final class KastOptions {
 
     public String stringToParse() {
         if (parameters != null && parameters.size() > 0 && expression != null) {
-            GlobalSettings.kem.registerCriticalError("It is an error to provide both a file and an expression to parse.");
+            throw KExceptionManager.criticalError("It is an error to provide both a file and an expression to parse.");
         }
         if (expression != null) {
             return expression;
         }
         if (parameters != null && parameters.size() > 1) {
-            GlobalSettings.kem.registerCriticalError("You can only parse one program at a time.");
+            throw KExceptionManager.criticalError("You can only parse one program at a time.");
         }
         if (parameters == null || parameters.size() != 1) {
-            GlobalSettings.kem.registerCriticalError("You have to provide a file in order to kast a program.");
+            throw KExceptionManager.criticalError("You have to provide a file in order to kast a program.");
         }
         return files.loadFromWorkingDirectory(parameters.get(0));
     }

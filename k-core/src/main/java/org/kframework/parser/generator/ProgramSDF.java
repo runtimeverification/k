@@ -20,17 +20,17 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.KSyntax2GrammarStatesFilter;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
  */
 public class ProgramSDF {
 
-    public static StringBuilder getSdfForPrograms(Definition def, Context context) {
+    public static StringBuilder getSdfForPrograms(Definition def, Context context, KExceptionManager kem) {
         // collect all the syntax modules
-        CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context);
+        CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context, kem);
         csmv.visitNode(def);
 
         // collect the syntax from those modules
@@ -187,9 +187,9 @@ public class ProgramSDF {
         return sdf;
     }
 
-    public static Grammar getNewParserForPrograms(Definition def, Context context) {
+    public static Grammar getNewParserForPrograms(Definition def, Context context, KExceptionManager kem) {
         // collect all the syntax modules
-        CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context);
+        CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context, kem);
         csmv.visitNode(def);
 
         // collect the syntax from those modules
@@ -200,7 +200,7 @@ public class ProgramSDF {
             Module m = def.getModulesMap().get(modName);
             ctv.visitNode(m);
         }
-        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv);
+        KSyntax2GrammarStatesFilter ks2gsf = new KSyntax2GrammarStatesFilter(context, ctv, kem);
         // generate SDF and states for the new parser, using the terminals collected from the
         // previous step
         for (String modName : csmv.synModNames) {

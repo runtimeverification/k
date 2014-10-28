@@ -8,8 +8,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -227,7 +226,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
         private void concatenate(Term term) {
             if (!term.sort().equals(Sort.MAP)) {
-                GlobalSettings.kem.registerCriticalError("unexpected sort "
+                throw KExceptionManager.criticalError("unexpected sort "
                         + term.sort() + " of concatenated term " + term
                         + "; expected " + Sort.MAP);
             }
@@ -247,7 +246,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
             } else if (term instanceof Variable) {
                 variablesBuilder.add((Variable) term);
             } else {
-                GlobalSettings.kem.registerCriticalError("unexpected concatenated term" + term);
+                throw KExceptionManager.criticalError("unexpected concatenated term" + term);
             }
         }
 

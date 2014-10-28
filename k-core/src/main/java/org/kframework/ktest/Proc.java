@@ -8,8 +8,7 @@ import org.kframework.ktest.StringMatcher.MatchFailure;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
-
+import org.kframework.utils.errorsystem.KExceptionManager;
 import java.awt.*;
 import java.io.*;
 import java.util.Arrays;
@@ -97,6 +96,8 @@ public class Proc<T> implements Runnable {
      */
     private ProcOutput procOutput = new ProcOutput(null, null, -1);
 
+    private final KExceptionManager kem;
+
     public static final int SIGTERM = 143;
 
     /**
@@ -117,7 +118,7 @@ public class Proc<T> implements Runnable {
     public Proc(T obj, String[] args, String inputFile, String procInput,
                 Annotated<String, String> expectedOut, Annotated<String, String> expectedErr,
                 StringMatcher strComparator, File workingDir, KTestOptions options,
-                String outputFile, String newOutputFile) {
+                String outputFile, String newOutputFile, KExceptionManager kem) {
         this.obj = obj;
         this.args = args;
         this.inputFile = inputFile;
@@ -129,12 +130,13 @@ public class Proc<T> implements Runnable {
         this.options = options;
         this.outputFile = outputFile;
         this.newOutputFile = newOutputFile;
+        this.kem = kem;
         success = options.dry;
     }
 
-    public Proc(T obj, String[] args, File workingDir, KTestOptions options) {
+    public Proc(T obj, String[] args, File workingDir, KTestOptions options, KExceptionManager kem) {
         this(obj, args, null, "", null, null, options.getDefaultStringMatcher(), workingDir,
-                options, null, null);
+                options, null, null, kem);
     }
 
     @Override
@@ -216,7 +218,7 @@ public class Proc<T> implements Runnable {
                     return new ProcOutput(null, null, returnCode);
                 }
             } catch (IOException | InterruptedException e) {
-                GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
+                kem.registerInternalWarning(e.getMessage(), e);
                 reportErr("program failed with exception: " + e.getMessage());
             }
             return null; // unreachable
@@ -324,7 +326,7 @@ public class Proc<T> implements Runnable {
                 try {
                     IOUtils.write(normalOutput.stdout, new FileOutputStream(new File(outputFile)));
                 } catch (IOException e) {
-                    GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
+                    kem.registerInternalWarning(e.getMessage(), e);
                 }
             }
             if (doGenerateOut && options.getGenerateOut() && newOutputFile != null) {
@@ -332,7 +334,7 @@ public class Proc<T> implements Runnable {
                 try {
                     IOUtils.write(normalOutput.stdout, new FileOutputStream(new File(newOutputFile)));
                 } catch (IOException e) {
-                    GlobalSettings.kem.registerInternalWarning(e.getMessage(), e);
+                    kem.registerInternalWarning(e.getMessage(), e);
                 }
             }
 

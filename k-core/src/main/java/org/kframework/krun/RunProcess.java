@@ -67,7 +67,7 @@ public class RunProcess {
 
         try {
             if (commands.length <= 0) {
-                kem.registerCriticalError("Need command options to run");
+                throw KExceptionManager.criticalError("Need command options to run");
             }
 
             // create process
@@ -111,8 +111,7 @@ public class RunProcess {
             return new ProcessOutput(s1, s2, process.exitValue());
 
         } catch (IOException | InterruptedException e) {
-            kem.registerCriticalError("Error while running process:" + e.getMessage(), e);
-            throw new AssertionError("unreachable");
+            throw KExceptionManager.criticalError("Error while running process:" + e.getMessage(), e);
         }
 
     }
