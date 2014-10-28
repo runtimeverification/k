@@ -71,10 +71,6 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
         this(name, context, null, null);
     }
 
-    public AbstractVisitor(String name, Context context, Definition currentDefinition) {
-        this(name, context, currentDefinition, null);
-    }
-
     public AbstractVisitor(String name, Context context,
                            Definition currentDefinition, Module currentModule) {
         this.context = context;
