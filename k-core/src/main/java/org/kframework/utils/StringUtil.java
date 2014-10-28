@@ -418,20 +418,18 @@ public class StringUtil {
         return StringUtil.unEscapeSortName(ret);
     }
 
-    private static int number = 0;
-
     /**
      * Generate incremental numbers that doesn't contain the number 1
      *
      * @return an integer that doesn't contain the number 1
      */
-    public static int getUniqueId() {
+    public static int getUniqueId(int[] number) {
         boolean valid = false;
         while (!valid) {
-            int nr = number;
+            int nr = number[0];
             while (nr > 0) {
                 if (nr % 10 == 1) {
-                    number++;
+                    number[0]++;
                     break;
                 } else {
                     nr /= 10;
@@ -441,7 +439,7 @@ public class StringUtil {
                 valid = true;
             }
         }
-        return number++;
+        return number[0]++;
     }
 
     /**
