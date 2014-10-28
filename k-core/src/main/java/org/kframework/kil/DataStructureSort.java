@@ -140,11 +140,11 @@ public class DataStructureSort implements Serializable {
     public static Term listOf(Context context, Term... listItems) {
         DataStructureSort myList = context.dataStructureListSortOf(DEFAULT_LIST_SORT);
         if (listItems.length == 0) {
-            return KApp.of(KLabelConstant.of(myList.unitLabel(), context));
+            return KApp.of(KLabelConstant.of(myList.unitLabel()));
         }
         Term result = listItems[0];
         for (int i = 1; i < listItems.length; i++) {
-            result = KApp.of(KLabelConstant.of(myList.constructorLabel(), context), result, listItems[i]);
+            result = KApp.of(KLabelConstant.of(myList.constructorLabel()), result, listItems[i]);
         }
         return result;
     }

@@ -22,7 +22,6 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.InitialConfigurationProvider;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.ExecutorDebugger;
 import org.kframework.krun.api.KRunGraph;

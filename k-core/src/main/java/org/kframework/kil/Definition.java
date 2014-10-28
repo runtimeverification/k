@@ -7,6 +7,7 @@ import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.Poset;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
     /** An index of all modules in {@link #items} by name */
     private Map<String, Module> modulesMap;
     private String mainSyntaxModule;
+    private Poset<String> modules = Poset.create();
 
     public Definition() {
         super();
@@ -48,7 +50,21 @@ public class Definition extends ASTNode implements Interfaces.MutableList<Defini
         return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
     }
 
+    public void addModuleImport(String mainModule, String importedModule) {
+        if (mainModule.equals(importedModule))
+            return;
+        modules.addRelation(mainModule, importedModule);
+    }
 
+    public boolean isModuleIncludedEq(String localModule, String importedModule) {
+        if (localModule.equals(importedModule))
+            return true;
+        return modules.isInRelation(localModule, importedModule);
+    }
+
+    public void finalizeModules() {
+        modules.transitiveClosure();
+    }
 
     public void setItems(List<DefinitionItem> items) {
         this.items = items;

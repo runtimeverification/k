@@ -80,7 +80,6 @@ public class OuterParser {
             }
 
             setMainFile(file);
-            context.finalizeRequirements();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -111,12 +110,8 @@ public class OuterParser {
                         throw KExceptionManager.criticalError(missingFileMsg + req.getValue(), req);
 
                     slurp2(newFile, context, predefinedRequirement);
-                    context.addFileRequirement(newFile, file);
                 }
             }
-
-            if (!predefined)
-                context.addFileRequirement(files.resolveKBase(autoincludedFile), file);
 
             // add the modules to the modules list and to the map for easy access
             for (DefinitionItem di : defItemList) {

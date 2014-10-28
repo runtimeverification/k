@@ -3,6 +3,7 @@ package org.kframework.parser.generator;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
@@ -11,6 +12,9 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.ParseForestTransformer;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -52,11 +56,9 @@ public class ParseConfigsFilter extends ParseForestTransformer {
     }
 
     boolean checkInclusion = true;
-    String localModule = null;
 
     @Override
     public ASTNode visit(Module m, Void _) throws ParseFailedException {
-        localModule = m.getName();
         ASTNode rez = super.visit(m, _);
         new CollectStartSymbolPgmVisitor(context).visitNode(rez);
         return rez;
@@ -71,10 +73,16 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 if (ss.containsAttribute("kore")) {
                     long startTime = System.currentTimeMillis();
                     parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                    if (globalOptions.verbose)
+                    if (context.globalOptions.verbose)
                         System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
-                } else
-                    parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                } else {
+                    try {
+                        parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                    } catch (RuntimeException e) {
+                        String msg = "SDF failed to parse a configuration by throwing: " + e.getCause().getLocalizedMessage();
+                        throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
+                    }
+                }
                 Document doc = XmlLoader.getXMLDoc(parsed);
 
                 // replace the old xml node with the newly parsed sentence
@@ -96,7 +104,8 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 config = new SentenceVariablesFilter(context).visitNode(config);
                 config = new CellEndLabelFilter(context).visitNode(config);
                 if (checkInclusion)
-                    config = new InclusionFilter(localModule, context).visitNode(config);
+                    config = new InclusionFilter(context, getCurrentDefinition(),
+                            getCurrentModule()).visitNode(config);
                 // config = new CellTypesFilter().visitNode(config); not the case on configs
                 // config = new CorrectRewritePriorityFilter().visitNode(config);
                 config = new CorrectKSeqFilter(context).visitNode(config);
@@ -116,7 +125,7 @@ public class ParseConfigsFilter extends ParseForestTransformer {
                 // last resort disambiguation
                 config = new AmbFilter(context, kem).visitNode(config);
 
-                if (globalOptions.debug) {
+                if (context.globalOptions.debug) {
                     File file = context.files.resolveTemp("timing.log");
                     if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                         throw KExceptionManager.criticalError("Could not create directory " + file.getParentFile());

@@ -2,6 +2,8 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
 import org.kframework.kil.Source;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
@@ -13,12 +15,9 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 public class InclusionFilter extends ParseForestTransformer {
-    public InclusionFilter(String localModule, Context context) {
-        super("Inclusion filter", context);
-        this.localModule = localModule;
+    public InclusionFilter(Context context, Definition currentDefinition, Module currentModule) {
+        super("Inclusion filter", context, currentDefinition, currentModule);
     }
-
-    String localModule = null;
 
     @Override
     public ASTNode visit(TermCons tc, Void _) throws ParseFailedException {
@@ -33,7 +32,7 @@ public class InclusionFilter extends ParseForestTransformer {
 //            throw new PriorityException(kex);
 //        }
 
-        if (!context.isModuleIncludedEq(localModule, consModule)) {
+        if (!getCurrentDefinition().isModuleIncludedEq(getCurrentModule().getName(), consModule)) {
             String msg = "Production " + tc.getProduction().toString() + " has not been imported in this module.\n";
             msg += "    Defined in module: " + consModule + " file: " + consFile;
             KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getSource(), tc.getLocation());

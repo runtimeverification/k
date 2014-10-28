@@ -230,7 +230,7 @@ public class MetaK {
         if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(Sort.KLABEL)) {
-                return KLabelConstant.of(terminal, context);
+                return KLabelConstant.of(terminal);
             } else if (prod.getSort().equals(Sort.BUILTIN_BOOL)) {
                 return BoolBuiltin.kAppOf(terminal);
             } else if (prod.getSort().equals(Sort.BUILTIN_INT)) {
@@ -242,7 +242,7 @@ public class MetaK {
             }
         }
         if (prod.isLexical()) {
-            return KApp.of(KLabelConstant.of("#token", context),
+            return KApp.of(KLabelConstant.of("#token"),
                            StringBuiltin.kAppOf(prod.getSort().getName()),
                            Variable.getAnonVar(Sort.STRING));
         }

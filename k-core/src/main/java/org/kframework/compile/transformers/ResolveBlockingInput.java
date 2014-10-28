@@ -147,7 +147,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
         if ((
             (!(rewrite.getLeft() instanceof KApp &&
             ((KApp)rewrite.getLeft()).getLabel().equals(
-                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, context)))))) {
+                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL)))))) {
             kem.registerCompilerWarning(
                     "Expecting a list item but got " + rewrite.getLeft().getClass() + "." +
                             System.getProperty("line.separator") + "Won't transform.",
@@ -176,7 +176,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
         }
         if ((!(rewrite.getRight() instanceof KApp &&
             ((KApp)rewrite.getRight()).getLabel().equals(
-                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_UNIT_LABEL, context))))) {
+                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_UNIT_LABEL))))) {
             kem.registerCompilerWarning(
                     "Expecting an empty list but got " + rewrite.getRight().getClass() + " of sort " +
                             rewrite.getRight().getSort() + "." +
@@ -201,11 +201,11 @@ public class ResolveBlockingInput extends GetLhsPattern {
         DataStructureSort myList = context.dataStructureListSortOf(
             DataStructureSort.DEFAULT_LIST_SORT);
         Term term1 = new Rewrite(
-            KApp.of(KLabelConstant.of(myList.unitLabel(), context)),
-            KApp.of(KLabelConstant.of(myList.elementLabel(), context), parseTerm),
+            KApp.of(KLabelConstant.of(myList.unitLabel())),
+            KApp.of(KLabelConstant.of(myList.elementLabel()), parseTerm),
             context);
-        Term term2 = KApp.of(KLabelConstant.of(myList.elementLabel(), context), ioBuffer);
-        list = KApp.of(KLabelConstant.of(myList.constructorLabel(), context), term1, term2);
+        Term term2 = KApp.of(KLabelConstant.of(myList.elementLabel()), ioBuffer);
+        list = KApp.of(KLabelConstant.of(myList.constructorLabel()), term1, term2);
 
 
         node = node.shallowCopy();

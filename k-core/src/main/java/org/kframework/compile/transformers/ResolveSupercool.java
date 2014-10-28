@@ -21,7 +21,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(Rule node, Void _)  {
-        for (String cool : kompileOptions.supercool) {
+        for (String cool : context.kompileOptions.supercool) {
             if (node.containsAttribute(cool)) {
                 return super.visit(node, _);
             }

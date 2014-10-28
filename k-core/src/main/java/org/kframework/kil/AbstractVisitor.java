@@ -8,6 +8,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
+import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,25 +56,35 @@ import java.util.Map;
  * return {@code null}.
  */
 public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visitor<P, R, E> {
-    protected org.kframework.kil.loader.Context context;
-    protected KompileOptions kompileOptions;
-    protected GlobalOptions globalOptions;
-    String name;
+    protected final Context context;
+    private Module currentModule;
+    private Definition currentDefinition;
+    final String name;
 
     protected IdentityHashMap<ASTNode, R> cache = new IdentityHashMap<>();
 
-    public AbstractVisitor(org.kframework.kil.loader.Context context) {
-        this.context = context;
-        if (context != null) {
-            this.kompileOptions = context.kompileOptions;
-            this.globalOptions = context.globalOptions;
-        }
-        this.name = this.getClass().toString();
+    public AbstractVisitor(Context context) {
+        this(null, context, null, null);
     }
 
-    public AbstractVisitor(String name, org.kframework.kil.loader.Context context) {
-        this(context);
-        this.name = name;
+    public AbstractVisitor(String name, Context context) {
+        this(name, context, null, null);
+    }
+
+    public AbstractVisitor(String name, Context context,
+                           Definition currentDefinition, Module currentModule) {
+        this.context = context;
+        this.currentDefinition = currentDefinition;
+        this.currentModule = currentModule;
+        this.name = name == null ? this.getClass().toString() : name;
+    }
+
+    protected final Definition getCurrentDefinition() {
+        return currentDefinition;
+    }
+
+    protected final Module getCurrentModule() {
+        return currentModule;
     }
 
     @Override
@@ -281,6 +292,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
 
     @Override
     public R visit(Definition node, P p) throws E {
+        currentDefinition = node;
         node = genericVisitList(node, p, mutableList(Definition.class), null);
         return visit((ASTNode) node, p);
     }
@@ -297,6 +309,7 @@ public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visi
 
     @Override
     public R visit(Module node, P p) throws E {
+        currentModule = node;
         node = genericVisitList(node, p, mutableList(Module.class), null);
         return visit((DefinitionItem) node, p);
     }

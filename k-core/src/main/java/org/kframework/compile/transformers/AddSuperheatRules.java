@@ -48,7 +48,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
             return node;
         }
         boolean superheat = false;
-        for (String heat : kompileOptions.superheat) {
+        for (String heat : context.kompileOptions.superheat) {
             if (node.containsAttribute(heat)) {
                 superheat = true;
                 break;
@@ -107,7 +107,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
         KList inListList = new KList();
         inListList.add(red2);
         inListList.add(KApp.of(new KInjectedLabel(lHeat)));
-        Term inList = new KApp(KLabelConstant.of("'_inKList_", context), inListList);
+        Term inList = new KApp(KLabelConstant.of("'_inKList_"), inListList);
         KList condList = new KList();
         condList.add(inList);
         condList.add(BoolBuiltin.TRUE);

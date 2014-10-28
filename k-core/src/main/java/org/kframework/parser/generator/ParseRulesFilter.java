@@ -64,10 +64,16 @@ public class ParseRulesFilter extends ParseForestTransformer {
 
                 long koreStartTime = System.currentTimeMillis();
                 parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                if (globalOptions.verbose)
+                if (context.globalOptions.verbose)
                     System.out.println("Parsing with Kore: " + ss.getSource() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
-            } else
-                parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+            } else {
+                try {
+                    parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                } catch (RuntimeException  e) {
+                    String msg = "SDF failed to parse a rule by throwing: " + e.getCause().getLocalizedMessage();
+                    throw new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getSource(), ss.getLocation()));
+                }
+            }
             Document doc = XmlLoader.getXMLDoc(parsed);
 
             // replace the old xml node with the newly parsed sentence
@@ -101,7 +107,7 @@ public class ParseRulesFilter extends ParseForestTransformer {
             }
             cachedDef.put(key, new CachedSentence(sentence, startLine, startColumn));
 
-            if (globalOptions.debug) {
+            if (context.globalOptions.debug) {
                 File file = context.files.resolveTemp("timing.log");
                 if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                     throw KExceptionManager.criticalError("Could not create directory " + file.getParentFile());

@@ -27,7 +27,7 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
             so whenever somebody refactors the backends should split this transformer
             for each backend.
              */
-            if (kompileOptions.experimental.legacyKast) {
+            if (context.kompileOptions.experimental.legacyKast) {
                 if (context.variableTokenSorts.contains(node.tokenSort())) {
                     Sort sort = Sort.K;
                     String name = node.value();

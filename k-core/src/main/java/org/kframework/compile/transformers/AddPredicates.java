@@ -48,7 +48,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (!lists.isEmpty()) {
                 for (Sort listSort : lists) {
                     Rule rule = new Rule(
-                            KApp.of(KLabelConstant.of(predicate(listSort), context), new ListTerminator(listSort, null)),
+                            KApp.of(KLabelConstant.of(predicate(listSort)), new ListTerminator(listSort, null)),
                             BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);
@@ -99,7 +99,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                rhs = KApp.of(KSymbolicPredicate, term);
             else
                rhs = BoolBuiltin.TRUE;
-            Term lhs = KApp.of(KLabelConstant.of(syntaxPredicate(sort), context), term);
+            Term lhs = KApp.of(KLabelConstant.of(syntaxPredicate(sort)), term);
             Rule rule = new Rule(lhs, rhs, context);
             rule.addAttribute(Attribute.PREDICATE);
             result.add(rule);
@@ -188,10 +188,10 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
                     Variable var = Variable.getAnonVar(Sort.K);
-                    Term lhs = KApp.of(KLabelConstant.of(symPred, context), var);
+                    Term lhs = KApp.of(KLabelConstant.of(symPred), var);
                     Term rhs = KApp.of(
                             KLabelConstant.BOOL_ANDTHENBOOL_KLABEL,
-                            KApp.of(KLabelConstant.of(pred, context), var),
+                            KApp.of(KLabelConstant.of(pred), var),
                             KApp.of(KSymbolicPredicate, var));
                     Rule rule = new Rule(lhs, rhs, context);
                     rule.addAttribute(Attribute.PREDICATE);
@@ -199,10 +199,10 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
                     var = Variable.getAnonVar(Sort.KLIST);
-                    Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
+                    Term symTerm = KApp.of(KLabelConstant.of(symCtor), var);
 
                     // define isSort for symbolic sort constructor symSort
-                    lhs = KApp.of(KLabelConstant.of(pred, context), symTerm);
+                    lhs = KApp.of(KLabelConstant.of(pred), symTerm);
                     rule = new Rule(lhs, BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);

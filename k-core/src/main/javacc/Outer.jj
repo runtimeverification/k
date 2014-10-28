@@ -590,7 +590,7 @@ List<KLabelConstant> KLabels() :
 { List<KLabelConstant> list = new ArrayList<KLabelConstant>(); }
 {
   // Note that we don't assign location information b/c KLabels are interned
-  (<KLABEL> { list.add(KLabelConstant.of(image(), context)); })+
+  (<KLABEL> { list.add(KLabelConstant.of(image())); })+
   // TODO: check if need context
   { return list; }
 }

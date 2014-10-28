@@ -125,7 +125,7 @@ public class BackendJavaKILtoKILTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
-        ASTNode kil = org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);
+        ASTNode kil = org.kframework.kil.KLabelConstant.of(kLabelConstant.label());
         kil.copyAttributesFrom(kLabelConstant);
         return kil;
     }
